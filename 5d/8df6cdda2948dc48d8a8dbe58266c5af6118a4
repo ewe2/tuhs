@@ -1,0 +1,81 @@
+From: sms@moe.2bsd.com (Steven M. Schultz)
+Date: Mon, 29 Nov 1999 14:07:48 -0800 (PST)
+Subject: 2.11BSD boot looping
+Message-ID: <199911292207.OAA02606@moe.2bsd.com>
+
+Hi -
+
+> From: James Lothian <simul8 at simul8.demon.co.uk>
+> For what it's worth, this does sound suspiciously like what the 4.3
+> boot code did with the Viking. As far as I can remember, there is a 
+> flag in one of the UDA50 registers that is set to 1 one the device
+> interrupts. The 4.3 boot code runs the UDA50 with interrupts disabled,
+
+	Actually it's in the response packet rather than a UDA 'register' but
+	yep - that sounds very familiar.
+
+> but polls this flag to find out when the controller has finished a
+> command.
+> On the UDA50, even if interrupts are disabled, this flag gets set. On
+> the viking, it doesn't. I can't remember the exact change I made, but I
+
+	At least one of the changes was to give the MSCP adaptor a vector 
+	during the 3 or 4 step init process.   Normally 4.3/2.11 didn't bother
+	to give a vector since interrupts were disabled.   It doesn't
+	reall matter what the vector is as long as it's non zero - the
+	value used was 0154 (primary/1st MSCP adaptor).
+
+	Some other 3rd party adaptors (can't recall if it was Dilog or
+	Emulex or ...) had the same problem.
+
+> "Daniel A. Seagraves" wrote:
+> > 
+> > It's looping around at 157702.
+> > 
+> > 157702 contains 001776
+
+	Hmmm, I wonder if that's in the bootblock code or the actual boot
+	program. 
+
+	The standalone MSCP driver in 2.11 has the "give a vector to the
+	adaptor" change  so my guess is that the bootblock is where the
+	looping is happening.  The bootbock (rauboot.s from /sys/mdec)
+	relocates itself to 0160000-01000 or 0157000 so a loop at 0157702
+	would be where the 'racmd:' routine is looping waiting for a
+	command to complete (or the adaptor to come ready the first time).
+
+	I thought the same "give a vector" change had been made to rauboot.s
+	but it would appear that's not the case ;-(
+
+	Steven Schultz
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA59602
+	for pups-liszt; Wed, 1 Dec 1999 02:59:41 +1100 (EST)
+Received: from gull.prod.itd.earthlink.net (gull.prod.itd.earthlink.net [207.217.121.85])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA59598
+	for <pups at minnie.cs.adfa.oz.au>; Wed, 1 Dec 1999 02:59:32 +1100 (EST)
+Received: from gort (1Cust124.tnt2.covina.ca.da.uu.net [63.27.25.124])
+	by gull.prod.itd.earthlink.net (8.9.3/8.9.3) with SMTP id HAA18132
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 30 Nov 1999 07:59:21 -0800 (PST)
+Date: Tue, 30 Nov 1999 07:59:21 -0800 (PST)
+Message-Id: <199911301559.HAA18132 at gull.prod.itd.earthlink.net>
+X-Sender: mjcrehan at earthlink.net
+X-Mailer: Windows Eudora Light Version 1.5.2
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+To: pups at minnie.cs.adfa.oz.au
+From: Martin Crehan <mjcrehan@earthlink.net>
+Subject: Salon.com article on John Lions book
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+The site Salon.com has an article:
+http://www.Salon1999.com/tech/feature/1999/11/30/lions/index.html
+on John Lions' book about Sixth Edition Unix, written by from a non-computer
+geek's viewpoint.
+
+Martin Crehan
+
+
+
