@@ -1,0 +1,33 @@
+From: helbig@Informatik.BA-Stuttgart.DE (Wolfgang Helbig)
+Date: Tue, 31 Dec 2002 12:04:27 +0100 (MET)
+Subject: [pups] V7 setjmp/longjmp
+Message-ID: <200212311307.gBVD7p600218@bsd.korb>
+
+Michael Davidson distrusted:
+>Note that this means that r4, r3 and r2 get restored to the values
+>that they had at the time that the next stack frame was established
+>(ie when the "next" function down was called from the original context)
+>and that these are not necessarily the values that they had at the
+>moment when the original call to setjnp returned. Hence the various
+>caveats about not relying on the value of any register variables
+>after returning via longjmp.
+
+You can trust register variables when setjmp() returns the second time. Then
+the registers are restored to the values they had when the "next" function was 
+called, that is the "values as of the time longjmp() was called" (quoted from
+longjmp(3)'s man page. Thus any variable behaves the same, regardless of its
+storage class.
+
+By the way, this is not the case in V6. The register variables-- and only
+the register variables-- are restored to the values as of the time setexit() was
+called. (In V6 "setjmp()" is named "setexit()" and "longjmp()" is named "reset()").
+Thus the value of a variable depends on its storage class. If it is register,
+you get the value when setexit() was called, if it is not register, you get
+the value when reset() was called. This might be considered a bug.
+
+Greetings
+
+Wolfgang
+
+
+
