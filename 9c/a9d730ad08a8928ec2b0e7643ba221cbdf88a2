@@ -1,0 +1,167 @@
+From: wkt@henry.cs.adfa.edu.au (Warren Toomey)
+Date: Mon, 29 Jan 2001 12:24:43 +1100 (EST)
+Subject: [pups] Help! Standalone DZ-11 driver
+Message-ID: <200101290124.f0T1Ois26299@henry.cs.adfa.edu.au>
+
+Hi all,
+	I'm working on a new version of my Vtserver, which allows a PDP-11
+with no tape drive to boot from a Unix/Linux server (via serial cable) and
+install a UNIX. See ftp://minnie.cs.adfa.edu.au/pub/PDP-11/Vtserver
+
+At present I'm working on a new version which uses the 2.11BSD boot code
+so as to support more disk drives. The work in progress is at:
+http://minnie.cs.adfa.edu.au/Vtserver. At present it's not usable
+unless you have a PDP-11/45.
+
+I've got a potential user with an 11/34, two RK05s and a DZ-11. I can't
+find any details of DZ-11 here in my peripherals handbooks, and the 2.11
+kernel drivers are a bit too complicated to read.
+
+My existing KL-11 driver is below. Can someone come up with a standalone
+equivalent for a DZ-11, or point me at some docs?
+
+I'll be away from 1st to 14th Feb, so there may be some delays in
+responding.
+
+Thanks all,
+	Warren
+
+
+struct  vtdevice  {
+        int     rcsr,rbuf;
+        int     tcsr,tbuf;
+};
+
+#define NVT     2
+struct  vtdevice *VTcsr[NVT + 1] = {
+                (struct vtdevice *)0176500,     /* We use VTcsr[0] unit 1 */
+                (struct vtdevice *)0,
+                (struct vtdevice *)-1
+};
+
+/* Get a character, or timeout and return with hitim zero */
+char vtgetc()
+{   
+        register c;
+    
+        VTcsr[0]->rcsr = 1; hitim=3; lotim=65535;
+  
+        while ((VTcsr[0]->rcsr&0200)==0) {
+           lotim--;
+           if (lotim==0) hitim--;
+           if (hitim==0) { putchar('t'); return(0); }
+        }
+        c = VTcsr[0]->rbuf; return(c);
+}
+
+vtputc(c)
+register c;
+{
+        register s;
+
+        while((VTcsr[0]->tcsr&0200) == 0) ;
+        s = VTcsr[0]->tcsr;
+        VTcsr[0]->tcsr = 0; VTcsr[0]->tbuf = c; VTcsr[0]->tcsr = s;
+}
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id BAA15283
+	for pups-liszt; Tue, 30 Jan 2001 01:14:40 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from finch-post-10.mail.demon.net (finch-post-10.mail.demon.net [194.217.242.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id BAA15279
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 01:14:36 +1100 (EST)
+	(envelope-from robin at ruffnready.co.uk)
+Received: from falstaf.demon.co.uk ([158.152.152.109])
+	by finch-post-10.mail.demon.net with esmtp (Exim 2.12 #1)
+	id 14NF3N-0006Ms-0A; Mon, 29 Jan 2001 14:13:10 +0000
+Message-ID: <RQsFELAVoXd6EwKY at ruffnready.co.uk>
+Date: Mon, 29 Jan 2001 14:11:33 +0000
+To: wkt at cs.adfa.edu.au
+Cc: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+From: Robin Birch <robin@ruffnready.co.uk>
+Subject: Re: [pups] Help! Standalone DZ-11 driver
+References: <200101290124.f0T1Ois26299 at henry.cs.adfa.edu.au>
+In-Reply-To: <200101290124.f0T1Ois26299 at henry.cs.adfa.edu.au>
+MIME-Version: 1.0
+X-Mailer: Turnpike Integrated Version 5.00 U <YSkKJATYm0AxAbv6xwlBrCeVCW>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Warren,
+Why not do this as a terminal emulator that can switch into emulating a
+tape drive by some start/stop messaging using the console device.  You
+could upload a simple bootstrap using ODT that could then read a more
+complex boot driver in.  If you use the console then that shoud be
+universal across all PDP11s.
+
+Robin
+In message <200101290124.f0T1Ois26299 at henry.cs.adfa.edu.au>, Warren
+Toomey <wkt at henry.cs.adfa.edu.au> writes
+>Hi all,
+>       I'm working on a new version of my Vtserver, which allows a PDP-11
+>with no tape drive to boot from a Unix/Linux server (via serial cable) and
+>install a UNIX. See ftp://minnie.cs.adfa.edu.au/pub/PDP-11/Vtserver
+>
+>At present I'm working on a new version which uses the 2.11BSD boot code
+>so as to support more disk drives. The work in progress is at:
+>http://minnie.cs.adfa.edu.au/Vtserver. At present it's not usable
+>unless you have a PDP-11/45.
+>
+>I've got a potential user with an 11/34, two RK05s and a DZ-11. I can't
+>find any details of DZ-11 here in my peripherals handbooks, and the 2.11
+>kernel drivers are a bit too complicated to read.
+>
+>My existing KL-11 driver is below. Can someone come up with a standalone
+>equivalent for a DZ-11, or point me at some docs?
+>
+>I'll be away from 1st to 14th Feb, so there may be some delays in
+>responding.
+>
+>Thanks all,
+>       Warren
+>
+>
+>struct  vtdevice  {
+>        int     rcsr,rbuf;
+>        int     tcsr,tbuf;
+>};
+>
+>#define NVT     2
+>struct  vtdevice *VTcsr[NVT + 1] = {
+>                (struct vtdevice *)0176500,     /* We use VTcsr[0] unit 1 */
+>                (struct vtdevice *)0,
+>                (struct vtdevice *)-1
+>};
+>
+>/* Get a character, or timeout and return with hitim zero */
+>char vtgetc()
+>{   
+>        register c;
+>    
+>        VTcsr[0]->rcsr = 1; hitim=3; lotim=65535;
+>  
+>        while ((VTcsr[0]->rcsr&0200)==0) {
+>           lotim--;
+>           if (lotim==0) hitim--;
+>           if (hitim==0) { putchar('t'); return(0); }
+>        }
+>        c = VTcsr[0]->rbuf; return(c);
+>}
+>
+>vtputc(c)
+>register c;
+>{
+>        register s;
+>
+>        while((VTcsr[0]->tcsr&0200) == 0) ;
+>        s = VTcsr[0]->tcsr;
+>        VTcsr[0]->tcsr = 0; VTcsr[0]->tbuf = c; VTcsr[0]->tcsr = s;
+>}
+
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+
