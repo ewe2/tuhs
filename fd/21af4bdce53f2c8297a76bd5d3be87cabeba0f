@@ -1,0 +1,128 @@
+From: DSEAGRAV@toad.xkl.com (Daniel A. Seagraves)
+Date: Fri, 27 Nov 1998 12:06:59 -0800
+Subject: 2.9BSD/DZ-11 clone screw
+Message-ID: <13407312462.14.DSEAGRAV@toad.xkl.com>
+
+I got my hands on a Aviv DZ-11 clone.  16-line MUX.  So, I go about
+shoving it in the 83.  It boots 2.9BSD off a RL02.  Shove device in,
+set CSR and interrupt vector, and fire up BSD.
+I screwed with the dtab line - With it using dzdma in place of dzou, I can't
+make the MUX go.  The kernel attaches it, but I can't seem to be able to talk
+to it.  So, I switched to dzou.  Now, upon boot, I get the message:
+
+dz 0 csr 160100 vector 320 no address found for dzou
+SERIOUS CONFIGURATION ERROR^G^G^G
+
+I've tried other vectors and other bus slots, and get no improvements
+with either method (dzdma or dzou).  Any ideas?
+
+(Oh, and if you've got another SDZV11, the DIP switches are BACKWARDS of their
+labels!  1=0 and 0=1.  Cute, eh?)
+
+I also have a DHV11, but no idea how to tell BSD it's there.
+All I ever get from it is
+
+dh ? csr 160020 vector 370 didn't interrupt
+
+I think I need to set the DM address, but have no idea what to set it to.
+-------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id MAA28694
+	for pups-liszt; Sat, 28 Nov 1998 12:11:23 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id MAA28689
+	for <pups at minnie.cs.adfa.oz.au>; Sat, 28 Nov 1998 12:11:09 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id QAA23331
+	for pups at minnie.cs.adfa.oz.au; Fri, 27 Nov 1998 16:56:52 -0800 (PST)
+Date: Fri, 27 Nov 1998 16:56:52 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199811280056.QAA23331 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.9BSD/DZ-11 clone screw
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: "Daniel A. Seagraves" <DSEAGRAV at toad.xkl.com>
+> 
+> I got my hands on a Aviv DZ-11 clone.  16-line MUX.  So, I go about...
+> shoving it in the 83.  It boots 2.9BSD off a RL02.  Shove device in,
+
+> I screwed with the dtab line - With it using dzdma in place of dzou, I can't
+> make the MUX go.  The kernel attaches it, but I can't seem to be able to talk
+> to it.  So, I switched to dzou.  Now, upon boot, I get the message:
+
+	How are you trying to talk to it?  If the line is marked as "modem
+	controlled" you will see/hear nothing until there is 'CD' (carrier
+	detect) present. 
+
+	Typically the /dev nodes are "modem controlled" unless you add 0200
+	(128 dec) to the minor device number.
+
+	For 2.9 the major device number of the DZ is 21 so /dev/tty00 would
+	be "mknod /dev/tty00 c 21 0" and expect modemcontrol while
+	"mknod /dev/tty00 c 21 128" would be a "hardwired" line w/o modem
+	control.
+
+> dz 0 csr 160100 vector 320 no address found for dzou
+> SERIOUS CONFIGURATION ERROR^G^G^G
+
+	That's not surprising since there is no such symbol in the DZ driver ;)
+
+	'dzdma' is a replacement for the transmit interrupt routine - the
+	xmit interrupt goes to 'dzdma' (IF 'DZ_DMA' is enabled in the kernel
+	config file).  'dzdma' calls 'dzxint' at the end of dzdma's processing.
+
+	Thus if you change 'dzdma' to anything it should be to 1) a symbol
+	which exists <grin> and 2) 'dzxint'.
+
+	I think something bad happens if DZ_DMA is enabled but dzxint is
+	called directly - it probably won't work since there are two different
+	'dzxint' routines (one for use with dzdma and one without and the
+	args are different).  So if the symbol 'dzdma' is present in the
+	kernel you probably want to least the "xmit field" in /etc/dtab
+	as 'dzdma'.  If 'dzdma' is not present in the kernel then use 'dzxint'.
+
+> I've tried other vectors and other bus slots, and get no improvements
+> with either method (dzdma or dzou).  Any ideas?
+
+	Try remaking the device nodes to indicate no modem control. Or perhaps
+	create a cable that asserts the necessary signals.
+
+> I also have a DHV11, but no idea how to tell BSD it's there.
+> All I ever get from it is
+
+> dh ? csr 160020 vector 370 didn't interrupt
+
+	Quite so.  The original 2.9BSD didn't support the DHV or DHU devices.
+	Later on there were drivers created but the original distributions
+	lack (according to the CSRG archive CDs) 'dhv' and 'dhu' support.  The
+	closest 2.9 came was the venerable DH/DM.
+
+	2.11BSD does have DHV support but the silo handling of those devices
+	is *terrible*.  If you have any choice in the matter at all get a
+	DHQ-11 and set it for 'DHU' mode.  The DHQ can run in DHV  or
+	DHU modes with the latter being far preferable (its behaviour is that
+	of the older DH-11 with regard to silo alarm level selectability).
+
+> I think I need to set the DM address, but have no idea what to set it to.
+
+	Not for a DHV.  An older DH/DM you would have needed to but that is
+	one of the differences (and why the DHV isn't compatible with the DH
+	driver) is how modem signals are handled.  On a 2.11BSD system there
+	is a single line:
+
+	dhv     ? 160440 310    5       dhvrint dhvxint # dhv terminal mux
+
+	for the DHV-11.  Where the CSR/Vector were set to whatever didn't
+	conflict with something else.
+
+	Good Luck.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+
