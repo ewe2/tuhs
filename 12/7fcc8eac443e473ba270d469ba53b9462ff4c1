@@ -1,0 +1,169 @@
+From: talmage@cmf.nrl.navy.mil (David W Talmage)
+Date: Wed, 13 Feb 2002 17:24:18 -0500
+Subject: [pups] screen 3.9.9 vs. 2.11BSD write() to fifo and/or select() on socket
+Message-ID: <5706.1013639058@paul.cmf.nrl.navy.mil>
+
+Would someone please advise me about fifos and sockets in 2.11BSD?  I'm having 
+trouble porting screen 3.9.9, the multiplexing terminal emulator, to 2.11BSD 
+because of them.  I'm running Mr. Schultz's 2.11BSD with all patches up to 
+#442 on Mr. Brandt's p11 emulator version 2.9.  FWIW, I have INET in my kernel 
+but I've ifconfig-ed only lo0.
+
+screen's configure complains that it finds no usable fifo or socket.
+
+The fifo test portion of the configure script fails when writing to the fifo.  
+The write() returns -1 and sets errno == 79, "Inappropriate file type or 
+format".  This happens when I run the test as root, as I must in order to use 
+mknod() to create the fifo.  See fifotest.c, below.
+
+screen can use sockets instead of fifos.  That portion of the configure script 
+fails as well.  It fails in that it does not return from the select() on the 
+socket until the alarm goes off.  See socketstest.c, below.
+
+/* fifotest.c */
+#include "confdefs.h"
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+/*
+#ifndef O_NONBLOCK
+#define O_NONBLOCK O_NDELAY
+#endif
+#ifndef S_IFIFO
+#define S_IFIFO 0010000
+#endif
+*/
+char *fin = "/tmp/conftest254";
+
+main()
+{
+  struct stat stb;
+  int f;
+
+  (void)alarm(5);
+#ifdef POSIX
+  if (mkfifo(fin, 0777)) {
+#else
+  if (mknod(fin, S_IFIFO|0777, 0)) {
+#endif
+printf("mknod failed\n");
+perror("mknod");
+    exit(1);
+    }
+  if (stat(fin, &stb) || (stb.st_mode & S_IFIFO) != S_IFIFO) {
+  printf("stat failed\n");
+    exit(1);
+    }
+  close(0);
+#ifdef __386BSD__
+  /*
+   * The next test fails under 386BSD, but screen works using fifos.
+   * Fifos in O_RDWR mode are only used for the BROKEN_PIPE case and for
+   * the select() configuration test.
+   */
+  exit(0);
+#endif
+  if (open(fin, O_RDONLY | O_NONBLOCK)) {
+    printf("open #1 failed\n");
+    exit(1);
+    }
+  if (fork() == 0)
+    {
+      printf("f0\n");
+      close(0);
+      if (open(fin, O_WRONLY | O_NONBLOCK)) {
+        printf("f0 open #2 failed\n");
+        exit(1);
+        }
+      close(0);
+      if (open(fin, O_WRONLY | O_NONBLOCK)) {
+        printf("f0 open #3 failed\n");
+        exit(1);
+        }
+      if (write(0, "TEST", 4) == -1) { /* FAILS HERE */
+        printf("f0 write failed %d\n", errno);
+        perror("write");
+        exit(1);
+        }
+      exit(0);
+    }
+  printf("f1\n");
+  f = 1;
+  if (select(1, &f, 0, 0, 0) == -1) {
+    printf("f1 select failed\n");
+    exit(1);
+    }
+  exit(0);
+}
+
+
+
+/* socketstest.c */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <fcntl.h>
+
+char *son = "/tmp/conftest254";
+
+main()
+{
+  int s1, s2, s3, l;
+  struct sockaddr_un a;
+
+  (void)alarm(5);
+  if ((s1 = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    perror("socket");
+    exit(1);
+    }
+  a.sun_family = AF_UNIX;
+  strcpy(a.sun_path, son);
+  (void) unlink(son);
+  if (bind(s1, (struct sockaddr *) &a, strlen(son)+2) == -1) {
+    perror("bind");
+    exit(1);
+    }
+  if (listen(s1, 2)) {
+    perror("listen");
+    exit(1);
+    }
+  if (fork() == 0)
+    {
+      if ((s2 = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        perror("f0 socket");
+        kill(getppid(), 3);
+        }
+      (void)connect(s2, (struct sockaddr *)&a, strlen(son) + 2);
+      if (write(s2, "HELLO", 5) == -1) {
+        perror("f0 write");
+        kill(getppid(), 3);
+        }
+      exit(0);
+    }
+  l = sizeof(a);
+  if (close(0) == -1) {
+    perror("close");
+  }
+
+  if (accept(s1, &a, &l)) {
+    perror("accept");
+    exit(1);
+    }
+  l = 1;
+  if (select(1, &l, 0, 0, 0) == -1) { /* DOESN'T RETURN BEFORE SIG_ALARM */
+    perror("select");
+    exit(1);
+    }
+  exit(0);
+}
+
+
+-- 
+David Talmage (talmage at cmf.nrl.navy.mil)
+ITT Industries, Advanced Engineering & Sciences,
+Advanced Technology Group
+
+
+
+
