@@ -1,0 +1,39 @@
+From: peter.jeremy@alcatel.com.au (Peter Jeremy)
+Date: Wed, 2 Jul 2003 08:19:34 +1000
+Subject: [TUHS] V7/8086 I'm a bit behind the times here, but...
+In-Reply-To: <CC6E949C87F45324BAF7BC430FFEE40E@usagi.tsukino.pinku.zzn.com>
+References: <CC6E949C87F45324BAF7BC430FFEE40E@usagi.tsukino.pinku.zzn.com>
+Message-ID: <20030701221934.GM430@gsmx07.alcatel.com.au>
+
+On 2003-Jul-01 18:16:27 -0400, Steve Nickolas <usagi.tsukino at pinku.zzn.com> wrote:
+>I already had some ideas, and when I saw something called "v7upgrade", a weird thought came to my head...
+>
+>I'm wondering if any gurus out there would be able to point me in the
+>general direction, as far as getting V7 stuff running on an 8086,
+>perhaps a full V7 system.  Something like v7upgrade but including a
+>kernel and bootloader.  I don't know.  Just musing...
+
+I've also been considering this in the background ever since "ancient"
+Unix became available.  At least one other person has posted that they
+did actually do a suitable port.
+
+Downsides:
+- 8086 has no hardware protection.  You'd need to go to the 80286 to
+  get any inter-process protection.
+- 80x86 16-bit memory management is far more primitive than the PDP-11.
+  Given the requirement for data and stack addresses to be in the same
+  address space (assumed by virtually all C programs), the total data+
+  heap+stack space required for a process must be pre-allocated and
+  there is no protection between heap and stack.
+
+The main reason I've never proceeded is the lack of a suitable C
+compiler: 16-bit 80x86, open source, able to run in 64K I+D mode, and
+generating half-way decent code.  (Without the last requirement, the
+kernel and some of the larger userland utilities will probably be too
+large).
+
+Supporting overlays would add the requirement to handle mixed-mode
+code, support segment overrides and 'far' objects.
+
+Peter
+
