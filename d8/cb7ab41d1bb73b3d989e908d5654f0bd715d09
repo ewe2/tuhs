@@ -1,0 +1,92 @@
+From: chd_1@nktelco.net (Chuck Dickman)
+Date: Tue, 06 Nov 2001 19:48:57 -0500
+Subject: [pups] Trouble with 2.11BSD and CQD-220
+References: <200111062050.fA6Koh627439@moe.2bsd.com>
+Message-ID: <3BE884F9.9D4752A5@nktelco.net>
+
+Hi
+Combining what Steven and Tom have said and looking at ra.c
+in standalone, I think I have a working version of rauboot now. 
+
+rauboot set the bit to cause an interrupt on ring transitions,
+and then looped on the interrupt flag of the command and
+response packets. I guess since CQD-220 was not completely set
+up for interrupts, it would never set these flags.
+
+pdpstand/ra.c did not set the interrupt on ring transitions bit,
+and instead looped on the packet ownership bits. The CQD-220
+seems to handle these bits as the standalone code expects.
+
+Here are the changes that I made to rauboot.s. 
+
+Chuck
+
+[Steven, Let me know if you want me to send you more than
+this.]
+------------------------cut here----------------------
+*** rauboot.s.orig      Wed May 31 22:54:49 1995
+--- rauboot.s   Mon Nov  5 19:21:26 2001
+***************
+*** 16,22 ****
+ 
+  MSCPSIZE =    64.     / One MSCP command packet is 64bytes long (need
+2)
+
+! RASEMAP       =       140000  / RA controller owner semaphore
+
+  RAERR =               100000  / error bit
+  RASTEP1 =     04000   / step1 has started
+--- 16,23 ----
+
+  MSCPSIZE =    64.     / One MSCP command packet is 64bytes long (need
+2)
+  
+! /RASEMAP =    140000  / RA controller owner semaphore and _interrupt_
+! RASEMAP       =       100000  / RA controller owner semaphore
+
+  RAERR =               100000  / error bit
+  RASTEP1 =     04000   / step1 has started
+***************
+*** 287,304 ****
+        mov     $RASEMAP,*$ra+RARSPH    / set mscp semaphores
+        mov     $RASEMAP,*$ra+RACMDH
+        mov     *raip,r0                / tap controllers shoulder
+!       mov     $ra+RACMDI,r0
+  1:
+        tst     (r0)
+!       beq     1b                      / Wait till command read
+!       clr     (r0)+                   / Tell controller we saw it, ok.
+  2:
+        tst     (r0)
+!       beq     2b                      / Wait till response written
+        clr     (r0)                    / Tell controller we go it
+        rts     pc
+
+! icons:        RAERR
+        ra+RARING
+        0
+        RAGO
+--- 288,308 ----
+        mov     $RASEMAP,*$ra+RARSPH    / set mscp semaphores
+        mov     $RASEMAP,*$ra+RACMDH
+        mov     *raip,r0                / tap controllers shoulder
+!       mov     $ra+RACMDH,r0
+  1:
+        tst     (r0)
+!       bmi     1b                      / Wait till command read
+! /     clr     (r0)+                   / Tell controller we saw it, ok.
+!       mov     $ra+RARSPH,r0
+  2:
+        tst     (r0)
+!       bmi     2b                      / Wait till response written
+!       mov     $ra+RACMDI,r0
+!       clr     (r0)+                   / Tell controller we saw it, ok.
+        clr     (r0)                    / Tell controller we go it
+        rts     pc
+  
+! icons:        RAERR + 033
+        ra+RARING
+        0
+        RAGO
+
+
