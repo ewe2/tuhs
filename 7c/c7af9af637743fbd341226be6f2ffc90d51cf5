@@ -1,0 +1,145 @@
+From: rp@servium.ch (Rico Pajarola)
+Date: Wed, 22 May 2002 20:03:02 +0200 (CEST)
+Subject: [TUHS] simh vax and 4.3-quasijarus
+Message-ID: <20020522180302.7508F40E821@enigma.cybertime.ch>
+
+I installed 4.3-quasijarus on simh, and I managed to boot indirectly
+by putting the kernel as /quasijarus0a in the netbsd root filesystem,
+and then booting it from the netbsd bootloader with 'boot quasijarus0a
+-a'. I have been unable to boot it directly from it's 'own'
+filesystem.
+
+here's what I see, complete transcript at the end
+> >>>boot dua0
+> (BOOT/R5:0 DUA0)
+> 
+> 
+> 
+>   2..
+> -DUA0
+> HALT instruction, PC: 00000C1A (MOVL (R11),SP)
+
+that's obviously not what I want. I tried all combinations of
+installboot and disklabel -B I can think of, both in netbsd and
+quasijarus, and all lead to the same result.
+
+Can anybody tell me the exact incantations necessary to install
+the bootblocks for quasijarus0a, or does anybody who has installed
+quasijarus0a have a session transcript? any idea what I might be
+doing wrong?
+
+So far I have not been able to boot any other VAX operating system
+from the TUHS archive, the netbsd bootloader cannot load ultrix32m,
+32v and 3bsd. I have not yet had time to try any of the other 4.x
+bsds, but I assume they'd have the same problem as quasijarus0a.
+
+I have tried ultrix-4.3 (also from the netbsd bootloader, I don't
+have ultrix/vax media to do it right), but it does not work either.
+
+If anybody can help me with this, thanks in advance
+
+Rico Pajarola
+
+The following transcript shows how I boot it (first the way it
+fails, then the way it works):
+
+> VAX simulator V2.9-9
+> sim> show c
+> VAX simulator configuration
+> 
+> CPU, 32768KB
+> TLB, 2 units
+>   TLB0, 8KW
+>   TLB1, 8KW
+> ROM, 128KB
+> NVR, 1KB
+> SYSD, 2 units
+>   SYSD0
+>   SYSD1
+> QBA
+> TTI
+> TTO
+> CSI
+> CSO, not attached
+> CLK
+> PTR, address=20001F68-20001F6F, not attached
+> PTP, address=20001F68-20001F6F, not attached
+> LPT, address=20001F4C-20001F4F, not attached
+> RQ, address=20001468-2000146B, 4 units
+>   RQ0, 159334KB, attached to 4.3-quasijarus0a.rd54.dsk, write enabled, RD54
+>   RQ1, 622932KB, attached to ../netbsd-vax/netbsd-vax.ra82.dsk, write enabled, RA82
+>   RQ2, 409KB, not attached, write enabled, RX50
+>   RQ3, 409KB, not attached, write enabled, RX50
+> RL, disabled
+> TS, disabled
+> DZ, disabled
+> sim> boot cpu
+> 
+> 
+> KA655-B V5.3, VMB 2.7
+> Performing normal system tests.
+> 40..39..38..37..36..35..34..33..32..31..30..29..28..27..26..25..
+> 24..23..22..21..20..19..18..17..16..15..14..13..12..11..10..09..
+> 08..07..06..05..04..03..
+> Tests completed.
+> >>>boot dua0
+> (BOOT/R5:0 DUA0)
+> 
+> 
+> 
+>   2..
+> -DUA0
+> HALT instruction, PC: 00000C1A (MOVL (R11),SP)
+
+
+> >>>boot dua1
+> (BOOT/R5:0 DUA1)
+> 
+> 
+> 
+>   2..
+> -DUA1
+>   1..0..
+> 
+> 
+> >> NetBSD/vax boot [Aug 19 2001 05:57:49] <<
+> >> Press any key to abort autoboot 3
+> > boot quasijarus0a -a
+> 327204+103384+130352+[29436+24084] total=0x96220
+> 4.3 BSD Quasijarus UNIX #0: Sat Oct  2 22:15:38 CDT 1999
+>     msokolov at luthien:/usr/src/sys/GENERIC
+> real mem  = 33521664
+> SYSPTSIZE limits number of buffers to 80
+> avail mem = 31697920
+> using 80 buffers containing 655360 bytes of memory
+> MicroVAX 3000, ucode rev 6
+> uda0 at uba0 csr 172150 vec 774, ipl 15
+> uda0: version 3 model 3
+> uda0: DMA burst size set to 4
+> ra0 at uda0 slave 0: RD54, size = 311200 sectors
+> ra1 at uda0 slave 1: vaxnetbsd, size = 1216665 sectors
+> ra2 at uda0 slave 2: floppy
+> ra3 at uda0 slave 3: floppy
+> lp0 at uba0 csr 177514 vec 200, ipl 14
+> root device? ra0
+> WARNING: clock gained 14 days -- CHECK AND RESET THE DATE!
+> erase ^?, kill ^U, intr ^C
+> #
+
+from this point on, it works as expected.
+
+
+Ultrix 4.3 gives me:
+> 466788+254256+177476+[36984+34990] total=0xecfa2
+> machine check 82: vap 82000004 istate1 7c000c00 istate2 c070fe pc 80001c61 psl 41f0008
+> r0=8000000c, r1=8000167c, r2=0, r3=211bd0dd, r4=0, r5=dd274
+> panic: mchk
+> 
+> dumping to dev ffffffff, offset 0
+> dump machine check 80: vap 78302077 istate1 fb000c00 istate2 c070fd pc 8004eb57 psl 41f0000
+> r0=78302073, r1=0, r2=0, r3=211bd0dd, r4=22, r5=80
+> panic: mchk
+> 
+> HALT instruction, PC: 8000165B (XFC)
+
+
