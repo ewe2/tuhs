@@ -1,0 +1,52 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Sun, 16 Mar 2003 23:36:02 -0800 (PST)
+Subject: [pups] 2BSD build problem - unix.o not too big
+Message-ID: <200303170736.h2H7a2w22625@moe.2bsd.com>
+
+> From: "Ian King" <iking at killthewabbit.org>
+> I'm building a 2.11BSD kernel on my 11/73 (so I can include the networking
+> code and put my machine on the LAN!), and I'm seeing the error "too big for
+> type 431".  Through the wonders of Google, I saw your discussion of this
+> error and followed your advice (from 1996!).  However, when I ask 'size
+
+	I'd have, up to now, sworn that the overlay setup was in the 
+	documentation (one of the appendices) but it could well be that it's
+	still off in a file somewhere in the mess I call my filesystem ;)
+
+> unix.o', I get a size comfortably within the limits for base - 50112, well
+> below the 57344 you cite.  None of the overlays exceeds 8192, and the 'total
+> text' figure is well below your example, too.  FWIW, I did a 'naive build'
+
+	Do you have any 0 length overlays?   There can't be any gaps in the
+	overlay structure.
+
+	For example, this is legal:
+
+		overlays: 8128,7552,8000,7296,8192,7424,5824,6784,3520
+
+	but this is not:
+		
+		overlays: 8128,7552,8000,7296,8192,0,5824,6784,3520
+
+> first, copying GENERIC and changing a few parameters; after seeing the error
+> 'text segment too big' I went through the config file with a little more
+> thought and eliminated drivers I clearly didn't need (I don't have RL01/02s,
+
+	You might need to go thru the Makefile too.  Good idea to eliminate
+	drivers you don't have (save their D-space requirements) but that
+	can create empty overlays and that does not work.
+
+> for instance).  Then I started getting this error.  I did a 'make clean'
+> just to be sure, but still make gives me the 'too big for type 431' error.
+> (Yes, I RTFM on ld.)
+
+	Hmmm, patch level 431 is recent enough I'd have thought to avoid
+	a 'ld' problem (current is 444 but nothing recently has touched
+	ld).
+
+	What is the output from 'size unix.o'?
+
+	Cheers,
+	Steven Schultz
+
+
