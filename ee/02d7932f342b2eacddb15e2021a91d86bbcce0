@@ -1,0 +1,96 @@
+From: tih@Hamartun.Priv.NO (Tom Ivar Helbekkmo)
+Date: 06 Nov 2001 20:55:27 +0100
+Subject: [pups] Trouble with 2.11BSD and CQD-220
+In-Reply-To: <200111050415.fA54Fxd02290@moe.2bsd.com> ("Steven M. Schultz"'s message of "Sun, 4 Nov 2001 20:15:59 -0800 (PST)")
+References: <200111050415.fA54Fxd02290@moe.2bsd.com>
+Message-ID: <m24ro73c9c.fsf@barsoom.Hamartun.Priv.NO>
+
+"Steven M. Schultz" <sms at 2BSD.COM> writes:
+
+>> When booting from the SCSI drive, the boot sector is loaded into memory
+>> and then relocated. It hangs waiting for the MSCP controller to respond.
+>> I have not diagnosed it to the command that hangs.
+> 
+> 	Bug in the CMD controller but CMD isn't unique - others have had
+> 	the problem as well.   The bug is that the controller insists on
+> 	an interrupt vector being presented during the 3 or 4 step 
+> 	initialization protocol.
+
+Not exactly.  You and I actually worked this out together back in
+1995, when I was figuring out how to get Reno to boot my VAX using a
+CQD-220.  :-)  You don't have to present any interrupt vector, but you
+shouldn't lie to the controller about this.  Instead of setting the
+"please interrupt" bit in the MSCP datagram, and waiting for the
+controller to set the "I've interrupted now" bit, you should set the
+"controller owns this datagram now" bit, and wait for it to clear it.
+This make much better sense, anyway, while running in polled mode.
+
+I don't have any of my 2.11 systems running right now (but with winter
+coming up, I shortly will, and will then have quite some work to do
+patching them up to the current level), but the change I had to make
+to the Reno uda.c illustrates it well:
+
+*** uda.c.ORIG	Tue Nov 25 20:10:01 1997
+--- uda.c	Tue Nov 25 20:11:50 1997
+***************
+*** 140,163 ****
+  	u->uda1_cmd.mscp_opcode = op;
+  	u->uda1_cmd.mscp_msglen = MSCP_MSGLEN;
+  	u->uda1_rsp.mscp_msglen = MSCP_MSGLEN;
+! 	u->uda1_ca.ca_rspdsc |= MSCP_OWN|MSCP_INT;
+! 	u->uda1_ca.ca_cmddsc |= MSCP_OWN|MSCP_INT;
+  	i = udaddr[io->i_adapt][io->i_ctlr]->udaip;	/* start uda polling */
+  #ifdef lint
+  	i = i;
+  #endif
+  	mp = &u->uda1_rsp;
+  	for (;;) {
+  		if (u->uda1_ca.ca_cmdint)
+  			u->uda1_ca.ca_cmdint = 0;
+! 		if (u->uda1_ca.ca_rspint == 0)
+  			continue;
+  		u->uda1_ca.ca_rspint = 0;
+  		if (mp->mscp_opcode == (op | M_OP_END))
+  			break;
+  		printf("unexpected rsp type %x op %x ignored\n",
+  			MSCP_MSGTYPE(mp->mscp_msgtc), mp->mscp_opcode);
+! 		u->uda1_ca.ca_rspdsc |= MSCP_OWN | MSCP_INT;
+  	}
+  	if ((mp->mscp_status&M_ST_MASK) != M_ST_SUCCESS)
+  		return (-1);
+--- 140,165 ----
+  	u->uda1_cmd.mscp_opcode = op;
+  	u->uda1_cmd.mscp_msglen = MSCP_MSGLEN;
+  	u->uda1_rsp.mscp_msglen = MSCP_MSGLEN;
+! 	u->uda1_ca.ca_rspdsc |= MSCP_OWN;
+! 	u->uda1_ca.ca_cmddsc |= MSCP_OWN;
+! 
+  	i = udaddr[io->i_adapt][io->i_ctlr]->udaip;	/* start uda polling */
+  #ifdef lint
+  	i = i;
+  #endif
+  	mp = &u->uda1_rsp;
++ 
+  	for (;;) {
+  		if (u->uda1_ca.ca_cmdint)
+  			u->uda1_ca.ca_cmdint = 0;
+! 		if (u->uda1_ca.ca_rspdsc & MSCP_OWN)
+  			continue;
+  		u->uda1_ca.ca_rspint = 0;
+  		if (mp->mscp_opcode == (op | M_OP_END))
+  			break;
+  		printf("unexpected rsp type %x op %x ignored\n",
+  			MSCP_MSGTYPE(mp->mscp_msgtc), mp->mscp_opcode);
+! 		u->uda1_ca.ca_rspdsc |= MSCP_OWN;
+  	}
+  	if ((mp->mscp_status&M_ST_MASK) != M_ST_SUCCESS)
+  		return (-1);
+
+Oh, and that very VAX is still running Reno, happily booting off the
+CQD-220 whenever I ask it to.  :-)
+
+-tih
+-- 
+Popularity is the hallmark of mediocrity.  --Niles Crane, "Frasier"
+
+
