@@ -1,0 +1,31 @@
+From: norman@nose.cs.utoronto.ca (Norman Wilson)
+Date: Wed, 19 Mar 2003 11:52:24 -0500
+Subject: [pups] 2.11BSD "make unix" aborts Error 141
+Message-ID: <200303191652.h2JGqqVJ025026@minnie.tuhs.org>
+
+Steven M. Schultz:
+
+	It's the exit status of the assembler.   On _some_ modules, the 
+	assembler ('as') jumps off into the weeds and executes an 'exit'
+	system call with a non-zero value in R0.   141 is a lower case 'a'
+	as I recall.
+
+0141 (octal) is 'a.  141 decimal is 0215 octal, i.e. carriage return with
+parity.
+
+What seems more likely is that 141 decimal is 0200 + 13 decimal.  If a
+simple value returned by wait, that means SIGPIPE + core image, which
+seems unlikely.  If an exit status as displayed by the shell, it just
+means SIGPIPE (128 + signal number).  Or is signal 13 different in 2.11
+than in V7?  (That seems even less likely.)
+
+SIGPIPE doesn't seem entirely unreasonable as an accident that could
+happen if something goes wrong in the assembly-language-code-tweaking
+part of the kernel build.
+
+Of course if it's a random value handed to sys exit, all rules are off.
+
+Norman Wilson
+Toronto ON
+
+
