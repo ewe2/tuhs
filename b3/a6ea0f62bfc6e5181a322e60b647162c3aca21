@@ -1,0 +1,68 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Mon, 9 Sep 2002 17:03:49 -0700 (PDT)
+Subject: [pups] BSD 2.11 on an 11/73 + RD54
+Message-ID: <200209100003.g8A03nA13896@moe.2bsd.com>
+
+Hi -
+
+	A few days ago the "getty plays parity games" topic came up
+	again.
+
+	I've been thinking about it and looked at the kernel a bit more.
+	7e1 is rather firmly in place and I'm not sure turning the 'console'
+	(kl/dl) driver into a "LITOUT only" one is a 100% correct way to
+	go (the other drivers such as dz, dh, etc remain 7e1 output by
+	default).
+
+	Here's a patch for getty/main.c which I think will do what's 
+	wanted without having to modify the kernel:
+
+------------snip-------------
+*** main.c.dist	Mon Sep  9 16:52:24 2002
+--- main.c	Mon Sep  9 16:56:55 2002
+***************
+*** 384,391 ****
+  
+  	c = cc;
+  	c |= partab[c&0177] & 0200;
+! 	if (OP)
+! 		c ^= 0200;
+  	if (!UB) {
+  		outbuf[obufcnt++] = c;
+  		if (obufcnt >= OBUFSIZ)
+--- 384,401 ----
+  
+  	c = cc;
+  	c |= partab[c&0177] & 0200;
+! /*
+!  * If "any" parity do nothing otherwise set even parity unless OP is
+!  * set.  Since 'ap' is set in the "default" entry of /etc/gettytab this
+!  * has the effect of disabling parity on output without having to change
+!  * the kernel.
+! */
+! 	if (!AP) {
+! 	   c |= partab[c & 0177] & 0200;
+! 	   if (OP)
+! 	      c ^= 0200;
+! 	}
+! 
+  	if (!UB) {
+  		outbuf[obufcnt++] = c;
+  		if (obufcnt >= OBUFSIZ)
+--------------snip---------------
+
+	What this does is check the "AP" (AnyParity) flag from /etc/gettytab
+	and if NOT set then do the 'even' (or 'odd' if OP is set) parity.
+
+	Since 'ap' is present in the default line of /etc/gettytab the above
+	block effectively becomes a no-op unless /etc/gettytab is explicitly
+	set for 'ep' or 'op'.
+
+	If someone could test this and report back I'd appreciate it.
+
+	Thanks.
+
+	Steven Schultz
+	sms at 2bsd.com
+
+
