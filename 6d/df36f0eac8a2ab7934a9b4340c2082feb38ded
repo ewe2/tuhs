@@ -1,0 +1,53 @@
+From: michael_davidson@pacbell.net (Michael Davidson)
+Date: Mon, 30 Dec 2002 18:23:14 -0800
+Subject: [pups] V7 setjmp/longjmp
+References: <ad59f854675cbdf4887859e421701e4f@coraid.com>
+Message-ID: <3E10FF92.3080807@pacbell.net>
+
+bwc at coraid.com wrote:
+
+>Looking thru the code for setjmp/longjmp (/usr/src/libc/gen/setjmp.s),
+>and have a question.  Longjmp seems to make an attempt at restoring
+>register two through four, but setjmp doesn't save them.  Where do
+>these register get saved from?
+>
+setjmp and longjmp are intimately familiar with the way in which
+the standard stack frame for C functions is laid out
+
+The stack frame itself is maintained by the functions csv and cret
+which are defined in /usr/src/libc/crt/csv.s
+
+The C compiler generates a call to csv at the start of each function:
+
+    jsr    r5, csv
+
+which has the net effect of saving the current value of r5 on the stack,
+setting r5 to point to the saved r5, and saving r4, r3 and r2
+
+and at the end of each function it generates:
+
+    jmp    cret
+
+which restores the values of r2 - r5 and returns to the function's caller.
+
+Thus r5 is used as a frame pointer.
+
+All that setjmp saves are the values of r5, sp and the return address.
+
+When longjmp is called it walks back up the chain of frame pointers
+pointed to by r5 until it gets to the frame immediately below the
+one for the context it wants to return to. It then patches the return
+address in that frame to be the return address saved by setjmp and
+uses cret to restore everything (almost) as if setjmp had just returned.
+
+Note that this means that r4, r3 and r2 get restored to the values
+that they had at the time that the next stack frame was established
+(ie when the "next" function down was called from the original context)
+and that these are not necessarily the values that they had at the
+moment when the original call to setjnp returned. Hence the various
+caveats about not relying on the value of any register variables
+after returning via longjmp.
+
+
+
+
