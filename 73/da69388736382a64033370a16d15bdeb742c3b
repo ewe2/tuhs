@@ -1,0 +1,51 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 16 Jan 2003 18:28:30 +0100 (CET)
+Subject: [pups] Making a TK50 2.11BSD boot tape for an 11/73
+In-Reply-To: <20030116110643.B28361@bcr10.uwaterloo.ca>
+Message-ID: <Pine.LNX.4.21.0301161819350.6829-100000@Tempo.Update.UU.SE>
+
+On Thu, 16 Jan 2003, David Evans wrote:
+
+> On Thu, Jan 16, 2003 at 07:53:02AM -0800, Andru Luvisi wrote:
+> > maketape will pad each of "mtboot", "mtboot", and "boot" out to an even
+> > length of 512 bytes.  The "cat | dd" method will not pad the first two
+> > out.
+> 
+>   Ahhh--of course.  One would have to do a series of "dd"s in order to
+> get the padding happening.
+
+Probably not. Repeated "dd"s will not produce the same result. This is the
+typical error when not understanding that tapes actually are not a stream
+of characters. (And also a good example when the Unix paradigm fails 
+pretty bad).
+Each write to the tape device will create a block. You cannot do two
+writes after each other to extend the block. You will instead get two
+different blocks.
+
+Boot tapes for VAXen (and PDP-11s) are expected to have 512 byte
+blocks. Actually, the first block should be repeated twice, and this is
+the primary boot block. After that you can put whatever you want. Most
+primary boot blocks however also expects to read 512 byte blocks, which
+means that the next file (secondary booter or the system itself) also most
+often is written with 512 byte blocks.
+
+> > I discovered this while trying to create a bootable tape image for simh.
+> > I needed to emulate the maketape behavior for it to work.
+> 
+>   That's not a bad idea.  Perhaps I should just make a minimal bootable image
+> using simh or such, dd it to a SCSI disk, and then attach that to my 11/73.
+> Might be easier than endless futzing with the TK50.
+
+Don't. The moment you copy a tape file to disk, you will loose meta
+information unless you use a program specifically designed to preserve
+that information.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+
