@@ -1,0 +1,99 @@
+From: sethm@loomcom.com (Seth Morabito)
+Date: Tue, 30 Nov 2004 19:57:18 -0800
+Subject: [TUHS] Ultrix from CD on SIMH
+In-Reply-To: <m2fz33c6j3.fsf@dejah.hamartun.priv.no>
+References: <20041116165332.5ae15a0b.txomsy@yahoo.es>
+	<m2fz33c6j3.fsf@dejah.hamartun.priv.no>
+Message-ID: <41AD411E.4020005@loomcom.com>
+
+Tom Ivar Helbekkmo wrote:
+> "Jose R. Valverde" <txomsy at yahoo.es> writes:
+> 
+> 
+>>I've been trying but when it goes to device detection it always turns 
+>>up with an empty list. I mean, the install kernel boots, detects the
+>>virtual hard disk and the CD-ROM, the install program starts and reaches
+>>the installation menu (options for BASIC or ADVANCED) and it's then,
+>>when choosing any option that it does not detect any suitable install
+>>device.
+> 
+> 
+> I know that I figured out, a number of years back, how to install
+> Ultrix on non-supported media.  It involved aborting the install,
+> editing the install script to "recognize" the target media, and then
+> restarting the script.  You might want to experiment with this...
+> 
+> -tih
+
+
+I've managed to do this by editing the ULTRIX install script, 
+'install.1', to support installing from RA disks.  It turned out to be 
+quite simple.
+
+I have media and licenses for ULTRIX and UWS V4.3 (My media is 
+AG-ND76E-RE, September 1992), so that's what I used for this experiment. 
+  I don't know how ULTRIX 4.2, 4.4, or 4.5 would differ, you will have 
+to experiment.  I just used dd to dump the CD-ROM image (i.e.,
+"dd if=/dev/cdrom of=ultrix.iso bs=512")
+
+I then set up SIMH with the following commands.  You may be able to play 
+around with this and choose a different disk setup, but this is what 
+worked for me:
+
+   set cpu 64M
+   set rq0 ra90
+   set rq1 ra90
+   set rq2 cdrom
+   set rq3 disable
+   attach rq0 d0.dsk
+   attach rq1 d1.dsk
+   attach rq2 ultrix.iso
+
+ULTRIX will see rq0 as /dev/ra0*, rq1 as /dev/ra1, etc.  RA90 is 
+supported under ULTRIX 4.3, RA92 is not, and RA60 failed to work for me, 
+so my disk choices were limited.  Your milage may vary.
+
+At the sim> prompt, type "b cpu" to boot the CPU.  Then at the VAX
+ >>> prompt, type "b dua2" to boot from the CD-ROM.
+
+You'll be greeted by the ULTRIX installer.  It has a menu like:
+Select one of the following options:
+
+         1) BASIC Installation
+         2) ADVANCED Installation
+         3) System management
+
+Choose "3", which dumps you at a standalone shell, so you can edit the 
+installer script, 'install.1'
+
+The only editor available in this environment is 'ed' (The Standard 
+Editor!).  Invoke it with the command:
+
+   # ed install.1
+
+If you have the same ULTRIX media I have, then you can just use these 
+commands:
+
+   173s/`btd`/ra2/
+   193s/rz/ra/
+   w
+   q
+
+If you have a different version of the installer, the line numbers might 
+be different, so you'll have to poke around in the file yourself. 
+Here's what to look for:  Line 173 reads "BTD=`btd`".  On SIMH, /bin/btd 
+returns an empty string, so we're just explicitly setting BTD to 'ra2', 
+the CDROM drive.  Line 193 is part of a case statement that switches on 
+the value of $BTD, but there's no support for 'ra', so we'll just change 
+the line that reads "rz *)" to "ra *)" instead.  Voila!  The script 
+should now work.
+
+Type "w" to write out the file, "q" to quit.  Then type ^D to exit the 
+shell and return to the installation script.
+
+This time, choose "2) ADVANCED installation", and select the first RA90 
+device as the root disk.  You should be able to install normally from 
+here on out.
+
+-Seth
+
