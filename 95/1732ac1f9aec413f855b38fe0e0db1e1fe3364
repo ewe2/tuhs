@@ -1,0 +1,83 @@
+From: DSEAGRAV@toad.xkl.com (Daniel A. Seagraves)
+Date: Wed, 8 Dec 1999 13:09:16 -0800
+Subject: 2.11BSD boot looping
+In-Reply-To: <199911292207.OAA02606@moe.2bsd.com>
+Message-ID: <13505889943.17.DSEAGRAV@toad.xkl.com>
+
+[I need to change the bootstrap]
+
+Okay, someone needs to explain what I should change then, I don't have
+any docs about MSCP.
+
+[I don't know how to use my mailer]
+
+Yes, I sent this twice. ^_^
+-------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA18420
+	for pups-liszt; Thu, 9 Dec 1999 15:20:56 +1100 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA18416
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 9 Dec 1999 15:20:47 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id UAA06521
+	for pups at minnie.cs.adfa.oz.au; Wed, 8 Dec 1999 20:11:55 -0800 (PST)
+Date: Wed, 8 Dec 1999 20:11:55 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199912090411.UAA06521 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.11BSD boot looping
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: "Daniel A. Seagraves" <DSEAGRAV at toad.xkl.com>
+> [I need to change the bootstrap]
+> 
+> Okay, someone needs to explain what I should change then, I don't have
+> any docs about MSCP.
+> 
+> [I don't know how to use my mailer]
+> 
+> Yes, I sent this twice. ^_^
+
+	I received 3 copies :)
+
+	No docs for/about MSCP are required to install the bootblock.  That
+	would only be needed if you wanted to write a bootblock and/or
+	driver.
+
+	The documentation you do want to read is the 'disklabel(8)' manpage
+	and in particular the "-B" option.
+
+			disklabel -B ra0
+
+	should do what you want.  You can also do it with a 'dd':
+
+	You will need to be at a single user prompt since writes to raw
+	disks for which the cooked counterpart is mounted are prohibited
+	if the secure level of the system is greater than 0:
+
+			dd if=/mdec/rauboot of=/dev/rra0a
+
+	If, as I seem to recall, you can't boot the disk (image/whatever)
+	because the wrong bootblock is present you will have to use the
+	'boot' program from a "bootable tape".   This may entail using
+	a "toggle in" tape boot (described in the 2.11 setup/installation
+	documentation in fairly good detail).   At the boot prompt (':')
+	after booting from tape:
+
+			: ra(0,0)unix
+			   .... kernel should load, print out the usual
+			   .... messages about memory size, etc
+			# disklabel -B ra0  (or 'dd ...')
+
+	In essence you're going thru the last part of system installation,
+	you don't need to 'mkfs', 'restor', etc because the data is already
+	present on the disk.  Just skip all that and use the tape 'boot'
+	program to load the kernel and then write the proper bootblock to
+	disk.
+
+	Steven
+
+
