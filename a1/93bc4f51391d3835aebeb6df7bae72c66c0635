@@ -1,0 +1,229 @@
+From: norman@nose.cita.utoronto.ca (norman@nose.cita.utoronto.ca)
+Date: Tue, 04 Jan 2000 18:32:03 -0500
+Subject: 200(0) Ancient UNIX Licenses
+Message-ID: <200001042310.KAA35724@minnie.cs.adfa.edu.au>
+
+Here's Brian Kernighan's note on troff and Y2K:
+
+in n1.c, numtab[YR] is set to localtime()->tm_year, which is the
+number of years since 1900.  in 2000, this will contain 100.
+the troff manual says that \n(yr contains "the last two digits of
+the current year", but nowhere in the code is this set, and the
+year can be set to anything.  so it's really "the current year
+minus 1900".  the manual and the code are 
+inconsistent, which is always a problem. 
+
+in any case, in most installations troff and nroff are legacy
+systems for which there is no source code, so changing them is
+not feasible.  furthermore, any change to troff is likely to
+require changes in macro packages anyway, and may cause silent
+errors by conflicting with current behavior or colliding with
+previously unused names.
+
+fortunately, it seems straightforward to fix the macro packages
+that are the most likely sources of problem; individual macro
+packages will have to be fixed by individuals.  grepping for
+"yr" will find most trouble spots.
+
+typical macros packages use \n(yr in two ways.  one is
+
+	ds ]W (printed \n(mo/\n(dy/\n(yr)
+
+which assumes that the year is 2 digits and to be printed as 2
+digits.  presumably the first day of 2000 is to be printed as
+1/1/00, so the fix here is to set register yr to 2 digits
+
+	.nr yr \n(yr%100
+
+either once at the beginning (under the assumption that the year
+isn't changed by the macro package) or each time \n(yr is going
+to be used (providing locality at the price of more changes).
+
+the other common usage is
+
+	.ds ]W \*(]m \n(dy, 19\n(yr
+
+the easiest way to fix this is to add, at the beginning again,
+
+	.nr yr 1900+\n(yr
+
+and change all subsequent uses from 19\n(yr to \n(yr.
+
+any macro package that uses both of these constructions will need
+a bit more care to unify things; the easiest fix is likely to be
+two registers, one with the full year and one with the last two
+digits.
+
+	.nr YR 1900+\n(yr	\" 4-digit year
+	.nr yr \n(yr%100	\" last two digits
+
+this will break code that happened to use this register name.
+
+some macro packages (e.g., -mm) try to be clever about dates,
+and include explicit tests to determine whether a user-provided
+date has 2 or 4 digits, and then adjust by 1900; this is another
+case that has to be fiddled by hand.
+
+any approach that changes register yr at the beginning fails if
+the year is set explicitly later on, as it might be by some of
+the date macros in -ms and -mm.  this still seems like the best
+fix, however.
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA35876
+	for pups-liszt; Wed, 5 Jan 2000 10:35:21 +1100 (EST)
+Received: from nose.cita.utoronto.ca (nose.cita.utoronto.ca [128.100.76.157])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA35866
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 5 Jan 2000 10:34:57 +1100 (EST)
+From: norman@nose.cita.utoronto.ca
+Message-Id: <200001042334.KAA35866 at minnie.cs.adfa.edu.au>
+Subject: Re: 200(0) Ancient UNIX Ulcers
+To: pups at minnie.cs.adfa.edu.au
+Date: Tue, 04 Jan 2000 18:56:48 -0500
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Michael Sokolov grumbled:
+
+  > Warren's note reminds me of a few other Y2K bugs I've spotted that affect
+  > ancient UNIX:
+    ^^^^^^^
+
+  Would you please avoid that term? It is offensive to those for whom Kernighan/
+  Ritchie/Thompson/Berkeley UNIX is the primary and sole computing platform.
+  Thank you.
+
+If the shoe doesn't fit, feel free not to wear it.  I certainly didn't have
+`Kernighan/Ritchie/Thompson/Berkeley UNIX' in mind; I rarely do, as I am
+much more interested in ancient systems.
+
+Chuckling all the way to the rest home,
+
+Norman Wilson
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id UAA37886
+	for pups-liszt; Wed, 5 Jan 2000 20:13:04 +1100 (EST)
+Received: from freebie.lemis.com (root at freebie.lemis.com [192.109.197.137])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id UAA37882
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 5 Jan 2000 20:12:42 +1100 (EST)
+Received: (from grog at localhost)
+	by freebie.lemis.com (8.9.3/8.9.0) id UAA60952;
+	Wed, 5 Jan 2000 20:03:12 +1030 (CST)
+Date: Wed, 5 Jan 2000 20:03:12 +1030
+From: Greg Lehey <grog@lemis.com>
+To: norman at nose.cita.utoronto.ca
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: 200(0) Ancient UNIX Licenses
+Message-ID: <20000105200311.Y30038 at freebie.lemis.com>
+References: <200001041145.WAA32766 at minnie.cs.adfa.edu.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 1.0pre2i
+In-Reply-To: <200001041145.WAA32766 at minnie.cs.adfa.edu.au>
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tuesday,  4 January 2000 at  7:08:51 -0500, norman at nose.cita.utoronto.ca wrote:
+> Warren's note reminds me of a few other Y2K bugs I've spotted that affect
+> ancient UNIX:
+> - date: no way to set the date past 1999 unless in the present year,
+> because two-digit input.
+
+I didn't have any problem with 2.11BSD.  I just supplied 00 for the
+year.  Which release were you using?
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA38658
+	for pups-liszt; Thu, 6 Jan 2000 00:03:32 +1100 (EST)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id AAA38654
+	for <PUPS at MINNIE.CS.ADFA.EDU.AU>; Thu, 6 Jan 2000 00:03:11 +1100 (EST)
+Received: by timaxp.trailing-edge.com; Wed, 5 Jan 2000 8:23:18 -0500
+Date: Wed, 5 Jan 2000 8:23:18 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: grog at lemis.com
+CC: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <000105082318.202000b0 at trailing-edge.com>
+Subject: Re: 200(0) Ancient UNIX Licenses
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Greg wrote:
+>On Tuesday,  4 January 2000 at  7:08:51 -0500, norman at nose.cita.utoronto.ca wrote:
+>> Warren's note reminds me of a few other Y2K bugs I've spotted that affect
+>> ancient UNIX:
+>> - date: no way to set the date past 1999 unless in the present year,
+>> because two-digit input.
+>I didn't have any problem with 2.11BSD.  I just supplied 00 for the
+>year.  Which release were you using?
+
+That's because I did the fix for 2.11BSD back when I was Y2K-ing all
+my PDP-11 sources a few years ago, and Steven incorporated it into the
+distribution.  The fix was quick and dirty, but works fine because
+Unix effectively has an expiration date of 2038 when the signed 32-bit time
+word goes negative, so it's easy enough to window the centuries.
+
+This brings up a question: should fixes (and I mean fundamental fixes
+like Y2K ones) be incorporated back into the boot images in the archive, or
+should they be left in their "pristine" state?  (Yes, i know, some of
+those boot images aren't quite so pristine.)
+
+As long as we're on the topic, which versions of Unix had the C
+compiler recognize when it was recompiling the kernel and put a back
+door in for the developers?  And of course the C compiler recognized
+when it was recompiling itself and made sure that the this recognition
+code was also inserted.  As I understand it, the distributed sources
+never had this security hole in them, only the binaries, but of course
+the binaries self-perpetuated the security hole even if you recompiled them.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id BAA39019
+	for pups-liszt; Thu, 6 Jan 2000 01:30:17 +1100 (EST)
+Received: from playground.lan (qmailr at minbar-1-131.mdm.mke.execpc.com [169.207.136.133])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id BAA39006
+	for <PUPS at minnie.cs.adfa.edu.au>; Thu, 6 Jan 2000 01:29:49 +1100 (EST)
+Received: (qmail 451 invoked by uid 1000); 5 Jan 2000 14:46:13 -0000
+Date: 5 Jan 2000 14:46:13 -0000
+Message-ID: <20000105144613.450.qmail at playground.lan>
+From: "A. P. Garcia" <apg@execpc.com>
+To: grog at lemis.com, SHOPPA at trailing-edge.com
+Subject: Re: 200(0) Ancient UNIX Licenses
+Cc: PUPS at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> This brings up a question: should fixes (and I mean fundamental fixes
+> like Y2K ones) be incorporated back into the boot images in the archive, or
+> should they be left in their "pristine" state?  (Yes, i know, some of
+> those boot images aren't quite so pristine.)
+
+Ideally, both.  Perhaps boot images with these fixes should be available,
+yes, but so should the originals.
+
+
+> As long as we're on the topic, which versions of Unix had the C
+> compiler recognize when it was recompiling the kernel and put a back
+> door in for the developers?
+
+Good question!  I don't know, but it was actually the login command...
+
+
