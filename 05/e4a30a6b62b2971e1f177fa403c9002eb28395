@@ -1,0 +1,60 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 19 Mar 2003 08:29:34 -0800 (PST)
+Subject: [pups] 2.11BSD "make unix" aborts Error 141
+Message-ID: <200303191629.h2JGTYY02048@moe.2bsd.com>
+
+Hi -
+
+> From: "Jonathan Engdahl" <j.r.engdahl at adelphia.net>
+> I'm running essentially the CURLY 2.11BSD system with networking on a
+
+	Ah, yes - the 'master reference 2.11BSD system' ('SHEMP' is a virtual
+	pdp-11 running under P11 ;)).
+
+> PDP-11/53. When I go to rebuild unix with "make all", the build will run for
+> a while, then quit with "Error 141". If I type "make all" again, it keeps on
+
+	Yep, I've been seeing that for years and aside from some kernel
+	hackery to assist in the debugging I haven't done much other than
+	to come up with a workaround.
+
+> going for a while. After several iterations of this, eventually the make
+> completes, and the system will boot the result. What is this "Error 141"
+> business?
+
+	It's the exit status of the assembler.   On _some_ modules, the 
+	assembler ('as') jumps off into the weeds and executes an 'exit'
+	system call with a non-zero value in R0.   141 is a lower case 'a'
+	as I recall.
+
+	Now for the interesting part.  If you do something like
+
+		setenv FOOBAR abcdef
+
+	and run the make the assembler won't "exit 'a".   ALSO, if you run
+	the pipeline of the failing command manually, using temp files, it
+	won't fail.  Makes it very hard to debug.
+	
+> I've not looked for the cause of this yet. I'm being lazy, and hoping
+> someone has seen this before and can give me a quick answer, before I go
+
+	I'm lazy too (I hear that being lazy is a virtue in programmers ;))
+	so I just pad the environment with "FOO abc" or something and the
+	make works.
+
+	The only idea I've come up with to try and track the problem down
+	is a hack to the 'exit' logic in the kernel to create a coredump
+	of a program that exits with 'non-zero' status.  Then at least
+	there'd be something to postmortem.   An added complication is that
+	the assembler has this nasty habit of using 'jmp' to move around
+	rather than 'jsr' so it's hard to find out where the program was
+	at times.   A long time ago I did make a few changes to 'as' to reduce
+	the usage of 'jmp' in an attempt to track this down but then, when
+	even I ran the program under the debugger it never failed - a typical
+	Heisenberg type of bug ;(
+
+	Good Luck.
+
+	Steven Schultz
+
+
