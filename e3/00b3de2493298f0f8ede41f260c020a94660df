@@ -1,0 +1,77 @@
+From: jkunz@unixag-kl.fh-kl.de (Jochen Kunz)
+Date: Tue, 29 Apr 2003 23:54:01 +0200
+Subject: [pups] 2.11BSD device config trouble
+Message-ID: <20030429215401.GO1368@oblina>
+
+Hi.
+
+I am preparing my PDP-11/73 for my exhibition at the VCFe. I wane get
+the DHV11 (M3104) and a four port DLV11J colne to work. At the moment I
+get upon boot:
+
+autoconfig: warning: more than three handlers for device cn on line 38.
+dhv ? csr 160440 vector 310 didn't interrupt.
+ra 0 csr 172150 vector 154 vectorset attached
+ra 1 csr 160334 vector 764 vectorset attached
+rx ? csr 177170 vector 264 skipped:  No CSR.
+tms 0 csr 174500 vector 260 vectorset attached
+ts 0 csr 172520 vector 224 attached
+cn 1 csr 176540 vector 344 no address found for kl/dl-11
+
+Extract from /etc/dtab:
+# grep '^[a-zA-Z]' /etc/dtab
+dhv     ? 160440 310    5       dhvrint dhvxint # dhv terminal mux
+ra      ? 172150 154    5       raintr          # uda50, rqdx1/2/3
+ra      ? 160334 764    5       raintr          # uda50, rqdx1/2/3
+rx      ? 177170 264    5       rxintr          # rx01/02
+tms     ? 174500 260    5       tmsintr         # tmscp driver
+ts      ? 172520 224    5       tsintr          # ts11 driver
+cn      1 176540 344    5       cnrint  cnxint
+cn      2 176550 354    5       cnrint  cnxint
+cn      3 176560 364    5       cnrint  cnxint
+
+What is wrong with the "cn" devices? 
+
+I checked the CSRs of the DHV11 and the DLV11J cards with the "show
+qbus" command on a MicroVAX 4000-200 to be sure that the CSRs are where
+I am expecting them:
+>>>sh q
+Scan of Qbus I/O Space
+-20000120 (760440) = 009D DHQ11/DHV11/CXA16/CXB16/CXY08
+-20000122 (760442) = F081
+-20000124 (760444) = 0000
+-20000126 (760446) = 0000
+-20000128 (760450) = 0000
+-2000012A (760452) = 0000
+-2000012C (760454) = 0000
+-2000012E (760456) = 0000
+-20001940 (774500) = 0000 TQK50/TQK70/TU81E/RV20/KFQSA-TAPE
+-20001942 (774502) = 0BC0
+-20001D60 (776540) = 0000 DLV11J
+-20001D62 (776542) = 0000
+-20001D64 (776544) = 0080
+-20001D66 (776546) = 0000
+-20001D68 (776550) = 0000 DLV11J
+-20001D6A (776552) = 0000
+-20001D6C (776554) = 0080
+-20001D6E (776556) = 0000
+-20001D70 (776560) = 0000 DLV11J
+-20001D72 (776562) = 0000
+-20001D74 (776564) = 0080
+-20001D76 (776566) = 0000
+-20001F40 (777500) = 0020 IPCR
+-20001F70 (777560) = 0000
+-20001F72 (777562) = 0000
+-20001F74 (777564) = 0080
+-20001F76 (777566) = 0000
+-- 
+
+
+tschüß,
+       Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz/
+
+
+
+
