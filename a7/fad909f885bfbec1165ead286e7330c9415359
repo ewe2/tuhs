@@ -1,0 +1,173 @@
+From: enf@pobox.com (Eric Fischer)
+Date: Tue, 23 Nov 1999 16:45:34 -0600 (CST)
+Subject: source code for PDP-7 dsw command
+Message-ID: <199911232245.QAA32000@216-80-13-83.d.enteract.com>
+
+Sorry for the repetition if you've already seen this.  The
+source code for the PDP-7 Unix dsw command was just reposted
+in alt.sysadmin.recovery.  Here's the article:
+
+
+Newsgroups: alt.sysadmin.recovery
+From: flaps@dgp.toronto.edu (Alan J Rosenthal)
+Subject: Re: Time to train not one, but 15 PFY's. . .
+Date: 23 Nov 99 22:17:39 GMT
+
+SKaranyi+n0 at localhost.ruhr.de (Wolfgang Schelongowski) writes:
+>>NAME               dsw -- delete interactively
+...
+>Radio hams with contact to the `Evil Empire' know that it's the short
+>form of doswidanye or so. IOW "Bye".
+
+Fascinating.  It appears that although it was claimed to stand for "delete
+from switches", and this is what it actually did, it was also a pun on the
+amateur radio abbreviation.
+
+The later program described in the previous article seems to be named after
+the original (and no longer deserves the name "dsw").  And the original "dsw"
+was *not* interactive.
+
+The original "dsw" program uses the console switches to specify the file
+to be deleted, for file names with funny characters in them.  It was
+astonishingly round-about: you would set the number 'n' on the switches,
+then run dsw, and it found the name of file #n in the current directory,
+and then created a core dump which when executed, would delete that file.
+Sheesh.  It's not like there wasn't an unlink() system call; why not just
+unlink it?  Well, I guess the idea is that you would examine the core file
+and make sure it was deleting the right file.  But there are still obvious
+trivial improvements.  And why not take the number in argv[1]?
+
+Of course this was well before it was possible to write something like
+"rm `command`".
+
+It is interesting that the 1971(?) man page mentions that really there should
+be an option to rm, and then goes on to specify "rm -i *" behaviour as
+appropriate for a serious version of this command.  That "BUGS" section sure
+was a good idea.  I still can't believe the sysV people renamed it to "NOTES".
+
+dmr posted the man page of the original dsw program to net.general in 1981,
+and it can thus be found at
+http://communication.ucsd.edu/A-News/NET.general/81.08.12_research.19_net.general.html
+
+(there is an earlier posting about dsw, which is a joke)
+
+dmr also posted the source code to net.unix-wizards in 1984.  This is too
+late for the "oldnews" archive, so I'll include the article here.  I love
+his comment that he considered posting instead to net.sources.
+
+
+Date: 8 Dec 84 09:45:09 GMT
+From: dmr@research.UUCP
+Newsgroups: net.unix-wizards
+Subject: dsw: pdp7 memorabilia
+
+I happened to dredge up an old notebook and found a listing
+of the PDP-7 version of dsw.  Because several people have approached
+me recently about reviving a version of PDP-7 Unix as a sort of
+paleontological exhibit, and because the subject has been discussed
+here, I thought people might be interested in seeing the code.
+I first considered net.sources, but decided not to carry whimsy too far.
+
+		Dennis Ritchie
+
+Notes:
+
+1) The assembler has Knuth-style temporary labels but no literals.
+
+2) The name of the current directory was evidently ".."
+
+3) Formatting is faithfully reproduced.
+
+4) "sys save" makes a core image.
+------
+" dsw
+
+   lac djmp
+   dac .-1
+   oas cla
+   cma
+   tad d1
+   dac t1
+   sys open; dd; 0
+1:
+   lac d2
+   sys read; dir; 8
+   sna
+   sys exit
+   lac dir
+   sna
+   jmp 1b
+   isz t1
+   jmp 1b
+
+wr:
+   lac d1
+   sys write; dir+1; 4
+   lac d1
+   sys write; o12; 1
+   sys save
+do:
+   sys unlink; dir+1
+   sys exit
+
+d1: 1
+d2: 2
+o12: 012
+t1: 0
+djmp: jmp do
+dd: 056056; 040040; 040040; 040040
+dir: .=.+8
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA06682
+	for pups-liszt; Wed, 24 Nov 1999 11:13:19 +1100 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA06677
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 24 Nov 1999 11:13:11 +1100 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id LAA52032
+	for pups at minnie.cs.adfa.edu.au; Wed, 24 Nov 1999 11:13:11 +1100 (EST)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <199911240013.LAA52032 at henry.cs.adfa.edu.au>
+Subject: Also, new PDP-11 emulator
+To: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Date: Wed, 24 Nov 1999 11:13:11 +1100 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Thanks to Eric for passing on that posting from Dennis re PDP-7 dsw.
+
+For those who don't read the newsgroups, there's a new version of the
+Begemot PDP-11 emulator:
+
+------------------
+    From: Hartmut Brandt <brandt at fokus.gmd.de>
+    Newsgroups: alt.sys.pdp11
+    Subject: Version 2.4 of the p11 PDP-11 emulator
+    Date: 19 Nov 1999 15:04:33 GMT
+
+Version 2.4 of p11 - the Begemot PDP-11 emulator - is available on
+ftp.fokus.gmd.de:/pub/cats/usr/harti/p11. This release supports the following
+platforms:
+
+	FreeBSD 4.0
+	Sparc-Solaris 2.[5678]
+	Redhat-Linux
+
+It will possibly work on FreeBSD [23].* and other Linux variants.
+To build it you need libbegemot (avalaible in the same location), gcc and
+gmake. Previous versions also built on BSD/OS and SunOS.
+------------------
+
+Cheers,
+	Warren
+
+
+
