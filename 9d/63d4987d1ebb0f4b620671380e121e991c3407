@@ -1,0 +1,417 @@
+From: sysyphus@crl.com (Danny R. Brown)
+Date: Sun, 3 Dec 1995 16:28:57 -0800 (PST)
+Subject: Building 2.11BSD...Huzzah!
+Message-ID: <Pine.SUN.3.91.951203160902.3194A-100000@crl9.crl.com>
+
+1. That little doc you sent out, Steven, made my day.
+2. I got your note on the updates. Thanks again.
+3. BSD2.11 is now running fine with a modified kernel. At this point
+   it is my pleasure to give you this Bug Report (or, what do I do now?)
+
+a: The Netnix burps at link time. It says:
+        ............. long list of modules...uipc_ustteq.o d.netnix.o
+Undefined:
+_arpresolve
+_arpwhohas
+_arpinput
+
+It continues to build, but does issue a stop 1 (ignored) message.
+At boot time netnix generates a bad magick number and fails to
+load. I made the minimum number of modifications to the SYSYTEM
+file to install the net.
+
+Questions: Where do I look for the abovementioned symbols?
+           Do I have to run Netnix to go multi-user?
+Unrelated questions: Will a DZV-11 (four line mux) work in place
+of DZ-11? In my experience the Unibus and Q-Buss versions of this
+board are 100% software compatible, but I'm failing to get a second
+terminal going...
+
+Now, the Real Doozie...
+I have, to date, been unable to make any of the Games work. The message
+is always "<name> not found". I tried worm, backgammon, wump, fortune,
+others from the games directory. Binary dumps show what looks like valid
+data in these files.
+Spooky, huh?
+ 
+The Saga Continues...
+
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+Received: from mail.crl.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id NAA12449; Mon, 4 Dec 1995 13:18:14 +1100
+Received: from crl12.crl.com by mail.crl.com with SMTP id AA02592
+  (5.65c/IDA-1.5 for <oldunix at minnie.cs.adfa.oz.au>); Sun, 3 Dec 1995 18:10:36 -0800
+Received: by crl12.crl.com id AA21511
+  (5.65c/IDA-1.5 for oldunix at minnie.cs.adfa.oz.au); Sun, 3 Dec 1995 18:04:49 -0800
+Date: Sun, 3 Dec 1995 18:04:49 -0800 (PST)
+From: "Danny R. Brown" <sysyphus@crl.com>
+To: oldunix at minnie.cs.adfa.oz.au
+Subject: Building BSD2.11 Huzzah! #2
+Message-Id: <Pine.SUN.3.91.951203180007.21469A at crl12.crl.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+Greetings!
+  In my earlier I asked a question about DZ vs. DZV11 support. I am
+glad to note that the distributed Kermit works quite happily on 
+/dev/tty0, the first line on the DZV-11.
+  I still can't log on to that line, but the night is young.
+Cheers,
+D.Brown
+
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id RAA12900; Mon, 4 Dec 1995 17:14:35 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id WAA10558; Sun, 3 Dec 1995 22:06:03 -0800
+Date: Sun, 3 Dec 1995 22:06:03 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512040606.WAA10558 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: Building BSD2.11 Huzzah! #2
+
+Greetings -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+>   In my earlier I asked a question about DZ vs. DZV11 support. I am
+> glad to note that the distributed Kermit works quite happily on 
+> /dev/tty0, the first line on the DZV-11.
+>   I still can't log on to that line, but the night is young.
+
+	You have to enable a getty on the port before you can log in on it.
+
+	Edit /etc/ttys, adding if needed a tty00 line. There are numerous
+	examples in the file - it should be pretty easy to figure out what
+	to add or change.  Then you need to tell 'init' about the change
+	by doing a "kill -HUP 1".
+
+	NOTE:  ports are NOT bidirectional - if you're going to enable logins
+	on a line you won't be able to kermit _out_.  And vice versa, if you're
+	going to kermit out you'll need to disable logins on that line.  Yes
+	it'd be nice to have bidirectional ports - but someone keeps stealing
+	my copious supply of free time ;-)
+
+	Steven
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id RAA12884; Mon, 4 Dec 1995 17:03:43 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id WAA10542; Sun, 3 Dec 1995 22:01:18 -0800
+Date: Sun, 3 Dec 1995 22:01:18 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512040601.WAA10542 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: Building 2.11BSD...Huzzah!
+
+Hi -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+> 
+> 1. That little doc you sent out, Steven, made my day.
+> 2. I got your note on the updates. Thanks again.
+
+	You're welcome.
+
+> a: The Netnix burps at link time. It says:
+>         ............. long list of modules...uipc_ustteq.o d.netnix.o
+> Undefined:
+> _arpresolve
+> _arpwhohas
+> _arpinput
+
+	I wager you forgot to select the 'NETHER' option in your kernel
+	config file.  Setting NETHER to 1 brings in the ARP modules.
+
+> It continues to build, but does issue a stop 1 (ignored) message.
+
+	Hmmm, - the 'netbind' process gives an error about
+	undefined symbols.  It sounds like that was ignored.
+	That's the signal not to run the kernel.
+
+> At boot time netnix generates a bad magick number and fails to
+> load. I made the minimum number of modifications to the SYSYTEM
+
+	That's because the netnix image was not successfully loaded - the
+	linker left the header set to something other than a valid a.out
+	header.
+
+> Questions: Where do I look for the abovementioned symbols?
+>            Do I have to run Netnix to go multi-user?
+
+	In your kernel config file make sure that 'NETHER' is set to 1.
+
+	You could go multi user but you'd likely see a number of errors
+	as programs try to use sockets to communicate.
+
+	Best to have a valid kernel+netnix image set before going multiuser.
+
+> Unrelated questions: Will a DZV-11 (four line mux) work in place
+> of DZ-11? In my experience the Unibus and Q-Buss versions of this
+
+	It should.  Just don't try to use ports 4,5,6, or 7 that a DZ-11\
+	would have.
+
+> I have, to date, been unable to make any of the Games work. The message
+> is always "<name> not found". I tried worm, backgammon, wump, fortune,
+
+	sigh.  Did you put /usr/games into your search path?  The games
+	are not in /usr/bin or /usr/ucb with the system programs.  Try putting
+	/usr/games in your PATH (or simply typing /usr/games/robots).
+
+	Good Luck.
+
+	Steven
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id VAA14915; Tue, 5 Dec 1995 21:17:05 +1100
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <06064-0 at oxmail.ox.ac.uk.>; Tue, 5 Dec 1995 10:05:32 +0000
+Message-Id: <m0tMuMD-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: Still trying v6 build for multiple DL11s ...
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Tue, 5 Dec 1995 10:12:17 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 2843
+
+
+OK, I'm still attempting kernel builds of v6 to support my 2nd DL11-W.
+Thanks to everyone who's given me advice so far -- sadly it doesn't
+work yet ...
+
+I have two DL11-Ws, one as the console (CSR=0177560, VEC=0060), one as
+the first local interface (CSR=0176500, VEC=0300). Under RT11, I'm
+able to use both interfaces without trouble (using CONSOL.MAC to
+switch from one to the other, since I haven't SYSGENed for
+multi-terminal support). Thus I know the hardware works and is
+correctly configured.
+
+According to the docs in /usr/docs/start, all I need do to get support
+for the second DL11-W is edit /usr/sys/dmt/kl.c to increase NKL11 from
+1 to 2. (As far as the KL/DL driver is concerned the only difference
+between the two types of interface is the base addresses, and it
+happens to be configured so that the first KL11 other than the console
+will have a CSR of 0176500, so I choose that one.) I can then rebuild
+everything and run /usr/sys/conf/mkconf. At the mkconf prompt I enter
+"rk", and "1kl", as stated in the docs. /usr/sys/conf/c.c and
+/usr/sys/conf/l.s are built. Inspection of l.s suggests that the
+correct interrupt vector of 300 is used ... Inspection of c.c implies
+that the KL11 character devices will all have major device number
+0. Looking at kl.c, it seems that:
+
+	c	0	0	Console		177560
+	c	0	1	1st KL11 	176500
+	c	0	2	2nd KL11 	176510
+				...
+	c	0	3	1st DL11 	175610
+	c	0	4	2nd DL11 etc.	175620
+
+I then finish building the kernel and boot from it --- no errors.
+
+Creating the character devices as shown, I get:
+
+	echo fred >/dev/tty0 (the console) works fine
+	echo fred >/dev/tty1 (1st DL11)    gives ...
+		/dev/tty1: cannot create
+
+So I'm back to square one. As a test I set NKL11 and NDL11 to 4 and
+ran mkconf with rk and 8kl. Still doesn't work. What am I doing wrong?
+I'm out of ideas ...
+
+Another interesting thing caught my eye as I was looking at the
+docs. Apparently, the system should print out memory size as it
+boots. Looking at /usr/sys/ken/main.c, I can see a whole bunch of
+"printf"s which print out a copyright message and memory
+details. Nothing is actually displayed on the console during boot! 
+
+_main is called from m40.s, and printf is a function defined within
+the kernel code itself (of course ;)
+
+Any ideas?
+
+Cheers, Bob.
+
+
+--
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+      "There's more to life than books you know, but not much more"
+----------------------------------------------------------------------------
+
+
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id VAA14942; Tue, 5 Dec 1995 21:50:46 +1059
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <07324-0 at oxmail.ox.ac.uk.>; Tue, 5 Dec 1995 10:49:23 +0000
+Message-Id: <m0tMv2c-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: v6 kernel stuff again ...
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Tue, 5 Dec 1995 10:56:06 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 861
+
+
+I've found out the reason for the non-printing printf's. The code in
+prf.c only actually outputs to the console if the contents of the
+switch register are non-zero...  the code in question is the function
+putchar() in /usr/sys/ken/prf.c
+
+Still can't get the second DL11 going though ;)
+
+
+--
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+      "There's more to life than books you know, but not much more"
+----------------------------------------------------------------------------
+
+
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id XAA17264; Wed, 6 Dec 1995 23:08:29 +1100
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <10915-0 at oxmail.ox.ac.uk.>; Wed, 6 Dec 1995 11:54:21 +0000
+Message-Id: <m0tNIXH-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: v6 with two DL11s now works ... silly me!
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Wed, 6 Dec 1995 12:01:19 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 2676
+
+
+I've recently been deluging the list with problems and obseervations
+concerning the v6 kernel. Most recently, I discussed the putchar()
+routine in /usr/sys/ken/prf.c, which prints messages only if the front
+panel switches are set appropriately. I modified that routine by
+commenting out an if, so the messages would always be sent to the
+console regardless.
+
+Having edited prf.c and rebuilt the kernel, I was suprised to find no
+change in the behavior on bootup. Comparing the 'new' and 'old'
+kernels (with cmp) showed them to be the same. The problem then is
+that the kernel was not being rebuilt correctly.
+
+Accordingly I removed all .o files, and the files /usr/sys/lib1 and
+/usr/sys/lib2. I rebuilt again. The lib1 and lib2 files do not build
+directly from the /usr/sys/run script, but rather use "ar r" to
+replace the files in the libraries with the newly-built object
+files. Thus I had to manually build the libraries. NOTE: it is
+important to get the object files into the library in the correct
+order -- I simply copied the order as for the distributed files... 
+
+I remember using tsort and lorder for Minix to determine library
+component ordering, but I forget how that works ;)
+
+Having rebuilt everything, not only did the messages print, but also
+the second KL11 magically worked. Thus what I had been doing all along
+was OK, but the kernel was not being properly built using all the new
+object files.
+
+Summary - to set up a second DL11 (configured as the first "local"
+interface):
+
+	1) ed /usr/sys/dmr/kl.c 
+
+			changing NKL11 to 2 
+
+	2) modify /usr/sys/run to call mkconf with the additional 
+	   parameter:
+
+			1kl
+
+	3) Bob, so to speak, is your uncle.
+
+Be sure everyhing is rebuilt. 
+
+I wonder if there is a bug in "ar r", whereby certain files fail to be
+inserted into the library, so that old versions persist. Using the "ar
+rv" verbose option may be wise ...
+
+Hope this info is useful to those mad enough to want to use v6 ;)
+Thanks for all your help. 
+
+Next project --- port the v7 shell to v6. Hmmmmmmmmm.
+
+
+Bob
+
+-- 
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+       "I'd rather stay a child
+        and keep my self respect,
+        if being an adult
+        means being like you"   Jello Biafra
+----------------------------------------------------------------------------
+
+
+
+Received: from mail.crl.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id MAA18472; Thu, 7 Dec 1995 12:41:59 +1059
+Received: from crl14.crl.com by mail.crl.com with SMTP id AA27551
+  (5.65c/IDA-1.5 for <oldunix at minnie.cs.adfa.oz.au>); Wed, 6 Dec 1995 17:40:00 -0800
+Received: by crl14.crl.com id AA00417
+  (5.65c/IDA-1.5 for oldunix at minnie.cs.adfa.oz.au); Wed, 6 Dec 1995 17:31:37 -0800
+Date: Wed, 6 Dec 1995 17:31:36 -0800 (PST)
+From: "Danny R. Brown" <sysyphus@crl.com>
+To: oldunix at minnie.cs.adfa.oz.au
+Subject: Undefined Inconsistency
+Message-Id: <Pine.SUN.3.91.951206171925.116A-100000 at crl14.crl.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+Greetings:
+  When I do a "reboot" the system declares that /dev/ra0f has an
+undefined inconsistency (during fsck). It tells me to run fsck
+manually, then aborts before starting the daemons.
+I have dchecked, ichecked and fscked /dev/ra0f, and it seems to
+be a happy partition.
+ra0f starts on an even cylinder boundary. It has one file which
+occupies some 54% of the space on it.
+reboot -f brings everything up normally.
+
+reboot worked at least twice without finding any faults prior to
+this boo-boo. Looking through the man pages did not point me in
+any yet untried direction. I did encounter a 'bad block' on /dev/ra0d,
+the /usr partition, while doing a make clean in usr/src/sys, but this
+turned out to be bogus, and did not involve ra0f. Coincidence or ?
+
+All hints appreciated...
+
+
+
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+
