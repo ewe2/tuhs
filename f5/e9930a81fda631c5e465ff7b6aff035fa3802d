@@ -1,0 +1,48 @@
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Date: Sun, 14 Dec 03 17:22:40 PST
+Subject: [TUHS] question about mkfs(8) and stdio
+Message-ID: <0312150122.AA03565@ivan.Harhan.ORG>
+
+Kenneth Stailey <kstailey at yahoo.com> wrote:
+
+> Did stdio buffering change over time?
+
+Line buffering was a Berkeley innovation.  stdout became line-buffered by
+default (when it is a terminal) in 4.0BSD.  4.2BSD added setlinebuf(3) to allow
+people to make stdout or stderr line-buffered when they want to.  4.3BSD
+extended it to work on any stream, not just stdout or stderr.
+
+> If you look at an old BSD mkfs for cylinder-group style file systems (not 7th
+> Ed filesystems)
+
+Ahmm, you call that old?  To me it's new...  It's a (wonderful) 4.2BSD
+innovation.
+
+> but I have memories that the superblocks were printed out one at a time as if
+> fflush(stdout) was called between them rather than one line at a time with
+> line-buffered stdio.
+
+I use 4.3BSD-* systems every day and have been for the past several years, and
+you can take my word for it that on all 4.3BSD-* systems, including Quasijarus,
+plain 4.3, and Ultrix the alternate superblock list output from mkfs/newfs
+appears one line at a time on the tty.
+
+> At some point I thought "SysV must have broke this"
+
+I'm curious, where does SysV fit into this?  It's the wonderful 4.2BSD
+filesystem a BSD-only thing that Missed'em-five people treated as a satanic
+manifestation?
+
+> since newfs would print out
+> a complete row of superblock numbers at once with a big delay between the rows
+
+That's exactly what it does.  BTW mkfs = newfs.  mkfs was/is the original UNIX
+filesystem creator.  It was almost completely rewritten in 4.2BSD to create the
+new filesystems.  At the same time the newfs program was written as a user-
+friendly front-end to mkfs (it merely exec'ed mkfs with a bunch of options).
+The situation remained in 4.3.  In 4.3-Tahoe/Quasijarus mkfs.c and newfs.c are
+compiled and linked into one binary called newfs, CSRG was forced to do this in
+order to support disk labels.
+
+MS
+
