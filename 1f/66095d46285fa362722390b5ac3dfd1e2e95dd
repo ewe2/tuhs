@@ -1,0 +1,32 @@
+From: luvisi@andru.sonoma.edu (Andru Luvisi)
+Date: Mon, 2 Dec 2002 13:52:27 -0800 (PST)
+Subject: [pups] 2.11BSD networking on simh
+In-Reply-To: <Pine.LNX.4.44.0211281703350.643-100000@gladen>
+Message-ID: <Pine.LNX.4.44.0212021349370.643-100000@gladen>
+
+I finally tracked it down with strace.  The send() function was
+complaining about not being connected.
+
+By changing it to a sendto and providing some hard coded data I was able
+to make it work.  Obviously this is not the "correct" solution, but it
+illustrates the problem.
+
+Here's the patch:
+
+--- sim_ether.c.org     Mon Dec  2 12:43:49 2002
++++ sim_ether.c Mon Dec  2 13:51:47 2002
+@@ -406,7 +406,9 @@
+
+ int pcap_sendpacket(pcap_t* handle, u_char* msg, int len)
+ {
+-  return (send(pcap_fileno(handle), msg, len, 0) == len)?0:-1;
++  struct sockaddr_pkt spkt = { AF_INET, "eth0", -1 };
++  return (sendto(pcap_fileno(handle), msg, len, 0,
++                 (struct sockaddr *)&spkt, sizeof(spkt)) == len)?0:-1;
+ }
+
+ int PacketGetAdapterNames(char* buffer, int* size)
+
+
+
+
