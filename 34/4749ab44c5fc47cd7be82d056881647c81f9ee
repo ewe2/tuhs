@@ -1,0 +1,886 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Sun, 25 Feb 2001 19:34:57 +0100 (CET)
+Subject: [pups] Stray Interupts
+In-Reply-To: <Uz90cvA$kUm6EwgT@ruffnready.co.uk>
+Message-ID: <Pine.LNX.4.21.0102251934050.17586-100000@Tempo.Update.UU.SE>
+
+On Sun, 25 Feb 2001, Robin Birch wrote:
+
+> Dear All,
+> Having got to the point where I can get ultrix trying to boot on p11 I
+> can confirm that it complains of stray interrupts on p11 as well.  A
+> thought occurred to me over the weekend that I haven't had time to try
+> out.  Is this the toy clock.  It is certainly built into p11, is it
+> built into Bob Supnik's emulator and if so, does it generate interrupts?
+
+Nope. The TOY clock don't generate interrupts.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA38600
+	for pups-liszt; Mon, 26 Feb 2001 05:54:08 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA38596
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 05:54:04 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f1PImpn25642
+	for pups at minnie.cs.adfa.edu.au; Sun, 25 Feb 2001 10:48:51 -0800 (PST)
+Date: Sun, 25 Feb 2001 10:48:51 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200102251848.f1PImpn25642 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Stray Interupts
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Robin Birch <robin at ruffnready.co.uk>
+>
+> Having got to the point where I can get ultrix trying to boot on p11 I
+> can confirm that it complains of stray interrupts on p11 as well.  A
+> thought occurred to me over the weekend that I haven't had time to try
+> out.  Is this the toy clock.  It is certainly built into p11, is it
+> built into Bob Supnik's emulator and if so, does it generate interrupts?
+> 
+	As Billy pointed out the TOY clock does not generate interrupts.  The
+	line frequency clock does but the TOY clock does not.
+
+	Looking at the Ultrix-3.1 sources I found something that may be
+	relevant in sys/errlog.c:
+
+/*
+ * Log a stray device interrupt.
+ *
+ * A stray interrupt is defined as one that occurs for
+ * a configured device through a valid vector address,
+ * but is unexpected. In the case of big disks, a stray
+ * interrupt is logged when the interrupt service routine
+ * is entered and the device is not active and no attention
+ * summary bits are set.
+ */
+
+	One guess is that other systems do not use or concern themselves with
+	'attention summary' bits and simply dismiss the interrupt without
+	comment.
+
+	Looking at the errlogs (I do not know what the commands for doing that
+	are but a big of digging would probably find them) might yield more
+	information.
+
+	Cheers.
+
+	Steven  Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA39100
+	for pups-liszt; Mon, 26 Feb 2001 08:08:14 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from anchor-post-33.mail.demon.net (anchor-post-33.mail.demon.net [194.217.242.91])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA39096
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 08:08:10 +1100 (EST)
+	(envelope-from robin at ruffnready.co.uk)
+Received: from falstaf.demon.co.uk ([158.152.152.109])
+	by anchor-post-33.mail.demon.net with esmtp (Exim 2.12 #1)
+	id 14X8L9-0007uE-0X; Sun, 25 Feb 2001 21:04:24 +0000
+Message-ID: <v179WIA8LXm6Ew3b at ruffnready.co.uk>
+Date: Sun, 25 Feb 2001 21:02:52 +0000
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au
+From: Robin Birch <robin@ruffnready.co.uk>
+Subject: Re: [pups] Stray Interupts
+References: <200102251848.f1PImpn25642 at moe.2bsd.com>
+In-Reply-To: <200102251848.f1PImpn25642 at moe.2bsd.com>
+MIME-Version: 1.0
+X-Mailer: Turnpike Integrated Version 5.00 U <YSkKJATYm0AxAbv6xwlBrCeVCW>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Rats,
+This means that it won't be simple to fix!!!!!!!!
+
+It could mean that running Ultrix on a simulator isn't on without some
+work on the emulators themselves.  When the SI message is generated it
+comes out with a number that looks like an address.  Would this point to
+the source of the interrupt?  On p11 it is a constant address, I just
+can't remember what it is for the moment.
+
+Cheers
+
+Robin
+In message <200102251848.f1PImpn25642 at moe.2bsd.com>, Steven M. Schultz
+<sms at moe.2bsd.com> writes
+>> From: Robin Birch <robin at ruffnready.co.uk>
+>>
+>> Having got to the point where I can get ultrix trying to boot on p11 I
+>> can confirm that it complains of stray interrupts on p11 as well.  A
+>> thought occurred to me over the weekend that I haven't had time to try
+>> out.  Is this the toy clock.  It is certainly built into p11, is it
+>> built into Bob Supnik's emulator and if so, does it generate interrupts?
+>> 
+>       As Billy pointed out the TOY clock does not generate interrupts.  The
+>       line frequency clock does but the TOY clock does not.
+>
+>       Looking at the Ultrix-3.1 sources I found something that may be
+>       relevant in sys/errlog.c:
+>
+>/*
+> * Log a stray device interrupt.
+> *
+> * A stray interrupt is defined as one that occurs for
+> * a configured device through a valid vector address,
+> * but is unexpected. In the case of big disks, a stray
+> * interrupt is logged when the interrupt service routine
+> * is entered and the device is not active and no attention
+> * summary bits are set.
+> */
+>
+>       One guess is that other systems do not use or concern themselves with
+>       'attention summary' bits and simply dismiss the interrupt without
+>       comment.
+>
+>       Looking at the errlogs (I do not know what the commands for doing that
+>       are but a big of digging would probably find them) might yield more
+>       information.
+>
+>       Cheers.
+>
+>       Steven  Schultz
+>       sms at moe.2bsd.com
+
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA39340
+	for pups-liszt; Mon, 26 Feb 2001 08:41:19 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mailhost.cs.uofs.edu (mailhost.cs.uofs.edu [134.198.169.1])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA39336
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 08:41:14 +1100 (EST)
+	(envelope-from bill at cs.uofs.edu)
+Received: from triangle.cs.uofs.edu (IDENT:root at triangle.cs.uofs.edu [134.198.172.101])
+	by mailhost.cs.uofs.edu (8.9.3/8.9.2) with ESMTP id QAA41428;
+	Sun, 25 Feb 2001 16:39:45 -0500 (EST)
+Received: from localhost (bill at localhost)
+	by triangle.cs.uofs.edu (8.9.3/8.8.6) with ESMTP id QAA14066;
+	Sun, 25 Feb 2001 16:37:23 -0500
+X-Authentication-Warning: triangle.cs.uofs.edu: bill owned process doing -bs
+Date: Sun, 25 Feb 2001 16:37:21 -0500 (EST)
+From: Bill Gunshannon <bill@cs.scranton.edu>
+To: Robin Birch <robin at ruffnready.co.uk>
+cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Stray Interupts
+In-Reply-To: <v179WIA8LXm6Ew3b at ruffnready.co.uk>
+Message-ID: <Pine.LNX.4.10.10102251630510.13466-100000 at triangle.cs.uofs.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Sun, 25 Feb 2001, Robin Birch wrote:
+
+> Rats,
+> This means that it won't be simple to fix!!!!!!!!
+> 
+> It could mean that running Ultrix on a simulator isn't on without some
+> work on the emulators themselves. 
+
+Well, that's my estimation.  I thought at first it was harmless, but
+work I have attempted over this weekend using the Supnik emulator has
+changed my mind.
+
+>                                    When the SI message is generated it
+> comes out with a number that looks like an address.  Would this point to
+> the source of the interrupt?  On p11 it is a constant address, I just
+> can't remember what it is for the moment.
+
+Let me guess: 176700.  :-)
+
+It's the csr of the device that issued the stray interrupt.  My guess is
+your having the same trouble with p11 that I am having with Bob's.  It's
+the hp device and every RP disk access causes stray interrupts.
+ 
+bill
+
+-- 
+Bill Gunshannon          |  de-moc-ra-cy (di mok' ra see) n.  Three wolves
+bill at cs.scranton.edu     |  and a sheep voting on what's for dinner.
+University of Scranton   |
+Scranton, Pennsylvania   |         #include <std.disclaimer.h>   
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA39822
+	for pups-liszt; Mon, 26 Feb 2001 09:53:35 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sydney.worldwide.lemis.com (root at belldandy.iteration.net [208.190.180.179])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA39818
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 09:53:30 +1100 (EST)
+	(envelope-from grog at sydney.worldwide.lemis.com)
+Received: (from grog at localhost)
+	by sydney.worldwide.lemis.com (8.11.1/8.9.3) id f1PIvAI11659;
+	Sun, 25 Feb 2001 13:57:10 -0500 (EST)
+	(envelope-from grog)
+Date: Sun, 25 Feb 2001 13:57:10 -0500
+From: Greg Lehey <grog@lemis.com>
+To: Bill Gunshannon <bill at cs.scranton.edu>
+Cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au,
+        Hartmut Brandt <brandt at fokus.gmd.de>,
+        Joerg Micheel <joerg at begemot.org>
+Subject: [pups] Begemot emulator (was: Stray Interupts)
+Message-ID: <20010225135710.B11541 at sydney.worldwide.lemis.com>
+References: <200102230427.f1N4RhD19979 at moe.2bsd.com> <Pine.LNX.4.10.10102230834350.12446-100000 at triangle.cs.uofs.edu>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
+X-Mailer: Mutt 1.0i
+In-Reply-To: <Pine.LNX.4.10.10102230834350.12446-100000 at triangle.cs.uofs.edu>; from bill at cs.scranton.edu on Fri, Feb 23, 2001 at 08:43:41AM -0500
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Friday, 23 February 2001 at  8:43:41 -0500, Bill Gunshannon wrote:
+> On Thu, 22 Feb 2001, Steven M. Schultz wrote:
+>> 	so the machine can be placed on a network.  P11's also quite a bit
+>> 	more efficient/fast.   Configuration can be puzzling but sample
+>> 	config files are available (from various PUPS folks who run P11).
+>
+> I would love to us the Begemot emulator.  I have the latest version but
+> I have been unable to get any of my disk images to work.  Can anyone
+> tell me if you can use the disk images from the other emulators and if
+> so, how??  Do they have to be converted somehow like tapes??
+
+*sigh* The Begemot emulator has bitrotted a little.  I can no longer
+get it to work, though admittedly I didn't try very hard the last
+time, and it may be something as simple as a corrupted disk image.
+But the other thing is that the Begemot ftp site is no longer
+accessible, which is somewhat embarrassing, since I host it.  I'm
+copying J�rg Micheel and Harti Brandt, the Begemot people, and I hope
+that we'll get it up again soon.  J�rg, Harti, the problem is that I
+migrated a system disk, and seem to have lost the connection to the
+ftp files.  You should find them somewhere on the file systems
+/freebie or /freebie/usr, which are the old system disk, still
+spinning.
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA47415
+	for pups-liszt; Mon, 26 Feb 2001 11:50:13 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA47410
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 11:50:08 +1100 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+ (Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f2651f4d3a8c8 at mwnt5.microwalt.nl>;
+ Mon, 26 Feb 2001 01:44:22 +0000
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <FQJ8RA4N>; Mon, 26 Feb 2001 01:39:26 +0100
+Message-ID: <6F63E31101C6D41196490008C7B2BFC32CA5 at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "'Bill Gunshannon'" <bill at cs.scranton.edu>,
+        Robin Birch
+	 <robin at ruffnready.co.uk>
+Cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Stray Interupts
+Date: Mon, 26 Feb 2001 01:39:25 +0100
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+
+Robin Birch wrote:
+
+> > This means that it won't be simple to fix!!!!!!!!
+Sure, fix the source :)
+
+> > It could mean that running Ultrix on a simulator isn't on 
+> without some work on the emulators themselves. 
+I have been running Ultrix-11 V3.1 on Ersatz-11 without any of that. It
+_could_ be linked to interrupt latency issues- Ultrix tells controller
+to do something (e.g., three commands to read a sector).  Controller does
+as told, generating an interrupt for each of the requests saying its ready.
+However, because of latency, only ints 1 and 3 actually get delivered within
+the expected timeframe (can happen).
+
+Usually (from my experience with writing Unix kernel drivers), this is not
+a problem, because the "message" from (in this case) int2 will be picked up
+when we start to service int3, which we _did_ see.  So, even though we didnt
+get int2, we were fine.
+
+Now... emulator wakes up again, goes "oi, i messed up, better go send that
+int now" and sends the int.  The driver no longer _awaits_ an interrupt
+(because
+we cleared the AttentionNeeded flags when servicing int3), so... we get the
+"stray int" message.
+
+If this logic is correct, it will get worse when loading the host system
+heavily, so latency will occur more often.  On a very fast box (like my quad
+CPU
+P3/850 Linux box) it should hardly occur.
+
+Anyone?
+
+Fred (hacking on the V3.1 source to not fuck up TCP/IP on the 11/23 ..)
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA47701
+	for pups-liszt; Mon, 26 Feb 2001 12:27:18 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA47697
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 12:27:16 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1Q1Uij05690
+	for pups at minnie.cs.adfa.edu.au; Mon, 26 Feb 2001 12:30:44 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102260130.f1Q1Uij05690 at henry.cs.adfa.edu.au>
+Subject: [pups] Announce: The Unix Tree
+To: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Date: Mon, 26 Feb 2001 12:28:04 +1100 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi all,
+	
+	A while ago I floated the idea of a web-browsable set of old Unix
+distributions, along with a way of finding out how each file evolved. Well,
+after a bit of coding on the weekend, I now have this available. It's
+called the Unix Tree, and the URL is http://minnie.cs.adfa.edu.au/UnixTree/
+
+Because of the license restrictions, you need your normal UNIX Archive
+username and password to browse.
+
+I've only inserted research editions up to 7th Edition for now, in case
+I have to make major changes. However, tell me what you think.
+
+Cheers, and off to have some lunch.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA48209
+	for pups-liszt; Mon, 26 Feb 2001 13:49:49 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mailhost.cs.uofs.edu (mailhost.cs.uofs.edu [134.198.169.1])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA48205
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 13:49:43 +1100 (EST)
+	(envelope-from bill at cs.uofs.edu)
+Received: from triangle.cs.uofs.edu (IDENT:root at triangle.cs.uofs.edu [134.198.172.101])
+	by mailhost.cs.uofs.edu (8.9.3/8.9.2) with ESMTP id VAA42195;
+	Sun, 25 Feb 2001 21:48:18 -0500 (EST)
+Received: from localhost (bill at localhost)
+	by triangle.cs.uofs.edu (8.9.3/8.8.6) with ESMTP id VAA14159;
+	Sun, 25 Feb 2001 21:45:55 -0500
+X-Authentication-Warning: triangle.cs.uofs.edu: bill owned process doing -bs
+Date: Sun, 25 Feb 2001 21:45:53 -0500 (EST)
+From: Bill Gunshannon <bill@cs.scranton.edu>
+To: "Fred N. van Kempen" <Fred.van.Kempen at microwalt.nl>
+cc: PUPS Mailing List <pups at minnie.cs.adfa.edu.au>
+Subject: RE: [pups] Stray Interupts
+In-Reply-To: <6F63E31101C6D41196490008C7B2BFC32CA5 at mwnt4.microwalt.nl>
+Message-ID: <Pine.LNX.4.10.10102252140060.13466-100000 at triangle.cs.uofs.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 26 Feb 2001, Fred N. van Kempen wrote:
+
+> > > It could mean that running Ultrix on a simulator isn't on 
+> > without some work on the emulators themselves. 
+> I have been running Ultrix-11 V3.1 on Ersatz-11 without any of that. It
+
+Which I think says a lot about the quality of Ersatz-11.
+
+> _could_ be linked to interrupt latency issues- Ultrix tells controller
+> to do something (e.g., three commands to read a sector).  Controller does
+> as told, generating an interrupt for each of the requests saying its ready.
+> However, because of latency, only ints 1 and 3 actually get delivered within
+> the expected timeframe (can happen).
+> 
+> Usually (from my experience with writing Unix kernel drivers), this is not
+> a problem, because the "message" from (in this case) int2 will be picked up
+> when we start to service int3, which we _did_ see.  So, even though we didnt
+> get int2, we were fine.
+> 
+> Now... emulator wakes up again, goes "oi, i messed up, better go send that
+> int now" and sends the int.  The driver no longer _awaits_ an interrupt
+> (because
+> we cleared the AttentionNeeded flags when servicing int3), so... we get the
+> "stray int" message.
+
+Based on my experience over this weekend, I can definitely agree with
+all of the above.  It makes perfect sense and goes a long way toward
+explaining my problems.
+
+> 
+> If this logic is correct, it will get worse when loading the host system
+> heavily, so latency will occur more often. 
+
+I can also vouch for this.  I finally gave up on trying to do anything 
+I/O intensive on the emulated RP disk.  Emulator was continuously
+crashing.
+
+>                                      On a very fast box (like my quad CPU
+> P3/850 Linux box) it should hardly occur.
+
+While this is not a solution most people here are likely to be able to
+apply :-)  I also have doubts that it will solve the problem.  I also
+doubt that the problem is as easy as just throwing away the stray interrupt.
+
+bill
+
+-- 
+Bill Gunshannon          |  de-moc-ra-cy (di mok' ra see) n.  Three wolves
+bill at cs.scranton.edu     |  and a sheep voting on what's for dinner.
+University of Scranton   |
+Scranton, Pennsylvania   |         #include <std.disclaimer.h>   
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA49935
+	for pups-liszt; Mon, 26 Feb 2001 18:59:24 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sylvester.killthewabbit.org (root at 64-6-189-55.sea2.phoenixdsl.net [64.6.189.55])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA49931
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 18:59:19 +1100 (EST)
+	(envelope-from iking at killthewabbit.org)
+Message-ID: <000a01c09fc8$a2965290$450010ac at dawabbit>
+From: "Ian King" <iking@killthewabbit.org>
+To: <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] Swap device in V6?
+Date: Sun, 25 Feb 2001 23:49:22 -0800
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_000_0007_01C09F85.94050E80"
+X-Priority: 3
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 5.00.2919.6700
+X-MimeOLE: Produced By Microsoft MimeOLE V5.00.2919.6700
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_000_0007_01C09F85.94050E80
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+I'm working with the install image provided by Ken Wellsch, and when I =
+execute the 'ps' command I get an error that says "no swap device".  I'm =
+not particularly concerned about ps itself, but another symptom of =
+problems is that I can't compile anything in C; I get an error out of cc =
+that says "Fatal error in /lib/c0".  Given where that error comes from =
+in cc, it appears related. =20
+
+I've combed the docs and the code, and I can't find ANYthing about how =
+swap space is assigned or designated.  Does anyone have any hints?  =
+Thanks -- Ian=20
+
+------=_NextPart_000_0007_01C09F85.94050E80
+Content-Type: text/html;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD>
+<META content=3D"text/html; charset=3Diso-8859-1" =
+http-equiv=3DContent-Type>
+<META content=3D"MSHTML 5.00.2920.0" name=3DGENERATOR>
+<STYLE></STYLE>
+</HEAD>
+<BODY bgColor=3D#c8e0d8>
+<DIV><FONT face=3DArial size=3D2>I'm working with the install image =
+provided by Ken=20
+Wellsch, and when I execute the 'ps' command I get an error that says =
+"no swap=20
+device".&nbsp; I'm not particularly concerned about ps itself, but =
+another=20
+symptom of problems is that I can't compile anything in C; I get an =
+error out of=20
+cc that says "Fatal error in /lib/c0".&nbsp; Given where that error =
+comes from=20
+in cc, it appears related.&nbsp; </FONT></DIV>
+<DIV>&nbsp;</DIV>
+<DIV><FONT face=3DArial size=3D2>I've combed the docs and the code, and =
+I can't find=20
+ANYthing about how swap space is assigned or designated.&nbsp; Does =
+anyone have=20
+any hints?&nbsp; Thanks -- Ian </FONT></DIV></BODY></HTML>
+
+------=_NextPart_000_0007_01C09F85.94050E80--
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id UAA50497
+	for pups-liszt; Mon, 26 Feb 2001 20:38:17 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mailhub.fokus.gmd.de (mailhub.fokus.gmd.de [193.174.154.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id UAA50493
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 20:38:12 +1100 (EST)
+	(envelope-from brandt at fokus.gmd.de)
+Received: from beagle (beagle [193.175.132.100])
+	by mailhub.fokus.gmd.de (8.8.8/8.8.8) with ESMTP id KAA19420;
+	Mon, 26 Feb 2001 10:31:40 +0100 (MET)
+Date: Mon, 26 Feb 2001 10:31:40 +0100 (CET)
+From: Harti Brandt <brandt@fokus.gmd.de>
+To: Greg Lehey <grog at lemis.com>
+cc: Bill Gunshannon <bill at cs.scranton.edu>,
+        "Steven M. Schultz" <sms at moe.2bsd.com>, <pups at minnie.cs.adfa.edu.au>,
+        Hartmut Brandt <brandt at fokus.gmd.de>,
+        Joerg Micheel <joerg at begemot.org>
+Subject: [pups] Re: Begemot emulator (was: Stray Interupts)
+In-Reply-To: <20010225135710.B11541 at sydney.worldwide.lemis.com>
+Message-ID: <Pine.BSF.4.33.0102261027150.70540-100000 at beagle.fokus.gmd.de>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=KOI8-R
+Content-Transfer-Encoding: 8bit
+X-MIME-Autoconverted: from QUOTED-PRINTABLE to 8bit by minnie.cs.adfa.edu.au id UAA50494
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Sun, 25 Feb 2001, Greg Lehey wrote:
+
+GL>On Friday, 23 February 2001 at  8:43:41 -0500, Bill Gunshannon wrote:
+GL>> On Thu, 22 Feb 2001, Steven M. Schultz wrote:
+GL>>> 	so the machine can be placed on a network.  P11's also quite a bit
+GL>>> 	more efficient/fast.   Configuration can be puzzling but sample
+GL>>> 	config files are available (from various PUPS folks who run P11).
+GL>>
+GL>> I would love to us the Begemot emulator.  I have the latest version but
+GL>> I have been unable to get any of my disk images to work.  Can anyone
+GL>> tell me if you can use the disk images from the other emulators and if
+GL>> so, how??  Do they have to be converted somehow like tapes??
+GL>
+GL>*sigh* The Begemot emulator has bitrotted a little.  I can no longer
+GL>get it to work, though admittedly I didn't try very hard the last
+GL>time, and it may be something as simple as a corrupted disk image.
+GL>But the other thing is that the Begemot ftp site is no longer
+GL>accessible, which is somewhat embarrassing, since I host it.  I'm
+GL>copying J�rg Micheel and Harti Brandt, the Begemot people, and I hope
+GL>that we'll get it up again soon.  J�rg, Harti, the problem is that I
+GL>migrated a system disk, and seem to have lost the connection to the
+GL>ftp files.  You should find them somewhere on the file systems
+GL>/freebie or /freebie/usr, which are the old system disk, still
+GL>spinning.
+
+I have done some work on the emulator last autumn and plan to release
+a new version Real-Soon-Now(tm). Well, I think I will to a
+
+kill -STOP `cat /var/run/currentwork`
+
+and try to do it in the next couple of days.
+
+Please watch the alt.sys.pdp11 for an anouncement.
+
+Disc images work directly (at least the images from Bob Supnik do).
+
+harti
+-- 
+harti brandt, http://www.fokus.gmd.de/research/cc/cats/employees/hartmut.brandt/private
+              brandt at fokus.gmd.de, harti at begemot.org
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id XAA51329
+	for pups-liszt; Mon, 26 Feb 2001 23:37:47 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sun.rhrk.uni-kl.de (sun.rhrk.uni-kl.de [131.246.137.50])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id XAA51325
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 26 Feb 2001 23:37:43 +1100 (EST)
+	(envelope-from jkunz at unixag-kl.fh-kl.de)
+From: jkunz@unixag-kl.fh-kl.de
+Received: from aixs1.rhrk.uni-kl.de
+           ( exim at aixs1.rhrk.uni-kl.de [131.246.137.3] ) by sun.rhrk.uni-kl.de
+          id aa09944 for <pups at minnie.cs.adfa.edu.au>; 26 Feb 2001 13:33 MET
+Received: from pm11.rhrk.uni-kl.de ([131.246.94.11] helo=unixag-kl.fh-kl.de)
+	by aixs1.rhrk.uni-kl.de with esmtp (Exim 3.03 #2)
+	id 14XMqc-0005Vg-00
+	for pups at minnie.cs.adfa.edu.au; Mon, 26 Feb 2001 13:33:51 +0100
+Received: by unixag-kl.fh-kl.de (8.11.0/8.8.7) id f1QCWt400747
+	for pups at minnie.cs.adfa.edu.au; Mon, 26 Feb 2001 13:32:55 +0100 (CET)
+	(envelope-from jkunz)
+Message-Id: <200102261232.f1QCWt400747 at unixag-kl.fh-kl.de>
+Date: Mon, 26 Feb 2001 13:32:54 +0100 (CET)
+Subject: [pups] 2.11BSD boot hangs.
+To: pups at minnie.cs.adfa.edu.au
+MIME-Version: 1.0
+Content-Type: TEXT/plain; CHARSET=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi.
+
+Yesterday I installed 2.11BSD on my PDP11/73. Everything went fine up
+to the first time when UNIX was booted. The kernel came up, init was
+started, autoconfig run and printed out the devices it had (not) found.
+My disk and tape were found but then, after printing:
+-----
+73Boot from tms(0,0,0) at 0174500
+: ra(0,0)unix
+Boot: bootdev=02400 bootcsr=0172150
+
+2.11 BSD UNIX #115: Sat Apr 22 19:07:25 PDT 2000
+    sms1 at curly.2bsd.com:/usr/src/sys/GENERIC
+
+ra0: Ver 3 mod 3
+ra0: RD54  size=311200
+
+phys mem  = 4186112
+avail mem = 3962176
+user mem  = 307200
+
+June  8 21:21:24 init: configure system
+
+hk ? csr 177440 vector 210 skipped:  No CSR.
+ht ? csr 172440 vector 224 skipped:  No CSR.
+ra 0 csr 172150 vector 154 vectorset attached
+rl ? csr 174400 vector 160 skipped:  No CSR.
+tm ? csr 172520 vector 224 skipped:  No CSR.
+tms 0 csr 174500 vector 260 vectorset attached
+ts ? csr 172520 vector 224 skipped:  No CSR.
+xp ? csr 176700 vector 254 skipped:  No CSR.
+-----
+it hangs. Characters I type into the terminal are echod, but nothing
+else happens. The "Run" LED at the front panel is of. I tried with an
+other CPU und memory card, but the same happend.
+
+System configuration:
+11/73 (M8192), one with FP accel. or one without. (Jumpers W1..W6 in,
+W7..W9 out, so that the CPU enters ODT at power up.)
+4MB or 1MB memory card (non DEC)
+Sigma DLV11-J clone for console (CSR 1765{0,1,2}0 and 177560)
+TK50 with TQK50 (CSR 174500)
+RA54, last week reformated on a MV2000 with RQDX3 (CSR 172150)
+BA23 from a MVII.
+
+BTW: What serial parameters does 2.11BSD use? The first time I booted
+UNIX I got garbage after "user mem  = 307200". I seted the vt220 to 7e1
+and this worked, but is it correct?
+-- 
+
+
+
+tschuess,
+          Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id EAA53205
+	for pups-liszt; Tue, 27 Feb 2001 04:35:02 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from grumpy.usu.edu (grumpy.usu.edu [129.123.1.86])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id EAA53196
+	for <PUPS at MINNIE.CS.ADFA.EDU.AU>; Tue, 27 Feb 2001 04:34:59 +1100 (EST)
+	(envelope-from IVIE at cc.usu.edu)
+Received: from cc.usu.edu by cc.usu.edu (PMDF V5.2-32 #39375)
+ id <01K0K9U87TRK9ODB68 at cc.usu.edu> for PUPS at MINNIE.CS.ADFA.EDU.AU; Mon,
+ 26 Feb 2001 10:31:41 MST
+Date: Mon, 26 Feb 2001 10:31:41 -0700 (MST)
+From: Roger Ivie <IVIE@cc.usu.edu>
+Subject: Re: [pups] Swap device in V6?
+To: PUPS at minnie.cs.adfa.edu.au
+Message-id: <01K0K9U87UPE9ODB68 at cc.usu.edu>
+X-VMS-To: PUPS at MINNIE.CS.ADFA.EDU.AU
+MIME-version: 1.0
+Content-type: TEXT/PLAIN; CHARSET=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ian King said:
+> I've combed the docs and the code, and I can't find ANYthing about how =
+> swap space is assigned or designated.  Does anyone have any hints?  =
+> Thanks -- Ian=20
+
+Yeah, I figured this out a while ago. Unfortunately, I'm in the middle
+of changing employers so everything's in boxes at the moment.
+
+Basically, the swap space is hard-coded into the device drivers. If you
+take a look at, for example, the RK05 driver you'll see that one of the
+drives is smaller than the others. That extra space is the swap space.
+I forget how the rest of the system is informed of the swap space, but
+it's done in the disk driver sources IIRC.
+
+Roger Ivie
+ivie at cc.usu.edu
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id EAA53322
+	for pups-liszt; Tue, 27 Feb 2001 04:55:47 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id EAA53318
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 04:55:43 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.2/8.11.2) with ESMTP id f1QHpnL27849;
+	Mon, 26 Feb 2001 12:51:49 -0500 (EST)
+Message-ID: <3A9A97B5.4EBD13A4 at tampabay.rr.com>
+Date: Mon, 26 Feb 2001 12:51:49 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.0.38 i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Roger Ivie <IVIE at cc.usu.edu>
+CC: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+References: <01K0K9U87UPE9ODB68 at cc.usu.edu>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Roger Ivie wrote:
+> 
+> Ian King said:
+> > I've combed the docs and the code, and I can't find ANYthing about how =
+> > swap space is assigned or designated.  Does anyone have any hints?  =
+> > Thanks -- Ian=20
+> 
+> Yeah, I figured this out a while ago. Unfortunately, I'm in the middle
+> of changing employers so everything's in boxes at the moment.
+> 
+> Basically, the swap space is hard-coded into the device drivers. If you
+> take a look at, for example, the RK05 driver you'll see that one of the
+> drives is smaller than the others. That extra space is the swap space.
+> I forget how the rest of the system is informed of the swap space, but
+> it's done in the disk driver sources IIRC.
+
+I took a quick look at this this morning and as Roger says, the kernel
+is built with a wired in swap.  In the case of the kernel 'rkunix,' in
+looking at usr/sys/run or something like that, I see they are wiring
+the swap to be device major=0 and minor=0 which is the root RK05 drive.
+
+Looking at the code it seems the first 4000 blocks are file system and
+a following 782 (or something like that) are for swap.
+
+The "ps" command source appears to be poking around /dev looking for a
+block device that matches the kernel value for swapdev (or something like
+that) and confirming it is a block device.
+
+Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+still gripes about "no swap device."
+
+So I'm missing something I guess.
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA53659
+	for pups-liszt; Tue, 27 Feb 2001 05:39:14 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA53655
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 05:39:10 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f1QIMNt09941
+	for pups at minnie.cs.adfa.edu.au; Mon, 26 Feb 2001 10:22:23 -0800 (PST)
+Date: Mon, 26 Feb 2001 10:22:23 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200102261822.f1QIMNt09941 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: jkunz at unixag-kl.fh-kl.de
+> 
+> Yesterday I installed 2.11BSD on my PDP11/73. Everything went fine up
+> to the first time when UNIX was booted. The kernel came up, init was
+> started, autoconfig run and printed out the devices it had (not) found.
+
+> 2.11 BSD UNIX #115: Sat Apr 22 19:07:25 PDT 2000
+>     sms1 at curly.2bsd.com:/usr/src/sys/GENERIC
+
+	That looks good - and familiar ;)
+
+> xp ? csr 176700 vector 254 skipped:  No CSR.
+> -----
+> it hangs. Characters I type into the terminal are echod, but nothing
+
+	The next thing that should have come out is the '# ' single user
+	prompt.
+
+> else happens. The "Run" LED at the front panel is off. I tried with an
+
+	That sounds like the system 'halt'ed for some (unknown) reason.
+
+	Sigh - that kernel should work fine, especially with a RQDX3/RD54.  I
+	am at a loss to explain/diagnose the problem.
+
+> System configuration:
+> 11/73 (M8192), one with FP accel. or one without. (Jumpers W1..W6 in,
+> W7..W9 out, so that the CPU enters ODT at power up.)
+
+	There is a jumper (I forget which one) that enables/disables the
+	'halt' instruction.  If 'halt' is disabled then the 'halt' instruction
+	is treated as a 'nop' even in kernel mode.  If 'halt' is enabled then
+	the console ODT will be entered if the kernel executes a halt.
+
+	Looks like we'll have to try and solve this the hard way ;(
+
+	After the system hangs press the 'halt' button on the front of the
+	machine and note the PC - hopefully that value will give a clue as
+	to where the kernel is at the time (likely in a clock interrupt).
+
+> BTW: What serial parameters does 2.11BSD use? The first time I booted
+> UNIX I got garbage after "user mem  = 307200". I seted the vt220 to 7e1
+> and this worked, but is it correct?
+
+	Yes, 7e1 is correct - a legacy setting from eons ago.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+
