@@ -1,0 +1,51 @@
+From: talmage@cmf.nrl.navy.mil (David W Talmage)
+Date: Thu, 14 Feb 2002 10:27:04 -0500
+Subject: [pups] screen 3.9.9 vs. 2.11BSD write() to fifo and/or select() 
+ on socket
+In-Reply-To: Your message of "Wed, 13 Feb 2002 16:25:48 PST."
+             <200202140025.g1E0Pmr20483@moe.2bsd.com> 
+Message-ID: <8332.1013700424@paul.cmf.nrl.navy.mil>
+
+"Steven M. Schultz" <sms at 2BSD.COM> wrote:
+>> From: David W Talmage <talmage at cmf.nrl.navy.mil>
+>> Would someone please advise me about fifos and sockets in 2.11BSD?
+>...
+>	Don't use fifos - they don't exist (as you probably have found
+>	out by now :))
+
+I thought that I'd read in the FM that they do.  I see now that I was 
+mistaken, perhaps delusional.  I see now that <sys/stat.h> contains the gospel:
+
+#define S_IFIFO 0010000         /* named pipe (fifo) - Not used by 2.11BSD */
+
+
+>> I'm having 
+>> trouble porting screen 3.9.9, the multiplexing terminal emulator, to 2.11BSD
+> ...
+>	an attempt at porting it and ran into the address space problems - seems
+>	that screen wants to use lots of large buffers, has lots of strings
+>	(all the help, etc) and so on. 
+
+Sounds like I'm in for some deep hacking if I continue with this.  Will 
+overlays help me here?
+
+>...
+>> screen can use sockets instead of fifos.  That portion of the configure 
+script
+>> fails as well.  It fails in that it does not return from the select() on the
+> 
+>> socket until the alarm goes off.  See socketstest.c, below.
+>...
+>	With the child exited the select() will block until interrupted by
+>	the alarm() call.
+
+I wonder if setitimer() will fare any better.  alarm() is obsolete.
+
+I'll send a progress report if I decide to continue this project.  Thanks for 
+your help, Mr. Schultz.
+
+David Talmage
+
+
+
+
