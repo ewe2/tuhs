@@ -1,0 +1,58 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Fri, 21 Mar 2003 10:33:00 -0800 (PST)
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <200303211833.h2LIX0N06827@moe.2bsd.com>
+
+Hi -
+
+> From: "Ian King" <iking at killthewabbit.org>
+> I tried changing the partition type with disklabel -e -r but, when I exited
+> vi, I got an error message saying that the type I'd provided was not valid.
+> Viewing the label (with disklabel -r) showed the fstype set to 'unknown'.
+
+	"unknown" or "unused"
+
+	On my virtual 11 I see disklabel report:
+
+8 partitions:
+#        size   offset    fstype   [fsize bsize]
+  a:    16720        0   2.11BSD     1024  1024         # (Cyl.    0 - 39)
+  b:     8360    16720      swap                        # (Cyl.   40 - 59)
+  c:   340670        0    unused     1024  1024         # (Cyl.    0 - 814)
+  h:   315590    25080   2.11BSD     1024  1024         # (Cyl.   60 - 814)
+
+> Just for grins, I tried modifying the drive type, too - no success there,
+> either.  The disklabel utility isn't having any of that; again it claims
+> 'unknown'.
+
+	Ah, that says something is corrupt somewhere.
+
+	If you look at /usr/include/sys/disklabel.h you'll see the
+	table of filesystem types:
+
+static char *fstypenames[] = {
+        "unused",
+	"swap",
+	"Version 6",
+	"Version 7",
+	"System V",
+	"2.11BSD",
+	"Eighth Edition",
+	"4.2BSD",
+	"MSDOS",
+	"4.4LFS",
+	"unknown",
+	"HPFS",
+	"ISO9660",
+	0
+};
+
+	So for 'unknown' to appear there would need to be a 10 in the type
+	field instead of a 5 (for "2.11BSD").   'unused' is a 0 obviously.
+
+	Try booting up a standalone disklabel and see what it says without
+	a kernel getting involved.
+
+	Steve
+
+
