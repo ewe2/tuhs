@@ -1,0 +1,349 @@
+From: cpg@aladdin.de (Christian Groessler)
+Date: Sun, 11 Jun 2000 23:35:18 +0100
+Subject: problems booting 2.11_rp_unknown
+Message-ID: <412568FB.0081A620.00@saturn.aladdin.de>
+
+
+
+
+Hi,
+
+(Sorry if this is a FAQ)
+
+I'm trying to boot the 2.11_rp_unknown image from Boot_Images.
+This is what happens:
+
+----------------------
+gibbon:/net/scharfzahn/playing/boot_images$ pdp11
+
+PDP-11 simulator V2.3d
+sim> set cpu 18b
+sim> att rp0 2.11_rp_unknown
+sim> boot rp
+
+53Boot from xp(0,0,0) at 0176700
+: xp(0,0,0)unix
+Boot: bootdev=05000 bootcsr=0176700
+
+2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET 1998
+    root at pdp11.begemot.com:/usr/src/sys/HIPPON
+
+panic: buffers
+no fs on dev 10/0
+
+dumping to dev 5001 off 512
+dump args:EINVAL
+
+HALT instruction, PC: 006606 (JSR R5,3162)
+sim>
+----------------------
+
+What am I doing wrong?
+
+regards,
+chris
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA51856
+	for pups-liszt; Mon, 12 Jun 2000 09:41:54 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA51851
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 12 Jun 2000 09:41:49 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id QAA12888;
+	Sun, 11 Jun 2000 16:36:45 -0700 (PDT)
+Date: Sun, 11 Jun 2000 16:36:45 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200006112336.QAA12888 at moe.2bsd.com>
+To: cpg at aladdin.de, pups at minnie.cs.adfa.edu.au
+Subject: Re: problems booting 2.11_rp_unknown
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: "Christian Groessler" <cpg at aladdin.de>
+> 
+> I'm trying to boot the 2.11_rp_unknown image from Boot_Images.
+> This is what happens:
+> 
+> PDP-11 simulator V2.3d
+> sim> set cpu 18b
+
+	Try "set cpu 22b" instead.  Using 18b tells the simulator you have
+	a 248kb (and 8kb for the I/O page) machine and that is not enough 
+	for 2.11 to load and allocate all the resources it needs.
+
+> panic: buffers
+
+	Yep -that panic message says the kernel could not allocate any
+	memory for the buffer cache.  I am almost certain that means
+	there is not enough free memory left out of 248kb.
+
+> What am I doing wrong?
+
+	Try telling the emulator to use "22bit" mode.  If that still
+	fails let us know.  Then it will be time for "Plan B" ;)
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA52060
+	for pups-liszt; Mon, 12 Jun 2000 10:45:16 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from saturn.aladdin.de (saturn.aladdin.de [194.123.19.66])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA52056
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 12 Jun 2000 10:45:11 +1000 (EST)
+	(envelope-from cpg at aladdin.de)
+Received: by saturn.aladdin.de(Lotus SMTP MTA v4.6.2  (693.3 8-11-1998))  id 412568FC.00097079 ; Mon, 12 Jun 2000 02:43:06 +0100
+X-Lotus-FromDomain: AKS
+From: "Christian Groessler" <cpg@aladdin.de>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.edu.au
+Message-ID: <412568FC.00096F95.00 at saturn.aladdin.de>
+Date: Mon, 12 Jun 2000 01:37:24 +0100
+Subject: Re: problems booting 2.11_rp_unknown
+Mime-Version: 1.0
+Content-type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+
+On 06/11/2000 11:36:45 PM GMT "Steven M. Schultz" wrote:
+>
+>>
+>> PDP-11 simulator V2.3d
+>> sim> set cpu 18b
+>
+>    Try "set cpu 22b" instead.  Using 18b tells the simulator you have
+>    a 248kb (and 8kb for the I/O page) machine and that is not enough
+>    for 2.11 to load and allocate all the resources it needs.
+>
+>> panic: buffers
+>
+>    Yep -that panic message says the kernel could not allocate any
+>    memory for the buffer cache.  I am almost certain that means
+>    there is not enough free memory left out of 248kb.
+>
+>> What am I doing wrong?
+>
+>    Try telling the emulator to use "22bit" mode.  If that still
+>    fails let us know.  Then it will be time for "Plan B" ;)
+
+Hmm, sorry, it still doesn't work:
+---------------------
+gibbon:/net/scharfzahn/playing/boot_images$ pdp11
+
+PDP-11 simulator V2.3d
+sim> set cpu 22b
+sim> att rp0 2.11_rp_unknown
+sim> boot rp
+
+53Boot from xp(0,0,0) at 0176700
+: xp(0,0,0)unix
+Boot: bootdev=05000 bootcsr=0176700
+
+2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET 1998
+    root at pdp11.begemot.com:/usr/src/sys/HIPPON
+
+panic: buffers
+no fs on dev 10/0
+
+dumping to dev 5001 off 512
+dump args:EINVAL
+
+HALT instruction, PC: 006606 (JSR R5,3162)
+sim>
+---------------------
+
+What is "Plan B"?  :-)
+
+regards,
+chris
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA52223
+	for pups-liszt; Mon, 12 Jun 2000 11:41:50 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA52219
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 12 Jun 2000 11:41:46 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id SAA13674;
+	Sun, 11 Jun 2000 18:33:37 -0700 (PDT)
+Date: Sun, 11 Jun 2000 18:33:37 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200006120133.SAA13674 at moe.2bsd.com>
+To: cpg at aladdin.de, sms at moe.2bsd.com
+Subject: Re: problems booting 2.11_rp_unknown
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: "Christian Groessler" <cpg at aladdin.de>
+> Hmm, sorry, it still doesn't work:
+
+> sim> set cpu 22b
+> sim> att rp0 2.11_rp_unknown
+> sim> boot rp
+> What is "Plan B"?  :-)
+
+	Plan B is to specify the amount of memory directly.   Simply saying
+	"set cpu 22B" tells the emulator to use 22 bit addressing - but it
+	does not say how much memory the system has (it's possible to have
+	1mb of memory even though ~4mb is possible).
+
+	Try using both "set cpu 22B" and "set cpu 2048K" - that worked here.
+
+	It may well be that only "set cpu 2048K" is actually needed - I didn't
+	try that by itself.
+
+Script started on Sun Jun 11 18:30:40 2000
+moe.1-> cat f
+set cpu 22B
+set cpu 2048K
+att rp0 rp
+boot rp
+moe.2-> pdp11 f
+
+PDP-11 simulator V2.3d
+
+53Boot from xp(0,0,0) at 0176700
+: 
+: xp(0,0,0)unix
+Boot: bootdev=05000 bootcsr=0176700
+
+2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET 1998
+    root at pdp11.begemot.com:/usr/src/sys/HIPPON
+
+attaching lo0
+
+phys mem  = 2097152
+avail mem = 1668352
+user mem  = 307200
+
+January  8 06:50:29 init: configure system
+
+lp 0 csr 177514 vector 200 attached
+rl 0 csr 174400 vector 160 attached
+tm 0 csr 172520 vector 224 attached
+xp 0 csr 176700 vector 254 attached
+cn 1 csr 176500 vector 300 skipped:  No CSR.
+cn 2 csr 176510 vector 310 skipped:  No CSR.
+cn 3 csr 176520 vector 320 skipped:  No CSR.
+cn 4 csr 176530 vector 330 skipped:  No CSR.
+erase, kill ^U, intr ^C
+# halt
+syncing disks... done
+halting
+
+HALT instruction, PC: 000014 (MOV #1,12456)
+sim> q
+Goodbye
+moe.3-> exit
+exit
+
+Script done on Sun Jun 11 18:30:59 2000
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id XAA55064
+	for pups-liszt; Mon, 12 Jun 2000 23:39:41 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from saturn.aladdin.de (saturn.aladdin.de [194.123.19.66])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id XAA55060
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 12 Jun 2000 23:39:35 +1000 (EST)
+	(envelope-from cpg at aladdin.de)
+Received: by saturn.aladdin.de(Lotus SMTP MTA v4.6.2  (693.3 8-11-1998))  id 412568FC.00505777 ; Mon, 12 Jun 2000 15:37:32 +0100
+X-Lotus-FromDomain: AKS
+From: "Christian Groessler" <cpg@aladdin.de>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.edu.au
+Message-ID: <412568FC.005055C9.00 at saturn.aladdin.de>
+Date: Mon, 12 Jun 2000 14:34:47 +0100
+Subject: Re: problems booting 2.11_rp_unknown
+Mime-Version: 1.0
+Content-type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+
+On 06/12/2000 01:33:37 AM GMT "Steven M. Schultz" wrote:
+>
+>    Plan B is to specify the amount of memory directly.   Simply saying
+>    "set cpu 22B" tells the emulator to use 22 bit addressing - but it
+>    does not say how much memory the system has (it's possible to have
+>    1mb of memory even though ~4mb is possible).
+>
+>    Try using both "set cpu 22B" and "set cpu 2048K" - that worked here.
+>
+>    It may well be that only "set cpu 2048K" is actually needed - I didn't
+>    try that by itself.
+
+It works :-) :-)
+
+Thanks for your help!
+
+regards,
+chris
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA55279
+	for pups-liszt; Tue, 13 Jun 2000 00:14:34 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from lostwithiel.cley.com (lostwithiel.cley.com [212.240.242.98])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id AAA55275
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 13 Jun 2000 00:14:29 +1000 (EST)
+	(envelope-from tfb at lostwithiel.cley.com)
+Received: (from tfb at localhost)
+	by lostwithiel.cley.com (8.9.3+Sun/8.9.1) id PAA20719
+	for PUPS at minnie.cs.adfa.edu.au; Mon, 12 Jun 2000 15:11:31 +0100 (BST)
+X-Mailer: 21.1 (patch 10) "Capitol Reef" XEmacs Lucid (via feedmail 8 I);
+	VM 6.72 under 21.1 (patch 10) "Capitol Reef" XEmacs Lucid
+From: Tim Bradshaw <tfb@cley.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Message-ID: <14660.61330.622418.671382 at cley.com>
+Date: Mon, 12 Jun 2000 15:11:30 +0100 (BST)
+To: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: PLEASE TAKE THIS ELSEWHERE (was Re: RX50 on RQDX3 on 2.11BSD)
+In-Reply-To: <20000609152354.A60849 at dragon.nuxi.com>
+References: <000609165909.20200fd8 at trailing-edge.com>
+	<20000609152354.A60849 at dragon.nuxi.com>
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+* David O'Brien wrote:
+
+> This goes back to the UHS / PUPS discussion.  I didn't vote so before,
+> but maybe it is time to separate the mail for the two.  I agree that the
+> first posts were interesting in the historical insight that could be
+> gained.  But this thread has turned into a rather long hardware
+> discussion applicable to only a handful of people that have this
+> hardware.
+
+> I do not mean to be mean, but it seems moving this to some PDP-11 list (I
+> guess one needs to be created) would be possible.
+
+Please don't.  I love reading discussions of random old bits of
+hardware, and such discussions have gone on on the PUPS list for a
+long time.
+
+--tim
+
+
+
