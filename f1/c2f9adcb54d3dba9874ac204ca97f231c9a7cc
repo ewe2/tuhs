@@ -1,0 +1,760 @@
+From: ejb@leguin.org.uk (Edward Brocklesby)
+Date: Thu, 19 Apr 2001 21:51:24 +0100
+Subject: [pups] Maximum PDP-11 executable size?
+Message-ID: <01041921512403.00527@klamath.leguin.org.uk>
+
+Hi,
+
+I'm having problems compiling some large-ish programs on 2.11BSD, for example 
+MH. Even when putting *everything* on overlays, I still get an error:
+
+[ejb at styx] ~/mh-6.8.4.orig/uip > /bin/ld -i -X -o xforw /lib/crt0.o -Z forw.o 
+-Z whatnowproc.o -Z whatnowsbr.o -Z sendsbr.o -Z annosbr.o -Z distsbr.o -Z 
+../config/config.o -Z ../sbr/libmh.a -Z ../mts/libmts.a -Z ../zotnet/libzot.a 
+-Z -lc -Z -lerrlst -Z ../config/version.o
+ld: too big for type 431 (problem 2: tsize = 0, ovrnd = 8192, dtotal = 0)
+[ejb at styx] ~/mh-6.8.4.orig/uip >
+
+is there any way around this, or is MH just too big to fix on a PDP?
+
+	-larne-
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA56896
+	for pups-liszt; Fri, 20 Apr 2001 10:01:25 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA56892
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 10:01:20 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f3JNlMq22283
+	for pups at minnie.cs.adfa.edu.au; Thu, 19 Apr 2001 16:47:22 -0700 (PDT)
+Date: Thu, 19 Apr 2001 16:47:22 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200104192347.f3JNlMq22283 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Edward Brocklesby <ejb at leguin.org.uk>
+> I'm having problems compiling some large-ish programs on 2.11BSD, for example 
+> MH. Even when putting *everything* on overlays, I still get an error:
+
+	It has been eons and eons since I attempted MH and I can't remember
+	if I gave up or finally got something to work (shows how long its
+	been ;)).
+
+> [ejb at styx] ~/mh-6.8.4.orig/uip > /bin/ld -i -X -o xforw /lib/crt0.o -Z forw.o 
+> -Z whatnowproc.o -Z whatnowsbr.o -Z sendsbr.o -Z annosbr.o -Z distsbr.o -Z 
+> ../config/config.o -Z ../sbr/libmh.a -Z ../mts/libmts.a -Z ../zotnet/libzot.a 
+> -Z -lc -Z -lerrlst -Z ../config/version.o
+> ld: too big for type 431 (problem 2: tsize = 0, ovrnd = 8192, dtotal = 0)
+> [ejb at styx] ~/mh-6.8.4.orig/uip >
+
+	Hmmm, I grep'd the current source to 'ld' and couldn't find the
+	message "problem 2: ...".   I do remember that being present during
+	the debugging of 'ld' when the long symbol names (the "string table"
+	aka 4.3BSD a.out format) capability was being developed.
+
+	That suggests that 'ld' might be out of date.
+
+	The answer to the 'Maximum PDP-11 executable size?' question is fairly
+	length and a bit involved ;).   Assuming split I/D:
+
+	  Short answer: 120KB to 904KB
+
+	Long answer:
+
+	without overlays there is one 64KB code segment and one 56KB data
+	segment giving 120KB for a non overlaid program.  In practice if a
+	program hits 56KB out of 'ld' then there's no room for malloc() and
+	the program may link but it won't run ;(
+
+	For overlaid programs there is still but one 56KB data segment (the top
+	8KB is for the stack) but now the code can be arranged differently:
+
+	There is a maximum of 15 overlays and there can be no 'gaps' (zero
+	length/empty overlays between populated overlays).
+
+	BASE	OVERLAYSIZE	TOTALTEXT
+	8KB	56KB * 15	840KB
+	16KB	48KB * 15	736KB
+	24KB	40KB * 15	624KB
+	32KB	32KB * 15	512KB
+	40KB	24KB * 15	400KB
+	48KB	16KB * 15	288KB
+	56KB	8KB  * 15	176KB
+
+	In reality the kernel probably would choke on the first several cases,
+	and even if it didn't that large of a program would cause severe 
+	swapping.
+
+	Most overlaid programs on the system ('vi' for example) use either the
+	base=48KB or base=56KB layout.  I think 'kermit' might use the 40KB
+	base segment.
+
+	The "tsize" error would indicate that the code size summing had an
+	overflow - that was a bug at one time and was later fixed, which 
+	again suggests that the 'ld' is out dated somehow.
+
+	If 'ld' was able to create 'xforw' try doing a "size xforw" on it
+	and seeing how far it got - perhaps a clue can be gathered that
+	way.
+
+	You may need to usually terminate the overlay list with a -Y - I don't
+	believe it's "required" though.
+
+	-Z -lc -Z -lerrlst -Y ../config/version.o
+
+> is there any way around this, or is MH just too big to fix on a PDP?
+
+	Couple things to try.  Use 'size' on the .o (and/or .a) files to
+	see how big things are - add them up and see if things start overflowing
+	16 bits.   There was an overflow bug in ld's size computations - it was
+	fixed by using a 'long' in a couple places to detect wraparound. 
+
+	What version of 2.11 (should be in the first couple lines of /VERSION)
+	are you using?   Sure feels like 'ld' is old and having problems that
+	were fixed later on.
+
+	Steven Schultz
+	sms at to.gd-es.com
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA57165
+	for pups-liszt; Fri, 20 Apr 2001 10:57:13 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from klamath.leguin.org.uk (pc62-oxf1.cable.ntl.com [62.254.132.62])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA57161
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 10:57:08 +1000 (EST)
+	(envelope-from ejb at leguin.org.uk)
+Received: from klamath.leguin.org.uk (klamath [127.0.0.1])
+	by klamath.leguin.org.uk (8.9.3/8.9.3/Debian 8.9.3-21) with SMTP id BAA17554;
+	Fri, 20 Apr 2001 01:48:21 +0100
+X-Authentication-Warning: klamath.leguin.org.uk: Host klamath [127.0.0.1] claimed to be klamath.leguin.org.uk
+Content-Type: text/plain;
+  charset="iso-8859-1"
+From: Edward Brocklesby <ejb@leguin.org.uk>
+Organization: Leguin Network Services
+To: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Date: Fri, 20 Apr 2001 01:48:19 +0100
+X-Mailer: KMail [version 1.2]
+References: <200104192347.f3JNlMq22283 at moe.2bsd.com>
+In-Reply-To: <200104192347.f3JNlMq22283 at moe.2bsd.com>
+MIME-Version: 1.0
+Message-Id: <01042001482004.00527 at klamath.leguin.org.uk>
+Content-Transfer-Encoding: 8bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Friday 20 April 2001 12:47 am, Steven M. Schultz wrote:
+> > [ejb at styx] ~/mh-6.8.4.orig/uip > /bin/ld -i -X -o xforw /lib/crt0.o -Z
+> > forw.o -Z whatnowproc.o -Z whatnowsbr.o -Z sendsbr.o -Z annosbr.o -Z
+> > distsbr.o -Z ../config/config.o -Z ../sbr/libmh.a -Z ../mts/libmts.a -Z
+> > ../zotnet/libzot.a -Z -lc -Z -lerrlst -Z ../config/version.o
+> > ld: too big for type 431 (problem 2: tsize = 0, ovrnd = 8192, dtotal = 0)
+> > [ejb at styx] ~/mh-6.8.4.orig/uip >
+>
+> 	Hmmm, I grep'd the current source to 'ld' and couldn't find the
+> 	message "problem 2: ...".   I do remember that being present during
+
+That's something I added myself, to try to help with the problem..
+
+> 	That suggests that 'ld' might be out of date.
+
+/VERSION says:
+Current Patch Level: 400
+Date: January 24, 1998
+
+That's what was on the PUPS FTP site..
+
+> 	without overlays there is one 64KB code segment and one 56KB data
+> 	segment giving 120KB for a non overlaid program.  In practice if a
+> 	program hits 56KB out of 'ld' then there's no room for malloc() and
+> 	the program may link but it won't run ;(
+>
+> 	For overlaid programs there is still but one 56KB data segment (the top
+> 	8KB is for the stack) but now the code can be arranged differently:
+>
+> 	There is a maximum of 15 overlays and there can be no 'gaps' (zero
+> 	length/empty overlays between populated overlays).
+>
+> 	BASE	OVERLAYSIZE	TOTALTEXT
+> 	8KB	56KB * 15	840KB
+> 	16KB	48KB * 15	736KB
+> 	24KB	40KB * 15	624KB
+> 	32KB	32KB * 15	512KB
+> 	40KB	24KB * 15	400KB
+> 	48KB	16KB * 15	288KB
+> 	56KB	8KB  * 15	176KB
+>
+> 	In reality the kernel probably would choke on the first several cases,
+> 	and even if it didn't that large of a program would cause severe
+> 	swapping.
+>
+> 	Most overlaid programs on the system ('vi' for example) use either the
+> 	base=48KB or base=56KB layout.  I think 'kermit' might use the 40KB
+> 	base segment.
+
+hm.. how do you specify the base segment size to ld? i don't see anything in 
+the manual page. Just link enough code into the base that it becomes the 
+right size?
+
+> 	The "tsize" error would indicate that the code size summing had an
+> 	overflow - that was a bug at one time and was later fixed, which
+> 	again suggests that the 'ld' is out dated somehow.
+
+possibly, i will look on the 2BSD patch archives now..
+
+> 	If 'ld' was able to create 'xforw' try doing a "size xforw" on it
+> 	and seeing how far it got - perhaps a clue can be gathered that
+> 	way.
+
+text    data    bss     dec     hex
+27648   35860   32412   95920   176b0   total text: 83072
+        overlays: 832,4352,2624,832,1920,29568,192,11008,4096
+
+this particular link gave the error:
+ld: too big for type 431 (problem 2: tsize = 0, ovrnd = -32768, dtotal = 0)
+
+the negative ovrnd i find very strange- perhaps the wrapround bug?
+
+> 	You may need to usually terminate the overlay list with a -Y - I don't
+> 	believe it's "required" though.
+>
+> 	-Z -lc -Z -lerrlst -Y ../config/version.o
+
+nope.. this doesn't seem to help
+
+> > is there any way around this, or is MH just too big to fix on a PDP?
+>
+> 	Couple things to try.  Use 'size' on the .o (and/or .a) files to
+> 	see how big things are - add them up and see if things start overflowing
+> 	16 bits.   There was an overflow bug in ld's size computations - it was
+> 	fixed by using a 'long' in a couple places to detect wraparound.
+
+Well, considering that there's a couple of *large* libraries here..
+-rw-r--r--  1 ejb        127074 Apr  9 14:47 ../zotnet/libzot.a
+-rw-r--r--  1 ejb        102126 Apr  9 14:39 ../sbr/libmh.a
+
+maybe that's the problem..
+
+	-larne-
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA57746
+	for pups-liszt; Fri, 20 Apr 2001 13:01:24 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA57741
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 13:01:19 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f3K2gsf23361
+	for pups at minnie.cs.adfa.edu.au; Thu, 19 Apr 2001 19:42:54 -0700 (PDT)
+Date: Thu, 19 Apr 2001 19:42:54 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200104200242.f3K2gsf23361 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> > 	message "problem 2: ...".   I do remember that being present during
+> 
+> That's something I added myself, to try to help with the problem..
+
+	Ok - whew, for a minute there I thought some of my debug code had
+	leaked to the world ;)   That's the style of debug message I use <g>
+
+> /VERSION says:
+> Current Patch Level: 400
+> Date: January 24, 1998
+
+	Ouch - that is a bit old, there are updates thru 434 (I've 435 in
+	midstream but haven't had time to finish it).
+
+> That's what was on the PUPS FTP site..
+
+	Ah.   Much becomes clear now.   That indeed was the version at one time.
+	A year or so ago I and Warren coordinated an update to the 2.11 in PUPS
+	The current PUPS version is 431 (only 3 updates since then - I've
+	slowed down a lot over the last couple years).
+
+> hm.. how do you specify the base segment size to ld? i don't see anything in 
+
+	You don't.   At least not directly.  Anything outside an overlay
+	goes into the base segment.  Thus anything before the first -Z goes
+	into the base, and anything after the -Y goes into the base.
+
+> the manual page. Just link enough code into the base that it becomes the 
+> right size?
+
+	That's basically the way to do it.  You can do "size" on the .o files
+	first to get an idea what you want to put where but after that tuning
+	the overlays to fit is a bit of an art.
+
+> text    data    bss     dec     hex
+> 27648   35860   32412   95920   176b0   total text: 83072
+>         overlays: 832,4352,2624,832,1920,29568,192,11008,4096
+	
+	the single BIGGEST problem is that 'data + bss' exceeds not only the
+	56KB limit but the total 64KB limit available to a process.  Looks
+	like MH want 35860+32412 or 68272 bytes of D space.
+
+	You might be able to get the code to fit - I'd pack the base to at
+	least 40KB (more likely 48KB) and only have two or three overlays
+	of 24KB or 16KB.
+
+	THe data space problem means you're going to have to go and lower
+	a lot of the buffer size limits.   Remember:  even if you do get
+	the dataspace down to where the linker doesn't complain the program
+	will almost certainly try to malloc() memory.  Thus the smaller the
+	data+bss the better - and be prepared for malloc() failures
+
+	One thing that can be done is to run 'xstr' over the sources and
+	collect error message strings, printf strings, and so on into a common
+	pool.   The other thing that can be done is create a strings file
+	and extract as many as possible strings from the source modules into
+	an external file.   Examples of doing this type of thing can be found
+	in the source tree - 'lint' was one such program, 'sendmail' was another
+	and kermit yet another (that's why there are 'sendmail.sr'  and
+	'kermit5.sr' files on the system).
+
+	In fact 'kermit' is a good example of squishing a monster program into
+	a small machine.  Check out /usr/src/new/kermit5.188
+
+> ld: too big for type 431 (problem 2: tsize = 0, ovrnd = -32768, dtotal = 0)
+> 
+> the negative ovrnd i find very strange- perhaps the wrapround bug?
+
+	Hmmm, could be.  
+
+> Well, considering that there's a couple of *large* libraries here..
+> -rw-r--r--  1 ejb        127074 Apr  9 14:47 ../zotnet/libzot.a
+> -rw-r--r--  1 ejb        102126 Apr  9 14:39 ../sbr/libmh.a
+> 
+> maybe that's the problem..
+
+	The size of the .a doesn't accurately reflect the code+text+bss
+
+	For one thing 'bss' takes up no room at all in an archive.   Don't
+	forget that symbol tables and relocation information (as well as
+	'ar' book keeping info) is present.   You can't rely on "ls -l"
+	to say very much about an object file - only "size" can do that.
+	"size libmh.a" will give a much better idea where the problem areas
+	are.
+
+	Steven Schultz
+	sms at to.gd-es.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA58045
+	for pups-liszt; Fri, 20 Apr 2001 14:21:45 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from klamath.leguin.org.uk (pc62-oxf1.cable.ntl.com [62.254.132.62])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA58041
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 14:21:41 +1000 (EST)
+	(envelope-from ejb at leguin.org.uk)
+Received: from klamath.leguin.org.uk (klamath [127.0.0.1])
+	by klamath.leguin.org.uk (8.9.3/8.9.3/Debian 8.9.3-21) with SMTP id FAA19106;
+	Fri, 20 Apr 2001 05:12:59 +0100
+X-Authentication-Warning: klamath.leguin.org.uk: Host klamath [127.0.0.1] claimed to be klamath.leguin.org.uk
+Content-Type: text/plain;
+  charset="iso-8859-1"
+From: Edward Brocklesby <ejb@leguin.org.uk>
+Organization: Leguin Network Services
+To: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Date: Fri, 20 Apr 2001 05:12:58 +0100
+X-Mailer: KMail [version 1.2]
+References: <200104200242.f3K2gsf23361 at moe.2bsd.com>
+In-Reply-To: <200104200242.f3K2gsf23361 at moe.2bsd.com>
+MIME-Version: 1.0
+Message-Id: <01042005125805.00527 at klamath.leguin.org.uk>
+Content-Transfer-Encoding: 8bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Friday 20 April 2001  3:42 am, Steven M. Schultz wrote:
+> 	the single BIGGEST problem is that 'data + bss' exceeds not only the
+> 	56KB limit but the total 64KB limit available to a process.  Looks
+> 	like MH want 35860+32412 or 68272 bytes of D space.
+>
+> 	You might be able to get the code to fit - I'd pack the base to at
+> 	least 40KB (more likely 48KB) and only have two or three overlays
+> 	of 24KB or 16KB.
+
+The problem appears to be `libmh.a', which alone has 30K text + 22K data + 
+24K bss (77444 total).  Any way around this? I've tried all the combinations 
+i can think of, to no avail..
+
+> 	One thing that can be done is to run 'xstr' over the sources and
+> 	collect error message strings, printf strings, and so on into a common
+> 	pool.   The other thing that can be done is create a strings file
+> 	and extract as many as possible strings from the source modules into
+> 	an external file.   Examples of doing this type of thing can be found
+> 	in the source tree - 'lint' was one such program, 'sendmail' was another
+> 	and kermit yet another (that's why there are 'sendmail.sr'  and
+> 	'kermit5.sr' files on the system).
+
+hmm... a lot of work just to get MH working.
+
+> > ld: too big for type 431 (problem 2: tsize = 0, ovrnd = -32768, dtotal =
+> > 0)
+> >
+> > the negative ovrnd i find very strange- perhaps the wrapround bug?
+>
+> 	Hmmm, could be.
+
+Could be i used the wrong printf format also..
+
+> 	"size libmh.a" will give a much better idea where the problem areas
+> 	are.
+
+unfortunately, size doesn't appear to work on archive libraries.
+
+	-larne-
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA58237
+	for pups-liszt; Fri, 20 Apr 2001 15:01:25 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA58232
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 15:01:21 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f3K4nxv24294
+	for pups at minnie.cs.adfa.edu.au; Thu, 19 Apr 2001 21:49:59 -0700 (PDT)
+Date: Thu, 19 Apr 2001 21:49:59 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200104200449.f3K4nxv24294 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Edward Brocklesby <ejb at leguin.org.uk>
+> The problem appears to be `libmh.a', which alone has 30K text + 22K data + 
+> 24K bss (77444 total).  Any way around this? I've tried all the combinations 
+> i can think of, to no avail..
+
+	I think this would be a very good time to point out that 'data' is
+	NOT overlaid, only the text is overlaid.   There is but 1 data segment
+	and all data+bss goes into it.
+
+	Text overlays work because there's a very careful dance done by the
+	assembler and linker.   Functions use a 'thunk' (intermediate
+	transfer vector) - thus when a program calls foo() it is really
+	calling something like ~foo().  That thunk performs part of the 
+	function prolog and then checks if the overlay mapping needs to changeoa	and if so makes a syscall to have the kernel twiddle the MMU.  Then
+	the thunk calls foo+4 (skipping the part of the function prolog that
+	has already been done).   Very elegant but completely unapplicable
+	to data references (think on it - how is each and every pointer
+	dereference to be checked to see if that data is mapped in?).
+	
+	In order to get the code to fit it would be necessary to extract
+	all of the .o files from the .a file ("ar x libmh.a") and
+	pack the .o files into overlays so they fit nicely.
+
+> > 	One thing that can be done is to run 'xstr' over the sources and
+> 
+> hmm... a lot of work just to get MH working.
+
+	Getting 32bit programs (and MH was done on a VAX or PDP10 (which is
+	actually a 36 bit machine ;)) to run on a 16 bit machine is a lot of
+	work.
+
+	Since MH was written with a large address space in mind it will likely
+	be necessary to go thru the code and find the "#define BUFSIZE 32000"
+	or whatever and scale things back.   The odds are good that many 
+	buffers are declared to be large just because it didn't matter on
+	a big address space machine.   That's what had to be done for 'vi',
+	'sendmail', 'kermit', etc.
+
+> > 	"size libmh.a" will give a much better idea where the problem areas
+> > 	are.
+> 
+> unfortunately, size doesn't appear to work on archive libraries.
+
+	Oh.  Darn, I got my systems mixed up.  On some systems 'size' will
+	work on .a files - something to put on the TODO pile (shouldn't be
+	too hard since 'nm' works with .a files).
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA58368
+	for pups-liszt; Fri, 20 Apr 2001 15:35:23 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from klamath.leguin.org.uk (pc62-oxf1.cable.ntl.com [62.254.132.62])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA58364
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 15:35:18 +1000 (EST)
+	(envelope-from ejb at leguin.org.uk)
+Received: from klamath.leguin.org.uk (klamath [127.0.0.1])
+	by klamath.leguin.org.uk (8.9.3/8.9.3/Debian 8.9.3-21) with SMTP id GAA19840;
+	Fri, 20 Apr 2001 06:26:27 +0100
+X-Authentication-Warning: klamath.leguin.org.uk: Host klamath [127.0.0.1] claimed to be klamath.leguin.org.uk
+Content-Type: text/plain;
+  charset="iso-8859-1"
+From: Edward Brocklesby <ejb@leguin.org.uk>
+Organization: Leguin Network Services
+To: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+Date: Fri, 20 Apr 2001 06:26:25 +0100
+X-Mailer: KMail [version 1.2]
+References: <200104200449.f3K4nxv24294 at moe.2bsd.com>
+In-Reply-To: <200104200449.f3K4nxv24294 at moe.2bsd.com>
+MIME-Version: 1.0
+Message-Id: <01042006262506.00527 at klamath.leguin.org.uk>
+Content-Transfer-Encoding: 8bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Friday 20 April 2001  5:49 am, Steven M. Schultz wrote:
+> 	In order to get the code to fit it would be necessary to extract
+> 	all of the .o files from the .a file ("ar x libmh.a") and
+> 	pack the .o files into overlays so they fit nicely.
+
+hmm.. i might have a look at doing this after i get xstr working.
+
+> 	Getting 32bit programs (and MH was done on a VAX or PDP10 (which is
+> 	actually a 36 bit machine ;)) to run on a 16 bit machine is a lot of
+> 	work.
+
+36bit with 9bit bytes, iirc .. fun :>
+
+I'm currently converting libmh.a to use xstr, but I've come across a 
+problem.. given the definition
+
+static char  unixbuf[BUFSIZ] = "";
+
+xstr generates the code
+
+static char  unixbuf[BUFSIZ] = (&xstr[0]);
+
+which the C compiler refuses to compile.  Any way around this?
+
+	-larne-
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA59071
+	for pups-liszt; Fri, 20 Apr 2001 17:41:53 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from RVC1.Informatik.BA-Stuttgart.DE (isdn258.s.netic.de [212.9.163.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA59067
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 17:41:48 +1000 (EST)
+	(envelope-from helbig at Informatik.BA-Stuttgart.DE)
+Received: (from helbig at localhost)
+	by RVC1.Informatik.BA-Stuttgart.DE (8.11.2/8.9.3) id f3K7bSv10954;
+	Fri, 20 Apr 2001 09:37:28 +0200 (CEST)
+Date: Fri, 20 Apr 2001 09:37:28 +0200 (CEST)
+From: Wolfgang Helbig <helbig@Informatik.BA-Stuttgart.DE>
+Message-Id: <200104200737.f3K7bSv10954 at RVC1.Informatik.BA-Stuttgart.DE>
+To: helbig at Informatik.BA-Stuttgart.DE, leypold at informatik.uni-tuebingen.de
+Subject: Re: [pups] V6 and Supnik-simulator
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>  > If the following  README sounds interesting to you, maybe we can
+>  > arrange to put a tar ball of it onto minnie?
+>  > 
+>  > I also prepared postscript files of the V6-documentation.
+>  > Anyone interested?
+>
+>
+> Yes, me in example :-). I wonder wether you could give them to dmr to be
+> placed just at the side of the v7 docs, or wether you could put it
+> into the archive?
+
+I asked Dennis, and he told me, the best place for those directories
+is the minnie archive. So I'd like to put it there, but don't know how to.
+
+Wolfgang
+
+>
+> Regards -- Markus
+>
+>  > 
+>  > Wolfgang
+>  > 
+>  > First README:
+>  > UNIX V6 on the Supnik simulator:
+>  > --------------------------------
+>  > This directory contains tape files for the Supnik simulator and
+>  > accompaning README files, which I produced when preparing an OS
+
+[...]
+
+>  > Second README:
+>  > This directory contains some documentation as found on the UNIX V6
+>  > Distribution tape. The files were converted to postscript with
+>  > groff and the usage of the V6 ms-macro package. (See the print
+>  > shell script)
+
+[...]
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA59307
+	for pups-liszt; Fri, 20 Apr 2001 18:22:59 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mx2.informatik.uni-tuebingen.de (mx2.Informatik.Uni-Tuebingen.De [134.2.12.9])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA59303
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 18:22:55 +1000 (EST)
+	(envelope-from leypold at informatik.uni-tuebingen.de)
+Received: from neuromancer.informatik.uni-tuebingen.de (neuromancer [134.2.12.58])
+	by mx2.informatik.uni-tuebingen.de (Postfix) with ESMTP
+	id C80C01066; Fri, 20 Apr 2001 10:14:18 +0200 (MST)
+Received: (from leypold at localhost)
+	by neuromancer.informatik.uni-tuebingen.de (8.9.3/8.8.7) id IAA01537;
+	Fri, 20 Apr 2001 08:15:44 GMT
+Date: Fri, 20 Apr 2001 08:15:44 GMT
+Message-Id: <200104200815.IAA01537 at neuromancer.informatik.uni-tuebingen.de>
+X-Authentication-Warning: neuromancer.informatik.uni-tuebingen.de: leypold set sender to leypold at informatik.uni-tuebingen.de using -f
+From: Markus E Leypold <leypold@informatik.uni-tuebingen.de>
+To: helbig at Informatik.BA-Stuttgart.DE
+Cc: helbig at Informatik.BA-Stuttgart.DE, pups at minnie.cs.adfa.edu.au
+In-reply-to: <200104200737.f3K7bSv10954 at RVC1.Informatik.BA-Stuttgart.DE>
+	(message from Wolfgang Helbig on Fri, 20 Apr 2001 09:37:28 +0200
+	(CEST))
+Subject: Re: [pups] V6 and Supnik-simulator
+References:  <200104200737.f3K7bSv10954 at RVC1.Informatik.BA-Stuttgart.DE>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+ > Delivered-To: leypold at informatik.uni-tuebingen.de
+ > Date: Fri, 20 Apr 2001 09:37:28 +0200 (CEST)
+ > From: Wolfgang Helbig <helbig at Informatik.BA-Stuttgart.DE>
+ > Cc: pups at minnie.cs.adfa.edu.au
+ > 
+ > >  > If the following  README sounds interesting to you, maybe we can
+ > >  > arrange to put a tar ball of it onto minnie?
+ > >  > 
+ > >  > I also prepared postscript files of the V6-documentation.
+ > >  > Anyone interested?
+ > >
+ > >
+ > > Yes, me in example :-). I wonder wether you could give them to dmr to be
+ > > placed just at the side of the v7 docs, or wether you could put it
+ > > into the archive?
+ > 
+ > I asked Dennis, and he told me, the best place for those directories
+ > is the minnie archive. So I'd like to put it there, but don't know how to.
+
+Well -- send a mail to warren k tomey (wkt at .... -- you'll find him in
+the mailing list). He has been building the archive and might tell
+you, how to transfer the files. Since PUPS-archive has an incoming
+directory, I think, it might be, that ftp-'put' to incoming will
+work. Warren or some other archive maintainer can pick it from there,
+and place it in the proper directories.
+
+Ask Warren. He is the one who should know.
+
+Regards -- Markus
+
+PS: Somehow I know your name. You haven't written a book by chance?
+
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id TAA59510
+	for pups-liszt; Fri, 20 Apr 2001 19:00:17 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from Tempo.Update.UU.SE (root at Tempo.Update.UU.SE [130.238.19.17])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id TAA59503
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 20 Apr 2001 19:00:11 +1000 (EST)
+	(envelope-from bqt at update.uu.se)
+Received: from localhost (bqt at localhost)
+	by Tempo.Update.UU.SE (8.11.2/8.11.2/Update-Iltempogigante) with ESMTP id f3K8pKq08127;
+	Fri, 20 Apr 2001 10:51:20 +0200
+Date: Fri, 20 Apr 2001 10:51:19 +0200 (CEST)
+From: Johnny Billquist <bqt@update.uu.se>
+To: Edward Brocklesby <ejb at leguin.org.uk>
+cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+In-Reply-To: <01042006262506.00527 at klamath.leguin.org.uk>
+Message-ID: <Pine.LNX.4.21.0104201049370.3728-100000 at Tempo.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Fri, 20 Apr 2001, Edward Brocklesby wrote:
+
+> On Friday 20 April 2001  5:49 am, Steven M. Schultz wrote:
+> > 	Getting 32bit programs (and MH was done on a VAX or PDP10 (which is
+> > 	actually a 36 bit machine ;)) to run on a 16 bit machine is a lot of
+> > 	work.
+> 
+> 36bit with 9bit bytes, iirc .. fun :>
+
+Actually, the PDP-10 have variable byte size. Anything from 1 to 36
+bits. Lazy people went with 9 bit bytes, while size-aware people used 7
+bit bytes. And then you have SIXBIT...
+
+	/Department for worthless knowledge. :-)
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA65073
+	for pups-liszt; Sat, 21 Apr 2001 05:02:46 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from uucp-relay.eunet.no (gasspedal.eunet.no [193.71.71.15])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA65069
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 21 Apr 2001 05:02:41 +1000 (EST)
+	(envelope-from tih at barsoom.Hamartun.Priv.NO)
+Received: (from uucp at localhost)
+	by uucp-relay.eunet.no (8.9.3/8.9.3) with UUCP id UAA97313;
+	Fri, 20 Apr 2001 20:54:02 +0200 (CEST)
+	(envelope-from tih at barsoom.Hamartun.Priv.NO)
+Received: by barsoom.Hamartun.Priv.NO (Postfix, from userid 1001)
+	id D4DED7201; Fri, 20 Apr 2001 20:23:52 +0200 (CEST)
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Maximum PDP-11 executable size?
+References: <200104200242.f3K2gsf23361 at moe.2bsd.com>
+From: Tom Ivar Helbekkmo <tih@Hamartun.Priv.NO>
+Date: 20 Apr 2001 20:23:51 +0200
+In-Reply-To: "Steven M. Schultz"'s message of "Thu, 19 Apr 2001 19:42:54 -0700 (PDT)"
+Message-ID: <867l0f8m6g.fsf at barsoom.Hamartun.Priv.NO>
+Lines: 13
+User-Agent: Gnus/5.0807 (Gnus v5.8.7) Emacs/20.7
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+"Steven M. Schultz" <sms at moe.2bsd.com> writes:
+
+> > Current Patch Level: 400
+> > Date: January 24, 1998
+> 
+> 	Ouch - that is a bit old, there are updates thru 434 (I've 435 in
+> 	midstream but haven't had time to finish it).
+
+You mean 435/436: patch 435 was released on February 7th, 2001.  :-)
+
+-tih
+-- 
+Popularity is the hallmark of mediocrity.  --Niles Crane, "Frasier"
+
+
