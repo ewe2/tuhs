@@ -1,0 +1,250 @@
+From: DSEAGRAV@toad.xkl.com (Daniel A. Seagraves)
+Date: Sat, 27 Nov 1999 09:54:53 -0800
+Subject: 2.11BSD
+Message-ID: <13502970974.14.DSEAGRAV@toad.xkl.com>
+
+I am now dangerously close to getting 2.11BSD on my 11/44. ^_^
+I got a SCSI disk controller (Viking UDT) and TS11 tapes, and 16 ports of
+DZ11s  (Anyone got jumper/DIP switch info on these?), but my problem is
+lack of a boot tape.
+
+Anyway, since I have other machines around which can grok SCSI disks, I tried
+making an RP06 image on Supnik's emulator, installing the rauboot instead of
+hkuboot, but it failed.  The PDP-11 read the bootstrap in OK and the bootstrap
+was running but it was looping (I forgot the address).
+
+Has anyone done this before?  I would use a SCSI tape to boot from but the
+SCSI tape drive I have died.  (Roached literally - one of the little fsckers
+got inside it and got fried.)
+
+-------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA39579
+	for pups-liszt; Sun, 28 Nov 1999 06:14:13 +1100 (EST)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id GAA39566
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Sun, 28 Nov 1999 06:14:03 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Sat, 27 Nov 1999 14:13:59 -0500
+Date: Sat, 27 Nov 1999 14:13:59 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <991127141359.20a000ba at trailing-edge.com>
+Subject: Re: 2.11BSD
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>Anyway, since I have other machines around which can grok SCSI disks, I tried
+>making an RP06 image on Supnik's emulator, installing the rauboot instead of
+>hkuboot, but it failed.
+
+Are you sure it was a RP06 image?  hkuboot is the RK06/07 bootstrap.
+
+How did you move the RP06 (or RK06) image to the physical SCSI drive?  You
+were asking about doing it with RT-11 a few weeks ago, but you *do*
+know that RT-11 won't conventionally access the 65536th (and
+2*65536th, and 3*65536th...) blocks on a MSCP partition, don't you?  (There
+is a way of accessing that last block, but you have to code it with
+a .SPFUN call to the DU driver, and none of the distributed RT-11 utilities
+work on that last block, even with the /DEVICE qualifier.)
+
+Did the version of 2.11BSD you're working from have disklabel support in
+the hk driver?  Disklabel support there was added recently (where "recent"
+= 2 years ago).
+
+>  The PDP-11 read the bootstrap in OK and the bootstrap
+>was running but it was looping (I forgot the address).
+
+Get us the address (HALT the 11/44, either with the front panel toggle
+or control-P from the console) and we'll find out why it's looping.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA39623
+	for pups-liszt; Sun, 28 Nov 1999 06:21:02 +1100 (EST)
+Received: from mrynet.com (root at mrynet.com [24.234.53.177])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id GAA39619
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 28 Nov 1999 06:20:53 +1100 (EST)
+Received: (from pups at localhost)
+	by mrynet.com (8.9.3/8.9.3) id LAA02916;
+	Sat, 27 Nov 1999 11:20:43 -0800 (PST)
+	(envelope-from pups)
+Posted-Date: Sat, 27 Nov 1999 11:20:43 -0800 (PST)
+Message-Id: <199911271920.LAA02916 at mrynet.com>
+From: pups@mrynet.com (PUPS mailing list)
+Date: Sat, 27 Nov 1999 11:20:43 +0000
+X-Mailer: Mail User's Shell (7.2.6 beta(3) 11/17/96)
+To: "Daniel A. Seagraves" <DSEAGRAV at toad.xkl.com>
+Subject: Re: 2.11BSD
+Cc: pups at minnie.cs.adfa.oz.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> I am now dangerously close to getting 2.11BSD on my 11/44. ^_^
+> I got a SCSI disk controller (Viking UDT) and TS11 tapes, and 16 ports of
+> DZ11s  (Anyone got jumper/DIP switch info on these?), but my problem is
+> lack of a boot tape.
+
+I have the DZ11 (M7814)  user's guide right here. 
+
+1) Priority insert level 5 goes in E41.
+
+2) E72 -- Address.
+   Closed (on) is binary 1.
+
+	A12 A11 A10  A9  A8  A7  A6  A5  A4  A3
+       -----------------------------------------
+       | 10| 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 |
+   on  |   |   |   |   |   |   |   |   |   |   |
+       |   |   |   |   |   |   |   |   |   |   |
+  off  |   |   |   |   |   |   |   |   |   |   |
+       -----------------------------------------
+
+  Addressing examples:
+	160000 -- A12 thru A3 OFF
+	160010 -- A12 thru A4 OFF, A3 ON
+	177770 -- A12 thru A3 ON
+	(OFF=Logical 0, ON=Logical 1)
+
+3) E81 -- Vector
+   Closed (on) is a binary 0.
+
+       -unused- V3  V4  V5  V6  V7  V8
+       ---------------------------------    
+       | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 |
+   on  |   |   |   |   |   |   |   |   |
+       |   |   |   |   |   |   |   |   |
+  off  |   |   |   |   |   |   |   |   |
+       ---------------------------------
+
+  Vectoring examples:
+	Vector	V8   V7   V6   V5   V4   V3
+	 300    ON   OFF  OFF  ON   ON   ON
+	 310    ON   OFF  OFF  ON   ON   OFF
+	 770    OFF  OFF  OFF  OFF  OFF  OFF
+	(ON=Logical 0, OFF=Logical 1)
+
+  Let me know if you need any more info.
+
+> Anyway, since I have other machines around which can grok SCSI disks, I tried
+> making an RP06 image on Supnik's emulator, installing the rauboot instead of
+> hkuboot, but it failed.  The PDP-11 read the bootstrap in OK and the bootstrap
+> was running but it was looping (I forgot the address).
+
+Did you successfully build from a boot-tape image on the emulator, or did you copy
+the RP06 image (such as on the PUPS archive) directly to the disk and tranfer
+the physical drive to the PDP?  (And what method/command did you use?)
+
+> Has anyone done this before?  I would use a SCSI tape to boot from but the
+> SCSI tape drive I have died.  (Roached literally - one of the little fsckers
+> got inside it and got fried.)
+
+I do this regularly for my vaxen.   10 to 1 Steven Schultz has been this route
+on the PDP-11's tho (Hi Steven :).
+
+Lemme know if I can help more.
+
+Regards,
+		-skots
+--
+Scott G. Akmentins-Taylor     InterNet: staylor at mrynet.com
+MRY Systems			        staylor at mrynet.lv
+    (Skots Gregorijs Akmentins-Teilors -- just call me "Skots")
+		----- Labak miris neka sarkans -----
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA39662
+	for pups-liszt; Sun, 28 Nov 1999 06:26:23 +1100 (EST)
+Received: from tele-post-20.mail.demon.net (tele-post-20.mail.demon.net [194.217.242.20])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id GAA39658
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 28 Nov 1999 06:26:13 +1100 (EST)
+Received: from simul8.demon.co.uk ([212.228.120.103])
+	by tele-post-20.mail.demon.net with esmtp (Exim 2.12 #2)
+	id 11rnTr-000J6P-0K; Sat, 27 Nov 1999 19:26:00 +0000
+Message-ID: <3840305B.59044771 at simul8.demon.co.uk>
+Date: Sat, 27 Nov 1999 19:26:19 +0000
+From: James Lothian <simul8@simul8.demon.co.uk>
+X-Mailer: Mozilla 4.5 [en] (WinNT; I)
+X-Accept-Language: en,ja
+MIME-Version: 1.0
+To: "Daniel A. Seagraves" <DSEAGRAV at toad.xkl.com>
+CC: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.11BSD
+References: <13502970974.14.DSEAGRAV at toad.xkl.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hmm.. I've got a manual for the Viking UDT, and I'll try to remember to 
+bring it in on Monday. 
+
+I don't know anything about how 2.11BSD boots. However, I had an
+interesting
+time trying to get 4.3BSD on my 750 to boot off this controller. It
+turned out 
+that the Viking's emulation of the UDA50 isn't *quite* accurate, and
+that the 4.3 boot
+code was using one of the edge-of-the-envelope features that the Viking
+didn't quite 
+emulate right. I modified the bootstrap slightly and got it going.
+Whether this 
+has anything to do with your problem, I don't know. (It was worth all
+the effort 
+in the end, to see the monster hulking 750 booting of a little dinky
+plastic zip drive!)
+
+James
+
+"Daniel A. Seagraves" wrote:
+> 
+> I am now dangerously close to getting 2.11BSD on my 11/44. ^_^
+> I got a SCSI disk controller (Viking UDT) and TS11 tapes, and 16 ports of
+> DZ11s  (Anyone got jumper/DIP switch info on these?), but my problem is
+> lack of a boot tape.
+> 
+> Anyway, since I have other machines around which can grok SCSI disks, I tried
+> making an RP06 image on Supnik's emulator, installing the rauboot instead of
+> hkuboot, but it failed.  The PDP-11 read the bootstrap in OK and the bootstrap
+> was running but it was looping (I forgot the address).
+> 
+> Has anyone done this before?  I would use a SCSI tape to boot from but the
+> SCSI tape drive I have died.  (Roached literally - one of the little fsckers
+> got inside it and got fried.)
+> 
+> -------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA39726
+	for pups-liszt; Sun, 28 Nov 1999 06:29:51 +1100 (EST)
+Received: from toad.xkl.com (toad.xkl.com [192.94.202.40])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id GAA39714
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 28 Nov 1999 06:29:40 +1100 (EST)
+Date: Sat, 27 Nov 1999 11:28:56 -0800
+From: "Daniel A. Seagraves" <DSEAGRAV@toad.xkl.com>
+Subject: Re: 2.11BSD
+To: pups at minnie.cs.adfa.oz.au
+Message-ID: <13502988095.14.DSEAGRAV at toad.xkl.com>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+[Replied to Tim but not the list - oops!]
+
+Method to transfer drive:  FTPd disk image to MicroVAX running NetBSD,
+used cat.  Saved the RT11 image beforehand.  When BSD died I put RT11 back.
+RT11 works.
+
+Disk image was an RP06 constructed from a boot tape I made.  It used stuff
+from the PUPS archive but wasn't the image from the archive.
+
+I will get the loop address shortly - I have to get an extension cord back to
+power the machine.
+-------
+
+
