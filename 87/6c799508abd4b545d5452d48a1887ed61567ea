@@ -1,0 +1,47 @@
+From: arnold@skeeve.com (Aharon Robbins)
+Date: Tue, 27 May 2003 15:26:24 +0300
+Subject: [TUHS] V7 ls -s option
+Message-ID: <200305271226.h4RCQOQD005872@localhost.localdomain>
+
+The V7 ls.c code:
+
+> >>> 	long
+> >>>	nblock(size)
+> >>>	long size;
+> >>>	{
+> >>>		return((size+511)>>9);
+> >>>	}
+> >>
+
+I wrote:
+
+> > In fact, the V7 calculation is only
+> > an approximation in another sense; a file with large holes could
+> > generate too large a result.
+
+Greg wrote:
+
+> A block is a block.  If it's allocated, it's all there (at least in
+> the Seventh Edition).  It doesn't make any difference that some of the
+> space in the block may not represent valid data.
+
+You're missing my point.  Consider a C program along these lines:
+
+	int main(void)
+	{
+		int fd = creat("/some/file", 0600);
+
+		lseek(fd, 123456789L, 0);	/* absolute seek */
+		write(fd, "x", 1);
+		close(fd);
+	}
+
+After running this program, the `/some/file' file now looks rather
+large. But it only has one block allocated to it.  However, the V7
+nblock() function computes a number somewhat larger than one.
+
+Thanks,
+
+Arnold
+
+
