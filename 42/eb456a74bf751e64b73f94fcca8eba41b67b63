@@ -1,0 +1,64 @@
+From: msokolov@meson.jpsystems.com (Michael Sokolov)
+Date: Sat, 4 Sep 99 16:26:10 -0500
+Subject: What's the true size of an RA92?
+Message-ID: <9909042126.AA04576@meson.jpsystems.com>
+
+Hi,
+
+I wonder, does anyone know for sure what is the user capacity of an RA92 in
+blocks? I'm now updating disktab(5) and the driver tables in 4.3BSD-Quasijarus
+to cover new RA disks, and I can't figure out the user capacity of RA92 in
+blocks. For all other RA disks with no exceptions (all RA8x, all RA7x, and
+RA90) the user capacity in blocks is exactly equal to the number of cylinders
+multiplied by the number of heads multiplied by the number of sectors, i.e., no
+funny reserved sectors or tracks or anything like that. Looking in the
+disktab(5) from Ultrix V4.2 I see a perfect match between the geometry and the
+partition sizes for all disks except RA92. The RA92 entry indicates 3279
+cylinders, 13 heads, and 69 sectors per track, but partition c is listed as
+2940951 blocks instead of 3279*13*69=2941263 blocks. Does anyone know for sure
+whether the user capacity of an RA92 is 2940951 blocks, 2941263 blocks, or
+something else altogether?
+
+--
+Michael Sokolov
+Special Agent
+International Free Computing Task Force
+
+ARPA Internet SMTP mail: msokolov at meson.jpsystems.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA17754
+	for pups-liszt; Sun, 5 Sep 1999 10:41:13 +1000 (EST)
+Received: from nose.cita.utoronto.ca (nose.cita.utoronto.ca [128.100.76.157])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA17750
+	for <pups at minnie.cs.adfa.edu.au>; Sun, 5 Sep 1999 10:41:03 +1000 (EST)
+From: norman@nose.cita.utoronto.ca
+Message-Id: <199909050041.KAA17750 at minnie.cs.adfa.edu.au>
+To: msokolov at meson.jpsystems.com
+Cc: pups at minnie.cs.adfa.edu.au, quasijarus at minnie.cs.adfa.edu.au
+Subject: What's the true size of an RA92?
+Date: Sat, 04 Sep 1999 20:40:15 -0400
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+For any MSCP disk, the proper way to find out how many sectors there are
+is to ask the disk.  The `unit online' command (which has to be used anyway,
+to tell the controller to connect to the disk) reports the unit size in
+sectors; the `get unit status' command reports the number of sectors per
+track, tracks per group, and groups per cylinder.  (The term `group' here
+is MSCP-speak which I've never really understood; the idea seems to be that
+groups are collections of cylinders that can be switched between with relatively
+little time penalty, whereas switching between even adjacent cylinders is more
+expensive.)
+
+Beware, however, that modern disks usually don't have a fixed number of
+sectors per track; the tracks furthest from the spindle have more sectors,
+so that more of the disk surface can be used without too much density
+variation.  Such `zoned' disks weren't common (maybe they didn't even exist)
+when the MSCP spec was first written; maybe the RA92 is new enough that it
+has zones.
+
+I've never been convinced that worrying in great detail about track and
+cylinder sizes gains much performance anyway, but that's another story.
+
+
