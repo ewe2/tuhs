@@ -1,0 +1,83 @@
+From: sms@moe.2bsd.com (Steven M. Schultz)
+Date: Fri, 23 Feb 2001 12:59:58 -0800 (PST)
+Subject: [pups] Stray Interupts
+Message-ID: <200102232059.f1NKxwH11017@moe.2bsd.com>
+
+Hi -
+
+> From: Bill Gunshannon <bill at cs.scranton.edu>
+> Maybe the Ultrix source would be a help in better understanding some
+> of the internals of the hardware.
+
+	That could well be the case.  Yes, the simulator is still being
+	worked on and maintained.
+
+> My experience with Ultrix-11 up to this point would lead me to believe
+> that it isn't bugs, but I can easily accept that it is overly picky.
+> 
+> I tried RSTS.  As a matter of fact, I used DSKINT to create my empty
+> RP06 images.  No sogn of a problem there.
+
+	Ah, ok.   That tends to reinforce the thought that Ultrix may be
+	too picky about something.
+
+> I would love to us the Begemot emulator.  I have the latest version but
+> I have been unable to get any of my disk images to work.  Can anyone
+> tell me if you can use the disk images from the other emulators and if
+> so, how??  Do they have to be converted somehow like tapes??
+
+	Yes indeed you can use the RP06 images "bits as is".  As long as
+	the disk image is exactly an RP06 (the only size supported that I
+	can see by P11) nothing more need be done.   In fact that's how I
+	switched over from 'sim_2.x' to 'p11' - I just made a copy of the
+	disk image and hand crafted a p11conf file.
+
+	Tapes need "conversion" because they have to contain information 
+	about record lengths and end of file markers.   Disk images are
+	a simple collection of bytes.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+p.s. here's what I use for P11's conf file - perhaps it will be of use.  The
+     disk image "2.11BSD" is referenced on the line 'dev 0 ./2.11BSD  1999'
+
+--------------------p11conf------------------------
+set clock_rate 60
+
+ctrl rk 017777400 0220 5 4000
+end
+
+ctrl rl 017774400 0160 4 4000
+end
+
+ctrl rp 017776700 0254 5 4000
+dev 0 ./2.11BSD  1999
+dev 1 ./junk  1999
+end
+
+ctrl kl
+dev 017777560  060  064 4 tty_net  -7 -t 10000
+dev 017776500 0300 0304 4 tty_net  -7 -t 10001
+end
+
+ctrl mr 017777520 ./rp.boot
+end
+
+ctrl lp 017777514 0200 4
+end
+
+ctrl tm 017772520 0224 5
+# dev 0 /tmp/foo
+end
+
+ctrl qna 017774440 5 0x08:0x00:0x2b:0x07:0x82:0x6c 0xf8:0x7a qna.rom
+dev epp_tun tun0 0x08:0x00:0x2b:0x07:0x82:0x6c 0x08:0x00:0x2b:0x07:0x82:0x00
+end
+
+# The toy clock.
+#
+ctrl toy 017777526
+end
+
+
