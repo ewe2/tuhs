@@ -1,0 +1,531 @@
+From: msokolov@harrier.Uznet.NET (Michael Sokolov)
+Date: 7 Dec 1998   16:37:52 GMT
+Subject: Some nice progress with hardware and Ultrix in the PUPS archive
+Message-ID: <199812071638.VAA15617@harrier.Uznet.NET>
+
+   Dear Tim,
+   
+   You write:
+> I'd be glad to run off TK50's from images
+> for you, though I think your earlier idea, about installing from
+> the miniroot image that's commonly put on 4.2- and 4.3BSD derived
+> distributions, is a *far* better idea as it avoids using a TK50
+> tape drive at all.
+   
+   I will need to boot from a tape at some point in any case. I have to
+boot from SOMETHING. Since none of the disks in this machine is bootable, I
+have to boot either from a tape or over the network. Since the only two
+computers in my apartment are the VAX in question and my DOS machine,
+netbooting is not an option. Well, I could attach another disk to the PC,
+download FreeBSD, and install it, but this is _WAY_ too much pain. Also
+there is no guarantee of success with this approach, since there are all
+kinds of traps waiting to catch me. The spare disk I'm talking about may
+turn out to be toast, FreeBSD may not like something about this PC, the
+DELQA in the VAX may turn out broken, etc., etc., etc. OTOH, the labor
+investment in just trying it out is enormous (this PC has a VERY special
+configuration, and adding another disk may turn out to be a royal pita,
+plus downloading FreeBSD or some other PeeCee UNIX clone over my 14400 BPS
+modem is going to be a nightmare). On the other hand, I know that the TK50
+boot path is working, since I have been able to boot from some VMSish tape
+(see my previous messages), thus all I need is a good Ultrix tape.
+   
+   Another friendly PUPS member has promised to send me copies of his
+Ultrix tapes, so hopefully I'll get something going.
+   
+> It's not that tape copies are bad ideas - it's just that TK50's
+> are so slow.  If you were coming from 9-track or DLT or something
+> fast, that wouldn't be so bad.
+   
+   Are 9-track tapes faster than TK50s? In addition to the TK50 I also have
+the CDC Keystone and the QT13 which seems to work after all, but I
+_STRONGLY_ doubt that it's going to be any easier. This big beast is very
+dirty, it has been exposed to a little rain, and it has been dropped on
+concrete pavement a couple times, so before I even try plugging it in, I
+would have to perform a very careful cleaning and inspection procedure, and
+I currently don't have anywhere near the resources and knowledge needed for
+that operation.
+   
+> If you can get just about any OS running on your
+> Q-bus machine, under any CPU - i.e. NetBSD, RT-11, 2.11BSD, RSX,
+> whatever you might have - then you can just write the miniroot
+> straight to a "scratch" disk.
+   
+   Again, regardless of what approach I take, I'll need to boot from some
+device first. See above.
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id DAA13664
+	for pups-liszt; Tue, 8 Dec 1998 03:51:29 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id DAA13659
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 03:51:04 +1100 (EST)
+Received: from dosdev (pm8-105.dial.qual.net [205.212.2.105])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id VAA15637
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 7 Dec 1998 21:50:03 +0500
+Message-Id: <199812071650.VAA15637 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 7 Dec 1998   16:49:46 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+   Dear Tim,
+   
+   Your explanation of 9-track tape interfaces is extremely helpful!
+Thanks! This area has always been a huge gap in my hardware knowledge.
+   
+   What I still don't understand is how do all these interfaces handle the
+issue of recording density (800 BPI vs. 1600 BPI vs. 6250 BPI). You are
+saying that the Pertec unformatted interface is very low-level. Do you mean
+that it gives the controller the raw stream from the heads without trying
+to separate data and clock bits? It is my understanding (please correct me
+if I'm wrong) that the difference between 1600 and 6250 BPI is the data
+encoding (PE vs. GCR) and that the actual magnetic density (flux
+transitions per inch) is the same. If so, does this mean that a Pertec
+unformatted transport can be made 1600 or 6250 BPI at the formatter's
+discretion without the transport knowing or caring about the density? I
+mean, is it like the ST-506/412 MFM vs. ST-506/412 RLL thing?
+   
+   And how does the Pertec formatted interface address this issue? In this
+case the controller has to tell the transport what density it wants with
+the transport being able to accept or deny the request depending on its
+capabilities, right?
+   
+   You write:
+> Yep, Pertec formatted.  The QT13 is nice because it'll emulate
+> either MU: or MS:-type devices.
+   
+   This brings me to the following question. Assuming that the Pertec
+formatted interface does carry explicit density control information, which
+software interface would be a better choice in terms of density control,
+TS-11 or TMSCP? It is my understanding that the original UNIBUS TS-11 is a
+formatter for Pertec unformatted transports that supports 1600 BPI only,
+right? If so, the TS-11 interface doesn't give the OS any control over the
+density, does it? If so, what density does the QT13 choose in this mode?
+And what about TMSCP? How much control does it give to the OS in terms of
+density selection?
+   
+> Yep, a TS05 is a rebadged Cipher F880 (with some slightly-different
+> firmware).
+   
+   And where does it stand density-wise? According to DEC, TS05 is a 1600
+BPI only transport, and as far as I can remember, the Cipher at CWRU had
+"1600 BPI" printed on the back somewhere. However, it had a switch on the
+front panel labeled "HI DEN" or something like that. What the hell is this?
+According to DEC docs, on TS05 this switch is labeled "ENTER" and the docs
+call it "reserved".
+   
+> It probably had 4 50-pin edge connectors [...]
+   
+   Yes.
+   
+> [...] so that multiple drives could
+> be chained on the same Pertec-formatted-bus.  (There are terminators at
+> each end of the bus, much like SCSI.)  There's provisions for at least
+> 4 formatters per bus, with each formatter potentially running multiple
+> drives.
+   
+   Huh! I have never thought about it this way.
+   
+> (again, with slightly different firmware - for instance a DEC TU80
+> controller
+> will only work with TU80 drives or their CDC equivalent, the Keystone.)
+   
+   CDC Keystone is exactly what I have here. The interface coming out of
+the (incredibly huge) cabinet is Pertec formatted. Does it have a Pertec
+unformatted interface lurking inside or not? Which densities does it
+support?
+   
+> TU80's and TS(V)05's are simple
+> Pertec formatted interfaces.  Other times they convert to some other
+> interface (Massbus, LESI, etc.) before the cables come out to the "real
+> world".
+   
+   Hmm, the only DEC tape transport with LESI I know of is TU81+. Are there
+any others? And what about that plus? Has there ever been a TU81 without
+the plus? My manuals are at my main VAX farm from which I'm currently away,
+but I remember the picture of the TU81+ in there looked similar to the
+Keystone I have here. Since you say above that TU80 is Keystone in
+disguise, does it mean that TU80, TU81, and TU81+ are all the same beast
+with different interface converters tacked on?
+   
+   And what is LESI anyway? I have heard somewhere that the KLESI
+controller can drive more than just a TU81+, so is LESI actually more than
+just a tape interface?
+   
+   Oh, what about that leading edge strobe vs. trailing edge strobe? Your
+vmsnet.pdp11 posting with the QT13 switch settings says that Kennedy 9300
+uses trailing edge strobe while all others use leading edge strobe. Mine,
+however, is set for trailing edge strobe, and it was connected to the
+Keystone. Does this mean that the Keystone and Kennedy 9300 are the same
+beast, or is it simply that the 9300 is not the only transport using
+trailing edge strobe?
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id DAA13678
+	for pups-liszt; Tue, 8 Dec 1998 03:51:55 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id DAA13671
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 03:51:39 +1100 (EST)
+Received: from dosdev (pm8-105.dial.qual.net [205.212.2.105])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id VAA15642
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 7 Dec 1998 21:51:19 +0500
+Message-Id: <199812071651.VAA15642 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 7 Dec 1998   16:51:09 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: Sigma unidentified flying board
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+   Dear Tim,
+   
+   You write:
+> Any chance it's a simple parallel I/O?
+>
+> Could also be the bus interface for a Sigma and/or DSD MFM drive
+> controller (if so, it probably emulates RL02's).  The assembly number
+> sounds vaguely DSD-like.
+   
+   From looking at the board I see that the BDMGI and BDMGO fingers are
+simply shorted and not connected to any circuitry. This means that the
+board is non-DMA, right? If so, it can't emulate RL-11 or any other DEC
+disk controller because they are all DMA, right? The BIAKI and BIAKO
+fingers ARE connected to some circuitry, though, so at least this board
+interrupts, right?
+   
+   And what's DSD? What MFM controller are you referring to? The "SIGMA
+INFORMATION SYSTEMS, INC." label and the assembly number are etched, not
+silk-screened, stamped, or stickered, so it suggests that Sigma is the
+original designer.
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id FAA14057
+	for pups-liszt; Tue, 8 Dec 1998 05:32:10 +1100 (EST)
+Received: from mail.calweb.com (mail.calweb.com [208.131.56.12])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id FAA14052
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 8 Dec 1998 05:32:00 +1100 (EST)
+Received:  by mail.calweb.com (8.8.6/8.8.6) with SMTP id KAA09365
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 7 Dec 1998 10:31:55 -0800 (PST)
+X-SMTP: helo rgc from rickgc at calweb.com server @12.22.0.83 ip 12.22.0.83
+Message-Id: <3.0.32.19981207104119.00926100 at pop.calweb.com>
+X-Sender: rickgc at pop.calweb.com
+X-Mailer: Windows Eudora Pro Version 3.0 (32)
+Date: Mon, 07 Dec 1998 10:41:59 -0800
+To: pups at minnie.cs.adfa.oz.au (Unix Heritage Society)
+From: Rick Copeland <rickgc@calweb.com>
+Subject: Rugged 1182
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Dear PUPS list,
+
+I recently picked up a rack mounted computer that is called a "Rugged
+11/82".  One individual I know has suggested that it is a pdp 11/82 is a
+ruggedized box.  Has anyone on this list seen one of these.  Is there any
+software in the PUPS archive that might run on one of these?
+
+Sincerely,
+
+Rick Copeland
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id FAA14248
+	for pups-liszt; Tue, 8 Dec 1998 05:53:26 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id FAA14243
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Tue, 8 Dec 1998 05:53:13 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Mon, 7 Dec 1998 13:53:01 -0500
+Date: Mon, 7 Dec 1998 13:53:01 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <981207135301.2f0000e2 at trailing-edge.com>
+Subject: Re: Rugged 1182
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>I recently picked up a rack mounted computer that is called a "Rugged
+>11/82".  One individual I know has suggested that it is a pdp 11/82 is a
+>ruggedized box.  Has anyone on this list seen one of these.
+
+I have seen ruggedized 11/83's, as well as "Industrial 11/83"'s, but
+it's not clear yet exactly what you have.  The obvious solution
+is to look inside and see what Q-bus and/or Unibus boards are present.
+
+>  Is there any
+>software in the PUPS archive that might run on one of these?
+
+Some ruggedized PDP-11 systems didn't have a real Q-bus or Unibus backplane
+at all, making it very difficult (if not impossible) to use them
+with a standard disk controller.  That's why it's vital that you figure
+out what exactly is in your machine.
+
+Assuming that the guts are indeed a Q-bus or Unibus KDJ-based CPU,
+you'll be able to run 2.11BSD once you get a compatible disk, load,
+and console system up and going on it.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA14657
+	for pups-liszt; Tue, 8 Dec 1998 06:42:52 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id GAA14652
+	for <PUPS at MINNIE.CS.adfa.edu.AU>; Tue, 8 Dec 1998 06:42:35 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.adfa.edu.AU;
+          Mon, 7 Dec 1998 14:42:28 -0500
+Date: Mon, 7 Dec 1998 14:42:28 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <981207144228.2f0000e2 at trailing-edge.com>
+Subject: Re: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>   Are 9-track tapes faster than TK50s? 
+
+In every reasonable case that I know of, yes.
+
+>In addition to the TK50 I also have
+>the CDC Keystone and the QT13 which seems to work after all, but I
+>_STRONGLY_ doubt that it's going to be any easier. This big beast is very
+>dirty, it has been exposed to a little rain, and it has been dropped on
+>concrete pavement a couple times, so before I even try plugging it in, I
+>would have to perform a very careful cleaning and inspection procedure, and
+>I currently don't have anywhere near the resources and knowledge needed for
+>that operation.
+
+You're lucky - there's an incredible scarcity of moving parts on
+a TU80/CDC Keystone: two reel motors and a blower are all you've
+got.  There's also two metallic "hub" sensors used to sense tape
+motion/tension.  Clean these and the heads, load a scratch tape with
+write ring, power it up, close the door, make sure the logic is on,
+and hit "TEST" followed by "EXECUTE".  It'll go into a self-test mode,
+including some maximum-Maytag gymnastics, which will run for 15
+minutes or so on a 2400-foot tape.
+   
+[Unknown Sigma board]
+>   From looking at the board I see that the BDMGI and BDMGO fingers are
+>simply shorted and not connected to any circuitry. This means that the
+>board is non-DMA, right? If so, it can't emulate RL-11 or any other DEC
+>disk controller because they are all DMA, right? The BIAKI and BIAKO
+>fingers ARE connected to some circuitry, though, so at least this board
+>interrupts, right?
+
+Hmm - you said it has a 40-pin connector.  Given that it doesn't
+do DMA, I'm guessing that it's either a DLV11-type clone (a single
+serial line) or a parallel interface (either a DRV11-C type or a
+line-printer driver, possibly either Data Products or Centronics
+interface.)
+   
+>   And what's DSD?
+
+Data Systems Design - they made some disk controller subsystems.
+
+> The "SIGMA
+>INFORMATION SYSTEMS, INC." label and the assembly number are etched, not
+>silk-screened, stamped, or stickered, so it suggests that Sigma is the
+>original designer.
+
+Any obvious buffers (or banks of buffers) near the external connector?  What
+are the date codes on the chips?
+   
+>   What I still don't understand is how do all these interfaces handle the
+>issue of recording density (800 BPI vs. 1600 BPI vs. 6250 BPI). You are
+>saying that the Pertec unformatted interface is very low-level. Do you mean
+>that it gives the controller the raw stream from the heads without trying
+>to separate data and clock bits?
+
+At least at 800 and 1600 BPI, the Pertec Unformatted interface does
+do the data recovery.  There's a line from the formatter that puts
+the drive into either PE (1600 BPI) or NRZI (800 BPI) mode, and some
+optional lines that set the thresholds of the analog comparators used
+for data recovery.
+
+I'm not too sure about Pertec Unformatted drives at 6250 BPI.
+
+> It is my understanding (please correct me
+>if I'm wrong) that the difference between 1600 and 6250 BPI is the data
+>encoding (PE vs. GCR) and that the actual magnetic density (flux
+>transitions per inch) is the same.
+
+6250 BPI is definitely higher flux density on the tape (in addition to
+the different encoding.)
+
+>   And how does the Pertec formatted interface address this issue? In this
+>case the controller has to tell the transport what density it wants with
+>the transport being able to accept or deny the request depending on its
+>capabilities, right?
+
+There are a couple "spare" lines on the Pertec formatted interface
+so that the host can tell the formatter such "optional" information.
+The interpretation of these spare lines was never perfectly standardized:
+sometimes they're used to select 800 vs 1600 or 1600 vs 6250 BPI
+operation, other times they're used to put the drive into streaming
+vs non-streaming mode, other times it's used to change the speed on
+a streaming drive.  The IDEN line was the most commonly used line
+on the Pertec formatted interface to choose these options, but some
+CDC drives implemented a scheme where density/speed negotiation were
+done in a much more complex way.
+   
+>   This brings me to the following question. Assuming that the Pertec
+>formatted interface does carry explicit density control information, which
+>software interface would be a better choice in terms of density control,
+>TS-11 or TMSCP?
+
+It depends on what your OS's driver is capable of.  In most cases
+TMSCP gives you more control.
+
+> It is my understanding that the original UNIBUS TS-11 is a
+>formatter for Pertec unformatted transports that supports 1600 BPI only,
+>right?
+
+Right.
+
+> If so, the TS-11 interface doesn't give the OS any control over the
+>density, does it?
+
+The "official DEC" TS-11 interface didn't.  The DEC TSV05 interface
+(which was upward-compatible with the TS11's)
+gave the software control over the "high speed" vs "low speed" bit.
+And as I pointed out, some drives could be set to interpret this
+bit as a density select.  I don't think the ability to set/clear
+this bit ever made it into 2.11BSD (looking at the ts driver
+code there I don't see it, at least) and I have no idea if it ever
+made it to the 4.xBSD's.
+
+> If so, what density does the QT13 choose in this mode?
+
+The QT13 will support either IDEN-style density select or CDC-style
+density select, and I believe in MS: mode this choice is made through
+the TSV05 speed-select bit.
+
+>And what about TMSCP? How much control does it give to the OS in terms of
+>density selection?
+
+TMSCP is much more flexible, and supports at least two different schemes
+for selecting and reporting density.  Here's what I've figured out about
+possible reported-back density values in the TMSCP packets (as
+excerpted from my DUSTAT.MAC):
+
+DENTBL: TBLENT  1       ,<NRZI 800 BPI>
+        TBLENT  2       ,<PE 1600 BPI>
+        TBLENT  4       ,<GCR 6250 BPI>
+        TBLENT  10      ,<Cartridge (TK50)>
+        TBLENT  401     ,<NRZI 800 BPI>
+        TBLENT  402     ,<PE 1600 BPI>
+        TBLENT  404     ,<GCR 6250 BPI>
+        TBLENT  420     ,<TU82 special high density>;according to RSTS/E
+        TBLENT  1001    ,<Cartridge (TK50)>
+        TBLENT  1002    ,<Cartridge (TK70)>
+        ;       20xx entries are supposed to be RV80, whatever that is,
+        ;            according to RSTS/E sources.
+
+I'm pretty sure that 2.11BSD properly handles TU81 density select
+in its TMSCP driver.  (Steve, can you confirm this?  I know you've
+made some effort to get write caching to work with TU81's over the
+years!)
+
+In any event, remote density selection/reporting is largely a
+frill, as any drive/controller combination that I ever used let you
+explicitly select it with a physical button or a switch and displayed
+the current selection in some useful way on the drive.
+   
+>> Yep, a TS05 is a rebadged Cipher F880 (with some slightly-different
+>> firmware).
+>   And where does it stand density-wise? According to DEC, TS05 is a 1600
+>BPI only transport, and as far as I can remember, the Cipher at CWRU had
+>"1600 BPI" printed on the back somewhere. However, it had a switch on the
+>front panel labeled "HI DEN" or something like that. What the hell is this?
+
+Some Cipher's (I think F890's) supported a special 3200 BPI mode.  It
+was never in real wide use, but it was supported on some other
+manufacturer's drives (some Kennedy 96xx's, for example.)
+
+I know that some F880's had a button that said "HI DEN" but was for
+all normal purposes non-functional (I think it did become useful
+for selecting diagnostics.)
+
+>   CDC Keystone is exactly what I have here. The interface coming out of
+>the (incredibly huge) cabinet is Pertec formatted. Does it have a Pertec
+>unformatted interface lurking inside or not? Which densities does it
+>support?
+
+1600 BPI only, it's an "embedded-formatter" drive, so there is no
+internal Pertec unformatted interface.
+   
+>   Hmm, the only DEC tape transport with LESI I know of is TU81+. Are there
+>any others?
+
+Yep, the RC25 also used the LESI bus.  (LESI="Low End Storage Interconnect".)
+
+> And what about that plus? Has there ever been a TU81 without
+>the plus?
+
+Hmm - the non-plus may have been the version without write-caching.
+Not real sure.
+
+>Keystone I have here. Since you say above that TU80 is Keystone in
+>disguise, does it mean that TU80, TU81, and TU81+ are all the same beast
+>with different interface converters tacked on?
+
+They all look similar, and have similar mechanics, but the 81's electronics
+can do 6250 BPI, something an 80's can't.
+   
+>   And what is LESI anyway? I have heard somewhere that the KLESI
+>controller can drive more than just a TU81+, so is LESI actually more than
+>just a tape interface?
+
+It was CDC's attempt at a SCSI-like universal interface.
+   
+>   Oh, what about that leading edge strobe vs. trailing edge strobe? Your
+>vmsnet.pdp11 posting with the QT13 switch settings says that Kennedy 9300
+>uses trailing edge strobe while all others use leading edge strobe. Mine,
+>however, is set for trailing edge strobe, and it was connected to the
+>Keystone. Does this mean that the Keystone and Kennedy 9300 are the same
+>beast, or is it simply that the 9300 is not the only transport using
+>trailing edge strobe?
+
+Hmm - some combinations of drives may not be sensitive to this.  (It's
+also possibly a misprint in my QT13 manual, as I remember having to
+futz with this switch's setting in some cases to get everything to work.)
+
+No, the Keystone and the Kennedy 9300 are not the same beast.  The
+Keystone is a cute little streaming tape drive, while the 9300 is
+a humongous vacuum-column 125IPS machine.  (I'm sure someone will
+now chime in about the days when Univac UniServo drives ruled the
+earth...)
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+
