@@ -1,0 +1,119 @@
+From: mirian@cosmic.com (Mirian Crzig Lennox)
+Date: Sun, 3 Feb 2002 15:21:54 +0000 (UTC)
+Subject: [TUHS] booting 4.3-Quasijarus on SIMH VAX
+Message-ID: <slrna5qlch.41s.mirian@trantor.cosmic.com>
+
+I've managed to boot the latest 4.3-Quasijarus0a on Bob Supnik's SIMH
+VAX emulator.  SIMH emulates a MicroVAX 3000, which is one of the
+currently supported configurations in 4.3-Quasijarus.
+
+The way I did it was:
+
+First I installed NetBSD 1.5.2/vax on the VAX emulator.  I used this to
+label and newfs the root/usr diskimage for 4.3-Q (it is important to use
+the -O option to newfs so that NetBSD will create a 4.3-style
+filesystem.  (In all cases, I used RA90 disk images, which are nice and
+spacious and which both netbsd and 4.3-Q seem to work well with.)  Then
+I restored the root and usr filesystems from the 4.3-Q distribution onto
+these diskimages, and used the /usr/mdec/installboot command in NetBSD
+to install the bootblock onto the root diskimage.  I created an fstab
+for it, and also commented out everything in rc* having to do with the
+network (there's no network device support in SIMH VAX yet).  I also
+commented out all gettys listed in /etc/ttys except for console.
+
+Speaking of console, it's important to use something which is as close
+to a VT-100 as possible.  I've been using rxvt, which is pretty good.
+
+It seems to be important to disable the RL controller ("set rl disabled"
+in SIMH) when booting the GENERIC kernel.  Otherwise, you get a page
+fault and panic on boot.  (I haven't tracked the cause of this down
+yet).  The GENERIC kernel also expects there to be images on ra0, ra1
+and ra2 (which are rq0, rq1 and rq1 in SIMH, respectively).
+
+I can get the system to come up in multiuser mode, and I can log in as
+root.  Unfortunately, though, after a few seconds, the system locks up
+with 
+
+uda0: lost interrupt
+uba0: reset uda0    
+uda0: DMA burst size set to 4
+ra0: uda0, unit 0, size = 2376153 sectors
+
+Typing ^E to get to the SIMH prompt, and single-stepping the emulator
+shows it is stuck in the idle loop.  At this point, nothing short of
+shutting down SIMH has any effect.
+
+Any thoughts on what might be going wrong?  The complete log is included
+below:
+
+--Mirian
+
+KA655-B V5.3, VMB 2.7
+Performing normal system tests.
+40..39..38..37..36..35..34..33..32..31..30..29..28..27..26..25..
+24..23..22..21..20..19..18..17..16..15..14..13..12..11..10..09..
+08..07..06..05..04..03..
+Tests completed.
+>>>boot dua0:
+(BOOT/R5:0 DUA0)
+
+
+
+  2..
+-DUA0
+  1..0..
+
+loading boot
+
+Boot
+: /vmunix
+327204+103384+130352 start 0x23a8
+4.3 BSD Quasijarus UNIX #0: Sat Oct  2 22:15:38 CDT 1999
+    msokolov at luthien:/usr/src/sys/GENERIC
+real mem  = 67076096
+SYSPTSIZE limits number of buffers to 18
+avail mem = 65240064
+using 18 buffers containing 147456 bytes of memory
+MicroVAX 3000, ucode rev 6
+uda0 at uba0 csr 172150 vec 774, ipl 15
+uda0: version 3 model 3
+uda0: DMA burst size set to 4
+ra0 at uda0 slave 0: mydisk, size = 2376153 sectors
+ra1 at uda0 slave 1: no disk label: ra90, size = 2376153 sectors
+ra2 at uda0 slave 2: no disk label: ra90, size = 2376153 sectors
+ra3 at uda0 slave 3: floppy
+dz0 at uba0 csr 160100 didn't interrupt
+dz1 at uba0 csr 160110 didn't interrupt
+dz2 at uba0 csr 160120 didn't interrupt
+dz3 at uba0 csr 160130 didn't interrupt
+Changing root device to ra0a
+WARNING: todr too small -- CHECK AND RESET THE DATE!
+Automatic reboot in progress...
+Sun Aug 19 18:07:26 CDT 2001
+/dev/ra0a: 429 files, 5504 used, 26548 free (52 frags, 3312 blocks, 0.0% fragmentation)
+/dev/rra0d: 2588 files, 21064 used, 968769 free (785 frags, 120998 blocks, 0..0% fragmentation)
+Sun Aug 19 18:07:58 CDT 2001
+checking quotas: done.
+starting system logger
+preserving editor files
+clearing /tmp
+standard daemons: update cron.
+starting local daemons:.
+Sun Aug 19 18:08:01 CDT 2001
+
+
+4.3 BSD UNIX (kryluk) (console)
+
+login: root
+Last login: Sun Aug 19 17:52:53 on console
+4.3 BSD Quasijarus UNIX #0: Sat Oct  2 22:15:38 CDT 1999
+
+Welcome to UNIX!
+
+erase ^?, kill ^U, intr ^C
+# uda0: lost interrupt
+uba0: reset uda0
+uda0: DMA burst size set to 4
+ra0: uda0, unit 0, size = 2376153 sectors
+
+
