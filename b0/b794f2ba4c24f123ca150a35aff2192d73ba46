@@ -1,0 +1,703 @@
+From: tih@Hamartun.Priv.NO (Tom Ivar Helbekkmo)
+Date: 27 Feb 2001 19:27:24 +0100
+Subject: [pups] 2.11BSD boot hangs.
+In-Reply-To: "Steven M. Schultz"'s message of "Mon, 26 Feb 2001 10:22:23 -0800 (PST)"
+References: <200102261822.f1QIMNt09941@moe.2bsd.com>
+Message-ID: <864rxgdlrn.fsf@barsoom.Hamartun.Priv.NO>
+
+"Steven M. Schultz" <sms at moe.2bsd.com> writes:
+
+> > BTW: What serial parameters does 2.11BSD use? The first time I booted
+> > UNIX I got garbage after "user mem  = 307200". I seted the vt220 to 7e1
+> > and this worked, but is it correct?
+> 
+> 	Yes, 7e1 is correct - a legacy setting from eons ago.
+
+This bothered me enough, a handful years ago, to change things a bit:
+
+For getty/main.c:
+
+*** main.c.ORIG	Thu Dec 29 17:22:13 1994
+--- main.c	Thu Dec 29 17:21:28 1994
+***************
+*** 383,391 ****
+--- 383,393 ----
+  	char c;
+  
+  	c = cc;
++ #ifdef notdef /* hack to get rid of parity in getty */
+  	c |= partab[c&0177] & 0200;
+  	if (OP)
+  		c ^= 0200;
++ #endif /* parity hack */
+  	if (!UB) {
+  		outbuf[obufcnt++] = c;
+  		if (obufcnt >= OBUFSIZ)
+
+For pdp/cons.c:
+
+*** cons.c.ORIG	Sun May 11 11:21:01 1997
+--- cons.c	Sun May 11 11:26:05 1997
+***************
+*** 62,68 ****
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = EVENP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+--- 62,68 ----
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = ANYP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+
+For sys/tty.c:
+
+*** tty.c.ORIG	Sun May 11 11:21:40 1997
+--- tty.c	Sun May 11 11:27:40 1997
+***************
+*** 48,53 ****
+--- 48,54 ----
+   */
+  
+  char partab[] = {
++ #ifdef notdef /* even parity setup */
+  	0001,0201,0201,0001,0201,0001,0001,0201,
+  	0202,0004,0003,0201,0005,0206,0201,0001,
+  	0201,0001,0001,0201,0001,0201,0201,0001,
+***************
+*** 64,69 ****
+--- 65,88 ----
+  	0200,0000,0000,0200,0000,0200,0200,0000,
+  	0200,0000,0000,0200,0000,0200,0200,0000,
+  	0000,0200,0200,0000,0200,0000,0000,0201,
++ #else /* no parity setup follows */
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0002,0004,0003,0001,0005,0006,0001,0001,
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0001,
++ #endif /* end of parity selection stuff */
+  
+  	/*
+  	 * 7 bit ascii ends with the last character above,
+
+Hmm.  It's been a while.  I should fire up the old /83 and get all the
+latest patches from Steven applied, while it's still winter, and I can
+run it and the VAX without overheating my machine room.  :-)
+
+-tih
+-- 
+Popularity is the hallmark of mediocrity.  --Niles Crane, "Frasier"
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA62202
+	for pups-liszt; Wed, 28 Feb 2001 07:12:45 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id HAA62198
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 07:12:41 +1100 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+ (Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f2651fe222a98 at mwnt5.microwalt.nl> for <pups at minnie.cs.adfa.edu.au>;
+ Tue, 27 Feb 2001 21:06:42 +0000
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <FQJ8RA5N>; Tue, 27 Feb 2001 21:01:51 +0100
+Message-ID: <6F63E31101C6D41196490008C7B2BFC32CC3 at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "PUPS Mailing List (E-mail)" <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] DEC Ultrix-11 V3.1
+Date: Tue, 27 Feb 2001 21:01:50 +0100
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+
+Just a note to let you know that I am making good progress on
+getting my modified Ultrix-11 V3.1 up and running.  I'll be
+uploading disk images of various MicroPDP-11 (/23, /53, /73,
+/83) based systems for you to enjoy :)
+
+Most of all, I should be able to run TK50 install tapes again as
+of next week, given my working 11/83 with TK50.
+
+Many thanks go to Bill Gunshannon for the initial image (I could
+not get my boot tapes to work), Warren Toomey for letting me play
+lots with VTserver and integrating it into Ultrix, Kees Stravers
+for giving me the hardware I needed, and, of course, to The
+Wanderer for figuring out my hardware problemns with me :)
+
+Cheers,
+	Fred
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA62303
+	for pups-liszt; Wed, 28 Feb 2001 07:37:52 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id HAA62299
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 07:37:47 +1100 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+ (Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f2651fe392559 at mwnt5.microwalt.nl> for <pups at minnie.cs.adfa.edu.au>;
+ Tue, 27 Feb 2001 21:31:48 +0000
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <FQJ8RA5R>; Tue, 27 Feb 2001 21:26:57 +0100
+Message-ID: <6F63E31101C6D41196490008C7B2BFC32CC4 at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "'PUPS Mailing List (E-mail)'" <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] DEC Ultrix-11 V3.1  part II
+Date: Tue, 27 Feb 2001 21:26:56 +0100
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+
+> Many thanks go to ...
+
+Blah!  And of course to Wilko Bulte, who provided the dumps of the
+original V3.1 tapes, and with whom I spent quite some time debugging
+the why-doesn-this-work problems with the initial tape dump files...
+
+Fred (compiling stuff on the PDP so he can transfer stuff in and out
+of the box without having to use the slow VTserver link ;-)
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA62479
+	for pups-liszt; Wed, 28 Feb 2001 08:20:16 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sun.rhrk.uni-kl.de (sun.rhrk.uni-kl.de [131.246.137.50])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id IAA62475
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 08:20:12 +1100 (EST)
+	(envelope-from jkunz at unixag-kl.fh-kl.de)
+From: jkunz@unixag-kl.fh-kl.de
+Received: from aixs1.rhrk.uni-kl.de
+           ( exim at aixs1.rhrk.uni-kl.de [131.246.137.3] ) by sun.rhrk.uni-kl.de
+          id aa10030 for <pups at minnie.cs.adfa.edu.au>; 27 Feb 2001 22:16 MET
+Received: from forelle32.wohnheim.uni-kl.de ([131.246.141.32] helo=unixag-kl.fh-kl.de)
+	by aixs1.rhrk.uni-kl.de with esmtp (Exim 3.03 #2)
+	id 14XrTa-000EcG-00
+	for pups at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 22:16:06 +0100
+Received: from unixag-kl.fh-kl.de (localhost [127.0.0.1])
+	by unixag-kl.fh-kl.de (8.8.8/8.8.8) with ESMTP id WAA20346
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 22:15:35 +0100 (CET)
+Message-Id: <200102272115.WAA20346 at unixag-kl.fh-kl.de>
+Date: Tue, 27 Feb 2001 22:15:34 +0100 (CET)
+Subject: cabinet issues (Re: [pups] 2.11BSD boot hangs.)
+To: pups at minnie.cs.adfa.edu.au
+In-Reply-To: <200102270302.OAA31721 at psychwarp.psych.usyd.edu.au>
+MIME-Version: 1.0
+Content-Type: TEXT/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8BIT
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 27 Feb, John Holden wrote:
+
+> On BA-23 boxes, there is a small, two lever DIP switch. [...]
+Thanks for the enlightening.
+
+As we are on the topic cabinets: Can a 11/73 run in a BA21x or BA440
+cabinet? 
+
+> You can run into problems with the BHALT line, which can be asserted by a line
+> break on the console line [...]
+That is the reason why I disconnect console terminals bevore I power
+them off (if there is no break disable switch on the machine). :-)
+-- 
+
+
+
+tsch��,
+         Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz/
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA62508
+	for pups-liszt; Wed, 28 Feb 2001 08:24:13 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sun.rhrk.uni-kl.de (sun.rhrk.uni-kl.de [131.246.137.50])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id IAA62504
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 08:24:09 +1100 (EST)
+	(envelope-from jkunz at unixag-kl.fh-kl.de)
+From: jkunz@unixag-kl.fh-kl.de
+Received: from aixs1.rhrk.uni-kl.de
+           ( exim at aixs1.rhrk.uni-kl.de [131.246.137.3] ) by sun.rhrk.uni-kl.de
+          id aa10566 for <pups at minnie.cs.adfa.edu.au>; 27 Feb 2001 22:20 MET
+Received: from forelle32.wohnheim.uni-kl.de ([131.246.141.32] helo=unixag-kl.fh-kl.de)
+	by aixs1.rhrk.uni-kl.de with esmtp (Exim 3.03 #2)
+	id 14XrXX-000Ae4-00
+	for pups at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 22:20:11 +0100
+Received: from unixag-kl.fh-kl.de (localhost [127.0.0.1])
+	by unixag-kl.fh-kl.de (8.8.8/8.8.8) with ESMTP id WAA20351
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 22:19:40 +0100 (CET)
+Message-Id: <200102272119.WAA20351 at unixag-kl.fh-kl.de>
+Date: Tue, 27 Feb 2001 22:19:39 +0100 (CET)
+Subject: Re: [pups] 2.11BSD boot hangs.
+To: pups at minnie.cs.adfa.edu.au
+In-Reply-To: <200102262226.f1QMQOv11403 at moe.2bsd.com>
+MIME-Version: 1.0
+Content-Type: TEXT/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8BIT
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 26 Feb, Steven M. Schultz wrote:
+
+> 	I suspect that one of the switches enables the line frequency clock.
+> 	With out a clock running things will work (at least minimally) as
+> 	long as there are some interrupts happening.   
+Hmm? Why will it run with_out_ a clock?
+
+>> OK. The machine is currently un-tar-ing /usr... :-)))
+> 
+> 	Fantastic!
+The next adventure is un-tar-ing the source and build my own kernel...
+-- 
+
+
+
+tsch��,
+         Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz/
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA71575
+	for pups-liszt; Wed, 28 Feb 2001 14:28:19 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA71571
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 14:28:17 +1100 (EST)
+	(envelope-from johnh at psychwarp.psych.usyd.edu.au)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id OAA16488
+	for pups at minnie.cs.adfa.edu.au; Wed, 28 Feb 2001 14:24:22 +1100 (EST)
+Date: Wed, 28 Feb 2001 14:24:22 +1100 (EST)
+From: John Holden <johnh@psych.usyd.edu.au>
+Message-Id: <200102280324.OAA16488 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Swap device in V6?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> The good news is, this fixed my ps problem - ps now works.  The bad news
+> is that cc still fails with the following error:
+> 
+> fFatal error in /lib/c0
+> 
+> The lowercase f appears, followed shortly by the rest of the line.  I've
+> tried the -c option to suppress linking, and still get this error.  I
+> don't get this error on the Supnik emulator.  
+
+'/lib/c0' is the first pass of the C compiler, after the preprocessor
+has be run (the order is cc, c0, c1, c2 for the optimiser, and then 'as'
+to produce the object file). I dimly recall that the various passes forked
+by 'cc' didn't bother to catch signals, so any error just gives the
+"Fatal error in ..." message. The '-c' would have no effect this early.
+
+You could try the '-f' option, that uses a different compiler (with FP
+emulation).
+
+Assuming that you don't have a corrupted binary, or faulty processor/memory,
+then is one obscure possibility. While a user program will not see any
+difference between a 11/34 and 11/40 (except for floating point instructions),
+the behaviour after a memory management fault IS different. The non ID space
+processors (11/23/34/35/40/60) don't have a register to record the changes
+in the general cpu registers after a fault, and it has to be calculated in
+software. The 34 and 40 leave the registers in different states after a fault.
+
+The classic example is "cmp -(sp), -(sp)" to extend the stack. This may generate
+a fault because the stack needs to grow dynamically. The kernel extends the
+stack (where automatic variables are allocated), and then attempts to 
+reexecute the instruction. In the case of a 34 using a standard m40.s,
+it sometimes gets it wrong, and is very program and data dependent.
+
+Does this ring any bells with people having ported unix to 11/34's?
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA71920
+	for pups-liszt; Wed, 28 Feb 2001 14:58:47 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA71916
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 14:58:45 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1S3soX00509;
+	Wed, 28 Feb 2001 14:54:50 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102280354.f1S3soX00509 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] Swap device in V6?
+In-Reply-To: <200102280324.OAA16488 at psychwarp.psych.usyd.edu.au> from John Holden
+ at "Feb 28, 2001 02:24:22 pm"
+To: John Holden <johnh at psych.usyd.edu.au>
+Date: Wed, 28 Feb 2001 14:54:49 +1100 (EST)
+CC: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by John Holden:
+> > The good news is, this fixed my ps problem - ps now works.  The bad news
+> > is that cc still fails with the following error:
+> > fFatal error in /lib/c0
+> 
+> Assuming that you don't have a corrupted binary, or faulty processor/memory,
+> then is one obscure possibility. While a user program will not see any
+> difference between a 11/34 and 11/40 (except for floating point instructions),
+> the behaviour after a memory management fault IS different. The non ID space
+> processors (11/23/34/35/40/60) don't have a register to record the changes
+> in the general cpu registers after a fault, and it has to be calculated in
+> software. The 34 and 40 leave the registers in different states after a fault.
+> 
+>The classic example is "cmp -(sp), -(sp)" to extend the stack.This may generate
+> a fault because the stack needs to grow dynamically. The kernel extends the
+> stack (where automatic variables are allocated), and then attempts to 
+> reexecute the instruction. In the case of a 34 using a standard m40.s,
+> it sometimes gets it wrong, and is very program and data dependent.
+> 
+> Does this ring any bells with people having ported unix to 11/34's?
+
+That comment made me go through and scan my old AUUGNs for some articles
+written by Dave Horsfall [who is on this mailing list]. I found his
+article on porting V6 to the 11/23, but not for a port to the 11/34.
+
+However, at least two tar files in the UNIX Archive have an m34.s in them:
+
+Applications/Shoppa_Tapes/usenix_80_delaware.gz:
+	delaware/maryland/os40/m34.s
+
+Applications/Shoppa_Tapes/usenix_80_delaware.gz:m34.s:
+	toronto/case/sys/conf/m34.s
+
+The first appears to be modifications to V6, I haven't checked the latter
+yet. It may be something worth pursuing.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA71947
+	for pups-liszt; Wed, 28 Feb 2001 15:01:08 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from fgh.geac.com.au ([203.32.189.101])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA71943
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 15:01:05 +1100 (EST)
+	(envelope-from dave at horsfall.org)
+Received: from localhost (dave at localhost)
+	by fgh.geac.com.au (8.11.2/8.11.2) with ESMTP id f1S3rNj29913;
+	Wed, 28 Feb 2001 14:53:23 +1100 (EST)
+Date: Wed, 28 Feb 2001 14:53:22 +1100 (EST)
+From: Dave Horsfall <dave@horsfall.org>
+X-X-Sender:  <dave at fgh.au.geac.com>
+To: John Holden <johnh at psych.usyd.edu.au>
+cc: <pups at minnie.cs.adfa.edu.au>
+Subject: RE: [pups] Swap device in V6?
+In-Reply-To: <200102280324.OAA16488 at psychwarp.psych.usyd.edu.au>
+Message-ID: <Pine.GSO.4.32.0102281452230.2716-100000 at fgh.au.geac.com>
+X-No-Archive: Yes
+X-Disclaimer: "Me, speak for us?"
+X-Witty-Saying: "Mobius Strip - See other side for instructions"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wed, 28 Feb 2001, John Holden wrote:
+
+> The classic example is "cmp -(sp), -(sp)" to extend the stack. This may generate
+[...]
+> Does this ring any bells with people having ported unix to 11/34's?
+
+I have actual code on how we handled this in those days; who wants it?
+
+-- 
+Dave Horsfall CL VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493  Fx: * 9978-7490
+Geac Computers P/L (ERP Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA71965
+	for pups-liszt; Wed, 28 Feb 2001 15:04:34 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA71961
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 15:04:32 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1S40Uk00578;
+	Wed, 28 Feb 2001 15:00:30 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102280400.f1S40Uk00578 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] Swap device in V6?
+In-Reply-To: <Pine.GSO.4.32.0102281452230.2716-100000 at fgh.au.geac.com> from Dave
+ Horsfall at "Feb 28, 2001 02:53:22 pm"
+To: Dave Horsfall <dave at horsfall.org>
+Date: Wed, 28 Feb 2001 15:00:30 +1100 (EST)
+CC: John Holden <johnh at psych.usyd.edu.au>, pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Dave Horsfall:
+> On Wed, 28 Feb 2001, John Holden wrote:
+> > The classic example is "cmp -(sp), -(sp)" to extend the stack. This may generate
+> [...]
+> > Does this ring any bells with people having ported unix to 11/34's?
+> I have actual code on how we handled this in those days; who wants it?
+
+Mail it to me and I'll drop it in the archive somewhere.
+Thanks Dave!
+	Warren
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA72108
+	for pups-liszt; Wed, 28 Feb 2001 15:19:34 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA72104
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 15:19:32 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1S4FYA00697;
+	Wed, 28 Feb 2001 15:15:34 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102280415.f1S4FYA00697 at henry.cs.adfa.edu.au>
+Subject: [pups] V6 or V6 patches for 11/34
+In-Reply-To: <Pine.GSO.4.32.0102281500120.2716-400000 at fgh.au.geac.com> from Dave
+ Horsfall at "Feb 28, 2001 03:02:28 pm"
+To: Dave Horsfall <dave at horsfall.org>
+Date: Wed, 28 Feb 2001 15:15:34 +1100 (EST)
+CC: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Dave Horsfall:
+> On Wed, 28 Feb 2001, Warren Toomey wrote:
+> > Mail it to me and I'll drop it in the archive somewhere.
+> As attached...  I see it actually came from ChemEng.  It's for the 11/60,
+> but has the 11/34 stuff in there as well.
+> 
+> PS: I'm sure I did a port to the 11/34 :-)
+
+I have moved the 11/34 patches into the UNIX Archive at
+
+	PDP-11/Bug_Fixes/V7_on11-34
+
+They look like V7 patches though, so they may not be readily
+usable on a V6 system. Those other files I mentioned may be
+better. Your mileage may vary :-)
+
+Dave, did you write an AUUGN paper for an 11/34 port, and what year
+so I can go back and have another look.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA72119
+	for pups-liszt; Wed, 28 Feb 2001 15:19:44 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA72114
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 15:19:42 +1100 (EST)
+	(envelope-from johnh at psychwarp.psych.usyd.edu.au)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id PAA17381
+	for pups at minnie.cs.adfa.edu.au; Wed, 28 Feb 2001 15:15:46 +1100 (EST)
+Date: Wed, 28 Feb 2001 15:15:46 +1100 (EST)
+From: John Holden <johnh@psych.usyd.edu.au>
+Message-Id: <200102280415.PAA17381 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+>John Holden wrote:
+>> You can run into problems with the BHALT line, which can be asserted by a line
+>> break on the console line (if enabled), or on some DHV serial card emulations.
+>> Turning off a terminal may be enough to halt the process if it generates a
+>> serial break as the power goes down.
+>
+>On my /53+ running 2.11, it's enough to kick in ODT.. Very anoying, really.
+>Is there any way to disable this functionality, save rewiring the backplane?
+
+You can usually disable the HALT on break feature. When the console is on
+a separate serial card :-
+
+DEC	DLV11-E or F	Remove jumper on wire-wrap pin H
+
+DEC	DLV11-J		wire-wrap pins X-B enables boot on break
+			wire-wrap pins X-H enable halt (ODT) on break
+			nothing on X disables both
+
+Webster	WQDHV		switch 4 at J9 OFF to ignore break.
+
+For processor cards with serial ports, I only have a manual for 11/23+. DEC
+is pretty consistent, so there should be options on 11/53 and latter 11/73's.
+
+11/23+	KDF11-B?	Remove jumper from J5-J4 and connect J3-J4
+			The jumpers aren't marked on the PCB, so looking
+			at the board with the Qbus fingers at the bottom,
+			handles at the top, there is a vertical row of
+			three jumpers on the right hand side of the board.
+			towards the bottom. Top to bottom is J5, J4 and J3.
+		
+If anybody has manuals for 11/53+ and the quad slot 11/73's and can send me
+the details, I'll collate the information, and add it to my web page at :-
+
+	http://www.psych.usyd.edu.au/pdp-11/
+
+The 11/53+ I have does have lots of jumpers, but no numbers or letters beside
+them.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA72755
+	for pups-liszt; Wed, 28 Feb 2001 17:07:01 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from fgh.geac.com.au ([203.32.189.101])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA72751
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 17:06:58 +1100 (EST)
+	(envelope-from dave at horsfall.org)
+Received: from localhost (dave at localhost)
+	by fgh.geac.com.au (8.11.2/8.11.2) with ESMTP id f1S5xfW00886;
+	Wed, 28 Feb 2001 16:59:41 +1100 (EST)
+Date: Wed, 28 Feb 2001 16:59:41 +1100 (EST)
+From: Dave Horsfall <dave@horsfall.org>
+X-X-Sender:  <dave at fgh.au.geac.com>
+To: <wkt at cs.adfa.edu.au>
+cc: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] Re: V6 or V6 patches for 11/34
+In-Reply-To: <200102280415.f1S4FYA00697 at henry.cs.adfa.edu.au>
+Message-ID: <Pine.GSO.4.32.0102281656310.2716-100000 at fgh.au.geac.com>
+X-No-Archive: Yes
+X-Disclaimer: "Me, speak for us?"
+X-Witty-Saying: "Mobius Strip - See other side for instructions"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wed, 28 Feb 2001, Warren Toomey wrote:
+
+> Dave, did you write an AUUGN paper for an 11/34 port, and what year
+> so I can go back and have another look.
+
+Vol 1 No 6.  "Implementing UNIX on a PDP-11/34" (sub-titled: "What does
+the `F' in "RK05-F" really stand for ?").
+
+I still have the nroff source available...  It's about 1983-ish.
+
+-- 
+Dave Horsfall CL VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493  Fx: * 9978-7490
+Geac Computers P/L (ERP Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA74876
+	for pups-liszt; Thu, 1 Mar 2001 00:20:54 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from igas2.postoffice.co.uk (firewall-user at igas2-2.igas.postoffice.co.uk [194.152.87.163])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id AAA74872
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Mar 2001 00:20:50 +1100 (EST)
+	(envelope-from robin.birch at postoffice.co.uk)
+From: robin.birch@postoffice.co.uk
+Received: by igas2.postoffice.co.uk; id NAA14850; Wed, 28 Feb 2001 13:16:48 GMT
+Received: from unknown(10.5.4.1) by igas2.postoffice.co.uk via smap (V5.0)
+	id xma014669; Wed, 28 Feb 01 13:16:39 GMT
+Received: with SMTP id NAA28800 for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 13:16:39 GMT
+Received: by postoffice.co.uk(Lotus SMTP MTA v4.6.6  (890.1 7-16-1999))  id 00256A01.0048DFD4 ; Wed, 28 Feb 2001 13:15:58 +0000
+X-Lotus-FromDomain: POSTOFFICE
+To: pups at minnie.cs.adfa.edu.au
+Message-ID: <00256A01.0048DD1E.00 at postoffice.co.uk>
+Date: Wed, 28 Feb 2001 13:05:27 +0000
+Subject: [pups] TS05
+Mime-Version: 1.0
+Content-type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+
+Dear All,
+I now have one of these but the tape hub locking mechanism is acting up.  Has
+anyone got a set of the maintenance docs for a TS05 that they can scan for me?
+
+Regards
+
+Robin
+
+
+
+
