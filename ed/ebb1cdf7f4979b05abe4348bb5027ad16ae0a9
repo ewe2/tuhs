@@ -1,0 +1,699 @@
+From: wkt@henry.cs.adfa.edu.au (Warren Toomey)
+Date: Tue, 30 Jan 2001 08:37:01 +1100 (EST)
+Subject: [pups] Help! Standalone DZ-11 driver
+In-Reply-To: <RQsFELAVoXd6EwKY@ruffnready.co.uk> from Robin Birch at "Jan 29,
+ 2001 02:11:33 pm"
+Message-ID: <200101292137.f0TLb2d29560@henry.cs.adfa.edu.au>
+
+In article by Robin Birch:
+> Warren,
+> Why not do this as a terminal emulator that can switch into emulating a
+> tape drive by some start/stop messaging using the console device.  You
+> could upload a simple bootstrap using ODT that could then read a more
+> complex boot driver in.  If you use the console then that shoud be
+> universal across all PDP11s.
+> 
+> Robin
+
+I had thought of that. I'm not sure I want to write a terminal emulator :)
+I guess I should ask those people with tapeless PDP-11s.
+
+If you had a method of booting and installing disk images over a serial
+line, would you be happy with a serial line to a `tape server' separate
+to your console line, or would you rather have the two combined?
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA18242
+	for pups-liszt; Tue, 30 Jan 2001 09:14:39 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from nose.cs.utoronto.ca (nose.cs.utoronto.ca [128.100.27.218])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id JAA18238
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 09:14:35 +1100 (EST)
+	(envelope-from norman at nose.cs.utoronto.ca)
+Message-Id: <200101292214.JAA18238 at minnie.cs.adfa.edu.au>
+Subject: Re: [pups] Help! Standalone DZ-11 driver
+From: norman@nose.cs.utoronto.ca (Norman Wilson)
+To: pups at minnie.cs.adfa.edu.au
+Date: Mon, 29 Jan 2001 17:12:40 -0500
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I don't have a PDP-11, but I have done work in various ways with
+remote-device installs.  If it were me I would prefer to be able
+to use a device distinct from the console, for several reasons:
+- a separate device might have an input silo (e.g. the DZ11 does);
+the console usually doesn't.  A silo offers a little more robustness
+and may allow greater speeds.
+- it is better to keep the console available as a place for error
+messages to show up when things go wrong.
+- things are going to go wrong in any case, and I am going to have
+to try booting several times.  If I have to get a serial-line switch
+or move cables back and forth, that is another thing that can go
+wrong, and another thing I can screw up.
+
+On the other hand, if I had the problem I would likely be happy to
+get any code that would help, whichever way it worked.  So I also
+favour letting the implementor choose.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA18661
+	for pups-liszt; Tue, 30 Jan 2001 11:07:27 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA18657
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 11:07:23 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Mon, 29 Jan 2001 15:18:44 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <D8RCCVFR>; Mon, 29 Jan 2001 15:19:55 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB07 at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'norman at nose.cs.utoronto.ca'" <norman at nose.cs.utoronto.ca>,
+        pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Help! Standalone DZ-11 driver
+Date: Mon, 29 Jan 2001 15:19:45 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+That's why I've inquired of Warren about using the DZ-11 as the
+pseudo-device.  I also have a console input (DL-11, from memory).  The input
+silo is potentially a benefit, but it's not a panacea by any means -- it has
+to be handled pretty carefully.  -- isk 
+
+-----Original Message-----
+From: norman@nose.cs.utoronto.ca [mailto:norman@nose.cs.utoronto.ca]
+Sent: Monday, January 29, 2001 2:13 PM
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Help! Standalone DZ-11 driver
+
+
+I don't have a PDP-11, but I have done work in various ways with
+remote-device installs.  If it were me I would prefer to be able
+to use a device distinct from the console, for several reasons:
+- a separate device might have an input silo (e.g. the DZ11 does);
+the console usually doesn't.  A silo offers a little more robustness
+and may allow greater speeds.
+- it is better to keep the console available as a place for error
+messages to show up when things go wrong.
+- things are going to go wrong in any case, and I am going to have
+to try booting several times.  If I have to get a serial-line switch
+or move cables back and forth, that is another thing that can go
+wrong, and another thing I can screw up.
+
+On the other hand, if I had the problem I would likely be happy to
+get any code that would help, whichever way it worked.  So I also
+favour letting the implementor choose.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA19302
+	for pups-liszt; Tue, 30 Jan 2001 12:59:02 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from wantadilla.lemis.com (postfix at wantadilla.lemis.com [192.109.197.80])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA19298
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 30 Jan 2001 12:58:46 +1100 (EST)
+	(envelope-from grog at lemis.com)
+Received: by wantadilla.lemis.com (Postfix, from userid 1004)
+	id 1488F6AC9D; Tue, 30 Jan 2001 12:26:50 +1030 (CST)
+Date: Tue, 30 Jan 2001 12:26:50 +1030
+From: Greg Lehey <grog@lemis.com>
+To: nanduri shankar <n_shankar_2001 at yahoo.com>
+Cc: freebsd-doc at freebsd.org, UNIX Heritage Society <pups at minnie.cs.adfa.oz.au>
+Subject: [pups] Re: regarding bsd 4.3 for vax machines  documentation
+Message-ID: <20010130122650.D48490 at wantadilla.lemis.com>
+References: <20010129184128.50518.qmail at web9007.mail.yahoo.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.2.5i
+In-Reply-To: <20010129184128.50518.qmail at web9007.mail.yahoo.com>; from n_shankar_2001 at yahoo.com on Mon, Jan 29, 2001 at 10:41:28AM -0800
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Monday, 29 January 2001 at 10:41:28 -0800, nanduri shankar wrote:
+> hello sir/madam,
+>                   i want to know the information about
+> the bsd 4.3 for vax machines .
+> let u provide me documentation regarding this topic.
+> iam waiting for your earliest reply.
+
+The FreeBSD documentation project doesn't deal with 4.3BSD, nor with
+Vaxen.   Check the UNIX Heritage Society at
+http://minnie.cs.adfa.edu.au/TUHS for details of 4.3BSD and how you
+can get it for the Vax.
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA19420
+	for pups-liszt; Tue, 30 Jan 2001 13:24:19 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.harhan.org [209.25.32.251])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id NAA19416
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 30 Jan 2001 13:24:16 +1100 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA03337; Mon, 29 Jan 01 18:19:40 PST
+Date: Mon, 29 Jan 01 18:19:40 PST
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0101300219.AA03337 at ivan.Harhan.ORG>
+To: grog at lemis.com, n_shankar_2001 at yahoo.com
+Subject: Re: [pups] Re: regarding bsd 4.3 for vax machines  documentation
+Cc: pups at minnie.cs.adfa.oz.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Greg Lehey <grog at lemis.com> wrote:
+
+> Check the UNIX Heritage Society at
+> http://minnie.cs.adfa.edu.au/TUHS for details of 4.3BSD and how you
+> can get it for the Vax.
+
+For VAX 4.3BSD UNIX specifically, check out:
+
+http://minnie.cs.adfa.edu.au/Quasijarus/
+
+-- 
+Michael Sokolov
+Public Service Agent
+International Engineering and Science Task Force
+
+1351 VINE AVE APT 27		Phone: +1-714-738-5409
+FULLERTON CA 92833-4291 USA	(home office)
+
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA19895
+	for pups-liszt; Tue, 30 Jan 2001 15:26:38 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA19891
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 15:26:36 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.1/8.9.3) id f0U4PIO32651
+	for pups at minnie.cs.adfa.edu.au; Tue, 30 Jan 2001 15:25:18 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200101300425.f0U4PIO32651 at henry.cs.adfa.edu.au>
+Subject: [pups] Re: new VTserver (was DZ-11 driver)
+In-Reply-To: <200101290215.NAA06982 at psychwarp.psych.usyd.edu.au> from John Holden
+ at "Jan 29, 2001 01:15:11 pm"
+Date: Tue, 30 Jan 2001 15:25:17 +1100 (EST)
+CC: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Robin Birch:
+> Warren,
+> Why not do this as a terminal emulator that can switch into emulating a
+> tape drive by some start/stop messaging using the console device.  You
+> could upload a simple bootstrap using ODT that could then read a more
+> complex boot driver in.  If you use the console then that shoud be
+> universal across all PDP11s.
+> 
+> Robin
+
+Done! See http://minnie.cs.adfa.edu.au/Vtserver and 
+http://minnie.cs.adfa.edu.au/Vtserver/vtserver/vtreadme.html
+for details.
+
+At the present I have Ersatz-2.0 running as a PDP-11/34A, one RK05 and
+just the console. I have my tape server connected to the serial console
+line, and I'm bringing in an RK05 disk image:
+
+Virtual tape server, $Revision: 2.0 $ 
+Running command stty -f /dev/ttyid1 9600 cs8 clocal -crtscts
+
+Tape records are:
+   0 tinyboot
+   1 copy
+   2 root.img
+
+Opening port /dev/ttyd1 .... Port open
+
+E11>show cpu
+Emulation:  PDP-11/34a, FP11A
+  NOASR, NOCCR, NOCDR, NOCHR, NOCMDR, NOCPUERR, NOCSM, NODSPACE, NODUALREGSET,
+  NODESTFIRST, EIS, NOFPBACKOUT, FPP, NOHALT4, NOJMPPLUS2, JMP4, NOKTJ11B,
+  NOMBR, NOMFPT, NOMMTRAPS, MMU, NOMMU22, NOMR, NOMSEA, NOMSER, MXPS, ODD,
+  NOPARCSR, NOPCR, NOPIRQ, PSWIO, NOQBUS, NOSIZE, NOSPL, SR, NOSR1, NOSTACKLIM,
+  NOSUPMODE, NOSYSID, NOTSTSET, UNDOAUTO, NOUMAP
+Host:  Cyrix 486, NPX
+E11>g 70000
+
+Opened tinyboot
+ rrrrrrrrrrrrrr EOF
+
+40tinyboot from virtual tape server
+Load tape record: 1
+
+Opened copy
+ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrcopy
+Infile: vt(0,0,2)
+Outfile: rk(0,0,0)
+
+Opened root.img
+ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+100K sent
+rrrrrrrrrrrrrrr
+
+So no need for DZ-11, but many thanks to Norman, John and others who
+wrote code for me. I'll probably still try to add DZ-11 support.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA19994
+	for pups-liszt; Tue, 30 Jan 2001 15:44:56 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA19990
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 15:44:55 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.1/8.9.3) id f0U4hYh32768
+	for pups at minnie.cs.adfa.edu.au; Tue, 30 Jan 2001 15:43:34 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200101300443.f0U4hYh32768 at henry.cs.adfa.edu.au>
+Subject: [pups] A bootable disk image for a PDP-11/34?
+To: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Date: Tue, 30 Jan 2001 15:43:34 +1100 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Now that I (think I) have got a working system of loading a bootable
+disk image over a serial line into a PDP-11/34, can someone create
+a suitable disk image? I'm away until Feb 14th and won't be able to do it.
+
+The requestor is Ian King <iking at microsoft.com>, who says:
+
+  I've recently acquired a working PDP-11/34, with RK05s.  (I also have some
+  Plessey DD 11/80s for it.) My 11/34 is mapped, with 124k
+  available; I also have another memory card with 128k on it, and if I can
+  ever find any documentation on the Plessey memory cards and the memory
+  management switch settings, I may have 252k one of these days.  :-)
+  I have only one DL/KL-11, but also a DZ11.
+
+He'd like a 6th Edition bootable RK05 disk image that he can download
+onto his real disk.
+
+Many thanks all!
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id WAA21488
+	for pups-liszt; Tue, 30 Jan 2001 22:27:54 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chalfont.mail.uk.easynet.net (chalfont.mail.uk.easynet.net [195.40.1.44])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id WAA21484
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 22:27:51 +1100 (EST)
+	(envelope-from rdonkin at bigfoot.com)
+Received: from bigfoot.com (dsl-212-135-223-35.dsl.easynet.co.uk [212.135.223.35])
+	by chalfont.mail.uk.easynet.net (Postfix) with ESMTP id 9D518F81EE
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 07:54:33 +0000 (GMT)
+Message-ID: <3A767367.3B2FDC99 at bigfoot.com>
+Date: Tue, 30 Jan 2001 07:55:19 +0000
+From: Richard Donkin <rdonkin@bigfoot.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.2.14-15mdk i586)
+X-Accept-Language: en, fr
+MIME-Version: 1.0
+To: PUPS List <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] 2.11 BSD compilation fails
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi,
+
+I have got 2.11 BSD (from the rp_unknown disk) up and working on the
+Supnik 2.3+BB1 simulator, configured as follows:
+
+set cpu 22b
+set cpu 2048K
+at rp0 mydisks/2.11BSD/2.11_rp_unknown
+boot rp
+
+While tinkering with the date2.c program posted earlier by Alex
+Chupakhin, which now runs on 2.11 BSD btw, I discovered the following:
+
+- 'cc -o date2 date2.c' works fine, producing a 12K binary
+
+- a makefile containing this command fails - the compilation starts but
+fails silently, producing a 2K binary that is not marked executable. 
+The makefile is:
+
+   date2: date2.c
+           cc -o date2 -c date2.c 
+
+- 'make -n | sh' fails in the same way
+
+Is this a known problem that will be fixed by patches (none applied yet
+as the simulator is not networked)?  Or do I need to provide more
+memory?
+
+Some other info:
+
+# uname -a
+2.11BSD whistler-2bsd 2.11BSD 2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET
+1998
+     root at pdp11.begemot.com:/usr/src/sys/HIPPON  PDP11
+
+By the way, if anyone else has 2.11 BSD in unpatched state and wants to
+set the date to 2001, email me for a copy of the 
+updated date2.c program.
+
+Apart from this problem, 2.11BSD is working very nicely - I'm impressed
+that such a feature-rich Unix can even be run on a PDP-11!
+
+Cheers,
+
+Richard
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA22856
+	for pups-liszt; Wed, 31 Jan 2001 02:29:08 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from finch-post-10.mail.demon.net (finch-post-10.mail.demon.net [194.217.242.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA22852
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 02:29:02 +1100 (EST)
+	(envelope-from robin at ruffnready.co.uk)
+Received: from falstaf.demon.co.uk ([158.152.152.109])
+	by finch-post-10.mail.demon.net with esmtp (Exim 2.12 #1)
+	id 14Ncgp-0009DZ-0A; Tue, 30 Jan 2001 15:27:28 +0000
+Message-ID: <NatiWLAS0td6Ewpf at ruffnready.co.uk>
+Date: Tue, 30 Jan 2001 15:26:10 +0000
+To: wkt at cs.adfa.edu.au
+Cc: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+From: Robin Birch <robin@ruffnready.co.uk>
+Subject: Re: [pups] Help! Standalone DZ-11 driver
+References: <RQsFELAVoXd6EwKY at ruffnready.co.uk>
+ <200101292137.f0TLb2d29560 at henry.cs.adfa.edu.au>
+In-Reply-To: <200101292137.f0TLb2d29560 at henry.cs.adfa.edu.au>
+MIME-Version: 1.0
+X-Mailer: Turnpike Integrated Version 5.00 U <YSkKJATYm0AxAbv6xwlBrCeVCW>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In message <200101292137.f0TLb2d29560 at henry.cs.adfa.edu.au>, Warren
+Toomey <wkt at henry.cs.adfa.edu.au> writes
+>In article by Robin Birch:
+>> Warren,
+>> Why not do this as a terminal emulator that can switch into emulating a
+>> tape drive by some start/stop messaging using the console device.  You
+>> could upload a simple bootstrap using ODT that could then read a more
+>> complex boot driver in.  If you use the console then that shoud be
+>> universal across all PDP11s.
+>> 
+>> Robin
+>
+>I had thought of that. I'm not sure I want to write a terminal emulator :)
+>I guess I should ask those people with tapeless PDP-11s.
+>
+>If you had a method of booting and installing disk images over a serial
+>line, would you be happy with a serial line to a `tape server' separate
+>to your console line, or would you rather have the two combined?
+>
+>       Warren
+Well, the terminal emulator doesn't have to be very sophisticated as
+once the thing was running properly then you would use what ever the PC
+system had installed.
+
+The "two separate" would probably be easier to create but it occurs to
+me that many PCs only have one serial line and the only serial line that
+is common to all 11s is the console therefore only needing a single
+driver.
+
+Robin
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA23022
+	for pups-liszt; Wed, 31 Jan 2001 02:57:09 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id CAA23018
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 02:57:03 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Mon, 29 Jan 2001 23:18:30 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <D8RC1PP1>; Mon, 29 Jan 2001 23:19:41 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB0D at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'wkt at cs.adfa.edu.au'" <wkt at cs.adfa.edu.au>,
+        PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Date: Mon, 29 Jan 2001 23:19:44 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In fact, if someone has RK05s and isn't too far away, I'd love to get a
+bootable image on an RK05 cartridge -- of course I'd pay postage both ways.
+(I even have some original shipping boxes.)  
+
+BTW, the mail Warren cites below was sent before I had really dug into my
+11/34's manuals; I have 124kW of MOS memory in the machine, and RSX-11M can
+use it all in a "mapped" configuration.  Also, if I am going to transfer a
+disk image, I have another DL-11 I am going to install to make use of
+Warren's VTServer program.  
+
+TIA -- Ian 
+
+-----Original Message-----
+From: Warren Toomey [mailto:wkt@henry.cs.adfa.edu.au]
+Sent: Monday, January 29, 2001 8:44 PM
+To: PDP-11 Unix Preservation Society
+Subject: [pups] A bootable disk image for a PDP-11/34?
+
+
+Now that I (think I) have got a working system of loading a bootable
+disk image over a serial line into a PDP-11/34, can someone create
+a suitable disk image? I'm away until Feb 14th and won't be able to do it.
+
+The requestor is Ian King <iking at microsoft.com>, who says:
+
+  I've recently acquired a working PDP-11/34, with RK05s.  (I also have some
+  Plessey DD 11/80s for it.) My 11/34 is mapped, with 124k
+  available; I also have another memory card with 128k on it, and if I can
+  ever find any documentation on the Plessey memory cards and the memory
+  management switch settings, I may have 252k one of these days.  :-)
+  I have only one DL/KL-11, but also a DZ11.
+
+He'd like a 6th Edition bootable RK05 disk image that he can download
+onto his real disk.
+
+Many thanks all!
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA23100
+	for pups-liszt; Wed, 31 Jan 2001 03:05:55 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from scapa.cs.ualberta.ca (root at scapa.cs.ualberta.ca [129.128.4.44])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA23096
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 03:05:51 +1100 (EST)
+	(envelope-from mark at cs.ualberta.ca)
+Received: (from localhost user: 'mark' uid#150 fake: goodfare.cs.ualberta.ca)
+	by scapa.cs.ualberta.ca id <S433530AbRA3QEQ>;
+	Tue, 30 Jan 2001 09:04:16 -0700
+Subject: Re: [pups] 2.11 BSD compilation fails
+In-Reply-To: <3A767367.3B2FDC99 at bigfoot.com> from Richard Donkin at "Jan 30,
+ 2001 07:55:19 am"
+From: Mark Green <mark@cs.ualberta.ca>
+To: Richard Donkin <rdonkin at bigfoot.com>
+Date:   Tue, 30 Jan 2001 09:04:16 -0700 (MST)
+CC: PUPS List <pups at minnie.cs.adfa.edu.au>
+X-Mailer: ELM [version 2.4ME+ PL66 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Message-Id: <20010130160418Z433530-3339+182 at scapa.cs.ualberta.ca>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> 
+> While tinkering with the date2.c program posted earlier by Alex
+> Chupakhin, which now runs on 2.11 BSD btw, I discovered the following:
+> 
+> - 'cc -o date2 date2.c' works fine, producing a 12K binary
+> 
+> - a makefile containing this command fails - the compilation starts but
+> fails silently, producing a 2K binary that is not marked executable. 
+> The makefile is:
+> 
+>    date2: date2.c
+>            cc -o date2 -c date2.c 
+Remove the -c flag, it tells the compiler to only compile the program
+and not produce an executable.
+
+> 
+> - 'make -n | sh' fails in the same way
+> 
+
+
+-- 
+Dr. Mark Green                                 mark at cs.ualberta.ca
+McCalla Professor                              (780) 492-4584
+Department of Computing Science                (780) 492-1071 (FAX)
+University of Alberta, Edmonton, Alberta, T6G 2H1, Canada
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA23775
+	for pups-liszt; Wed, 31 Jan 2001 05:22:29 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chiton.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA23771
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 05:22:25 +1100 (EST)
+	(envelope-from cdl at mpl.ucsd.edu)
+Received: (from cdl at localhost)
+	by chiton.ucsd.edu (8.9.3/8.9.3) id KAA24283
+	for pups at minnie.cs.adfa.edu.au; Tue, 30 Jan 2001 10:20:58 -0800 (PST)
+Date: Tue, 30 Jan 2001 10:20:58 -0800 (PST)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <200101301820.KAA24283 at chiton.ucsd.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Just from the historical point of view, note that the first major
+file on a genuine 6th Edition distribution tape _is_ a bootable
+RK05 image.  Something like 4000 blocks.
+
+    carl
+
+        carl lowenstein         marine physical lab     u.c. san diego
+        {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+                                                  clowenstein at ucsd.edu
+
+> From owner-pups at minnie.cs.adfa.edu.au Tue Jan 30 08:17 PST 2001
+> From: Ian King <iking at microsoft.com>
+> To: "'wkt at cs.adfa.edu.au'" <wkt at cs.adfa.edu.au>,
+>         PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+> Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+> Date: Mon, 29 Jan 2001 23:19:44 -0800
+> 
+> In fact, if someone has RK05s and isn't too far away, I'd love to get a
+> bootable image on an RK05 cartridge -- of course I'd pay postage both ways.
+> (I even have some original shipping boxes.)  
+> 
+> -----Original Message-----
+> From: Warren Toomey [mailto:wkt at henry.cs.adfa.edu.au]
+> Sent: Monday, January 29, 2001 8:44 PM
+> To: PDP-11 Unix Preservation Society
+> Subject: [pups] A bootable disk image for a PDP-11/34?
+> 
+> 
+> He'd like a 6th Edition bootable RK05 disk image that he can download
+> onto his real disk.
+> 
+> Many thanks all!
+> 
+> 	Warren
+> 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA23853
+	for pups-liszt; Wed, 31 Jan 2001 05:31:48 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA23848
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 05:31:44 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.0/8.11.0) with ESMTP id f0UIUER28642;
+	Tue, 30 Jan 2001 13:30:14 -0500 (EST)
+Message-ID: <3A770836.5E42CF2B at tampabay.rr.com>
+Date: Tue, 30 Jan 2001 13:30:14 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; NetBSD 1.5.1_ALPHA i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Carl Lowenstein <cdl at mpl.ucsd.edu>
+CC: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+References: <200101301820.KAA24283 at chiton.ucsd.edu>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I'll second that.  The V6 tape image I provided to PUPS has the
+usual boot blocks at the start of the tape then as I recall three
+RJ05 disk images.  Long long ago I think I got folks interested in
+using emulators like Bob Supnik's by using the first tape disk image
+as the "disk" image for "sim" and booted V6... but it has been more
+than 6 years now since I did that and I may be rusty on details.
+
+-- Ken
+
+Carl Lowenstein wrote:
+> 
+> Just from the historical point of view, note that the first major
+> file on a genuine 6th Edition distribution tape _is_ a bootable
+> RK05 image.  Something like 4000 blocks.
+> 
+>     carl
+> 
+>         carl lowenstein         marine physical lab     u.c. san diego
+>         {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+>                                                   clowenstein at ucsd.edu
+> 
+> > From owner-pups at minnie.cs.adfa.edu.au Tue Jan 30 08:17 PST 2001
+> > From: Ian King <iking at microsoft.com>
+> > To: "'wkt at cs.adfa.edu.au'" <wkt at cs.adfa.edu.au>,
+> >         PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+> > Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+> > Date: Mon, 29 Jan 2001 23:19:44 -0800
+> >
+> > In fact, if someone has RK05s and isn't too far away, I'd love to get a
+> > bootable image on an RK05 cartridge -- of course I'd pay postage both ways.
+> > (I even have some original shipping boxes.)
+> >
+> > -----Original Message-----
+> > From: Warren Toomey [mailto:wkt at henry.cs.adfa.edu.au]
+> > Sent: Monday, January 29, 2001 8:44 PM
+> > To: PDP-11 Unix Preservation Society
+> > Subject: [pups] A bootable disk image for a PDP-11/34?
+> >
+> >
+> > He'd like a 6th Edition bootable RK05 disk image that he can download
+> > onto his real disk.
+> >
+> > Many thanks all!
+> >
+> >       Warren
+> >
+
+
