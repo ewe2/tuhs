@@ -1,0 +1,199 @@
+From: wkt@henry.cs.adfa.oz.au (Warren Toomey)
+Date: Sat, 5 Dec 1998 18:27:36 +1100 (EST)
+Subject: Some nice progress with hardware and Ultrix in the PUPS archive
+In-Reply-To: <199812041031.PAA09422@harrier.Uznet.NET> from Michael Sokolov at "Dec 4, 98 10:31:01 am"
+Message-ID: <199812050727.SAA04411@henry.cs.adfa.oz.au>
+
+In article by Michael Sokolov:
+>    As I was thinking about how else can I get correctly written Ultrix
+> tapes, the following idea sneaked into my mind. The PUPS archive already
+> contains PDP-11 Ultrix. How about VAX Ultrix? With Warren's permission, I
+> would be more than happy to upload my VAX Ultrix tape images (I have them
+> sitting as files on my DOS disk). Once that is done, would someone
+> volunteer to download them, write them to two TK50 cartridges, and send
+> them to me? TIA for any help.
+
+We have to be careful with 3rd party UNIXes. We would have to get approval
+from DEC (or whoever they are) to allow us to add their product into the
+archive. I did this with V7M and the later Ultrix-11s before DEC got bought
+out.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA04900
+	for pups-liszt; Sun, 6 Dec 1998 01:36:15 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id BAA04895
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Sun, 6 Dec 1998 01:36:03 +1100 (EST)
+Received: by timaxp.trailing-edge.com; Sat, 5 Dec 1998 9:33:16 -0500
+Date: Sat, 5 Dec 1998 9:33:16 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: msokolov at harrier.Uznet.NET
+CC: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <981205093316.2de002c3 at trailing-edge.com>
+Subject: Re: System Industries MSCP disk controller problem
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>   I have just tried configuring the board as you have suggested and it
+>works! Thanks! You have saved the Project!
+
+"It has to be simple or I can't do it :-)".  In this case (like just
+about all), it's a matter of getting rid of unknowns.
+   
+>   When I tried starting WOMBAT, it also worked. However, there are tons of
+>configuration parameters you can set there.
+
+Oh yeah - the Webster controllers are wonderfully configurable.  It's
+incredibly useful, as one physical disk can be partitioned up many ways
+into "virtual" MSCP units - especially useful for OS's which don't deal
+well with large units (or when it's desirable to have many different 
+versions of many different OS's on the same disk.)
+
+>Do you have a full manual for this controller? Would you mind sending me a
+>xerox copy?
+
+Sure, for the cost of copying and postage.  Or I'd trade you for some
+surplus of yours.
+   
+>   What about VAXen? Can you still call 1-800-DIGITAL with a _BIG_ credit
+>card in hand and order a VAX?
+
+Yep - high end 3100 and 4000 units are still available.
+
+(It looks like someone has already pointed you towards the Emulex QD21
+and QT13 docs available around the net.)   
+   
+>   And while we are at it, I have a question about 9-track tape transports
+>and controllers in general. I often hear about something called Pertec.
+>What is it? Is it some kind of standard interface that nearly all tape
+>transports use?
+
+Nearly all non-SCSI, non-proprietary interface tape drives will have
+either (or both) Pertec formatted and Pertec unformatted interfaces.
+
+Pertec unformatted drives have three cables; one carries read data, 
+another carries write data, and the third carries control signals.  It's
+a rather low-level interface - the controller tells the drive to go
+forward, then reads or writes data, with the controller responsible
+for all the timing.  The controller gets to do the nitty-gritty work
+of repositioning and spacing forward and backward over tape marks.
+
+Pertec formatted drives have two 50-pin cables.  It's a higher-level
+interface, where the "formatter" does a lot of the nitty-gritty work, and
+the controller in the backplane just has to spew out data bytes (or
+take them in).
+
+Many times you'll see a Pertec unformatted drive with a formatter bolted
+onto it with two 50-pin cables coming out.  (In most cases, a formatter
+could control multiple physical drives.)  Other times you'll find
+"embedded formatter" drives, where there is no 3-cable unformatted
+interface lurking inside.
+
+> It is what this QT13 controller is for? (It has 2 50-lead
+>connectors.)
+
+Yep, Pertec formatted.  The QT13 is nice because it'll emulate
+either MU: or MS:-type devices.
+
+> I remember at CWRU there was a very neat-looking tape
+>transport called Cipher. It looked EXACTLY like DEC TS05, suggesting that
+>it's what the TS05 really is.
+
+Yep, a TS05 is a rebadged Cipher F880 (with some slightly-different 
+firmware).
+
+> That one also had a two-50-lead-cables
+>interface as far as I could tell (it was disconnected). It also appeared to
+>be dual-ported.
+
+It probably had 4 50-pin edge connectors, so that multiple drives could
+be chained on the same Pertec-formatted-bus.  (There are terminators at
+each end of the bus, much like SCSI.)  There's provisions for at least
+4 formatters per bus, with each formatter potentially running multiple
+drives.
+
+> Does this mean that DEC also used this Pertec interface?
+
+Yep.  Actually, the DEC TS05/TSV05/TU80 controllers are rebadged Dilog boards
+(again, with slightly different firmware - for instance a DEC TU80 controller
+will only work with TU80 drives or their CDC equivalent, the Keystone.)
+
+>Then why are there different DEC controllers for different DEC 9-track tape
+>transports (TSV05 for TS05, KLESI for TU81+, etc.)? If they were all Pertec
+>one controller would fit all, wouldn't it? Or is that some DEC 9-track tape
+>hardware uses Pertec and other DEC hardware doesn't?
+
+At the guts of most DEC tape drives, you will often find either a Pertec
+formatted or unformatted interface.  TU80's and TS(V)05's are simple
+Pertec formatted interfaces.  Other times they convert to some other
+interface (Massbus, LESI, etc.) before the cables come out to the "real
+world".
+   
+>   Moving on to the next and last unidentified flying board. This one is a
+>total mystery. The board is labeled "SIGMA INFORMATION SYSTEMS, INC." and
+>"ASSY NO 400135 REV A". There are NO microprocessors, ROMs, or any other
+>LSI chips on the board, only SSI/MSI chips, resistors, and capacitors. It's
+>a dual-height board. It has 3 8-switch packs. There is one 40-lead shrouded
+>header connector on the board, and a straight 40-lead ribbon cable connects
+>it to a bulkhead which has a female 37-lead D-sub connector on the outside.
+>Any ideas on what in the world is this?
+
+Any chance it's a simple parallel I/O?
+
+Could also be the bus interface for a Sigma and/or DSD MFM drive controller
+(if so, it probably emulates RL02's).  The assembly number sounds vaguely
+DSD-like.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA04942
+	for pups-liszt; Sun, 6 Dec 1998 01:44:43 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id BAA04937
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Sun, 6 Dec 1998 01:44:33 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Sat, 5 Dec 1998 9:42:42 -0500
+Date: Sat, 5 Dec 1998 9:42:42 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <981205094242.2de002c3 at trailing-edge.com>
+Subject: Re: Some nice progress with hardware and Ultrix in the PUPS archive
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>   As I was thinking about how else can I get correctly written Ultrix
+>tapes, the following idea sneaked into my mind. The PUPS archive already
+>contains PDP-11 Ultrix. How about VAX Ultrix?
+
+As Warren pointed out, there might be a problem with putting such
+tapes on the PUPS archive.  I'd be glad to run off TK50's from images
+for you, though I think your earlier idea, about installing from
+the miniroot image that's commonly put on 4.2- and 4.3BSD derived
+distributions, is a *far* better idea as it avoids using a TK50
+tape drive at all.
+
+It's not that tape copies are bad ideas - it's just that TK50's
+are so slow.  If you were coming from 9-track or DLT or something
+fast, that wouldn't be so bad.
+
+If you can get just about any OS running on your
+Q-bus machine, under any CPU - i.e. NetBSD, RT-11, 2.11BSD, RSX,
+whatever you might have - then you can just write the miniroot
+straight to a "scratch" disk.  You can also write the root
+dump and tar savesets straight to another scratch disk, in "raw"
+format, if you desire.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd                 Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+
