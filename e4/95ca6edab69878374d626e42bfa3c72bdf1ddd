@@ -1,0 +1,43 @@
+From: frank@wortner.com (Frank Wortner)
+Date: Wed, 27 Feb 2002 21:24:49 -0500
+Subject: [pups] missing space in 2.11_rp_unknown
+In-Reply-To: <200202272325.g1RNPM825304@moe.2bsd.com>
+Message-ID: <B8A2FF20.3EC6%frank@wortner.com>
+
+FYI,  here's the patch that fixes the "df" problem that Christian reported.
+If I recall correctly,  it took me about a day to figure out that the
+problem wasn't in df,  wasn't in the 2.11 BSD C library,  but was in the p11
+emulator.  The fact that the same disk image booted by Bob Supnik's SIMH
+PDP/11 emulator produced correct "df" results was the big clue.  Here's the
+fix for p11 (version 2.7).
+
+$ diff -c float.h*
+*** float.h     Tue Oct 10 10:36:14 2000
+--- float.h.orig        Sat Mar  4 03:03:29 2000
+***************
+*** 442,448 ****
+  # define CnvL(A,L)    (void)((A) = F_int((L)))
+  # define CnvF2L(S,L)  (void)((L) = F_chop((S)))
+
+! # define FrExp(A)     ((signed)((A).e - EOFFS))
+
+  # define GetMant(P)   (((P)->m & ~f_msb) << 1)
+  # define GetExp(P)    ((int)(P)->e - EOFFS + 1)
+--- 442,448 ----
+  # define CnvL(A,L)    (void)((A) = F_int((L)))
+  # define CnvF2L(S,L)  (void)((L) = F_chop((S)))
+
+! # define FrExp(A)     ((A).e - EOFFS)
+
+  # define GetMant(P)   (((P)->m & ~f_msb) << 1)
+  # define GetExp(P)    ((int)(P)->e - EOFFS + 1)
+
+-- 
+Frank
+
+"I don't hold with all this washing.  This modern Behind-the-ears nonsense."
+* Eeyore, "Winnie the Pooh"
+
+
+
+
