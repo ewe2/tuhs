@@ -1,0 +1,740 @@
+From: iking@microsoft.com (Ian King)
+Date: Mon, 29 Jan 2001 09:08:59 -0800
+Subject: [pups] Help! Standalone DZ-11 driver
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB00@red-msg-06.redmond.corp.microsoft.com>
+
+Warren, I have the DZ-11 docs; I'll scan the relevant sections and mail it
+to you.  
+
+-- Ian 
+
+-----Original Message-----
+From: Warren Toomey [mailto:wkt@henry.cs.adfa.edu.au]
+Sent: Sunday, January 28, 2001 5:25 PM
+To: PDP-11 Unix Preservation Society
+Subject: [pups] Help! Standalone DZ-11 driver
+
+
+Hi all,
+	I'm working on a new version of my Vtserver, which allows a PDP-11
+with no tape drive to boot from a Unix/Linux server (via serial cable) and
+install a UNIX. See ftp://minnie.cs.adfa.edu.au/pub/PDP-11/Vtserver
+
+At present I'm working on a new version which uses the 2.11BSD boot code
+so as to support more disk drives. The work in progress is at:
+http://minnie.cs.adfa.edu.au/Vtserver. At present it's not usable
+unless you have a PDP-11/45.
+
+I've got a potential user with an 11/34, two RK05s and a DZ-11. I can't
+find any details of DZ-11 here in my peripherals handbooks, and the 2.11
+kernel drivers are a bit too complicated to read.
+
+My existing KL-11 driver is below. Can someone come up with a standalone
+equivalent for a DZ-11, or point me at some docs?
+
+I'll be away from 1st to 14th Feb, so there may be some delays in
+responding.
+
+Thanks all,
+	Warren
+
+
+struct  vtdevice  {
+        int     rcsr,rbuf;
+        int     tcsr,tbuf;
+};
+
+#define NVT     2
+struct  vtdevice *VTcsr[NVT + 1] = {
+                (struct vtdevice *)0176500,     /* We use VTcsr[0] unit 1 */
+                (struct vtdevice *)0,
+                (struct vtdevice *)-1
+};
+
+/* Get a character, or timeout and return with hitim zero */
+char vtgetc()
+{   
+        register c;
+    
+        VTcsr[0]->rcsr = 1; hitim=3; lotim=65535;
+  
+        while ((VTcsr[0]->rcsr&0200)==0) {
+           lotim--;
+           if (lotim==0) hitim--;
+           if (hitim==0) { putchar('t'); return(0); }
+        }
+        c = VTcsr[0]->rbuf; return(c);
+}
+
+vtputc(c)
+register c;
+{
+        register s;
+
+        while((VTcsr[0]->tcsr&0200) == 0) ;
+        s = VTcsr[0]->tcsr;
+        VTcsr[0]->tcsr = 0; VTcsr[0]->tbuf = c; VTcsr[0]->tcsr = s;
+}
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA24991
+	for pups-liszt; Wed, 31 Jan 2001 09:17:28 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA24987
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 09:17:26 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.1/8.9.3) id f0UMDUQ35508;
+	Wed, 31 Jan 2001 09:13:30 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200101302213.f0UMDUQ35508 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+In-Reply-To: <200101301820.KAA24283 at chiton.ucsd.edu> from Carl Lowenstein at
+ "Jan 30, 2001 10:20:58 am"
+To: Carl Lowenstein <cdl at mpl.ucsd.edu>
+Date: Wed, 31 Jan 2001 09:13:30 +1100 (EST)
+CC: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Carl Lowenstein:
+> Just from the historical point of view, note that the first major
+> file on a genuine 6th Edition distribution tape _is_ a bootable
+> RK05 image.  Something like 4000 blocks.
+> 
+>     carl
+
+Yes, but it doesn't boot on an 11/34 :(
+That's the problem.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA25322
+	for pups-liszt; Wed, 31 Jan 2001 10:28:22 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA25314
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 10:28:18 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Tue, 30 Jan 2001 14:48:28 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <D8RC2W0X>; Tue, 30 Jan 2001 14:38:29 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB13 at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>,
+        Carl Lowenstein
+	 <cdl at mpl.ucsd.edu>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Date: Tue, 30 Jan 2001 14:38:15 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ken, I tried using that image and gunzip told me there was a crc error; it
+wouldn't unzip it.  (I downloaded it three times, just in case there was a
+transmission error -- twice by ftp, once by http.)  I've also tried the
+"Dennis" images, which are supposedly straight RK05 images; E11 won't boot
+'em.  One issue on which I'm not clear: where is the boot address?  Stuff at
+loc 0 doesn't look like boot instructions.  
+
+If I could get an image to run in an emulator (as I mentioned, I'm running
+E11 from DBit), I'd write some cheesy little loader to bring it down the
+serial line (I already have it sketched out); but until I can at least get
+one to boot in the emulator, I'm reluctant to spend the hours (at 9600 baud)
+to spray it onto a disk.  <sigh>  
+
+Any suggestions you may have would be greatly appreciated.  -- Ian 
+
+-----Original Message-----
+From: Ken Wellsch [mailto:kwellsch@tampabay.rr.com]
+Sent: Tuesday, January 30, 2001 10:30 AM
+To: Carl Lowenstein
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+
+
+I'll second that.  The V6 tape image I provided to PUPS has the
+usual boot blocks at the start of the tape then as I recall three
+RJ05 disk images.  Long long ago I think I got folks interested in
+using emulators like Bob Supnik's by using the first tape disk image
+as the "disk" image for "sim" and booted V6... but it has been more
+than 6 years now since I did that and I may be rusty on details.
+
+-- Ken
+
+Carl Lowenstein wrote:
+> 
+> Just from the historical point of view, note that the first major
+> file on a genuine 6th Edition distribution tape _is_ a bootable
+> RK05 image.  Something like 4000 blocks.
+> 
+>     carl
+> 
+>         carl lowenstein         marine physical lab     u.c. san diego
+>         {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+>                                                   clowenstein at ucsd.edu
+> 
+> > From owner-pups at minnie.cs.adfa.edu.au Tue Jan 30 08:17 PST 2001
+> > From: Ian King <iking at microsoft.com>
+> > To: "'wkt at cs.adfa.edu.au'" <wkt at cs.adfa.edu.au>,
+> >         PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+> > Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+> > Date: Mon, 29 Jan 2001 23:19:44 -0800
+> >
+> > In fact, if someone has RK05s and isn't too far away, I'd love to get a
+> > bootable image on an RK05 cartridge -- of course I'd pay postage both
+ways.
+> > (I even have some original shipping boxes.)
+> >
+> > -----Original Message-----
+> > From: Warren Toomey [mailto:wkt at henry.cs.adfa.edu.au]
+> > Sent: Monday, January 29, 2001 8:44 PM
+> > To: PDP-11 Unix Preservation Society
+> > Subject: [pups] A bootable disk image for a PDP-11/34?
+> >
+> >
+> > He'd like a 6th Edition bootable RK05 disk image that he can download
+> > onto his real disk.
+> >
+> > Many thanks all!
+> >
+> >       Warren
+> >
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA25337
+	for pups-liszt; Wed, 31 Jan 2001 10:29:33 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA25333
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 10:29:30 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.0/8.11.0) with ESMTP id f0UNRuR29214;
+	Tue, 30 Jan 2001 18:27:56 -0500 (EST)
+Message-ID: <3A774DFC.8A3260E8 at tampabay.rr.com>
+Date: Tue, 30 Jan 2001 18:27:56 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; NetBSD 1.5.1_ALPHA i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Ian King <iking at microsoft.com>
+CC: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+References: <8D25F244B8274141B5D313CA4823F39C018EEB13 at red-msg-06.redmond.corp.microsoft.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi Ian,
+
+Indeed, looks like there has been some bit rot on the archive... sigh.
+
+Luckily I am a pack rat and have copies of my Waterloo days data.  The
+images are all clean there.  Curiously enough I even found the directory
+where I ran that simulation (circa Oct/94 I see).  I just rebuilt the
+code there and ran it on my NetBSD/i386 system and it boots V6 just fine.
+
+In case you don't read minds, after doing the 'attach ...' then 'boot rk0'
+the intuitive V6 boot prompt '@' is where you type 'rkunix' for example B^)
+
+Almost instantly I had a 'login:' prompt, and the image is off the tape
+so there is no root password set...
+
+Don't forget to type 'date' when logged in ... it is a hoot to see B^)
+
+Oh heck, never thought to actually try to set the date, post 2000...
+maybe better to let it live back in 1975...
+
+I've tar/gzip'ed the bundle.  Do you want me to try and UUencode it
+and mail it to you?  It is nearly 1 Mbyte in binary form...
+
+Oh yeah, as Warren mentioned, stock V6 does not run on a '34.  I think
+it ran on a '40.  I know it can run on a '34 because in 1980 I started
+using UNIX, V6 running on a '34  B^)
+
+Cheers,
+
+-- Ken
+
+Ian King wrote:
+> 
+> Ken, I tried using that image and gunzip told me there was a crc error; it
+> wouldn't unzip it.  (I downloaded it three times, just in case there was a
+> transmission error -- twice by ftp, once by http.)  I've also tried the
+> "Dennis" images, which are supposedly straight RK05 images; E11 won't boot
+> 'em.  One issue on which I'm not clear: where is the boot address?  Stuff at
+> loc 0 doesn't look like boot instructions.
+> 
+> If I could get an image to run in an emulator (as I mentioned, I'm running
+> E11 from DBit), I'd write some cheesy little loader to bring it down the
+> serial line (I already have it sketched out); but until I can at least get
+> one to boot in the emulator, I'm reluctant to spend the hours (at 9600 baud)
+> to spray it onto a disk.  <sigh>
+> 
+> Any suggestions you may have would be greatly appreciated.  -- Ian
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA25365
+	for pups-liszt; Wed, 31 Jan 2001 10:32:27 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chiton.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA25361
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 10:32:23 +1100 (EST)
+	(envelope-from cdl at mpl.ucsd.edu)
+Received: (from cdl at localhost)
+	by chiton.ucsd.edu (8.9.3/8.9.3) id PAA29420;
+	Tue, 30 Jan 2001 15:30:55 -0800 (PST)
+Date: Tue, 30 Jan 2001 15:30:55 -0800 (PST)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <200101302330.PAA29420 at chiton.ucsd.edu>
+To: wkt at cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From wkt at henry.cs.adfa.edu.au Tue Jan 30 14:16 PST 2001
+> From: Warren Toomey <wkt at henry.cs.adfa.edu.au>
+> Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+> To: Carl Lowenstein <cdl at mpl.ucsd.edu>
+> Date: Wed, 31 Jan 2001 09:13:30 +1100 (EST)
+> CC: pups at minnie.cs.adfa.edu.au
+> MIME-Version: 1.0
+> Content-Transfer-Encoding: 7bit
+> 
+> In article by Carl Lowenstein:
+> > Just from the historical point of view, note that the first major
+> > file on a genuine 6th Edition distribution tape _is_ a bootable
+> > RK05 image.  Something like 4000 blocks.
+> > 
+> >     carl
+> 
+> Yes, but it doesn't boot on an 11/34 :(
+> That's the problem.
+> 
+> Cheers,
+> 	Warren
+
+Why, said he wonderingly.  Is the 11/34 one of those machines that does
+not have a directly addressable PSW at 177776 so it must be done with
+MPTS and MFPS instructions?  Thats all I can think of immediately.
+
+Pulling out my handy PDP-11 architecture handbook, I find this to be so.
+There are some other differences between 11/34 and 11/40-45 but this
+one would be a real show-stopper.
+
+The modifications to 6th Ed. Unix to take care of this would be
+concentrated in the save/raise/lower processor priority routines.  Just
+offhand I don't think one could make a zero-length binary patch that
+would work on the 11/34 and remain 11/40-45 compatible.
+
+I guess I will look at locore.s tonight when I get home.  That must
+be the place where such things happen.
+
+I wonder what the RT-11 guys did when they had the same problem.  I
+seem to remember something involving creative use of stack pushes and
+RTI instructions to set the processor priority.
+
+    carl
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA25390
+	for pups-liszt; Wed, 31 Jan 2001 10:35:01 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chalfont.mail.uk.easynet.net (chalfont.mail.uk.easynet.net [195.40.1.44])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA25383
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 10:34:57 +1100 (EST)
+	(envelope-from rdonkin at bigfoot.com)
+Received: from bigfoot.com (dsl-212-135-223-35.dsl.easynet.co.uk [212.135.223.35])
+	by chalfont.mail.uk.easynet.net (Postfix) with ESMTP
+	id 45018F8357; Tue, 30 Jan 2001 23:32:11 +0000 (GMT)
+Message-ID: <3A774F2E.46106B82 at bigfoot.com>
+Date: Tue, 30 Jan 2001 23:33:02 +0000
+From: Richard Donkin <rdonkin@bigfoot.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.2.14-15mdk i586)
+X-Accept-Language: en, fr
+MIME-Version: 1.0
+To: Mark Green <mark at cs.ualberta.ca>
+Cc: PUPS List <pups at minnie.cs.adfa.edu.au>
+Subject: Re: [pups] 2.11 BSD compilation fails
+References: <20010130160418Z433530-3339+182 at scapa.cs.ualberta.ca>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Mark Green wrote:
+> 
+> >
+> > While tinkering with the date2.c program posted earlier by Alex
+> > Chupakhin, which now runs on 2.11 BSD btw, I discovered the following:
+> >
+> > - 'cc -o date2 date2.c' works fine, producing a 12K binary
+> >
+> > - a makefile containing this command fails - the compilation starts but
+> > fails silently, producing a 2K binary that is not marked executable.
+> > The makefile is:
+> >
+> >    date2: date2.c
+> >            cc -o date2 -c date2.c
+> Remove the -c flag, it tells the compiler to only compile the program
+> and not produce an executable.
+
+Ooops... I must have been up too late when I came up with that one.  
+
+Thanks
+
+Richard
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA26019
+	for pups-liszt; Wed, 31 Jan 2001 12:46:59 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mailhost.cs.uofs.edu (mailhost.cs.uofs.edu [134.198.169.1])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA26015
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 12:46:54 +1100 (EST)
+	(envelope-from bill at cs.uofs.edu)
+Received: from triangle.cs.uofs.edu (IDENT:root at triangle.cs.uofs.edu [134.198.172.101])
+	by mailhost.cs.uofs.edu (8.9.3/8.9.2) with ESMTP id UAA37178
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 20:45:59 -0500 (EST)
+Received: from localhost (bill at localhost)
+	by triangle.cs.uofs.edu (8.9.3/8.8.6) with ESMTP id UAA03841
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 30 Jan 2001 20:45:24 -0500
+X-Authentication-Warning: triangle.cs.uofs.edu: bill owned process doing -bs
+Date: Tue, 30 Jan 2001 20:45:20 -0500 (EST)
+From: Bill Gunshannon <bill@cs.scranton.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+In-Reply-To: <3A774DFC.8A3260E8 at tampabay.rr.com>
+Message-ID: <Pine.LNX.4.10.10101302039390.3188-100000 at triangle.cs.uofs.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 30 Jan 2001, Ken Wellsch wrote:
+
+> Don't forget to type 'date' when logged in ... it is a hoot to see B^)
+> 
+> Oh heck, never thought to actually try to set the date, post 2000...
+> maybe better to let it live back in 1975...
+> 
+
+I assume it is just like Ultrix-11 was, soooooo
+Here's a quick way to get the date right until you get a chance to
+install a fixed "date" command.  Yes, it is only the date command
+that is not Y2K ready.
+
+First:   Set the date to 9912312359
+Second:  wait one minute.  It is now 1 Jan 2000.
+Third:   Set the date to 12312359
+Fourth:  wait one minute.  It is now 1 Jan 2001.
+Fifth:   Set the month, day, hour and minute to the current time.
+Voila.  Primitive, but it works.  I guess I could try building the GNU
+date command on Ultrix-11 or maybe just get the sources from FreeBSD.
+
+All the best.
+
+bill
+
+-- 
+Bill Gunshannon          |  de-moc-ra-cy (di mok' ra see) n.  Three wolves
+bill at cs.scranton.edu     |  and a sheep voting on what's for dinner.
+University of Scranton   |
+Scranton, Pennsylvania   |         #include <std.disclaimer.h>   
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA27811
+	for pups-liszt; Wed, 31 Jan 2001 18:07:33 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id SAA27807
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 18:07:29 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Tue, 30 Jan 2001 23:03:00 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <D0V9B1YG>; Tue, 30 Jan 2001 22:59:19 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB1A at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Carl Lowenstein'" <cdl at mpl.ucsd.edu>, wkt at cs.adfa.edu.au
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Date: Tue, 30 Jan 2001 22:58:53 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Again, I'd be glad to do things like this, if I could get an image to run on
+an emulator -- that's been a goal.  I've tried various 'processors' (in
+emulation), but not been successful at booting the Unix kernel.  Can anyone
+say, "I booted image X on emulator Y and had a successfully running Unix"?
+If so, please please please share your experience -- I haven't been able to
+boot anything out of the PUPS archive on the E11 emulator (held out by some
+to be the best).  
+
+And, if/when I have success, I promise to share a field report.  :-)  -- Ian
+
+
+-----Original Message-----
+From: Carl Lowenstein [mailto:cdl@mpl.ucsd.edu]
+Sent: Tuesday, January 30, 2001 3:31 PM
+To: wkt at cs.adfa.edu.au
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+
+
+> From wkt at henry.cs.adfa.edu.au Tue Jan 30 14:16 PST 2001
+> From: Warren Toomey <wkt at henry.cs.adfa.edu.au>
+> Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+> To: Carl Lowenstein <cdl at mpl.ucsd.edu>
+> Date: Wed, 31 Jan 2001 09:13:30 +1100 (EST)
+> CC: pups at minnie.cs.adfa.edu.au
+> MIME-Version: 1.0
+> Content-Transfer-Encoding: 7bit
+> 
+> In article by Carl Lowenstein:
+> > Just from the historical point of view, note that the first major
+> > file on a genuine 6th Edition distribution tape _is_ a bootable
+> > RK05 image.  Something like 4000 blocks.
+> > 
+> >     carl
+> 
+> Yes, but it doesn't boot on an 11/34 :(
+> That's the problem.
+> 
+> Cheers,
+> 	Warren
+
+Why, said he wonderingly.  Is the 11/34 one of those machines that does
+not have a directly addressable PSW at 177776 so it must be done with
+MPTS and MFPS instructions?  Thats all I can think of immediately.
+
+Pulling out my handy PDP-11 architecture handbook, I find this to be so.
+There are some other differences between 11/34 and 11/40-45 but this
+one would be a real show-stopper.
+
+The modifications to 6th Ed. Unix to take care of this would be
+concentrated in the save/raise/lower processor priority routines.  Just
+offhand I don't think one could make a zero-length binary patch that
+would work on the 11/34 and remain 11/40-45 compatible.
+
+I guess I will look at locore.s tonight when I get home.  That must
+be the place where such things happen.
+
+I wonder what the RT-11 guys did when they had the same problem.  I
+seem to remember something involving creative use of stack pushes and
+RTI instructions to set the processor priority.
+
+    carl
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA27852
+	for pups-liszt; Wed, 31 Jan 2001 18:13:33 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id SAA27848
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 18:13:30 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Tue, 30 Jan 2001 23:04:36 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <D0V9BGQ8>; Tue, 30 Jan 2001 23:05:48 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEB1C at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Date: Tue, 30 Jan 2001 23:05:55 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ken, if you send it to my personal email account, there's no size
+restriction (I run the mail server); it's iking at killthewabbit.org.  I would
+greatly appreciate your sending it to me.  BTW, I've been using 1977 (the
+year I graduated fron high school) on my PDP-11 under RSX-11; some tools
+won't accept the "01" year.  :-)  
+
+Cheers -- isk 
+
+PS: I've hired a lot of Waterloo folks -- smart buggers, the lot of them.
+:-)  
+
+-----Original Message-----
+From: Ken Wellsch [mailto:kwellsch@tampabay.rr.com]
+Sent: Tuesday, January 30, 2001 3:28 PM
+To: Ian King
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+
+
+Hi Ian,
+
+Indeed, looks like there has been some bit rot on the archive... sigh.
+
+Luckily I am a pack rat and have copies of my Waterloo days data.  The
+images are all clean there.  Curiously enough I even found the directory
+where I ran that simulation (circa Oct/94 I see).  I just rebuilt the
+code there and ran it on my NetBSD/i386 system and it boots V6 just fine.
+
+In case you don't read minds, after doing the 'attach ...' then 'boot rk0'
+the intuitive V6 boot prompt '@' is where you type 'rkunix' for example B^)
+
+Almost instantly I had a 'login:' prompt, and the image is off the tape
+so there is no root password set...
+
+Don't forget to type 'date' when logged in ... it is a hoot to see B^)
+
+Oh heck, never thought to actually try to set the date, post 2000...
+maybe better to let it live back in 1975...
+
+I've tar/gzip'ed the bundle.  Do you want me to try and UUencode it
+and mail it to you?  It is nearly 1 Mbyte in binary form...
+
+Oh yeah, as Warren mentioned, stock V6 does not run on a '34.  I think
+it ran on a '40.  I know it can run on a '34 because in 1980 I started
+using UNIX, V6 running on a '34  B^)
+
+Cheers,
+
+-- Ken
+
+Ian King wrote:
+> 
+> Ken, I tried using that image and gunzip told me there was a crc error; it
+> wouldn't unzip it.  (I downloaded it three times, just in case there was a
+> transmission error -- twice by ftp, once by http.)  I've also tried the
+> "Dennis" images, which are supposedly straight RK05 images; E11 won't boot
+> 'em.  One issue on which I'm not clear: where is the boot address?  Stuff
+at
+> loc 0 doesn't look like boot instructions.
+> 
+> If I could get an image to run in an emulator (as I mentioned, I'm running
+> E11 from DBit), I'd write some cheesy little loader to bring it down the
+> serial line (I already have it sketched out); but until I can at least get
+> one to boot in the emulator, I'm reluctant to spend the hours (at 9600
+baud)
+> to spray it onto a disk.  <sigh>
+> 
+> Any suggestions you may have would be greatly appreciated.  -- Ian
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA29613
+	for pups-liszt; Thu, 1 Feb 2001 00:21:49 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id AAA29604
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 00:21:43 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.0/8.11.0) with ESMTP id f0VDK7R00577
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 08:20:07 -0500 (EST)
+Message-ID: <3A781106.F7302A5A at tampabay.rr.com>
+Date: Wed, 31 Jan 2001 08:20:06 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; NetBSD 1.5.1_ALPHA i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+References: <8D25F244B8274141B5D313CA4823F39C018EEB13 at red-msg-06.redmond.corp.microsoft.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ian King wrote:
+> 
+> Ken, I tried using that image and gunzip told me there was a crc error; it
+> wouldn't unzip it.  (I downloaded it three times, just in case there was a
+> transmission error -- twice by ftp, once by http.)
+
+So going over all the things I can easily do data integrity checks on, I've
+run 'gzip -tv' on all the GZip'ed things and found three that are apparently
+damaged:
+
+gzip: ./PDP-11/Distributions/dec/Ultrix-3.1/ultrix-3.1-bootape.tar.gz:
+              invalid compressed data--crc error
+gzip: ./PDP-11/Distributions/research/Ken_Wellsch_v6/v6.tape.gz:
+              invalid compressed data--crc error
+gzip: ./PDP-11/Distributions/unsw/90/record0.gz:
+              invalid compressed data--crc error
+
+I can't comment on the *.Z compressed archives as they do not do any crc.
+
+I will have to peruse my stack of archive CD's made at various stages of
+the archive to see if I have the other two (I have a good 'v6.tape.gz' file).
+
+I did not try and run the MD5 list yet.  But this is an example of why I
+had been pushing for the use of MD5 for all items in the archive...  B^)
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA30614
+	for pups-liszt; Thu, 1 Feb 2001 03:08:48 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA30610
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 03:08:43 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.0/8.11.0) with ESMTP id f0VG79R00768;
+	Wed, 31 Jan 2001 11:07:10 -0500 (EST)
+Message-ID: <3A78382D.37188B15 at tampabay.rr.com>
+Date: Wed, 31 Jan 2001 11:07:09 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; NetBSD 1.5.1_ALPHA i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Bill Gunshannon <bill at cs.scranton.edu>
+CC: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+References: <Pine.LNX.4.10.10101302039390.3188-100000 at triangle.cs.uofs.edu>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Bill Gunshannon wrote:
+> 
+> On Tue, 30 Jan 2001, Ken Wellsch wrote:
+> 
+> > Don't forget to type 'date' when logged in ... it is a hoot to see B^)
+> >
+> > Oh heck, never thought to actually try to set the date, post 2000...
+> > maybe better to let it live back in 1975...
+> 
+> I assume it is just like Ultrix-11 was, soooooo
+> Here's a quick way to get the date right until you get a chance to
+> install a fixed "date" command.  Yes, it is only the date command
+> that is not Y2K ready.
+
+No, V6 predates Ultrix-11 by just a bit I believe.
+
+The date setting format on V6 appears to be '1231245999', that is
+two digits for: month, day, hour, minute, year.  A trailing 'p' means
+the hours are 12 based (and it is PM), otherwise 24 based.
+
+I can confirm as I expected that setting 0131110301 puts me at 1970 B^)
+
+No big deal.  I can see in the 'date' source what it is doing...
+
+Thanks for the 'put it into the year 2001' method!
+
+-- Ken
+
+
