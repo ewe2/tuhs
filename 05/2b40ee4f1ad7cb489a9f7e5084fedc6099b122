@@ -1,0 +1,38 @@
+From: iking@killthewabbit.org (Ian King)
+Date: Tue, 18 Mar 2003 23:44:58 -0800
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <000901c2edeb$70942650$450010ac@dawabbit>
+
+Well, given the excellent advice I received here (especially from Steven
+Schultz), I got the networking kernel to build after moving a few modules
+around between overlays.  It was indeed the overage on DATA/BSS that was
+killing my build.  I did a 'make install' and sync'ed, then restarted.
+
+<sigh>
+
+Now, when I respond to the boot prompt with 'ra(0,0)unix', I'm getting the
+following:
+
+<banner for the image, date, time, etc.>
+panic: iinit
+no fs on 5/0
+
+I'm booting from an RD54, and checking both 'ls -l /dev/ra*' and
+/dev/MAKEDEV, it sure looks to me that the major device number for this
+drive is 5 - am I missing anything yet?  That's what I called out as the
+ROOTDEV in my config file (in sys/conf), with '5,1' as the SWAPDEV.  (I
+snuck a peek at the CURLY config file as well, and it shows major device 5
+for ra.)  Note that this is exactly the same device as I have been using all
+along with the GENERIC kernel, so I know there's really a filesystem there.
+(FWIW, I didn't define an autoboot device.)  In ufs_subr.c, I see where this
+message is apparently generated in the getfs() function, but I can't really
+tell from that where it's biting me.
+
+Hey, if it wasn't a challenge, it wouldn't be fun, right?  Right?  TIA --
+Ian
+
+PS: I'm really glad I followed the advice to copy my old (GENERIC) kernel
+image to 'oldunix' - so I can still boot!
+
+
+
