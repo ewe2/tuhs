@@ -1,0 +1,61 @@
+From: michael_davidson@pacbell.net (Michael Davidson)
+Date: Sun, 23 Feb 2003 13:40:40 -0800
+Subject: [pups] Re: PDP11 - RQDX1 standalone format utility? --> XXDP
+References: <001201c2d98f$b4ff34d0$77b95b8b@ics.forth.gr> <020901c2dad6$e0afcf70$8a00a8c0@arctura>
+Message-ID: <3E593FD8.2090207@pacbell.net>
+
+Jonathan Engdahl wrote:
+
+>I documented the procedure to extract a program from XXDP and put a header
+>on it so that you can boot it from VTserver or a UNIX disk. It has been a
+>long time since I did this to ZRQCH0, so I practiced on the program that I
+>think Christos needs (ZRQBC1) and sent it to him.
+>
+>There's a lot I don't know about the a.out header, so if someone can improve
+>my method, let me know.
+>
+>http://users.safeaccess.com/engdahl/xxdp.htm#hackXXDP
+>
+There isn't very much to know about the a.out header,
+and what you are doing looks OK although I would probably
+have set a_text to 160000 and left a_data and a_bss as 0.
+
+While I am not really familiar with the BSD boot code that
+vtserver uses when loading a program I am almost certain that
+it will use the entrypoint address in the a.out header and
+not just jump to address 0. (remember it's an actual program
+loader that understands a.out format, not just something that
+only knows how to load a boot block and jump to it)
+
+This is confirmed by the fact that the code you are patching
+into the image at address 0 is wrong if you want it to get
+you to the restart address.
+
+In your example you have:
+
+000020/ 000167
+000022/ 145702
+
+If this was loaded at address 0 in memory and the boot code
+jumped to address 0, you would end up at 145706 *not* 145702
+(of course, you might very well get lucky and still land on
+an instruction boundary, but you would have skipped the first
+2 words of the restart code).
+
+If this code were really necessary (and I'm 99.99% sure that
+it isn't) you would want either:
+
+000137
+145702
+
+or:
+
+000167
+145676
+
+
+
+
+
+
+
