@@ -1,0 +1,905 @@
+From: lars@nocrew.org (lars brinkhoff)
+Date: 15 Jun 2000 09:35:50 +0200
+Subject: Help reviewing PDP-11 model processors
+Message-ID: <85ya478kh5.fsf@junk.nocrew.org>
+
+The following message is a courtesy copy of an article
+that has been posted to alt.sys.pdp11 as well.
+
+Time for the second round of assembler source code review.
+
+If the user specifies a PDP-11 model to the assembler (e.g. -m11/45),
+this code is used to tell the assembler what processor to assemble for.
+
+Also, in one case (11/34a), the model enables FP-11 floating-point
+instructions.  Should this be done for 11/34c too?  If there are any
+other models with otherwise optional features installed, I'd like to
+know.
+
+  if (strcmp (arg, "03") == 0)                  /* 11/03 */
+    return set_cpu_model ("kd11f");             /* KD11-F */
+
+  else if (strcmp (arg, "04") == 0)             /* 11/04 */
+    return set_cpu_model ("kd11d");             /* KD11-D */
+
+  else if (strcmp (arg, "05") == 0 ||           /* 11/05 or 11/10 */
+           strcmp (arg, "10") == 0)
+    return set_cpu_model ("kd11b");             /* KD11-B */
+
+  else if (strcmp (arg, "15") == 0 ||           /* 11/15 or 11/20 */
+           strcmp (arg, "20") == 0)
+    return set_cpu_model ("ka11");              /* KA11 */
+
+  else if (strcmp (arg, "21") == 0)             /* 11/21 */
+    return set_cpu_model ("t11");               /* T11 */
+
+  else if (strcmp (arg, "24") == 0)             /* 11/24 */
+    return set_cpu_model ("f11");               /* F11 */
+
+  else if (strcmp (arg, "34") == 0)             /* 11/34 */
+    return set_cpu_model ("kd11e");             /* KD11-E */
+
+  else if (strcmp (arg, "34a") == 0)            /* 11/34a */
+    return set_cpu_model ("kd11e") &&           /* KD11-E with FP-11 */
+           set_option ("fpp");
+
+  else if (strcmp (arg, "35") == 0 ||           /* 11/35 or 11/40 */
+           strcmp (arg, "40") == 0)
+    return set_cpu_model ("kd11da");            /* KD11-A */
+
+  else if (strcmp (arg, "44") == 0)             /* 11/44 */
+    return set_cpu_model ("kd11dz");            /* KD11-Z */
+
+  else if (strcmp (arg, "45") == 0 ||           /* 11/45/50/55/70 */
+           strcmp (arg, "50") == 0 ||
+           strcmp (arg, "55") == 0 ||
+           strcmp (arg, "70") == 0)
+    return set_cpu_model ("kb11");              /* KB11 */
+
+  else if (strcmp (arg, "60") == 0)             /* 11/60 */
+    return set_cpu_model ("kd11k");             /* KD11-K */
+
+  else if (strcmp (arg, "53") == 0 ||           /* 11/53/73/83/84/93/94 */
+           strcmp (arg, "73") == 0 ||
+           strcmp (arg, "83") == 0 ||
+           strcmp (arg, "84") == 0 ||
+           strcmp (arg, "93") == 0 ||
+           strcmp (arg, "94") == 0)
+    return set_cpu_model ("j11");               /* J11 */
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA78381
+	for pups-liszt; Fri, 16 Jun 2000 11:09:19 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA78377
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 16 Jun 2000 11:09:14 +1000 (EST)
+	(envelope-from SHOPPA at timaxp.trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Thu, 15 Jun 2000 21:06:31 -0400
+Date: Thu, 15 Jun 2000 21:06:31 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <000615210631.262000b2 at trailing-edge.com>
+Subject: Bunch of Unix tapes rescued
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On an Expedition to NJ Tuesday, I rescued about 3/4 of a ton of magtapes.
+Some of these will probably be interesting for the PUPS archive.  In particular,
+I'm reading through seven of 'em tonight.  If someone could explain to
+me how "Unix System V Release 2.0" and "Unix System III" work into the
+grand scheme of AT&T Unices already in the PUPS archive, and how 2.9.1 BSD
+might be different from (or the same as) the 2.9 BSD stuff already in the
+archive, I'd forever appreciate it :-).
+
+The first two tapes are AT&T Unix System V tapes for VAXen:
+
+Tape 1:
+
+	AT&T 60462
+Unix System V Release 2.0
+VAX Version 2 for 11/780 and 11/750
+TPName: Root and Selectables
+
+	AT&T 60462
+Dwg: j1p077c-3  List:1M1
+TP No: OTP-1P550-01  IS: 2.0V2
+Order: VX501404 Spec:000 Item:1
+BPI 1600 Max Blksize: 05120  Files:0009
+Date:01/13/86  Opr: jlc Drv: tu-2
+
+
+Tape 2:
+	AT&T 60463
+Unix System V Release 2.0
+VAX Version 2 for 11/780 and 11/750
+TPName: USR File System
+
+	AT&T 60463
+Dwg: j1p077c-3  List:2m2
+TP No: OTP-1P550-02  IS: 2.0V2
+Order: UX501404 Spec:000 Item:1
+BPI 1600 Max Blksize: 05120  Files:0009
+Date:01/13/86  Opr: jlc Drv: tu-0
+
+
+The third tape is UNIX System III from AT&T:
+
+Tape 3:
+	UNIX* System III
+     PDP 11/70,45 - 800 BPI
+        Release Tape #1
+*UNIX is a trademark of Bell Laboratories
+
+	Restricted Rights
+Use Duplication or Disclosure is Subject
+To Restrictions Stated in your contract with
+American Telephone & Telegraph
+
+The Fourth and Fifth tape are either 2.9BSD or 2.9.1BSD (I
+can't tell the difference until I compare these tapes with the
+files already in the PUPS archives):
+
+Tape 4:
+
+	Berkeley UNIX (Rev. 2.9.1)  2.9BSD
+	Sun Nov 20 14:55:50 PST 1983
+	800 BPI HT/TM boot tape.  For tar files
+	skip the first 7 tape files with
+	``mt -t /dev/nrmt0 fsf 7''
+	Reel 1 of 2   Tape #
+
+Tape 5:
+	Berkeley UNIX (Rev. 2.9.1)  2.9BSD
+	Sun Nov 20 14:55:50 PST 1983
+	800 BPI		Tar of /usr/src
+	Reel 2 of 2
+
+And Tapes 6 and 7 seem to be a complete distribution set of 4.2BSD,
+they ought to form a good replacement for the supposedly damaged and
+incomplete set in /Distributions/4bsd/4.2BSD.
+
+Tape 6:
+	4.2bsd VAX UNIX System 8/23/83
+	6 files on tape:
+	 1 (boot stuff) 2 (mini root)
+	 3 ((root dump) 4 (/sys) 5 (/usr)
+	 6 (/usr/lib/vfont)
+	last three are tar; 1600 bpi
+
+Tape 7:
+	4.2bsd VAX UNIX System 8/23/83
+	tape 2: 3 files on tape
+	 1 (/usr/src)
+	 2 (user contributed software)
+	 3 (/usr/ingres)
+	all files are tar; 1600 bpi
+
+Like I said, there's about 3/4 of a ton of tapes in total, I'm sure there
+are some other PUPS-related goodies deeper in the pile...
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA78462
+	for pups-liszt; Fri, 16 Jun 2000 11:34:34 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.Harhan.ORG [207.55.197.4])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA78458
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 16 Jun 2000 11:34:29 +1000 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA29885; Thu, 15 Jun 00 20:30:44 CDT
+Date: Thu, 15 Jun 00 20:30:44 CDT
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0006160130.AA29885 at ivan.Harhan.ORG>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Bunch of Unix tapes rescued
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Tim Shoppa <SHOPPA at trailing-edge.com> wrote:
+
+> And Tapes 6 and 7 seem to be a complete distribution set of 4.2BSD,
+> they ought to form a good replacement for the supposedly damaged and
+> incomplete set in /Distributions/4bsd/4.2BSD.
+>
+> [contents skipped, perfectly matches CSRG 4.2BSD dist]
+
+Yes, please read them and I'll put them in the archive. I maintain the 4BSD
+area.
+
+--
+Michael Sokolov		Harhan Engineering Laboratory
+Public Service Agent	International Free Computing Task Force
+			International Engineering and Science Task Force
+			615 N GOOD LATIMER EXPY STE #4
+			DALLAS TX 75204-5852 USA
+
+Phone: +1-214-824-7693 (Harhan Eng Lab office)
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP) (UUCP coming soon)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA78621
+	for pups-liszt; Fri, 16 Jun 2000 12:06:55 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA78617
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 16 Jun 2000 12:06:53 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id MAA46483;
+	Fri, 16 Jun 2000 12:04:11 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200006160204.MAA46483 at henry.cs.adfa.edu.au>
+Subject: Re: Bunch of Unix tapes rescued
+In-Reply-To: <000615210631.262000b2 at trailing-edge.com> from Tim Shoppa at "Jun 15, 2000  9: 6:31 pm"
+To: SHOPPA at trailing-edge.com (Tim Shoppa)
+Date: Fri, 16 Jun 2000 12:04:11 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Tim Shoppa:
+> On an Expedition to NJ Tuesday, I rescued about 3/4 of a ton of magtapes.
+> Tape 1:
+> 
+> 	AT&T 60462
+> Unix System V Release 2.0
+> VAX Version 2 for 11/780 and 11/750
+> TPName: Root and Selectables
+
+Yes please, I have sysVR0 in the archive at the moment.
+ 
+> Tape 2:
+> 	AT&T 60463
+> Unix System V Release 2.0
+> VAX Version 2 for 11/780 and 11/750
+> TPName: USR File System
+
+Yes please. Don't have it yet!
+ 
+> Tape 3:
+> 	UNIX* System III
+>      PDP 11/70,45 - 800 BPI
+
+Could be the same as Distributions/usdl/SysIII, but read it anyway!
+ 
+> And Tapes 6 and 7 seem to be a complete distribution set of 4.2BSD,
+> they ought to form a good replacement for the supposedly damaged and
+> incomplete set in /Distributions/4bsd/4.2BSD.
+
+Again, yes please!!!
+
+Thanks Tim.
+	Warren
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA79038
+	for pups-liszt; Fri, 16 Jun 2000 13:27:36 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id NAA79034
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 16 Jun 2000 13:27:32 +1000 (EST)
+	(envelope-from SHOPPA at timaxp.trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Thu, 15 Jun 2000 23:24:51 -0400
+Date: Thu, 15 Jun 2000 23:24:51 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <000615232451.262000b2 at trailing-edge.com>
+Subject: Re: Bunch of Unix tapes rescued
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> Again, yes please!!!
+
+Would it be useful if I also uploaded GIF's or JPG's or TIFF's of scans
+of the labels on the original tapes?  If so, is there any preference for
+the format of the scan?  These are all (as Tommy Smothers
+would say) "the original virgin" tapes.
+
+Tim.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA81018
+	for pups-liszt; Fri, 16 Jun 2000 18:07:47 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from toulon.informatik.uni-tuebingen.de (toulon.Informatik.Uni-Tuebingen.De [134.2.12.9])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA81014
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 16 Jun 2000 18:07:42 +1000 (EST)
+	(envelope-from leypold at informatik.uni-tuebingen.de)
+Received: from informatik.uni-tuebingen.de (wintermute [134.2.12.56])
+	by toulon.informatik.uni-tuebingen.de (Postfix) with ESMTP
+	id 9A8B71067; Fri, 16 Jun 2000 10:04:55 +0200 (MST)
+Received: (from leypold at localhost)
+	by informatik.uni-tuebingen.de (8.9.3/8.9.3) id KAA12190;
+	Fri, 16 Jun 2000 10:04:53 +0200 (CEST)
+	(envelope-from leypold at informatik.uni-tuebingen.de)
+Date: Fri, 16 Jun 2000 10:04:53 +0200 (CEST)
+Message-Id: <200006160804.KAA12190 at informatik.uni-tuebingen.de>
+X-Authentication-Warning: wintermute.informatik.uni-tuebingen.de: leypold set sender to leypold at informatik.uni-tuebingen.de using -f
+From: Markus Leypold <leypold@informatik.uni-tuebingen.de>
+To: SHOPPA at trailing-edge.com
+Cc: PUPS at MINNIE.CS.ADFA.OZ.AU
+In-reply-to: <000615210631.262000b2 at trailing-edge.com> (message from Tim
+	Shoppa on Thu, 15 Jun 2000 21:06:31 -0400)
+Subject: Re: Bunch of Unix tapes rescued
+References:  <000615210631.262000b2 at trailing-edge.com>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+
+WOW. Great. Super !! :-)
+
+
+------------------
+ > Delivered-To: leypold at lesbains.informatik.uni-tuebingen.de
+ > Date: Thu, 15 Jun 2000 21:06:31 -0400
+ > From: Tim Shoppa <SHOPPA at trailing-edge.com>
+ > Sender: owner-pups at minnie.cs.adfa.edu.au
+ > 
+ > On an Expedition to NJ Tuesday, I rescued about 3/4 of a ton of magtapes.
+ > Some of these will probably be interesting for the PUPS archive.  In particular,
+ > I'm reading through seven of 'em tonight.  If someone could explain to
+ > me how "Unix System V Release 2.0" and "Unix System III" work into the
+ > grand scheme of AT&T Unices already in the PUPS archive, and how 2.9.1 BSD
+ > might be different from (or the same as) the 2.9 BSD stuff already in the
+ > archive, I'd forever appreciate it :-).
+ > 
+ > The first two tapes are AT&T Unix System V tapes for VAXen:
+ > 
+ > Tape 1:
+ > 
+ > 	AT&T 60462
+ > Unix System V Release 2.0
+ > VAX Version 2 for 11/780 and 11/750
+ > TPName: Root and Selectables
+ > 
+ > 	AT&T 60462
+ > Dwg: j1p077c-3  List:1M1
+ > TP No: OTP-1P550-01  IS: 2.0V2
+ > Order: VX501404 Spec:000 Item:1
+ > BPI 1600 Max Blksize: 05120  Files:0009
+ > Date:01/13/86  Opr: jlc Drv: tu-2
+ > 
+ > 
+ > Tape 2:
+ > 	AT&T 60463
+ > Unix System V Release 2.0
+ > VAX Version 2 for 11/780 and 11/750
+ > TPName: USR File System
+ > 
+ > 	AT&T 60463
+ > Dwg: j1p077c-3  List:2m2
+ > TP No: OTP-1P550-02  IS: 2.0V2
+ > Order: UX501404 Spec:000 Item:1
+ > BPI 1600 Max Blksize: 05120  Files:0009
+ > Date:01/13/86  Opr: jlc Drv: tu-0
+ > 
+ > 
+ > The third tape is UNIX System III from AT&T:
+ > 
+ > Tape 3:
+ > 	UNIX* System III
+ >      PDP 11/70,45 - 800 BPI
+ >         Release Tape #1
+ > *UNIX is a trademark of Bell Laboratories
+ > 
+ > 	Restricted Rights
+ > Use Duplication or Disclosure is Subject
+ > To Restrictions Stated in your contract with
+ > American Telephone & Telegraph
+ > 
+ > The Fourth and Fifth tape are either 2.9BSD or 2.9.1BSD (I
+ > can't tell the difference until I compare these tapes with the
+ > files already in the PUPS archives):
+ > 
+ > Tape 4:
+ > 
+ > 	Berkeley UNIX (Rev. 2.9.1)  2.9BSD
+ > 	Sun Nov 20 14:55:50 PST 1983
+ > 	800 BPI HT/TM boot tape.  For tar files
+ > 	skip the first 7 tape files with
+ > 	``mt -t /dev/nrmt0 fsf 7''
+ > 	Reel 1 of 2   Tape #
+ > 
+ > Tape 5:
+ > 	Berkeley UNIX (Rev. 2.9.1)  2.9BSD
+ > 	Sun Nov 20 14:55:50 PST 1983
+ > 	800 BPI		Tar of /usr/src
+ > 	Reel 2 of 2
+ > 
+ > And Tapes 6 and 7 seem to be a complete distribution set of 4.2BSD,
+ > they ought to form a good replacement for the supposedly damaged and
+ > incomplete set in /Distributions/4bsd/4.2BSD.
+ > 
+ > Tape 6:
+ > 	4.2bsd VAX UNIX System 8/23/83
+ > 	6 files on tape:
+ > 	 1 (boot stuff) 2 (mini root)
+ > 	 3 ((root dump) 4 (/sys) 5 (/usr)
+ > 	 6 (/usr/lib/vfont)
+ > 	last three are tar; 1600 bpi
+ > 
+ > Tape 7:
+ > 	4.2bsd VAX UNIX System 8/23/83
+ > 	tape 2: 3 files on tape
+ > 	 1 (/usr/src)
+ > 	 2 (user contributed software)
+ > 	 3 (/usr/ingres)
+ > 	all files are tar; 1600 bpi
+ > 
+ > Like I said, there's about 3/4 of a ton of tapes in total, I'm sure there
+ > are some other PUPS-related goodies deeper in the pile...
+ > 
+ > -- 
+ >  Tim Shoppa                        Email: shoppa at trailing-edge.com
+ >  Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ >  7328 Bradley Blvd		   Voice: 301-767-5917
+ >  Bethesda, MD, USA 20817           Fax:   301-767-5927
+ > 
+ > 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA81036
+	for pups-liszt; Fri, 16 Jun 2000 18:10:53 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from toulon.informatik.uni-tuebingen.de (toulon.Informatik.Uni-Tuebingen.De [134.2.12.9])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA81032
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 16 Jun 2000 18:10:49 +1000 (EST)
+	(envelope-from leypold at informatik.uni-tuebingen.de)
+Received: from informatik.uni-tuebingen.de (wintermute [134.2.12.56])
+	by toulon.informatik.uni-tuebingen.de (Postfix) with ESMTP
+	id CEBC51067; Fri, 16 Jun 2000 10:08:08 +0200 (MST)
+Received: (from leypold at localhost)
+	by informatik.uni-tuebingen.de (8.9.3/8.9.3) id KAA12196;
+	Fri, 16 Jun 2000 10:08:07 +0200 (CEST)
+	(envelope-from leypold at informatik.uni-tuebingen.de)
+Date: Fri, 16 Jun 2000 10:08:07 +0200 (CEST)
+Message-Id: <200006160808.KAA12196 at informatik.uni-tuebingen.de>
+X-Authentication-Warning: wintermute.informatik.uni-tuebingen.de: leypold set sender to leypold at informatik.uni-tuebingen.de using -f
+From: Markus Leypold <leypold@informatik.uni-tuebingen.de>
+To: SHOPPA at trailing-edge.com
+Cc: PUPS at MINNIE.CS.ADFA.OZ.AU
+In-reply-to: <000615232451.262000b2 at trailing-edge.com> (message from Tim
+	Shoppa on Thu, 15 Jun 2000 23:24:51 -0400)
+Subject: Re: Bunch of Unix tapes rescued
+References:  <000615232451.262000b2 at trailing-edge.com>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+ > Delivered-To: leypold at lesbains.informatik.uni-tuebingen.de
+ > Date: Thu, 15 Jun 2000 23:24:51 -0400
+ > From: Tim Shoppa <SHOPPA at trailing-edge.com>
+ > Sender: owner-pups at minnie.cs.adfa.edu.au
+ > 
+ > > Again, yes please!!!
+ > 
+ > Would it be useful if I also uploaded GIF's or JPG's or TIFF's of scans
+ > of the labels on the original tapes?  If so, is there any preference for
+ > the format of the scan?  These are all (as Tommy Smothers
+ > would say) "the original virgin" tapes.
+
+
+Well, I'm presently only a client of the archive, so to say, but why not use
+png (the gif replacement advocated by the FSF). Better not use GIF for all
+this licensing issues. And as far as I see, png can be shown by -- well -- 
+Netscape, whereas TIFF requires a plugin or an external viewer.
+
+
+Regards - Markus
+
+
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id VAA81738
+	for pups-liszt; Fri, 16 Jun 2000 21:24:43 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id VAA81734
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 16 Jun 2000 21:24:38 +1000 (EST)
+	(envelope-from SHOPPA at timaxp.trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Fri, 16 Jun 2000 7:21:56 -0400
+Date: Fri, 16 Jun 2000 7:21:56 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <000616072156.262000b2 at trailing-edge.com>
+Subject: Yet Another "where does it fit" question
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+OK, I started sorting through some more piles of tapes, and I found
+a one more thing that I'm-not-quite-sure-where-it-fits:
+
+Two tapes labeled "Vol 1 of 2" and "Vol 2 of 2" and then "2.10.2 SMS
+Unix".  Steven, does this mean you know what's on this and how it's
+different than the 2.10 and 2.10.1 stuff already in the archive? :-)  Terry
+didn't remember...
+
+Also, more goodies that may (or may not) be appropriate to add:
+
+* A 4.3BSD-Reno VAX tape dated "1/2/91".  I suppose I have to get down
+  on my hands and knees and see how this differs from the version dated
+  "30 Jul 90" currently in Distributions/4bsd/4.3BSD-Reno.  This has
+  the original UCB stickers on it.
+
+* A set of tar files on a tape claiming to be the "4.4BSD snapshot
+  4/1/92".  Is PUPS/TUHS collecting anything anything this late?  Is
+  something like this already in Kirk's archive?
+
+Tim.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id WAA81919
+	for pups-liszt; Fri, 16 Jun 2000 22:03:25 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.Harhan.ORG [207.55.197.4])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id WAA81915
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 16 Jun 2000 22:03:20 +1000 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA00544; Fri, 16 Jun 00 06:59:26 CDT
+Date: Fri, 16 Jun 00 06:59:26 CDT
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0006161159.AA00544 at ivan.Harhan.ORG>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Yet Another "where does it fit" question
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Tim Shoppa <SHOPPA at trailing-edge.com> wrote:
+
+> * A 4.3BSD-Reno VAX tape dated "1/2/91".  I suppose I have to get down
+>   on my hands and knees and see how this differs from the version dated
+>   "30 Jul 90" currently in Distributions/4bsd/4.3BSD-Reno.  This has
+>   the original UCB stickers on it.
+
+Yes.
+
+> * A set of tar files on a tape claiming to be the "4.4BSD snapshot
+>   4/1/92".  Is PUPS/TUHS collecting anything anything this late?  Is
+>   something like this already in Kirk's archive?
+
+Kirk, you'll have to fill me in on this one. Is this the "4.4BSD-Alpha" I've
+seen mentioned in some places? In any case this is not on Kirk's CD-ROMs and
+I'll include it in my 4BSD collection.
+
+--
+Michael Sokolov		Harhan Engineering Laboratory
+Public Service Agent	International Free Computing Task Force
+			International Engineering and Science Task Force
+			615 N GOOD LATIMER EXPY STE #4
+			DALLAS TX 75204-5852 USA
+
+Phone: +1-214-824-7693 (Harhan Eng Lab office)
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP) (UUCP coming soon)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA82759
+	for pups-liszt; Sat, 17 Jun 2000 00:09:54 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id AAA82755
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Sat, 17 Jun 2000 00:09:50 +1000 (EST)
+	(envelope-from SHOPPA at timaxp.trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Fri, 16 Jun 2000 10:07:07 -0400
+Date: Fri, 16 Jun 2000 10:07:07 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <000616100707.2620009e at trailing-edge.com>
+Subject: 4.4BSD-Alpha
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>> * A set of tar files on a tape claiming to be the "4.4BSD snapshot
+>>   4/1/92".  Is PUPS/TUHS collecting anything anything this late?  Is
+>>   something like this already in Kirk's archive?
+
+>Kirk, you'll have to fill me in on this one. Is this the "4.4BSD-Alpha" I've
+>seen mentioned in some places? In any case this is not on Kirk's CD-ROMs and
+>I'll include it in my 4BSD collection.
+
+I found a separate tape, labeled "August 23, 1992", with a matching cover
+letter (signed by Kirk McKusick) saying "This is a distribution tape
+for the 4.4BSD-Alpha release ... The binaries and kernel on the
+tape support the HP 9000/300 68000-based workstations...".  Is this
+the holy grail?
+
+I would guess the "4.4BSD snapshot 4/1/92" is pre-release.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA84172
+	for pups-liszt; Sat, 17 Jun 2000 00:40:20 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.Harhan.ORG [207.55.197.4])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id AAA84161;
+	Sat, 17 Jun 2000 00:40:04 +1000 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA00708; Fri, 16 Jun 00 09:35:55 CDT
+Date: Fri, 16 Jun 00 09:35:55 CDT
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0006161435.AA00708 at ivan.Harhan.ORG>
+To: pups at minnie.cs.adfa.edu.au, quasijarus at ivan.Harhan.ORG,
+        tuhs at minnie.cs.adfa.edu.au
+Subject: 4.2BSD dist in the TUHS/PUPS archive: resolution
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Quasijarus Consortium members and TUHS/PUPS archive users,
+
+Since early fall 1998 the archive has had an incomplete distribution of 4.2BSD
+reconstructed from some bogus tape images from Per Andersson. This morning Tim
+Shoppa read an authentic 4.2BSD tape dist. I compared it with the incomplete
+dist in the archive and found that it is the same dist, Tim Shoppa's version is
+complete and correct, and Per Andersson's version was incomplete. The files
+that were in the archive were correct. I added the missing files this morning,
+making the 4.2BSD dist in the archive complete. It is in
+Distributions/4bsd/4.2BSD, it is a superset of what was there before (because
+what was there before was just missing some files), and it identically matches
+Tim Shoppa's copy in his home directory.
+
+I left Per Andersson's original (bogus) files in the Per_Andersson
+subdirectory. Warren, it's up to you if you want to keep or delete them.
+
+--
+Michael Sokolov		Harhan Engineering Laboratory
+Public Service Agent	International Free Computing Task Force
+			International Engineering and Science Task Force
+			615 N GOOD LATIMER EXPY STE #4
+			DALLAS TX 75204-5852 USA
+
+Phone: +1-214-824-7693 (Harhan Eng Lab office)
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP) (UUCP coming soon)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA84202
+	for pups-liszt; Sat, 17 Jun 2000 00:48:04 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.Harhan.ORG [207.55.197.4])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id AAA84198
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 17 Jun 2000 00:47:59 +1000 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA00776; Fri, 16 Jun 00 09:44:07 CDT
+Date: Fri, 16 Jun 00 09:44:07 CDT
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0006161444.AA00776 at ivan.Harhan.ORG>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: 4.4BSD-Alpha
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Tim Shoppa <SHOPPA at trailing-edge.com> wrote:
+
+> I found a separate tape, labeled "August 23, 1992", with a matching cover
+> letter (signed by Kirk McKusick) saying "This is a distribution tape
+> for the 4.4BSD-Alpha release ... The binaries and kernel on the
+> tape support the HP 9000/300 68000-based workstations...".  Is this
+> the holy grail?
+
+OK, I dunno whether it qualifies as "the holy grail" or not, but yes, it is the
+4.4BSD-Alpha dist.
+
+> I would guess the "4.4BSD snapshot 4/1/92" is pre-release.
+
+OK, just upload both if you can, I'll be happy to put them in the archive and
+I'm sure Warren will be too.
+
+--
+Michael Sokolov		Harhan Engineering Laboratory
+Public Service Agent	International Free Computing Task Force
+			International Engineering and Science Task Force
+			615 N GOOD LATIMER EXPY STE #4
+			DALLAS TX 75204-5852 USA
+
+Phone: +1-214-824-7693 (Harhan Eng Lab office)
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP) (UUCP coming soon)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA84892
+	for pups-liszt; Sat, 17 Jun 2000 02:42:25 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sam.on-net.net (sam.on-net.net [204.117.190.8])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA84888
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 17 Jun 2000 02:42:21 +1000 (EST)
+	(envelope-from jasomill at shaffstall.com)
+Received: from guildenstern.shaffstall.com (cisdn-2 [206.229.84.2])
+	by sam.on-net.net (8.9.3/8.9.3) with ESMTP id LAA05790
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 16 Jun 2000 11:37:42 -0500 (EST)
+Date: Fri, 16 Jun 2000 11:31:18 -0500 (EST)
+From: "Jason T. Miller" <jasomill@shaffstall.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: RX50 vocoder timing; FreeBSD kernel woes
+Message-ID: <Pine.LNX.4.10.10006161046320.22889-100000 at guildenstern.shaffstall.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Sorry in advance if you unintentionally deleted this message because of
+the topic, I'm an incorrigable smart-arse and couldn't resist. My other
+idea was ILOVEYOU, but that's been done before...
+
+> This thread has gotten *way* beyond what I (and I'll bet many others)
+> read this list for.
+
+The initiator of this post was yours truly. I have been silet since this
+post. I hate politics. I figured, "just let it simmer down and then
+rationally respond." I hate flamefesten.
+
+Sorry. Can't please everybody all the time. Hey, I don't even try, most of
+the time. I find that sitting on the fence can be quite an uncomfortable
+position to be in, especially if you're on one of the fenceposts. But, wie
+immer, I digress. I didn't mean to crowd your (that is, the royal "your")
+mailbox with my hardware woes. I had some issues, directly related to my
+_usage_ of PDP-11 UNIX, and, insofar as both the mentioned PDP-11 mailing
+list and the DECUS PDP-11 list on eisner.decus.org are both ghost towns,
+and several members of this mailing list seem to know quite a bit about
+both the hardware platform and the software I choose to run (2.11BSD), I
+dreamt of things that never were and said "why not." Thanks to the
+knowledge of fellow list-members, my questions were answered, my problem
+was solved, and the result is now available in the PUPS archive under
+Tools/Disks/rx50-FreeBSD.tar.gz (no comments on code quality to the group,
+please; that would be off-topic [read: embarassing] :) Qs and Cs to
+jasomill at indiana.edu welcome), which is useful to me and may possibly be
+of some interest to other PDP-11 UNIX hobbyists trying to solve the same
+problem.
+
+I read the entire PUPS mailing list archive before making my first post.
+I've noticed that the top three platform-specific topics seem to be (in
+order of appearance):
+
+  1) emulator software
+  2) VAX hardware
+  3) PDP hardware
+
+I don't use an emulator and I don't have a VAX (though I want one very
+very much, but admittably to run VMS mostly), but the discussions don't
+bother me. As a matter of fact, some of them interest me; those that
+don't, I skip. Anyway, just an observation.
+
+I know it's not the PHPS, but I can not be dissuaded in my belief that
+actually _using_ the systems is a vital part of a living preservation
+effort, and using them without functional hardware is a bit difficult,
+emulators notwithstanding. But please don't deactivate me :), I'll read a
+UHS list and a PUPS list and a VAX list and an RT-PC list (I've been
+wanting to get my hands on one of those buggers for awhile, actually),
+desirous of everything at the same time, and try my best not to yawn and
+say commonplace things (apologizes to Jack Kerouac). Thanks again for help
+and interesting discussion, to all parties involved, mad to talk or less
+so.
+
+What about archiving PDP hardware information? I don't mean discussing
+obscure timing details of RK05 controllers or anything, but having a
+section of the archive for random hardware tidbits re: PDP. It's not
+_directly_ related to UNIX preservation, but it'd be a boon to PDP UNIX
+users (not to mention keeping list traffic down in re: these things), and
+its space requirements are miniscule. Maybe wait until the PDP-specific
+stuff is split off, and create a directory. I'd be happy to maintain it
+(I'm also attempting to contact DEC ne Compaq about getting some legacy
+docs released; those, of course, would be included; no, that's not what
+Mentec bought, I don't think, that's RSX and RSTS/E and RT-11, maybe even
+Ultrix. They provide engineering support to DEC PDP-11 customers as well
+as compatible hardware, but I believe Compaq still owns the copyrights to
+the Digital hardware documentation. Not 100% sure though).
+
+Once again, sorry, once again, thanks, and in closing,
+
+AWWWW,
+jasomill
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA87825
+	for pups-liszt; Sat, 17 Jun 2000 05:14:27 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from relay.nuxi.com (root at nuxi.cs.ucdavis.edu [169.237.7.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA87821
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 17 Jun 2000 05:14:22 +1000 (EST)
+	(envelope-from obrien at NUXI.com)
+Received: from dragon.nuxi.com (root at trang.nuxi.com [209.152.133.57])
+	by relay.nuxi.com (8.9.3/8.9.3) with ESMTP id MAA58858
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 16 Jun 2000 12:11:35 -0700 (PDT)
+	(envelope-from obrien at dragon.nuxi.com)
+Received: (from obrien at localhost)
+	by dragon.nuxi.com (8.9.3/8.9.1) id MAA67489
+	for pups at minnie.cs.adfa.edu.au; Fri, 16 Jun 2000 12:11:28 -0700 (PDT)
+	(envelope-from obrien)
+Date: Fri, 16 Jun 2000 12:11:28 -0700
+From: "David O'Brien" <obrien@NUXI.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: 4.4BSD-Alpha
+Message-ID: <20000616121128.A35577 at dragon.nuxi.com>
+Reply-To: obrien at NUXI.com
+References: <0006161444.AA00776 at ivan.Harhan.ORG>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.2i
+In-Reply-To: <0006161444.AA00776 at ivan.Harhan.ORG>; from msokolov at ivan.Harhan.ORG on Fri, Jun 16, 2000 at 09:44:07AM -0500
+X-Operating-System: FreeBSD 5.0-CURRENT
+Organization: The NUXI BSD group
+X-PGP-Fingerprint: B7 4D 3E E9 11 39 5F A3  90 76 5D 69 58 D9 98 7A
+X-Pgp-Keyid: 34F9F9D5
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+It may have already been discussed before, but here is the list of
+distirbutions on McKusick's "The CSRG Archives" 4-CD set:
+
+1BSD, 2BSD, 3BSD, 2.9pucc, 2.10, 2.79, 2.8, 2.9, 4.0, 4.1, 4.1a, 4.1c.1,
+4.1c.2, 4.1.snap, 4.2, 4.3, VM.snapshot.1, VM.snapshot.2, 4.3Tahoe,
+4.3Reno, Net/1, Net/2, 4.4, 4.4-Lite1, 4.4-Lite2, and /usr/src SCCS
+files.
+
+-- 
+-- David    (obrien at NUXI.com)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA87954
+	for pups-liszt; Sat, 17 Jun 2000 05:31:49 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from ivan.Harhan.ORG (ivan.Harhan.ORG [207.55.197.4])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id FAA87950
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 17 Jun 2000 05:31:45 +1000 (EST)
+	(envelope-from msokolov at ivan.Harhan.ORG)
+Received: by ivan.Harhan.ORG (5.61.1.1/1.36)
+	id AA01375; Fri, 16 Jun 00 14:27:54 CDT
+Date: Fri, 16 Jun 00 14:27:54 CDT
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Message-Id: <0006161927.AA01375 at ivan.Harhan.ORG>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: 4.4BSD-Alpha
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+David O'Brien <obrien at NUXI.com> wrote:
+
+> It may have already been discussed before, but here is the list of
+> distirbutions on McKusick's "The CSRG Archives" 4-CD set:
+>
+> 1BSD, 2BSD, 3BSD, 2.9pucc, 2.10, 2.79, 2.8, 2.9, 4.0, 4.1, 4.1a, 4.1c.1,
+> 4.1c.2, 4.1.snap, 4.2, 4.3, VM.snapshot.1, VM.snapshot.2, 4.3Tahoe,
+> 4.3Reno, Net/1, Net/2, 4.4, 4.4-Lite1, 4.4-Lite2, and /usr/src SCCS
+> files.
+
+I know this of course, I have one.
+
+--
+Michael Sokolov		Harhan Engineering Laboratory
+Public Service Agent	International Free Computing Task Force
+			International Engineering and Science Task Force
+			615 N GOOD LATIMER EXPY STE #4
+			DALLAS TX 75204-5852 USA
+
+Phone: +1-214-824-7693 (Harhan Eng Lab office)
+E-mail: msokolov at ivan.Harhan.ORG (ARPA TCP/SMTP) (UUCP coming soon)
+
+
