@@ -1,0 +1,234 @@
+From: jstevep@tron.superglobalmegacorp.com (PUP)
+Date: Wed, 16 May 2001 21:31:48 -0500 (EST)
+Subject: [pups] BSD 2.11 SL/IP and sim2.3d+BB1
+Message-ID: <200105170231.f4H2VmO23175@tron.superglobalmegacorp.com>
+
+	I know that there must be some setup guides for BSD2.11 still floating around there, but I have not been able to find anything.. Here is what I am trying to do:
+
+	I noticed that the sim2.3d+BB1 emulator will allow you to connect Unix "devices" to the DL1 lines.  I set it to connect the serial port on my Linux box, and connected a IBM 3151 (VT100 like terminal), and it worked great!  Taking this a step further, I took the serial port and moved it to my Cisco router (the aux port).. I have been trying to configure SL/IP on it.. I first setup my Linux box to connect to the router via slip so that I can verify my cisco config.  I am having trouble on the BSD side.. As far as I can tell it is not routing replys over the sl0 interface.. (Or the emulator is cooking the serial data...)  A final test I tried to connect to copies of sim2.3d+BB1 via pty's.. same thing.  The good part is when you try to telnet from the router, you can see the socket accept on the BSD side.. The BSD box seems not to reply..  Additionally I saw some  stuff on increasing the size of CBLOCK in param.h (my default was 32, I tried 64), which seemed to have no effect.
+
+I started SL/IP by running 
+slattach ttyl1 9600
+
+then
+ifconfig sl0 10.1.1.1 10.1.1.2 up
+
+by default as this I can't ping the 10.1.1.1 (my side).. so I added a route
+
+route add 10.1.1.1 127.0.0.1 0
+
+I don't know if I have to do this...  Oh the image that I'm using is the 2.11_rp_unknown from the archive.. (It has a note that it is patch level 400.)  Also the person that maintains BSD 2.11's site is down.. bummer..
+
+Sorry for the rambling!
+
+Received: (from major at localhost)
+	by minnie.tuhs.org (8.9.3/8.9.3) id OAA96454
+	for pups-liszt; Thu, 17 May 2001 14:04:16 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.tuhs.org (8.9.3/8.9.3) with ESMTP id OAA96450
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 17 May 2001 14:04:12 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f4H3qVx16950
+	for pups at minnie.cs.adfa.edu.au; Wed, 16 May 2001 20:52:31 -0700 (PDT)
+Date: Wed, 16 May 2001 20:52:31 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200105170352.f4H3qVx16950 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] BSD 2.11 SL/IP and sim2.3d+BB1
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: PUP <jstevep at tron.superglobalmegacorp.com>
+
+	I've taken the liberty of adding <\n> characters - something about 1k
+	character lines bugs me ;)
+
+> I know that there must be some setup guides for BSD2.11 still floating 
+> around there, but I have not been able to find anything.. Here is what I 
+
+	/usr/doc/2.10/setup.2.11
+
+	bit of a misnomer and it's a long enough story I won't bother anyone
+	with the details.  That's the raw troff sources though.  If it's the
+	formatted version that is wanted there should be a copy in the 2.11
+	portion of the PUPS/TUHS section of the archive.  It shows up at
+	PDP-11/Distributions/ucb/2.11BSD and there are also complete tarballs
+	and a dump of the root filesystem all at rev level 431.  It should be
+	a simple matter of putting the bits on tape/disk (using the makesimtape
+	or similar utility provided with the emulator being used).  At that
+	point the normal 2.11 installation process can be followed - there have
+	only been 5 updates since then (432 thru 436) so catching up wouldn't be
+	hard at all.
+
+> 	I noticed that the sim2.3d+BB1 emulator will allow you to connect Unix 
+> "devices" to the DL1 lines.  I set it to connect the serial port on my Linux 
+> box, and connected a IBM 3151 (VT100 like terminal), and it worked great!  
+
+	Probably doing 7E1 and just about anything would work with that ;)
+
+> Taking this a step further, I took the serial port and moved it to my Cisco 
+> router (the aux port).. I have been trying to configure SL/IP on it..
+
+	That'll definitely require a 'raw' or 8bit clean path and I don't know
+	if the sim2.3d does that or not - never tried it.    The stock sim2.3d
+	doesn't appear to have extra serial line support - or if it does it
+	isn't obvious.  Perhaps that is what the BB1 part is about.
+
+> I first setup my Linux box to connect to the router via slip so that I can 
+> verify my cisco config.  I am having trouble on the BSD side.. As far as I 
+> can tell it is not routing replys over the sl0 interface.. (Or the emulator 
+> is cooking the serial data...)  
+
+	That's a real possibility.  The 'slattach' command on the 11 side will
+	take care of setting all the modes so that an 8bit path is obtained.  If
+	the emulator is stripping the parity bit (which wouldn't show up in the
+	normal "hook a terminal up" test) then SL/IP will obviously have
+	problems.
+
+	You might have better luck with the Begemot emulator P11.  No need for
+	SL/IP since P11 has an emulated DEQNA ethernet driver.
+
+> A final test I tried to connect to copies of sim2.3d+BB1 via pty's.. same 
+> thing.  The good part is when you try to telnet from the router, you can see 
+> the socket accept on the BSD side.. The BSD box seems not to reply..  
+> Additionally I saw some  stuff on increasing the size of CBLOCK in param.h 
+> (my default was 32, I tried 64), which seemed to have no effect.
+	
+	I'd not muck about with CBLOCK - it doesn't really buy much and from
+	the sounds of things aren't getting anywhere near the conditions that 
+	comment was aimed at.
+
+
+> I started SL/IP by running 
+> slattach ttyl1 9600
+> then
+> ifconfig sl0 10.1.1.1 10.1.1.2 up
+
+	That should be all that's necessary
+
+> by default as this I can't ping the 10.1.1.1 (my side).. so I added a route
+> 
+> route add 10.1.1.1 127.0.0.1 0
+> I don't know if I have to do this...
+
+	You shouldn't have to do that because in /etc/netstart, if things are
+	set up right you would have:
+
+	slattach ttyl1 9600
+	ifconfig sl0 10.1.1.1 10.1.1.2 up
+	route add $hostname localhost 0
+	route add default $default 1
+
+	So if 'hostname' and 'default' are set at the top of the file all the
+	routing is all set to go.  Just make sure that 'ifconfig sl0' happens
+	before 'ifconfig lo0 ...'.   Also, by default the C library is compiled
+	to use DNS resolver routines so it will likely be necessary to use
+	a combination of numeric IP addresses and entries in /etc/hosts
+
+> Oh the image that I'm using is the 2.11_rp_unknown from the archive.. 
+> (It has a note that it is patch level 400.)
+
+	That is fairly old, but SL/IP hasn't changed since the system came out
+	eons ago.
+
+> Also the person that maintains BSD 2.11's site is down.. bummer..
+
+	It has _never_ been down except for a reboot the other day to install
+	another 512MB of memory a week or so ago.   With a 1400VA UPS the
+	system can ride out most of the power problems California's having.
+
+	If the FTP site here is unreachable you might try going to the mirror
+	at FTP.TO.GD-ES.COM - all the updates are in /pub/2.11BSD
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.tuhs.org (8.9.3/8.9.3) id OAA96508
+	for pups-liszt; Thu, 17 May 2001 14:11:44 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.tuhs.org (8.9.3/8.9.3) with ESMTP id OAA96503
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 17 May 2001 14:11:41 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f4H406m51958;
+	Thu, 17 May 2001 14:00:06 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200105170400.f4H406m51958 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] BSD 2.11 SL/IP and sim2.3d+BB1
+In-Reply-To: <200105170352.f4H3qVx16950 at moe.2bsd.com> from "Steven M. Schultz"
+ at "May 16, 2001 08:52:31 pm"
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Date: Thu, 17 May 2001 14:00:06 +1000 (EST)
+CC: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Reply-To: wkt at tuhs.org
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Steven M. Schultz:
+>> 	I noticed that the sim2.3d+BB1 emulator will allow you to connect Unix 
+>> "devices" to the DL1 lines.  I set it to connect the serial port on my Linux 
+>> box, and connected a IBM 3151 (VT100 like terminal), and it worked great!  
+> 
+> 	Probably doing 7E1 and just about anything would work with that ;)
+> 
+> > Taking this a step further, I took the serial port and moved it to my Cisco 
+> > router (the aux port).. I have been trying to configure SL/IP on it..
+> 
+> 	That'll definitely require a 'raw' or 8bit clean path and I don't know
+> 	if the sim2.3d does that or not - never tried it.    The stock sim2.3d
+> 	doesn't appear to have extra serial line support - or if it does it
+> 	isn't obvious.  Perhaps that is what the BB1 part is about.
+
+I can confirm that sim2.3d is not 8-bit clean on output. I got bitten
+on this when working on Vtserver, and I tore my hair out for a whole day.
+
+443c449
+< if ((temp = sim_putchar (tto_unit.buf & 0177)) != SCPE_OK) return temp;
+---
+> if ((temp = sim_putchar (tto_unit.buf)) != SCPE_OK) return temp;
+
+It is 8-bit clean on input.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.tuhs.org (8.9.3/8.9.3) id RAA97320
+	for pups-liszt; Thu, 17 May 2001 17:04:28 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from tron.superglobalmegacorp.com ([12.21.28.170])
+	by minnie.tuhs.org (8.9.3/8.9.3) with ESMTP id RAA97316
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 17 May 2001 17:04:24 +1000 (EST)
+	(envelope-from jstevep at tron.superglobalmegacorp.com)
+Received: (from jstevep at localhost)
+	by tron.superglobalmegacorp.com (8.10.1/8.10.1) id f4H7buK16947
+	for pups at minnie.cs.adfa.edu.au; Thu, 17 May 2001 02:37:56 -0500 (EST)
+Date: Thu, 17 May 2001 02:37:56 -0500 (EST)
+From: PUP <jstevep@tron.superglobalmegacorp.com>
+Message-Id: <200105170737.f4H7buK16947 at tron.superglobalmegacorp.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] BSD 2.11 SL/IP and sim2.3d+BB1
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+Thanks for the pointer, I found the part you mentioned for the ASCII clean up and removed them from the DL11 and KL11 drivers, and noticed that I need to detect the 0 device so the console is usable =) but the big thing is that I telneted into the VM using slip ok!!!!
+
+Thanks again, I didn't know what to look for in the source (I was looking @ the other half in the attach stuff not I/O (doh!))
+
+If you want/need I'll gladly diff mine out... 
+
+Oh btw Steven, every time I try to ftp the site, I get connection closed.. It
+'s definatly "up" but I can't get to it.. does your site try to reverse lookup clients? if so, that's the issue.. I don't have reverse entries for dns.
+
+Thanks again!
+
+
