@@ -1,0 +1,205 @@
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Date: Wed, 29 Nov 1995 10:44:32 +0000 (GMT)
+Subject: mknod device numbers
+Message-ID: <m0tKk08-00000DC@swift.eng.ox.ac.uk>
+
+
+First off, thanks to all the people who gave me info for the rk? and
+rrk? devices. That now works. I now come to the question of tty
+devices.
+
+On v5 and v6, the single terminal device which is set up is /dev/tty8
+(c 0 0). This suggests to me that the system is build with a DZ11 (or
+similar) as tty0 to tty7. Am I correct in this assumption? 
+
+My system has a pair of DL11s, and one of them works happily as
+tty8. I'd like to get the second interface up and running. I also have
+a DZ11, if that is any help. (The second DL11 is set up at present and
+works with RT11 using the CONSOL.MAC mechanism to switch ttys. I can't
+remember the CSR/VEC, but it is the RT11 default for a second DL11).
+
+Question is:
+------------
+
+o  What is the device numbering (major/minor) for a second DL11? (and
+   what CSR/VEC should it have?)? Or need I rebuild the system for
+   support of a second DL11?
+
+o  Second, is the DZ11 supported by default, and, if so, what CSR/VEC
+   should I set, and what are the device major and minor numbers?
+
+Cheers once again,
+
+Bob.
+
+-- 
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+    This message brought to you from an entirely Microsoft free system. 
+----------------------------------------------------------------------------
+
+
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id SAA02966; Thu, 30 Nov 1995 18:46:33 +1100
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <29043-0 at oxmail.ox.ac.uk.>; Wed, 29 Nov 1995 10:50:29 +0000
+Message-Id: <m0tKkBC-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: v5, v6 on /34
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Wed, 29 Nov 1995 10:55:58 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 2528
+
+
+Having got past the emulator stage now (and having had my RK05 fitted
+with new heads after a _spectacular_ crash), I've been setting to the
+task of resurecting UNIX on the system.
+
+Thanks to John Wilson's excellent KSERVE Kermit server for RT11 I've
+been able to transfer v5 and v6 disk images to RK05. 
+
+v6 boots just fine, and runs without any real drama. v5, much to my
+suprise, does not ...
+
+First off, my hardware is:
+
+	11/34a (no fpp, no cache)
+	124K word (248Kb) MOS
+	2 x DL11-W 
+	RX11
+	RK11D
+
+	1 x RK05
+	1 x RX01
+
+v5 boots to the '@' prompt. Entering the kernel name at this prompt
+(this is the kernel for the RK05, obviously), causes a great deal of
+disk activity - far more than for v6, in fact. The disk activity
+stops, but no login prompt is presented. The processor is not halted,
+but is executing a relatively tight loop.
+
+Under emulation (using Bob Supnic's pdp11 emulator), v6 ran fine, but
+v5 caused TRAPS every so often. It occurs to me that the behaviour
+I've seen on the real 11/34 corresponds to a trap observed using the
+emulator. The emulator can be 'continued' after a trap and all is
+well. Since the 11/34 doesn't actually halt, but merely sits in a
+tight loop, I can't see how to proceed.
+
+Question is, is what I'm seeing a kernel panic? Since nothing is
+output to the tty, after the '@' prompt, it may be that the kernel
+doesn't like the look of my DL11 configuration? Alternatively,
+everything may be AOK, and running, except that no login prompt is
+produced on the tty.
+
+Interestingly UNIX causes a UNIBUS reset as it finishes booting. This
+is evidenced by the clattering of the RX01.
+
+Naturally it's not necessary for me to get v5 going, since v6 is fine,
+but it would be extremely interesting to find out what is going on. v7
+seems to give a great deal of TRAPs on the emualtor, so maybe that
+would not like the real hardware either judging from current
+observations.
+
+What do people think about this?
+
+Cheers,
+
+Bob.
+
+
+--
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+    This message brought to you from an entirely Microsoft free system. 
+----------------------------------------------------------------------------
+
+
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id JAA04474; Fri, 1 Dec 1995 09:55:19 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA08974; Fri, 1 Dec 1995 09:54:54 +1100
+From: wkt@csadfa.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9511302254.AA08974 at dolphin>
+Subject: Re: v5, v6 on /34
+To: rjm at swift.eng.ox.ac.uk (Bob Manners)
+Date: Fri, 1 Dec 1995 09:54:53 +1100 (EST)
+Cc: oldunix at minnie.cs.adfa.oz.au
+In-Reply-To: <m0tKkBC-00000DC at swift.eng.ox.ac.uk> from "Bob Manners" at Nov 29, 95 10:55:58 am
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Bob Manners:
+> 
+> 
+> Having got past the emulator stage now (and having had my RK05 fitted
+> with new heads after a _spectacular_ crash), I've been setting to the
+> task of resurecting UNIX on the system.
+> 
+> Thanks to John Wilson's excellent KSERVE Kermit server for RT11 I've
+> been able to transfer v5 and v6 disk images to RK05. 
+> 
+> v6 boots just fine, and runs without any real drama. v5, much to my
+> suprise, does not ...
+
+Bob, I got the v5 image from the PUPS archive to run under Bob Supnik's
+emulator by using the bootblock from the v6 image:
+
+/usr/local/src/Megan: ./pdp11 
+
+PDP-11 simulator V1.0
+Unknown command
+Unknown command
+Unknown command
+Unknown command
+@unix
+
+login: root
+# ls -l
+total 60
+drwxr-xr-x  2 bin       944 Nov 26 18:13 bin
+drwxr-xr-x  2 bin        96 Mar 21 12:07 dev
+drwxr-xr-x  2 bin       240 Mar 21 12:07 etc
+drwxr-xr-x  2 bin       224 Nov 26 18:13 lib
+drwxr-xr-x  2 bin        32 Nov 26 18:13 mnt
+drwxrwxrwx  2 bin       144 Mar 21 12:08 tmp
+-rwxrwxrwx  1 bin     25802 Mar 21 12:07 unix	Amazing size, huh?!
+drwxr-xr-x 14 bin       224 Nov 26 18:13 usr
+# 
+
+The bootblock is uuencoded below. I've modified the simulator to have
+a .pdp11rc so I don't have to type in the boot commands. I should
+put the diffs somewhere.
+
+	Warren
+
+begin 600 bootblk
+M!P&^`0`````````````!`,85`+Z!$0`*P2$*AA<B!P$"`L`5$``1%%<@`,#\
+MATX`$`H&(/V'Q160O\`50`#-"<(5)KR!$/<)Y@`7(`H`"@,7("\``@,1D/8!
+M at 2#T`\)E#@#P`<(5)KS`%0$`-PK"_?<)2@#*"Q@#]PEJ`,D!P14 at NH,01!#!
+M91``U`L)`]2D!P(!(?R'0!SP_\)E#@#F`5<@(+SNA^@!`@KW"3@`;0'!%2"Z
+M4A17(""\_(?V`<!E'P`%$!=T_/_W"5H`Q47P_U=U!0#%92"ZQ!4`NE05%R$8
+MNOR'AP#.90(`P!U$_;<*0/WW-0`0&/L'`L`,`!P(NA("SN4"`(<`)@H.D`"*
+MP`#`#``<"+KU`_<)"@"`%<`,`!P at NNX#-Q`*_3T!(+H`_]^+</_]!,`=2$#`
+M18#_%R!!``6'%R!:``*"P&4@`!<@#0`"`L`5"@`7(`H`!0+`%0T`S0G`%0H`
+M]XL80/V`-Q`40(<`@)\```,#S0F."OH!SF4"`,Y%`0"'```*%R('`00"$!P0
+M``8 at _(?F%0"^!PK;`<8!YP'!'8K\``H7<@P`%W0$`$!0P14*_PD0X1UL_^$=
+M:O_A%04`R8O^@(<`````````````````````````````````````````````
+1````````````````````````
+`
+end
+
+
