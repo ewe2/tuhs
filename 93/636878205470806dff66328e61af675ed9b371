@@ -1,0 +1,44 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 19 Mar 2003 15:08:46 -0800 (PST)
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <200303192308.h2JN8kD04865@moe.2bsd.com>
+
+Hi -
+
+> From: David Evans <dfevans at bbcr.uwaterloo.ca>
+> 
+>   OK.  From what I recall (that turned-off machine again...) the entire
+> discussion on tuning MAXUSERS and friends is based on allocation of UMRs.
+> Might be a good idea to slip in a note about what to do when you don't have
+
+	It is less a matter of MAXUSERS than it is of NBUF.   NBUF sets
+	the number of disc cache buffers.   MAXUSERS affects the size of the
+	proc table, file table, and other tables which are in the permanent
+	(not mapped in/out) portion of the kernel's address space but does 
+	not affect the disc buffer cache which is the entity requiring UMRs
+	on a UNIBUS system.
+
+	The buffer cache must be entirely mapped by UMRs - so if you have a 
+	32KB buffer the kernel will reserve 4 UMRs on a UNIBUS system.   
+	Realistically a 64KB buffer cache is about the maximum a UNIBUS system 
+	can have because that takes 8 of the UMRs.  
+
+	With the old (thankfully no longer in use, etc) 3Com ethernet boards
+	you had to disable 4 UMRs so the system could access the memory in the
+	card - that made for a very tight fit.
+
+	The other constraint, even for Qbus systems, is the D space requirement.
+	The 1KB portion of the disc buffer is "external" to the kernel (is 
+	mapped in/out as needed) but there is a header structure which is
+	part of the kernel's permanent address space.  Each buffer header is
+	24 bytes so even without UMRs around it's not feasible to have a 200KB
+	cache because that'd use 4800 bytes of kernel D space (which is always
+	on the edge of being overflowed it seems).
+
+	On a 11/73 I've used a 100KB buffer cache but when I was using 11/44s
+	and /70s the max was 64KB.
+
+	Cheers,
+	Steven Schultz
+
+
