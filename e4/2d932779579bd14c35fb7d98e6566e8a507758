@@ -1,0 +1,53 @@
+From: MichaelDavidson@pacbell.net (Michael Davidson)
+Date: Fri, 20 Sep 2002 18:11:32 -0700
+Subject: [pups] Re: v7 crypt(3)
+References: <200209210017.g8L0HYu27548@minnie.tuhs.org>
+Message-ID: <3D8BC744.6040305@pacbell.net>
+
+Warren Toomey wrote:
+
+>>
+>>
+>>static	char	PC1_D[] {
+>>	63,55,47,39,31,23,15,
+>>	 7,62,54,46,38,30,22,
+>>	14, 6,61,53,45,37,29,
+>>	21,13, 5,28,20,12, 4,
+>>};
+>>
+>>That wasn't legal syntax, was it?  There should be an '='
+>>between [] and {, as in the rest of the file, no?
+>>
+>
+>I just tried to compile the code with the V7 compiler and it complained.
+>Maybe it was legal in V6 and they used the .o file from there and didn't
+>recompile it.
+>
+Actually I'm surprised that the V7 compiler would complain about this.
+
+I seem to recall that there was still quite a lot of code in V7
+(including the compiler itself) which didn't have an '=' before
+the initialiser.
+
+I don't have a V7 system to hand right now, but looking at the
+compiler source appears to confirm that the '=' was still optional.
+
+In extdef() at around line 69 of c02.c there is:
+
+	if (o!=ASSIGN)
+		peeksym = o;
+
+... at this point in the code we have just processed an external
+definition which is not a function and which is not followed by
+either a comma or a semicolon and are about to attempt to parse
+what follows as an initialiser. If the next symbol is '=' the
+compiler swallows it, otherwise it pushes it back and continues
+with parsing the initialiser.
+
+So it certainly *looks* as if the V7 compiler didn't require the '='.
+
+Perhaps you were using pcc?
+
+
+
+
