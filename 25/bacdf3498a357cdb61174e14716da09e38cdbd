@@ -1,0 +1,117 @@
+From: kstailey@yahoo.com (Kenneth Stailey)
+Date: Fri, 23 May 2003 20:42:24 -0700 (PDT)
+Subject: [TUHS] (no subject)
+In-Reply-To: <e0190f1c49950f6047d23047f9a45a1f@plan9.bell-labs.com>
+Message-ID: <20030524034224.21529.qmail@web10008.mail.yahoo.com>
+
+--- Dennis Ritchie <dmr at plan9.bell-labs.com> wrote:
+>  > The V7 ls(1) man page says that the -s option, which prints total
+>  >blocks, includes any indirect blocks.
+> 
+>  >However, the V7 struct stat didn't have the st_blocks member in the
+>  > struct stat, and the code in ls.c uses
+> 
+>  > 	long
+>  >	nblock(size)
+>  >	long size;
+>  >	{
+>  >		return((size+511)>>9);
+>  >	}
+> 
+>  >So, is this just a case of the man page being mistaken?
+> 
+> Yes, it looks like a manual bug. Retrieving
+> the true number of indirect blocks isn't possible
+> from the 7th edition stat.  I'm not sure when (or by
+> whom) the st_blocks member was added.
+> 
+>  > While I'm at it, the V7 ls -a option only adds . and .. to the
+>  > list; apparently all other dot files were printed by default.
+>  > When did ls change such that -a applied to all dot files?
+> 
+> UCB or USL did this (I'm sure which first).
+> Both tended to use more . files.
+> 
+> 	Dennis
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> http://minnie.tuhs.org/mailman/listinfo/tuhs
+
+1BSD ls.c has:
+
+        for(;;) {
+                p = &dentry;
+                for (j=0; j<16; j++)
+                        *p++ = getc(&inf);
+                if (dentry.dinode==0
+                 || aflg==0 && dentry.dname[0]=='.')
+                        continue;
+                if (dentry.dinode == -1)
+                        break;
+                ep = gstat(makename(dir, dentry.dname), 0);
+                if (ep->lnum != -1)
+                        ep->lnum = dentry.dinode;
+                for (j=0; j<14; j++)
+                        ep->lname[j] = dentry.dname[j];
+        }
+
+so it skips all that start with "." unless aflg is set from invoking ls with
+-a.
+
+I got it from the 1BSD tape that is on the CSRG archive CD-ROM set.  I had to
+port ar11 to FreeBSD/i386 to get the sources out of the cont.a files.  If
+anyone wants my port of ar11 I can send it to them.
+
+ls.c starts with this block of comments:
+
+#
+/*
+ * ls - list file or directory
+ *
+ * Modified by Bill Joy UCB May/August 1977
+ *
+ * This version of ls is designed for graphic terminals and to
+ * list directories with lots of files in them compactly.
+ * It supports three variants for listings:
+ *
+ *      1) Columnar output.
+ *      2) Stream output.
+ *      3) Old one per line format.
+ *
+ * Columnar output is the default.
+ * If, however, the standard output is not a teletype, the default
+ * is one-per-line.
+ *
+ * With columnar output, the items are sorted down the columns.
+ * We use columns only for a directory we are interpreting.
+ * Thus, in particular, we do not use columns for
+ *
+ *      ls /usr/bin/p*
+ *
+ * This version of ls also prints non-printing characters as '?' if
+ * the standard output is a teletype.
+ *
+ * Flags relating to these and other new features are:
+ *
+ *      -m      force stream output.
+ *
+ *      -1      force one entry per line, e.g. to a teletype
+ *
+ *      -q      force non-printings to be '?'s, e.g. to a file
+ *
+ *      -c      force columnar output, e.g. into a file
+ *
+ *      -n      like -l, but user/group id's in decimal rather than
+ *              looking in /etc/passwd to save time
+ */
+
+It's interesting they called CRTs "graphic terminals".
+
+
+__________________________________
+Do you Yahoo!?
+The New Yahoo! Search - Faster. Easier. Bingo.
+http://search.yahoo.com
+
+
