@@ -1,0 +1,208 @@
+From: cube1@home.com (Jay Jaeger)
+Date: Fri, 30 Mar 2001 21:38:04 -0600
+Subject: [pups] Re: New Release of VTserver program
+In-Reply-To: <200103282045.GAA92101@minnie.cs.adfa.edu.au>
+Message-ID: <4.3.2.7.2.20010330212401.00bb29b0@cirithi>
+
+Well, I had mixed success on a PDP-11/24.
+
+First off, a couple of bugs.
+
+In vtserver.c in the code that loads the bootstrap via console odt, the "C" 
+format strings have "%6o".  These need to be changed to "%6.6o" to make it 
+work on my 11/24.  Otherwise you get leading spaces.
+
+Also, the code that sends an entire ODT command in one "write()" fails.  I 
+had to change that (and the one that sends the "G" command) into a loop 
+where I wrote just one character, and then read back one character that the 
+11/24 echoed.  Otherwise it just hung.
+
+I suspect both of these changes would fix problems on some machines and 
+would not harm any others.
+
+So, I got around that, and the standalone loaded.  (Hooray)  But.....
+
+When I tried to use my RK07 as input ( hk(0,0,0) , I got an error:  sc=1 
+cs2=64 er=40  .  Upon examination,  HKCS1 bit 10 was indeed off (indicating 
+an RK611 controller) whereas the RK07 bit for the drive at +12(octal) was 
+set ON.  So, the error itself is not unreasonable.  But....
+
+I looked at the code in hk.c, and tried it manually after resetting the 
+machine, and the code should be getting the expected drive error when it 
+first tries to address it as an RK06.  That should cause it to switch to 
+thinking it is an RK07, but something is going haywire.  And, if I boot a 
+pack, the boot code correctly figures out that it is an RK07 (when I look 
+after it reads the boot block off of a garbage pack, Bit 10 in HKCS1 is 
+indeed on).
+
+So, my guess is that the code in hk.c is busted in some way.
+
+Are there "2.11BSD for dummies under an emulator" instructions somewhere, 
+so that I could hardwire hk.c to an RK07 temporarily?  Or, perhaps can 
+someone point me to the physical memory addresses in hk.c so I could just 
+patch the array to tell it I have 2 RK07's ahead of time, rather than 
+having it attempt to auto-detect the drive type?
+
+Haaaaaaaaaaaaalp  8~)
+
+Jay Jaeger
+---	
+Jay R. Jaeger					The Computer Collection
+cube1 at home.com			visit http://members.home.net/thecomputercollection
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA10752
+	for pups-liszt; Sat, 31 Mar 2001 17:55:53 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from anchor-post-34.mail.demon.net (anchor-post-34.mail.demon.net [194.217.242.92])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA10748
+	for <pups-digest at minnie.cs.adfa.edu.au>; Sat, 31 Mar 2001 17:55:47 +1000 (EST)
+	(envelope-from robin at ruffnready.co.uk)
+Received: from falstaf.demon.co.uk ([158.152.152.109])
+	by anchor-post-34.mail.demon.net with esmtp (Exim 2.12 #1)
+	id 14jG82-000IE3-0Y; Sat, 31 Mar 2001 08:48:58 +0100
+Message-ID: <XPB0TIAQuYx6Ewac at ruffnready.co.uk>
+Date: Sat, 31 Mar 2001 08:47:28 +0100
+To: Jay Jaeger <cube1 at home.com>
+Cc: pups-digest at minnie.cs.adfa.edu.au
+From: Robin Birch <robin@ruffnready.co.uk>
+Subject: Re: [pups] Re: New Release of VTserver program
+References: <200103282045.GAA92101 at minnie.cs.adfa.edu.au>
+ <4.3.2.7.2.20010330212401.00bb29b0 at cirithi>
+In-Reply-To: <4.3.2.7.2.20010330212401.00bb29b0 at cirithi>
+MIME-Version: 1.0
+X-Mailer: Turnpike Integrated Version 5.00 U <YSkKJATYm0AxAbv6xwlBrCeVCW>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In message <4.3.2.7.2.20010330212401.00bb29b0 at cirithi>, Jay Jaeger
+<cube1 at home.com> writes
+>Well, I had mixed success on a PDP-11/24.
+>
+>First off, a couple of bugs.
+>
+>In vtserver.c in the code that loads the bootstrap via console odt, the "C" 
+>format strings have "%6o".  These need to be changed to "%6.6o" to make it 
+>work on my 11/24.  Otherwise you get leading spaces.
+>
+>Also, the code that sends an entire ODT command in one "write()" fails.  I 
+>had to change that (and the one that sends the "G" command) into a loop 
+>where I wrote just one character, and then read back one character that the 
+>11/24 echoed.  Otherwise it just hung.
+>
+>I suspect both of these changes would fix problems on some machines and 
+>would not harm any others.
+>
+>So, I got around that, and the standalone loaded.  (Hooray)  But.....
+>
+>When I tried to use my RK07 as input ( hk(0,0,0) , I got an error:  sc=1 
+>cs2=64 er=40  .  Upon examination,  HKCS1 bit 10 was indeed off (indicating 
+>an RK611 controller) whereas the RK07 bit for the drive at +12(octal) was 
+>set ON.  So, the error itself is not unreasonable.  But....
+>
+>I looked at the code in hk.c, and tried it manually after resetting the 
+>machine, and the code should be getting the expected drive error when it 
+>first tries to address it as an RK06.  That should cause it to switch to 
+>thinking it is an RK07, but something is going haywire.  And, if I boot a 
+>pack, the boot code correctly figures out that it is an RK07 (when I look 
+>after it reads the boot block off of a garbage pack, Bit 10 in HKCS1 is 
+>indeed on).
+>
+>So, my guess is that the code in hk.c is busted in some way.
+>
+>Are there "2.11BSD for dummies under an emulator" instructions somewhere, 
+>so that I could hardwire hk.c to an RK07 temporarily?  Or, perhaps can 
+>someone point me to the physical memory addresses in hk.c so I could just 
+>patch the array to tell it I have 2 RK07's ahead of time, rather than 
+>having it attempt to auto-detect the drive type?
+>
+Jay,
+I don't know how to do this and I suspect that it would be very
+difficult (someone PLEASE prove me wrong).  But, if you load it into an
+emulator using another type of disk, say, an RP05 or RM05 that the
+emulator can support, then you can play with hk.c to your heart's
+content.  Then you can run the code out and test it on the PDP.
+
+Cheers
+
+Robin
+>Haaaaaaaaaaaaalp  8~)
+>
+>Jay Jaeger
+>---    
+>Jay R. Jaeger                                  The Computer Collection
+>cube1 at home.com                 visit http://members.home.net/thecomputercollect
+>ion
+>
+
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA12583
+	for pups-liszt; Sun, 1 Apr 2001 00:33:07 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from goby.ciswired.com (IDENT:root at goby.ciswired.com [206.97.67.65])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id AAA12579
+	for <pups-digest at minnie.cs.adfa.edu.au>; Sun, 1 Apr 2001 00:33:02 +1000 (EST)
+	(envelope-from greg at ciswired.com)
+Received: from weasel.ciswired.com (root at weasel.ciswired.com [206.97.67.73])
+	by goby.ciswired.com (8.8.7/8.8.7) with ESMTP id JAA12688;
+	Sat, 31 Mar 2001 09:17:21 -0500
+Received: from localhost (greg at localhost)
+	by weasel.ciswired.com (8.9.3/8.9.3) with ESMTP id JAA08702;
+	Sat, 31 Mar 2001 09:26:58 -0500
+X-Authentication-Warning: weasel.ciswired.com: greg owned process doing -bs
+Date: Sat, 31 Mar 2001 09:26:58 -0500 (EST)
+From: "Gregory R. Travis" <greg@ciswired.com>
+To: classiccmp at classiccmp.org, pups-digest at minnie.cs.adfa.edu.au
+Subject: [pups] Reformat RA81/82?
+Message-ID: <Pine.LNX.4.10.10103310916520.8697-100000 at weasel.ciswired.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Can RA81/82 disks be reformatted in the field?  If so, is this
+done through XXDP or is there a way to do it from the disk's
+serial port?
+
+My RA82 occasionally lights its FAULT light and extinguishes its
+ready light during write operations.  The likelyhood of it
+faulting appears (but I am not certain) to be correlated with a specific
+region of the disk.
+
+About five-ten seconds after the fault, the FAULT indicator turns
+off and ready comes back on.  At no time is an I/O error generated
+that the application or the operating system (2.11BSD) see
+so this fault appears to be transient and is resolved by either
+the drive or the drive/controller together.
+
+It "smells" like a data write error that's resolved after a few
+automatic retries.  I'm hoping a low-level reformat could clear it
+up.  Am I wacked out?
+
+If there's an XXDP exerciser/formatter available I'd appreciate it
+if someone could point me there.  It's been nearly twenty years since
+the last time I even tried running XXDP
+
+Thanks as always,
+
+greg
+
+p.s.  The RA81 drive on the same controller never gives any
+trouble (yet).  I've tried some more basic things like
+swapping SDI cables and drive ports but it doesn't make
+a difference.
+
+Gregory Travis
+Cornerstone Information Systems ATS
+greg at ciswired.com
+812 330 4361 ext. 18
+
+
+
+
