@@ -1,0 +1,61 @@
+From: engdahl@safeaccess.com (Jonathan Engdahl)
+Date: Wed, 6 Feb 2002 10:09:35 -0500
+Subject: [pups] bootstrapping an RT-11 image via VTserver
+Message-ID: <NBBBKGHOAIDAAHFIJOFGGEFBENAA.engdahl@safeaccess.com>
+
+I built an 11/23 with 256K RAM, a UDC11 disk controller, one 80 meg MFM hard
+drive. The hard drive formatter runs under RT-11. The assumption is that you
+have a working floppy from which you can boot RT-11. I want to devise a
+method to run the formatter via VTserver.
+
+I figured out how to do this for the RQDX3 and XXDP. You can run XXDP under
+E11, load the utility you want to run, then stop E11 and dump the entire 28K
+word memory image to a disk file. By hacking a header onto this memory
+image, you can turn it into a standalone that can be bootstrapped via
+VTserver, just like the disklabel, mkfs, and restor standlones. This is
+easy, because XXDP tells you what the restart address is when you load a
+program.
+
+The question: is is possible to restart RT11SJ in the same manner as XXDP? I
+read some of the manuals, and tried using ODT to restart RT-11 at various
+points pointed to by the vector table and fixed area. By starting at the
+trap 4 address I can get it to restart and live. However, this seems to make
+RT-11 forget that I had done a "GET" of the utility that I wanted to run. I
+tried restarting at the RMON address, but that crashes.
+
+One other experiment I've tried is to GET the utility then "START 1000", but
+that crashes too. If I GET then just type "START" it lives. What am I doing
+wrong?
+
+One assumption is that the utility only uses memory and TT: system calls --
+no disk accesses or swapping. Is it possible to abuse RT-11 in this manner?
+
+The utilities I'm trying to run are the UDC11 OCT and UDCT utilities. I want
+to make it possible to reformat the hard drive on this single drive system
+without tearing it apart and moving pieces to another system. It is also
+possible to mess up the NVRAM on the UDC11 so that you cannot boot. If this
+happens, and you are lucky enough to have another running system (and I am),
+you can rejumper the CSR of the stuck board and fix it on the other system.
+Otherwise, you are in big trouble.
+
+I wonder if it would be possible to bootstrap a VM0: image into high RAM and
+boot from it?
+
+I realize there are other solutions. The standard answer to questions like
+this is "get more hardware". The reason for doing this is I want to invent a
+method that will work for a very minimal pile of hardware. And the whole
+point of that is to make it possible for people to get a PDP-11 running with
+minimal investment.
+
+
+--
+Jonathan Engdahl                 Rockwell Automation
+Principal Research Engineer      1 Allen-Bradley Drive
+Advanced Technology              Mayfield Heights, OH 44124, USA
+Mayfield Heights Labs            engdahl at safeaccess.com  440-646-7326
+
+http://users.safeaccess.com/engdahl/PDP-11.htm
+
+
+
+
