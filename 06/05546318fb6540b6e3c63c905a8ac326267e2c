@@ -1,0 +1,60 @@
+From: norman@nose.cs.utoronto.ca (norman@nose.cs.utoronto.ca)
+Date: Mon, 04 Feb 2002 17:23:31 -0500
+Subject: [TUHS] Re: Porting Unix v6 to i386
+Message-ID: <200202042224.IAA18805@guardian-ext.bond.edu.au>
+
+Greg Lehey:
+
+  To repeat what I said earlier: the hardware-dependent code isn't very
+  interesting, it's the kernel interfaces.  Minix is not UNIX; BSD is.
+  You'll find it easier to adapt a BSD driver to the Sixth or Seventh
+  Edition than you will a Minix or Linux driver.
+
+It depends on approach, which depends in turn on intent.
+
+If the intent is to get a system up and running as quickly as possible,
+it would probably be best to shoehorn existing code into the existing
+old UNIX framework, and code from a current BSD system is probably easier
+to do that with than code from Minix (says someone who has looked at
+neither within living memory).
+
+If the intent is to learn about the innards of operating systems and
+how they interact with hardware, or about the specifics of old UNIXes
+or the OS aspects of Intel hardware, it is better to compare different
+descriptions of the hardware (whether abstract descriptions in books
+or pragmatic ones in code), write your own small test programs to be
+run on bare hardware or as special cases within some system that
+already runs there, and eventually write your own code or adopt code
+that you now understand thoroughly.
+
+Which of these you consider fun depends both on your goals and on your
+personal taste.  Both are worthy of respect.
+
+In days long past, when I did a lot of work to make a research version
+of UNIX as robust as possible against hardware flaws (recover if possible,
+at least explain clearly what broke if not) and to port it to a few new
+VAXes of the time, I found the best hardware information to lie in the
+VAX/VMS source fiche.  The UNIXes of the day tended either to crash on
+the slightest hardware error or to ignore the error and just misbehave
+until rebooted.  Stealing code from them would have been easier, but it
+wouldn't have done what I wanted.  Reading the VMS sources and treating
+them as a hardware reference manual did.  Modern UNIXes doubtless do
+better, but the point is that different systems do different things
+with the hardware, and if your goal is understanding and not just
+function, you will gain more by looking in many places.
+
+An irrelevant but fun anecdote:  it could be argued that the resulting
+code recovered too smoothly from errors.  One day I discovered that
+one of our systems was running more slowly than usual, though it was
+otherwise OK; checking back on the paper console log, I discovered
+that several weeks earlier it had had a hard cache error, reported it
+and cheerfully turned off the bad half of the cache, and continued on
+its way.  So I called Field Service and we scheduled a convenient time
+to run diagnostics--yes, the hardware really had failed--and replace
+the bad CPU board; but it would have been better to have noticed
+earlier.  I watched the console logs more carefully after that.
+
+Norman Wilson
+Toronto ON
+
+
