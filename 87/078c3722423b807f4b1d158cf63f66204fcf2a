@@ -1,0 +1,57 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Tue, 26 Feb 2002 15:29:07 -0800 (PST)
+Subject: [pups] missing space in 2.11_rp_unknown
+Message-ID: <200202262329.g1QNT7T07646@moe.2bsd.com>
+
+Hi!
+
+> From: Christian Groessler <cpg at aladdin.de>
+> >	Did you use dump+restor?
+> 
+> No, tar. I tried again with dump and restor and now it works! Thanks
+> for the hint! I seldomly use dump/restore.
+	
+	Ah ha!  For moving filesystems dump+restor or 'afio' need to be
+	used.   Dump+restor also have the advantage of preserving the
+	file flags (see chflags(2) and chflags(1)) - other utilities do
+	not preserve that metadata.
+
+	The other thing that dump+restor (or afio) handle correctly is
+	the special files in /dev.  'tar' does not know how to archive
+	files such as "/dev/rp0a".
+
+	Mmmm, I wonder if the problems you were having  were caused by
+	/dev not being correctly populated.
+
+> Now there's enough space in /:
+> 
+> $ df
+> Filesystem  1K-blocks     Used    Avail Capacity  Mounted on
+> /dev/xp0a        7816     2658     5158    04%    /
+> /dev/xp0g      151625   117599    34026    08%    /usr
+> $ 
+> 
+> Btw, the capacity values look a bit strange?
+
+	Yes, they do look (more than a little bit) strange.
+
+	On my system here (a P11 based emulated PDP-11 - I have a real 11/73
+	but it is only powered up when I'm actively testing):
+
+Filesystem  1K-blocks     Used    Avail Capacity  Mounted on
+/dev/xp0a        8228     3163     5065    38%    /
+/dev/xp0h      155328    84188    71140    54%    /usr
+
+	What patchlevel did you mention the system was at?   There were a lot
+	of patches issued after the ' 2.11_rp_unknown' image was created.
+	One thing, which probably will not make any difference, to try would
+	be to recompile 'df' (and possibly 'libc') and see if the problem
+	changes.   Looks like it's a math error of some kind so either
+	the compiler/libraries are broken or P11's having a problem doing
+	arithmetic.
+
+	Cheers,
+	Steven Schultz
+	sms at 2bsd.com
+
+
