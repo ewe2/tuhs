@@ -1,0 +1,65 @@
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Date: Thu, 23 May 02 08:07:13 PDT
+Subject: [TUHS] Re: simh vax and 4.3-quasijarus
+Message-ID: <0205231507.AA01361@ivan.Harhan.ORG>
+
+Rico Pajarola <rp at servium.ch> wrote:
+
+> At this point, I am at the simh prompt (">"). I think simh catches
+> the halt instruction and goes to the simh prompt when it encounters
+> one. I have a VAX 4000/300 at home (unfortunately it doesn't run
+> any of the older unixes), and when it halts, I get the >>> prompt
+> (differs from simh).
+
+The 4000/300 works like any other uVAX (VAX processor implemented in a single
+IC) in this respect: a halt is a special exception that works like regular VAX
+macrocode exceptions except that it saves the PC and the PSL in special IPRs
+rather than on the stack (so that it doesn't depend on a stack), vectors to the
+hardwired ROM address 20040000 rather than through SCB (so that it doesn't
+depend on SCB), and MAPEN is cleared (so that it goes to the physical address
+20040000 in the ROM rather than whatever that address may be virtually). The
+CPU board firmware than displays the halt message and the >>> prompt as
+prescribed by the VAX Architecture (DEC STD 032-0). KA650/655 works exactly the
+same way.
+
+While I haven't played with simh and don't intend to in the near future (due to
+my general lack of interest in emulators), thus I don't claim to be right here,
+but from your session logs it appears that simh is not doing the above uVAX
+halt exception but instead it handles halts like an 11/780, by "physically"
+stopping all instruction execution. That is fine and dandy, the 11/780 way is
+certainly cooler, but the problem is it ain't a KA655 any more, and one should
+not expect the KA655 boot ROM to work right then (and IMAO it has no right to
+report the KA655 SID code either).
+
+> I am pretty sure that I have configured simh correctly, I verified
+> this by installing netbsd on the same setup, and it boots ok.
+
+When I took a cursory look at SIMH/VAX, which consisted only of glancing at its
+brief documentation, I read that the KA655 ROM image it comes with is not the
+real one but hacked to work with the poor emulator. This suggests to me that
+you are able to boot some OSes because Bob has gutted the (quite complicated)
+KA655 console and boot logic to the bare minimum he had emulated. I wouldn't be
+surprised if he hacked out the KA655 diagnostic executive almost entirely, so
+that on "power-up" one goes through an absolutely minimal init sequence without
+a single halt/unhalt cycle occuring (of which on a real KA655 several occur on
+every power-up during diagnostics), gets to the >>> prompt, and then when
+booting, runs VMB, unhalts once (the SIMH probably doesn't even know that it
+unhalts, as the uVAX unhalt is simply an RFI: on real hardware it knows that
+this RFI is an unhalt and lights the RUN LED because the SSC chip compares
+instruction fetch addresses against the halt range and detects the unhalt, but
+I doubt that SIMH emulates this), and then it all goes well (cross your fingers
+three times!) never goes through a proper KA655 halt/unhalt again. But if
+something goes wrong in the boot and VMB's error handler gets invoked, SIMH's
+very poor man's emulation is not prepared for it.
+
+> My only problem seems to be getting the bootblocks right. I have
+> heard that someone managed to install quasijarus0a on simh, so it
+> must be me somehow screwing the bootblocks.
+
+But the rub is that because of SIMH talking the KA655 talk but not walking the
+KA655 walk, you can't see what exactly is the problem with your bootblocks:
+VMB's error messages aren't displayed.
+
+MS
+
+
