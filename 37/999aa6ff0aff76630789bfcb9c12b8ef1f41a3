@@ -1,0 +1,100 @@
+From: tih@Hamartun.Priv.NO (Tom Ivar Helbekkmo)
+Date: 08 Sep 2002 19:35:14 +0200
+Subject: [pups] BSD 2.11 on an 11/73 + RD54
+In-Reply-To: <43589.62.252.0.4.1031495047.squirrel@mail.taer.com> ("Tobias Russell"'s message of "Sun, 8 Sep 2002 15:24:07 +0100 (BST)")
+References: <43589.62.252.0.4.1031495047.squirrel@mail.taer.com>
+Message-ID: <m21y84bd0t.fsf@barsoom.Hamartun.Priv.NO>
+
+"Tobias Russell" <toby at taer.com> writes:
+
+> Currently when I boot, I start off with my terminal set to 19,200 baud
+> 8-N-1 but once BSD has booted I have to switch to 19,200 7-E-1
+
+The PDP-11s tend to like 8n1, but UNIX used to prefer 7e1.  I got
+tired of 2.11BSD behaving like this, so I changed it thus (note that
+the relative directory names in the patch headers are probably not
+relative to the same place; you'll have to figure it out):
+
+*** getty/main.c.ORIG	Thu Dec 29 17:22:13 1994
+--- getty/main.c	Thu Dec 29 17:21:28 1994
+***************
+*** 383,391 ****
+--- 383,393 ----
+  	char c;
+  
+  	c = cc;
++ #ifdef notdef /* hack to get rid of parity in getty */
+  	c |= partab[c&0177] & 0200;
+  	if (OP)
+  		c ^= 0200;
++ #endif /* parity hack */
+  	if (!UB) {
+  		outbuf[obufcnt++] = c;
+  		if (obufcnt >= OBUFSIZ)
+
+*** pdp/cons.c.ORIG	Sun May 11 11:21:01 1997
+--- pdp/cons.c	Sun May 11 11:26:05 1997
+***************
+*** 62,68 ****
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = EVENP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+--- 62,68 ----
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = ANYP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+
+*** sys/tty.c.ORIG	Sun May 11 11:21:40 1997
+--- sys/tty.c	Sun May 11 11:27:40 1997
+***************
+*** 48,53 ****
+--- 48,54 ----
+   */
+  
+  char partab[] = {
++ #ifdef notdef /* even parity setup */
+  	0001,0201,0201,0001,0201,0001,0001,0201,
+  	0202,0004,0003,0201,0005,0206,0201,0001,
+  	0201,0001,0001,0201,0001,0201,0201,0001,
+***************
+*** 64,69 ****
+--- 65,88 ----
+  	0200,0000,0000,0200,0000,0200,0200,0000,
+  	0200,0000,0000,0200,0000,0200,0200,0000,
+  	0000,0200,0200,0000,0200,0000,0000,0201,
++ #else /* no parity setup follows */
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0002,0004,0003,0001,0005,0006,0001,0001,
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0001,0001,0001,0001,0001,0001,0001,0001,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0000,
++ 	0000,0000,0000,0000,0000,0000,0000,0001,
++ #endif /* end of parity selection stuff */
+  
+  	/*
+  	 * 7 bit ascii ends with the last character above,
+
+-tih
+-- 
+Popularity is the hallmark of mediocrity.  --Niles Crane, "Frasier"
+
+
+
