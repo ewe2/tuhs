@@ -1,0 +1,55 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 30 Apr 2003 09:03:40 -0700 (PDT)
+Subject: [pups] 2.11BSD device config trouble
+Message-ID: <200304301603.h3UG3eE20319@moe.2bsd.com>
+
+Hi!
+
+> From: David Evans <dfevans at bbcr.uwaterloo.ca>
+> > cn      1 176540 344    5       cnrint  cnxint
+>  
+> to the end of this line?  Perhaps the autoconfig parser becomes confused
+> if there aren't any.
+	
+	I don't think that's the problem in this case - the error that is
+	being printed out:
+
+	 cn 1 csr 176540 vector 344 no address found for kl/dl-11
+
+	comes from what appears to be a missing entry (or an entry that
+	autoconfig can't find) in the /unix kernel symbol table.   One way,
+	I think, this can happen is when booting an alternate kernel (/genunix
+	instead of /unix).
+
+	THe only suggestion I have at this point is to turn on debugging
+	in autoconfig.   To do this go into /sys/autoconfig/main.c and
+	add a line that forces 'debug = 1;', then install (after saving the
+	original ;)) autoconfig into /etc and reboot.   Hopefully useful
+	info about what autoconfig is doing will be printed.
+
+>   Mine is at least correctly identified by autoconfig, though I've never
+> attached a terminal to it to see whether the ports actually do anything.
+> The post that's vanished included my dhv line from /etc/dtab but, except
+> for the goofy CSR I used for some reason that I cannot now remember, it
+
+	If I find the time I'll power up the 11/73 and see what it says but
+	I've had a DHV11 on the system for years (it's how I got the RTS/CTS
+	flow control working).
+
+	My suspicion is that the DHV clone isn't behaving 100% like a DEC
+	DHV card.
+
+> > BTW: Never play with the SMD cables when the machine is running. Now I
+> > get: 
+> 
+>   Is the disk write-inhibited?
+
+	Doing a 'reboot' (which performs a sync(2) call) will overwrite
+	what fsck has done - when the message about "reboot" comes out you
+	should use the front panel or ODT to simply halt the cpu and then
+	start the boot process cold.
+
+	Cheers,
+	Steven Schultz
+
+
