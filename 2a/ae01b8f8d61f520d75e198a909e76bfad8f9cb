@@ -1,0 +1,34 @@
+From: helbig@Informatik.BA-Stuttgart.DE (Wolfgang Helbig)
+Date: Mon, 23 Dec 2002 00:01:55 +0100 (MET)
+Subject: [TUHS] In V6 exit(): wakeup(&proc[1])) unnecessary?
+Message-ID: <200212230104.gBN14iw00526@bsd.korb>
+
+>>When a process terminates (in sys1.c/exit()), it explicitly wakes up
+>>the init process. In light of the fact, that every process has a parent,
+>>this extra wakeup(&proc[1]) seems unnecessary.
+>
+>I believe this is meant to handle the case where a process exits
+>without having called wait() on its children.
+>
+>Imagine two processes, A and B, where A is B's parent and A's parent
+>is some process other than init.  B calls exit(), becomes a zombie,
+>and awakens A.  Some time later, A calls exit() without ever having
+>called wait().  This will cause B to become a child of init, and as B
+>is a zombie, init should awaken so that B can die.  However, A might
+>have any number of zombie children, and it would be redundant to call
+>wakeup(&proc[1]) for each one.  Therefore, the wakeup call to init is
+>done up front, whether it is needed or not.  This does result in some
+>unnecessary wakeup calls but on the whole it seems a good tradeoff for
+>code simplicity.
+
+Oh, I see! So the condition to wakeup init would be
+	"Do I have any zombie children"?
+The code as it is is simpler. But harder to understand.
+Thank you very much for your help!
+
+Greetings
+
+Wolfgang Helbig
+
+
+
