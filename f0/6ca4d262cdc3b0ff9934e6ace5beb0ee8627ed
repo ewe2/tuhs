@@ -1,0 +1,41 @@
+From: MichaelDavidson@pacbell.net (Michael Davidson)
+Date: Sat, 14 Dec 2002 15:27:40 -0800
+Subject: [TUHS] re: Raise of interrupt level necessary
+References: <200212141049.gBEAnqb01254@bsd.korb>
+Message-ID: <3DFBBE6C.5010602@pacbell.net>
+
+Wolfgang Helbig wrote:
+
+>
+>To see what happens, I just removed those IPL raising instructions from gword,
+>pword,_savu, _aretu, _copyseg, and _clearseg in m40.s. In fact, it didn't crash
+>the system. At least on my configuration, ISRs don't touch user space while
+>interrupting a kernel process. This rule is broken by the clock ISR, which calls
+>display() unconditionally. Just curious: Is there any other reason beside
+>seeing blinking lights that justifies calling display() 60 times per second
+>and breaking the rule?
+>
+Well it depends on what you think that the "rule" is ...
+
+If you think that the "rule" is "no ISR can touch user space while
+interrupting a kernel process", then it is display() that breaks
+the rule.
+
+If, however, the rule is "the user PAR and PDR registers will at
+all times reflect the address space mapping of the current user
+process" then it is _copyseg and _clearseg that "break" the rule
+by "borrowing" some of the user PARs and PDRs, and in that case
+it seems appropriate that they should raise the spl level so that
+nobody else will be "surprised" by seeing those registers in an
+apparently inconsistent state.
+
+
+
+
+
+
+
+ 
+
+
+
