@@ -1,0 +1,53 @@
+From: chd_1@nktelco.net (Chuck Dickman)
+Date: Mon, 17 Jun 2002 22:40:55 -0400
+Subject: [pups] bsd2.11 kernel compile
+References: <3D0E81C0.9046BF5D@bellsouth.net>
+Message-ID: <3D0E9DB7.988203A@nktelco.net>
+
+joseph lang wrote:
+> When compiling a new kernel (to include network) I get an error
+> 
+> ld: too big for type 431
+> *** exit 2
+> 
+> I assume this error is due to one of the overlays being too
+> large. (this is pointed out in the install docs)
+
+During the compile 'size' outputs a list of the sizes of the
+overlays. Look at the output. For mine....
+
+# size unix	! the OS kernel                                           
+text    data    bss     dec     hex
+55296   6492    20738   82526   1425e   total text: 106752
+	overlays: 7744,7360,7872,7296,3072,7680,4864,5568
+# size netnix	! the network code
+text    data    bss     dec     hex
+60864   2362    38448   101674  18d2a
+                       
+ 
+> How do I figure out which overlay (or base) is the problem?
+
+The base must be less than 7 8k pages or 57344(decimal) bytes.
+Each overlay must be less than 8k bytes or 8192(decimal).
+The network code is not overlayed, so you have 8 pages or the
+full 64k. 
+
+> Is there a more scientific way to arrange the overlays?
+
+To make it work, just get the sizes below the limits. The 
+optimal arrangement would be placing the code in such that
+the overlay changes were minimized. So... move your system
+disk drivers into base and change the configuration to
+remove any hardware you don't actually have. 
+
+> Am I missing something obvious?
+
+No, it just requires some tweeking.....
+
+> joe lang
+
+Good luck,
+
+-chuck
+
+
