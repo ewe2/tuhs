@@ -1,0 +1,81 @@
+From: asbesto@freaknet.org (asbesto)
+Date: Tue, 30 Aug 2005 20:44:24 +0000
+Subject: [TUHS] A patch for compiling vtserver under linux ...
+Message-ID: <20050830204424.GA9088@freaknet.org>
+
+Compiling vtserver gave me an error:
+
+asbesto at gemini ~/pdp11/vtserver $ cc vtserver.c -o vtserver
+/tmp/ccUTkHRZ.o(.text+0x76e): In function o_command':
+: undefined reference to rrno'
+/tmp/ccUTkHRZ.o(.text+0xad6): In function ead_config':
+: undefined reference to rrno'
+/tmp/ccUTkHRZ.o(.text+0xb63): In function ead_config':
+: undefined reference to rrno'
+/tmp/ccUTkHRZ.o(.text+0xd10): In function etraw':
+: undefined reference to rrno'
+/tmp/ccUTkHRZ.o(.text+0xdc1): In function etraw':
+: undefined reference to rrno'
+/tmp/ccUTkHRZ.o(.text+0xe7e): more undefined references to rrno' follow
+collect2: ld returned 1 exit status
+asbesto at gemini ~/pdp11/vtserver $ 
+
+This due to the way errno is now used; errno.h has to be 
+included. 
+
+Here's a patch to compile vtserver 2.3a-20010404 under linux:
+
+
+-------begin-patch-snip-here------
+--- vtserver.c	2001-04-04 02:57:38.000000000 +0000
++++ vtserver-linux.c	2005-08-30 20:40:32.000000000 +0000
+@@ -74,7 +74,23 @@
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <string.h>
+-char *strerror(int errno);
++
++#ifdef linux
++/* asbesto 30-8-2005 - asbesto at freaknet.org
++   linux need errno.h included. :)
++*/
++#include <errno.h>
++
++/* asbesto 30-8-2005 - asbesto at freaknet.org
++   as errno.h was included, the following line need 
++   to be commented:
++   char *strerror(int errno); 
++*/
++#else
++
++ char *strerror(int errno); 
++ 
++#endif
+ 
+ /* Commands sent in both directions */
+ struct vtcmd {
+
+---------------------end-patch-snap-here---------
+
+maybe this can be included in ftp://minnie.tuhs.org/pub/PDP-11/Vtserver
+and maybe the version of vtserver has to be changed :)
+
+p.s. i'm not so good in C, i quit programming many years ago, i
+hope this can work ok  :)))))
+
+hope all this can help.
+
+-- 
+[ asbesto : IW9HGS : freaknet medialab : radiocybernet : poetry ]
+[ http://freaknet.org/asbesto http://papuasia.org/radiocybernet ]
+[ http://www.emergelab.org :: NON SCRIVERMI USANDO LE ACCENTATE ]
+[ *I DELETE* EMAIL > 100K, ATTACHMENTS, HTML, M$-WORD DOC, SPAM ]
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: not available
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20050830/215d559d/attachment.sig>
+
