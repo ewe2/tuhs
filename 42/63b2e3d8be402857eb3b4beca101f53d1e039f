@@ -1,0 +1,52 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Wed, 9 Nov 2005 17:03:07 -0500
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <Pine.LNX.4.62.0511091221220.6113@static-141-149-129-16.buff.east.verizon.net>
+Message-ID: <849b04683754b84f7e42810d761db3bd@coraid.com>
+
+my suggestions are as follows (i assume you really mean 8086 mode):
+
+use a pdp emulator to run a donor system and do the port from there.
+
+using a floppy to boot is a great idea.  i've written several boot
+straps to boot from the floppy that configure the serial port, and put
+the processor in 32-bit mode.  it's tight, but not too hard.  you have
+a great advantage in that you're going to stick to 16 bit so you can
+use the bios.  512 bytes in that case is tons of space.
+
+first job is to get an assembler and compiler for the 8086.  i would
+use the mit's compilers/assembler from the 1980's.  if you can't find
+a copy, i have one.
+
+next, figure out how you are going to manage memory.  avoiding
+protected memory would make things much easier.  just have each
+process use a full 64K of memory for the data segment.  for text you
+don't have to worry about stepping on anything, so they don't have to
+be a full 64k.  that'll give you 10 processes worth of processes.  you
+can just swap if you want any more.
+
+the routines you'll need to fix are in /usr/sys/ken/main.c.
+
+then you need to rewrite the trap code to use the pc's interrupts.
+this is very straight forward.  you'll have to write some small
+assembler code to setup the stack frames to get into trap.c.
+
+next you'll need to write device drivers for the screen/keyboard, the
+clock, and the floppy.  later you can write an ATA driver and get a
+mbr and hard disk boot strap.
+
+
+if you want to do a 32-bit version, then things are a little
+different.  but this should give you the v6 in about as little
+work as can be.
+
+
+ Brantley Coile
+-------------- next part --------------
+An embedded message was scrubbed...
+From: Lyrical Nanoha <LyricalNanoha@dosius.net>
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+Date: Wed, 9 Nov 2005 12:26:32 -0500 (EST)
+Size: 2709
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20051109/86c19884/attachment.mht>
+
