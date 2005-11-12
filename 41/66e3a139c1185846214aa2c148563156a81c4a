@@ -1,0 +1,72 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Sat, 12 Nov 2005 08:18:50 -0500
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <787b0d920511112213q7156614cv2fe3c5d00852f45c@mail.gmail.com>
+Message-ID: <e82a1c07e297628c639705226ded3f56@coraid.com>
+
+> I believe you want this:
+> 
+> * 16-bit
+> * protected mode
+> * no paging
+> * 8 or 16 segments
+> * 128 kB of the memory
+> * no FPU
+
+i may be wrong, but i don't think you want the segments.  pdp-11
+segments divided the address space into eight, well, segments.  each
+could be grow up or grow down and had a physical base and a limit.
+intel segments don't work that way.  the major difference is that the
+segment selector, instead of being the upper most three bits of the
+virtual address, is not even in the address space at all.
+
+so the eight, for a pdp-11/40 say, or the sixteen for the 11/70 don't
+really apply.  instead just give each data segment the whole 64k
+address space and it'll not klobber anybody else.  just itself.
+
+there's not really any reason not to use the whole 640K.
+
+> 
+>> using a floppy to boot is a great idea.  i've written several boot
+>> straps to boot from the floppy that configure the serial port, and put
+>> the processor in 32-bit mode.  it's tight, but not too hard.  you have
+>> a great advantage in that you're going to stick to 16 bit so you can
+>> use the bios.  512 bytes in that case is tons of space.
+> 
+> 512 is easy until you try to handle more than one machine. :-(
+
+didn't quit understand this.  the boot sector is a short driver for
+the media you're booting.  the floopy or the harddisk.  it has to know
+about the file system enough to pull out /boot.  it can use the
+drivers in the bios.
+
+> 
+>> next you'll need to write device drivers for the screen/keyboard, the
+>> clock, and the floppy.  later you can write an ATA driver and get a
+>> mbr and hard disk boot strap.
+> 
+> I think you need a 4 MB disk and a 10 MB disk. :-)
+
+you're correct to imply that v6 takes up MUCH less space than other
+systems.  it's amazing how small you can run this.  the root in the
+6th edition system is only 1.4MB.  and that includes the normal
+binaries, libraries and the source to the kernel.  it'll run great on
+a floopy.
+
+> 
+>> if you want to do a 32-bit version, then things are a little
+>> different.  but this should give you the v6 in about as little
+>> work as can be.
+> 
+> You might use a 32-bit CPU in 16-bit mode. Then you could use
+> a 32-bit limit on the FS or GS segment for easier physical memory
+> access from the kernel. (use an opcode prefix as needed)
+
+you could.  i still think that just plain old native mode would
+be a great way to run 6th Ed.
+
+ bc
+ 1011 1100 
+
+
+
