@@ -1,0 +1,68 @@
+From: peter.jeremy@alcatel.com.au (Peter Jeremy)
+Date: Tue, 15 Nov 2005 06:49:47 +1100
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <8a61b612cf43394f33e6531339fe4263@coraid.com>
+References: <20051113201609.GW6574@gsmx07.alcatel.com.au>
+	<8a61b612cf43394f33e6531339fe4263@coraid.com>
+Message-ID: <20051114194946.GE6574@gsmx07.alcatel.com.au>
+
+
+On 2005-Nov-14 10:45:13 -0500, Brantley Coile <brantley at coraid.com> wrote:
+>> This is fairly wasteful of RAM.  Keep in mind that V6 cannot page -
+>> a process is either entirely in memory or entirely on disk.  If you
+>> limit yourself to 640K RAM, you are probably restricting yourself
+>> to about 6 resident processes.  And swapping means moving 64K of
+>> data to/from disk.
+>
+>true, but your numbers are a bit off.  640k / 64k = 10 not 6.
+
+I realise that.
+
+>  the kernel will take only 2, so you should have 8.
+
+I was assuming split I+D, with the data segment fixed at 64K.  This
+means that you have (64K + code) per process.  If you have code plus
+data in 64K then you can fit more, but I think that was getting to
+be a squeeze even on V6.  (And would definitely write off something
+like 2BSD).
+
+>the mit x86 stuff would be where i'd start.  i haven't looked to see
+>if you need to tweak the assignment operators to avoid having
+>to s/=+/+=/, but it might already be done.
+
+Given an open-source compiler, it would be fairly easy to retrofit the
+=+ operators into the lexer.  (Probably easier than cleaning up the
+code).  The alternative is to start with something later (eg 2BSD) but
+code quality then becomes far more of an issue (because 2BSD tends to
+push the I-space limits in lots of areas).
+
+>it's all 16 bit stuff: port of PCC, assembler and loader.
+
+The x86 instruction set and registers are nothing like as regular and
+orthogonal as the PDP-11.  In particular, there are _no_ general
+purpose registers - every register has has a particular purpose and
+either you need to do data-flow analysis to work out what register to
+load something into, or you (basically) give up and load from memory
+as needed.  You could port PCC but this would be much more difficult
+than (say) a M68K port.  You'd probably need a fairly decent peep-hole
+optimiser to get good results.
+
+Wesley Parish mentioned bcc and OpenWatcom.  I looked into the former
+and it's probably the best starting point (though, with due respect to
+BDE, the code it generates could be better).  Assuming that Unix fits
+into the C subset implemented by bcc, you'd be better off spending the
+effort on improving bcc than porting PCC.  At the time I looked,
+OpenWatcom was either still vapourware or not self-hosting.
+
+>an enjoyable discussion.  wish i had time to work on it.
+
+Agreed.
+
+-- 
+Peter Jeremy
+
+This email may contain privileged/confidential information. You may not copy or disclose this email to anyone without the written permission of the sender.  If you have received this email in error please kindly delete this message and notify the sender.  Opinions expressed in this email are those of the sender and not necessarily the opinions of the employer. 
+
+This email and any attached files should be scanned to detect viruses.  No liability will be accepted by the employer for loss or damage (whether caused by negligence or not) as a result of email transmission.
+
+
