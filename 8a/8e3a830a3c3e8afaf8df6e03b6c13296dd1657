@@ -1,0 +1,66 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Tue, 3 Oct 2006 15:40:07 -0400
+Subject: [TUHS] Reading UNIX V6: Does eash process has its own user
+In-Reply-To: <2051ec920610031123n10d2737cq977af058f98e7149@mail.gmail.com>
+Message-ID: <2bda8189a5f15f1e8b106e662546b408@coraid.com>
+
+I'm reading from the printed Lion's commentary and I have the 
+following:
+
+0742	mov	(sp)+, r1
+0743	mov	(sp),KISA6
+0744	mov	$_u,r0
+
+What are you looking at?
+
+> hi Brantley,
+> 
+> Now I start to understand what's going on.
+> 
+> But do you mean 0744 by 0743?
+> 0743    mov    (sp), r0
+> 0744    mov    $_u, r0
+> 
+> And 2230 should be 2229, which is:
+> 2229    sureg();
+> 
+> Thanks  &
+> Regards,
+> 
+> Qinglai
+> 
+> On 10/3/06, Brantley Coile <brantley at coraid.com> wrote:
+>> Rp->p_addr is the address of the swappable image in core.  The process
+>> image begins with the user segment for that process.  Line 0743 maps
+>> the upage into the current address space (KISA6) and _retu loads
+>> previously saved sp and r5 from there.  Notice that on line 2230
+>> Ken reloads the other memory mapping registers.
+>>
+>> Read the section `Memory Management' starting on page 2-4 for background
+>> on this.
+>>
+>>
+>> U.u_rsave is just a constant location in memory.  Notice that rp->p_addr
+>> isn't a byte address but a core click address in units of 64 bytes.
+>>
+>> Hope that helps.
+>>
+>>  Brantley
+>>
+>> > The final question is about how savu/retu work.
+>> >
+>> > savu:
+>> > line 0729 and line 0730: r5 and sp are saved to (r0) and (r0)+, which
+>> > are the address of u.u_rsav.
+>> >
+>> > retu:
+>> > 0746 and 0747: sp and r5 are read from (r0) and (r0)+, which is
+>> > "rp->p_addr" (see line 2228). It looks weird to me. (Okay...I have to
+>> > confess I look stupid here...) When making call to retu, why bother
+>> > "retu(rp->p_addr)"? Why not calling with "retu(u.u_rsav)"? Does it
+>> > mean that rp->p_addr == u.u_rsav?
+>>
+>>
+
+
+
