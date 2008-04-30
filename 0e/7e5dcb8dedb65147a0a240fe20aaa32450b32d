@@ -1,0 +1,86 @@
+From: milov@uwlax.edu (Milo Velimirovic)
+Date: Wed, 30 Apr 2008 11:53:52 -0500
+Subject: [TUHS] Query on PDP-11 assembly
+In-Reply-To: <48187A41.80105@coraid.com>
+References: <20080430115651.GA86539@minnie.tuhs.org>
+	<48187A41.80105@coraid.com>
+Message-ID: <2B09A491-EB29-476C-B88E-27BA9D953BA6@uwlax.edu>
+
+A subprogram using this calling convention would look something like  
+this:
+
+questf:	mov (r5)+,r0
+	/ play with string pointed to by r0.
+	rts r5
+
+On Apr 30, 2008, at 8:55 AM, Brantley Coile wrote:
+
+> In your example, -(sp) = r5; r5 = pc; pc = guestf.
+> Guestf will have to bump r5 as in consumes the parameters.
+> Rts r5 means pc = r5; r5 = (sp)+.
+>
+> Hope this helps.
+>
+> Warren Toomey wrote:
+>> All, I'm trying to write a PDP-11 disassembler for a.out files. I'm  
+>> having
+>> trouble dealing with jsrs. Take, for example, the code here:
+>> http://minnie.tuhs.org/UnixTree/1972_stuff/s1/frag19.html
+>>
+>> I can happily deal with the   jsr pc,do   type of jsr, but the ones
+>> involving r5 have me stumped, e.g.:
+>>
+>> 	jsr	r5,questf; < nonexistent\n\0>; .even
+>>
+>> It appears that data is being inserted into the executable directly
+>> after the jsr instruction. How does the rts which returns from the  
+>> jsr
+>> know how much data to skip, and what is the involvement of r5 here?
+
+The rts doesn't know anything about how much data to skip. In this  
+snippet r5 is a linkage register that's doing double duty: it's both  
+an argument pointer to the location immediately following the jsr and  
+once r5 has been adjusted to point to the location after the argument  
+list it becomes a return address. This programming technique is  
+dependent on the subprogram and its callers agreeing on the number of  
+arguments though it's possible to do a vararg style as well. It's  
+necessary for the subprogram to pick up the arguments and adjust the  
+linkage register accordingly AND to return to the caller with the same  
+register named in the rts instruction as was used in the calling jsr.
+
+/ variable argument list with linkage register
+	jsr r5,some_fn; $argc; arg1; arg2; ... argn
+
+/ in the function it's necessary to pick up all the args
+
+some_fn: mov	(r5)+,r0	/ pick up argc
+	beq	2f		/ if no arguments, process simplest case.
+1:
+/ pick up an argument:
+	mov	(r5)+, somewhere
+/ or
+	mov	*(r5)+, somewhere
+	...
+	dec	r0
+	bne	1b	/ process remaining arguments.
+2:	...
+	rts r5
+
+
+I've seen other ways of processing arguments passed with this method  
+that involved using indexing and adding the argument count to the  
+linkage register. Tastes and mileage may vary.
+
+Regards,
+Milo
+
+--
+Milo Velimirović,  Unix Computer Network Administrator
+608.785.6618 Office -  608.386.2817 Cell
+University of Wisconsin - La Crosse
+La Crosse, Wisconsin 54601 USA   43 48 48 N 91 13 53 W
+
+
+
+
+
