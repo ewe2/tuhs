@@ -1,0 +1,49 @@
+From: jam@magic.com (James A. Markevitch)
+Date: Wed, 30 Apr 2008 09:20:08 -0700 (PDT)
+Subject: [TUHS] Query on PDP-11 assembly
+Message-ID: <200804301620.JAA10112@mist.magic.com>
+
+> I can happily deal with the   jsr pc,do   type of jsr, but the ones
+> involving r5 have me stumped, e.g.:
+> 
+>         jsr     r5,questf; < nonexistent\n\0>; .even
+
+I have encountered this type of construct a lot when doing disassemblers
+over the years.  My usual strategy for dealing with this is:
+
+1. If it's quick and dirty and I am not running huge amounts of code,
+then the disassembler allows the user to provide a list of "hints" to
+it.  The hints for this would describe the arguments to each subroutine.
+For illustrative purposes, you might have a side file that contains
+the following:
+
+	subr 002004 questf string
+
+meaning that location 002004 is a subroutine names questf that expects
+a null-terminated string as the argument.  As an additional benefit,
+you get a nice name for the subroutine that the disassembler can put
+into the output.
+
+And if a subroutine takes two 16-bit arguments, you might have:
+
+	subr 003436 mysub arg16 arg16
+
+If the disassembler identifies each of the targets of the jsr
+instructions, then you can usually do a quick look at the code to
+see what it expects, then add to the side file, then re-run the
+disassembler.
+
+2. If you want to be less quick and dirty, you can have the disassembler
+do a partial flow analysis of the code to figure out what is expected
+for arguments.  This is usually much more involved and you still often
+need to add hints for cases where the '60s or '70s programmer did some
+kind of "neat trick" when coding.
+
+My philosophy on these is to use tools to get to the 95%+ level of
+automation and provide hints to pick up the rest.  Using strategy
+number 1 above will probably get you a lot of success with a small
+amount of coding in your disassembler.
+
+James Markevitch
+
+
