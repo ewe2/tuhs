@@ -1,0 +1,63 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Thu, 1 May 2008 17:21:54 -1000 (HST)
+Subject: [Unix-jun72] Anyone working on V1 mkfs?
+In-Reply-To: <20080502023122.GA82050@minnie.tuhs.org>
+References: <20080501234225.GA77327@minnie.tuhs.org> <5372.1209688415@mini>
+	<20080502005808.GA79200@minnie.tuhs.org>
+	<20080502023122.GA82050@minnie.tuhs.org>
+Message-ID: <Pine.BSI.4.64.0805011719290.20114@malasada.lava.net>
+
+> I gave up and decided to write mkfs from scratch :-)
+
+I did a little more research on the disks, and added my notes
+to the machine.txt file.  Included below.  Looks like we should
+be able to craft a tape image with a list of files and use the
+cold boot mechanism to initialize the rf0 disk (which has to be
+the root fs).  We may still want an mkfs for initializing an
+rf03 later.
+
+----------------
+
+Disks:
+    rf0 - 1024 blocks, always mounted, has root and swap.
+          last 64 blocks (32kbyte) allocated to swap by u0.s
+          u0.s can setup rudimentary fs on this if built with "cold=1"
+    rk0 - 4871 blocks
+
+
+u0.s sets up rf0 as:
+
+    - superblock layout
+      - free storage map contains 128 bytes
+      - inode map contains 64 bytes
+
+    - allocate top 64 blocks "to unix"  (960..1023)
+    - allocate 17 blocks per process (nproc) (688..960 - 16 procs)
+    - free blocks 687..34
+    - zero out blocks 33..1 for use as inodes
+      (and 2nd half of superblock which is unused?)
+
+    - for each special inode i-1 to i-40 initialize it
+      - mode 100017 (allocated, read, write, other read, othe write)
+      - num links = 1
+      - uid = 1 (yup, not root)
+      - fill in timestamp info
+
+   - write out premade i-nodes on i-41 .. i-47
+     with premade directory data.
+     i-41 root (with dev, bin, etc, usr, tmp)
+     i-42 dev (with tty, ppt, mem, rf0, rk0, tap0 .. tap7, tty0..tty7, lpr, 
+tty8)
+     i-43 bin (empty)
+     i-44 etc (with init)
+     i-45 usr (empty)
+     i-46 tmp (empty)
+     i-47 init (binary, included in u0.s)
+          special version that opens /dev/tap0 and reads files from it,
+          creates them, chmods them and chowns them
+
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+
+
