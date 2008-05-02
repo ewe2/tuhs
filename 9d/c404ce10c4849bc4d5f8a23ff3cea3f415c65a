@@ -1,0 +1,52 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Thu, 1 May 2008 16:08:47 -1000 (HST)
+Subject: [Unix-jun72] Anyone working on V1 mkfs?
+In-Reply-To: <20080502005808.GA79200@minnie.tuhs.org>
+References: <20080501234225.GA77327@minnie.tuhs.org> <5372.1209688415@mini>
+	<20080502005808.GA79200@minnie.tuhs.org>
+Message-ID: <Pine.BSI.4.64.0805011559190.20114@malasada.lava.net>
+
+> On another note, I thought of taking V6 mkfs.c as a start-point to rewrite
+> V1 mkfs. I'm trying to work out what f_m and f_n do:
+>
+>        if(fsys[n] == 'r') {
+>                if(f == 'k') {
+>                        f_n = 24;	/* RK, why these numbers? */
+>                        f_m = 3;
+>                }
+>                if(f == 'p') {
+>                        f_n = 10;	/* RP, why these numbers? */
+>                        f_m = 4;
+>                }
+>        }
+
+Looks like they stagger the insertion of blocks onto the free list
+so that they're not adjacent.  It first builds a table in adr[] of
+the stagger offsets, then it frees blocks from the top linearly
+until it hits a round number, then it allocates as many staggered
+blocks as it can until finally returning to allocating the bottom
+f_n blocks in a linear fashion again.  For example if f_n is 10 and
+f_m is 4, and igh is 100 and low is 20 you puts blocks on the
+list in this order:
+     0,    - always zero first
+     100   - linear at top
+     99, 95, 91, 97, 93, 98, 94, 90, 96, 92, ...
+     33, 38, 34, 30, 36, 32
+     29, 28, 27, ... 22, 21, 20    -- linear at the bottom
+
+as to why they chose these particular constants for these disks,
+I can only guess that they figured having blocks roughly four
+apart made for good performance due to read and seek latencies?
+
+> Finally, are we going to use RK03 or RK05, as the sizes are different?
+
+The sources mention "rk03" several times and give 4872 decimal as
+the maximum block number allowed (and also rf0 with 1024 as maximum
+block number).
+
+> 	Warren
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+
+
