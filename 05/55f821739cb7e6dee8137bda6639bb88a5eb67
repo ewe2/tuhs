@@ -1,0 +1,57 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 00:33:43 +1000
+Subject: [Unix-jun72] mkfs.c is now working
+Message-ID: <20080504143343.GA39542@minnie.tuhs.org>
+
+All, my mkfs.c $Revision: 1.17 $, $Date: 2008/05/04 14:20:12 $ now produces
+mountable filesystem images, and it's now checked into the svn repository.
+The problem was that the size of a directory is not the size of the blocks
+allocated to it, but is in fact the number of bytes of the in-use directory
+entries. For example, / was being allocated 1 block == 512 bytes. But 512
+is not its size (as it would be in later UNIXes); in fact if / has entries
+
+ 41 sdrwr-  7 root     70 Jan  1 00:00:00 .
+ 41 sdrwr-  7 root     70 Jan  1 00:00:00 ..
+ 43 sdrwr-  2 root    570 Jan  1 00:00:00 bin
+ 42 sdrwr-  2 root    250 Jan  1 00:00:00 dev
+ 99 sdrwr-  2 root    100 Jan  1 00:00:00 etc
+108 sdrwr-  2 root     70 Jan  1 00:00:00 tmp
+114 sdrwr-  2 root     20 Jan  1 00:00:00 usr
+
+then its size is 7 entries * 10 bytes each = 70 bytes.
+
+Importantly, this also means that we can now make bootable root filesystems
+without having to do a cold UNIX:
+
+% tools/mkfs /usr/local/src/V1 rf0.dsk rf	# Make the / disk
+% tools/mkfs /usr/local/src/V1 rk0.dsk rk	# Make the /usr disk, same stuff
+% ./simh.cfg
+PDP-11 simulator V3.7-3
+./simh.cfg> #!tools/pdp11
+Unknown command
+Disabling CR
+Disabling XQ
+RF: buffering file in memory
+TC0: 16b format, buffering file in memory
+sim> g
+
+:login: root
+root
+# /tmp/a.out
+/dev/rk0# ls -l /usr/tmp
+total    8
+112 sxrwrw  1 root    156 Jan  1 00:00:00 a.out
+110 sxrwrw  1 root   1664 Jan  1 00:00:00 etma
+113 sxrwrw  1 root      6 Jan  1 00:00:00 hello
+109 sxrwrw  1 root     26 Jan  1 00:00:00 ttmp
+111 sxrwrw  1 root    142 Jan  1 00:00:00 utmp
+# df
+806+4602			# Number of free blocks on / and /usr
+
+I added /usr/tmp/hello just to verify that I was getting files that
+were not on the cold UNIX tape.
+
+Cheers,
+	Warren
+
+
