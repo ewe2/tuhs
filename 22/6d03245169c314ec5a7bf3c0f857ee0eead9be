@@ -1,0 +1,36 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 11:17:06 +1000
+Subject: [Unix-jun72] Another RK mount program
+In-Reply-To: <Pine.BSI.4.64.0805031940510.20114@malasada.lava.net>
+References: <Pine.BSI.4.64.0805031915580.20114@malasada.lava.net>
+	<Pine.BSI.4.64.0805031923530.20114@malasada.lava.net>
+	<Pine.BSI.4.64.0805031940510.20114@malasada.lava.net>
+Message-ID: <20080505011706.GA67094@minnie.tuhs.org>
+
+On Sun, May 04, 2008 at 10:18:08AM -1000, Tim Newsham wrote:
+> I added a patch "aout407.patch" for running a.out binaries in the 1ed
+> kernel. I was able to run "as" and "size", both of which are 0407 binaries.
+
+Here is an asm program to mount /usr, which assembles with "as". This
+replaces my hand-crafted one from yesterday.
+
+	Warren
+
+/ rkmnt.s: mount /dev/rk0 onto /usr
+/ Assembles with V1 "as" on V1 kernel with 0407 patch
+
+exit  = 1.
+write = 4.
+mount = 21.
+
+        mov     $1,r0
+        sys     write; rk0; 8.
+        mov     $1,r0
+        sys     write; usr; 4.
+        sys mount; rk0; usr
+        sys exit
+
+rk0:    </dev/rk0\0>
+usr:    </usr\0>
+
+
