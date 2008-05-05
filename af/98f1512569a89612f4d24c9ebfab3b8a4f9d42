@@ -1,0 +1,35 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 11:23:56 +1000
+Subject: [Unix-jun72] No luck with C compiler yet, but an idea
+In-Reply-To: <Pine.BSI.4.64.0805031940510.20114@malasada.lava.net>
+References: <Pine.BSI.4.64.0805031915580.20114@malasada.lava.net>
+	<Pine.BSI.4.64.0805031923530.20114@malasada.lava.net>
+	<Pine.BSI.4.64.0805031940510.20114@malasada.lava.net>
+Message-ID: <20080505012356.GB67094@minnie.tuhs.org>
+
+On Sun, May 04, 2008 at 10:18:08AM -1000, Tim Newsham wrote:
+> I added a patch "aout407.patch" for running a.out binaries in the 1ed
+> kernel.  It could be a little cleaner; if anyone can review it and fix
+> it up I would appreciate it.  I was able to run "as" and "size",
+> both of which are 0407 binaries.
+
+I played around trying to get the last11c C compiler to work, but no luck
+yet. I can compile it using Apout and the existing cc, c0, c1, as binaries.
+
+Tim, I suspect that we need to modify the 0407 patch to also clear the
+bss area in core. Here are the headers from several binaries
+
+	    Size of:   text    data    bss
+/usr/lib/c0   000407  023324  003574  005700  017614  000000  000000  000001
+/usr/lib/c1   000407  016664  011554  003030  010624  000000  000000  000001
+/usr/bin/cc   000407  004576  000416  001024  003644  000000  000000  000001
+/usr/bin/as   000407  016616  000000  000000  000000  000000  000000  000001
+/usr/bin/size 000407  002626  000000  000000  000000  000000  000000  000001
+
+You can see that c0, c1 and cc all have bss areas, but as and size have no
+bss areas, which is probably why they work OK.
+
+Cheers,
+	Warren
+
+
