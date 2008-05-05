@@ -1,0 +1,44 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 21:36:32 +1000
+Subject: [Unix-jun72] Why is V1 so slow?
+In-Reply-To: <20080505091011.GL7293@server.vk2pj.dyndns.org>
+References: <20080505045229.GA76763@minnie.tuhs.org>
+	<20080505091011.GL7293@server.vk2pj.dyndns.org>
+Message-ID: <20080505113632.GA85746@minnie.tuhs.org>
+
+On Mon, May 05, 2008 at 07:10:11PM +1000, Peter Jeremy wrote:
+> On Mon, May 05, 2008 at 02:52:29PM +1000, Warren Toomey wrote:
+> >    i= *c & 0277;
+>              ^^^^ 0377 maybe
+
+Yep :)
+ 
+> >But it's very sloooow. I wonder why; V7 on simh is much faster than V1.
+> 
+> Is V1 executing more instructions to get the same thing done or is simh
+> managing to execute V7 instruction streams (or maybe emulate higher-end
+> PDP-11's) better?  Judging by some of the earlier hardware comments,
+> maybe V1 is thrashing.
+
+I think there are output delays in the kernel, probably to deal with
+the speed of mechanical output devices. When I use the compiler, the
+compilations are fast, but doing an ls -l /bin takes ages. We might be
+able to tweak out the delays.
+
+For example, grep delay build/u9.s, and these lines in u4.s:
+
+1:
+       cmp     r1,$11 / char = ht
+       bne     1f
+       movb    $15.,toutt+0 / set time out to 15 clock tics
+1:
+       cmp     r1,$15 / char = cr
+       bne     2f
+       movb    $15.,toutt+0 / set time out to 15 clock ticks
+2:
+       rts     r0
+
+Cheers,
+	Warren
+
+
