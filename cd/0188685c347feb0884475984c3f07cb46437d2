@@ -1,0 +1,56 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Tue, 6 May 2008 12:57:44 +1000
+Subject: [Unix-jun72] Import V1 filesystem trees into svn?
+In-Reply-To: <Pine.BSI.4.64.0805051641230.20114@malasada.lava.net>
+References: <20080506023814.GA21907@minnie.tuhs.org>
+	<Pine.BSI.4.64.0805051641230.20114@malasada.lava.net>
+Message-ID: <20080506025744.GA22678@minnie.tuhs.org>
+
+On Mon, May 05, 2008 at 04:48:46PM -1000, Tim Newsham wrote:
+> > I think it would be a good idea to import the V1 / and /usr filesystem from
+> > the s2 tape into the subversion repository, so that we can write a tools/
+> > script to build "known good" rf0.dsk and rk1.dsk disk images.
+> 
+> The rf0 disk is pretty manageable.  The rk0 disk is 2.5M and might
+> be a little big for putting into the SVN
+
+Sorry Tim. I meant putting the files which will go onto the images, not
+the images themselves. Plus a tools/ script to build the images.
+
+> I think the bigger question here is what do we want the standard disk
+> image to look like?  Are we building rf0 with s2/bin and s2/etc only?
+> Should it have the jun72 init on it?  the jun72 sh?  A "mount" utility?
+> Will there be any new versions or hacks applied?
+
+Perhaps we do the same as we have done with patches:
+
+	fs/root == original files as per s2 tape
+	fs/usr  == original files as per s2 tape
+	fs/newfiles == new files to add to images
+	fs/buildroot == modified root	(not in svn)
+	fs/buildusr == modified usr	(not in svn)
+	tools/xxx	== script to build root and usr
+ 
+> What about the files that mkfs can't currently put on the system due to size?
+
+Current mkfs can write all the s2 files, including the large ones.
+
+> What about file permissions? Are we going to restore the old s2 permissions?
+
+We can modify mkfs to restore uid, time and V1 permissions.
+
+> Do we want to put up prebuilt kernels?
+
+No, just document the method to build the kernels.
+
+> I imagine we want to have a script that autogenerates each of the
+> images that we intend to put up.
+
+I think that's the way to go: a script to build a kernel + a set of
+suitable tape/disk image files for it. Make it a top-level script
+that calls next-level scripts, so that we can still run tools/assemv7
+if we want to build a kernel and not build a filesystem.
+
+	Warren
+
+
