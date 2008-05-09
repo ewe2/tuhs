@@ -1,0 +1,33 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Fri, 9 May 2008 23:18:15 +1000
+Subject: [Unix-jun72] DC-11 quick hack
+In-Reply-To: <Pine.BSI.4.64.0805062049550.20114@malasada.lava.net>
+References: <Pine.BSI.4.64.0805062049550.20114@malasada.lava.net>
+Message-ID: <20080509131815.GA8761@minnie.tuhs.org>
+
+On Tue, May 06, 2008 at 09:04:26PM -1000, Tim Newsham wrote:
+> Ok, I had some initial success with a quick and dirty hack.
+>   - apply the attached patch to your simh tree and rebuild pdp11
+>     and copy it into your tools directory.
+>     - maps the TTIX device into the DC11 space
+>     - forces the CSR to return the carry-detect bit as always on
+
+I was going to write a proper DC-11 device for Simh, but Tim's patch to
+the DL11 was so small that I decided it would be easier to allow runtime
+configuration of the DL11 to behave like a DC11. I've just added misc/DL.diff
+to our subversion tree. If you apply this patch to Simh, then you can add
+these lines to your simh.cfg to make 8 DC-11 devices:
+
+set ttix en                             ; Enable DC/DL-11 device
+set ttix lines=8                        ; We want 8 serial ports
+set ttix address=17774000               ; Set the address to be a DC-11
+set ttix carrier=dc                     ; Turn on the DC-11 carrier detect bit
+set ttox 7b                             ; Set output to be 7-bit, lowercase
+att ttix 5555                           ; Attach serial ports to telnet 5555
+
+I hope we can get the change into the Simh tree.
+
+Cheers,
+	Warren
+
+
