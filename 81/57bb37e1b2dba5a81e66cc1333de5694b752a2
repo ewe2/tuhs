@@ -1,0 +1,104 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 11 May 2008 22:44:09 +1000
+Subject: [Unix-jun72] when did jsr r5 stop?
+In-Reply-To: <1160605.1210386850465.JavaMail.root@elwamui-norfolk.atl.sa.earthlink.net>
+References: <1160605.1210386850465.JavaMail.root@elwamui-norfolk.atl.sa.earthlink.net>
+Message-ID: <20080511124409.GA13686@minnie.tuhs.org>
+
+On Fri, May 09, 2008 at 10:34:10PM -0400, Doug Merritt wrote:
+> NOTE: I am not sure of precisely when s1 dates to, but many of these
+> source files use the "jsr    r5, 0: <buffer>" calling convention that
+> requires writable code segments -- did that go away sharply with the
+> pdp11/20 to pdp11/45 move, or no?
+
+I promise I'll stop replying now, just one more...
+
+After unpacking the 5th Edition source, there are lots of applications
+still written in assembly code; I'll provide a list below. And many
+of them still use the jsr    r5, calling convention.
+
+5th Edition UNIX has two a.out header types: the 0407 a.out header still
+allowed mixed code+data with writable code. The 0410 a.out header was the
+first where code was read-only, and data was separated out. Looking at the
+paper manuals I've got, 4th Edition is the first manual which mentions the
+0410 header.
+
+I would guess that the 0410 read-only code header was created when
+PDP-11s arrived which supported split instruction/data address spaces.
+
+And here are the .s files from 5th Edition:
+
+usr/c/c0t.s		usr/source/s1/grep.s	usr/source/s4/exp.s
+usr/c/c1t.s		usr/source/s1/kill.s	usr/source/s4/ffltpr.s
+usr/c/cctab.s		usr/source/s1/ld1.s	usr/source/s4/floor.s
+usr/c/efftab.s		usr/source/s1/ld2.s	usr/source/s4/fltpr.s
+usr/c/regtab.s		usr/source/s1/ldx.s	usr/source/s4/fmod.s
+usr/c/sptab.s		usr/source/s1/lpd.s	usr/source/s4/fork.s
+usr/fort/sum.s		usr/source/s2/mesg.s	usr/source/s4/fstat.s
+usr/mdec/dldr.s		usr/source/s2/mkdir.s	usr/source/s4/gamma.s
+usr/mdec/dli.s		usr/source/s2/msh.s	usr/source/s4/getc.s
+usr/mdec/dtf.s		usr/source/s2/passwd.s	usr/source/s4/getchr.s
+usr/mdec/list.s		usr/source/s2/pfe.s	usr/source/s4/getcsw.s
+usr/mdec/mcopy.s	usr/source/s2/rew.s	usr/source/s4/getgid.s
+usr/mdec/rkf.s		usr/source/s2/rmdir.s	usr/source/s4/getuid.s
+usr/mdec/tboot.s	usr/source/s2/strip.s	usr/source/s4/gtty.s
+usr/mdec/uboot.s	usr/source/s2/sum.s	usr/source/s4/hmul.s
+usr/source/s1/ar.s	usr/source/s2/time.s	usr/source/s4/hsw.s
+usr/source/s1/as11.s	usr/source/s2/tp1.s	usr/source/s4/kill.s
+usr/source/s1/as12.s	usr/source/s2/tp2.s	usr/source/s4/ldfps.s
+usr/source/s1/as13.s	usr/source/s2/tp3.s	usr/source/s4/link.s
+usr/source/s1/as14.s	usr/source/s2/tp4.s	usr/source/s4/locv.s
+usr/source/s1/as15.s	usr/source/s2/tty.s	usr/source/s4/log.s
+usr/source/s1/as16.s	usr/source/s2/update.s	usr/source/s4/ltod.s
+usr/source/s1/as17.s	usr/source/s2/write.s	usr/source/s4/makdir.s
+usr/source/s1/as18.s	usr/source/s3/atan.s	usr/source/s4/mcrt0.s
+usr/source/s1/as19.s	usr/source/s3/atof.s	usr/source/s4/mdate.s
+usr/source/s1/as21.s	usr/source/s3/atoi.s	usr/source/s4/mknod.s
+usr/source/s1/as22.s	usr/source/s3/compar.s	usr/source/s4/mount.s
+usr/source/s1/as23.s	usr/source/s3/crypt.s	usr/source/s4/nargs.s
+usr/source/s1/as24.s	usr/source/s3/dpadd.s	usr/source/s4/nice.s
+usr/source/s1/as25.s	usr/source/s3/ecvt.s	usr/source/s4/nlist.s
+usr/source/s1/as26.s	usr/source/s3/exp.s	usr/source/s4/open.s
+usr/source/s1/as27.s	usr/source/s3/fakfp.s	usr/source/s4/pipe.s
+usr/source/s1/as28.s	usr/source/s3/fp1.s	usr/source/s4/pow.s
+usr/source/s1/as29.s	usr/source/s3/fp2.s	usr/source/s4/printf.s
+usr/source/s1/bas0.s	usr/source/s3/fp3.s	usr/source/s4/prof.s
+usr/source/s1/bas1.s	usr/source/s3/fpx.s	usr/source/s4/putc.s
+usr/source/s1/bas2.s	usr/source/s3/gamma.s	usr/source/s4/putchr.s
+usr/source/s1/bas3.s	usr/source/s3/get.s	usr/source/s4/read.s
+usr/source/s1/bas4.s	usr/source/s3/hypot.s	usr/source/s4/reset.s
+usr/source/s1/bas5.s	usr/source/s3/ldiv.s	usr/source/s4/retrn.s
+usr/source/s1/basx.s	usr/source/s3/log.s	usr/source/s4/rsave.s
+usr/source/s1/cat.s	usr/source/s3/mesg.s	usr/source/s4/sbrk.s
+usr/source/s1/chown.s	usr/source/s3/mon.s	usr/source/s4/seek.s
+usr/source/s1/clri.s	usr/source/s3/nlist.s	usr/source/s4/setgid.s
+usr/source/s1/db1.s	usr/source/s3/pow.s	usr/source/s4/setuid.s
+usr/source/s1/db2.s	usr/source/s3/put.s	usr/source/s4/signal.s
+usr/source/s1/db3.s	usr/source/s3/qsort.s	usr/source/s4/sin.s
+usr/source/s1/db4.s	usr/source/s3/rand.s	usr/source/s4/sleep.s
+usr/source/s1/dc1.s	usr/source/s3/sin.s	usr/source/s4/sqrt.s
+usr/source/s1/dc2.s	usr/source/s3/sqrt.s	usr/source/s4/stat.s
+usr/source/s1/dc3.s	usr/source/s3/ttyn.s	usr/source/s4/stime.s
+usr/source/s1/dc4.s	usr/source/s4/abort.s	usr/source/s4/stty.s
+usr/source/s1/dc5.s	usr/source/s4/atan.s	usr/source/s4/sync.s
+usr/source/s1/diff2.s	usr/source/s4/atan2.s	usr/source/s4/time.s
+usr/source/s1/dsw.s	usr/source/s4/atof.s	usr/source/s4/times.s
+usr/source/s1/du.s	usr/source/s4/chdir.s	usr/source/s4/umount.s
+usr/source/s1/ed1.s	usr/source/s4/chmod.s	usr/source/s4/unlink.s
+usr/source/s1/ed2.s	usr/source/s4/chown.s	usr/source/s4/wait.s
+usr/source/s1/ed3.s	usr/source/s4/close.s	usr/source/s4/write.s
+usr/source/s1/fed1.s	usr/source/s4/cos.s	usr/source/s7/roff1.s
+usr/source/s1/fed2.s	usr/source/s4/crand.s	usr/source/s7/roff2.s
+usr/source/s1/fed3.s	usr/source/s4/creat.s	usr/source/s7/roff3.s
+usr/source/s1/form1.s	usr/source/s4/crt0.s	usr/source/s7/roff4.s
+usr/source/s1/form2.s	usr/source/s4/crypt.s	usr/source/s7/roff5.s
+usr/source/s1/form3.s	usr/source/s4/dup.s	usr/source/s7/roff7.s
+usr/source/s1/form4.s	usr/source/s4/ecvt.s	usr/source/s7/roff8.s
+usr/source/s1/form5.s	usr/source/s4/execl.s	usr/source/s7/suftab.s
+usr/source/s1/form6.s	usr/source/s4/execv.s	usr/sys/conf/low.s
+usr/source/s1/getty.s	usr/source/s4/exit.s	usr/sys/conf/mch.s
+
+Cheers,
+	Warren
+
+
