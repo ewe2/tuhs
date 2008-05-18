@@ -1,0 +1,167 @@
+From: jam@magic.com (James A. Markevitch)
+Date: Sat, 17 May 2008 18:04:48 -0700 (PDT)
+Subject: [Unix-jun72] UNIX V1 bootstrap
+Message-ID: <200805180104.SAA27787@mist.magic.com>
+
+> > I've ported the bootstrap stuff over the whole UNIX V1 build process.
+> > (Note: it would be nice to have a V1 as, so that all of these hacks
+> > we've been doing can go away).
+> 
+> Did you write bos.s and msys.s from scratch?   I noticed your
+> wunix contains no header, just the binary bits.  Was this standard
+> procedure in other versions of unix or is it possible that
+> the msys program took in an 0405 or 0407 and stripped the header
+> off before writing it?  Is there an easy way to strip the header
+> from within the unix system with standard commands?
+
+I wrote bos.s and msys.s from scratch.  I am not aware of any binaries
+or source for these.
+
+bos is written in an entirely position-independent manner so that it can be
+compiled with a v1 assembler, v2 assembler, etc. and still run when loaded
+at location 54000 in core.  Other than the option to load a paper tape, I
+believe this to be as true to V1 as possible.
+
+msys was implemented to be as true to V1 as I believed possible.  It copies
+images directly from disk without modifying them, as I believe the original
+V1 msys did.  There is no header kludging, since a V1 a.out UNIX kernel
+should be bootable without modification.
+
+For wunix (warm unix), I took the build/loadfile, stripped off the
+first 6 bytes, then copied the next 16K bytes, just as the boot/installboot
+script does.
+
+For building under UNIX itself, there are a variety of strategies.  Here
+is my list, in order of preference:
+
+1. Use the V1 assembler.  This will produce a 12-byte header that is
+exactly compatible with the kernel source as it appears in the listing.  As
+many people on this are aware, the first 12 bytes get manually patched
+by the UNIX code when it starts up.  But, I don't think the V1 assembler
+exists anywhere, or at least not that has been found.  That kind of makes
+this option moot.
+
+2. Modify the V2 assembler to produce V1 binaries.  If the V2 assembler
+can be built from sources, then it should be straighforward to edit it
+to produce V1 binaries (i.e. 405 instead of 407).  This would allow a
+kernel in the true spirit of V1 to be created, then copied into the
+boot area by msys.  It would also allow other programs to all be created
+as V1 binaries, which has a lot of attraction to me.
+
+3. Modify msys.s to be msys2.s to strip the 407 header and also truncate
+the copy to not overrun the size of the area being copied into (1K, 6K,
+6K, 3K).  I just tested a modified version of this and attached it below,
+since that should help to get things going; but I really think that
+option #2 would be nice to have eventually.
+
+Note to use msys2, you need to copy build/a.out to fs/usr/boot/unix.out,
+and to put msys2.s into fs/usr/boot/msys2.s.  Then after you boot, do:
+	chdir /usr/boot
+	as msys2.s
+	mv a.out msys2
+	msys2 u unix.out
+I'll clean up the source and send a complete fs/usr/boot out later
+tonight.
+
+James Markevitch
+
+--------------------------- fs/usr/boot/msys2.s -------------------------
+/ msys2 -- copy file to RF read only slot
+/
+/ re-creation, based on description in UNIX_ProgammersManual_Nov71.pdf,
+/ page 7-06, BOOT PROCEDURES (VII)
+/ 5/9/08 jam at magic.com
+/ 5/17/08 jam at magic.com -- hacked to copy 407-format a.out files
+
+/ b bos		1700
+/ u warm unix	1704
+/ 1 cold unix	1734
+/ 2 unassigned	1764
+
+	mov	sp,r5
+	mov	(r5)+,r3	/ argc
+	cmp	$3,r3		/ must be 3
+	bne	badcmd		/ else error
+	tst	(r5)+
+	mov	(r5)+,r4	/ get first arg
+
+	cmpb	(r4),$'b
+	bne	1f
+	mov	$1700,r3
+	mov	$4,r4
+	br	2f
+1:
+	cmpb	(r4),$'u
+	bne	1f
+	mov	$1704,r3
+	mov	$30,r4
+	br	2f
+1:
+	cmpb	(r4),$'1
+	bne	1f
+	mov	$1734,r3
+	mov	$30,r4
+	br	2f
+1:
+	cmpb	(r4),$'2
+	bne	badcmd
+	mov	$1764,r3
+	mov	$14,r4
+2:
+
+	/ open file
+	mov	(r5),r5
+	mov	r5,0f
+	sys	open; 0:..; 0
+	bes	error
+	mov	r0,r1
+	sys	seek; 20; 0
+	bes	error
+
+	/ open rf0 and seek to correct block
+	sys	open; disk; 1
+	bes	error
+	mov	r0,r2
+	mov	r3,0f
+	sys	seek; 0:..; 0
+	bes	error
+
+	/ copy file from file to disk one block at a time
+1:
+	mov	r1,r0
+	sys	read; buf; 512.
+	mov	r0,r5
+	mov	r2,r0
+	sys	write; buf; 512.
+	bes	error
+	dec	r4
+	beq	3f
+	tst	r5
+	bne	1b
+
+3:
+	sys	exit
+
+error:
+	mov	$1,r0
+	sys	write; 1f; 2
+	4
+	sys	exit
+1:
+	<?\n>
+
+badcmd:
+	mov	$1,r0
+	sys	write; 1f; 2
+	4
+	sys	exit
+1:
+	<?\n>
+
+disk:
+	</dev/rf0\0>
+	.even
+
+buf:	.=.+512.
+
+
