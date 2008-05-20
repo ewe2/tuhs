@@ -1,0 +1,66 @@
+From: doug@remarque.org (Doug Merritt)
+Date: Mon, 19 May 2008 22:16:28 -0700 (PDT)
+Subject: [Unix-jun72] status on disassembler
+In-Reply-To: <Pine.BSI.4.64.0805180801350.16752@malasada.lava.net>
+Message-ID: <20080520051628.379B75A525@remarque.org>
+
+Interim status on disassembler:
+
+Usually we think "crank out opcodes and operands, how hard could it be?"
+
+But for our effort, we really would like to have disassembly produce
+something as close to the original source code as possible, including
+many things such as which parts are code versus data, and much else.
+
+It turns out there is in fact "much else", and I have been addressing
+all that, starting from the basic "decode opcodes and operands"
+disassembler of Jeffery L. Post.
+
+My initial efforts are directed at disassembling s2 programs and
+comparing them to reconstructed s1 sources. This is a rich experimental
+playground, for now.
+
+It's coming along very nicely, but there are a lot of "little"
+issues, and I will only skim the surface here.
+
+It understands all v1 syscalls, and disassembles appropriately.
+
+It generates all needed "not in assembler" syscall definitions, when used.
+
+My first approach to "temporary labels" (1f/1b, see Knuth) failed badly;
+if anyone has insights on how such things should be disassembled,
+please tell me; I'm still mentally going through various possible
+algorithms.
+
+Currently it supports a "directives file" to insert human-defined labels
+and parameter types. The latter successfully disassembles constructs
+of the form
+     jsr  f5, mesg; <This is a mesg\n\0>
+
+...after being told that address (say 0200) equals "mesg" and that
+that subr takes a jsr_r5 parameter of type asciz.
+
+It does other cool stuff, too, but alas, still fails in all sorts
+of horrible ways, e.g. in not being aware of the difference between
+rvals and lvals when it should.
+
+In general, I'm trying to automate any aspects of disassembly that
+can be, to avoid needing human intervention. Doing so increases
+the fidelity of the reconstruction: minimizing intervention
+is inherently desirable, for historical reconstruction.
+
+Another example of philosophy: it converts BCS to BES if it follows a syscall.
+
+In short, it is pretty cool in certain regards, but is not ready
+for prime time by any means. It's not beta, it's not alpha, it's
+prototype -- but pretty promising.
+
+Handling simple BSS issues is another TODO example (probably next on my list)
+
+Just thought I should report on current progress, since
+people get impatient sometimes. Feedback appreciated.
+   Doug
+--
+Professional Wild-eyed Visionary        Member, Crusaders for a Better Tomorrow
+
+
