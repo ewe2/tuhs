@@ -1,0 +1,131 @@
+From: brad@heeltoe.com (Brad Parker)
+Date: Wed, 21 May 2008 05:49:25 -0400
+Subject: [Unix-jun72] status on disassembler
+In-Reply-To: <20080521074439.9D3575A52C@remarque.org> 
+References: <20080521074439.9D3575A52C@remarque.org>
+Message-ID: <27294.1211363365@mini>
+
+
+Doug Merritt wrote:
+>Tim Newsham wrote:
+>> This is a standard register allocation problem (ie. assigning registers to 
+>
+>Thanks for the thought, but I don't think it is, quite, in part because
+>of the presence of backward branches:
+>
+>2:
+>	br	1f
+>	br	2b
+>1:
+>
+>Here the 2 could be a 1, despite overlapping ranges:
+>
+>1:
+>	br	1f
+>	br	1b
+>1:
+
+I'm confused.  Those are both the same, aren't they?
+
+Isn't the simplest thing to do 2 passes and generate numeric labels as
+needed?  i.e.
+
+L0001:
+	br	L0002
+	br	L0001
+L0002:
+
+That's ugly, but it's correct and will assemble so I'd start there.
+
+Once you have that, and you have all the code in memory as some sort of
+tree, it should be possible to make a pass an attempt to clean this
+up a little.
+
+Here's a snipped of real code, with the uninteresting parts turned into "..."
+
+badsys:
+	...
+	mov	$3f,u.namep
+	...
+	br	1f
+	...
+	br	2f
+1:
+	...
+2:
+	br	sysexit
+3:
+	<core\0\0>
+
+-------
+
+badsys:
+	...
+	mov	$L0001,u.namep
+	...
+	br	L0002
+	...
+	br	L0003
+L0002:
+	...
+L0003:
+	br	sysexit
+L0001:
+	<core\0\0>
+
+You should be able to scan the code and check for references to each
+location.  Assume for a second you have an vector with one entry for
+each instruction location.  You could then chain references off each
+element.  With that information you could tell the "lifetime" of a
+label. i.e.  at L0001 above you could look and decide that that no one
+else referenced it going forward.
+
+I would think that as you scanned that vector from beginning to end you
+could keep a count of active references, and use that to reset your
+local label number.
+
+Let's try it.
+
+   badsys:
+01	...
+02 	mov	$L0001,u.namep
+03	...
+04	br	L0002
+05	...
+06	br	L0003
+   L0002:
+07	...
+   L0003:
+08	br	sysexit
+   L0001:
+09	<core\0\0>
+10
+
+
+01
+02 uses L0001      +1
+03
+04 uses L0002      +2
+05
+06 uses L0003      +3
+07 defines L0002   +2; look forward, no refs to L0002 so decrement
+08 defines L0003   +1; look forward, no refs to L0003 so decrement
+09 defines L0001   0; look forward, no refs to L0001 so decrement
+10
+
+I'm probably trivializing it, but I'm willing to put my money where my mouth
+is if you want me to take a look at your code.
+
+I think it has to be a 2 pass operation, however. I think this is true of
+any good disassembler; they are generally multiple pass.  Deciding where
+the "data" is sometimes takes a little work, which can sometimes be
+a heuristic like "it looks like ascii and there is a reference to it",
+so having a tree of references generally helps.
+
+This is not unlike binary recompilation where you follow each possible
+code path to a terminal node.
+
+-brad
+
+
+
