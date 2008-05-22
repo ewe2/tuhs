@@ -1,0 +1,58 @@
+From: andreww591@gmail.com (Andrew Warkentin)
+Date: Wed, 21 May 2008 21:05:09 -0600
+Subject: [Unix-jun72] Semi-OT: Other systems to reconstruct?
+Message-ID: <4834E2E5.20302@gmail.com>
+
+With the successful restoration of Unix V1, I was thinking of other
+operating systems that could be restored in a similar way. The most
+historically significant would probably be CTSS. The SIMH IBM 7094
+simulator has everything necessary to run CTSS implemented already,
+although the CTSS-specific stuff is untested (since as far as I know,
+nobody has booted CTSS in it yet) and may need some patching.
+
+There are several tapes of listings (for almost all of the system), and
+a few tapes of binaries (one with supervisor binaries, and one with
+"standalone" utilities, but nothing with user-mode programs) available.
+The listings need to be converted back into source that can be assembled
+or compiled. Part of this can be done automatically (I have written some
+dumb scripts to do this), but there will likely be quite a bit of manual
+editing involved. There is nothing to be OCRed, since everything is on 
+magtapes.
+
+Most of the source is either assembly or MAD (an Algol-58 dialect), with
+a few files in AED (another Algol dialect, for which no compiler appears
+to have survived). Restoring the assembler stuff should be easy (there
+exists a cross-assembler which would work), but restoring the MAD stuff
+will be a little bit harder. There is no cross-compiler for it (there is
+a compiler that runs under IBSYS, but it is probably just for an IBSYS
+target, and I'm not sure if anyone has even figured out how to run it).
+The AED stuff will have to be rewritten in MAD (which shouldn't be
+especially hard, since AED and MAD are somewhat similar). Only a few
+non-essential programs are written in AED.
+
+I think that all (or at least most of) the stuff required for booting is
+written in assembler, so the best way to get it working would be get a
+minimal system booting (I suspect all that is necessary is the
+supervisor, so the binaries on the tape might be of use), and run the
+CTSS MAD compiler under it to compile all the MAD stuff (which includes
+many of the "core" commands).
+
+I'm not sure what the best way to get stuff into a filesystem is. The
+standalone utilities run under FMS, and there is no bootable FMS tape.
+There is a version of FMS that runs under IBSYS, but for some reason, it
+  returns an error when attempting to load the utilities off the tape.
+It  is probably possible to patch it to fix that bug, though. It would
+also work to write utilities that run on the host system, much like what
+was done for Unix V1 (although I think that fixing the bug in FMS would
+probably be easier).
+
+Maybe I should start a Sourceforge project.
+
+
+Another, much simpler, system which might be possible to restore is
+MUMPS-15, for which a PDF of a paper listing is available on bitsavers.
+Restoring it would probably just be a matter of OCRing, correcting, and
+assembling it (and maybe writing a bootstrap).
+
+
+
