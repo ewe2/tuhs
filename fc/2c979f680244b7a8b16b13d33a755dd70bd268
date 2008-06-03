@@ -1,0 +1,112 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Tue, 3 Jun 2008 06:18:07 +0200
+Subject: [TUHS] Introduction
+Message-ID: <20080603061807.996d9648.lehmann@ans-netz.de>
+
+Hi everybody,
+
+I don't know if it's usual or not to write an introduction but I'll just
+do so by keeping more an eye on the computer system I own.
+If you don't care just skip this mail ;)
+
+As my From header states my name is Oliver, I live in germany and right
+now I'm 27 years old. That should be enough to my person - now let me
+tell you a bit more about the computer system I own ;)
+
+EAW P8000
+
+This system was built between 1987 and the breakdown of the former GDR -
+the eastern part of germany - 1990. The system itself is split up into
+two "towers" connected together. The first tower called "P8000 Computer"
+contains a 8Bit system (Z80) and a 16Bit system (Z8001).The 2nd case -
+the "P8000 Winchester" - contains a Winchester Disc Controller which runs
+with a Z80 CPU and is connected to the 16Bit part of the "P8000
+Computer". Up to three MFM drives (all with the same geometry while the
+geometry itself can be configured) can be connected to the WDC.
+
+The 8Bit part is built on a single board, has 64KB SRAM, 2 SIOs to
+connect up to 4 terminals to it, one PIO to connect a EPROM programmer,
+and one PIO to establish a connection to the 16Bit part. It has 2 5.25"
+floppy drives with an external connector to connect two further 5.25" or
+8" floppy drives. The systemmonitor is loaded from two 2732 EPROMs.
+The system originally supported three operating systems while two
+survived the time being. I own UDOS which is a Z80-RIO clone and OS/M
+which is a CP/M clone. There also was an OS called IS/M which was an ISIS
+clone.
+
+The more interesting (at least for me) part is the 16Bit part. The 16Bit
+part is built on a single board too (6layer) while the DRAM are single
+board which can be hooked up onto the mainboard.
+The system runs a Z8001 with 3 MMUs and Z80-peripherial ICs (PIO, SIO...)
+It also has 2 SIOs for 4 terminal connections, and one PIO to connect the
+WDC. The system also has two furhter PIO chips to establish a connection
+to the 8Bit system. The system runs with up to 4MB of DRAM but it might
+run with more RAM with self-made RAM modules. There exists also a RTC for
+the system and an extension to connect an 80286CPU + 1MBRAM to the 16BIT
+port to run a x86 OS on it while stearing it from the OS running on the
+16Bit system.
+The Operating-System running on the 16Bit part is WEGA - a ZiLOG ZEUS
+clone.
+To boot WEGA at first the 8Bit system has to be booted up with UDOS (the
+Z80-RIO clone) to load a communication software which handles the
+communication over the 8Bit-PIO. After this is done the system switches
+over to the 16Bit system and the system monitor there gets loaded. The
+WEGA-Kernel (most parts are still original ZEUS objects) itself has the
+corresponding part for the 8<->16Bit communication interface in it.
+This was done to get access to the floppy drives, the EPROM programmer
+and the 4 8Bit-terminal connections which are all connected to the Z80
+on the 8Bit-system.
+To access for example a floppy, the WEGA-kernel has to send the request
+using the PIO connection to the 8Bit system which handles it and sends
+the results back to the WEGA-kernel on the 16 Bit system. Same goes with
+the WDC which is connected through another PIO directly to the 16Bit
+system - command codes are sent to the Z80 on the WDC which handles the
+codes and sends the results back to the 16Bit system. Not that fast but
+it works good.
+
+Pictures and so one are all collected on my homepage
+http://pofo.de/P8000/ while most (if not to say all) of original
+documents are written in german...
+
+So - what do I do with the system? I use it for learn more about hardware
+processes itself, assembler and to get a deeper UNIX knowledge which is
+easier to start with there then with todays UNIX systems.
+
+Las project was to get TCP/IP working and I successed by usingg K5JB to
+get FTP and ping to work via SLIP. Because the speed was damn slow (and
+not just because of the baud rate), I came to the conclusion that a
+better performance could be achieved by implementing TCP/IP in the
+kernelspace instead of having it run in the userspace.
+
+So my goal is now to get the kernel sources right now to make the
+neccessary changes to get TCP/IP running in the kernel. As you might
+think now this is not so easy as it sounds. The sources for some objects
+of the kernel survied over the time, but many are missing. I'm now
+sitting here since a month disassembling the original kernel object and
+writing the disassembled code back in C. I've started this by having lets
+say nearly-to-zero ASM knowldege and I'm making good progress. Not much
+is left, but from time to time the C files are not compiling to
+exactly the same object which is in the kernel. Some times other
+temporary registers are used for operations, or I can't get to the same C
+code doesn't matter of what I'm trying and so on. I'm trying to get 100%
+the same object to be 100% sure I have the same code the object was built
+with. The compiler on that system should be the same but of course I
+can't guarantee that for sure.
+
+I'll put a web page together with my open C<->ASM questions because I
+think I can format things better there so asking and reading would be
+easier (probably because it is a lot of text)
+
+My progess can be seen here: http://pofo.de/P8000/kernel.php
+And the sources I got so far are here: 
+  http://cvs.laladev.org/index.html/WEGA/src/uts/
+
+I hope you can help me a bit with answering the things I can't find an
+answer myself ;)
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+
