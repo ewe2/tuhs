@@ -1,0 +1,53 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Wed, 25 Jun 2008 12:25:05 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080623181101.e862a3a2.lehmann@ans-netz.de>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+Message-ID: <20080625122505.4e3d9803@veda.cnb.uam.es>
+
+Oliver,
+
+	BTW, I am thiking more clearly now and realize I initially confused 
+the uap struct in lock() with u_uap, although what is actually assigned is
+uap->linkname to u.u_dirp.
+
+	When seeing the type definitions in param.h I also notice that it
+defines caddr_t (the type of the u.u_dirp.l side of the saddr_t union) as
+
+typedef char 		*caddr_t;	/* pointer to kernel things */
+
+that leads me to consider that the &0x7F00FFFF may be an additional 
+security check to ensure that the pointer falls within valid memory 
+space, in which case it would match the memory map.
+
+I notice that nsseg in mch.s may return %7F00 on some cases and is used
+in machdep.c as stseg = nsseg(u_state->s_sp); so it seems the stack uses
+segment 0x7F00. Then may be the & is shorthand to make sure the address
+pointed by the ANDed pointer falls within the stack. It would probably
+imply user programs have a maximum stack size of 65536 bytes as well.
+
+That may explain why some pointers are ANDed and others not. I haven't
+had a thorough look, but if the &0x7F00FFFF usage is consistent, then
+that's is an explanation that may guide source reconstruction.
+
+Does this look sensible?
+
+					j
+
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080625/8fe9f063/attachment.sig>
+
