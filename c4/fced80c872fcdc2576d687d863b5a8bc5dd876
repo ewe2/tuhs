@@ -1,0 +1,100 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Thu, 26 Jun 2008 16:52:46 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080625122505.4e3d9803@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+	<20080625122505.4e3d9803@veda.cnb.uam.es>
+Message-ID: <20080626165246.9c3933eb.lehmann@ans-netz.de>
+
+Hi Jose,
+
+first - thanks for taking the time helping me here on this issue.
+
+		s=(char *)(*(long *)adx & 0x7F00FFFF);
+
+in prf.c compiles to:
+
+        ldl     rr2,|_stkseg+~L1+8|(fp)
+        ldl     rr4, at rr2
+        and     r4,#32512
+        ldl     |_stkseg+~L1+12|(fp),rr4
+
+I've some places in the WEGA kernel where this ANDing is done in a
+way I need it, but I have no source which compiles to the way I need
+it. I've searched all the kernel for it.
+I guess the WEGA-developer which replaced some ZEUS objects by his
+own implementation didn't found out the real syntax too and so created
+basically the same syntax I have now in the sources for the original
+ZEUS objects. So some sources (mostly theese with german comments ;)
+are containing 7F00FFFF ANDings which are compatible because they are
+not the original ZEUS objects where this copying is made. And for
+ZEUS I've zero sources...
+
+So the only thing in sys2.c's link() you wanted me to change in your
+previous mail was:
+
+	u.u_dirp.l = (caddr_t) ((long *) uap->linkname & 0x7F00FFFF);
+
+right? Tried this, and got:
+
+"sys2.c":305: operands of "&" have incompatible types 
+Error in file sys2.c: Error.  No assembly.
+
+
+> I notice that nsseg in mch.s may return %7F00 on some cases and is used
+> in machdep.c as stseg = nsseg(u_state->s_sp); so it seems the stack uses
+> segment 0x7F00. Then may be the & is shorthand to make sure the address
+> pointed by the ANDed pointer falls within the stack. It would probably
+> imply user programs have a maximum stack size of 65536 bytes as well.
+> 
+> That may explain why some pointers are ANDed and others not. I haven't
+> had a thorough look, but if the &0x7F00FFFF usage is consistent, then
+> that's is an explanation that may guide source reconstruction.
+
+A memory segment is 64Kbyte of size. The hardware is a bit special here.
+The CPU can access the memory in a segmented and a nonsegmented mode. For
+this purpose 3(!) MMUs are existing. A special MMU control logic is
+implemented which can handle 3 states:
+1: segmented OS (CPU works in system mode)
+	The segments Code, Data and Stack are managed by MMU1. MMU2 and
+	MMU3 are not active
+2: userprocess not segmented (CPU works in normal-mode, segmentnumber 63)
+	The segments Code, Data and Stack are managed by MMU1. MMU2 and
+	MMU3 are not active. This is done by a special break register
+3: userprocess segmented (CPU works in normal-mode)
+	MMU2 and MMU3 are used to process the 128 possible memory segments
+	which can be Code-, Data- or Stack-Segments. MMU2 manages the
+	segments 0-63 and MMU3 manages the segments 64-128. The switching
+	between both MMUs works hardwarecontrolled in dependence of the
+	segmentline. Both MMUs are programmed for segment 0..63.
+
+A colleague of mine wrote about this:
+>>>>>
+I've looked at your problems site and think I can imagine why the AND 0x7f00ffff
+is there. Remember, the Z8000 segmentation concept is flawed the way that a segment
+address can wrap around without warning. Now, at a higher level, UNIX uses a flat 
+address space and somewhere, this logic address needs to be translated into 
+physical addresses. This is done by the MMU - however, if within a pointer arithmetic
+an overflow beyond the 64k boundary happens, it can spill over into the segment number
+which is - you might remember at bit [30:24]. So as soon as a pointer is created by the
+compiler, it is ANDed with 0x7f00 for the upper 16bits to extract the segment number and 
+with 0xffff for the lower 16bit address to obtain the real logic address PC.
+
+It would be really interesting to look at the implementation of malloc for memory blocks
+greater than 64K byte. My assumption is that the compiler inserts this AND on its own for
+any pointer arithmetic.
+<<<<<
+
+Maybe this helps...
+
+   Greetings, Oliver
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+
