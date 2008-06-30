@@ -1,0 +1,125 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Mon, 30 Jun 2008 11:30:28 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080629102523.0219a85c.lehmann@ans-netz.de>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+	<20080625122505.4e3d9803@veda.cnb.uam.es>
+	<20080626165246.9c3933eb.lehmann@ans-netz.de>
+	<20080627142430.57e0a9c4@veda.cnb.uam.es>
+	<20080629102523.0219a85c.lehmann@ans-netz.de>
+Message-ID: <20080630113028.46a50360@veda.cnb.uam.es>
+
+On Sun, 29 Jun 2008 10:25:23 +0200
+Oliver Lehmann <lehmann at ans-netz.de> wrote:
+> Jose R. Valverde wrote:
+> 
+> > Why don't you try to split the assignment into various statements
+> > to reproduce the assembly and the recombine them? Like, e.g.
+> > 
+> > 1:	r2 = uap->linkname;		/* ldl rr2,rr8(#4) */
+> > 2:	r4 = (long) r2;			/* ldl rr4,rr2 */
+> > 3:	r4 &= 0x7F00FFFF;		/* and rr4,#32512 */
+> > 4:	u.u_dirp.l = (caddr_t) r4;	/* ldl _u+78, rr4 */
+> 
+> hm.. this won't work because the compiler starts handing out registers
+> the register-declared variables with the highest register possible so
+> would start with rr10 or so.
+
+But you would still be able to see what did generate the code (barring
+register number).
+> 
+> > 	u.u_dirp.l = (caddr_t) ((long) (((saddr_t) uap->linkname).l) & 0x7F00FFFF);
+> 
+> I've changed it to:
+> 
+> 	u.u_dirp.l = (caddr_t) ((long) (((saddr_t *) uap->linkname)->l) & 0x7F00FFFF);
+> 
+> otherwise it won't compile. It compiles to:
+> 
+>         ldl     rr2,rr8(#4)
+>         ldl     rr4, at rr2
+>         and     r4,#32512
+>         ldl     _u+78,rr4
+> 
+> is it because I added a * and changed . to ->?
+
+Yes, but it also does not reflect the correct usage. linkname is not an saddr_t* but
+an saddrt_t. And you want to assign directly the value of uap->linkname not what it
+points to.
+
+typedef	union	
+{
+    caddr_t		l;
+    struct
+    {
+	unsigned	left;
+	unsigned	right;
+    }			half;
+}			saddr_t;	/* segmented address with parts */
+
+> 
+> > 	u.u_dirp = (saddr_t) (((long) uap->linkname) & 0x7F00FFFF);
+> 
+> this generates:
+> "sys2.c":305: operands of CAST have incompatible types 
+> "sys2.c":305: operands of "=" have incompatible types 
+> 
+> :(
+
+My fault. That's a typical beginner's mistake I made there. I'm starting
+to feel embarrassed of so many mistakes I'm making lately. BTW, I'm on a
+deadline so most probably my mind is not 100% in place so do not take me
+too seriously specially when dealing with complex abstract data types.
+
+That is because an saddr_t is a union. You cannot assign directly to a
+union (u.u_dirp), you must assign to a union member (u.u_dirp.l), but
+the union member is not an saddr_t, it is a caddr_t: the correct text
+would be 
+ 	u.u_dirp.l = (caddr_t) (((long) uap->linkname) & 0x7F00FFFF);
+
+which you know does not work. That is why I suggested the extra cast to
+see if the compiler would be misled into using an unneeded zero-offset
+assignment instruction to an auxiliary register.
+
+	u.u_dirp.l = (caddr_t) ((long) (((saddr_t) uap->linkname).l) & 0x7F00FFFF);
+
+that should be tantamount to
+
+	u.u_dirp.l = (caddrt_t) ((long) ((caddr_t) uap->linkname) & 0x7F00FFFF);
+
+where due to the long cast the initial caddr_t cast would be redundant
+reducing to
+
+	u.u_dirp.l = (caddr_t) ((long) uap->linkname & 0x7F00FFFF);
+
+but introducing a saddr_t cast that might fool the compiler into a
+temporary assignment with a zero offset (the .l) into ldl rr4,rr2
+
+And I still think that dividing the assignment into intermediate
+instructions and looking at the assembly might shed some light into
+what is going on.
+
+> 
+> -- 
+>  Oliver Lehmann
+>   http://www.pofo.de/
+>   http://wishlist.ans-netz.de/
+
+
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080630/e747ed01/attachment.sig>
+
