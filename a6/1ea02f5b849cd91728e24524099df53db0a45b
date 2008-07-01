@@ -1,0 +1,131 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Tue, 1 Jul 2008 16:21:02 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080630193450.b82063bb.lehmann@ans-netz.de>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+	<20080625122505.4e3d9803@veda.cnb.uam.es>
+	<20080626165246.9c3933eb.lehmann@ans-netz.de>
+	<20080627142430.57e0a9c4@veda.cnb.uam.es>
+	<20080629102523.0219a85c.lehmann@ans-netz.de>
+	<20080630113028.46a50360@veda.cnb.uam.es>
+	<20080630193450.b82063bb.lehmann@ans-netz.de>
+Message-ID: <20080701162102.4812f3d6@veda.cnb.uam.es>
+
+On Mon, 30 Jun 2008 19:34:50 +0200
+Oliver Lehmann <lehmann at ans-netz.de> wrote:
+> Jose R. Valverde wrote:
+> 
+> > But you would still be able to see what did generate the code (barring
+> > register number).
+> 
+> my C code:
+> 
+>         register char *r2;
+>         register long r4;
+> 
+> 	r2 = uap->linkname;
+> 	r4 = (long) r2;
+> 	r4 &= 0x7F00FFFF;
+> 	u.u_dirp.l = (caddr_t) r4;
+> 
+> leads to:
+> 
+>         ldl     rr2,rr8(#4)			/* r2 = uap->linkname; */
+>         ldl     |_stkseg+~L1|(fp),rr2		/* r2 = uap->linkname; */
+>         ldl     |_stkseg+~L1+4|(fp),rr2		/* r4 = (long) r2;     */
+>         ldl     rr4,rr2				/* r4 &= 0x7F00FFFF;   */
+>         and     r4,#32512			/* r4 &= 0x7F00FFFF;   */
+>         ldl     |_stkseg+~L1+4|(fp),rr4		/* r4 &= 0x7F00FFFF;   */
+>         ldl     _u+78,rr4			/* u.u_dirp.l = (caddr_t) r4; */
+> 
+> looks not sooo bad - just the assigning into the stacked variables (no
+> idea why no register bound is used here even if I told the compiler to
+> make them register bound - but ,,register'' isn't that strong anyway)
+>
+
+So it means that you can reproduce (barring the stack assignments) the
+behavior that you describe is puzzling you by using an auxiliary variable.
+That is you exactly get
+
+>         ldl     rr2,rr8(#4)			/* r2 = uap->linkname; */
+>         ldl     rr4,rr2			/* r4 = (long) r2   */
+>         and     r4,#32512			/* r4 &= 0x7F00FFFF;   */
+>         ldl     _u+78,rr4			/* u.u_dirp.l = (caddr_t) r4; */
+
+So the problem now is to figure out how the compiler came to use an
+additional internal variable (maybe by playing with parenthesis) or
+figure out if the original coder could have sensibly used an additional
+variable actually.
+> 
+> but not with that code :/
+> 
+> u.u_dirp.l = (caddr_t) ((long) (((saddr_t) uap->linkname).l) & 0x7F00FFFF);
+> "sys2_.c":50: operands of CAST have incompatible types 
+> "sys2_.c":50: warning: struct/union or struct/union pointer required
+> 
+> Thats why I changed it the last time... to * and ->.
+> 
+This is starting to look nasty. My bet now is the compiler is getting confused
+to parse the line. One thing: try with some additional parenthesis to 
+disambiguate
+
+	u.u_dirp.l = (caddr_t) ((long) (((saddr_t) (uap->linkname).l) & 0x7F00FFFF);
+
+and see if that works or the same error repeats. Then, either one of two:
+the original code did look that ugly, the author faced a difficult to parse
+expression and broke it with an auxiliary variable,
+
+	saddr_t aux;
+
+	aux.l = (caddr_t) uap->linkname;
+	u.u_dirp.l = (caddr_t) ((long) aux.l & 0x7F00FFFF);
+
+or, now that I come to think of that, seeing the split example I just gave,
+maybe it was all the way implicitly defined _the right way_: and instead of
+
+	register struct a {
+		char	*target;
+		char	*linkname;
+	} *uap;
+	...
+	u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);	/* FIXME: this is not 100% compatible */
+
+they actually had the original code
+
+	register struct a {
+		char	*target;
+		saddr_t	*linkname;
+	} *uap;
+	...
+	u.u_dirp.l = (caddr_t)(((long)uap->linkname.l & 0x7F00FFFF);
+
+which would be absolutely clean, coherent with the way u_dirp is declared and
+introduce a zero-offset union reference in the expression leading to the compiler
+assigning an additional auxiliary variable to produce the expression.
+
+
+					j
+> 
+> -- 
+>  Oliver Lehmann
+>   http://www.pofo.de/
+>   http://wishlist.ans-netz.de/
+
+
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080701/f001c388/attachment.sig>
+
