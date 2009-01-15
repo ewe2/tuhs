@@ -1,0 +1,214 @@
+From: neozeed@gmail.com (Jason Stevens)
+Date: Thu, 15 Jan 2009 12:15:46 -0500
+Subject: [TUHS] historical users and groups
+In-Reply-To: <20090114140034.4e20ce6d@cnb.csic.es>
+References: <Pine.NEB.4.64.0901131824440.26223@tx.reedmedia.net>
+	<20090114140034.4e20ce6d@cnb.csic.es>
+Message-ID: <46b366130901150915m66e31fccq38c2b0d0ed4f5d2f@mail.gmail.com>
+
+I would recommend the book "The Cuckoo's egg" for a 'feel' of what the old
+multi user BSD boxes were like..
+
+http://en.wikipedia.org/wiki/The_Cuckoo's_Egg_(book)
+
+Clifford does go a bit into the administrative roles, and of course tracking
+back a SYSV influenced hacker...
+It was quite an interesting read when I was a kid, and it still holds up.
+
+Naturally SIMH can run the 4.2BSD that they were running back then... If you
+are on windows I've pre-packaged
+it here:
+http://downloads.sourceforge.net/bsd42/BSD4.2-For-Windows_v0.1a_SIMH-3.7-3.exe?modtime=1189324059&big_mirror=0
+
+
+Some additional links:
+http://www.amazon.com/Cuckoos-Egg-Tracking-Computer-Espionage/dp/0743411463
+
+http://www.ci.ulsa.mx/~elinos/docencia/herseg/cuckoo_egg.pdf
+
+
+
+On Wed, Jan 14, 2009 at 8:00 AM, Jose R. Valverde <jrvalverde at cnb.csic.es>wrote:
+
+> From what I remember this had to do with two old time trends.
+>
+> First you have a professional trend: an ancient system would not be
+> normally
+> run by one sysadmin (or even the user) as it is now. There would be a data
+> center with a legion of workers.
+>
+> You would have the master system manager/administrator (root). In some
+> cases it might have more than one member or even -e. g. BSD2- a special
+> group name 'superuser'.
+>
+> Then a hoard of minions to handle basic tasks (operators) like launching
+> system backups, allocating resources, changing tapes on user request,
+> getting printouts and giving them back to users, handling punched cards
+> on user behalf, running  fsck, restarting the system, putting paper on
+> printers... (users were often not allowed inside the computer room where
+> expensive equipment was locked).
+>
+> This (root + operators) would deal with the minimal set of the time, but on
+> most places you would also have junior sysadmins (to manage delegated
+> system
+> tasks like rebuilding the kernel), system programmers (to develop system
+> software and automation scripts), etc.. These would belong to the 'sys'
+> group
+> which would allow them wider access than 'oper' but less than 'root'. And
+> then you would have assistants, students, secretaries, etc... all of them
+> also part of the computer center 'staff' so they could share memos, data,
+> etc..
+>
+> 'guest' should be obvious. Most single users do not need it, but we still
+> use
+> a 'guest' group for external visitors, short course students,
+> demonstrations,
+> etc... to distinguish them from normal users -who can do more (and pay for
+> it).
+> Still, even for home systems, notice how the Mac and Windows still provide
+> by
+> default a 'guest' account (useful when a relative or friend pays a visit
+> and
+> you don't want them to use your account nor setup a one-time account
+> either).
+>
+>
+> Secondly, you have a modularization trend. In principle it might seem
+> sensible
+> that all system binaries belong to 'root'. And they do on many modern
+> systems.
+> On second thought -and at the time- it makes more sense to have categories:
+>
+> Critical system files would belong to 'root' and not be modifiable by
+> anyone.
+>
+> When you have system programmers adding software, or junior sysadmins
+> installing
+> user software, you need to give them some privilege. If that is not 'root'
+> which
+> should it be? The 'bin' group solves the problem. You can think of 'bin' as
+> 'binary installer' (software, manual pages, files...).
+>
+> Then, you may need a separate group for other, non-public or non-shared
+> files.
+> This was originally group 'other', and /var/spool or /usr/spool belonged to
+> it.
+>
+> But then you can go further ahead: some software is special, so why not
+> make a
+> distinction? Daemons are a prominent case: they have no associated
+> terminal,
+> so they need to log their messages to a file. Simplest way is to have a
+> 'daemon' group. This was the case for 'netdaemon' and its spawned daemons
+> in
+> BSD, later inetd, but also LPR, SENDMAIL, UUCP, etc.. Programs in this
+> group
+> could log messages in a directory owned by 'daemon' and these logs would
+> need
+> not be visible outside the group.
+>
+> What confuses you is that taking this to the extreme leads you to use
+> separate
+> groups and log directories for each daemon as we do now. And even for
+> separate
+> user programs (e. g. if they need direct access to a hardware device). See
+> e.g. X11.
+>
+> But think of it: which is more informative when you see a directory?
+> Seeing it belongs to 'xyz.nlm' as you do now or to 'xyz.daemon'? In a
+> personal
+> system where you did yourself or do not care, the first is OK. On a complex
+> house with lots of hands the second wins. It is like the later division in
+> SV
+> between 'bin' and 'sbin' to separate security sensitive system binaries.
+>
+>
+> As for nobody/nogroup... I'd say it's a dilettante game play. Or a matter
+> of
+> taste. Problem is, once someone users 'nogroup' and expects it, you need to
+> have both to avoid breaking the odd tool (sigh).
+>
+>
+>
+> On Tue, 13 Jan 2009 18:59:40 -0600 (CST)
+> "Jeremy C. Reed" <reed at reedmedia.net> wrote:
+> > Trying to understand some users and groups that continue to exist on BSD
+> > systems.
+> >
+> > Can someone please point me to references or share examples of historical
+> > and/or recent uses of the following users and groups?
+> >
+> > Also any clarifications of my understandings below would be appreciated.
+> >
+> > (My context is BSD. I know some of these may have different old and
+> > existing uses on other systems.)
+> >
+> > daemon user
+> > I see /var/msgs on NetBSD is owned by daemon. msgs will abort if doing -c
+> > (cleanup) if not root or daemon user. I guess that is historic. I don't
+> > see any daemon user usage.
+> >
+> > operator user
+> > I understand that historically, the operator user had logins
+> > for those doing disk backups (via its login group privileges).
+> > I understand the operator group, just wondering if any recent uses of
+> > operator user.
+> >
+> > bin user
+> > Don't know what uses it.
+> >
+> > daemon group
+> > I understand that historically, these are for processes needing less
+> > privileges than the wheel group. Also historically, programs using
+> > /var/spool directories were setgid daemon. Anything common other than
+> > LPD/LPR still use the daemon group?
+> >
+> > sys group
+> > I understand that historically, the sys group was used for access to the
+> > kernel (/sys?) sources. (I don't know if that was just read or was for
+> > writing too.) Anyone still use "sys" group? (I guess this is like wsrc
+> > which sometimes I manually setup and use for writing to src directories.)
+> >
+> > bin group
+> > I understand that historically, used as the group for system binaries,
+> but
+> > commonly the wheel group is used instead. Some third-party software, like
+> > OpenOffice.org, install files owned by the bin group.
+> >
+> > staff group
+> > How would this differ from wheel or operators?
+> > Any recent systems actually have default use of this?
+> >
+> > guest group
+> > Any recent systems actually have default use of this?
+> >
+> > nobody group versus nogroup group
+> > What is the significance of having both of these groups?
+> >
+> >
+> > Thanks!
+> > _______________________________________________
+> > TUHS mailing list
+> > TUHS at minnie.tuhs.org
+> > https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+>
+> --
+>                        EMBnet/CNB
+>                Scientific Computing Service
+>        Solving all your computer needs for Scientific
+>                        Research.
+>
+>                http://bioportal.cnb.csic.es
+>                  http://www.es.embnet.org
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20090115/75bf7719/attachment.html>
+
