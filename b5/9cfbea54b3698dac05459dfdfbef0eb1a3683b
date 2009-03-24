@@ -1,0 +1,56 @@
+From: neozeed@gmail.com (Jason Stevens)
+Date: Tue, 24 Mar 2009 12:34:53 -0400
+Subject: [TUHS] 4.3 BSD under SIMH's 11/780 emulator
+Message-ID: <46b366130903240934s3e679aebnfacf0af9977b75bf@mail.gmail.com>
+
+if anyone is interested, I noticed that if you remove the error
+checking form the recv portion of the if_de driver it seems to work
+for 4.3 BSD & variants...   As far as I know there is no if_de for 4.2
+BSD... But then if there were you would still have it's
+incompatibility problems...
+
+Anyways, here is a diff from 4.3 BSD
+
+*** if_de-orig.c        Mon Mar 24 04:05:10 1986
+--- if_de.c     Mon Mar 24 04:06:09 1986
+***************
+*** 457,466 ****
+                len = (rp->r_lenerr&RERR_MLEN) - sizeof (struct ether_header)
+                        - 4;    /* don't forget checksum! */
+                /* check for errors */
+!               if ((rp->r_flags & (RFLG_ERRS|RFLG_FRAM|RFLG_OFLO|RFLG_CRC)) ||
+                    (rp->r_flags&(RFLG_STP|RFLG_ENP)) != (RFLG_STP|RFLG_ENP) ||
+                    (rp->r_lenerr & (RERR_BUFL|RERR_UBTO|RERR_NCHN)) ||
+                    len < ETHERMIN || len > ETHERMTU) {
+                        ds->ds_if.if_ierrors++;
+                        if (dedebug)
+                        printf("de%d: ierror, flags=%b lenerr=%b (len=%d)\n",
+--- 457,468 ----
+                len = (rp->r_lenerr&RERR_MLEN) - sizeof (struct ether_header)
+                        - 4;    /* don't forget checksum! */
+                /* check for errors */
+! /***          if ((rp->r_flags & (RFLG_ERRS|RFLG_FRAM|RFLG_OFLO|RFLG_CRC)) ||
+                    (rp->r_flags&(RFLG_STP|RFLG_ENP)) != (RFLG_STP|RFLG_ENP) ||
+                    (rp->r_lenerr & (RERR_BUFL|RERR_UBTO|RERR_NCHN)) ||
+                    len < ETHERMIN || len > ETHERMTU) {
++ ***/
++       if(1==5){
+                        ds->ds_if.if_ierrors++;
+                        if (dedebug)
+                        printf("de%d: ierror, flags=%b lenerr=%b (len=%d)\n",
+
+
+I have set it up with my SLiRP patch, and I had it pinging away at
+10.0.2.2 for 5 hours, 100% success, and I had no issues TELNETTing
+into the VM..I think that BSD see's the crc32 on the end and treats
+all inbound packets as bad, dropping them all.. so I just quickly
+sidestepped the error check..  I would imagine this would work with
+SIMH's libpcap support so you can now get your virtual 11/780 onto the
+Internet, and party like it's 1986!
+
+For any windows users out there, I'll package up 4.3 BSD & the
+Wisconsin version up onto sourceforge...
+
+http://sourceforge.net/project/showfiles.php?group_id=204974&package_id=245145
+
+
