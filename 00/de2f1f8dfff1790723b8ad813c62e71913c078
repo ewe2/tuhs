@@ -1,0 +1,86 @@
+From: j_hoppe@t-online.de (=?ISO-8859-15?Q?J=F6rg_Hoppe?=)
+Date: Fri, 07 Aug 2009 11:29:21 +0200
+Subject: [TUHS] New patch for 2.11BSD on PDP-11: network DEUNA does not
+ respond to ethernet broadcasts
+Message-ID: <4A7BF3F1.9060104@t-online.de>
+
+
+I found and patched an error in the network driver for UNIBUS ethernet 
+controllers
+DEUNA/DELUA in 2.11BSD for PDP-11.
+
+Error reproduction:
+--------------------------
+Build 2.11 BSD with ethernet/TCP/IP support over DEUNA/DELUA controller.
+Configure the network.
+Boot up 2.11 BSD, switch to multiuser mode.
+Wait for 15 Minutes, until all ARP caches in the system are aged out.
+Try to ping the PDP-11 from a network node, which is NOT listed anywhere 
+in the
+PDP-11's network configuration files. Ping will fail.
+Important: since arp requests are also arp responses, do not ping the 
+test node from your
+PDP-11. The test node may not be contacted by the PDP-11!
+Before testing, verify on the test node that the PDP-11 is unkown. The 
+command "arp -a" must not display the PDP-11 yet.
+You can clean the test node's arp cache by executing "arp -d *".
+
+This can also be reproduced in SimH,
+for example with the installation downloadable at
+/www.ak6dn.com/PDP-11/2.11BSD/
+
+
+Error explanation:
+--------------------
+The DEUNA/DELUA does not answer ARP requests, so other network nodes
+can not get the PDP-11's ethernet MACID and can not send anything to it.
+The DEUNA/DELUA does not answer ARP because it does not receive ethernet 
+broadcast packets
+(those addressed to MACID FF:FF:FF:FF:FF:FF).
+And it is not receiving broadcasts, because the DELUA driver in 
+/sys/pdpif/if_de.c
+did not set up the DELUA's packet filter to receive FF:FF:FF:FF:FF:FF.
+
+Error patch
+---------------
+In /sys/pdpif/if_de.c , the DEUNA/DELUA must be programmed to receive 
+ethernet broadcast pakets.
+The good way would be to explicitly add MACID FF:FF:FF:FF:FF:FF to the 
+filter.
+The fast and dirty way was to program the DELUA to receive ALL multicasts,
+ by setting one more bit in the mode register:
+In /sys/pdpif/if_de.c, change line
+        ds->ds_pcbb.pcbb2 = MOD_TPAD|MOD_HDX;
+into
+        ds->ds_pcbb.pcbb2 = MOD_TPAD|MOD_HDX|MOD_ENAL;
+
+
+Status
+-----------------------------
+This is a major bug, as it prevents the PDP-11 under 2.11BSD to run as a 
+server.
+It's hard to believe that it is still there.
+In the typical quick "boot up and ping someone" test, it is almost 
+invisible.
+
+The bug is not present in the DELQA driver "if_qe.c".
+
+I did posted already to alt.sys.pdp11 newsgroup.
+The error has been acknowledeged by one other user.
+
+In the BSD patch archive, this bug seems not to be addressed.
+
+
+
+regards
+
+Joerg Hoppe
+
+
+
+_______________________________________________
+TUHS mailing list
+TUHS at minnie.tuhs.org
+https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
