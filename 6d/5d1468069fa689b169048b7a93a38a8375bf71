@@ -1,0 +1,74 @@
+From: bqt@softjar.se (Johnny Billquist)
+Date: Fri, 09 Apr 2010 12:15:03 +0200
+Subject: [pups] extract old archive format?
+In-Reply-To: <alpine.NEB.2.01.1004082057300.13963@t1.m.reedmedia.net>
+References: <1270775431.29470.for-standards-violators@oclsc.org>
+	<alpine.NEB.2.01.1004082057300.13963@t1.m.reedmedia.net>
+Message-ID: <4BBEFE27.1080104@softjar.se>
+
+Jeremy C. Reed wrote:
+> Well I found the ar specification (in ar.5 not ar.1).
+> 
+>              struct ar_hdr {
+>                      char      ar_name[14];
+>                      long      ar_date;
+>                      char      ar_uid;
+>                      char      ar_gid;
+>                      int       ar_mode;
+>                      long      ar_size;
+>              };
+
+Simple enough... :-)
+
+> This is same as the old ar.c source.
+> 
+> (plus more in the manual page.)
+> 
+> Now my problem is I don't know what "long" or "int" is on the old PDP-11 
+> / system 5 this was made on.
+
+An int on the pdp11 is 16 bits, and a long is 32.
+Remember? int is whatever size is most convenient for the architecture? :-)
+
+> And I read about PDP-11 "middle endianess" (first time I heard of 
+> "middle").
+
+A mess, but we have to live with it.
+In short, the bytes of a long on a PDP11 is likely laid out like this:
+3412
+
+So, the 16-bit values are each little-endian, but the 16 bit values as 
+such, in the 32-bit view, is laid out as big-endian.
+Thus middle-endian... :-)
+
+> So I had (wrong but gets ar_name and ar_size correct for my few tests 
+> for the first header but chops two characters into the data section).
+> 
+> struct {
+>         char    ar_name[14];
+>         int32_t ar_date;
+>         char    ar_uid;
+>         char    ar_gid;
+>         uint16_t        ar_mode;
+>         uint16_t        ar_size;
+> } ar_buf;
+> 
+> Well I know above is wrong because ar_size and ar_date should be the 
+> same. But I get ar_size correct each time. But it also loses the next 
+> two bytes from the data. So I am guessing I have some endian issue where 
+> I am getting some things reversed.
+> 
+> Any ideas?
+
+As others already said, it's your compiler trying to optimize the 
+alignments.
+One solution (already presented) is to just play with 16-bit values.
+You could also explain to the compiler that it shouldn't try to optimize 
+the alignments, but since you have to deal with the middle-endianess 
+anyway, you are probably better off just looking at 16-bit values and 
+combine them into 32-bit values as needed yourself.
+
+	Johnny
+
+
+
