@@ -1,0 +1,67 @@
+From: tih@hamartun.priv.no (Tom Ivar Helbekkmo)
+Date: Fri, 03 Sep 2010 13:22:07 +0200
+Subject: [TUHS] 2.11 BSD question... (exe sizes)
+In-Reply-To: <AANLkTi=xUSRhv4zM6c90N5BifoWUB1WMT-mwWRWma4o8@mail.gmail.com>
+	(Jason Stevens's message of "Tue, 10 Aug 2010 18:23:00 -0400")
+References: <AANLkTi=xUSRhv4zM6c90N5BifoWUB1WMT-mwWRWma4o8@mail.gmail.com>
+Message-ID: <m2vd6n2hsw.fsf@athene.hamartun.priv.no>
+
+Jason Stevens <neozeed at gmail.com> writes:
+
+> I'll admit I'm not all that swift on the pdp-11, but I get the impression
+> that the maximum exe size is 128kb with 64kb of instructions, and 64kb of
+> data?  Isn't there something that can be done with overlays or some other
+> linker thing to act like an 8086/80286 with the large memory model (ie
+> multiple segments...?)
+
+There is. :)
+
+> I've been trying to build ircII-4.4 and I can't figure out how to link
+> something that big... I've tried the -Z and -O flags to ld to no avail.
+>
+> Clearly I'm doing either something wrong, or impossible or stupid.
+
+IIRC, you want something along the lines of:
+
+ld -i -o irc -Z a.o b.o -Z c.o d.o -Z e.o f.o -Y g.o h.o -lc
+
+where -i says to use split I/D (64KB for each), each -Z introduces a set
+of object modules to go into one overlay, and the -Y introduces the
+object modules that are not to be overlaid.  You'll want your main() to
+be in the -Y group, ideally along with the most used parts of the code.
+Each -Z group should ideally contain object modules that are all used at
+the same time; the idea is to minimize the number of overlay swaps that
+have to be done.
+
+There are binaries in 2.11BSD that are built in this way.  Look for the
+-Z flag in the Makefiles.
+
+Use size(1) on the a.out to see the sizes of the various overlays and
+the main area: you'll get error messages from ld(1), and size(1) will
+help you figure out how you need to move objects around to keep the main
+area under 56KB, and each overlay under 8KB.  (Actually, I seem to
+recall that those limits can also be 48 and 16, or 40 and 24, and so
+on.  'man ld' might be of help.)
+
+> FWIW, here is the size of the same program on the VAX
+>
+> myname# ls -l irc-4.4
+> -rwxr-xr-x  1 root       413696 Jun  8 08:46 irc-4.4*
+> myname# size irc-4.4
+> text    data    bss     dec     hex
+> 293888  67584   20784   382256  5d530
+>
+> I have a feeling that 300kb of text, along with 67kb of data is just too
+> much...?
+
+You might be able to squeeze it in.  Your data space usage will be less
+on a 16-bit system, and you may be able to reduce the sizes of arrays
+and allocations here and there by accepting limitations in the resulting
+program.
+
+-tih
+-- 
+I don't believe that souls or bodies can be changed by incantation.
+                                            --Christopher Hitchens
+
+
