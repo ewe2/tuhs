@@ -1,0 +1,55 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Tue, 28 Sep 2010 15:54:26 +1000
+Subject: [TUHS] 2.11BSD cross compiler
+Message-ID: <AANLkTikjXZJ1W-0Ae5eZYfU2Kh+i+uCAB_-W=nFR-TmJ@mail.gmail.com>
+
+hi everyone,
+
+Just to let you all know that a few years ago I adapted the 2.11BSD
+source so that it could be built on a modern system and transferred
+across to the PDP-11.  The changes are:
+
+1. The PDP-11 assembler was written in assembler so made a
+line-by-line translation into C code.
+2. The C compiler required access to PDP-11 math e.g. for constant
+folding, so I inserted some code from Bob Supnik's emulator in those
+places.
+3. Basically everything that runs from a makefile (e.g. "sh", "make",
+"yacc", etc) has been upgraded to a more modern coding style with non
+portable code fixed up, independence on type sizes, prototypes added,
+etc, and the build system now generates two versions where
+appropriate, one for running locally (compiled with gcc or whatever
+your local compiler is) and one for inclusion in the distribution
+(compiled with the PDP-11 cross toolchain).
+4. I also fixed a number of "just plain bugs" that obviously had
+remained undiscovered under PDP-11 conditions.
+
+I used conditional compilation and macros where appropriate so as not
+to break the PDP-11's ability to run the toolchain locally.  I used a
+binary comparison between the locally compiled build and the cross
+compiled build to weed out bugs, and it did seem to be pretty robust
+as I left it.  The only reason I didn't make this work available
+generally (apart from laziness), was that there's quite a few
+experimental changes in addition to points 1-4, for example:
+
+5. A reworking of the (existing) system that extracts strings and puts
+them in the code segment (necessary to get the PDP-11 to run large
+executables such as nethack).  I can't really remember why I did this,
+probably just to clean things up, but I don't think it's all that
+essential so perhaps could be removed for the sake of minimal change.
+6. Some changes to how "make" works, and to the Makefiles, intended to
+clean things up, which in retrospect weren't essential and should be
+removed (except for those changes necessary for point 3 above, need to
+untangle it somehow).  I didn't get around to converting all Makefiles
+so there's probably a bit of inconsistency there.  I might have broken
+some things like "make tags" and "make depend", not sure.
+7. Fortran stuff had to be disabled as the Fortran compiler is written
+in assembly language (IIRC) and would probably be difficult to convert
+into C (but I don't think this is a big deal).
+
+If anybody volunteers to sift through the changes and sort out the
+good from the dross then I will happily send the whole thing.
+
+cheers, Nick
+
+
