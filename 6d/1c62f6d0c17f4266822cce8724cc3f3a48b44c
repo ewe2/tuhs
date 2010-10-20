@@ -1,0 +1,89 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Tue, 19 Oct 2010 20:18:48 -1000 (HST)
+Subject: [TUHS] v6: where is "man"?
+In-Reply-To: <AANLkTikmng8YMbaJDank7=5OBebrfOJLv3FZs6dBeKrt@mail.gmail.com>
+References: <Pine.BSI.4.64.1010191507110.25174@malasada.lava.net>
+	<20101020052532.GA5690@minnie.tuhs.org>
+	<AANLkTikmng8YMbaJDank7=5OBebrfOJLv3FZs6dBeKrt@mail.gmail.com>
+Message-ID: <Pine.BSI.4.64.1010192010330.25174@malasada.lava.net>
+
+> I just booted up the interdata version and... it doesn't have 'man'
+> either...
+>
+> I get the impression from /usr/doc/man   that the man pages on the ID32 were
+> setup with a 'make' command to format and print them all....
+>
+> I guess the man command didn't exist...????
+
+Why is there a man page for it?
+
+By the way, I found a /usr/bin/man command in
+PDP-11/Distributions/other/Tim_Shoppa_v6
+in the unix_v6.rl02 image.  Oddly, it uses "cd" instead
+of "chdir" and doesnt run in the normal v6 shell!
+(cut and pasted in the attached file).
+It also uses "set" which isnt supported in v6.
+Although, it does look like a pre-v7 shell script
+by the control flow constructs and lack of variables.
+(compare to /bin/man in V7, which is a new style shell
+script which wont run in V6).
+
+There's also a /usr/ucb/man binary present.  I haven't
+tried it in stock v6.
+
+Its pretty easy to boot the Tim_Shoppa_v6 image,
+just un-gzip it and use:
+
+   set cpu 11/23
+   set tto 7b
+   attach rl0 unix_v6.rl02
+   boot rl0
+
+in simh.  At the boot prompt enter "unix".
+
+Tim Newsham | www.thenewsh.com/~newsham | thenewsh.blogspot.com
+-------------- next part --------------
+cd /usr/doc/man
+if $1x = x goto nope
+        set b = 1
+if ! -r man$1 goto sect1
+        set b = $1
+        shift
+: sect1
+        if -r /mnt/webb/doc/$1.$b goto man
+        if -r man$b/$1.$b goto oldman
+        if -r /etc/help/$1 goto ok
+        if $b != 1 goto notcmd
+        if -r /bin/$1 -o -r /usr/bin/$1 goto iscmd
+        echo $1 "is not a command"
+        goto loop
+: iscmd
+: notcmd
+        echo "Sorry, manual page" $1 "is not available."
+        goto loop
+: man
+        chdir /mnt/webb/doc
+        fmt -term --u $1.$b
+        goto loop
+: oldman
+        chdir man$b
+        nroff -mm $1.$b ^ iul
+        goto loop
+: oldman0
+        chdir man$b
+        nroff -mm $1 ^ iul
+        goto loop
+: ok
+help $1 </dev/tty
+goto loop
+: nope
+echo "usage: man [section] name"
+echo "The following manual pages exist (in form name.section)"
+f /mnt/webb/doc
+exit
+: loop
+shift
+cd /usr/doc/man
+if $1x != x goto sect1
+exit
+
