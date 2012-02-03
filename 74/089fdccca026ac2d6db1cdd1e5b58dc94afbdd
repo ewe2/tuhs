@@ -1,0 +1,106 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Fri, 3 Feb 2012 16:22:16 +0100
+Subject: [TUHS] Understanding the /bin, /sbin, /usr/bin, /usr/sbin Split
+In-Reply-To: <0D449762-FD45-4528-B46E-AEA962E6B7CA@tfeb.org>
+References: <CAFCBnZvMuUvZNm72pvWkS30PH7o3eS8ii2WQ5XaZyviAxhwHOA@mail.gmail.com>
+	<20120201121214.55c73577@cnb.csic.es>
+	<4F2A907D.9000000@fastmail.us>
+	<89159FF1-5521-4890-A5F0-30DC9E5B7EC9@bsdimp.com>
+	<20120202173623.GQ30634@mercury.ccil.org>
+	<alpine.BSF.2.00.1202030759350.66525@aneurin.horsfall.org>
+	<52BD3851-95AF-4DFC-8728-9F2DB1E1614C@bsdimp.com>
+	<AF73B35E-BB6C-44FE-A128-2EEE0A4CF0E0@orthanc.ca>
+	<0D449762-FD45-4528-B46E-AEA962E6B7CA@tfeb.org>
+Message-ID: <20120203162216.504c4bb7@cnb.csic.es>
+
+Whoa!
+
+	I wasn't expecting this flood of comments! :-)
+
+	Anyway, I think that I was clear: the choices about separating files
+into directories, partitions, disks, network shares, etc... have always been
+pretty obvious to anybody with a minimum of common sense. The only way around
+them is foolishness or ignorance (or both).
+
+	I can understand a newcomer, using a computer for his/her petty games
+one task at a time and not doing much, to believe the world would be simpler
+if it (or the filesystem) were flat and suited to his unvoiced personal 
+expectations. This is nothing new, the machine language opcode RPM (read  
+programmer's mind) is as old a joke as I can remember.
+
+	There was a reason to separate user data from system data to avoid
+the system disk from becoming unusable by a misbehaving user. There was one
+to separate /tmp for the same reason (a buggy program might generate a huge
+temporary file and render the system unusable for all other users). Same for
+/var and out of control log files. When vendors started adding their software 
+in /usr (and maintaining it) there ceased to be a standard, well known set 
+of "reserved system program names" and it made sense to separate /usr/local 
+for non-vendor maintained files which might have an unknown naming conflict 
+(and I witnessed many at the time, not the less GNU) with "non-standard-UNIX" 
+vendor additions. When LANs started to be common it made sense to share as 
+many files as possible, and since executables would not be shareable on an
+heterogeneous network (something most newcomers have never experienced -or
+fancied) it became sensible to have /home and /usr/share separate and served
+over the network. When UNIX systems became more complex and started to take 
+over mainframes and get many users, it made sense to separate system programs 
+from user programs, and it didn't make sense to duplicate all of them: hence 
+a /bin for programs common to users and admins, and a /sbin for just admins 
+(for standard system commands) and a /usr/bin and /usr/sbin (for vendor 
+maintained commands and  system daemons) and a /usr/local/bin and a 
+/usr/local/sbin (for locally added commands and system tools and daemons). 
+/lib, /lib64, /usr/lib and /usr/lib64? Heck! that's not even enough to
+ensure user programs keep on running after a system upgrade and cleanup.
+I often try to keep relevant packages in their own directory and run an
+automated ldd to save in their own .../lib their shared libraries before
+doing an upgrade. There are binaries that haven't been updated since the
+'90s and require very old libraries (or even worst, complex sources that
+require various versions of the GCC toolchain). It doesn't make sense to
+port them, it's easier to ensure they keep on running keeping their libraries.
+And so on.
+
+	And many of these arguments might hold today. One might argue that
+since people is now tied to a vendor (Ubuntu, or RedHat, or Oracle, or HP,
+or whomever) one no longer needs separate / and /usr spaces. The problem
+is that would only work for newbies and occasional users, but would fail
+for most other cases (large computing servers and multiuser shops as well
+as tiny embedded devices, as pointed out). So, as long as systems are shipped
+to run on any machine, the layout should be versatile enough to accommodate
+all uses. Hence the need for maintaining these conventions, not legacy or
+bureaucracy. What is shortsighted is to expect all use-cases to be like a
+home user who only runs one game or, at most, his/her word-processor, 
+e-mail and navigator simultaneously.
+
+	Beyond that, the original articles and comments complained also about
+directory naming (/bin /etc /lib) as "unintuitive". I fail to understand in
+what way is it easier for someone new to a computer to learn a "/bin /etc /var
+/lib" alien terminology and what it means, than to learn "System Config Libraries
+etc..." or "Windows Windows32 Windows64 Temp Users and Settings, etc..." The
+point is one needs to learn them and if you are familiar with one terminology
+then to map terms, and if we are to use a standard, at least POSIX is one.
+
+	That said, I often place everything (but /boot) in a single partition 
+for single-user machines (except for power users who usually demand at least
+separate /tmp and /home) and there is nothing to prevent one from making symlinks
+(er, aliases for Windowers) to system directories with whatever names you like.
+And I still see a need to separate the system from vendor files and from user
+files (like, e.g. when you later want to switch from say RedHat to Debian). Only
+a moron would ignore the risk of system files left around by vendor-specific
+naming conventions.
+
+	I said originally I could rant on and on. And I can. And add lots of
+anecdotes, but I'll leave it here.
+
+	Sorry. Couldn't resist.
+
+				j
+
+-- 
+			EMBnet/CNB
+		Scientific Computing Service
+	Solving all your computer needs for Scientific
+			Research.
+
+		http://bioportal.cnb.csic.es
+		  http://www.es.embnet.org
+
+
