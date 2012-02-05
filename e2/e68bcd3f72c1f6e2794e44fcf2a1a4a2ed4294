@@ -1,0 +1,42 @@
+From: hjt@ATComputing.nl (Hendrik Jan Thomassen)
+Date: Sun, 5 Feb 2012 09:38:00 +0100
+Subject: [TUHS] Understanding the /bin, /sbin, /usr/bin, /usr/sbin Split
+Message-ID: <20120205083800.GA12910@vcursdoc.atcomputing.nl>
+
+
+If I recall well the /sbin directory first appeared in HP/UX,
+and the name stood for 'Static binaries'. Its reason for existence
+was that with the introduction of shared libraries the file with
+the C-library had become a single point of failure. Therefore this
+sbin was introduced to hold Statically linked executables for the
+most important commands needed to fix a broken system (sh, ls, mv,
+cp, find, tar, fsck etcetera). With this directory earlier than
+/bin in his PATH the administrator could at least restore a working
+libc.so file. And, while we are at it, the name 'executable' was
+not commonly used: they were called 'binaries' (except in IBM
+mainframe terminology were they were called 'load modules').
+Only much later the habit of /sbin = System binaries emerged.
+
+An important reason to split /bin vs. /usr/bin and /lib vs. /usr/lib
+etc. was that the root file system had to be kept small. The fsck
+program, while at work, builds tables. If possible, they stay in
+memory, but if memory runs out fsck writes them to disk. However,
+you don't want them to be written to an untrusted/unchecked file
+system, and certainly not to the file system currently under repair.
+Since the root file system has to be checked before the others, it
+had to be small enough so ensure that fsck could run memory-based
+only. Therefore: the /bin, /lib and other root-fs based directories
+held the minimal stuff needed for booting and for repairs/restores,
+while all the rest had to go into the "overflow" directories /usr/bin,
+/usr/lib etc (and, obviously, /usr was a separately mounted partition).
+Remember: those were the days that every reboot included a full
+fsck on all your partitions. 
+-- 
+Hendrik-Jan Thomassen     <hjt at ATComputing.nl>
+AT Computing
+6546 BE  Nijmegen NL      Fax +31 24 352 72 92
+info at atcomputing.nl       www.atcomputing.nl
+'If you think education is expensive, then try ignorance.'
+
+
+
