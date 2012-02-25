@@ -1,0 +1,44 @@
+From: random832@fastmail.us (Random832)
+Date: Sat, 25 Feb 2012 17:15:32 -0500
+Subject: [TUHS] why the leading under score added to function names?
+In-Reply-To: <20120225203959.GE29866@mercury.ccil.org>
+References: <201202221917.q1MJHSGw013561@freefriends.org>
+	<alpine.BSF.2.00.1202230752140.62608@aneurin.horsfall.org>
+	<20120223043021.GA72269@dereel.lemis.com>
+	<4F492C43.3020602@fastmail.us>
+	<20120225203959.GE29866@mercury.ccil.org>
+Message-ID: <4F495D84.8030206@fastmail.us>
+
+I'm going to need to train myself to use the "reply to list" button. 
+Though in this case I think part of the problem was duplicate-filtering 
+which lost the copy that had the appropriate header.
+
+On 2/25/2012 3:39 PM, John Cowan wrote:
+>  Random832 scripsit:
+>
+>>  For instance, this is, according to Raymond Chen, why they added
+>>  WinMain rather than extending main (they didn't know if extensions to
+>>  main would be allowed).
+>  That doesn't sound very reasonable to me.  When you link a Windows
+>  program, it still has a main() procedure provided by Windows which does
+>  setup and then invokes WinMain().
+
+This is not true in my experience. If it was ever true, it's not true
+today (with MSVC, anyway. GCC may be different, but if there is a
+'system-provided main()' it's GCC, or cygwin or mingw, and not anything
+from microsoft, that is providing it). The procedure "provided by
+windows" (provided by MSVC, actually) that does that is in fact called
+WinMainCRTStartup. When you link a windows _console_ program, a
+different function (called mainCRTStartup) which does the same setup
+(plus opening a console if none is open and setting up stdio which the
+WinMain version doesn't) and then invokes main().
+
+The startup function is an interesting read - it has more work to do on
+windows than the unix equivalent, because systems like signals (which
+are in ANSI), file descriptor based I/O (which is not ANSI but
+nevertheless is implemented in MSVC), and such, that are "naturally
+occuring" on unix have to be set up. The whole program executes in a
+__try/__except block to allow them to make signals work, for example.
+
+
+
