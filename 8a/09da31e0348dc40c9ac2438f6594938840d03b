@@ -1,0 +1,43 @@
+From: ramble1035@dslextreme.com (ramble1035 @dslextreme.com)
+Date: Thu, 1 Mar 2012 15:59:53 -0800
+Subject: [TUHS] "Slow system call" and EINTR
+In-Reply-To: <CAGGBd_p12gWvRTz5soB_swFkT4QxL0upTKxLP2L_P=UKym2Z6w@mail.gmail.com>
+References: <CAGGBd_p12gWvRTz5soB_swFkT4QxL0upTKxLP2L_P=UKym2Z6w@mail.gmail.com>
+Message-ID: <CAFn3HkPJ7ccGZXrupAeFo5nK6Xab_Denuu2qW4qAwenixHdCrQ@mail.gmail.com>
+
+On Thu, Mar 1, 2012 at 3:29 PM, Dan Stromberg <drsalists at gmail.com> wrote:
+>
+> I gather system calls can return EINTR only when they are "slow".  True?
+
+For a unique definition of "slow"...  :)
+
+> What makes a system call "slow"?  Is it the ability to block for a while?
+> But I wouldn't think dup(2) would block, for example.
+
+From my experience, a slow vs fast call is only partially based on
+time.  It's more based on obtaining and releasing resources.
+
+A slow system call is one that might take a long time, and any
+resource allocations requested during the system call processing can
+be easily undone (returned).  TTY input, as an example.
+
+Things like a disk request are *supposed* to be quick, but even if
+they're not, they involve allocating buffers, queueing disk requests,
+setting up possible interrupts or DMA, and other messy internal
+details.  Aborting a pending disk request would be a substantial
+amount of effort.  Thus, a disk request cannot be interrupted and it's
+classified as "fast".  (or "not slow")
+
+This presents a few difficulties when you consider something like NFS,
+which acts like a disk request until it gets down to the network
+layer, where things might well take a long time.  But interrupting and
+aborting this is not easy, which is why some NFS requests, when hung,
+stay hung even when you bang on Control-C for a while.
+
+Really simple things like dup, which involves a simple copy, would
+probably not block unless there were extreme issues with memory
+allocation or something.
+
+  -- Chris
+
+
