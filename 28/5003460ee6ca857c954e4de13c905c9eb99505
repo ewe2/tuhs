@@ -1,0 +1,70 @@
+From: reed@reedmedia.net (Jeremy C. Reed)
+Date: Fri, 20 Apr 2012 11:56:32 -0500 (CDT)
+Subject: [TUHS] 4.4BSD installed image or login shell?
+In-Reply-To: <1334906561.3249.2.camel@mary.home.gateway>
+References: <alpine.NEB.2.01.1204181601420.7466@t1.m.reedmedia.net>
+	<20120419205405.f0b3627e.jkunz@unixag-kl.fh-kl.de>
+	<CAGSRWbg4zcs681DmYBjiZ1jQmeSbQdfN_BJ-0EWBGxhUZ734Gw@mail.gmail.com>
+	<20120419215030.c116bf2c.jkunz@unixag-kl.fh-kl.de>
+	<CAGSRWbgLN4DVOHi8GgqsbpZQWsoebfZZbp-t8-Gi2_9KDgyRNQ@mail.gmail.com>
+	<20120419230724.8144b348.jkunz@unixag-kl.fh-kl.de>
+	<1334891195.6852.2.camel@mary.home.gateway>
+	<20120420083427.11d4bfb8.jkunz@unixag-kl.fh-kl.de>
+	<1334906561.3249.2.camel@mary.home.gateway>
+Message-ID: <alpine.NEB.2.01.1204201054340.6607@t1.m.reedmedia.net>
+
+On Fri, 20 Apr 2012, Nick Downing wrote:
+
+> OK, I hadn't been aware of the significance of the 2 in 4.4BSD-Lite2, so
+> I understand it contains a CSRG version of the startup code, etc that
+> was originally from AT&T and was left out of 4.4BSD-Lite?  Is it
+> anything to do with Jolitz's work on 386BSD?  Does it have anything
+> else?  Searching threw up a few results on multiprocessor locking so
+> maybe it contains additional features as well as just the missing code?
+> cheers, Nick
+
+It doesn't appear to include the needed code. From looking at huge diff, 
+I don't see any additions identified from Jolitz/Telemuse/386BSD. (For 
+example, Lite already had Jolitz i386 code and Lite2 only had minimal 
+changes to the code.)  I quote from Cover.rel2 document for Lite2:
+
+``It will not be possible to compile or run this software without a 
+pre-existing system that is already installed and running. In addition, 
+the distribution does not include sources for a complete system. It 
+includes source code and manual pages for the C library, approximately 
+90% of the utilities distributed as part of 4.4BSD, and most of the 
+kernel (the same subsystems that were deleted in Net/2 are still missing 
+in 4.4BSD-Lite Release 2 (support for executing files, doing physical 
+I/O, managing the buffer cache, handling process tracing, terminal 
+character I/O, and doing accounting).''
+
+The diff is huge. Lite2 has many changes: ``includes the copy editing 
+work done for the Usenix/O'Reilly manuals as well as numerous bug fixes 
+and enhancements that have been accumulated in the year since the 
+release of 4.4BSD-Lite. Of particular interest are the changes needed to 
+port the system to 64-bit architectures, important security enhancements 
+to TCP/IP, and much improved functionality for the union and 
+log-structured filesystems.'' (See 
+http://mail-index.netbsd.org/current-users/1995/03/23/0008.html or the 
+Cover.rel2 document.)   I think is also incorporates many changes 
+already done by BSDI, NetBSD, and FreeBSD.
+
+By the way, the TUHS page at 
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=4.4BSD lists some files 
+removed to create Lite. Actually per filenames, only the sysv_shm.c and 
+shm.h and cpio.c files were removed. (cpio replaced with pax.) All were 
+modified.  (That TUHS page also has two mistakes: lists /sys/sys/buf.h 
+twice and misspells /sys/ufs/inode.h as indode.h.)
+
+The Restricted Files also listed: sys/kern/kern_physio.c, 
+sys/kern/vfs_bio.c, and sys/sys/tty.h and they are still included in 
+Lite. Probably because files were not included in historical AT&T code, 
+because newer USL code did include them, lots rewritten and so if any 
+code was reused it became insignificant and was agreed on.  vfs_bio.c 
+was mentioned in a declaration stating is was based on published 
+pseudo-code.
+
+Where is the actual list of files missing in Lite (that are in 
+Encumbered)?
+
+
