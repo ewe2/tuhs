@@ -1,0 +1,54 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Thu, 9 Jan 2014 14:13:37 -0500
+Subject: [TUHS] History of chown semantics
+In-Reply-To: <alpine.NEB.2.02.1401090914270.4786@t1.m.reedmedia.net>
+References: <F174F3EE-BFED-4561-9A1A-B4D33D179513@tfeb.org>
+ <alpine.NEB.2.02.1401090914270.4786@t1.m.reedmedia.net>
+Message-ID: <20140109191336.GD24304@mercury.ccil.org>
+
+Jeremy C. Reed scripsit:
+
+> A few years ago, Thompson had told me that while at Berkeley (on a  
+> sabbatical), he did a modification at Berkeley to put in disk space 
+> quotas to prevent runaways.                                         
+
+This is apparently not the same as Robert Elz's disc [sic] quotas, which
+were first released with 4.2BSD.  That was the first version to cash the
+cheque supplied by all Research versions until 8th Edition:
+
+> "Only the super-user is allowed to change the owner of a file, in
+> order to simplify as yet unimplemented accounting procedures."
+
+Since there were never any such procedures in the line leading to System
+V, there was no longer any reason to restrict giving away files.
+
+Quotas aren't very useful any more, what with most systems being either
+single-user clients or servers with no need for privilege separation
+other than root/non-root.  Unless you are using mandatory access
+control, which has never been a standard part of any Unix-like system, I
+see no reason to continue to forbid changes of ownership.
+
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=1BSD/s6/chownall.c has:
+> if (chgusr && !chggrp && source.uid == 0)
+> 	panic("owner of \"%s\" is uid 0 in his group !?!", spth);
+> else if (!chgusr && chggrp && source.uid != 0)
+> 	panic("owner of \"%s\" is not uid 0 of his group !?!", spth);
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=1BSD/man6/chownall.6
+> also mentions the "user number 0 in his group." 
+
+Looking at
+<http://minnie.tuhs.org/cgi-bin/utree.pl?file=1BSD/man6/chownall.6>
+suggests that in the base system underlying 1BSD, you were only the
+superuser if you had a uid of 0 and a gid of 0.  I suspect this was a
+kernel patch.
+
+-- 
+First known example of political correctness:   John Cowan
+After Nurhachi had united all the other         http://www.ccil.org/~cowan
+Jurchen tribes under the leadership of the      cowan at ccil.org
+Manchus, his successor Abahai (1592-1643)
+issued an order that the name Jurchen should       --S. Robert Ramsey,
+be banned, and from then on, they were all           The Languages of China
+to be called Manchus.
+
+
