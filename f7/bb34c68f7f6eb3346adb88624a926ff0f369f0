@@ -1,0 +1,72 @@
+From: tuhs@cuzuco.com (Brian S Walden)
+Date: Thu, 16 Jan 2014 03:56:05 -0500 (EST)
+Subject: [TUHS] History of chown semantics
+Message-ID: <201401160856.s0G8u5fe021668@cuzuco.com>
+
+the short: yes you could chown your own files in 1st to 5th editions, the
+first pwb was a derivition of 4th ed, so its not the originator of the idea.
+
+the long:
+that "superuser could not even chown setuid files" awoke a long dead memory.
+I needed to go back to read the 1st ed man entries for chown(1) and (2)
+again ( see http://cm.bell-labs.com/cm/cs/who/dmr/1stEdman.html inc. below)
+and it is documented that yes, one indeed could give away their
+own files. also note 1st ed was pre-gid, files had only owner and
+non-owner, so no setgid to worry about. looking more 2nd and 3rd ed
+were the same (see ttp://www.tuhs.org/Archive/PDP-11/Distributions/research/Dennis_v2/v2man.pdf
+and http://www.tuhs.org/Archive/PDP-11/Distributions/research/Dennis_v3/v3man.tar.gz)
+however in the 3rd ed there were now gids yet no restistions on chown of
+setgid files.  4th and 5th ed still allowed file give away even if the
+setuid bit was set by stripping that bit out (unless superuser) (but
+did not strip the setgid bit)
+(see http://www.tuhs.org/Archive/PDP-11/Distributions/research/Dennis_v4/v4man.tar.gz 
+and http://www.tuhs.org/Archive/PDP-11/Distributions/research/Dennis_v5/v5man.pdf)
+The 6th ed and on is when only the superuser could change file owners.
+Since the first PWBs were derived from 4th and 5th editions, they just
+did not buy into the new chown() restrictions from v6 (and added the
+missed strippig of the setgid bit)
+
+1st Ed manual enries --
+
+11/3/71								CHOWN (I)
+NAME		chown -- change owner
+SYNOPSIS	chown owner file
+DESCRIPTION	owner becomes the new owner of the files. The owner may be
+		either a decimal UID or a name found in /etc/uids.
+		Only the owner of a file is allowed to change the owner. It
+		is illegal to change the owner of a file with the set-user-
+		ID mode.
+FILES		/etc/uids
+SEE ALSO	stat
+DIAGNOSTICS
+BUGS
+OWNER		ken, dmr
+
+11/3/71							 SYS CHOWN (II)
+NAME		chown -- change owner of file
+SYNOPSIS	sys chown; name; owner / chown = 16.
+DESCRIPTION	The file whose name is given by the null-terminated string
+		pointed to by name has its owner changed to owner. Only
+		the present owner of a file (or the super-user) may donate
+		the file to another user. Also, one may not change the
+		owner of a file with the set-user-ID bit on, otherwise one
+		could create Trojan Horses able to misuse other's files.
+FILES
+SEE ALSO	/etc/uids has the mapping between user names and user
+		numbers.
+DIAGNOSTICS	The error bit (c-bit) is set on illegal owner changes.
+BUGS
+OWNER		ken, dmr
+
+
+> From Doug McIlroy <doug at cs.dartmouth.edu>
+> 
+> Indeed, research Unix never allowed ordinary users to
+> change a uid. And even in the first edition, the superuser
+> was not allowed to do so on set-uid files, presumably to
+> prevent inadvertent laying of cuckoo eggs. The v6 note
+> about interaction with accounting reflected field
+> experience with the overly liberal stance of other Unixes.
+> 
+
+
