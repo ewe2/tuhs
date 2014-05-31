@@ -1,0 +1,63 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 31 May 2014 11:55:27 -0400 (EDT)
+Subject: [TUHS] Bugs in V6 'dcheck'
+Message-ID: <20140531155527.39A3B18C09C@mercury.lcs.mit.edu>
+
+    > From: jnc at mercury.lcs.mit.edu (Noel Chiappa)
+
+    > the second (the un-initialized variable) should have happened every
+    > time.
+
+OK, so I was wrong! The variable in question was a global static, 'ino' (the
+current inode number), so the answer isn't something simple like 'it was an
+auto that happened to be cleared for each disk'. But now that I look closely,
+I think I see a way it might have worked.
+
+
+'dcheck' is a two-pass per disk thing: it begins each disk by clearing its
+'inode link count' table; then the first pass does a pass over all the inodes,
+and for ones that are directories, increments counts for all the entries; the
+second pass re-scans all the inodes, and makes sure that the link count in the
+inode itself matches the computed count in the table.
+
+'ino' was cleared before the _second_ pass, but not the _first_. So it was
+zero for the first pass of the first disk, but non-zero for the first pass on
+the second disk.
+
+This looks like the kind of bug that should almost always be fatal, right?
+That's what I thought at first... (and I tried the original version on one of
+my machines to make sure it did fail). But...
+
+
+The loop in each pass has two index variables, one of which is 'ino', which it
+compares with the maximum inode number for that disk (per the super-block),
+and bails if it reaches the max:
+
+	      for(i=0; ino<nfiles; i =+ NIBLK)
+
+If the first disk is _larger_ than the second, the first pass will never
+execute at all for the second desk (producing errors).
+
+However, if the _second_ is larger, then the second disk's first pass will in
+fact examine the starting (nfilesSUBsecond - nfilesSUBfirst) inodes of the
+second disk to see if they are directories (and if so, count their links).
+
+So if the last nfilesSUBfirst inodes of the second disk are empty (which is
+often the case with large drives - I had modified 'df' to count the free
+inodes as well as disk blocks, and after doing so I noticed that Unix seems to
+be quite generous in its default inode allocations), it will in fact work!
+
+The fact that 'ino' is wrong all throughout the first pass of the second disk
+(it counts up from nfilesSUBfirst to nfilesSUBsecond) turns out to be
+harmless, because the first pass never uses the current inode number, it only
+looks at the inode numbers in the directories.
+
+
+Note that with two disks of _equal size_, it fails. Only if the second is
+larger does it work! (And this generalizes out to N disks - as long as each
+one is enough larger than the one before!) So for the config they were
+running (rk2, dp0) it probably did in fact work!
+
+   Noel
+
+
