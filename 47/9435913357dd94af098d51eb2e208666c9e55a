@@ -1,0 +1,72 @@
+From: tim.newsham@gmail.com (Tim Newsham)
+Date: Sat, 31 May 2014 08:58:39 -1000
+Subject: [TUHS] Bugs in V6 'dcheck'
+In-Reply-To: <20140531131504.AC41E18C0C8@mercury.lcs.mit.edu>
+References: <20140531131504.AC41E18C0C8@mercury.lcs.mit.edu>
+Message-ID: <CAGSRWbgL9cHNiva5MzS5Sz6k_=n4A7_EkzVU3GwNeOrPhqAbkA@mail.gmail.com>
+
+There are bugs to be found, and it can be a fun hunt
+(though not too much of a challenge).  Here are some
+more (security related, as thats my inclination):
+
+  http://marc.info/?l=bugtraq&m=108627540130457&w=2
+  http://minnie.tuhs.org/pipermail/unix-jun72/2008-May/000126.html
+  http://minnie.tuhs.org/pipermail/unix-jun72/2008-May/000250.html
+
+Tim
+
+
+On Sat, May 31, 2014 at 3:15 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+> So it turns out the 'dcheck' distributed with V6 has two (well, three, but
+> the third one was only a potential problem for me) bugs it.
+>
+>
+> The first was a fence-post error on a table clearing operation; it could
+> cause the entry for the last inode of the disk in the constructed table of
+> directory entry counts to start with a non-zero count when a second disk was
+> scanned. However, it was only triggered in very specific circumstances:
+>
+> - A larger disk was listed before a smaller one (either in the command line,
+>     or compiled in)
+> - The inode on the larger disk corresponding to the last inode on the smaller
+>     one was in use
+>
+> I can understand how they never ran across this one.
+>
+>
+> The other one, however, which was an un-initalized variable, should have
+> bitten them anytime they had more than one disk listed! It caused the
+> constructed table of directory entry counts to be partially or wholly
+> (depending on the size of the two disks) blank in all disks after the first
+> one, causing numerous (bogus) error reports.
+>
+> (It was also amusing to find an un-used procedure in the source; it looks
+> like dcheck was written starting with the code for 'icheck' - which explains
+> the second bug; since the logic in icheck is subtly different, that variable
+> _is_ set properly in icheck.)
+>
+> How this bug never bit them I cannot understand - unless they saw it, and
+> couldn't be bothered to find and fix it!
+>
+> To me, it's completely amazing to find such a serious bug in such a critical
+> piece of widely-distributd code! A lesson for archaeologists...
+>
+>
+> Anyway, a fixed version is here:
+>
+>   http://ana-3.lcs.mit.edu/~jnc/tech/unix/ucmd/dcheck.c
+>
+> if anyone cares/needs it.
+>
+>         Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
+
+-- 
+Tim Newsham | www.thenewsh.com/~newsham | @newshtwit | thenewsh.blogspot.com
+
+
