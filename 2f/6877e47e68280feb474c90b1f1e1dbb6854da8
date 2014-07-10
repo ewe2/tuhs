@@ -1,0 +1,56 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 10 Jul 2014 12:06:58 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140710160658.DCB1318C09E@mercury.lcs.mit.edu>
+
+    > From: Larry McVoy <lm at mcvoy.com>
+
+    > Making what you are talking about work is gonna be a mess of buffer
+    > management and it's going to be hard to design system calls that would
+    > work and still give you reasonable semantics on the pipe. Consider
+    > calls that want to know if there is data in the pipe
+
+Oh, I didn't say it would work well, and cleanly! :-) I mean, taking one
+element in an existing, operating, chain, and blowing it away, is almost
+bound to cause problems.
+
+My previous note was merely to say that the file descriptor/pipe
+re-arrangement involved might be easier done with a system call - in fact, now
+that I think about it, as someone has already sort of pointed out, without a
+system call to merge the two pipes into one, you have to keep the middle
+process around, and have it turn into a 'cat'.
+
+
+Thinking out loud for a moment, though, along the lines you suggest....
+Here's one problem - suppose process2 has read some data, but not yet
+processed it and output it towards process3, when you go to do the splice.
+How would the anything outside the process (be it the OS, or the command
+interpreter or whatever is initiating the splice) even detect that, much less
+retrieve the data?
+
+Even using a heuristic such as 'wait for process2 to try and read data, at
+which point we can assume that it no longer has any internally buffered data,
+and it's OK to do the splice' fails, because process2 may have decided it
+didn't have a complete semantic unit in hand (e.g. a complete line), and
+decided to go back and get the rest of the unit before outputting the
+complete, processed semantic unit (i.e. including data it had previously
+buffered internally).
+
+And suppose the reads _never_ happen to coincide with the semantic units
+being output; i.e. process2 will _always_ have some buffered data inside it,
+until the whole chain starts to shut down with EOFs from the first stage?
+
+
+In short, maybe this problem isn't solvable in the general case. In which
+case I guess we're back to your "Every utility that you put in a pipeline
+would have to be reworked".
+
+Stages would have to have some way to say 'I am not now holding any buffered
+data', and only when that state was true could they be spliced out. Or there
+could be some signal defined which means 'go into "not holding any buffered
+data" state'. At which point my proposed splice() system call might be some
+use... :-)
+
+	Noel
+
+
