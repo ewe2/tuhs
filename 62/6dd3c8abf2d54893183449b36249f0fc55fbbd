@@ -1,0 +1,29 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 10 Jul 2014 11:10:21 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140710151021.3ABE018C09F@mercury.lcs.mit.edu>
+
+    > From: Larry McVoy <lm at mcvoy.com>
+
+    > Every utility that you put in a pipeline would have to be reworked to
+    > pass file descriptors around
+
+Unless the whole operation is supported in the OS directly:
+
+	if ((pipe1 = process1->stdout) == process2->stdin) &&
+	   ((pipe2 = process2->stdout) == process3->stdin) {
+		prepend_buffer_contents(pipe1, pipe2);
+		process1->stdout = process2->stdout;
+		kill_pipe(pipe1);
+		}
+
+to be invoked from the chain's parent (e.g. shell).
+
+(The code would probably want to do something with process2's stdin and
+stdout, like close them; I wouldn't have the call kill process2 directly, that
+could be left to the parent, except in the rare cases where it might have some
+use for the spliced-out process.)
+
+	Noel
+
+
