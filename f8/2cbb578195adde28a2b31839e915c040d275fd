@@ -1,0 +1,111 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Fri, 11 Jul 2014 14:30:09 +1000
+Subject: [TUHS] Compiling the unix v5 kernel
+Message-ID: <20140711043009.GB21711@www.oztivo.net>
+
+here's the e-mail that I sent on to Mark in the hope that it would
+give him enough information to get his 5th Edition kernel working
+with a tape device. He has also now joined the list. Welcome aboard, Mark.
+
+	Warren
+
+----- Forwarded message from Warren Toomey <wkt at tuhs.org> -----
+
+On Thu, Jul 10, 2014 at 05:56:04PM -0400, Mark Longridge wrote:
+> There was no m40.s in v5 so I substituted mch.s for m40.s and that
+> seemed to create a kernel and it booted but I can't access /dev/mt0.
+
+Mark, glad to hear you were able to rebuild the kernel. I've never tried
+on 5th Edition. Just reading through the 6th Edition docs, it says this:
+
+-----
+     Next  you  must  put in all of the special files in the
+directory /dev using mknod‐VIII.   Print  the  configuration
+file  c.c created above.  This is the major device switch of
+each device class (block and character).  There is one  line
+for  each  device  configured in your system and a null line
+for place holding for those  devices  not  configured.   The
+block special devices are put in first by executing the fol‐
+lowing generic command for each disk or tape  drive.   (Note
+that  some  of  these  files  already exist in the directory
+/dev.  Examine each file with ls‐I with −l flag  to  see  if
+the file should be removed.)
+
+          /etc/mknod /dev/NAME b MAJOR MINOR
+
+The NAME is selected from the following list:
+
+     c.c  NAME device
+     rf   rf0  RS fixed head disk
+     tc   tap0 TU56 DECtape
+     rk   rk0  RK03 RK05 moving head disk
+     tm   mt0  TU10 TU16 magtape
+     rp   rp0  RP moving head disk
+     hs   hs0  RS03 RS04 fixed head disk
+     hp   hp0  RP04 moving head disk
+
+The  major  device  number  is selected by counting the line
+number (from zero) of the device’s entry in the  block  con‐
+figuration  table.  Thus the first entry in the table bdevsw
+would be major device zero.
+
+     The minor device is the drive number,  unit  number  or
+partition as described under each device in section IV.  The
+last digit of the name (all given as 0 in the  table  above)
+should reflect the minor device number.  For tapes where the
+unit is dial selectable, a special file may be made for each
+possible selection.
+
+     The  same  goes  for  the  character devices.  Here the
+names are arbitrary except that devices meant to be used for
+teletype  access  should  be named /dev/ttyX, where X is any
+character.  The files tty8 (console), mem,  kmem,  null  are
+already correctly configured.
+
+     The  disk and magtape drivers provide a ‘raw’ interface
+to the device which provides direct transmission between the
+user’s  core  and  the  device and allows reading or writing
+large records.  The raw device counts as a character device,
+and should have the name of the corresponding standard block
+special file with ‘r’ prepended.  Thus the raw magtape files
+would be called /dev/rmtX.
+
+     When  all  the  special  files  have been created, care
+should be taken to change  the  access  modes  (chmod‐I)  on
+these files to appropriate values.
+-----
+
+Looking at the c.c generated, it has:
+
+int     (*bdevsw[])()
+{
+        &nulldev,       &nulldev,       &rkstrategy,    &rktab,
+        &tmopen,        &tmclose,       &tmstrategy,    &tmtab,		/* 1 */
+        &nulldev,       &tcclose,       &tcstrategy,    &tctab,
+        0
+};
+
+int     (*cdevsw[])()
+{
+        &klopen,   &klclose,   &klread,   &klwrite,   &klsgtty,
+        &nulldev,  &nulldev,   &mmread,   &mmwrite,   &nodev,
+        &nulldev,  &nulldev,   &rkread,   &rkwrite,   &nodev,
+        &tmopen,   &tmclose,   &tmread,   &tmwrite,   &nodev,		/* 3 */
+        &dcopen,   &dcclose,   &dcread,   &dcwrite,   &dcsgtty,
+        &lpopen,   &lpclose,   &nodev,    &lpwrite,   &nodev,
+        0
+};
+
+Following on from the docs, you should be able to make the /dev/mt0
+device file by doing:
+
+	/etc/mknod /dev/tm0 b 1 0
+
+And possibly also:
+
+	/etc/mknod /dev/rmt0 c 3 0
+
+Cheers,
+	Warren
+
+
