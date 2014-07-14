@@ -1,0 +1,67 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Mon, 14 Jul 2014 10:13:06 -0400
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <201407141413.s6EED6D7015657@coolidge.cs.dartmouth.edu>
+
+Larry wrote in separate emails
+
+> If you really think that this could be done I'd suggest trying to
+> write the man page for the call.
+
+> I already claimed splice(2) back in 1998; the Linux guys did
+> implement part of it ...
+
+I began to write the following spec without knowing that Linux had
+appropriated the name "splice" for a capability that was in DTSS
+over 40 years ago under a more accurate name, "copy". The spec
+below isn't hard: just hook two buffer chains together and twiddle
+a couple of file desciptors.  For stdio, of course, one would need
+fsplice(3), which must flush the in-process buffers--penance for
+stdio's original sin of said buffering.
+
+Incidentally, the question is not abstract. I have code that takes
+quadratic time because it grows a pipeline of length proportional
+to the input, though only a bounded number of the processes are
+usefully active at any one time; the rest are cats. Splicing out
+the cats would make it linear. Linear approaches that don't need
+splice are not nearly as clean.
+
+Doug
+
+SPLICE(2)
+
+SYNOPSIS
+
+int splice(int fd0, int fd1);
+
+DESCRIPTION
+
+Splice connects the source for a reading file descriptor fd0
+directly to the destination for a writing file descriptor fd1
+and closes both fd0 and fd1. Either the source or the destination
+must be another process (via a pipe). Data buffered for fd0 at
+the time of splicing follows such data for fd1. If both source
+and destination are processes, they become connected by a pipe. If
+the source (destination) is a process, the file descriptor
+in that process becomes write-only (read-only).
+
+If file descriptor fd0 is associated with a pipe and fd1 is not,
+then fd1 is updated to reflect the effect of buffered data for fd0,
+and the pipe's other descriptor is replaced with a duplicate of fd1.
+The same statement holds when "fd0" is exchanged with "fd1" and
+"write" is exchanged with "read".
+
+Splice's effect on any file descriptor propagates to shared file
+descriptors in all processes.
+
+NOTES
+
+One file must be a pipe lest the spliced data stream have no
+controlling process. It might seem that a socket would suffice,
+ceding control to a remote system; but that would allow the
+uncontrolled connection file-socket-socket-file.
+
+The provision about a file descriptor becoming either write-only or
+read-only sidesteps complications due to read-write file descriptors.
+
+
