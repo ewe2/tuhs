@@ -1,0 +1,59 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 14 Jul 2014 19:40:42 -0700
+Subject: [TUHS] the sin of buffering [offshoot of excise process from a
+ pipeline]
+In-Reply-To: <201407150231.s6F2VRK0022875@coolidge.cs.dartmouth.edu>
+References: <201407150231.s6F2VRK0022875@coolidge.cs.dartmouth.edu>
+Message-ID: <20140715024042.GD13698@mcvoy.com>
+
+On Mon, Jul 14, 2014 at 10:31:27PM -0400, Doug McIlroy wrote:
+> > Err, why is buffering data in the process a sin? (Or was this just a
+> humourous aside?)
+> 
+> Process A spawns process B, which reads stdin with buffering. B gets
+> all it deserves from stdin and exits. What's left in the buffer,
+> intehded for A, is lost. Sinful.
+
+It really depends on what you want.  That buffering is a big win for
+some use cases.  Even on today's processors reading a byte at a time via
+read(2) is costly.  Like 5000x more costly on the laptop I'm typing on:
+
+calvin:~/tmp lmdd opat=1 move=100m of=XXX
+104.8576 MB in 0.1093 secs, 959.5578 MB/sec
+calvin:~/tmp time a.out fd < XXX
+
+real    0m14.754s
+user    0m1.516s
+sys     0m13.201s
+calvin:~/tmp time a.out stdio < XXX
+
+real    0m0.003s
+user    0m0.000s
+sys     0m0.000s
+calvin:~/tmp bc
+14.754/.003
+4918.00000000000000000000
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#define unless(x)       if (!(x))
+#define streq(a, b)     !strcmp(a, b)
+
+main(int ac, char **av)
+{
+        char    c;
+
+        unless (ac == 2) exit(1);
+        if (streq(av[1], "stdio")) {
+                while ((c = fgetc(stdin)) != EOF)
+                        ;
+        } else {
+                while (read(0, &c, 1) == 1)
+                        ;
+        }
+        exit(0);
+}
+
+
+
