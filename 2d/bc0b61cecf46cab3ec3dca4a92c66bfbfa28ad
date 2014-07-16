@@ -1,0 +1,61 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Tue, 15 Jul 2014 17:32:20 -0700
+Subject: [TUHS] the sin of buffering [offshoot of excise process from a
+ pipeline]
+In-Reply-To: <201407152343.s6FNhnUT001960@coolidge.cs.dartmouth.edu>
+References: <201407152343.s6FNhnUT001960@coolidge.cs.dartmouth.edu>
+Message-ID: <20140716003220.GA24974@mcvoy.com>
+
+I dunno, we have a distributed source management system that uses a lot
+of network I/O.  We've carefully layered stdio on top of it because we
+had many cases where it was a performance bummer.
+
+Personally, I've come to really love stdio, at least our version of it.
+Want your stream compressed or uncompressed?
+
+	fpush(&stdin, fopen_vzip(stdin, "r"));
+
+Want your stream integrity checked with a CRC per block and an XOR block
+at the end so you can correct any single block error?
+
+	fpush(&stdout, fopen_crc(stdout, "w", 0, 0));
+
+I'm a performance guy for the most part and while read/write seem like 
+the fastest way to move stuff around that's only true for really nicely
+formed data, page sized blocks or bigger.  Fine for benchmarking but if
+you want to approach that performance with poorly formed data, like 
+small blocks, different sized blocks, that buffering layer smooths 
+things out.  You pay an extra bcopy() but that's typically lost in 
+the noise.
+
+I used to hate the idea of stdio but working in real world applications
+where I can't control the size of the data coming at me, yeah, I've 
+come to love stdio.  It's pretty darn useful.
+
+On Tue, Jul 15, 2014 at 07:43:49PM -0400, Doug McIlroy wrote:
+> Yes, an evil necessary to get things going. 
+> The very definition of original sin.
+> 
+> Doug
+> 
+> Larry McVoy wrote:
+> 
+> >>>> For stdio, of course, one would need fsplice(3), which must flush the
+> >>>> in-process buffers--penance for stdio's original sin of said buffering.
+> 
+> >>> Err, why is buffering data in the process a sin? (Or was this just a
+> >>> humourous aside?)
+>  
+> >> Process A spawns process B, which reads stdin with buffering. B gets
+> >> all it deserves from stdin and exits. What's left in the buffer,
+> >> intehded for A, is lost. Sinful.
+>  
+> > It really depends on what you want.  That buffering is a big win for
+> > some use cases.  Even on today's processors reading a byte at a time via
+> > read(2) is costly.  Like 5000x more costly on the laptop I'm typing on:
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+
