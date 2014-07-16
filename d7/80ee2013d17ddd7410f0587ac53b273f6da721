@@ -1,0 +1,59 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed, 16 Jul 2014 17:31:31 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140716213131.825F918C0A2@mercury.lcs.mit.edu>
+
+    >> From: Doug McIlroy <doug at cs.dartmouth.edu>
+
+    >> The spec below isn't hard: just hook two buffer chains together and
+    >> twiddle a couple of file desciptors.
+
+    > In thinking about how to implement it, I was thinking that if there was
+    > any buffered data in an output pipe, that the process doing the
+    > splice() would wait (inside the splice() system call) on all the
+    > buffered data being read by the down-stream process.
+    > ...
+    > As a side-benefit, if one adopted that line, one wouldn't have to deal
+    > with the case (in the middle of the chain) of a pipe-pipe splice with u
+    > buffered data in both pipes (where one would have to copy the data
+    > across); instead one could just use the exact same code for both cases
+
+So a couple of days ago I suffered a Big Hack Attack and actually wrote the
+code for splice() (for V6, of course :-).
+
+It took me a day or so to get 'mostly' running. (I got tripped up by pointer
+arithmetic issues in a number of places, because V6 declares just about
+_everything_ to be "int *", so e.g. "ip + 1" doesn't produce the right value
+for sleep() if ip is declared to be "struct inode *", which is what I did
+automatically.)
+
+My code only had one real bug so far (I forgot to mark the user's channels as
+closed, which resulted in their file entries getting sub-zero usage counts
+when the middle (departing) process exited).
+
+
+However, now I have run across a real problem: I was just copying the system
+file table entry for the middle process' input channel over to the entry for
+the downstream's input (so further reads on its part would read the channel
+the middle process used to be reading). Copying the data from one entry to
+another meant I didn't have to go chase down file table pointers in the other
+process' U structure, etc.
+
+Alas, this simple approach doesn't work.
+
+Using the approach I outlined (where the middle channel waits for the
+downstream pipe to be empty, so it can discard it and do the splice by
+copying the file table entries) doesn't work, because the downstream process
+is in the middle of a read call (waiting for more data to be put in the
+pipe), and it has already computed a pointer to the pipe's inode, and it's
+looping waiting for that inode to have data.
+
+So now I have to regroup and figure out how to deal with that. My most likely
+approach is to copy the inode data across (so I don't have to go mess with the
+downstream process to get it to go look at another inode), but i) I want to
+think about it a bit first, and ii) I have to check that it won't screw
+anything else up if I move the inode data to another slot.
+
+	Noel
+
+
