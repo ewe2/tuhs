@@ -1,0 +1,49 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 28 Jul 2014 09:27:17 -0400 (EDT)
+Subject: [TUHS] First Unix that could run on a PDP-11 with QBUS
+Message-ID: <20140728132717.73DD218C0B2@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall <dave at horsfall.org>
+
+    > I recall that there were other differences as well, but only minor. In
+    > my paper in AUUGN titled "Unix on the LSI-11/23" it will reveal all
+    > about porting V6 to the thing.
+
+I did a google for that, but couldn't find it. Is it available anywhere
+online? (I'd love to read it.) I seem to recall vaguely that AUUGN stuff were
+online, but if so, I'm not sure why the search didn't turn it up.
+
+
+    > I vaguely remember that the LTC had to be disabled during the boot
+    > process, for example, with an external switch.
+
+I think you might be right, which means the simulated 11/23 I tested on
+wasn't quite right - but keep reading!
+
+I remember being worried about this when I started doing the V6 11/23 version
+a couple of months back, because I remembered the 11/03's didn't have a
+programmable clock, just a switch. So I was reading through the 11/23
+documentation (I had used 11/23s, but on this point my memory had faded),
+trying to see if they too did not have a programmable clock.
+
+As best I can currently make out, the answer is 'yes/no, depending on the
+exact model'! E.g. the 11/23-PLUS _does_ seem to have a programmable clock
+(see pg. 610 of the 1982 edition of "microcomputers and memories"), but the
+base 11/23 _apparently_ does not.
+
+Anyway, the simulated 11/23 (on Ersatz11) does have the LTC (I just checked,
+and 'lks' contains '0177546', so it thinks it has one :-).
+
+
+But this will be easy to code around; if no link clock is found (in main.c),
+I'd probably set 'lks' to point somewhere harmless (054, say - I'm using
+050/052 to hold the pointer to the CSW, and the software CSW if there isn't a
+hardware one). That way I can limit the changes to be in main.c, I won't have
+to futz with clock.c too.
+
+	Noel
+
+PS: On at least the 11/40 (and maybe the /45 too), the line clock was an
+option! It was a single-height card, IIRC.
+
+
