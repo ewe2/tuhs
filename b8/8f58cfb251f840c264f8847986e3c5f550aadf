@@ -1,0 +1,46 @@
+From: cubexyz@gmail.com (Mark Longridge)
+Date: Sun, 3 Aug 2014 16:55:59 -0400
+Subject: [TUHS] changes for modern -> v7 -> v6 -> v5
+Message-ID: <CADxT5N6veRAk8VSVbpPQaFbc=4VJacsPtj6EANA6=Brdr5s2Dw@mail.gmail.com>
+
+    >> From: Mark Longridge <cubexyz at gmail.com>
+
+    >> I thought you folks might be interested in looking at the changes I had
+    >> to make. It was a bit harder than the port to v6 but porting to v6
+    >> first did make things a bit easier.
+
+> To save me from poring over 'diff' output :-), what (at a high level) were
+> the changes you had to make to get it to run on v5?
+
+ >       Noel
+
+Briefly the differences were these:
+
+modern to v7: remove all references to void
+no vi on v7, v6, and v5 so using ed instead.
+no conditional compilation so no way to make a truly universal version
+which works on everything.
+
+v7 to v6: use iolib instead of stdio: fopen -> copen, fclose ->
+cclose, fgetc -> cgetc, fputc -> cputc
+use int (no long or short in v6)
+call to srand uses different argument
+copen returns an int instead of a file pointer
+no strcat in v6 so the function had to be added
+
+v6 to v5: no iolib: fopen -> creat + open, copen -> open, cgetc ->
+read, cputc -> write, cclose -> close
+no scanf in v5 so I used the source for gets from v7 instead
+getchar()  leaves a newline in the buffer so I added an extra call to
+getchar() immediately before each call to gets
+
+The size of the unirubik executable was 8K for modern Linux, 10K for
+v7, 10K for v6, and 5492 bytes for v5.
+
+Generally I was a lot slower trying to edit files with ed rather than
+vi but I'm a lot better with ed now. There wasn't really much unix v5
+code to look at and I found the v5 manual a bit spartan.
+
+Mark
+
+
