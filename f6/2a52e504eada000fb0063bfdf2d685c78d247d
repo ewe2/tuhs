@@ -1,0 +1,42 @@
+From: mascheck@in-ulm.de (Sven Mascheck)
+Date: Mon, 11 Aug 2014 01:05:16 +0200
+Subject: [TUHS] unix v5 limitations
+In-Reply-To: <20140809153202.AB1CE18C0AC@mercury.lcs.mit.edu>
+References: <20140809153202.AB1CE18C0AC@mercury.lcs.mit.edu>
+Message-ID: <20140810230516.GA402137@lisa.in-ulm.de>
+
+On Sat, Aug 09, 2014 at 11:32:02AM -0400, Noel Chiappa wrote:
+> John Cowan nailed this; as an aside, I don't know about V5, but in vanilla V6
+> the entire argument list had to fit into one disk buffer (I would assume V5 is
+> the same).
+
+V4 to V6 had this limit of 512 bytes. It's documented in exec(2),
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/man/man2/exec.2
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/man/man2/exec.2
+and the code is in sys1.c, e.g. E2BIG,
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V5/usr/sys/ken/sys1.c
+
+> The PWB changes to v6 included a rewrite of exec() to accumulate the argument
+> list in swap space, so it could be much longer; the maximum length was a
+> parameter, NCARGS, which was set to 5120 (10 blocks) by default.
+
+V7 then also implemented NCARGS (sys/param.h).
+
+I can't read assembler and tried to find the limit in a running V1
+http://code.google.com/p/unix-jun72/
+with a script which just echoes its arguments, and found
+- command line (script or interactive) not longer than 255 characters
+- single argument not longer than about 82 characters  (how this might have come off?)
+Exceeding this lead to data corruption or kernel crash.
+
+Early exec(2) reads
+V1: The arguments are placed as high as possible incore: just below 60000(8).
+V3: The arguments are placed as high as possible in core: just below 57000(8).
+and I wonder if it's possible to determine limits from this.
+
+Sven
+
+(I was interested in ARG_MAX in general and collected my experiences on
+ http://www.in-ulm.de/~mascheck/various/argmax/)
+
+
