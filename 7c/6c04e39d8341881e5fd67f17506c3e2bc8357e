@@ -1,0 +1,36 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 16 Aug 2014 10:35:05 -0400 (EDT)
+Subject: [TUHS] Teletype
+Message-ID: <20140816143505.6A05618C13C@mercury.lcs.mit.edu>
+
+    > From: John Cowan <cowan at mercury.ccil.org>
+
+    >> if you're dialing up, you need to find a dial-up port that supports
+    >> 110 baud.
+
+    > I dialed up The World's local dialup line for my area, and heard a
+    > large variety of tones including Bell 103-compatible FSK, which is 300
+    > baud. I suspect that anything that can do Bell 103 can fall back to
+    > Bell 101, which was 110 baud.
+
+There are two more things one needs to have for the port to support 110: i)
+the serial interface needs to support 110 (even if the modem is integrated
+with the serial hardware on one board, the serial hardware might not do 110),
+and ii) the software needs to be willing to go 110.
+
+I don't know anything about how contemporary dial-up ports work, so maybe
+there's some side-channel from the modem to the interface which allows the
+software to find out directly what speed the modem is using. However, 'back in
+the day' with multi-speed ports, there was no such mechanism (the RS-232
+interface spec didn't provide for speed indication), and one had to hit BREAK
+and the serial line device driver would see that, and try the next speed in a
+list. You can still see this in the big table of terminal types in getty.c,
+e.g.:
+
+  /* table '0'-1-2 300,150,110 */
+
+which tried 300, 150, 110. So if the software isn't looking for 110...
+
+	Noel
+
+
