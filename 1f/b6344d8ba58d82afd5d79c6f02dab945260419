@@ -1,0 +1,69 @@
+From: reed@reedmedia.net (Jeremy C. Reed)
+Date: Tue, 26 Aug 2014 11:36:56 -0500 (CDT)
+Subject: [TUHS] networking on unix before uucp
+In-Reply-To: <alpine.DFB.2.11.1408221811070.817@meaghan.gimme-sympathy.org>
+References: <CADxT5N4L0YXSB0uqWeb6w87KJF+=0Mc7Nhb=Q_g+j8Q8-bQ7kg@mail.gmail.com>
+ <53F75D43.4030108@mhorton.net>
+ <alpine.DFB.2.11.1408221811070.817@meaghan.gimme-sympathy.org>
+Message-ID: <alpine.NEB.2.02.1408261023490.21577@t1.m.reedmedia.net>
+
+On Fri, 22 Aug 2014, Cory Smelosky wrote:
+
+> How does that Berknet differ from the Berknet in...4.0/4.1BSD?  I've 
+> seen what I THINK was ethernet code there...but I couldn't be sure as 
+> I couldn't even decipher the addressing scheme. ;)
+>
+> I've been meaning to ask about Berknet, anyway.  One of my side 
+> projects is to get it operational.
+
+I have read most (if not all) of the berknet docs and a lot of the code. 
+The docs and code referenced a rcs, rcsq, and rcslog as some tools that 
+could be ran without a personal account on a remote system. I didn't 
+recognize rcsq, but also these references pre-dated Tichy's alternative 
+to SCCS by a year or so.
+
+Then I realized this is "remote computer system link" used something 
+like: rcsq to see queued jobs no sent yet for CDC 6400; rcslog to see 
+history of jobs sent that day; and rcsrm to delete a job not sent yet. 
+Basic concepts similar to berknet (netq, netlog, netrm).
+(The clue I found was in 
+http://www.eecs.berkeley.edu/Pubs/TechRpts/1979/ERL-79-16.pdf)
+
+I know the Cyber 6400 was used there (some of my interviewees told me 
+about it). Does anyone know if Berknet's design was inspired by this 
+"rcs"?  Where can I learn more about it? (as searching for "rcs" is 
+difficult)
+
+I don't see any ethernet code in Berknet. The author had a summer job at 
+XEROX PARC I think in the middle of his Berknet project and discussed 
+the low-level network concepts with Boggs. Later, they considered an 
+LNI, an early token ring (if I understand correctly), device, and DMC-11 
+link, but I don't think berknet was ever extended for those or used 
+using ethernet.
+
+Note that extending Berknet probably didn't make sense. It was all 
+batched with all the systems known to each system hardcoded, compiled 
+in. Smallest jobs sent first from the queue to neighboring system which 
+would send the job to next as if it was queued locally until it arrived 
+to desired system.  So retrieving an email (box) or doing a remote copy, 
+you would have to wait for the jobs to get ran. The speed on the 1200 
+baud links was only around 50 characters per second. (I think at best on 
+9600 baud links was around 600 characters per second but normally 350 
+cps.) In addition, berknet had hardcoded restrictions limiting 100,000 
+characters per single job. (It was later extended to 500,000 characters 
+for some machines, then all machines while still limiting only 200,000 
+characters max size jobs during day time.) (I never used berknet only 
+read code and docs and did some interviews with users.) It was quite 
+limited compared to the new real-time tools and near 3Mb network that 
+started being developed and used there a couple years later.
+
+By the way, the early berknet had a symlink to the batch remote copy 
+netcp called "rcp" which predated Joy's real-time remote file copy, rcp, 
+by a few years. The early version also included a trivial "sendmail" to 
+remotely send mail over the batch berknet to another berknet system (by 
+running "mail" on the remote system later). It predated Allman's 
+unrelated intelligent mailer by around two years. The Berknet tool was 
+replaced and renamed with "sendberkmail".
+
+
+
