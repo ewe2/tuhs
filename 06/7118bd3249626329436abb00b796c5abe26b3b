@@ -1,0 +1,75 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 25 Aug 2014 17:43:01 -0700
+Subject: [TUHS] UUCP Maps
+In-Reply-To: <20140825223617.GB10994@mercury.ccil.org>
+References: <4E5EF9AB-6F41-4EB7-B48E-C502C8D87DC0@orthanc.ca>
+ <A153B584-9594-453A-BA82-D6A59036132B@xs4all.nl>
+ <4C1F271F-A4CC-4DCA-BD6E-7220ECA3AD82@orthanc.ca>
+ <20140825223617.GB10994@mercury.ccil.org>
+Message-ID: <20140826004301.GQ7039@mcvoy.com>
+
+On Mon, Aug 25, 2014 at 06:36:17PM -0400, John Cowan wrote:
+> Lyndon Nerenberg scripsit:
+> 
+> > Then we should see about getting them to Warren for the archives.
+> > They are a part of "internet" history that should never be lost. (Along
+> > with the code for pathalias.)
+> 
+> Pathalias is distributed as part of Smail 3 in the pd/pathalias directory.
+
+Good old pathalias.  I've got a story for you there, Clem (he's Masscomp
+right?) might get a grin out of it.
+
+I was sys admin for 20 users on a Masscomp machine that had a 40MB disk.
+We were at the end of a dog leg in UUCP, ...!uwvax!geophys!geowhiz!$user,
+and could easily see the appeal in user at host.whatever.
+
+When I ran pathalias it generated a 2MB (or more) sized file.  Way too big
+for our disk.
+
+So I walked across the street to talk to my alg prof (Udi Manber, he was
+A9, ran search at google, he's a smart cookie, I was not).  He listened
+to the problem and quickly said "You've got time best cast and space
+worst case" and described how you would change the system to do a lookup
+for each host in turn (the furthest host returns the next closer host
+and so on).  That gets you space best case, time worst case.  I got it,
+I saw how to write that code, and I say thanks and head out the door.
+"Not so fast" says Udi.  "What would be really interesting is if you
+could approximate both space and time best case".  Which lead to about
+a 6 month (or more) programming effort on my part (it's a graph problem
+and a dynamic programming problem) and a paper for IEEE.
+
+The fun part about that project was that Udi was all theory and I was all
+practice.  I was reading the maps in and building the graph on a microvax
+with not a lot of ram, might have been 4MB, might have been less.  For
+some reason that escapes me I had to sort them and I used qsort() and it
+took overnight.  I went to Udi and told him about it and he asked what
+sort I was using and I said qsort().  "Oh, that explains it, you need to
+use a radix sort".  Stupid me slinks out to figure what a radix sort was,
+did so, implemented it, it got slower!  WTF, right?
+
+So I poked around, this was my first journey into performance debugging,
+vmstat was a useful tool then (and now).  I eventually discovered that
+the machine was swapping like crazy and I poked some more.  After much 
+poking I decided I was fragmented and it was malloc()s fault.  Wrote my
+own malloc that allocated 400K at a time and did all my strdup()s into
+there.  Sort time, with qsort, when from overnight to 20 minutes.  Go
+practice, eh?
+
+I like to think that while Udi taught me all about the theory (and he did,
+I flunked his class at least twice before I passed), I taught him about 
+practice.  VM != real memory for example.
+
+He's also the guy who watched me jump every time xclock chimed on the hour
+and asked why?  I told him it sounded exactly the same as the beep on my
+radar detector (I was a kid, I drove way too fast).  After that every time
+in chimed and I jumped he'd laugh and say "you're hacking too fast" :)
+
+--lm
+
+P.S.  Is Honeyman still around?  I haven't seen him in years, we met in
+person at usenix and he promptly dragged me outside to smoke a spliff.
+Fun guy, last I heard he was running a research lab in Michigan.  Oh, yeah.
+Googled, he's still there.
+
+
