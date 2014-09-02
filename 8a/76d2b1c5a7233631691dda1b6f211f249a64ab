@@ -1,0 +1,69 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Tue, 2 Sep 2014 15:57:58 -0400
+Subject: [TUHS] portal daemon (was Re: networking on unix before uucp)
+In-Reply-To: <20140902191508.GJ22809@arwen.poofy.goof.com>
+References: <CADxT5N4L0YXSB0uqWeb6w87KJF+=0Mc7Nhb=Q_g+j8Q8-bQ7kg@mail.gmail.com>
+ <CAEoi9W50tqYzWHjvvfYTyxg2q6iqdczpSsLdb_Vg7tNBj6FXMQ@mail.gmail.com>
+ <20140822155701.GB19006@mercury.ccil.org>
+ <20140902191508.GJ22809@arwen.poofy.goof.com>
+Message-ID: <CAC20D2PG5Uj6ZuSfdB-pLDhb3pGN7fAukVMS=SAK21sTXfWGZg@mail.gmail.com>
+
+Mumble -- I would say that BSD portals was more in response to an MIT idea
+that the Apollo guys (Jim Rees I believe) put in domain as the Apollo Typed
+File System.   At the time of the BSD, there was a lots of discussion going
+on about how to move things out the kernel and a number of techniques were
+considered -- Portals was one of them.
+
+
+The idea of /dev/mumble/some_other_mumble was kicking around early UNIX for
+a long time.   I think I first encountered it in the MIT Chaos code, but
+the Arpanet NCP code may have redated its use.   The idea was simple, the
+kernel's nami() function that was called by kernel open code (or any other
+call the had to walk a pathname), left the pointer to the next undecoded
+part of the path in the user's input buffer alone.   So a hack was put in
+the kernel that caused open to vector to needed helper code for the network
+to do the rest of the pathname to get the parameters.    The advantage of
+this of course is open returns a real file descriptor.
+
+BTW: One idea I had many years ago, and I remember talking to Dennis about
+it at a couple of USENIX was similar to Apollo's typed scheme.   As dmr put
+it to me at the time, UNIX has a typed file system with very few types.
+ The question was if we opened up the typing scheme to allow for arbitrary
+types, would you get more of mess or would the new feature be of an
+advantage.  I was not doing research at the time - I was employed at
+Masscomp and just getting a distributed FS was enough.  Since I did not
+have a good use for the hack for EFS, I never tried to implement it.  It
+was always on my "TODO" list.   Maybe when I retire and I can hack just for
+the fun of it, I can try it ;-)
+
+Clem
+
+
+On Tue, Sep 2, 2014 at 3:15 PM, Aaron J. Grier <agrier at poofygoof.com> wrote:
+
+> On Fri, Aug 22, 2014 at 11:57:01AM -0400, John Cowan wrote:
+> > #     filedes = open( "/dev/net/harv",2 );
+> > #     if( filedes < 0 )
+> > #        printf(" harvard is dead");
+> > #     else
+> > #        while( (nbytes=read(filedes,buf,80)) > 0 )
+> > #           write( 0,buf,nbytes );
+> >
+> > If only this code still worked on modern Unixes!  The socket API is
+> > fine, but there really was no need to break good old open, at least
+> > for client-side operations.  Plan 9 got it right here, as usual.
+>
+> was this the impetus behind mount_portal in 4.4BSD?  It's still
+> available in NetBSD, although I've never played with it myself.
+>
+> --
+>   Aaron J. Grier | "Not your ordinary poofy goof." | agrier at poofygoof.com
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140902/f96dccb7/attachment.html>
+
