@@ -1,0 +1,38 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Sat, 13 Sep 2014 07:53:49 -0400
+Subject: [TUHS] Etymology of bc
+Message-ID: <201409131153.s8DBrnj8030233@coolidge.cs.dartmouth.edu>
+
+> Speaking of using a pipe to an existing command, I originally mis-read the
+> code to think there was only _one_ process involved, and that it was buffering
+> its output into the pipe before doing the exec() itself - something like this:
+> 
+>         pipe(p);
+>         write_stuff(p[1]);
+>         close(0);
+>         dup(p[0]);
+>         close(p[0]);
+>         close(p[1]);
+>         execl("/bin/other", "other", arg, 0);
+> 
+> Which is kind of a hack, but... it does avoid using a second process, although
+> the amount of data that can be passed is limited. (IIRC, a pipe will hold at
+> most 8 blocks, at least on V6.) Did this hack ever get used in anything?
+
+I didn't notice anybody commenting on the fact that this hack doesn't
+work for the purpose--an interactive desk calculator. Running bc then
+dc serially defeats interactivity.
+
+The scheme of filling a pipe completely before emptying it is used
+in Rob Pike's plan9 editor, sam, to pipe text through some transforming
+process. Because the transformer (think sort) may not produce any
+output until it has read all its input, sam can't read the result
+back until it has finished stuffing the pipe.
+
+Of course sam has to create two pipes, not just one, and it happens
+that the initial writer and ultimate reader are the same. But the 
+basic idea is the same.
+
+Doug
+
+
