@@ -1,0 +1,52 @@
+From: drsalists@gmail.com (Dan Stromberg)
+Date: Wed, 24 Sep 2014 16:53:13 -0700
+Subject: [TUHS] where is ecvt?
+In-Reply-To: <1411587684.755368.171378613.58B0C23E@webmail.messagingengine.com>
+References: <CADxT5N6mDEeo=4hERK3AuTGh3+-owQnbpeZSp=bEPJVhjLA02Q@mail.gmail.com>
+ <1411587684.755368.171378613.58B0C23E@webmail.messagingengine.com>
+Message-ID: <CAGGBd_rChrUH30nSBOTXZgCwYdDhzpvak1EaFovQioXRupAptw@mail.gmail.com>
+
+On Wed, Sep 24, 2014 at 12:41 PM,  <random832 at fastmail.us> wrote:
+> On Wed, Sep 24, 2014, at 13:24, Mark Longridge wrote:
+> $ objdump -t libc.a
+>
+> ...
+> efgcvt.o:     file format elf64-x86-64
+>
+> SYMBOL TABLE:
+> ...
+> 00000000000000b0 g     F .text  000000000000001e ecvt
+> ...
+>
+> On a system without a tool like objdump, the next logical step would be
+> ar x.
+
+You can also use nm:
+
+                    case "`uname`" in
+                        IRIX*)
+                            nm -B "$libpath" | sed "s#^#$libpath:#"
+                            ;;
+                        SunOS|OSF1)
+                            # here we're munging Sun format around into linux
+                            # format
+                            nm -P "$libpath" | awk ' { print $3,$2,$1 } ' | \
+                                sed "s#^#$libpath:#"
+                            ;;
+                        Linux|DragonFly)
+                            nm -o "$libpath"
+                            ;;
+                        AIX)
+                            #AIX: .popen               T     0430424        14
+                            # -X bits specifies the bitwidth for the library
+                            # -p says don't sort - Much faster
+                            nm -X 32 -p -o "$libpath" | awk ' { print
+$3,$2,$1 } ' | \
+                                sed "s#^#$libpath:#"
+                            nm -X 64 -p -o "$libpath" | awk ' { print
+$3,$2,$1 } ' | \
+                                sed "s#^#$libpath:#"
+                            ;;
+                    esac
+
+
