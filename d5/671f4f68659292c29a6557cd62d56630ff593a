@@ -1,0 +1,56 @@
+From: fair@netbsd.org (Erik Fair)
+Date: Thu, 2 Oct 2014 21:02:31 -0700
+Subject: [TUHS] Unisoft V7 68k sources (reviving a Codata machine)
+In-Reply-To: <20141003024514.GA16961@www.oztivo.net>
+References: <20141003024514.GA16961@www.oztivo.net>
+Message-ID: <EFE26D04-7AC7-409F-80E4-ADE9970CEFFC@netbsd.org>
+
+I recently sent the following message to port-m68k at netbsd.org that relates to that period in time:
+
+
+
+Begin forwarded message:
+
+> From: Erik Fair <fair at netbsd.org>
+> Subject: DUAL Systems documentation
+> Date: February 22, 2014 at 02:12:17 PST
+> To: port-m68k at netbsd.org
+> 
+> For those of you of a historical or digital archeological bent: while googling for something else, I came across this URL:
+> 
+> http://www.hartetechnologies.com/manuals/DUAL/
+> 
+> which contains PDFs of a few manuals & a price list from DUAL Systems of Berkeley, CA. DUAL produced the very first mc68000-based UNIX system (V7 UNIX on the S-100 (IEEE-696) bus), starting in November of 1981. I worked there as a UNIX systems programmer (kernel hacker) as my first job out of U.C. Berkeley from March 1983 to May 1985.
+> 
+> Of particular interest to this group: the CPU/MMU board manual. Please note: the mc68000 could not demand-page (i.e. no virtual memory) because the CPU did not save enough state from a memory access fault to restart the faulted instruction, so UNIX was a swapping OS (whole process in RAM, whole process out to swap area on disk if not enough RAM is available for whatever else needed to run).
+> 
+> Motorola corrected the fault state save in the mc68010, which provided the ability to make a proper VM system ... except for the mc68451 MMU (yes, a discrete MMU chip, in a package every bit as big as the CPU) which had only 32 descriptor registers (translation table entries). Motorola's theory was that if you wanted more (as one might for a lots of smaller-sized pages), add more MMU chips to your CPU board. Unfortunately, that doesn't fly on a board size as small as allowed by the S-100 standard. They were working on a proper paged MMU (PMMU) chip to go along with the mc68020 (the first fully 32-bit (address & data) 68k family CPU), but it was very, very late (DUAL was moving onto VMEbus from S-100 for the mc68020).
+> 
+> An aside, before Motorola shipped the mc68010, I saw another solution to the faulted-instruction state save problem from MassComp: their CPU board had two mc68k CPUs on it, one running a cycle behind the other, so a page fault would stop them both, the missing page could be paged in (I think they designed their own MMU; long since forgotten), and then execution resumed on the second, following CPU which hadn't taken the memory-access fault. Throw hardware at the problem ...
+> 
+> 	faulting my way down memory lane,
+> 
+> 	Erik <fair at netbsd.org>
+> 	formerly {ihnp4,ucbvax,hplabs,decwrl,cbosgd,sun,nsc,apple,pyramid}!dual!fair
+
+
+UniSoft Systems was started by Jeff Schriebman at the behest of Dual to port V7 UNIX to Dual’s system; they were just a few blocks away from Dual in west Berkeley, on 6th Street, if memory serves.
+
+CoData was one of Dual’s competitors - I usually saw their gear at vendor shows (e.g. when /usr/group held its vendor show co-located with USENIX conferences). One of the problems at the time that bedeviled UniSoft was that every 68k-based Unix box had its own unique MMU because Motorola’s offerings in that space (as noted above) were … lacking. So UniSoft had to redo the kernel MMU code for every strange and wonderful MMU that each hardware vendor came up with. Pixel, Plexus, Fortune, Codata, Apple (yes, UniSoft did a port of Unix to the Lisa and the awful 5MB “profile” drive on a parallel port (!!)), ...
+
+I have at least two old Dual boxes in my garage that I keep for sentimental reasons, but I have no idea what’s on those disks, or if they’ll even spin up after so long. They’re ST-506/419 interface 5.25 inch “winchester” drives; a forerunner of a sort of the IBM PC’s IDE. I wrote the drivers for the Morrow Designs (“ThinkerToys”) S-100 controller as my first project for Dual in March/April 1983.
+
+Previously, Dual was using 8-inch Memorex hard drives controlled by a CompuPro (nee “Godbout Electronics”) controller whose interface standard I don’t recall. I’ll have to see if they can be fired up again, and see what’s on the hard drives. Dual was very particular about using big, heavy linear power supplies in its systems as a matter of reliability, over the (to their mind) squirrelly switching power supplies that many of our competitors were using.
+
+The other way to go to get Unix going on that old Codata box would be a port of NetBSD/m68k - it supports a wide array of mc68k systems:
+
+	http://www.netbsd.org/ports/#ports-by-cpu
+
+The trick would be writing the MMU code, and a booter that would work with whatever firmware Codata used back in the day. I had to work on Dual’s boot firmware from time to time, and I recall it being fairly simple (“find /unix and see if it’s a.out, load, and jump”), and usually the trick is to make a secondary booter that the system firmware will load (in whatever executable format the firmware will recognize) to then parse a modern ELF kernel from FFSv2.
+
+NetBSD continues to support a whole lot of pretty old hardware - we believe in portability.
+
+	Erik <fair at netbsd.org>
+
+
+
