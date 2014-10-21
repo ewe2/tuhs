@@ -1,0 +1,70 @@
+From: M.Engel@leedsbeckett.ac.uk (Engel, Michael)
+Date: Tue, 21 Oct 2014 11:23:33 +0000
+Subject: [TUHS] Codata progress update
+Message-ID: <5F320B50-8490-4B3C-B774-737B017603C1@leedsbeckett.ac.uk>
+
+
+Hi,
+
+it's time for an update on our progress with the Codata machine.
+
+The serial interface problem was not caused by a defective transceiver
+chip (which I found out after buying a couple…), but by an extreme 
+amount of noise on the (quite long and old) serial cable we used to
+connect the machine to the PC acting as a terminal. Using a USB
+to serial adapter and a short 9-to-25-pin adapter cable solved this
+problem. Well, try the obvious things first (using a scope helped).
+The second CPU board also works, so we could build a complete
+second machine with our spare boards if we have another multibus
+backplane...
+
+We could get the machine up and booting from the first 8" hard disk 
+last Friday. Luckily, an old version of Kermit was installed and we 
+were able to transmit a large part of the root file system from single
+user more - especially the Unix kernels, driver sources, the build 
+directories for the kernel, include files and the build directory for 
+the standalone boot floppies. All with a speed of 500 bytes/s (9600
+bps serial line minus kermit overhead). cksum was used to confirm
+that the files were transferred correctly (this was the only checksumming 
+tool that was available on the Codata, I didn't want to mount the fs
+read-write and compile software before completing the backup).
+
+I had to shut the machine down on Friday evening (security policy
+that kicks you out of the building here), since I didn't want to leave
+it running unattended over the weekend. Unfortunately, the disk 
+seems to have developed a bad sector in the autoconfiguration 
+region (the system seems to be quite modern in this respect). 
+The kernel can be booted successfully, but it refuses to mount the 
+root fs, complaining about a timeout. There seems to be a complete 
+root file system on the second disk (the firmware is able to read files 
+from the disk, but it doesn't offer a feature to list directories…), but the 
+kernel on the second disk also is hardwired to mount its root fs from the 
+first disk. Trying to connect disk 2 as disk 1 resulted in a non-booting 
+system...
+
+The good news is that both root file systems seem to be reasonably 
+intact so far, I can read text files from the boot monitor. So our next 
+step to backup the rest of the system is to build an emergency boot 
+floppy. At the moment, however, the Codata refuses to talk to its 
+floppy drive. The machine has a Multibus FD controller with its own 
+8085 CPU and a uPD765, connected to a Toshiba 5.25" DD floppy 
+drive (720 kB, 80 tracks, 9 sectors of 512 bytes), the model identifier
+is DDF5-30C-34I (printed on the motor assembly). I couldn't find
+any information on that drive online, so I hesitate to simply 
+connect a more modern drive due to possible pinout differences.
+
+I also found out a bit more on the SMD disk controller. It seems to
+be an OEM variant of the Micro Computer Technology MCT-4300
+controller. The only place I could find this mentioned was in a 
+catalog of Multibus boards on archive.org. It has its own driver 
+(cd.c), there is a separate one for the Interphase 2180 and an 
+additional one for the Codata MFM controller.
+
+So, if you happen to have any information on the Codata floppy
+controller, the Toshiba floppy or the MCT-4300 SMD disk controller,
+I would be happy to hear from you...
+
+-- Michael
+
+
+
