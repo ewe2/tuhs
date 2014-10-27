@@ -1,0 +1,60 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Mon, 27 Oct 2014 13:03:15 +0000
+Subject: [TUHS] speaking of early C compilers
+In-Reply-To: <0F0B9BFC06289346B88512B91E55670D2F86@EXCHANGE>
+References: <0F0B9BFC06289346B88512B91E55670D2F86@EXCHANGE>
+Message-ID: <255EF9E2-2BA3-4928-8664-7C7B08FB48D4@coraid.com>
+
+Early C allowed you to use the '->' operator with any scaler.  See early C reference manuals.  This is the reason there is one operator to access a member of a structure using a pointer and another, '.', to access a member in a static structure.  The B language had no types, everything was a word, and dmr evolved C from B.  At first it made sense to use the '->' operator to mean add a constant to whatever is on the left and use as an l-value.  
+
+You will also find that member names share a single name space.   The simple symbol table had an bit in each entry to delineate members from normal variables.  You could only use the same member name in two different structs if the members had the same offsets.  In other words, it was legal to add a member name to the symbol table that was already there if the value of the symbol was the same as the existing entry. 
+
+Dennis' compilers kept some backward compatibility even after the language evolved away from them. 
+
+This really shows the value of evolving software instead of thinking one has all the answers going into development.  If one follows the development of C one sees the insights learned as they went.  The study of these early Unix systems have a great deal to teach that will be valuable in the post Moore's law age.  Much of the worlds software will need to a re-evolution. 
+
+By the way, did you notice the compiler overwrites itself?   We used to have to work in tiny spaces.  Four megabytes was four million dollars. 
+
+Sent from my iPad
+
+> On Oct 27, 2014, at 6:42 AM, Jason Stevens <jsteve at superglobalmegacorp.com> wrote:
+> 
+> has anyone ever tried to compile any of the old C compilers with a 'modern'
+> C compiler?
+> 
+> I tried a few from the 80's (Microsoft/Borland) and there is a bunch of
+> weird stuff where integers suddenly become structs, structures reference
+> fields that aren't in that struct,   
+> 
+> c01.c
+>        register int t1;
+> ....
+>                t1->type = UNSIGN;
+> 
+> 
+> And my favorite which is closing a bunch of file handles for the heck of it,
+> and redirecting stdin/out/err from within the program instead of just
+> opening the file and using fread/fwrite.. 
+> 
+> c00.c
+>    if (freopen(argv[2], "w", stdout)==NULL ||
+> (sbufp=fopen(argv[3],"w"))==NULL)
+> 
+> 
+> How did any of this compile?  How did this stuff run without clobbering
+> each-other?
+> 
+> I don't know why but I started to look at this stuff with some half hearted
+> attempt at getting Apout running on Windows.  Naturally there is no fork, so
+> when a child process dies, the whole thing crashes out.  I guess I could
+> simulate a fork with threads and containing all the cpu variables to a
+> structure for each thread, but that sounds like a lot of work for a limited
+> audience.
+> 
+> But there really is some weird stuff in v7's c compiler.
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
