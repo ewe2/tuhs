@@ -1,0 +1,96 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Mon, 27 Oct 2014 12:52:56 -0400
+Subject: [TUHS] speaking of early C compilers
+In-Reply-To: <20141027144833.536A618C0A5@mercury.lcs.mit.edu>
+References: <20141027144833.536A618C0A5@mercury.lcs.mit.edu>
+Message-ID: <CAEoi9W6Qd6=M=u0G8iXRFZbqG9YesVq-hFM2+xLtpZH6Z0QTBw@mail.gmail.com>
+
+An interesting digression....  A few years ago, the architects of MIT's
+6.828 course ("Operating Systems Engineering") were unsatisfied with the
+current stable of systems for teaching, so they did a re-implementation of
+6th Edition in modern ANSI C (with a couple of GNU extensions for things
+like assigning names to registers) targeting a multiprocessor x86.  It's an
+interesting, accessible piece of work; a modern take on a classic.
+http://pdos.csail.mit.edu/6.828/2014/xv6.html
+
+        - Dan C.
+
+On Mon, Oct 27, 2014 at 10:48 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Jason Stevens
+>
+>     > has anyone ever tried to compile any of the old C compilers with a
+>     > 'modern' C compiler?
+>     > ...
+>     > How did any of this compile? How did this stuff run without
+> clobbering
+>     > each-other?
+>
+> As Ron Natalie said, the early kernels are absolutely littered with all
+> sorts
+> of stuff that, by today's standards, are totally unacceptable. Using a
+> variable declared as an int as a pointer, using a variable declared as a
+> 'foo' pointer as a 'bar' pointer, yadda-yadda.
+>
+> I ran (tripped, actually :-) across several of these while trying to get my
+> pipe-splicing code to work. (I used Version 6 since i) I am _totally_
+> familiar with it, and ii) it's what I had running.)
+>
+> For example, I tried to be all nice and modern and declared my pointer
+> variables to be the correct type. The problem is that Unix generated unique
+> ID's to sleep on with code like "sleep(p+1, PPIPE)", and the value
+> generated
+> by "p+1" depends on what type "p" is declared as - and if you look in
+> pipe.c,
+> you'll see it's often declared as an int pointer. So when _I_ wrote
+> "sleep((p + 1), PPIPE)", with "p" declared as a "stuct file pointer", I got
+> the wrong number.
+>
+> I can only speculate as to why they wrote code like this. I think part of
+> it
+> is, as Brantley Coile points out, historical artifacts due to the evolution
+> of C from (originally) BCPL. That may have gotten them used to writing code
+> in a certain way - I don't know. I also expect the modern mindset (of being
+> really strict about types, and formal about coverting data from one to
+> another) was still evolving back then - partly because they often didn't
+> _have_ the tools (e.g. casts) to do it right. Another possibility is that
+> they were using line editors, and maintaining more extensive source is a
+> pain
+> with an editor like that. Why write "struct file *p" wnen you can just
+> write
+> "*p"? And of course everyone was so space-concious back then, with those
+> tiny
+> disks (an RK05 pack is, after all, only 2.5MB - only slightly larger than a
+> 3.5" floppy!) every byte counted.
+>
+>
+> I have to say, though, that it's really kind of jarring to read this stuff.
+>
+> I have so much respect for their overall structure (the way the kernel is
+> broken down into sub-systems, and the sub-systems into routines), how they
+> managed to get a very powerful (by anyone's standards, even today's) OS
+> into
+> such a small amount of code... And the _logic_ of any given routine is
+> usually quite nice, too: clear and efficient. And I love their commenting
+> style - no cluttering up the code with comments unless there's something
+> that
+> really needs elucidation, just a short header to say, at a high level, what
+> the routine does (and sometimes how and why).
+>
+> So when I see these funky declarations (e.g. "int *p" for something that's
+> _only_ going to be used to point to a "struct file"), I just cringe - even
+> though I sort of understand (see above) why it's like that. It's probably
+> the
+> thing I would most change, if I could.
+>
+>         Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20141027/c06fe681/attachment.html>
+
