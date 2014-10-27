@@ -1,0 +1,46 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Mon, 27 Oct 2014 10:09:21 -0700
+Subject: [TUHS] speaking of early C compilers
+In-Reply-To: <0F0B9BFC06289346B88512B91E55670D2F86@EXCHANGE>
+References: <0F0B9BFC06289346B88512B91E55670D2F86@EXCHANGE>
+Message-ID: <2c9c14d6fd7d2e98ae0bc98d7f593ff9.squirrel@webmail.yaccman.com>
+
+Casts were invented as part of the port of Unix to the 32-bit Interdata. 
+The early Unix system manuals actually printed the structure declarations
+for things like directory inodes in the manual -- there were no header
+files.  This meant a massive amount of work when we wanted to use
+different structures for the 32-bit system.  To make matters worse, many
+system calls returned -1 as an error indication, and on the Interdata
+loading an integer from location -1 gave an unrecoverable machine fault
+(!).  As a final blow, the lack of type checking between pointers and
+structure members made it very hard to catch old code at compile time.
+
+The cast syntax, arguably one of the ickiest parts of C syntax, was
+invented in desperation -- we needed the feature, and there was no good
+syntax proposal.  I blush to admit that the one Dennis chose is one that I
+suggested, largely because (unlike some of the others) it was easy to
+implement in Yacc.
+
+We hacked a version of Lint to force structures whose physical declaration
+locations were different to appear to be different structures, even if
+they were identical.  Then, as header files were introduced, we could find
+all the user-level structure declarations that were copied from the man
+pages and fix them.  This was extremely valuable, and allowed a summer
+intern from Princeton to convert most of the user-level programs to V7 in
+a summer.
+
+As an aside, one of the hairiest pieces of code I ever wrote was the part
+of PCC that handled structure declarations--it had to understand the "old
+style anything goes" syntax, but if the compiler decided that there was
+some attempt to use the new semantics, it changed modes and retroactively
+complained about possible type mismatches.  The code was festooned with
+assertions, most of which were very short (memory being precious) -- one
+or two words like "junk" or "garbage".  When compiling the V7 file system,
+Ken managed to totally confound my code by declaring a structure that had
+an array whose dimension was computed using a sizeof of another structure
+declared inside of the sizeof.  He came to me one afternoon with a strange
+expression on his face and asked "Hey Steve, what is a gummy
+structure?"...
+
+
+
