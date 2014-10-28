@@ -1,0 +1,45 @@
+From: ron@ronnatalie.com (Ronald Natalie)
+Date: Tue, 28 Oct 2014 08:52:47 -0400
+Subject: [TUHS] speaking of early C compilers
+In-Reply-To: <0F0B9BFC06289346B88512B91E55670D2F8A@EXCHANGE>
+References: <0F0B9BFC06289346B88512B91E55670D2F8A@EXCHANGE>
+Message-ID: <BBA0C370-422D-4ED4-8C12-F92F6154FB9B@ronnatalie.com>
+
+
+> On Oct 27, 2014, at 9:55 PM, Jason Stevens <jsteve at superglobalmegacorp.com> wrote:
+> 
+> Wow BSD on a supercomputer!  That sounds pretty cool! 
+> 
+> http://web.ornl.gov/info/reports/1986/3445600639931.pdf
+> 
+> From here it mentions it could scale to 16 process execution modules
+> (CPU's?) 
+> 
+> while here http://ftp.arl.mil/mike/comphist/hist.html it mentions 4 PEMs
+> which each could run 8 processes.
+> 
+> It still looks like an amazing machine.
+
+The US Army (notably the Ballistic Research Laboratory) contracted to have this computer built to solve fluid dynamics problems.    Originally, it was going to be an analog computer, then a hybrid, then Burton Smith came up with this idea for a high power multiple-instruction, multiple data stream parallel processor.   The BRL one had four PEMs each could run 8 processes in parallel but it could hardware schedule up to 256 processes.    Each data memory location had in addition to the 64 data bits semaphore bits called the "full/empty bits."   Instructions were such like "STORE AND SET FULL" and "WAIT EMPTY AND LOAD" so the hardware would suspend your thread (called processes in the hardware) until something else twiddled the bit.
+
+Mike Muuss had pretty much ran the JHU EE computer and was my mentor all while I was there.   My junion year he had taken a job at BRL.   I worked for him as a summer intern and then consultant while Bob Jesse and I ran the JHU EE computer our senior years.   I spent a year in the defense industry when Mike said "I've got this great job for you."
+
+Apparently nobody gave any concern to software on the HEP, and of course Mike's answer is "Let's put UNIX on it!"    He'd done this in the past with some graphics systems (11/34 based with vector processors attached) that had been delivered as remotes for the central CDC machine that never worked.    He'd also upgraded the ANTS (University of Illinois ArpaNet Terminal Server) from its dedicated software to UNIX when long leaders came out on the Arpanet making the ANTS incompatible.
+
+Mike, Robert Miles, and I spent weeks out at the Denelcor facility developing our prototype UNIX at night (amusingly sometimes the Denelcor employees would come in and hit enter on their terminals to find our software still running... HEP, TWO, THREE, FOUR... was the login prompt...we were working for the Army after all).
+Amusingly our machine was set up in a big room with tape on the floor showing where the building pillar at BRL was located.     You can see that tape in some of the publicity shots around.    Back at BRL there was tape on the floor where the HEP cabinets went around the real building pillar.
+
+First thing Mike did was adapt the portable C compiler to generate code for the thing.    Bob wrote the assembler I believe and me the loader.    I also ported the F77 front end to PCC over (for the benefit of our eventual scientist users of the thing).      Next, I set up UNIX on the PDP-11 front end the thing had.    Mike then wrote the software that worked the "low speed bus" that you used to boot the thing up (more on this later) and the configuration of the switch network that interconnected all the PEMs and memory, etc... for high speed memory access.
+
+Mike did the process scheduling part of the kernel while I delved into the I/O issues (my specialty at the time).    Bob aided by Doug Kingston took care of porting over most of the user mode code.    Once the thing was limping along we came to a startling discovery.   The thing, which had 32 UNIBUSes tied into it's I/O system, could only start about 10 ios a second.   That's not going to work.    I sat down at the Aberdeen Golden Corral steakhouse (our common dinner haunt) with Burton Smith and we designed a new I/O system, literally on napkins.   We built it out of spare parts, a spare memory switch node and I contributed a PDP-11/34 I had laying around for a control processor.    Now instead of feeding I/O to the front end which then talked tot he I/O system unibusses all over the low speed bus (aptly named), The PDP-11/34 running my "Little Operating System" that I used for the BRL Gateways listed to the high speed active switch for data and mirrored it to the slaved unibuses.    Essentially, the PEMs could now run the actual UNIBUS device drivers with just a slight tweak to bounce the CSR's off the PDP-11/34 with what appeared to be just a memory access.
+
+At this point the Army had woken up to the fact that the Air Force had supercomputers and even the Navy had supercomputers, and darn it they needed supercomputers.    As a result of the fact that we were a scientific organization with heavy computer expertise, we were slated to get the first two.   The first being an X-MP which the Army used emergency authority to grab the next one out of production (which I believe was slated to go to Apple).     Meanwhile at BRL we had turned the HEP over to production use but by then it was getting a little long in the tooth speedwise.   Despite being built out of all discrete 10800 ECL chips, the more traditional processors were beating on the door.    Denelcor was well on it's way to going out of business at this point.    The one big job we ran on this was Mike's raytraced movie  "a bullet's eye view of a tank."    The HEP allowed us 60:1 compute time on the RT (Took one minute to make 1 second of movie....which was pretty darned good back then scares me when I watch video games these days).    Shortly after we did that, they shut the thing down and replaced it with the X-MP.
+
+There weren't that many HEPs built.   In addition to ours, the University of Georgia got a 2 PEM one in exchange Georgia was to develop the software for the thing.     Messerschmidt got one, I never heard what they did with it.   The NSA got one on lease I believe and after Denelcor went out of business, I hear they shipped the whole thing back and dumped it on the loading dock of whatever hapless person happened to be occupying the last known address of Denelcor.   I've still got one of the DENELCOR H1000 name plates that were supposed to be affixed to thing but never got installed.
+
+As for the X-MP, some of you may remember the discussions that were gone around 1985 about whether a hacker with a Cray could break the Unix crypt routine.   I put in my proposal and essentially was granted unlimited CPU time on the X-MP to try to vectorize the crypt routine and perform an analysis (I was heavy into computer security by then).   My conclusion was that the Cray vector stuff wasn't well suited to breaking DES...a faster version of the HEP would have been ideal.   Somewhere I do have a picture of me peering out of the center of the X-MP CPU.
+
+One of the last things I did at BRL was sit on the SSB to buy the Cray 2.    I put my signature to a $25 MILLION dollar procurement.   The biggest single year purchase I made in my Reagan years in the government (I had bought several smaller UNIX machines in previous years at around $2MM a piece).
+
+
+
