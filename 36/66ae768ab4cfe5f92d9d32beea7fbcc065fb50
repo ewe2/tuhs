@@ -1,0 +1,85 @@
+From: jsteve@superglobalmegacorp.com (Jason Stevens)
+Date: Tue, 28 Oct 2014 09:55:00 +0800
+Subject: [TUHS] speaking of early C compilers
+Message-ID: <0F0B9BFC06289346B88512B91E55670D2F8A@EXCHANGE>
+
+Wow BSD on a supercomputer!  That sounds pretty cool! 
+
+http://web.ornl.gov/info/reports/1986/3445600639931.pdf
+
+From here it mentions it could scale to 16 process execution modules
+(CPU's?) 
+
+while here http://ftp.arl.mil/mike/comphist/hist.html it mentions 4 PEMs
+which each could run 8 processes.
+
+It still looks like an amazing machine.
+
+-----Original Message-----
+From: Ronald Natalie
+To: Noel Chiappa
+Cc: tuhs at minnie.tuhs.org
+Sent: 10/27/14 11:09 PM
+Subject: Re: [TUHS] speaking of early C compilers
+
+We thought the kernels got cleaned up a lot by the time we got to the
+BSD releases.    We were wrong.
+When porting our variant of the 4 BSD to the Denelcor HEP supercomputer
+we found a rather amusing failure.
+
+The HEP was a 64 bit word machine but it had partial words of 16 and 32
+bits.   The way it handled these was to encode the word size in the
+lower bits of the address (since the bottom three weren't used in word
+addressing anyhow).    If the bottom three were zero, then it was the
+full word.  If it was 2 or 6, it was the left or right half word, and
+1,3, 5, and 7 yielded the four quarter words.  (Byte operations used
+different instructions so they directly addressed the memory).
+
+Now Mike Muuss who did the C compiler port made sure that all the casts
+did the right thing.   If you cast "int *" to "short *" it would tweak
+the low order bits to make things work.    However the BSD kernel in
+several places did what I call conversion by union:  essentially this:
+
+union carbide {
+     char*  c;
+     short* s;
+     int*     i;
+} u;
+
+u.s  = ...some valid short* ...
+int* ip = u.i;
+
+Note the compiler has no way of telling that you are storing and
+retrieving through different union members and hence the low order bits
+ended up reflecting the wrong word size and this led to some flamboyant
+failures.     I then spent a week running around the kernel making these
+void* and fixing up all the access points to properly cast the accesses
+to it.
+
+The other amusing thing was what to call the data types.     Since this
+was a word machine, there was a real predisposition to call the 64 bit
+sized thing "int" but that meant we needed another typename for the 32
+bit thing (since we decided to leave short for the 16 bit integer).
+I lobbied hard for "medium" but we ended up using int32.   Of course,
+this is long before the C standards ended up reserving the _ prefix for
+the implementation.
+
+The afore mentioned fact that all the structure members shared the same
+namespace in the original implementation is why the practice of using
+letter prefixes on them (like b_flags and b_next etc... rather than just
+flags or next) that persisted long after the C compiler got this issue
+resolved.
+
+Frankly, I really wish they'd have fixed arrays in C to be properly
+functioning types at the same time they fixed structs to be proper types
+as well.     Around the time of the typesetter or V7 releases we could
+assign and return structs but arrays still had the silly "devolve into
+pointers" behavior that persists unto this day and still causes problems
+among the newbies.
+
+_______________________________________________
+TUHS mailing list
+TUHS at minnie.tuhs.org
+https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
