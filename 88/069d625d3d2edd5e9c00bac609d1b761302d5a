@@ -1,0 +1,71 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 21 Nov 2014 10:37:53 -0500 (EST)
+Subject: [TUHS] 2.10
+Message-ID: <20141121153753.C2EB818C153@mercury.lcs.mit.edu>
+
+    > From: Clem Cole <clemc at ccc.com>
+
+    > an old Able "Enable" board which will allow you to put 4Megs of memory
+    > in an 40 class processor (you get a cache plus a new memory MAP with 22
+    > bits of address like the 45 class processors).
+
+But it doesn't add I/D to a machine without it, though, right? (I tried
+looking for Enable documentation online, couldn't find any. Does anyone know
+of any?)
+
+I recall at MIT we had a board we added to our 11/45 which added a cache, and
+the ability to have more than 256KB of memory, but I am unable to remember
+much more about it (e.g. who made it, or what it was called) - it must have
+been one of these.
+
+I recall we had to set up the various memory maps inside the CPU to
+permanently point to various ranges of UNIBUS address space (so that, e.g.
+User I space was assigned 400000-577777), and then the memory map inside the
+board mapped those out to the full 4MB space; the code changes were (IIRC)
+restricted to m45.s; for the rest of the code, we just redefined UISA0 to
+point to the one on the added board, etc. And the board had a UNIBUS map to
+allow UNIBUS devices access to all of real memory, just like on an 11/70.
+
+
+    > From: Jacob Ritorto <jacob.ritorto at gmail.com>
+
+    > So does that single board contain the memory and everything, or is this
+    > a backplane mod/special memory kind of setup?
+
+I honestly don't recall much about how the board we had at MIT worked, but i)
+the memory was not on the board itself, and ii) there had to be some kind of
+special arrangements for the memory, since the stock UNIBUS only has 18 bits
+of address space. IIRC, the thing we had could use standard Extended UNIBUS
+memory cards.
+
+I don't recall how the mapping board got access to the memory - whether the
+whole works came with a small custom backplane which one stuck between the
+CPU and the rest of the system, and into which the new board and the EUB
+memory got plugged, or what. I had _thought_ it somehow used the FastBUS
+provision in the 11/45 backplane for high-speed memory (since with the board
+in, the machine had a basic instruction time of 300nsec if you hit the cache,
+just like an 11/70), and plugged in there somewhere, but maybe not, since
+apparently this board you have is for a /34? Or maybe there were two
+different models, one for the /45 and one for the /34?
+
+    > With the enable34 board, do I have some hope of getting 2.11bsd on this
+    > one?
+
+Since I doubt it adds I/D to machines that don't already have it, I would
+guess no. Unless somehow one can use overlays, etc, to fit 2.11 into 56KB of
+address space (note, not 'memory').
+
+    > I do have an 11/73 I'm working on that could run that build much more
+    > easily and appropriately..
+
+That's where I'd go.
+
+I do have that MIT V6 Unix with TCP/IP, where the TCP is almost entirely in
+user space (only incoming packet demux, etc is in the kernel), and I have
+found backup tapes for it, which are off at an old tape specialist being
+read, and the interim reports on readability are good, but until that
+happens, I'm not sure we'll be seeing TCP/IP on non-split-I/D machines.
+
+	Noel
+
+
