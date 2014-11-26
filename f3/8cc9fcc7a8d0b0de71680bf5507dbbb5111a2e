@@ -1,0 +1,72 @@
+From: fair-tuhs@netbsd.org (Erik E. Fair)
+Date: Tue, 25 Nov 2014 22:28:49 -0800
+Subject: [TUHS] BerkNet
+In-Reply-To: <alpine.GSO.2.03.1411210106100.646@gewt.net>
+References: <CAC20D2PJBmcqtOYcnMgMwkpUCBfoPCjoPrU2ZnSQMea+DR001A@mail.gmail.com>
+Message-ID: <14353.1416983329@cesium.clock.org>
+
+	Date: Fri, 21 Nov 2014 01:07:59 -0500 (EST)
+	From: Cory Smelosky <b4 at gewt.net>
+
+	I take it you actually understand BERKNET's addressing then? I could 
+	never figure it out!
+
+BerkNET was its own thing: it was effectively a store & forward batch/file
+based networking system which could handle E-mail, print jobs, and remote
+execution of commands for your account on another machine, if you sent the
+password to the account along. It's somewhat similar to UUCP, actually. Eric
+Schmidt (of Sun, Novell, & Google) wrote the code as a UCB grad student,
+because (as I heard it) the Berkeley Computer Center wanted to be paid money
+every time an operator had to hang a magtape on a tape drive, and the CS
+department was tired of being bled to move small files around.
+
+BerkNet used one single ASCII character designation per machine, originally
+just 26 allowed, and later extended to numerals for a total of 36 (before
+Ethernet & TCP/IP obsoleted it). The routing table for BerkNet was a
+statically-compiled table in every instance of its primary daemon, and if the
+network topology changed sufficiently, each daemon had to be modified and
+recompiled. No redundancy allowed in the network, if I recall correctly.
+
+Pretty slow convergence for changes to the routing table.
+
+Longer names were also allowed as aliases for the single letter, and that's
+what was sent to the rest of the world in E-mail addresses, e.g.
+cory:cc-54 at berkeley (Computer Club account #54, on the Cory Hall PDP-11/70;
+I think Cory's letter was "y") was my first ARPANET-reachable E-mail address.
+There might be some instances of that in the HUMAN-NETS or SF-LOVERS archives
+from 1981. I suspect that BerkNet's colon separator for host:file was how
+the rcp command got that syntax, and probably how ssh inherited it.
+
+Google turned up the following: http://typewritten.org/Articles/berk-net.html
+
+Being RS-232 serial-based, the interrupt loading was horrific ... so they
+restricted the bandwidth to 1200 baud (plus, there were some rather long RS-232
+cable runs between buildings), unless you used a serial interface card that
+had some input buffering & DMA I/O like the DH-11. The DZ-11 was
+contraindicated. To further lower overhead, there's even a TTY line discipline
+for BerkNet, so you don't wake up the daemon until a full packet arrives, even
+though the TTY interface is set to "raw" mode.
+
+I was for a time a system administrator for the "x" machine at UCB: the Onyx
+Z8002 installed for the undergrads in the basement of Evans Hall (room B50).
+That's also the machine on which "B news" was written by Matt Glickman.
+
+Later, I ran a small BerkNet (before we got Ethernet) at Dual Systems in
+Berkeley, between the Dual 83/80 mc68000-based S-100 systems in the various
+departments (engineering, sales, manufacturing/test), before we got an S-100
+Ethernet card working and ran thick Ethernet. We were able to run it at 19,200
+baud because Dual made some really sweet, 256-byte input buffer, DMA I/O,
+4-port serial cards: the SIO-4/DMA, based around the Zilog z8530 DUART.
+
+I insisted that we wait for ARP to be done before we deployed Ethernet &
+TCP/IP, because evil old hack of grabbing a Class A IP network number,
+pretending that the first three MAC address bytes were always the same (after
+all, everyone always uses Ethernet interfaces from the exact same manufacturer
+in every host on a given LAN, right?) and mapping the last three MAC bytes
+into the host part of the Class A wasn't going to fly in the real world.
+
+The hacks we used to do to make these turkeys fly ...
+
+	Erik <fair at netbsd.org>
+
+
