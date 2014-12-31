@@ -1,0 +1,91 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 01 Jan 2015 00:52:42 +0100
+Subject: [TUHS] I swear! I rtfm'ed
+In-Reply-To: <mailman.116.1420056874.3354.tuhs@minnie.tuhs.org>
+References: <mailman.116.1420056874.3354.tuhs@minnie.tuhs.org>
+Message-ID: <54A48C4A.90307@update.uu.se>
+
+On 2014-12-31 21:14, Clem Cole<clemc at ccc.com> wrote:
+>
+> Jake - you have lots of help from others and using curses(3) is definitely
+> the right way to program.
+>
+> But to answer your specific question about printf(string), according to
+> Chapter 3 (Programmer's Info) of my old VT-100 user's guide, I think what
+> is you are doing wrong is that "\033c" is not the ANSI clear to end of
+> screen command.
+
+Right...
+
+> When I saw your message on my iPhone last night, the cache said - wait that
+> can't be correct.   But I could not remember why.   So I had to wait until
+> I got back home today to look in my basement.
+>
+> As I suspected, it's not an ANSI sequence.  So are you running in VT-100
+> (ANSI) mode or VT52 mode?  I ask because it is close to the VT52 cursor
+> right command which is actually:  "\033C"  but I do not remember is case
+> mattered.
+
+Case do matter.
+
+> In VT52 mode you need to send the terminal:  "\033H\033J" to clear the
+> screen.
+>
+> In ANSI mode, it becomes:  "\033[1;1\033[0J"
+
+Shorter form: "\033[H\033[J"
+
+> A few things to remember:
+> 1.) Clear takes the current cursor position and clears from there to end of
+> X (where X depends on mode, and type of clear).  So you need to move the
+> cursor to home position (aka 1,1).
+
+Not really. It's way more advanced than that.
+
+If we start with the generic clear screen, it is CSI Pn J
+
+Where CSI can be expressed as ESC [ (or "\033[" in the same parlance as 
+above.)
+
+Pn, then is an argument to the function, while J is the actual function 
+(clear screen in this case).
+
+Now, Pn can cause many things:
+
+0	Clear from cursor to end of screen
+1	Clear from cursor to end of screen
+2	Clear from beginning of screen to cursor
+3	Clear whole screen
+
+If no argument is given, the default is 0.
+
+> 2.) VT-100's did not implement the full ANSI spec like Ann Arbor, Heathkit,
+> Wyse etc.  So there are a number of things that those terminals did
+> better.  A really good reason to you curses(3) because all the knowledge is
+> keep in the termcap and as a programmer you don't need to worry about it.
+
+Probably true. However, I'm not sure Ann Arbor or Heathkit did much 
+better. As far as I can remember, they were always more "weird", but I 
+might just be confused. However, curses(3) is definitely a good way of 
+not having to care about different terminal oddities.
+
+> 3.) I saw sites were VT52 mode was sometimes preferred because it was good
+> enough for most editing, and needed fewer chars to do manipulation.  On
+> slow serial lines, this sometimes was helpful.  That said, give me an AAA
+> any day.  Like others, I still miss that terminal.:-)
+
+Yeah, the VT52 was simpler, and had shorter control strings. But of 
+course, with the additional limitations that came with that.
+
+Personally, I'd give an AAA or a Heathkit away if one was dropped on me. 
+A VT100 I would keep. :-)
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
