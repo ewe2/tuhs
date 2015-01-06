@@ -1,0 +1,40 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Wed, 07 Jan 2015 00:14:00 +0100
+Subject: [TUHS] pdp11 UNIX memory allocation
+In-Reply-To: <50E11A72-348F-4391-B444-33DD1B4ED1CC@ronnatalie.com>
+References: <mailman.149.1420581544.3354.tuhs@minnie.tuhs.org>
+ <54AC5F94.3080401@update.uu.se>
+ <50E11A72-348F-4391-B444-33DD1B4ED1CC@ronnatalie.com>
+Message-ID: <54AC6C38.8070904@update.uu.se>
+
+On 2015-01-06 23:36, Ronald Natalie wrote:
+> Another quaint bit of history was when we made the jump to actually running the kernel in split-I/D mode.    My good friend Joe Pistritto wrote the JHU boot loader for that.   The 512-byte boot loader that was the standard UNIX one was used to load Joe’s split I/D booter.   It had a better support of the UNIX file system, but the question was how do you get from a non-split I/D program into the split I/D program.    Joe’s solution was rather clever.   He put an instruction that stored the processor status word with the new kernel mode at the top of the boot loader’s address space.    As he did the store the PC rolled over and now it was running at the new mode at location zero.
+
+??? Are you sure you remember that right?
+The change from non split I/D to split I/D is not in the processor 
+status word. Also, the last address of memory, before you enable the 
+MMU, is actually the PSW. You can't have code there.
+
+> Years later I found that others had solved the problem by just setting up the kernel registers and executing a trap which switched the modes.    I always thought Joe’s solution was more elegant.   The kernel started the same way any other UNIX program would start.
+
+I'm probably missing a whole bunch of detail here, as I'm not fully 
+following what was done.
+
+Also, I fail to even spot the problem. Enabling split I/D space is just 
+a bit in the MMU, but even after, you can have the same memory pages in 
+both page tables, in essence making it a noop. Of course, being able to 
+have data outside your code means you can have so much more code, in 
+addition to more data, that you'd just would want to keep them split.
+But that means just setting up the two page tables appropriately, load 
+the memory as needed, and then enable the MMU and the split I/D, and 
+you're done.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
