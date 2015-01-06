@@ -1,0 +1,82 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Tue, 6 Jan 2015 12:53:27 -0500
+Subject: [TUHS] termcap vs terminfo
+In-Reply-To: <54AC1C78.6090007@update.uu.se>
+References: <mailman.143.1420561935.3354.tuhs@minnie.tuhs.org>
+ <54AC127A.5050508@update.uu.se>
+ <CAEoi9W7Ke_AV8PjQ=i0kLK3PFUuXQBsFnR3a4A2hjqNTr88tJw@mail.gmail.com>
+ <54AC1C78.6090007@update.uu.se>
+Message-ID: <CAEoi9W5sGmqxjQornM8izVbwSdQ-rD9UcPS8SZPFeT6FcMxYog@mail.gmail.com>
+
+On Tue, Jan 6, 2015 at 12:33 PM, Johnny Billquist <bqt at update.uu.se> wrote:
+
+> On 2015-01-06 17:56, Dan Cross wrote:
+>>
+>> I believe that Mary Ann is referring to repeatedly looking up
+>> (presumably different) elements in the entry.  Assuming that e.g. `vi`
+>> looks up O(n) elements, where $n$ is the number of elements, doing a
+>> linear scan for each, you'd end up with quadratic behavior.
+>>
+>
+> Assuming that you'd look up all the elements of the termcap entry at
+> startup, and did each one from scratch, yes.
+
+
+Yes.  Isn't that exactly what Mary Ann said was happening?  :-)
+
+ Hashing, or storing in some kind of balanced-tree like structure or
+>> something, would of course help but would also necessitate doing a copy
+>> and would entail some additional memory inefficiency.
+>>
+>
+> Hashing would indeed cause some extra memory, but not necessarily any
+> copying.
+>
+
+I fail to see how you can avoid copying the data out of the environment
+vector (unless you intend to either (a) turn the env var into a hash table,
+or (b) store pointers to the datum in the env var, but you'd need to encode
+their length somehow.  I don't think environment variables can contain
+embedded NULs, can they?).
+
+But that would beg the question, why is vi doing a repeated scan of the
+> terminal entry at startup, if not to find all the capabilities and store
+> this somewhere? And if doing a look for all of them, why not scan the
+> string from start to finish and store the information as it is found? At
+> which point we move from quadratic to linear time.
+>
+
+I don't think she said it did things intelligently, just that that's how it
+did things.  :-)
+
+But now we're getting into the innards of vi, which I never looked at
+> anyway, and I guess is less relevant in this thread anyway.
+>
+> The short of it (from what I got out of it) is that the move from termcap
+> to terminfo was mostly motivated by attribute name changing away from fixed
+> 2 character names.
+>
+> A secondary motivation would be performance, but I don't really buy that
+> one. Since we only moved to terminfo on systems with plenty of memory,
+> performance of termcap could easily be on par anyway.
+>
+
+I tend to agree with you and I'll go one further: it seems that frequently
+we tend to identify a problem and then go to 11 with the "solution."  I can
+buy that termcap performance was an issue; I don't know that going directly
+to hashed terminfo files was the optimal solution.  A dbm file of termcap
+data and a hash table in whatever library parsed termcap would go a long
+way towards fixing the performance issues.  Did termcap have to be
+discarded just to add longer names?  I kind of tend to doubt it, but I
+wasn't there and don't know what the design criteria were, so my
+very-much-after-the-fact second guessing is just that.
+
+Thanks for the insights.
+>
+>         Johnny
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150106/bd279a0f/attachment.html>
+
