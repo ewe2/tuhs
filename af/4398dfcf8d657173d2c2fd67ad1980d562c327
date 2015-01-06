@@ -1,0 +1,40 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Tue, 6 Jan 2015 15:52:27 -0800
+Subject: [TUHS] pdp11 UNIX memory allocation.
+In-Reply-To: <54AC70EE.4060301@update.uu.se>
+References: <mailman.151.1420584979.3354.tuhs@minnie.tuhs.org>
+ <54AC70EE.4060301@update.uu.se>
+Message-ID: <d67f4ebdc4c39b2be03b841cf9f96876.squirrel@webmail.yaccman.com>
+
+
+>> ...Why the WCS was put in, I never understood, other than I expect
+>> the price of static RAM had finally dropped and DEC was buying it
+>> in huge quantities for the Vaxen...
+
+The Interdata 8/32, Bell Labs' first 32-bit Unix port target, had writable
+microcode.  It added a rather modest amount to the cost of the system as I
+remember (about $8K).  Unfortunately, it was pretty useless.  The
+instruction format, like many machines at the time, had opcodes and then
+some of the instruction bits were use to get the operands -- register,
+memory, offsets from registers, etc.  The operand handling was implemented
+in hardware, and any added instructions could not use get to this operand
+hardware.  So any new instructions that were added were pretty crippled.
+
+Moreover, the implementation in microcode was flawed.  If you tried to
+load a word through a pointer that had a -1 in it (a common error in
+earlier Unices where -1 was an error return from the OS), you actually got
+two faults--a memory bounds error and an alignment check.  Unfortunately,
+these faults came at slightly different times--the alignment check
+executed 2 or 3 micro instructions and then the bounds check arrived,
+reset the microcode and lost all the status information.  Not only was the
+fault unrecoverable but the only way to clear it was to power cycle the
+processor!
+
+A bunch of us went to talk to the manufacturer and said, in effect, "We
+like your machine but we won't buy any more until this fault recovery
+problem is fixed".  It was like talking to a bunch of cinder blocks --
+they just didn't get it.  Shortly afterwards the VAX arrived and the rest
+was history...
+
+
+
