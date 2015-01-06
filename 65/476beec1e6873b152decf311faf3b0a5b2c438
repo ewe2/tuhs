@@ -1,0 +1,54 @@
+From: random832@fastmail.us (random832@fastmail.us)
+Date: Tue, 06 Jan 2015 17:36:31 -0500
+Subject: [TUHS] pdp11 UNIX memory allocation.
+In-Reply-To: <1420583703.863814.210431037.61D6C6EC@webmail.messagingengine.com>
+References: <mailman.147.1420574271.3354.tuhs@minnie.tuhs.org>
+ <54AC4394.3050302@update.uu.se>
+ <1420576433.410248.210385277.513EF8EC@webmail.messagingengine.com>
+ <CAC20D2PP1hGyYsep1yNtj9KO55a-V02+QHS+S7bX-4joJy222g@mail.gmail.com>
+ <1420583703.863814.210431037.61D6C6EC@webmail.messagingengine.com>
+Message-ID: <1420583791.864424.210436089.64BFA544@webmail.messagingengine.com>
+
+Apparently the message I was replying to was off-list, but it seems like
+a waste to have typed all this out (including answering my own question)
+and have it not go to the list.
+
+On Tue, Jan 6, 2015, at 17:35, random832 at fastmail.us wrote:
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/src/cmd/factor.s
+> wrchar:
+> 	mov     r0,ch
+> 	mov     $1,r0
+> 	sys     write; ch; 1
+> 	rts     r5
+> 
+> Though it looks like the C wrappers use the "indirect" system call which
+> reads a "fake" trap instruction from the data segment. Looking at the
+> implementation of that, my question is answered:
+> 
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/sys/sys/trap.c
+> 		if (callp == sysent) { /* indirect */
+> 			a = (int *)fuiword((caddr_t)(a));
+> 			pc++;
+> 			i = fuword((caddr_t)a);
+> 			a++;
+> 			if ((i & ~077) != SYS)
+> 				i = 077;        /* illegal */
+> 			callp = &sysent[i&077];
+> 			fetch = fuword;
+> 		} else {
+> 			pc += callp->sy_narg - callp->sy_nrarg;
+> 			fetch = fuiword;
+> 		}
+> 
+> http://minnie.tuhs.org/TUHS/Archive/PDP-11/Trees/V7/usr/man/man2/indir.2
+> The main purpose of indir is to allow a program to
+> store arguments in system calls and execute them
+> out of line in the data segment.
+> This preserves the purity of the text segment.
+> 
+> Note also the difference between V2 and V5 libc - clearly support for
+> split I/D machines was added some time in this interval.
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=V2/lib/write.s
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=V5/usr/source/s4/write.s
+
+
