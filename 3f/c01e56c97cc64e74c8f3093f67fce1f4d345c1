@@ -1,0 +1,65 @@
+From: ron@ronnatalie.com (Ronald Natalie)
+Date: Fri, 9 Jan 2015 09:23:00 -0500
+Subject: [TUHS] single user mode in v5 & v6
+In-Reply-To: <20150109061848.94B1918C0CC@mercury.lcs.mit.edu>
+References: <20150109061848.94B1918C0CC@mercury.lcs.mit.edu>
+Message-ID: <ED116F20-2907-4F14-AB55-77CD8B46A784@ronnatalie.com>
+
+If I recall, our V6 system would go from singe user to multiuser when you logged out of the single user shell (our init checked the switch register to determine whether to bring up single or multiuser).    I believe our system shutdown if you kill -1-1 (HUP to init).   V7 would revert to single user at that point.
+
+
+I think the init 
+> On Jan 9, 2015, at 1:18 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+> 
+>> From: Mark Longridge <cubexyz at gmail.com>
+> 
+>> I've finally managed to get Unix v5 and v6 to go into single user mode
+>> while running under simh.
+>> ...
+>> dep system sr 173030 (simh command)
+> 
+> Just out of curiousity, why don't you set the SR before you boot the machine?
+> That way it'll come up single user, and you can icheck/dcheck before you go
+> to multi-user mode. I prefer doing it that way, there's as little as possible
+> going on, in case the disk is slightly 'confused', so less chance any bit-rot
+> will spread...
+> 
+>> Now I'm in muti user mode .. but then if I do a "ps -alx" I get:
+>> 
+>> TTY F S UID   PID PRI ADDR  SZ  WCHAN COMMAND
+>> ?:  3 S   0     0-100 1227   2   5676 ????
+>> ?:  1 W   0     1  40 1324   6   5740 -
+> 
+>> The ps command doesn't show the /etc/init process explicitly, although
+>> I'm pretty sure it is running.
+> 
+> No, it's there: the second line (PID 1). For some reason, the code for
+> /etc/init (in V6 at least, I don't know anything about V5) bashes the command
+> line so it just has '-' in it, so it looks just like a shell.
+> 
+> I fixed my copy so it says "/etc/init", or something like that. The machine
+> my source is on is powered down at the moment; if you want, I can upload the
+> 'fixed' code tomorrow.
+> 
+>> I'm not sure if unix of the v6 or v5 era was designed to go from multi
+>> user to single user mode and then back again.
+> 
+> I seem to recall there's some issue, something like in some cases there's an
+> extra shell left running attached to the console, but I don't recall the
+> details (too lazy to look for the note I made about the bug; I can look it up
+> if you really want to know).
+> 
+>> Would it be safer to just go to single user and then shut it down?
+> 
+> I don't usually bother; I just log out all the shells except the one on the
+> console, so the machine is basically idle; then do a 'sync', and shortly
+> after than completes, I just halt the machine.
+> 
+> 	Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
+
