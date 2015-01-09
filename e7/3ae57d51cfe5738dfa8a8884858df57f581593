@@ -1,0 +1,65 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri,  9 Jan 2015 13:38:45 -0500 (EST)
+Subject: [TUHS] single user mode in v5 & v6
+Message-ID: <20150109183845.05AEB18C0CE@mercury.lcs.mit.edu>
+
+    > From: Clem Cole
+
+    > ps "knew" about some kernel data structures and had to compiled with
+    > the same sources that your kernel used if you want all the command
+    > field in particular to look reasonable.
+
+Not just the command field!
+
+The real problem was that all the parameters (e.g. NPROC) were not stored in
+the kernel anywhere, so if you wanted to have one copy of the 'ps' binary
+which would work on two different machines (but which were running the same
+version of the kernel)... rotsa ruck.
+
+I have hacked my V6 to include lines like:
+
+  int     ninode  NINODE;
+  int     nfile   NFILE;
+  int     nproc   NPROC;
+
+etc so 'ps' can just read those variables to find the table sizes in the
+running kernel. (Obviously if you modify a table format, then you're SOL.)
+
+
+    > From: Ronald Natalie
+
+    > The user structure of the currently running process is the only one
+    > that is guaranteed to be in memory ... Any processes that were swapped
+    > you could read the user structure so things that were stored there were
+    > often unavailable (particularly the command name). 
+
+Well, 'ps' (even the V6 stock version) was actually prepared to poke around
+on the swap device to look at the images of swapped-out processes. And the
+command name didn't come from the U area (it wasn't saved there in stock V6),
+'ps' actually had to look on the top of the user stack (which is why it
+wasn't guaranteed to be accurate - the user process could smash that).
+
+
+    > From: Clem cole
+
+    > IIRC we had a table of sleep addresses so that ps could print the
+    > actual thing you were waiting for not just an address. 
+
+I've hacked my copy of 'ps' to grovel around in the system's symbol table,
+and print 'wchan' symbolically. E.g. here's some of the output of 'ps' on
+my system:
+
+ TTY  F  S UID   PID  PPID PRI NIC CPU TIM ADDR  SZ  TXT   WCHAN       COMMAND
+ ?:   SL S   0     0     0-100   0  -1 127 1676   16    runout         <swapper>
+ ?:    L W   0     1     0  40   0   0 127 1774   43  0 proc+26        /etc/init
+ ?:    L W   0    11     1  90   0   0 127 2405   37    tout           /etc/update
+ 8:    L W   0    12     1  10   0   0 127 2772   72  2 kl11           -
+ a:    L W   0    13     1  40   0   0 127 3122   72  2 proc+102       -
+ a:    L R   0    22    13 100   0  10   0 3422  138  3                ps axl
+ b:    L W   0    14     1  10   0   0 127 2120   41  1 dz11+40        - 4
+
+It's pretty easy to interpret this to see what each process is waiting for.
+
+	Noel
+
+
