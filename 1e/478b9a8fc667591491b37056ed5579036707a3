@@ -1,0 +1,52 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 16 Jan 2015 07:33:01 -0500 (EST)
+Subject: [TUHS] sync; sync; sync; halt (was: Re: Illumos ))
+Message-ID: <20150116123301.A4A9218C099@mercury.lcs.mit.edu>
+
+    > From: Tom Ivar Helbekkmo
+
+    > There was no fancy I/O order juggling, so everything was written in the
+    > same chronological order as it was scheduled.
+    > ...
+    > What this means is that the second sync, by waiting for its own
+    > superblock writes, will wait until all the inode and file data flushes
+    > scheduled by the first one have completed.
+
+Ah, I'm not sure this is correct. Not all disk drivers handled requests in a
+'first-come, first-served' order (i.e. where a request for block X, which was
+scheduled before a request for block Y, actually happened before the
+operation on block Y). It all depends on the particular driver; some drivers
+(e.g. the RP driver) re-organized the waiting request queue to optimize head
+motion, using a so-called 'elevator algorithm'.
+
+(PS: For a good time, do "dd if=/dev/[large_partition] of=/dev/null" on a
+running system with such a disk, and a lot of users on - the system will
+apparently come to a screeching halt while the 'up' pass on the disk
+completes... I found this out the hard way, needless to say! :-)
+
+Since the root block is block 1 in the partition, one might think that even
+with an elevator algorithm, this would tend to guarantee that doing it would
+more or less guarantee that all other pending operations would have completed
+(since it could only happen at the end of 'down' pass); _but_ the elevator
+algorithm is in terms of actual physical block numbers, so blocks in another
+lower partition might still remain to be written.
+
+But now that I think about it a bit, if such blocks existed, that partition's
+super-block would also need to be written, so when that one completed, the
+disk queue would be empty.
+
+But the point remains - because there's no guarantee of _overall_ disk
+operation ordering in V6, scheduling a disk request and waiting for it to
+complete does not guarantee that all previously-requested disk operations
+will have completed before it does.
+
+
+I really think the whole triple-sync thing is mythology. Look through the V6
+documentation and although IIRC there are instructions on how to shut the
+system down, it's not mentioned. We certainly never used it at MIT (and I
+still don't), and I've never seen a problem with disk corruption _when the
+system was deliberately shut down_.
+
+	Noel
+
+
