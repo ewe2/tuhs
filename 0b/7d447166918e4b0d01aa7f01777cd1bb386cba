@@ -1,0 +1,34 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun,  8 Feb 2015 17:42:09 -0500 (EST)
+Subject: [TUHS] 2.9BSD on an actual rl02 - swap confusion
+Message-ID: <20150208224209.6AB7718C0BE@mercury.lcs.mit.edu>
+
+    > From: Clem Cole <clemc at ccc.com>
+
+    > Once people started to partition them, then all sort of new things
+    > occurred and I that's when the idea of a dedicated swap partition came
+    > up. I've forgotten if that was a BSDism or UNIX/TS.
+
+Well, vanilla V6 had i) partitioned drives (that was the only way to support
+an RP03), and ii) the swap device in the c.c config file. That's all you need
+to put swap in its own partition. (One of the other MIT-LCS groups with V6
+did that; we didn't, because it was better to swap off the RK, which did
+multi-block transfers in a single I/O operation.)
+
+    > As I recall in V6 and I think V7, the process was first placed in the
+    > swap image before the exec (or at least space reserved for it).
+
+As best I understand it, the way fork worked in V6 was that if there was not
+enough memory for an in-core fork (in which case the entire memory of the
+process was just copied), the process was 'swapped out', and the swapped out
+image assumed the identity of the child.
+
+But this is kind of confusing, because when I was bringing up V6 under the
+Ersatz11 simulator, I had a problem where the swapper (process 0) was trying
+to fork (with the child becoming 1 and running /etc/init), and it did the
+'swap out' thing. But there was a ton of free memory at that point, so... why
+was it doing a swap? Eh, something to investigate sometime...
+
+	Noel
+
+
