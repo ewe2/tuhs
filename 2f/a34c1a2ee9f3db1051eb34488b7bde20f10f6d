@@ -1,0 +1,58 @@
+From: jacob.ritorto@gmail.com (Jacob Ritorto)
+Date: Sun, 8 Feb 2015 15:52:20 -0500
+Subject: [TUHS] 2.9BSD on an actual rl02 - swap confusion
+In-Reply-To: <20150208204207.7860218C0BE@mercury.lcs.mit.edu>
+References: <20150208204207.7860218C0BE@mercury.lcs.mit.edu>
+Message-ID: <CAHYQbfDb33-2z1=r=G_gkgwePK-wL+BuGVDEgDGYtfFubZopNQ@mail.gmail.com>
+
+Hey, thanks Guys!  Ok, good that the kernel already knows about it.
+
+  The actual problem I'm having is that ps doesn't work.
+
+  I assume it tries to look at /dev/swap as its pointer, but since there's
+no /dev/rl0a, dev/swap has nothing reasonable to point to, so ps fails with
+/dev/swap: no such device (iirc).
+
+  Was thinking of experimentally linking /dev/swap to rl0 but logic
+dictates that would trash the root filesystem (which is nbd since I can
+easily restore the 2.9 rl02 root from the archives with Warren's vtserver!)
+
+Gonna go read some source.  Thanks!
+
+jake
+
+
+
+On Sun, Feb 8, 2015 at 3:42 PM, Noel Chiappa <jnc at mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Jacob Ritorto
+>
+>     > I'm having trouble understanding how to get my swap configured. Since
+>     > rl02s are so little, the MAKE file in /dev doesn't partition them
+> into
+>     > a, b, c, etc. However, when MAKE makes the /dev/rl0 device, it uses
+>     > only 8500 of its 10000 blocks, so what would presumably be intended
+> as
+>     > swap space does exist. Swap is usually linked to the b partition,
+>     > right? So how do I create this b partition on an rl02?
+>
+> I don't know how the later systems work, but in V6, the swap device, and
+> the
+> start block / # of blocks are specified in the c.c configuration file (i.e.
+> they are compiled into the system). So you can take one partition, and by
+> specifying less than the full size to 'mkfs', you can use the end of the
+> partition for swap space (which is presumably what's happening with
+> /dev/rl0
+> here).
+>
+>         Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150208/542acca4/attachment.html>
+
