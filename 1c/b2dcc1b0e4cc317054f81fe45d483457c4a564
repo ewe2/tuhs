@@ -1,0 +1,131 @@
+From: jacob.ritorto@gmail.com (Jacob Ritorto)
+Date: Wed, 11 Feb 2015 22:23:20 -0500
+Subject: [TUHS] 2.9 kernel compile
+In-Reply-To: <20150211211408.EAE9E18C096@mercury.lcs.mit.edu>
+References: <20150211211408.EAE9E18C096@mercury.lcs.mit.edu>
+Message-ID: <CAHYQbfACaVPYw2j3S=rjHXg0QLrhCjtrXhsMqV+o+iePkdiBkw@mail.gmail.com>
+
+OK, I jiggled the memory board and the seqfault went away.  Which is weird
+because I had all the boards out of this one, thoroughly vacuumed the
+backplane and all boards and deoxidized the edge connectors before
+reassembling.   So now the real box is behaving more like the simh and just
+hanging, not panicing anymore.  How can I find this startup() you mention?
+
+On Wed, Feb 11, 2015 at 4:14 PM, Noel Chiappa <jnc at mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Jacob Ritorto
+>
+>     > I set simh to 11/34 and I managed to get actual panics before (that I
+>     > didn't record)
+>
+> Ah.
+>
+>
+>     > now I'm just getting hangs, mostly when hitting ctrl-D to bring
+> system to
+>     > mutiuser.
+>
+> The fact that it boots to the shell OK indicates things are mostly OK. I
+> wonder what it's trying to do, in going to multi-user, that's wedging the
+> system?
+>
+>     > Same if I mount -a in single user and then try to access /usr (works
+> for
+>     > a while, then hangs.).
+>
+> Ah. That sounds very much like a 'lost' interrupt. The process is waiting
+> (inside the kernel) for the device to complete, and ..... crickets.
+>
+>     > When hung, I can still get character echo to my terminal
+>
+> So the machine is still running OK (most echoing is done inside the TTY
+> interrupt handler).
+>
+>     >  but can't interrupt or background the running command, etc.
+>
+> Like I said, it's sleeping inside the kernel, and missed the wakeup event.
+>
+> If you have another console logged in, it would be interesting to see if
+> that
+> one is frozen too. If not, we can use tools like 'ps', running on the
+> second
+> line, to look at the first process and see what it's waiting for.
+>
+> Single user, the following hack:
+>
+>   sh < /dev/ttyX > /dev/ttyX &
+>
+> can be used to start a shell on another tty line (since going full
+> multi-user
+> seems to wedge it).
+>
+>     > Would it help if I traced memory and single-stepped through the
+>     > (apparently) infinite loop?
+>
+> No, because it's very likely not a loop! ;-)
+>
+>
+>     > here are some examples of crashes on the real pdp11/34 (booting via
+>     > vtserver, then bringing in system from the MSCP disk), with the
+> original
+>     > 2.9bsd-MSCP kernel (the one specifically built for 11/23):
+>     >
+>     >  CONFIGURE SYSTEM:
+>     >  ka6 = 2200
+>     >  aps = 141572
+>     >  pc = 50456 ps = 30250
+>     >  __ovno = 7
+>     >  trap type 11
+>     >  panic: trap
+>
+> That's a segmentation fault. Very odd trap to get! 2.9 uses overlays right?
+> Maybe there's a problem with how some overlay fits, or something? I don't
+> know
+> much about the overlay feature, never used it, sorry.
+>
+> Most of the other data (PS address, PC, KDSA6 contents, etc) aren't much
+> use
+> without a dump.
+>
+>
+>     > and another: plain boring old hang at boot when trying to size
+> devices.
+>     > Can't even echo characters this time.
+>
+> If the init process hasn't got as far an opening the TTY, you might not get
+> character echoing.
+>
+> If that randomly lost interrupt got lost very early on, you might could see
+> this sort of behaviour.
+>
+>
+>     > One thing I think is interesting is that it's claiming 158720KW of
+>     > memory. Is that weird? ...  Where's it getting that odd number?
+> Vanilla
+>     > 2.9.1 on the real 11/34 boots with
+>     >
+>     >  Berkeley UNIX (Rev. 2.9.1) Sun Nov 20 14:55:50 PST 1983
+>     >  mem = 135872
+>
+> No idea where it's coming from, but remember Beowulf Schaeffer's advice to
+> Gregory Pelton in "Flatlander".
+>
+> And now that I think about it, if the system thinks it has more memory
+> than it
+> actually does, that would definitely cause problems.
+>
+> Probably you should put some printf()'s in startup() and see where it's
+> coming
+> from.
+>
+>         Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150211/f647ab2c/attachment.html>
+
