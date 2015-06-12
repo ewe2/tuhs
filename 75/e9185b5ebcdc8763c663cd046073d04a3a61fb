@@ -1,0 +1,44 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 12 Jun 2015 15:31:23 -0400 (EDT)
+Subject: [TUHS] recreating bj.s for Unix v5
+Message-ID: <20150612193123.F29F418C0C0@mercury.lcs.mit.edu>
+
+    > From: Mark Longridge <cubexyz at gmail.com>
+
+    > My first idea was to grab bj.s from 2.11BSD and assemble it the Unix v5
+    > as command. That seems to generate a bunch of errors.
+
+I saw that there's a SysIII bj.s, which is almost identical to the 2.11 one;
+so the latter is probably descended from the first, which I assume is Bell
+source. So I grabbed it and tried to assemble it.
+
+The errors are because bj.s is designed to be assembled along with another
+assembler source file, which contains the following routines which are
+missing from bj.s:
+
+ mesg
+ decml
+ nline
+
+Dunno if you're aware of this, but, the line 'as a.s b.s' _doesn't_
+separately assemble a.s and b.s, rather it's as if you'd typed
+'cat a.s b.s > temp.s ; as temp.s'. (This is used in the demi-enigmatic
+"as data.s l.s" in the system generation procedure.)
+
+I looked around in the sources that come with V6, and I didn't see any obvious
+such file. I'm going to whip the required routines up really quickly, and see
+if the results assemble/run.
+
+
+I looked to see if I could steal them from the binary of 'bj' on V6, and...
+it looks like that binary is totally different from this source. Let me look
+into this...
+
+
+    > Also other assembly source files don't seem to have .even in them.
+
+The V6 assembler groks '.even'.
+
+	Noel
+
+
