@@ -1,0 +1,113 @@
+From: reed@reedmedia.net (Jeremy C. Reed)
+Date: Wed, 17 Jun 2015 14:53:05 -0500 (CDT)
+Subject: [TUHS] BSD manual set experience
+Message-ID: <alpine.NEB.2.11.1506171343420.26100@t1.m.reedmedia.net>
+
+Prompted by another thread, I decided to share about some of my 
+experience with providing printed BSD manuals.
+
+I was given a 4.4BSD set with the understanding that I would work on 
+preparing new print editions using NetBSD. It was a significant 
+undertaking. I ended up just doing Section 8 System. Here is a summary 
+of what I did:
+
+- Build the NetBSD distribution (which gets the manual pages generated 
+or at least put in place).
+
+- Manual clean up, like remove a link to manual page that wasn't needed 
+and remove a duplicated manual (in two sub-sections).
+
+- Learned about permuted index (the long KWIC index cross-reference). 
+Generated a list of characters and terms to ignore for building my 
+permuted index. Wrote script to generate it, including converting to 
+LaTeX using longtable. This resulted in 2937 entries and was 68 pages in 
+printed book.
+
+- Create list of all an section 8 pages, pruned for duplicate inodes.
+
+- Also have a list of 40 filenames of other manpages to include in the 
+man8 book. These are system maintenance procedures or commands that are 
+in wrong section or could be section 8 (or weren't installed). (Examples 
+are ipftest, pkg_admin, postsuper.)
+
+- Generate a sorted list of all the manuals.
+
+- Look for any missing manual pages. Script to check for libexec or sbin 
+tools not in man8, such as supfilesrv or supscan is really supservers.8 
+and missing kdigest.8. Get those files in place as needed. I cannot 
+remember now, but I think I may have wrote some missing manuals or got 
+others to submit some (officially).
+
+- Script to make sure all man pages are in order. This found some 
+duplicate manual pages with different inodes, wrong man macro DT values, 
+wrong filename, wrong sections, etc. Some of these were reported 
+upstream or fixed.
+
+- Script to create the book as a single huge postscript file, then a 
+PDF. Reviewed the possible ROFF related errors and warnings.
+(On 2009-10-23, it was 1304 pdf pages from 572 manuals.)
+
+- Script to figure out licenses. This was substantial! It looked for 
+copyright patterns in manual source, excluded junk formatting like 
+revision control markers, include some extra licenses that weren't 
+included in the manpage itself (like GPL2). Then another script to 
+generate LaTeX from the copyrights and licenses. It removed duplicate 
+license statements and sorted the copyrights.  So some license 
+statements had many copyrights using the same license verbiage.
+
+This represented 620 copyrighted files with approximately 683 copyright 
+lines and 109 different licenses. Yes 109! That resulted in 
+approximately 68 printed pages, pages 1461 through 1529. This didn't 
+duplicate any license verbiage. (I just realized that was the same 
+length as my permuted index.)
+
+A few things to note:  Some authors chose to use different names for 
+different copyright statements. Some authors used their names or 
+assigned the copyright to the project. Some licenses included software 
+or authors names instead of generic terms. Many BSD style licenses were 
+slightly changed with different grammar, etc. Many contributors created 
+own license or reworded someone else's existing license text. As an 
+example: "If it breaks then you get to keep both pieces." :)
+
+The four most common license statements represented 113 "THE REGENTS AND 
+CONTRIBUTORS" manuals, 75 "THE NETBSD FOUNDATION, INC." manuals, and 35 
+"IBM" (aka Postfix) manuals, and 30 generic "THE AUTHOR AND 
+CONTRIBUTORS" manuals.
+
+I found many were missing licenses. I hunted down original authors, 
+looked in CVS history, etc to help resolve some of these. I also 
+reported about still missing licenses to the project. We will assume 
+they meant it is open source and can be distributed since nobody has 
+complained for years (even prior to my printed work) :)
+
+- Generated a list of required advertising acknowledgments in LaTeX to 
+import into one printed book (and for webpage).
+
+- Split my long PDF into two volumes. Used LaTeX pdfpages package and 
+includepdf to include the generated PDFs. I made sure the page numbers 
+continued in the second book from end of previous volume. (After 
+printing, I realized a mistake where the second volume had odd numbers 
+on left pages, but order is still correct, so I assume nobody else 
+noticed.)
+
+Historically, the System Manager's Manual (SMM) also included other 
+system installation and administration documentation (in addition to the 
+manual pages). My work didn't include that documentation (some of which 
+was unmaintained since 4.4BSD in 1993 and covers some software and 
+features that are no longer included with NetBSD). That could be another 
+project.
+
+I only did the SMM / manual section 8. I realized if I did all manuals, 
+my book set would be well over ten thousand printed pages. The amount of 
+work and initial printing costs would not be worth it with the little 
+money it could bring in. It was certainly a learning experience, plus 
+some benefit such as cleanup of some mandoc/roff code, filename renames, 
+copyright/license additions, and manual pages added.
+
+  Jeremy C. Reed
+
+echo 'EhZ[h ^jjf0%%h[[Zc[Z_W$d[j%Xeeai%ZW[ced#]dk#f[d]k_d%' | \
+  tr            '#-~'            '\-.-{'
+
+
+
