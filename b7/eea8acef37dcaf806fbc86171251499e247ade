@@ -1,0 +1,356 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Fri, 11 Sep 2015 07:17:09 -0600
+Subject: [TUHS] TUHS Digest, Vol 128, Issue 1
+In-Reply-To: <CAMYpm87tBZ_P=W10O72sgoPNtK53M1SL+P_EfS=Dfy9NB7ZVcQ@mail.gmail.com>
+References: <mailman.1.1441936807.9984.tuhs@minnie.tuhs.org>
+ <CAMYpm87tBZ_P=W10O72sgoPNtK53M1SL+P_EfS=Dfy9NB7ZVcQ@mail.gmail.com>
+Message-ID: <CANCZdfpKNVCXfDStqboj5eF8jJ1yidnbrnPe7qmn4YDmswh1_Q@mail.gmail.com>
+
+When I ported OI to a few dozen OSes back in the early 1990s,
+realloc behaved correctly. We used it in the pre-template / STL
+days of C++ to implement variable length arrays. Any misbehavior
+predated this.
+
+The systems were HP/UX, AIX, AUX, OSF/1 (Digital Unix), SunOS 4,
+Solaris, Linux, FreeBSD, IRIX, and Apollo's Unix.
+
+Warner
+
+On Fri, Sep 11, 2015 at 12:21 AM, Rudi Blom <rudi.j.blom at gmail.com> wrote:
+
+> I never used realloc(), only malloc() and calloc().
+>
+> Checking a few unixes I have access to all reallocs() seem to state
+> either nothing on contents of memory added or state explicitly
+> 'undefined'.
+>
+> The only function which zeroes allocated memory is calloc() it seems.
+> Unixes checks: SCO UNIX 3.2V4.2, Digital Unix 4.0G, Tru64 Unix V5.1B,
+> HP-UX 11.23, HP-UX 11.31
+>
+> Cheers
+>
+> On 9/11/15, tuhs-request at minnie.tuhs.org <tuhs-request at minnie.tuhs.org>
+> wrote:
+> > Send TUHS mailing list submissions to
+> >       tuhs at minnie.tuhs.org
+> >
+> > To subscribe or unsubscribe via the World Wide Web, visit
+> >       https://minnie.tuhs.org/mailman/listinfo/tuhs
+> > or, via email, send a message with subject or body 'help' to
+> >       tuhs-request at minnie.tuhs.org
+> >
+> > You can reach the person managing the list at
+> >       tuhs-owner at minnie.tuhs.org
+> >
+> > When replying, please edit your Subject line so it is more specific
+> > than "Re: Contents of TUHS digest..."
+> >
+> >
+> > Today's Topics:
+> >
+> >    1. Did realloc ever zero the new memory? (David)
+> >    2. Re: Did realloc ever zero the new memory? (Jim Capp)
+> >    3. Re: Did realloc ever zero the new memory? (David)
+> >    4. Re: Did realloc ever zero the new memory? (Larry McVoy)
+> >    5. Re: Did realloc ever zero the new memory? (David)
+> >    6. Re: Did realloc ever zero the new memory? (Larry McVoy)
+> >    7. Re: Did realloc ever zero the new memory? (Clem Cole)
+> >    8. Re: Did realloc ever zero the new memory? (Dave Horsfall)
+> >
+> >
+> > ----------------------------------------------------------------------
+> >
+> > Message: 1
+> > Date: Thu, 10 Sep 2015 12:52:45 -0700
+> > From: David <david at kdbarto.org>
+> > To: tuhs at minnie.tuhs.org
+> > Subject: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <E798E102-2C50-4AB2-92CC-188D05AA951F at kdbarto.org>
+> > Content-Type: text/plain; charset=utf-8
+> >
+> > I?ve just had a discussion with my boss about this and he claimed that it
+> > did at one point and I said it hasn?t in all the unix versions I?ve ever
+> > played with (v6, v7, sys III, V, BSD 2, 3, 4, SunOS and Solaris).
+> >
+> > My question to this illustrious group is: Did any Unix or Unix like OS
+> ever
+> > zero fill on realloc?
+> >
+> >       David
+> >
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 2
+> > Date: Thu, 10 Sep 2015 16:10:41 -0400 (EDT)
+> > From: Jim Capp <jcapp at anteil.com>
+> > To: david at kdbarto.org
+> > Cc: tuhs at minnie.tuhs.org
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <5962857.12872.1441915841364.JavaMail.root at zimbraanteil>
+> > Content-Type: text/plain; charset="utf-8"
+> >
+> > On every system that I've ever used, I believe that realloc did not do a
+> > zero fill. There might have been a time when malloc did a zero fill, but
+> I
+> > never counted on it. I always performed a memset or bzero after a malloc.
+> > I'm pretty sure that I counted on realloc to NOT perform a zero fill.
+> >
+> >
+> > $.02
+> >
+> >
+> >
+> > From: "David" <david at kdbarto.org>
+> > To: tuhs at minnie.tuhs.org
+> > Sent: Thursday, September 10, 2015 3:52:45 PM
+> > Subject: [TUHS] Did realloc ever zero the new memory?
+> >
+> > I?ve just had a discussion with my boss about this and he claimed that it
+> > did at one point and I said it hasn?t in all the unix versions I?ve ever
+> > played with (v6, v7, sys III, V, BSD 2, 3, 4, SunOS and Solaris).
+> >
+> > My question to this illustrious group is: Did any Unix or Unix like OS
+> ever
+> > zero fill on realloc?
+> >
+> > David
+> >
+> > _______________________________________________
+> > TUHS mailing list
+> > TUHS at minnie.tuhs.org
+> > https://minnie.tuhs.org/mailman/listinfo/tuhs
+> > -------------- next part --------------
+> > An HTML attachment was scrubbed...
+> > URL:
+> > <
+> http://minnie.tuhs.org/pipermail/tuhs/attachments/20150910/f4857c45/attachment-0001.html
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 3
+> > Date: Thu, 10 Sep 2015 13:22:33 -0700
+> > From: David <david at kdbarto.org>
+> > To: Larry McVoy <lm at mcvoy.com>
+> > Cc: tuhs at minnie.tuhs.org
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <395F25EB-77F3-4830-A1AF-C27E43550C04 at kdbarto.org>
+> > Content-Type: text/plain; charset=us-ascii
+> >
+> > Buggy, sure.
+> >
+> > Zero (less) filling, that is the question.
+> >
+> > Realloc has had a difficult history, and I try to avoid it if at all
+> > possible.
+> >
+> >       David
+> >
+> >> On Sep 10, 2015, at 1:21 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >>
+> >> Am I the only one that remembers realloc() being buggy on some systems?
+> >
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 4
+> > Date: Thu, 10 Sep 2015 13:27:23 -0700
+> > From: Larry McVoy <lm at mcvoy.com>
+> > To: David <david at kdbarto.org>
+> > Cc: tuhs at minnie.tuhs.org
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <20150910202723.GI8154 at mcvoy.com>
+> > Content-Type: text/plain; charset=us-ascii
+> >
+> > Good, glad to know it wasn't just me.  I've finally let my team use it
+> > but we avoided it when we supported more odd ball platforms.
+> >
+> > On zero fill, I doubt many did that.  Many really early on when memory
+> > was small.
+> >
+> > What you might be thinking of is modern systems implement malloc()
+> > as an mmap of /dev/zero and the initial data comes through as zeroed.
+> > But counting on that would be a mistake.
+> >
+> > On Thu, Sep 10, 2015 at 01:22:33PM -0700, David wrote:
+> >> Buggy, sure.
+> >>
+> >> Zero (less) filling, that is the question.
+> >>
+> >> Realloc has had a difficult history, and I try to avoid it if at all
+> >> possible.
+> >>
+> >>      David
+> >>
+> >> > On Sep 10, 2015, at 1:21 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >> >
+> >> > Am I the only one that remembers realloc() being buggy on some
+> systems?
+> >
+> > --
+> > ---
+> > Larry McVoy                        lm at mcvoy.com
+> > http://www.mcvoy.com/lm
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 5
+> > Date: Thu, 10 Sep 2015 13:29:16 -0700
+> > From: David <david at kdbarto.org>
+> > To: Larry McVoy <lm at mcvoy.com>
+> > Cc: tuhs at minnie.tuhs.org
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <FF64BDD6-C57E-4959-B0D1-2F97FF909EA9 at kdbarto.org>
+> > Content-Type: text/plain; charset=utf-8
+> >
+> > I mentioned the /dev/zero malloc and, no, he was quite sure that it was
+> > realloc doing the zero fills.
+> >
+> > Glad to know that I?m sitting on the right side of history on this one.
+> >
+> >       David
+> >
+> >> On Sep 10, 2015, at 1:27 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >>
+> >> Good, glad to know it wasn't just me.  I've finally let my team use it
+> >> but we avoided it when we supported more odd ball platforms.
+> >>
+> >> On zero fill, I doubt many did that.  Many really early on when memory
+> >> was small.
+> >>
+> >> What you might be thinking of is modern systems implement malloc()
+> >> as an mmap of /dev/zero and the initial data comes through as zeroed.
+> >> But counting on that would be a mistake.
+> >>
+> >> On Thu, Sep 10, 2015 at 01:22:33PM -0700, David wrote:
+> >>> Buggy, sure.
+> >>>
+> >>> Zero (less) filling, that is the question.
+> >>>
+> >>> Realloc has had a difficult history, and I try to avoid it if at all
+> >>> possible.
+> >>>
+> >>>     David
+> >>>
+> >>>> On Sep 10, 2015, at 1:21 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >>>>
+> >>>> Am I the only one that remembers realloc() being buggy on some
+> systems?
+> >>
+> >> --
+> >> ---
+> >> Larry McVoy                       lm at mcvoy.com
+> >> http://www.mcvoy.com/lm
+> >
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 6
+> > Date: Thu, 10 Sep 2015 13:21:15 -0700
+> > From: Larry McVoy <lm at mcvoy.com>
+> > To: Jim Capp <jcapp at anteil.com>
+> > Cc: tuhs at minnie.tuhs.org, david at kdbarto.org
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <20150910202115.GH8154 at mcvoy.com>
+> > Content-Type: text/plain; charset=us-ascii
+> >
+> > Am I the only one that remembers realloc() being buggy on some systems?
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 7
+> > Date: Thu, 10 Sep 2015 16:41:26 -0400
+> > From: Clem Cole <clemc at ccc.com>
+> > To: Larry McVoy <lm at mcvoy.com>
+> > Cc: david at kdbarto.org, TUHS main list <tuhs at minnie.tuhs.org>
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID:
+> >       <
+> CAC20D2P_Gw-YKP8EHASFToTe_W0nfdcJabQ6_aJYnX0BhnPvng at mail.gmail.com>
+> > Content-Type: text/plain; charset="utf-8"
+> >
+> > below
+> >
+> > On Thu, Sep 10, 2015 at 4:21 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >
+> >> Am I the only one that remembers realloc() being buggy on some systems?
+> >>
+> >>
+> > ?Amen...   it was rarely useful.   I always found realloc to one of the
+> > part I could never trust.  I do remember  what you got back from any of
+> the
+> > malloc calls could vary widely.  Particularly pre-ANSI C and working on
+> > non-UNIX systems.
+> >
+> >
+> > Malloc in general was always a tarbaby because there were (are) so many
+> > implementations "in the wild."   I used to advise our application people
+> to
+> > create something that was application specific and then call the local
+> > malloc under the covers, but the chances that a general malloc
+> > implementation would be optimal for your code was low.?
+> >
+> > Clem
+> > -------------- next part --------------
+> > An HTML attachment was scrubbed...
+> > URL:
+> > <
+> http://minnie.tuhs.org/pipermail/tuhs/attachments/20150910/25a3e14c/attachment-0001.html
+> >
+> >
+> > ------------------------------
+> >
+> > Message: 8
+> > Date: Fri, 11 Sep 2015 10:13:41 +1000 (EST)
+> > From: Dave Horsfall <dave at horsfall.org>
+> > To: The Eunuchs Hysterical Society <tuhs at tuhs.org>
+> > Subject: Re: [TUHS] Did realloc ever zero the new memory?
+> > Message-ID: <alpine.BSF.2.11.1509111005190.42450 at aneurin.horsfall.org>
+> > Content-Type: text/plain; charset="utf-8"
+> >
+> > On Thu, 10 Sep 2015, David wrote:
+> >
+> >> I?ve just had a discussion with my boss about this and he claimed that
+> >> it did at one point and I said it hasn?t in all the unix versions I?ve
+> >> ever played with (v6, v7, sys III, V, BSD 2, 3, 4, SunOS and Solaris).
+> >
+> > Only V6?  I did V5...  Tell that to the young kids of today, and they
+> > won't believe you.
+> >
+> >> My question to this illustrious group is: Did any Unix or Unix like OS
+> >> ever zero fill on realloc?
+> >
+> > Never in my lifetime, which meant that you got inspect someone's private
+> > messages and there's someone knocking at my door and
+> >
+> > #$%^&*\{{{
+> >
+> > NO CARRIER
+> >
+> > ------------------------------
+> >
+> > _______________________________________________
+> > TUHS mailing list
+> > TUHS at minnie.tuhs.org
+> > https://minnie.tuhs.org/mailman/listinfo/tuhs
+> >
+> >
+> > End of TUHS Digest, Vol 128, Issue 1
+> > ************************************
+> >
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150911/d8a7541f/attachment.html>
+
