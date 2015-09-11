@@ -1,0 +1,39 @@
+From: arnold@skeeve.com (arnold@skeeve.com)
+Date: Fri, 11 Sep 2015 00:30:36 -0600
+Subject: [TUHS] Did realloc ever zero the new memory?
+In-Reply-To: <CAC20D2P_Gw-YKP8EHASFToTe_W0nfdcJabQ6_aJYnX0BhnPvng@mail.gmail.com>
+References: <E798E102-2C50-4AB2-92CC-188D05AA951F@kdbarto.org>
+ <5962857.12872.1441915841364.JavaMail.root@zimbraanteil>
+ <20150910202115.GH8154@mcvoy.com>
+ <CAC20D2P_Gw-YKP8EHASFToTe_W0nfdcJabQ6_aJYnX0BhnPvng@mail.gmail.com>
+Message-ID: <201509110630.t8B6UaYF010131@freefriends.org>
+
+
+> On Thu, Sep 10, 2015 at 4:21 PM, Larry McVoy <lm at mcvoy.com> wrote:
+>
+> > Am I the only one that remembers realloc() being buggy on some systems?
+
+Clem Cole <clemc at ccc.com> wrote:
+
+> Amen...   it was rarely useful.   I always found realloc to one of the
+> part I could never trust.  I do remember  what you got back from any of the
+> malloc calls could vary widely.  Particularly pre-ANSI C and working on
+> non-UNIX systems.
+
+I would not say this applies today. The GLIBC realloc is very effective.
+The place where I see this is in gawk, which special cases
+
+	a = a b	# concatenate string b onto the end of string a
+
+By using realloc to grow the contents of a and copying b's contents
+onto the end I see a huge speedup over the dance of
+
+	char *p malloc(length(a) + length(b))
+	copy in a
+	copy in b
+	free old a
+	make a point at new storage
+
+Arnold
+
+
