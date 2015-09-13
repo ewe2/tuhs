@@ -1,0 +1,38 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Sat, 12 Sep 2015 20:32:57 -0400
+Subject: [TUHS] Did realloc ever zero the new memory?
+Message-ID: <201509130032.t8D0WvPl024634@tahoe.cs.Dartmouth.EDU>
+
+> Did any Unix or Unix like OS ever zero fill on realloc?
+
+> On zero fill, I doubt many did that.  Many really early on when memory
+> was small.
+
+This sparks rminiscence. When I wrote an allocation strategy somewhat
+more sophisticated than the original alloc(), I introduced realloc() and
+changed the error return from -1 to the honest pointer value 0. The
+latter change compelled a new name; "malloc" has been with us ever since.
+
+To keep the per-byte cost of allocation low, malloc stuck with alloc's
+nonzeroing policy. The minimal extra code to handle calls that triggered
+sbrk had the startling property that five passes through the arena might
+be required in some cases--not exactly scalable to giant virtual address
+spaces!
+
+It's odd that the later introduction of calloc() as a zeroing malloc()
+has never been complemented by a similar variant of realloc().
+
+> Am I the only one that remembers realloc() being buggy on some systems?
+
+I've never met a particular realloc() bug, but realloc does inherit the
+portability bug that Posix baked into malloc(). Rob Pike and I
+requested that malloc(0) be required to return a pointer distinct from
+any live pointer. Posix instead allowed an undefined choice between
+that behavior and an error return, confounding it with the out-of-memory
+indication. Maybe it's time to right the wrong and retire "malloc".
+The name "alloc" might be recycled for it. It could also clear memory
+and obsolete calloc().
+
+Doug
+
+
