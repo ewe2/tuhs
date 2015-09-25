@@ -1,0 +1,52 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Fri, 25 Sep 2015 19:16:41 -0400
+Subject: [TUHS] Re {TUHS} Synchronous vs Asynchronous IO in Unix
+In-Reply-To: <alpine.BSF.2.11.1509260755080.44325@aneurin.horsfall.org>
+References: <201509211402.t8LE2E4K016401@coolidge.cs.Dartmouth.EDU>
+ <alpine.BSF.2.11.1509260755080.44325@aneurin.horsfall.org>
+Message-ID: <CAC20D2PmoVRU3g3uFUzAC-n=tmMrnFcj8Y5oahkBt=cd5m-DOw@mail.gmail.com>
+
+Sadly I have heard a number of stories/expereiences like this.   That's why
+the original Posix.4 specification had a new API: asynchronous system traps
+(AST) similar to what most other real time systems have had such as RSX,
+VMS or VxWorks for that matter and true async I/O calls. The idea was
+instead of trying to "fix" signals or read/write, put a new (optional) API
+in that had the proper semantics for a real IPC (like being queued, having
+priority etc...).    The AST call was later removed and z queued hacked was
+splitter into signals although async I/O did stay.   I was sad to see AST
+go.  I always felt it was better to not "fix" it, but rather offer and
+optional way that me the needs of people that wanted it.
+
+FWIW:  I've implemented AST a couple of times in my career into UNIX
+systems.   Very handy why you really want those semantics.
+
+Clem
+
+On Fri, Sep 25, 2015 at 6:05 PM, Dave Horsfall <dave at horsfall.org> wrote:
+
+> On Mon, 21 Sep 2015, Doug McIlroy wrote:
+>
+> > Signal() was there first and foremost to support SIGKILL; it did not
+> > purport to provide a sound basis for asynchronous IPC.
+>
+> Yeah, brother.  In a previous life, I got burned very badly when I relied
+> upon signals Doing the Right Thing [tm].
+>
+> I think it was dump/restor, on a BSDi box; the damned thing communicated
+> betwixt its child processes with signals, and I lost every backup tape
+> without realising it.
+>
+> --
+> Dave Horsfall DTM (VK2KFU)  "Those who don't understand security will
+> suffer."
+>               Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn!
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150925/f8c1ae79/attachment.html>
+
