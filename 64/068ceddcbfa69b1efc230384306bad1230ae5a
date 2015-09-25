@@ -1,0 +1,86 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 25 Sep 2015 16:23:49 -0700
+Subject: [TUHS] Re {TUHS} Synchronous vs Asynchronous IO in Unix
+In-Reply-To: <CAC20D2PmoVRU3g3uFUzAC-n=tmMrnFcj8Y5oahkBt=cd5m-DOw@mail.gmail.com>
+References: <201509211402.t8LE2E4K016401@coolidge.cs.Dartmouth.EDU>
+ <alpine.BSF.2.11.1509260755080.44325@aneurin.horsfall.org>
+ <CAC20D2PmoVRU3g3uFUzAC-n=tmMrnFcj8Y5oahkBt=cd5m-DOw@mail.gmail.com>
+Message-ID: <20150925232349.GA19979@mcvoy.com>
+
+On Fri, Sep 25, 2015 at 07:16:41PM -0400, Clem Cole wrote:
+> Sadly I have heard a number of stories/expereiences like this.   That's why
+> the original Posix.4 specification had a new API: asynchronous system traps
+> (AST) similar to what most other real time systems have had such as RSX,
+> VMS or VxWorks for that matter and true async I/O calls. 
+
+Tcl (really tk, but tcl implements it) has this.  You bind an event to 
+a subroutine and when the event happens it jumps into that subroutine,
+just like an AST (with similar rules about calling context etc).
+
+Mainly used for GUI programming where it fits nicely but one useful thing
+is you can post fake events.  That makes it possible to write regressions
+for gui code which is *awesome*.
+
+--larry "still using tcl/tk after all these years" mcvoy
+
+P.S.  We're not crazy, we implemented a C like language that compiles down
+to tcl byte codes so we don't have to deal with tcl very much.  Here's
+what that looks like, this is a little script that I use like
+
+tail -f access.log | awk { print $1, $7 } | bk tclsh dns.l
+
+It's like C with some perl goodness thrown in:
+
+void
+main(void)
+{
+        string  buf;
+        string  ip, file;
+
+        while (buf = <>) {
+                if (buf =~ /^\s*([0-9.]+)\s*$/) {
+                        ip = $1;
+                        buf = `host ${ip}`;
+                        if (buf =~ /not found/ || buf =~ /has no PTR record/) {
+                                printf("%s\n", ip);
+                        } else unless (skip(buf)) {
+                                buf =~ /([^ ]+$)/;
+                                printf("%s\n", $1);
+                        }
+                        continue;
+                }
+                buf =~ /([0-9.]+)\s+(.*)/;
+                ip = $1;
+                file = $2;
+                if (file =~ /assets/) continue;
+                if (file =~ /favicon/) continue;
+/*
+                unless (exists("/home/bk/homepage-live/public/${file}")) {
+                        file .= " (NOT FOUND)";
+                }
+*/
+                buf = `host ${ip}`;
+                if (buf =~ /not found/ || buf =~ /has no PTR record/) {
+                        printf("%s %s\n", ip, file);
+                        continue;
+                }
+                if (skip(buf)) continue;
+                buf =~ /([^ ]+$)/;
+                printf("%s %s\n", $1, file);
+        }
+}
+
+int
+skip(string host)
+{
+        switch (host) {
+            case /crawl/:
+            case /spider/:
+            case /msnbot/:
+                return (1);
+        }
+        return (0);
+}
+
+
+
