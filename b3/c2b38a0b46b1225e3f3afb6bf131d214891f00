@@ -1,0 +1,58 @@
+From: random832@fastmail.com (Random832)
+Date: Sun, 27 Sep 2015 14:12:14 -0400
+Subject: [TUHS] getting nroff to underline in v6,v5
+References: <CADxT5N70c5pTHYgn2J7fN7FnrgXSeP=h=ep2g7X0bkwsoSKt1Q@mail.gmail.com>
+Message-ID: <m21tdjivep.fsf@fastmail.com>
+
+Mark Longridge <cubexyz at gmail.com> writes:
+
+> It seems that nroff had the ability to show underlined text very early
+> on, possibly as early as v3 according to the v3 manual.
+>
+> I haven't managed to get this to work right under simh but I was
+> thinking maybe there's a way to do it. It needs an 'underline font'
+> but the mechanism of how this worked in the old days is a bit of
+> mystery to me. The output device would have to have the ability to
+> either display or print underlined text. Maybe someone can remember
+> which terminal devices supported this in the old days which worked
+> "out of the box" in the v5,v6 era.
+>
+> Maybe there was the ability to use overstrike characters on the teletype?
+>
+> In bash I can use:
+>
+> echo -e "\e[4munderline\e[0m"
+
+The proper escape sequence to end underline is technically \e[24m; using
+0 here ends all other formats (bold, color) as well.
+
+> Shouldn't be too hard to hack up something that works in emulated v5.
+
+The "ul" utility, which converts from overstrikes to termcap-based
+escape sequences, first appeared in 3.0BSD.
+
+The source code is here:
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=3BSD/usr/src/cmd/ul.c
+
+It'd probably be pretty easy to rip out the termcap dependency and have
+it just output ansi codes, though I don't know what dialect of C works
+on v5.
+
+1BSD to 3BSD also had an "iul" utility which just printed a row of
+dashes under characters to be underlined instead of using escape
+sequences. In 2.9BSD and 4BSD and later this functionality is provided
+by "ul -i".
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=1BSD/s6/iul.c
+
+It looks like this wouldn't be hard to modify to use escape sequences
+instead, and it uses the oldest C dialect of any of these versions.
+
+From 4.1c BSD, ul also handles bold, which is represented by
+self-overstriking in the nroff output, and represents superscript and
+subscript (half-linefeed) with dim attributes. Any missing attributes
+are represented with standout. This is essentially the same
+functionality available in modern versions of ul.
+
+
+
