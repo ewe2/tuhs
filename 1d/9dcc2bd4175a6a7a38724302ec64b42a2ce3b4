@@ -1,0 +1,129 @@
+From: b4@gewt.net (Cory Smelosky)
+Date: Sat, 7 Nov 2015 14:07:29 -0800
+Subject: [TUHS] System III - TCP/IP
+In-Reply-To: <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+References: <20151107200358.Horde.M1lYZZyTC4t0Qb8KrygKzhy@avocado.salatschuessel.net>
+ <20151107192043.GA11895@mcvoy.com>
+ <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+Message-ID: <5C15A998-5D10-47C7-888E-EADF42C1BFBE@gewt.net>
+
+
+
+Sent from my iPhone
+
+> On Nov 7, 2015, at 13:28, Clem Cole <clemc at ccc.com> wrote:
+> 
+> hmm...
+> 
+> 0.) adding pty's is pretty easy.  Just grab the BSD code and start hacking.  Grab the original version of Steven's book - he will talk to you through it in detail.   It's a two drivers, the control (ptyX) and the slave (ttypX) .   Having them in your system is handy anyway for a number of things besides networking (like the expect(1) program).
+> 
+> 1.) Larry's memory might be better than mine but I did not think streams shows up until System V.3.  I have an old PWB 3.0 (System III) manual and see no evidence of streams in it.   Given that Dennis did not create them until the V8 tty driver, and then later, the Summit guys use the streams interface for networking, I'm not surprised its not in System III.   So I think using streams is likely to be a dead end.
+> 
+> 2.) Perry Flinn, Bob Doolittle, and I spliced BSD sockets and the 4.2 stack into a System III -ish kernel for the Masscomp's RTU.  So it's definitely doable - although work.  The biggest issue is that the memory systems between BSD and System III are different.  So Rob Gurwitiz's old mbuf code will need to be hacked.  Definitely get a copy of Steven's, maybe the current BSD book and go for it.
+> 
+> 3.) One other thought if all you want to a solid IP/TCP network stack and can forgo the sockets API, then you might try to find the old BBN distribution for BSD 4.1 (Vax) -- which is what Joy started with[remember - Berkeley did not have contract for IP/TCP support for the Vax, BBN did - joy took the BBN code and redid it).  By definition its is a FOSS - because the US tax payer paid for it - although I'm not sure where to find the code these days (google in your friend).    Anyway, the BBN stack splices into the kernel with one small hook (a hack in nami - similar to the MIT ChaosNet stack) but otherwise things just look like devices:  i.e. open("/dev/tcp",...) or instead of socket(...)     There was a later version/distribution from BBN that included the BSD sockets code as an update for 4.2, but was the BBN guts (we actually used that version for the Stellar machine - splicing it into a System V3 based kernel after adding the BSD APIs).
+
+I have 4.1a and c source I think.
+
+> 
+> 4.) It strikes me that it would be easiest of all to just take something like a $20-$30 "Wiznet" 5100 board from Sparkfun and interface it to the system either via serial or better if you have a parallel port.   Then run the IP/TCP stack externally.   This is what we do for Arduino's and other small micro controllers - the board is well documents and easy to talk too.  They have both RJ45 style and wireless too.   I have a hand full of them here and am pretty happy with them for what they provide.
+> 
+> The fact is that for the Masscomp system originally, we ran the IP/TCP stack in a coprocessor (in that case an 186) for realtime reasons (we did not want networking to interrupt the main processor which was 10MHz 68K).  But when we finally went to the '020 the processor was so much faster, we put the stack into the kernel and just use the co-processor as a very large buffer.   
+> 
+> Anyway - the idea is that the system hacking for a tcp stack become very small, just a driver.   You don't get things like UNIX domain sockets, but if what you want it telnet/ftp and the like - a cheap coprocessor like the Wiznet should  work fine.
+> 
+> Clem
+> 
+>> On Sat, Nov 7, 2015 at 2:20 PM, Larry McVoy <lm at mcvoy.com> wrote:
+>> So this seems pretty tough, 16 bit machine and all.  If you were to get
+>> it to work it would probably be with Lachman's STREAMS based TCP/IP.
+>> No idea if that was open sourced.
+>> 
+>> On Sat, Nov 07, 2015 at 08:03:58PM +0100, Oliver Lehmann wrote:
+>> > Hi,
+>> >
+>> > i have an old Z8001 based SysIII variant and I would love to have
+>> > TCP/IP on it (SLIP first, later with a homebrew ethernet device).
+>> >
+>> > I wonder if someone ever saw TCP/IP available on a System III?
+>> >
+>> > I have lets say 90% of the kernel running on it as source
+>> > available and I started digging in the available 4.2 BSD sources.
+>> >
+>> > It looks like there would be much to do to hack in TCP/IP on my
+>> > own (no IPC, no Net, no PTY, no....).
+>> >
+>> > I got K5JB running (userland TCP/IP implementation) after I fixed
+>> > some C code because the C Compiler available on the system is.....
+>> > kinda limited.
+>> >
+>> > telnetd is of course not working as there are no pseudo-teletypes
+>> > on this SYSIII. At least I got ping, echoping and ftpd up and
+>> > running via SLIP
+>> >
+>> > (10.1.1.2 is my SysIII box:)
+>> >
+>> > # ping -c3 10.1.1.2
+>> > PING 10.1.1.2 (10.1.1.2): 56 data bytes
+>> > 64 bytes from 10.1.1.2: icmp_seq=0 ttl=254 time=316.317 ms
+>> > 64 bytes from 10.1.1.2: icmp_seq=1 ttl=254 time=297.328 ms
+>> > 64 bytes from 10.1.1.2: icmp_seq=2 ttl=254 time=296.369 ms
+>> >
+>> > --- 10.1.1.2 ping statistics ---
+>> > 3 packets transmitted, 3 packets received, 0.0% packet loss
+>> > round-trip min/avg/max/stddev = 296.369/303.338/316.317/9.186 ms
+>> > # ftp 10.1.1.2
+>> > Connected to 10.1.1.2.
+>> > 220  FTP version K5JB.k37 ready at Tue Apr 30 22:25:47 1991
+>> > Name (10.1.1.2:root): test
+>> > 331 Enter PASS command
+>> > Password:
+>> > 230 Logged in
+>> > ftp> get sa.timer
+>> > local: sa.timer remote: sa.timer
+>> > 500 Unknown command
+>> > 500 Unknown command
+>> > 200 Port command okay
+>> > 150 Opening data connection for RETR sa.timer
+>> >   2571       0.53 KB/s
+>> > 226 File sent OK
+>> > 2571 bytes received in 00:05 (0.48 KB/s)
+>> > ftp> get wega
+>> > local: wega remote: wega
+>> > 200 Port command okay
+>> > 150 Opening data connection for RETR wega
+>> >  98723       0.51 KB/s
+>> > 226 File sent OK
+>> > 98723 bytes received in 03:05 (0.51 KB/s)
+>> > ftp> exit
+>> > 221 Goodbye!
+>> > #
+>> >
+>> > So I wonder if someone got anything SYSIII -> Net/TCP/IP related
+>> > which could help me in any way to get a SYSIII kernel capable of
+>> > TCP/IP and PTYs to get a telnetd up and running via SLIP is my
+>> > first goal.
+>> >
+>> > Regards,
+>> > Oliver
+>> > _______________________________________________
+>> > TUHS mailing list
+>> > TUHS at minnie.tuhs.org
+>> > https://minnie.tuhs.org/mailman/listinfo/tuhs
+>> 
+>> --
+>> ---
+>> Larry McVoy                  lm at mcvoy.com             http://www.mcvoy.com/lm
+>> _______________________________________________
+>> TUHS mailing list
+>> TUHS at minnie.tuhs.org
+>> https://minnie.tuhs.org/mailman/listinfo/tuhs
+> 
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151107/29e91783/attachment.html>
+
