@@ -1,0 +1,114 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Tue, 10 Nov 2015 09:36:04 +1100
+Subject: [TUHS] System III - TCP/IP
+In-Reply-To: <20151109104051.Horde.YgA2De1sCJ0zishMzOjwnS8@avocado.salatschuessel.net>
+References: <20151107200358.Horde.M1lYZZyTC4t0Qb8KrygKzhy@avocado.salatschuessel.net>
+ <20151107192043.GA11895@mcvoy.com>
+ <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+ <20151107231338.Horde.d8EIgIMMf9VYCExfovc2K_M@avocado.salatschuessel.net>
+ <20151108051028.GA32246@cowbell.employees.org>
+ <CAH1jEzbzpuwzncuEFQMHHD-pHHk_4SHre2PY5BPZNpY_HAgXCw@mail.gmail.com>
+ <20151108143817.Horde.tlWgdF0OWmzmg-kXXO-AxUO@avocado.salatschuessel.net>
+ <CAH1jEzarQAW4ucfP81RRhP0pgkFiHiiMAH9F=a6DsEEiU0Uy=Q@mail.gmail.com>
+ <20151109091551.Horde.vyfPFb7gspsxIQB3WGNcE_A@avocado.salatschuessel.net>
+ <20151109091646.Horde.WJOBgOU20u5J3ItIHNJDwO9@avocado.salatschuessel.net>
+ <20151109104000.Horde.mZW7kq6nXQAQyqwKfyBtDlp@avocado.salatschuessel.net>
+ <20151109104051.Horde.YgA2De1sCJ0zishMzOjwnS8@avocado.salatschuessel.net>
+Message-ID: <CAH1jEzZ35dbkkGhErsHhWMka67g=9SND4_PB00PQqXNs0a384w@mail.gmail.com>
+
+Well that looks to me like a standard split I/D setup where each process,
+and the kernel, can have up to 64 kb of code and 64 kb of data. It will run
+2.11bsd with a relatively straightforward porting effort -- direct
+translation of each code fragment to do something equivalent on your device.
+
+What I discussed as another option (that I did on Z180 which did not have
+split I/D and hence had too small a logical address space to run 2.11bsd or
+any other reasonable unix)... was to increase the code limit past 64 kb by
+segmentation. Whilst this is difficult to do, it can be achieved without
+(much) compiler support. Code pointers become 3 bytes instead of 2, but
+luckily, code pointers are hardly used, and this limitation can be got
+around by using stubs.
+
+You are right though, in that a natively running system that can freely
+utilize your 6 Mb or 8 Mb or whatever, certainly IS possible. The MS DOS C
+compilers for PC/XT, PC/AT etc, supported this. The "large" memory model
+had segmented code and data, any process could have multiple code and data
+segments. Pointers were 4 bytes (equivalent to 3 bytes in your case, a
+16-bit offset and a 7-bit segment). However, pointer arithmetic did not
+carry into the segment field, so arrays and structs and the biggest
+"malloc" were limited to 64 kbytes. It was somewhat slower than the "small"
+memory model (2 byte pointers) and everything took more memory. The "huge"
+memory model removed the 64 kbyte limitation altogether via a software
+emulation of a flat address space (by doing carrying arithmetic whenever
+pointers, arrays or structs were derefenced) but was of course MUCH slower.
+
+If your compiler supports these things, go ahead and use them and port
+4.3BSD across, it would be great. I thought you were talking about a
+smaller system like 1 Mb, with 1 Mb you could support say 3 users and a
+kernel @ 256 kbytes each using a 2.11bsd-like split I/D system and a small
+memory model. They could run a reasonable toolchain consisting of a shell
+spawning cc spawning a compiler or linker (for example) and an editor,
+simultaneously, though it would be tight. In that case I would be concerned
+about speed and size and would recommend a "small" memory model. But if you
+have 6 Mb and your processor is relatively fast (say 8 MHz) and your
+compiler efficient, then I guess a "large" model would be reasonable. I
+like tiny unices, though :)
+
+Nick
+On 09/11/2015 8:40 PM, "Oliver Lehmann" <lehmann at ans-netz.de> wrote:
+
+>
+> http://cvs.laladev.org/index.html/P8000/WEGA/src/uts/sys/ureg.c?rev=1.9&content-type=text/x-cvsweb-markup
+>
+> 1.9 is the current version 1.1 is the plain SysIII file...
+>
+>
+> Oliver Lehmann <lehmann at ans-netz.de> wrote:
+>
+> This is for example the ureg.c which shows the Segmentation Code for the
+>> current SysIII Kernel I redid from original SysIII Sources + Disassembled
+>> object-File analysis of the current SysIII Kernel running on the system:
+>>
+>>
+>> http://cvs.laladev.org/index.html/P8000/WEGA/src/uts/sys/ureg.c?rev=1.1&content-type=text/x-cvsweb-markup
+>>
+>>
+>>
+>> Oliver Lehmann <lehmann at ans-netz.de> wrote:
+>>
+>> I hit the send button to fast :(
+>>>
+>>> Oliver Lehmann <lehmann at ans-netz.de> wrote:
+>>>
+>>> Nick Downing <downing.nick at gmail.com> wrote:
+>>>>
+>>>> You can most likely implement a split I/D architecture by having code
+>>>>> execute out of a different segment than data, although I haven't
+>>>>> checked the datasheet so I don't know for sure if this is possible.
+>>>>>
+>>>>
+>>>> I have 3 different MMUs available. Stack, Code and Data it is called in
+>>>> the Circuit diagram. I probably have to lookup the references but I
+>>>> still
+>>>> don't get why the kernel can only work with 64k of RAM as it is right
+>>>> now
+>>>> compiled as a segmented programm and uses more memory already with
+>>>> SysIII.
+>>>> Only the boot0-loader is compiled unsegmented and also some small
+>>>> utilities. Every other portion of the system uses the segmentation
+>>>> features
+>>>> of the Z8001 and is not limited to 64k adressable space.
+>>>>
+>>>> The system has right now MB of
+>>>>
+>>>
+>>> The system has right now around 6 MB of RAM but can be upgraded to 16MB
+>>> minus 64KB (Due to a firmware bug) of RAM.
+>>>
+>>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151110/9074cfd5/attachment.html>
+
