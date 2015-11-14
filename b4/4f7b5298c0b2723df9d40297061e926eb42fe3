@@ -1,0 +1,72 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sat, 14 Nov 2015 22:42:05 +0100
+Subject: [TUHS] link() syscall implementation
+In-Reply-To: <m2bnawqnze.fsf@fastmail.com>
+References: <20151114133415.Horde.waGYhqdGBssNHzZf3_TcC5x@avocado.salatschuessel.net>
+ <20151114135635.Horde.6nqJB5AyLmQsx2fCZX4iZtZ@avocado.salatschuessel.net>
+ <20151114161757.Horde.RL0PZVub39UDZ9-Qr0wtXdW@avocado.salatschuessel.net>
+ <m2bnawqnze.fsf@fastmail.com>
+Message-ID: <20151114224205.Horde.pNedl1JFkdNwTKQKHr6OiXv@avocado.salatschuessel.net>
+
+
+Random832 <random832 at fastmail.com> wrote:
+
+> Oliver Lehmann <lehmann at ans-netz.de> writes:
+>>         ldl        rr2,rr8(#4)
+>>         ldl        rr4,rr2
+>>         and        r4,#32512
+>>         ldl        _u+78,rr4
+>
+> This looks like it could be:
+>   u.u_dirp.l = uap->linkname;
+>   u.u_dirp.left &= 0x7f00;
+
+Good guess, but the optimizer didn't optimized this "away" so this
+generates literally what is done in C:
+
+         ldl     rr2,rr8(#4)
+         ldl     _u+78,rr2
+         ld      r2,_u+78
+         and     r2,#32512
+         ld      _u+78,r2
+
+
+>
+>>
+>> does the same but  with more instructions and of course not 1:1
+>> binary "the same" ;)
+>> wonder why
+>>   u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);
+>> didn't worked.
+>
+> Well, what code did it generate? Are longs in the same byte order as
+> pointers (could it have needed to be FFFF7F00)?
+
+Should be the same byte order, yes. It generates:
+
+0530 3582  0004     584         ldl     rr2,rr8(#4)
+0536 0702  7f00                 and     r2,#32512
+04d2 5d02  8000*    585         ldl     _u+78,rr2
+04d6 004e*
+
+OK - it is not temporarily copied to rr4, but directly modfied in
+rr2 and then assigned to u.u_dirp. It should be "the same" - But
+  - ln(1) does not work with this code. Instead of creating a
+hardlink, it creates a new empty file (different inode).
+
+And to be honest - who would write such a code in the first place
+    u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);
+Feels to crazy for me as someone would really write such a code.
+There are so many "better" way (readability) someone would come
+up with than this.... I/We just didn't figured out the better
+way yet ;)
+
+Another possibility could be, that the sys2.o was generated with
+an earlier version if the assembler and not recompiled with the
+"newer"/shipped one and that it might be impossible to generate
+this code now. But all sccs tags in the assembler are before the
+sccs tag in sys2.o....
+
+Regards, Oliver
+
+
