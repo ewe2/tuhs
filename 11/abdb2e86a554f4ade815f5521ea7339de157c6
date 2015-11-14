@@ -1,0 +1,57 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sat, 14 Nov 2015 16:17:57 +0100
+Subject: [TUHS] link() syscall implementation
+In-Reply-To: <20151114135635.Horde.6nqJB5AyLmQsx2fCZX4iZtZ@avocado.salatschuessel.net>
+References: <20151114133415.Horde.waGYhqdGBssNHzZf3_TcC5x@avocado.salatschuessel.net>
+ <20151114135635.Horde.6nqJB5AyLmQsx2fCZX4iZtZ@avocado.salatschuessel.net>
+Message-ID: <20151114161757.Horde.RL0PZVub39UDZ9-Qr0wtXdW@avocado.salatschuessel.net>
+
+I've now implemented this:
+
+         u.u_dirp.left = hiword(uap->linkname) & 0x7f00;
+         u.u_dirp.right = loword(uap->linkname);
+
+while hiword and loword being defined in my param.h like this:
+
+# define loword(X)      (((unsigned short *)&X)[sizeof(X) - \
+                         (sizeof(unsigned short)+1)])
+# define hiword(X)      (((unsigned short *)&X)[0])
+
+This results in:
+
+         ld      r2,rr8(#4)
+         and     r2,#32512
+         ld      _u+78,r2
+         ld      r2,rr8(#6)
+         ld      _u+80,r2
+
+
+versus
+
+         ldl        rr2,rr8(#4)
+         ldl        rr4,rr2
+         and        r4,#32512
+         ldl        _u+78,rr4
+
+does the same but  with more instructions and of course not 1:1
+binary "the same" ;)
+wonder why
+   u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);
+didn't worked.
+
+At least link() is now working again (before the fix it was only
+working when the file to be linked is in the working directory)
+
+#1 ls -i /z/tmp/
+  2487 hugo   2486 walter
+#2 rm /z/tmp/walter
+#3 ln /z/tmp/hugo /z/tmp/walter
+#4 !1
+ls -i /z/tmp/
+  2487 hugo   2487 walter
+#5 ln /z/tmp/hugo /z/walter
+#6 ls -i /z/tmp/hugo /z/walter
+  2487 /z/tmp/hugo                  2487 /z/walter
+#7
+
+
