@@ -1,0 +1,34 @@
+From: random832@fastmail.com (Random832)
+Date: Wed, 18 Nov 2015 00:36:28 -0500
+Subject: [TUHS] Interesting post by Rob Pike in 1985: Shells,
+	features and interaction
+References: <877flgw816.fsf@fastmail.com> <7694.1447811788@cesium.clock.org>
+Message-ID: <m2bnarvpgj.fsf@fastmail.com>
+
+"Erik E. Fair" <fair-tuhs at netbsd.org>
+writes:
+> That function export feature of bash was not the cause of the
+> Shellshock vulnerability.
+>
+> The cause was idiot programmers who wrote CGI scripts for bash
+> without proper data sanitization.
+
+The manner in which bash (pre-shellshock) imported functions from the
+environment, along with the vulnerability, made "proper data
+sanitization" flatly impossible without deep knowledge of what kind of
+strings it was looking for. It would import functions from absolutely
+any variable, with any name, including variables explicitly designated
+in the protocols involved to hold untrusted remote data.
+
+Removing text in a format that triggers a feature of a particular shell
+from HTTP_COOKIE is absolutely not the CGI script's responsibility (the
+bug triggers before the script gets to execute a single line), and I
+would argue it's not the HTTP server's problem either.
+
+And if the bash feature had been implemented correctly, it would have
+been mostly harmless (The remote client could still have caused a
+function called HTTP_COOKIE to be defined, but the script's almost
+certainly not going to execute it)
+
+
+
