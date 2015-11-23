@@ -1,0 +1,169 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 23 Nov 2015 11:56:42 +1100
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <565124E1.8050001@gmail.com>
+References: <20151121140022.Horde.ZwPZMYWApn-dXiuNCkiDWDA@avocado.salatschuessel.net>
+ <1448151215.3670388.446383649.14D3C39D@webmail.messagingengine.com>
+ <56510C98.2000301@gmail.com>
+ <20151122023630.Horde.YgAxkfni4xS7fRdlcpIUGSp@avocado.salatschuessel.net>
+ <565124E1.8050001@gmail.com>
+Message-ID: <CAH1jEzYW9DBrSE0A=NnREq8qyq6vOQ6nWN6d-dwEa3mp1r20Gw@mail.gmail.com>
+
+What I would do personally is:
+1. Run in an emulator such as the ones linked above, it will be heaps
+easier than the bare hardware. Need not emulate your particular machine.
+Preferably would emulate your Z800x CPU but even that isn't 100% essential.
+2. Get yourself a 2.11bsd filesystem, best way might be install or download
+2.11bsd for PDP-11 and run in simh. Hopefully the simulated disk is in raw
+form so it can be moved between simh and your emulator, otherwise you could
+modify one of the emulators or convert the file somehow.
+3. Figure out a way of copying between your real disk and your simulated
+disk. For example run an sshd under simh and "scp" to your disk. Or mount
+your file as a tape and "dd" it over to your disk with correct name. Or
+whatever, there could be existing utilities that can do this. (Kind of like
+msdosutils on linux has a userspace implementation of vfat and can do
+simple things to vfat formatted floppies or disk images).
+4. Figure out how the bootstrap works and translate it to Z800x assembly.
+In essence the boot sector will load the next 16 or so sectors into memory
+and jump to it. Those 16 sectors contain a cutdown version of a 2.11bsd
+filesystem mounted rdonly, enough to read superblock, locate inode table,
+maybe locate /boot/kernel and then load and jump to it. I can send some
+examples in Z80 code for my project. Or I can take a look in 2.11bsd and
+tell you how this works.
+5. You now have a cross assembler and linker and a development system. Get
+C working too. Compile the kernel with as many things as possible disabled
+-- no disk, network, etc. Find a way for dprintf() or similar to work --
+such as polled output to a serial port, or even just defining an unused
+Z8001 opcode to putchar() whatever is in R1. No need for any finesse here.
+6. In the first line of the kernel startup put a dprintf of "hello world".
+Copy resulting kernel to /boot/kernel or whatever it is supposed to be
+called. Put similar diagnostics in your bootstrap. Run and debug until your
+messages come out. Then gradually step through the kernel initialization
+and main loop fixing things as you go. Eventually add more subsystems.
+
+Nick
+On 22/11/2015 1:14 PM, "William Pechter" <pechter at gmail.com> wrote:
+
+> Oliver Lehmann wrote:
+>
+>>
+>> William Pechter <pechter at gmail.com> wrote:
+>>
+>>
+>> I found this for a Z8000 System III box. It was an East German dual cpu
+>>> Z80/Z8001 clone box running SysIII -- perhaps this may be of some help as a
+>>> comparison.
+>>>
+>>
+>> And I also redid (disassembled objects, translated it back to C) nearly
+>> all Kernel sources of the SYSIII (only lock.c is missing with file
+>> locking features - I only disassembled it)
+>>
+>> https://github.com/OlliL/P8000/tree/master/WEGA/src/uts
+>>
+>>
+>> Emulator
+>>> http://www.knothusa.net/Home.php
+>>>
+>>
+>> Yes... he built the Emulator based on MAME back in 2008 with quite
+>> some info from me - he used to work on a P8000 back in the 90s so
+>> he felt for it building the Emulator.... ;)
+>>
+>>
+>> More P8000 info
+>>> http://www.pofo.de/P8000/
+>>>
+>>
+>> Z8000 docs
+>>> http://www.pofo.de/P8000/  (there's some Zilog System 8000 Z8000 Zeus
+>>> info here as well.
+>>>
+>>
+>> Cool... you found my page ;)
+>>
+>> _______________________________________________
+>> TUHS mailing list
+>> TUHS at minnie.tuhs.org
+>> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>>
+>
+> Nice site... I worked for DEC back in the 80's and I ended up installing
+> Exxon Office Systems'  Vaxes which
+> they used for software development for the Zeus systems.  Some employees
+> were from the Berkeley area
+> and New Jersey, even Princeton, seemed to be culture shock.
+>
+> The computer room was directly under the flight path to the little
+> Princeton Airport and the rented building
+> wasn't really designed for those machines.  The place was small offices
+> for insurance sales, accounting,
+> lawyers and such.   They later moved over to a new building on the RT 1
+> corridor which had a real computer room after they had all the electricity
+> put in for the 11/780.
+>
+> They moved from California to Princeton, New Jersey back around '81 or so
+> and were gone shortly
+> when Exxon closed them down in '84.
+>
+> I think they were the first Ultrix32 box I saw in my lifetime... which was
+> much more AT&T focused working
+> for DEC in New Jersey.  By 92 or so I was doing SunOS 4.1.3 at work and
+> FreeBSD/NetBSD at home.
+>
+> I never could figure out how AT&T kept the miserable self-destructive Unix
+> Filesystem alive with it's 13 character filename limit and no symbolic
+> links.  SysVR4 finally showed some promise, and I even
+> thought they had a winner with their object-oriented management tools to
+> manage getty's and printers and such.
+>
+> FACE, the SVR4 character terminal graphic utilities were not too bad. You
+> could finally run the whole system without vi-ing configurations -- kind of
+> like a pre-SUSE  Yast that used the button labels on function keys.
+> Perkin-Elmer/Concurrent had a similar thing in Xelos (SVR2) on their
+> block-mode capable 1251 and 6312
+> terminals...  That was the thing in the 80's -- menu or function button
+> Unix sysadmin screens.
+>
+> AT&T killed their future OEM's by allowing the OSF/USL split to happen
+> over their Sun investment
+> and promise that Sun would get the new Unix before everyone else. The Unix
+> wars made sure there
+> wouldn't be one binary/source compatible version of Unix across all
+> hardware platforms.
+>
+> When I started to work with Solaris2 I was amazed as to how different it
+> seemed than straight SVR4 and
+> I helped write Pyramid's training for their OS/x SVR4 MIPS R3000 product.
+>
+> Had AT&T been more willing to supply the code equally and get out of the
+> way you wouldn't have had
+> the waste of the NCR purchase later after the less than stellar 3b and 3b2
+> sales of the late 80's.
+>
+> To bring this back to the Z8000 ZEUS and Zilog:
+>
+> Pyramid was an OEM for AT&T and AT&T was to sell Pyramid boxes to the US
+> Government to replace
+> the Z8000 Zilog Zeus machines which were used by the IRS.  I think this
+> all fell apart after the
+> NCR purchase.  My job kind of went with it as Pyramid went through a
+> downward sales spiral
+> as AT&T stopped buying MIServers and the MIPS MIServer-S line (R3000 SVR4)
+> multicpu boxes.
+>
+> Bill
+>
+> --
+> Digital had it then.  Don't you wish you could buy it now!
+> pechter-at-gmail.com  http://xkcd.com/705/
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151123/7a4fe56c/attachment.html>
+
