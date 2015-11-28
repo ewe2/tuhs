@@ -1,0 +1,39 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sat, 28 Nov 2015 18:30:53 -0500
+Subject: [TUHS] tool (that wnj wrote?) that reduced the data
+	segment	size?
+Message-ID: <1448753456.23036.for-standards-violators@oclsc.org>
+
+I'm too tired to dig for the exact words in the ISO standard,
+but I had the impression that the official C rule these days
+is that the effect of writing on a string literal is undefined.
+
+So it's legal for an implementation to make strings read-only,
+or to point several references to "What's the recipe today, Jim"
+to one copy of the stripng in memory, and even to point uses of
+"Jim" to the tail of the same string.  Or both.
+
+It is also legal for every string literal to reside in its own
+memory and to be writable, but since the effect is undefined,
+code that relies on that is on thin ice, especially if meant to
+be portable code.
+
+I have used, and even fixed (unrelated) bugs in, a compiler
+that merged identical strings.  I forget whether it also looked
+for suffix matches.  Whether the strings went in read-only
+memory was up to the code generator (of course); in the new
+back-end I wrote for it, I made them so.  This turned up quite a
+few fumbles in very-old UNIX code that assumed unique, writable
+string literals, especially those that called mktemp(3).  To my
+mind that just meant the programs needed to be fixed to match
+current standards (just as many old programs needed fixes to
+compile without error in ISO C), so I fixed them.
+
+I didn't (and still don't) like Joy's heavy-handed hack, but I
+see his point, and think it's just fine for the language rules
+to allow the compiler to do it hacklessly.
+
+Norman Wilson
+Toronto ON
+
+
