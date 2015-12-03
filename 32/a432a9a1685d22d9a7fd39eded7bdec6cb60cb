@@ -1,0 +1,59 @@
+From: random832@fastmail.com (Random832)
+Date: Thu, 3 Dec 2015 17:27:47 +0000 (UTC)
+Subject: [TUHS] Some notes on running UNIX v6 in 2015,
+ using SimH and a healthy dose of documentation
+References: <20151203152150.C571C18C084@mercury.lcs.mit.edu>
+Message-ID: <n3pu2j$27r$1@ger.gmane.org>
+
+On 2015-12-03, Noel Chiappa wrote:
+> I did a very similar exercise using the Ersatz11 simulator; I have a lot
+> of stuff about the process here:
+>
+>   http://www.chiappa.net/~jnc/tech/V6Unix.html
+>   
+> It contains a number of items that you might find useful, e.g.: "V6 as
+> distributed is strictly a 20th Century operating system. Literally. You can't
+> set the date to anytime in the 21st century, for two reasons. First, the
+> 'date' command only take a 2-digit year number. Second, even if you fix that,
+> the ctime() library routine has a bug in it that makes it stop working in the
+> closing months of 1999."
+
+I don't think your fix to the date command is accurate. The description says:
+
+>  The 'date' command has been extended to support 2- and 4-digit year
+>  numbers (to be upwardly compatible, the 2-digit ones assume 19xx).
+
+But the code says:
+>	if ((y < 0) || (yh < 0)) {
+>		time(nt);
+>		y = localtime(nt)[5];
+>		y =+ 1900;
+>	}
+>	  else
+>		y = yh + y;
+
+To match your description it should be
+	if ((y < 0) && (yh < 0)) {
+		time(nt);
+		y = localtime(nt)[5];
+	} else if(y < 0) {
+		/* yh = two digit year */
+		y = 1900 + yh;
+	} else
+		y = yh + y;
+
+Though I'd be inclined to add "if (y < 1970) y =+ 100;" to bring it in line
+with modern systems' 1970-2069 range for two-digit years.
+
+Of course, _any_ ancient unix system (and a fair few modern ones) can't
+represent dates past 2038. We've only got 23 years left before attempts to
+bring up old systems will need some trickery (maybe set the year to 28 or 56
+years before the present... that trick, with increasing windows, will work
+until 2100 isn't a leap year)
+
+On the other hand, treating it as an "unsigned" value will last about as long
+and is a bit less of a hack. But as you note, doing this sort of thing in V6 C
+isn't trivial.
+
+
+
