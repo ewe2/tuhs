@@ -1,0 +1,104 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Fri, 4 Dec 2015 08:51:32 -0500
+Subject: [TUHS] Installing a large set of files into v6 from a modern
+	host
+Message-ID: <CAC20D2Nuh+VnYu6U4yoa4aB54wG8gkeHZBafdhqMgL70v_F3nA@mail.gmail.com>
+
+​below​
+
+On Fri, Dec 4, 2015 at 12:02 AM, Will Senn <will.senn at gmail.com> wrote:
+
+> 1. a utility on the host that is capable of copying a directory and its
+> contents, recursively, onto a blank magtape/dectape/rk image that is then
+> readable in the v6 environment
+>
+​Right - you want a common archive format between the two systems that talk
+to the tape device.
+You can either create your own or better take on the old ones that exist.
+
+
+
+> 2. a tar and unzip binary for v6 that is capable of dealing with the
+> tarball (but isn't the tarball going to exceed the max file size anyway, if
+> so this won't work)
+>
+
+I think you have a many to chose from off the top of my head I can think of
+each with different advantages (more in a minute):
+
+   - tar
+   - cpio
+   - ​tp/stp
+   - ar (new format)
+
+You seem to also want a compression tool, but you might try compressing on
+the modern system - but there are solution here also.
+
+   - pack/unpack was the old v5/v6 compression tool - I've forgotten where
+   it was sourced check the first USENIX tape in 77
+   - porting a modern zip/gzip/bzip
+
+
+
+
+> 3. an alternative archiver that runs on FreeBSD or Mac OS X, that can
+> create a single file archive from a subdirectory's contents on the host
+> (the resultant file would need to be extractable on v6, and if file size is
+> too limited, won't work either).
+>
+​That is a lot of work and unless this is going to be a very long term
+thing, I'm not so sure it's worth it.    Basically you want a virtual FS on
+the v6 system and the simulator.    If you are going to do this alot, then
+its worth it.   Think the VFS that vmware and like offer.​
+
+
+
+> 4. some kind of directory transfer utility that works over telnet that can
+> be executed from a FreeBSD or Mac OS X host and that can be executed on the
+> v6 system as well.
+>
+​the original unix kermit will compile using ​the v6 compiler (maybe the
+v5) compiler.   You have to dig in the archives, but you want a version
+from Columbia circa 1977 and you be fine.   The latest version will use
+things in the language first described in the white book - aka Typersetter
+C (Dennis was wrote the book starting with v6, but's not published until
+v7).   If you a later compiler running on v6 you'll be fine.
+
+
+
+> 5. a utility capable of creating an empty magtape/dectape/rk image and
+> another capable of making a filesystem on the image and another of
+> populating the image (analogous to fdisk rkimage; mkfs rkimage; rkcopy dir
+> rkimage)
+>
+You could move the file system creation tools and set of a virtual v6 FS.
+It's a lot of work and unless this is going to be a very long term thing,
+I'm not so sure it's worth it.
+
+
+​As for the archivers which in the short term is likely to be your best bet:
+
+
+   1. tar - there a couple of versions of tar for v6 including binaries.
+   I personally would start there.
+   2. cpio was written for PWB 1.0 which is v6 kernel based.  That binary
+   should run.  But IIRC correctly the original cpio was only binary headers
+   (the -c/ascii headers was added later).   So you'll need to be careful on
+   the modern computer and make sure you set the switches so that he created
+   the proper endian/byte swapping -- ness in the header
+   3. tp/stp - on the original USENIX tape is a "super tp" that replaced
+   the original one.   The binary should run as is.  The code for it is
+   pre-K&R so compiling it with a modern compiler will be a little bit of
+   work.   Also, IIRC the "directory" which is on the front of the tape is
+   binary, so you'll need to make sure you write everything in PDP-11 format.
+   4. ar - was updated by the community.   Eventually, V7 took the "new ar"
+   from original USENIX tape.  Again that binary should just run fine.
+   Although I don't think its directory is recursive so it may fail that
+   requirement for you
+
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151204/36dba19f/attachment.html>
+
