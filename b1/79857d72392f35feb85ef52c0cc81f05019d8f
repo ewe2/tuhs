@@ -1,0 +1,118 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 5 Dec 2015 17:04:03 -0600
+Subject: [TUHS] Adding an RP06 disk to a running V7 instance
+In-Reply-To: <86631035-517A-4C4B-B75F-236B3E125AC7@serissa.com>
+References: <566344EA.7010401@gmail.com>
+ <63EEF957-00FD-4C1A-A290-70A4FDC4DA81@ronnatalie.com>
+ <5663663B.5030400@gmail.com>
+ <86631035-517A-4C4B-B75F-236B3E125AC7@serissa.com>
+Message-ID: <56636D63.70303@gmail.com>
+
+Lawrence,
+
+Thanks for the note. Moving /usr to another drive served as both an 
+exercise for me to understand how it works and for me to follow the 
+advice. Good to know the advice is less applicable to the sim. You were 
+correct about the math, duh, 1111 is 15, not 8 :). All good now.
+
+Thanks,
+
+Will
+
+On 12/5/15 4:48 PM, Lawrence Stewart wrote:
+> The reason for the advice to run root and usr on separate drives is so you don’t have to seek back and forth
+> between the two partitions if they are on the same drive.  That reason doesn’t apply to simulators, since the
+> drives are just files anyway.
+>
+> But it looks to me like you have the wrong minor device numbers for the block device
+>
+> If you want partition 7 of the second drive youwant
+> mknod rp3 b 6 15
+> not b 6 8
+>
+> minor device 8 would be partition 0 of the second drive, minor 9 is partition 1 of the second drive, etc.
+>
+> -L
+>
+>> On 2015, Dec 5, at 5:33 PM, Will Senn <will.senn at gmail.com> wrote:
+>>
+>>
+>> The v7 manual suggests running /usr mounted on a separate drive from /. I am trying to follow this advice, but I am getting a read error on the newly added disk.
+>>
+>> I read hp(4). According to this man page, hp partitions each device into 8 partitions of different sizes and lengths (given in cylinders of 418 512-byte blocks). Here are the partitions from the man page, where disk refers to pseudodisks on each drive (are these partitions?):
+>>
+>> disk start length
+>> 0 0 23
+>> 1 23 21
+>> 2 0 0
+>> 3 0 0
+>> 4 44 386
+>> 5 430 385
+>> 6 44 367
+>> 7 44 771
+>>
+>> It would appear that:
+>> partitions 0, 1 and 7 combined account for the entire contiguous disk, cylinders 0-815, and has the largest single partition (partition 7) of any of the schemes. This seems like the default scheme and during a default setup accounts for rp0 on partition 0 and rp3 on partition 7.
+>> partitions 0, 1 and 6 combined only account for cylinders 0-411.
+>> partitions 0, 1, 4, and 5 combined, but with more slices than the first scheme, also account for the entire disk cylinders 0-815.
+>> partitions 2 and 3 don't seem to be useable.
+>>
+>> Given the above constraints, it seems like the first partition scheme that includes partition 7 would also be a good choice to use for an additional drive.
+>>
+>> I kept this in mind and added an additional RP06 to the PDP11/45 simulation. At boot, I tried two different approaches to handling the new drive, both had the same problem ultimately. The first was to simply ignore it until after booting into unix and then creating the special files as Ronald describes and then running mkfs:
+>>
+>> /etc/mknod rp3 b 6 8
+>> /etc/mknod rrp3 c 14 15
+>> chmod go-w rp3 rrp3
+>>
+>> /etc/mkfs /dev/rp3 322278
+>> isize = 10328
+>> m/n = 3 500
+>>
+>> I don't see any errors, but the isize is different than it is during the default install onto the first drive.
+>>
+>> The second was to use tm(0,3) (is this mkfs or something like it?) like I did for the first drive:
+>> tm(0,3)
+>> file sys size: 5000
+>> file system: hp(1,0)
+>> isize = 1600
+>> m/n = 3 500
+>>
+>> then after creating the same special files as above, mkfs works the same way it did on the default setup on drive 0:
+>> /etc/mkfs /dev/rp3 322278
+>> isize = 65496
+>> m/n = 3 500
+>>
+>> Still no errors, but when I try to check the filesystem with icheck, or restore a filesystem from tape to the drive, I get the following error:
+>> read error 9736
+>>
+>> full result:
+>> icheck /dev/rp3
+>> /dev/rp3:
+>> read error 9736
+>> files      2 (r=1,d=1,b=0,c=0)
+>> used       1 (i=0,ii=0,iii=0,d=1)
+>> free    1389
+>> missing312699
+>>
+>> What does it look like I am doing wrong?
+>>
+>> Thanks,
+>>
+>> Will
+>>
+>> On 12/5/15 2:17 PM, Ronald Natalie wrote:
+>>> You want to add another drive?   The lower 3 bites selects the partition, the upper bits (shfited right 3) are the drive number.
+>>> The second disk (to match your first) would use 6,8 and 6,15 and 14,8 and 14,15 respectively.
+>>>
+>>>> On Dec 5, 2015, at 3:11 PM, Will Senn <will.senn at gmail.com> wrote:
+>>>>
+>>>>
+>>>> I would like to add another RP disk to the environment. After I attach an RP04/05/06 to the system, what should I use as the major/minor device numbers? To put it differently, it doesn't seem correct to me to use 6,1 for the block device or 14,1 for the character device on the new drive as it's a completely different disk from rp0 and rp3 which are just partitions on the first drive and have 6,0, 6,7, and 14,0, 14,7. If each RP can have 8 partitions and there can be 8 drives, what is the correct major, minor numbers to use with v7 for multiple devices?
+>> _______________________________________________
+>> TUHS mailing list
+>> TUHS at minnie.tuhs.org
+>> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
+
