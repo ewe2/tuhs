@@ -1,0 +1,44 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed,  9 Dec 2015 12:50:24 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151209175024.5180118C0C7@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > my now handy-dandy PDP11/40 processor handbook
+
+That's good for the instruction set, but for the memory management hardware,
+etc you'll really want one of the {/44, /45, /70, /73, etc} group, since only
+those models support split I+D.
+
+    > the 18 bits holding the word 000407
+
+You mean '16 bits', right? :-)
+
+    > This means that branches are to 9th, 10th, 11th and 7th words,
+    > respectively. It'll be a while before I really understand what the
+    > ramifications are.
+
+Only the '407' is functional. (IIRC, in early UNIX versions, the OS didn't
+strip the header on loading a new program into memory, so the 407 was actually
+executed.)  The others are just magic numbers, inspired by the '407' - the
+code always starts at byte 020 in the file.
+
+    > Oh and by the way, jumping between octal and decimal is weird, but
+    > convenient once you get the hang of it - 512 is 1000, which is nifty
+    > and makes finding buffer boundaries in an octal dump easy :).
+
+The _real_ reason octal is optimal for PDP-11 is that when looking at core,
+most instructions are more easily understood in octal, because the PDP-11 has
+8 registers (3 bits), and 3 bits worth of mode modifier, and the fields are
+aligned to show up in octal.
+
+I.e. in the double-op instruction '0awxyz', the 'a' octit gives the opcode,
+'w' is the mode for the first operand, 'x' is the register for the first
+operand, and 'y' and 'z' similarly for the second operand. So '12700' is
+'MOV (PC)+, R0' - AKA 'MOV #bbb, R0', where 'bbb' is the contents of the word
+after the '12700'.
+
+	Noel
+
+
