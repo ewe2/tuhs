@@ -1,0 +1,55 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed,  9 Dec 2015 09:24:13 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151209142413.3CA2918C0C7@mercury.lcs.mit.edu>
+
+    > From: Mark Longridge
+
+    > I've never been able to transfer any file larger than 64K to Unix V5 or
+    > V6.
+
+Huh?
+
+  # hrd /windows/desktop/TheMachineStops.htm Mach.htm
+  Xfer complete: 155+38
+  # l Mach.htm
+   154 -rw-rw-r--  1 root    78251 Oct 25 12:13 Mach.htm
+  #
+
+'more' shows that the contents are all there, and fine. ('hrd' is a command
+in my V6 under Ersatz11 that reads an arbitrary file off the host file
+system. Guess I need to set the date on the system!)
+
+V6 definitely supports fairly large files; see the code in bmap() in subr.c,
+which shows that the basic structure on disk can describe files of 7*256
+(1792) + 256*256 (65536) blocks, or 67328 blocks total (34MB).
+
+(In reality, of course, a file can't reach that limit; first, a disk
+partition in V6 is limited to 64K blocks, but from that one has to deduct
+blocks for the ilist, etc; further, the argument to bmap() is an int, which
+limits the 'block number in file' to 16 bits, and in fact the code returns an
+error if the high bit in the 'block number in file' is set.)
+
+
+    > I also don't recall seeing any file on V5 or V6 larger than 65536
+    > bytes
+
+I don't think there is one; the largest are just less than 64KB. I don't
+think this is deliberate, other than in the sense that they didn't put any
+huge files in the distro so it would fit on a couple of RK packs.
+
+
+    > dd if=/dev/mt0 of=cont.a bs=1 count=90212
+    > ..
+    > 24676+0 records in
+    > 24676+0 records out
+    > Now, if we take 90212 and subtract 65536 we get 24676 bytes. So there
+    > definitely seems to be some 64K limit here
+
+Probably 'count' is an 'int' in dd, i.e. limited to 16 bits. No longs in V6 C
+(as distributed, although later versions of the C compiler for V6 do support
+longs - see my 'bringing up Unix' pages).
+
+	Noel
+
+
