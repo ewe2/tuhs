@@ -1,0 +1,100 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Wed, 9 Dec 2015 10:29:22 -0600
+Subject: [TUHS] v6tar from v7 on v6, too large?
+In-Reply-To: <CAC20D2NVH_O6myB0NeYehenazHMFTHY5A+PAqngRpLMjBA4dVA@mail.gmail.com>
+References: <20151209045357.8573718C0C5@mercury.lcs.mit.edu>
+ <56683CDF.10609@gmail.com>
+ <CAC20D2PdNDRQ17whxxd5GEqaiG6px-NM58Q6xe4g7khzMsx+dw@mail.gmail.com>
+ <CAC20D2NVH_O6myB0NeYehenazHMFTHY5A+PAqngRpLMjBA4dVA@mail.gmail.com>
+Message-ID: <566856E2.7010009@gmail.com>
+
+On 12/9/15 9:07 AM, Clem Cole wrote:
+>
+> On Wed, Dec 9, 2015 at 9:56 AM, Clem Cole <clemc at ccc.com 
+> <mailto:clemc at ccc.com>> wrote:
+>
+>     check the man page on the a.out format.
+>
+>
+> ​Note to folks on the list - please don't give away the answer...
+>
+> Will
+>
+> A small piece of homework for the student -- look at 407 the magic 
+> number for the a.out file ​and see if you can explain why Ken picked 
+> that value.  Hint it is particular to the PDP-11 architecture and is 
+> not portable to other systems, although most other systems that UNIX 
+> was "ported" too continued to used the a.out format kept the magic 
+> numbers as 407/411 etc., although I know of some ports (like mine own 
+> for Magix - the Tek Magnolia system of the late 1970s) that changed 
+> the magic number to be correct for that architecture.
+>
+> Clem
+>
+Clem,
+
+Nice!
+
+In full disclosure, I read about magic numbers being PDP architecture 
+related somewhere in the recent past, but I didn't really understand the 
+connection. So, when you mentioned it, rather than google it and spoil 
+the fun, I took the hint and thought a bit about it in the context of 
+our discussion. As it turns out, according to my now handy-dandy 
+PDP11/40 processor handbook, the 18 bits holding the word 000407 which 
+appears as the first word of most of my v6 binaries, 000 000 100 000 
+111b, the magic number represents the BR instruction base where the last 
+8 bits is an offset added to the PC after it has read the word. So, the 
+PDP loads the object, reads the first word, determines it is a branch 
+instruction:
+
+BR PC+7
+
+and jumps forward to start reading the 9th word of the program. Why the 
+9th word? According to man 5 a.out, the a.out header always contains 8 
+words.
+
+So, given a binary, like write:
+dd if=write bs=128 count=1|od
+1+0 records in
+1+0 records out
+0000000 000407 001176 000032 000150 000000 000000 000000 000001
+0000020 022627 000002 001412 003006 012700 000001 104404 000657
+...
+
+The analysis that follows in light of the information discovered so far 
+would be:
+word 1 at 0000000 000407 Magic Number (BR PC+7)
+word 2 at 0000002 001176 Size of the program text segment (638 bytes)
+word 3 at 0000004 000032 Size of the initialized data segment (26 bytes)
+word 4 at 0000006 000150 Size of the uninitialized data segment (104 bytes)
+word 5 at 0000010 000000 Size of the symbol table (stripped in this case)
+word 6 at 0000012 000000 The entry location 0 at present
+word 7 at 0000014 000000 Unused
+word 8 at 0000016 000001 Relocation bit suppression flag (I think this 
+means the file contains absolute memory references)
+word 9 at 0000020 022627 The target of the first branch, contains 
+instructions to MOV (R6)+,(R7)+ (I think)...
+
+According to man 5 a.out on v7, the different magic numbers represent 
+normal, read-only text, separate I&D, and overlay:
+     #define A_MAGIC1 0407       /* normal */
+     #define A_MAGIC2 0410       /* read-only text */
+     #define A_MAGIC3 0411       /* separated I&D */
+     #define A_MAGIC4 0405       /* overlay */
+
+This means that branches are to 9th, 10th, 11th and 7th words, 
+respectively. It'll be a while before I really understand what the 
+ramifications are.
+
+Oh and by the way, jumping between octal and decimal is weird, but 
+convenient once you get the hang of it - 512 is 1000, which is nifty and 
+makes finding buffer boundaries in an octal dump easy :).
+
+Thanks,
+
+Will
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151209/10392878/attachment.html>
+
