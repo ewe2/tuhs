@@ -1,0 +1,39 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed,  9 Dec 2015 00:17:20 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151209051720.4C6D218C0C5@mercury.lcs.mit.edu>
+
+    > From: Noel Chiappa
+
+    > the most likely is that 'v6tar' is linked to be split I+D, and your V6
+    > emulation is on a machine that doesn't have split I+D (e.g. an 11/40)
+
+Now that I think about it, the linked systems that are part of the V6 distro
+tape are all linked to run on an 11/40. They will boot and run OK on a more
+powerful machine (/45 or /70), but they will act like they are on a /40 -
+i.e. no split I+D support/use (user or kernel). So to get split I+D support,
+you need to build a new Unix binary, with m45.s instead of m40.s. If you
+haven't done that, that's probably what the problem is.
+
+
+Aside: V6 comes in two flavours: no split I+D at all, or split I+D in both
+the kernel and user. For some reason that I can't recall, we actually
+produced an 'm43.s', BITD at MIT, which ran the kernel in non-split-I-D, but
+supported split I-D for the users.
+
+I wish I could remember why we did this - it couldn't have been to save
+memory (the machine didn't have a great deal on it when this was done -
+although I have this vague memory that that was why we did it), because
+running split I+D in the kernel does not, I think, use any more physical
+memory (provided you don't fiddle with the parameters like the number of
+buffers) than running non-split. Or maybe it does?
+
+One possible reason was that the odd layout of memory with split I+D in the
+kernel made debugging kernel code harder (we were doing a lot of kernel
+hacking to support early networking work); another was that we were just being
+conservative, didn't need to extra space in the kernel that I+D allowed, and
+so didn't want to run it.
+
+	Noel
+
+
