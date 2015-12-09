@@ -1,0 +1,49 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed,  9 Dec 2015 08:30:27 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151209133027.DCD0D18C0C7@mercury.lcs.mit.edu>
+
+    > From: Ronald Natalie
+
+    > I'm pretty sure the V6 kernel didn't run in split I/D.
+
+Nope. From 'SETTING UP UNIX - Sixth Edition':
+
+  "Another difference is that in 11/45 and 11/70 systems the instruction and
+  data spaces are separated inside UNIX itself."
+
+And if you don't believe that, check out:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/sys/conf/m45.s
+
+the source! ;-)
+
+
+    > It wasn't too involved of a change to make a split I/D kernel.
+    > Mike Muuss and his crew at JHU did it.
+
+Maybe you're remembering the process on a pre-V6 system?
+
+    > We spent more time getting the bootstrap to work than anything else I
+    > recall.
+
+It's possible you're remembering that, as distributed, V6 didn't support load
+images where the text+initialized-data was larger than 24KW-delta; it would
+have been pretty eaay to up that to 28KW-delta (change a parameter in the
+bootstrap source, and re-assemble), but after that, the V6 bootstrap would
+have had to have been extensively re-worked.
+
+And there were _also_ a variety of issues with handling maximal large images
+in the startup code. Once operating, the kernel has segments KI1-KI7 available
+the hold the system's code; however, it's not clear that all of KI1-7 are
+really usable, since the system can't 'see' enough code while in the code
+relocation phase in the startup to fill them all. E.g. during code relocation,
+KI7 is ripped off to hold a pointer to I/O space (since KD7 is set to point to
+low memory just after the memory that KD6 points to).
+
+These might have been issues in systems which were ARPANET-connected (i.e.
+ran NCP), as that added a very large amount of code to the kernel.
+
+	Noel
+
+
