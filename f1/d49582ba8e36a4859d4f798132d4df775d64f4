@@ -1,0 +1,46 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Fri, 11 Dec 2015 16:27:28 -0600
+Subject: [TUHS] why does tar have the tape device hard coded into it and why
+ is it mt1 instead of mt0
+Message-ID: <566B4DD0.6070700@gmail.com>
+
+All,
+
+In my exploration of v6, I followed the advice in "Setting up Unix - 
+Seventh Edition" and copied v6tar from v7 to v6. Life is good. However, 
+tar is using mt1 and it is hard coded into the source, tar.c:
+char    magtape[]       = "/dev/mt1";
+
+As the subject line suggested, I have two questions for those of you who 
+might know:
+
+1. Why is it hard coded?
+2. Why is it the second device and not the first?
+
+Interestingly, it took me a little while to figure out it was doing this 
+because I didn't actually move files between v6 and v7 until today. 
+Before this my tests had been limited to separate tests on v6 and v7 
+along the lines of:
+
+cd /wherever
+tar c .
+followed by
+tar t
+list of files
+cd /elsewhere
+tar x
+files extracted and matching
+
+What it was doing was writing to the non-existant /dev/mt1, which it 
+then created, tarring up stuff, and exiting. Then when I listed the 
+contents of the tarfile, or extracted the contents, it was successful. 
+But, when I went to move the tape between v6 and v7, the tape (mt0) was 
+blank, of course. It was at this point that I followed  Noel's advice 
+and "Used the source", and figured out that it was hard-coded as you see 
+above.
+
+Thanks,
+
+Will
+
+
