@@ -1,0 +1,54 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 11 Dec 2015 19:30:57 -0500 (EST)
+Subject: [TUHS] why is sum reporting different checksum's between v6 and
+	v7
+Message-ID: <20151212003057.75C5B18C0CB@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > I noticed that the sum utility from v6 reports a different checksum
+    > than it does using the sum utility from v7 for the same file.
+    > ... does anyone know what's going on here?
+    > Why is sum reporting different checksum's between v6 and v7?
+
+The two use different algorithms to accumulate the sum (I have added comments
+to the relevant portion of the V6 assembler one, to help understand it):
+
+V6:
+	mov	$buf,r2		/ Pointer to buffer in R2
+    2:	movb	(r2)+,r4	/ Get new byte into R4 (sign extends!)
+	add	r4,r5		/ Add to running sum
+	adc	r5		/ If overflow, add carry into low end of sum
+	sob	r0,2b		/ If any bytes left, go around again
+
+Read the description of MOVB in the PDP-11 Processor manual.
+
+V7:
+	while ((c = getc(f)) != EOF) {
+		nbytes++;
+		if (sum&01)
+			sum = (sum>>1) + 0x8000;
+		else
+			sum >>= 1;
+		sum += c;
+		sum &= 0xFFFF;
+		}
+
+I'm not clear on some of that, so I'll leave its exact workings as an
+exercise, but I'm pretty sure it's not a equivalent algorithm (as in,
+something that would produce the same results); it's certainly not
+identical. (The right shift is basically a rotate, so it's not a straight sum,
+it's more like the Fletcher checksum used by XNS, if anyone remembers that.)
+
+Among the parts I don't get, for instance, sum is declared as 'unsigned',
+presumably 16 bits, so the last line _should_ be a NOP!? Also, with 'c' being
+implicitly declared as an 'int', does the assignment sign extend? I have this
+vague memory that it does. And does the right shift if the low bit is one
+really do what the code seems to indicate it does? I have this bit that ASR on
+the PDP-11 copies the high bit, not shifts in a 0 (check the processor
+manual).  That is, of course, assuming that the compiler implements the '>>'
+with an ASR, not a ROR followed by a clear of the high bit, or something.
+  
+	Noel
+
+
