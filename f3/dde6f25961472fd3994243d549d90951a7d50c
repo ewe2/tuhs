@@ -1,0 +1,58 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 12 Dec 2015 17:10:11 -0600
+Subject: [TUHS] tar on v6 not creating directories on v6
+In-Reply-To: <20151212222358.GD5686@server.rulingia.com>
+References: <566C9772.9040508@gmail.com>
+ <20151212222358.GD5686@server.rulingia.com>
+Message-ID: <566CA953.3020207@gmail.com>
+
+
+
+On 12/12/15 4:23 PM, Peter Jeremy wrote:
+> On 2015-Dec-12 15:53:54 -0600, Will Senn <will.senn at gmail.com> wrote:
+>> That was ugly and all of it was output. What exactly did I wind up with?:
+>> # ls -l
+>> total 19
+>> drwxrwxrwx  2 root       32 Oct 10 12:54 y
+>> -rw-rw-rw-  1 root     8704 Oct 10 12:54 t.tar
+>>
+>> Ugh. Probably don't need the y directory...
+>> # rmdir y
+>> y ?
+>> # ls y
+>> y not found
+> Presumably, it's not 'y' but has some non-printable characters in it.
+> You could try "od -c ." to see what the entry actually is, or move
+> t.tar out of the way and "rm -r" remove the next level up.
+>
+It looks like you are correct about it not being 'y':
+
+# od -c .
+0000000  I \?  . \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0
+0000020 \? \0  .  . \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0
+0000040  K \?  t  .  t  a  r \0 \0 \0 \0 \0 \0 \0 \0 \0
+0000060  N \? \? \? \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0 \0
+0000100
+
+
+I moved t.tar out and then tried rm -r, it complained (t is the parent):
+# rm -r t
+No match
+
+I don't think rm -r will delete directories, but only the files in the 
+directory.
+
+>> I think this error is simply an effect related to the failure to create
+>> the necessary directories properly.
+> If you run "mkdir foo" from the shell, does it work properly?  That will
+> let you split between the problem being in tar and the problem being in
+> mkdir.  Adding some printf()s to checkdir() seems a reasonable step.
+>
+Yes, mkdir foo works. I'll add the print statements.
+
+Thanks,
+
+will
+
+
+
