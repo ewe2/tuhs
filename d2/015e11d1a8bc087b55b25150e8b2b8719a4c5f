@@ -1,0 +1,37 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 11 Dec 2015 20:07:19 -0500
+Subject: [TUHS] why is sum reporting different checksum's between v6 and
+	v7
+References: <20151212003057.75C5B18C0CB@mercury.lcs.mit.edu>
+Message-ID: <m28u5079vc.fsf@fastmail.com>
+
+Noel Chiappa writes:
+> The two use different algorithms to accumulate the sum (I have added comments
+> to the relevant portion of the V6 assembler one, to help understand it):
+>
+> V6:
+> 	mov	$buf,r2		/ Pointer to buffer in R2
+>     2:	movb	(r2)+,r4	/ Get new byte into R4 (sign extends!)
+> 	add	r4,r5		/ Add to running sum
+> 	adc	r5		/ If overflow, add carry into low end of sum
+> 	sob	r0,2b		/ If any bytes left, go around again
+
+Interestingly, the SysIII sum.c program, which I assume yields the same
+result for this input, appears to go through the whole input
+accumulating the sum of all the bytes into a long, then adds the two
+halves of the long at the end rather than after every byte. This
+suggests that the two programs would give different results for very
+large files that overflow a 32-bit value. Of course, that's (16843010
+bytes if all of them are 255) well beyond the size of file you're likely
+to encounter on a v6 system.
+
+Also, if this sign extends, then its behavior on "negative" (high bit
+set) bytes is likely to be very different from the SysIII one, which
+uses getc.
+
+Can someone who has V6 up test what the checksum of a file consisting of
+a single byte with the high bit set? On the "modern" implementations it
+is the same as the value of the byte [e.g. 255] in both algorithms.
+
+
+
