@@ -1,0 +1,43 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 11 Dec 2015 20:46:28 -0500
+Subject: [TUHS] why is sum reporting different checksum's between v6 and
+	v7
+References: <20151212012257.3740418C0AA@mercury.lcs.mit.edu>
+Message-ID: <m2r3is5thn.fsf@fastmail.com>
+
+Noel Chiappa writes:
+> No, I don't think so, depending on the exact detals of the implementation. As
+> long as when folding the two halves together, you add any carry into the sum,
+> you get the same result as doing it into a 16-bit sum.
+
+The issue I was suggesting comes if you've lost carry bits
+_before_ folding the two halves together, when you were working
+in 32-bit arithmetic.
+
+> (If my memory of how
+> this all works is correct - the neurons aren't what they used to be,
+> especially late in the day... :-)
+>
+>     > Also, if this sign extends, then its behavior on "negative" (high bit
+>     > set) bytes is likely to be very different from the SysIII one, which
+>     > uses getc.
+>
+> I have this bit set that in C, 'char' is defined to be signed
+
+The SysIII sum.c file uses getc and stores the result in an int,
+not a char.
+
+I *think* the definition of getc returns positive values the
+same as modern systems do, despite the manpage's caution to
+check feof because EOF is a "valid integer value":
+
+#define	getc(p)		(--(p)->_cnt>=0? *(p)->_ptr++&0377:_filbuf(p))
+
+_filbuf also has & 0377 in the relevant place.
+
+If getc returns negative values for high-bit characters, on the
+other hand, then they would sign-extend to 32 bits when the long
+math is done, still yielding different results.
+
+
+
