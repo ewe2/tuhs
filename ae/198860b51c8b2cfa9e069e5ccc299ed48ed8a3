@@ -1,0 +1,33 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 19 Dec 2015 08:27:52 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151219132752.E11C018C0A2@mercury.lcs.mit.edu>
+
+So, speaking of system calls that are missing in earlier versions of Unix,
+that tickled a memory:
+
+    > From: Will Senn
+
+    > ... a special version of tar must be prepared to run on V6.
+    > The document goes on to describe a reasonable method to make v6tar on
+    > v7 and copy the binary over to the v6 system.
+
+When I got tar running on my V6, I didn't know about this, and I took
+a V7 tar and got it running myself, see here:
+
+  http://mercury.lcs.mit.edu/~jnc/tech/ImprovingV6.html#tar
+  
+One thing I found out while doing that is that tar uses the 'utime' system
+call on V7 to set the file date, but i) V6 doesn't have utime() (although it
+has smdate(), albeit commented out in the standard distro), and ii) on now
+looking in src/cmd/tar and src/libc/v6 in the V7 distro, I don't see a
+replacement version of utime().
+
+As near as I can make out, 'v6tar' must be using the standard V7 version of
+utime(), which I assume turns into a call to nosys() on V6 (returns an error);
+tar doesn't check the return value, so the call fails (silently). So v6tar
+won't correctly set the file date when moving a file _to_ V6.
+
+	Noel
+
+
