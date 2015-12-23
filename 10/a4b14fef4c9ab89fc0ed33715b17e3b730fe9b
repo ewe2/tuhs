@@ -1,0 +1,81 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Wed, 23 Dec 2015 00:13:50 -0600
+Subject: [TUHS] Does anybody recall how the TU10 bootstrap code actually
+	operates?
+Message-ID: <567A3B9E.4000401@gmail.com>
+
+All,
+
+I am in the process of gaining a deeper understanding of PDP-11 machine 
+instructions and how the bootstrap loader and its cousins function. As 
+part of that process, I am analyzing the code. I am concurrently working 
+through the DEC bootstrap loader and the bootstrap loader that is 
+described in the v6 documentation. The DEC bootstrap loader, while 
+fascinating and elegant, is relatively straightforward, given its 
+enormous range and the fact that it is self-modifying. I wrote up my 
+preliminary notes here:
+
+http://decuser.blogspot.com/2015/12/analysis-of-pdp-11-bootloader-code.html
+
+The code that is in the v6 documentation on the other hand is not 
+yielding easily to reasonable interpretation and I was hoping y'all 
+might be able to shed some light on how it works.
+
+The following is the TU10 (TM11) bootstrap code from "Setting Up Unix - 
+Sixth Edition":
+TU10
+012700
+172526
+010040
+012740
+060003
+000777
+
+The author's notes around the code are:
+The tape should move and the CPU loop. (The TU10 code is not the DEC 
+bulk ROM for tape; it reads block 0, not block 1.)
+Halt and restart the CPU at 0. The tape should rewind. The console 
+should type ‘=’.
+
+Of course, following the instructions results in a successful outcome, 
+but understanding what is happening is difficult given that this is a 
+virtual environment and no discernible tape movement can be detected.
+
+My attempt at interpretation is along the following lines, I 
+manufactured the dissasembly based on my reading of the PDP-11/40 
+handbook and the machine codes:
+
+012700  MOV #172526, R0 ; moves the TM11 Current Memory Address Register 
+(MTCMA) address into R0
+172526                                  ; the immediate operand
+010040  MOV R0,-(R0)        ; moves the contents of R0, 172526, into 
+memory location 172524, the TM11 Byte Record Counter (MTBRC)
+012740  MOV #60003,-(R0); moves 60003 into memory location 172522, the 
+TM11 Command Register (MTC)
+060003                                   ; immediate data
+000777  HALT
+
+This seems like gobbledegook to me. It moves the MTCMA (Magtape Current 
+Memory Address) into R0, then it moves the MTCMA into the MTBRC (Magtape 
+Byte Record Count), then it moves 60003 into the MTC (Magtape control 
+register), which causes a read operation with 800BPI 9 Channel density. 
+172526 is -5252 in 2's complement.
+
+Am I misinterpreting the byte codes or is this some idiosyncratic way to 
+get the Magnetic tape to rewind or something (the TM11 has a control 
+function to rewind, so it seems unlikely that this is the case, but I'm 
+mystified)?
+
+I single stepped through the code in the simulator, and the TM11 
+registers appear to be pretty unobservable (examining these three 
+registers always displays 0's, but if I change from referencing the TM11 
+registers to another area of memory, say 100500 I see the values I would 
+expect to see as they are being moved from the registers into memory).
+
+Thanks,
+
+Will
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151223/6f3fefdc/attachment.html>
+
