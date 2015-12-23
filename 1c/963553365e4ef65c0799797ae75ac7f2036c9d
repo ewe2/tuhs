@@ -1,0 +1,40 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Wed, 23 Dec 2015 10:58:52 -0500
+Subject: [TUHS] Does anybody recall how the TU10 bootstrap code actually
+ operates?
+In-Reply-To: <567AB7B1.2050907@gmail.com>
+References: <20151223065957.5ED5718C095@mercury.lcs.mit.edu>
+ <567AB7B1.2050907@gmail.com>
+Message-ID: <20151223155852.GA6677@mercury.ccil.org>
+
+Will Senn scripsit:
+
+> Actually, after reflecting on your comments and walking through it
+> again, this is really elegant code. The guys who thought this up
+> were amazing.  
+
+As usual, they were standing on the shoulders of giants.  The OS/8
+bootstrap (on the PDP-8) for the RK8E disk controller was even more
+elegant, only two instructions long and requiring no further operator
+actions but "clear" and "start".  The first instruction simply read
+the current block into the current memory address, which because of
+the "clear" read block 0 into memory location 0; the second was also
+a branch-to-self.
+
+But the real cleverness was that the bootstrap was placed at locations
+30 and 31.  As the disk block was read in by DMA, location 30 was
+overwritten with the "skip if disk is ready" instruction and location
+31 with "branch to previous location".  So first the CPU was idling in
+a one-instruction infinite loop, then in a two-instruction loop as long
+as the block was still loading, and finally would continue executing at
+location 32 when the disk bootstrap was fully loaded.  The code there
+loaded the full device driver for the RK8E into reserved memory at
+07600-07777 and jumped to the code within it that loaded the Keyboard
+Monitor (the shell) at location 0 and jumped into it.
+
+-- 
+John Cowan          http://www.ccil.org/~cowan        cowan at ccil.org
+A rose by any other name may smell as sweet, but if you called it
+an onion you'd get cooks very confused.          --RMS
+
+
