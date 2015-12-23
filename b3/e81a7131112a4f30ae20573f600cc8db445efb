@@ -1,0 +1,111 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Wed, 23 Dec 2015 09:03:13 -0600
+Subject: [TUHS] Does anybody recall how the TU10 bootstrap code actually
+ operates?
+In-Reply-To: <20151223065957.5ED5718C095@mercury.lcs.mit.edu>
+References: <20151223065957.5ED5718C095@mercury.lcs.mit.edu>
+Message-ID: <567AB7B1.2050907@gmail.com>
+
+Noel,
+
+Comments inline. This has got to be the most helpful mailing list ever. 
+Thank you for responding so carefully.
+
+On 12/23/15 12:59 AM, Noel Chiappa wrote:
+>      > From: Will Senn
+>
+>      > 000777  HALT
+>
+> That's actually "BR ."; the difference is important, since the CPU (IIRC)
+> doesn't honour DMA requests when it is halted, and DMA needs to be working for
+> the controller to read that first block (a secondary tape bootstrap) into
+> memory.
+
+This one, I worked through in my dreams :). I woke up this morning with 
+the full-fledged thought, 000777 isn't halt, it's a branch to the new PC 
++ (2 * offset,  377) - I have been reading the PDP-11/40 handbook, much 
+too much :):
+
+0004 BR to PC+2 + (2* Offset of the next six bits, 377)
+  3   7   7 - offset in octal
+11 111 111 - binary equivalent
+00 000 000 - 1's complement
+00 000 001 - 2's complement
+----------
+         -1
+
+So: BR, PC+2 +( 2 * - 1), or .+2-2, or BR . as you say.
+
+>      > This seems like gobbledegook to me.
+>
+> :-)
+>
+>      > It moves the MTCMA (Magtape Current Memory Address) into R0, then it
+>      > moves the MTCMA into the MTBRC (Magtape Byte Record Count)
+>
+> "The address of the MTCMA into", etc. Looking quickly at the programming spec
+> for the TM11 controllers, it wants a negative of the byte count to transfer in
+> this register; the address of the MTCMA just happens to also be a large enough
+> negative number to be usable as the (negative) size of the transfer request.
+> (The first record is probably shorter than that, but that doesn't matter.)
+>
+> Note that this code could probably also have been written:
+>
+>      MOV #172524, R0
+>      MOV R0, at R0
+>
+> and been equally functional.
+>
+>      > then it moves 60003 into the MTC (Magtape control register), which
+>      > causes a read operation with 800BPI 9 Channel density.
+>
+> I'm too lazy to look at the programming spec for the details, but that sounds
+> right.
+>
+>      > Am I misinterpreting the byte codes or is this some idiosyncratic way to
+>      > get the Magnetic tape to rewind or something (the TM11 has a control
+>      > function to rewind, so it seems unlikely that this is the case
+>
+> No, it's just the shortest possible program to read the first block off the
+> tape.
+Actually, after reflecting on your comments and walking through it 
+again, this is really elegant code. The guys who thought this up were 
+amazing.  Using the MTCMA is brilliant, as you said, it's a big enough 
+negative value to cause the entire block to be read, but it's also the 
+value that is used to obtain the destination for that byte count through 
+it's decrement and further, to obtain the destination for the command to 
+read the data after it's second decrement.
+> It depends on i) the operator having manually set the tape to the right point
+> (the start of the tape), so that it's the first block that gets read, and ii)
+> the fact that the reset performed by hitting the 'Start' key on the CPU clears
+> the TM11 registers, including the Current Memory Address register, so the
+> block that's read is read into memory location zero.
+>
+> Hence the direction to 'once the tape has stopped moving, re-start the CPU at
+> 0'.
+>
+> 	Noel
+In order to test this and armed with my newfound knowledge, I fired up 
+SimH and attached the v6 distribution tape and set it locked for read 
+only. I examined memory from 0-100, which was empty. I then deposited 
+the bootstrap and ran it. It hung, allowing the NPR. I then stopped the 
+CPU with CTRL-E and examined the memory starting at location 0, voila, a 
+407 program starting at byte 0. My understanding at this point is that 
+the program never touches MTCMA (other than to use it for the byte count 
+and decrements) so it is initially 0 based on how SimH works and the 
+program simply reads the first block into memory in location 0 and hangs 
+until the simulator is suspended.
+
+The next step in the install is to g 0, which runs a program that prints 
+the = prompt to which tmrk is a reasonable response. I gather the 407 
+program is some kind of minimalist shell that includes tmrk as one of 
+its commands.
+
+Thanks again for your help.
+
+Will
+
+
+
+
+
