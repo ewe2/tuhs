@@ -1,0 +1,82 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 26 Dec 2015 12:34:15 -0600
+Subject: [TUHS] v6 RK05 bootloader question
+Message-ID: <567EDDA7.1000104@gmail.com>
+
+All,
+
+I'm trying to understand the RK bootloader code that is found in 
+"Setting up Unix - Sixth Edition". My question is related to RKBA, RK's 
+bus address buffer. Is the bus address the same as memory address? If 
+so, the code makes sense, if not, I appreciate y'alls help.
+
+Here's what I have so far:
+
+RK05
+
+01 012700       MOV 177414,R0  ; Move RKDB into R0
+02 177414                      ; RKDB Address
+03 005040       CLR -(R0)      ; Decrement R0 and clear the contents of RKDA
+04 005040       CLR -(R0)      ; Decrement R0 and clear the contents of RKBA
+05 010040       MOV R0,-(R0)   ; Move the contents of R0(RKBA) into 
+decremented R0(RKWC)
+06 012740       MOV 5,-(R0)    ; Decrement R0 and move 5 into RKCS
+07 000005                      ; Read and go
+08 105710 WAIT: TSTB (R0)      ; Test the lower byte of RKCS
+09 002376       BGE WAIT       ; When bit 7 becomes 1, the read is done
+10 005007       CLR PC         ; Set PC 000000, the start of the bytes read
+
+RKDB - RK data buffer register
+This register is a general data register and it only used by the code 
+above to initialize R0 so that subsequent RK addresses can be found by 
+simply decrementing R0.
+
+RKDA - RK disk address register
+This register determines the starting disk address of the read operation 
+and is cleared by the code.
+
+RKBA - RK current bus address register
+This register contains the bus address to or from which data will be 
+transferred. Is this the same as memory address?
+
+RKWC - RK word count register
+Two's complement of the number of words to be transferred.
+
+RKCS - RK control status register
+This is the register that controls the device and provides the device 
+status to the program
+
+Lines 1-2
+The execution of the boot loader code moves the address of RKDB into R0 
+to initialize the register so that it can be used to obtain the other RK 
+buffer addresses as they are needed.
+
+Line 3
+The RKDA buffer is cleared, setting the disk address to 0.
+
+Line 4
+The RKBA buffer is cleared, setting the bus address to 0.
+
+Line 5
+The value in R0 is transferred into the RKWC buffer. RKBA or 177410, the 
+value in R0, is a convenient number to use for the read operation 
+because it is big enough to cause the program to read in a block of 
+data. The number is in two's complement and represents -370. This tells 
+the disk controller that 370 words (540 bytes) will be transferred.
+
+Lines 6-7
+The value 5 is placed into RKCS, this value represents a read operation 
+and go.
+
+Lines 8-9
+The lower byte of RKCS is tested and when it is greater than or equal to 
+zero (not negative), it loops, waiting until the value is negative, that 
+is until bit 7 becomes 1, which indicates Control Ready (RDY) and done.
+
+Line 10
+  PC is set to 00000 and execution of the bytes read from the disk 
+begins at location 00000.
+
+
+
+
