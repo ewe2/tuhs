@@ -1,0 +1,65 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sun, 27 Dec 2015 15:32:12 -0500
+Subject: [TUHS] v6 RK05 bootloader question
+Message-ID: <1451248336.14973.for-standards-violators@oclsc.org>
+
+Something of a tangent:
+
+In my early days with UNIX, one of the systems I helped look
+after was an 11/45.  Normally we booted it from an SMD disk
+with a third-party RP-compatible contorller, for which we
+had a boot ROM.  Occasionally, however, we wanted to boot it
+from RK05, usually to run diagnostics, occasionally for some
+emergency reason (like the root file system being utterly
+scrambled, or the time we ran that system, with UNIX, on a
+single RK05 pack, for several days so our secretaries could
+keep doing their troff work while the people who had broken
+our air-conditioning system got it fixed--all other systems
+in our small machine room had to stay shut down).
+
+There was no boot ROM for the RK05, but it didn't matter:
+one just did the following from the front-panel switches:
+
+1.  Halt/Enable to Halt
+2.  System reset (also sends a reset to the UNIBUS)
+3.  Load address 777404
+4.  Deposit 5.
+(watch lights blink for a second or so)
+5.  Load address 0
+6.  Halt/Enable to Enable
+7.  Continue
+
+777404 is the RK11's command register.  5 is a read command.
+Resetting the system reset the RK11, which cleared all the
+registers; in particular the word count, bus address, and
+disk address registers.  So when the 5 was deposited (including
+the bit 01, the GO bit), the RK11 would read from address 0 on
+the disk to address 0 in physical memory, then increment the
+word-count register, and keep doing so until the word count
+was zero after the increment.  Or, in higher-level terms, read
+the first 65536 words of the disk into the first 65536 words
+of memory.
+
+Then starting at address 0 would start executing whatever code
+was at the beginning of memory (read from the beginning of the
+disk).
+
+Only the first 256 words (512 bytes) of the disk was really
+needed, of course, but it was harmless, faster, and easier to
+remember if one just left the word-count at its initial zero,
+so that is what we did.
+
+The boot ROM for the SMD disk had a certain charm as well.
+It was a quad-high UNIBUS card with a 16x16 array of diodes,
+representing 16 words of memory.  I forget whether one inserted
+or removed a diode to make a bit one rather than zero.
+
+It's too bad people don't get to do this sort of low-level stuff
+these days; it gives one rather a good feel for what a bootstrap
+does when one issues the command(s) oneself, or physically
+programs the boot ROM.
+
+Norman Wilson
+Toronto ON
+
+
