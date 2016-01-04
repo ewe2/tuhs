@@ -1,0 +1,49 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Sun, 3 Jan 2016 18:24:55 -0800
+Subject: [TUHS] Early Unix function calls: expensive?
+In-Reply-To: <20160104013151.C296718C0A0@mercury.lcs.mit.edu>
+References: <20160104013151.C296718C0A0@mercury.lcs.mit.edu>
+Message-ID: <07cc4a0aa17d242be5e26bbcd66c1c55.squirrel@webmail.yaccman.com>
+
+> A routine had to be pretty lengthy before it was worth paying the
+> overhead, in
+> order to amortize the calling cost across a fair amount of work (although
+> of
+> course, getting access to another three register variables could make the
+> compiled output for the routine somewhat shorter).
+>
+>         Noel
+>
+
+I remember Dennis Ritchie telling me that the C compiler itself got
+smaller and faster when he added register variables (and used them...)
+
+I used to tell people that the time required to make a good optimizing C
+compiler grew as the cube of the size of the instruction manual, including
+the appendix on instruction execution timing.   These days they don't even
+bother to have such an appendix, because timing depends on so many arcane
+internal pipe stalls, memory refreshes, cache misses, etc. that it is
+effectively uncomputible.  And then people wonder why
+compiled code isn't very "good"...
+
+At UC Berkeley, not long after they got their VAX, Prof. Susan Graham
+gave a year-long class on optimization.  The first semester, the  students
+learned all the relevant algorithms, etc.  The second semester,
+they each implemented an optimization and integrated them into the Unix
+F77 compiler.  As I recall, they got a 15% speedup on a set of benchmarks.
+
+Then, over the summer, a student who had studied the VAX hardware
+realized that the typical FORTRAN expression ( A = B op C ) was dealing
+with three 32-bit addresses, and the resulting instruction was too big
+to fit into the instruction lookahead buffer.  Allocating a register to
+point to the internal (static) variables for each routine and using a
+16-bit offset made these instructions fit, and the performance
+improvement (for what was a 2-day fix) was 20%.
+
+The moral of the story is that overhead kills you, and unknown or
+uncharacterized overhead is especially fatal...
+
+
+
+
+
