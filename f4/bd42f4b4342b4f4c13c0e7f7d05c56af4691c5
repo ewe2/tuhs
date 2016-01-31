@@ -1,0 +1,32 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Sat, 30 Jan 2016 21:37:00 -0500
+Subject: [TUHS] Short history of 'grep'
+In-Reply-To: <alpine.BSF.2.11.1601311227470.14724@aneurin.horsfall.org>
+References: <20160130030012.GB9762@minnie.tuhs.org>
+ <56AD0AB7.40701@mhorton.net>
+ <alpine.BSF.2.11.1601310639150.14724@aneurin.horsfall.org>
+ <56AD1B28.4010908@mhorton.net>
+ <alpine.BSF.2.11.1601310740170.14724@aneurin.horsfall.org>
+ <CAOkr1zUprhZws1WoD+4fuepMZkzNLO9HjNfLp1fGrDnjx4JKtA@mail.gmail.com>
+ <alpine.BSF.2.11.1601311227470.14724@aneurin.horsfall.org>
+Message-ID: <20160131023700.GB7917@mercury.ccil.org>
+
+Dave Horsfall scripsit:
+
+> I'm still trying to get my around about how a program such as "egrep" 
+> which handles complex patterns can be faster than one that doesn't...  It 
+> seems to defeat all logic :-)
+
+Actually, it just appears to be that way.  Many egrep things like + and ?
+are supported in grep too, you just have to enter them as \+ and \?, at
+least now that we have Posix regular expressions.  What egrep does not
+support that grep does is backreferences, and that allows it to use highly
+efficient deterministic (i.e. non-backtracking) finite state automata.
+Classic grep uses backtracking, which makes it much slower on problematic
+expressions like "a*b" where there is no b in the input.  On the other
+hand, creating a deterministic automaton has higher setup costs.
+
+-- 
+ John Cowan          http://www.ccil.org/~cowan        cowan at ccil.org
+               Si hoc legere scis, nimium eruditionis habes.
+
