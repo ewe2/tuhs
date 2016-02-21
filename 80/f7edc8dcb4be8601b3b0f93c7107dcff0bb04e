@@ -1,0 +1,59 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Sun, 21 Feb 2016 13:59:38 -0500
+Subject: [TUHS] Unix v6 File System information
+In-Reply-To: <20160221182749.8937718C0ED@mercury.lcs.mit.edu>
+References: <20160221182749.8937718C0ED@mercury.lcs.mit.edu>
+Message-ID: <CAC20D2O8s_8XnCbAvxRXVJCxdgtFCW7vyzgKs_gNvf36+2PuRQ@mail.gmail.com>
+
+​Will Senn asked
+
+> Supposing I created a byte faithful representation of a V6 filesystem
+
+ > on my mac, would I then be able to load the file in simh as an RK05 and
+>  > mount and access its files and directories from a V6 instance?
+>
+
+​Not 100% sure how to parse this... but that is exactly how simh (and
+Ersatz11)​
+
+​ work.
+You have a UNIX file on your mac and at the simh interactive command
+system, you "attach" it as the data for the simulated RK05.
+​But it's a manual process to do the attachment AND more importantly,
+since Mac OSx just sees it as bits, as a minimum you need to write tools to
+push/pull V6 "files" from the image.  This is the same as the "DOS Tools"
+trick you see in a lot of UNIX systems that know how to "grok" DOS/FAT file
+system images.   You would need to do the same thing.  If you poke around
+the Warren's TUHS archives, you might find some of this already there.
+
+​What many of us do it attach a file as a virtual disk but instead of using
+a UNIX file system format, use it is a tape image.   Then use tar/cpio or
+whatever if you already a tool on both sides that can interpret the bits.
+Hence, the v6tar discussion of a few weeks ago.   The UNIX ar(1) format is
+sometimes used also, since it was common.   cpio -c also works, but that
+was not on the research systems.​   My old room mate, Tom Quarles, wrote a
+really good ANSI tape reader/writer for BSD UNIX.  That should back port to
+v6 with a little work, particularly if you the "typesetter C" compiler for
+V6 which supported enough of the V7 C.   The advantage of the ANSI tape
+format is that its common with the DEC systems as well as UNIX.
+
+
+That said, you can be smarter and more automatic.   As Noel says Ersatz11
+supports a virtual shared disk (the same way VMware and Parallels) do.
+Writing such a device for simh would be cool and in fact useful for many
+different emulators.  Warning there are a lot of dragons hidden with such a
+shared FS.   At is definitely doable, but is going to take some work.
+
+The other thing you could do that might be a little less work, but would be
+Mac specific, is Mac OSX has the FUSE file system emulation that stuff that
+Google released.  If hacked up support for the old Unix FS, you could mount
+the V6 "disk" image as Mac OSx disk and see the bits with normal tools.
+I've thought about doing this but I have never had the time.  If I ever
+became a serious user of the simh, I would probably want something more
+like this.
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160221/883e0385/attachment-0001.html>
+
