@@ -1,0 +1,44 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Thu, 17 Mar 2016 23:59:36 -0400
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <20160318004832.GA18245@minnie.tuhs.org>
+References: <20160318004832.GA18245@minnie.tuhs.org>
+Message-ID: <20160318035936.GF16894@mercury.ccil.org>
+
+Warren Toomey scripsit:
+
+> It's a bit off-topic, but what were non-Unix filesystems like around
+> 1969-1970?  The PDP-7 filesystem has i-nodes (file metadata) and
+> filenames separate from the i-nodes. This allows hard links and thus
+> a non-tree structured filesystem.
+
+Not only that, but a non-tree-structured directory system: the directories
+themselves were a general directed graph, and it was possible to have any
+number of arbitrary hard links to a directory.  This was simplified in
+later Unices to the tree-structured directory system we have today, where
+the only hard links to a directory are the named link from the parent,
+the "." link from self, and the ".." links from the child directories.
+
+There was also no concept of pathnames in PDP-7 Unix, neither relative
+nor absolute.  The link syscall was link("foo", "bar", "baz"), meaning
+to cause entry "baz" in directory "bar" in the working directory to
+be the same file or directory as entry "foo" in the working directory.
+So for example, each home directory had a hard link to the main binaries
+directory, conventionally named "bin", and the shell could not execute
+commands out of a directory that did not contain a "bin" link.  With no
+reliable ".." entry, there was also no way to recover from a chdir, and
+traversal had to be done as digraph traversal rather than tree traversal.
+In particular, incautious use of unlink could cause the directory graph
+to become partitioned, requiring low-level disk surgery to recover.
+
+An interesting property of the ODS-1 (RSX) file system was that the
+root directory contained the i-node table as a file named INDEXF.SYS.
+This allowed ordinary programs to inspect the i-node table without messing
+about with raw disks.  It also contained a self-entry named 000000.DIR,
+but other directories did not contain self-links.
+
+-- 
+John Cowan          http://www.ccil.org/~cowan        cowan at ccil.org
+The internet is a web of tiny tyrannies giving an illusion of anarchy.
+                --David Rush
+
