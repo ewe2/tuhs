@@ -1,0 +1,35 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Fri, 18 Mar 2016 15:11:03 +1000
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <20160318035936.GF16894@mercury.ccil.org>
+References: <20160318004832.GA18245@minnie.tuhs.org>
+ <20160318035936.GF16894@mercury.ccil.org>
+Message-ID: <20160318051103.GA4419@minnie.tuhs.org>
+
+On Thu, Mar 17, 2016 at 11:59:36PM -0400, John Cowan wrote:
+> There was also no concept of pathnames in PDP-7 Unix, neither relative
+> nor absolute.  ...
+> directory, conventionally named "bin", and the shell could not execute
+> commands out of a directory that did not contain a "bin" link.
+
+Are you sure it was called "bin"? The PDP-7 team are working on the
+assumption that it was called "system" because init links the shell
+from "system" into a user's home directory:
+
+   sys setuid		" Set the user's user-id,
+   sys chdir; dd	" change into the "dd" directory
+   sys chdir; dir	" and then into the user's directory
+   ...
+   sys link; system; sh; sh	" Link sh in system dir to this dir
+system:
+   ...
+   <sy>;<st>;<em>; 040040
+
+https://github.com/DoctorWkt/pdp7-unix/blob/master/src/cmd/init.s
+
+There's no mention of the directory's name in the kernel, but i-node 3
+has to contain init (we assume "system" again) and i-node 4 is the
+directory that holds users' home directories ("dd").
+
+Cheers, Warren
+
