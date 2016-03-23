@@ -1,0 +1,26 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Tue, 22 Mar 2016 21:58:00 -0400
+Subject: [TUHS] Early non-Unix filesystems?
+Message-ID: <201603230158.u2N1w0LB139172@tahoe.cs.Dartmouth.EDU>
+
+> Those file structures are collected into a single, global table. The
+> question is why this latter table? One could rather imagine an
+> implementation where open() allocates (e.g., via malloc())
+
+Depending on how malloc() is implemented, fragmentation can be
+serious in a program that runs forever with as many frees as
+allocs. Separate allocations for each item can also be costly in time.
+
+One malloc() strategy is to divide the arena into regions,
+each of which caters for blocks of a single size, so
+fragmentation doesn't occur. In essence that's how the
+system tables work, except that these tables have
+hard limits. Now, if the tables could be reallocated
+as needed ...
+
+Another problem with per-item allocations is performance
+monitoring and debugging. It's hard to see what's
+going on in a well mixed dynamic storage heap.
+
+Doug
+
