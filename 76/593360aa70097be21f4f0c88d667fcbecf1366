@@ -1,0 +1,43 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Wed, 23 Mar 2016 20:32:17 -0400
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <alpine.BSF.2.11.1603240852200.15730@aneurin.horsfall.org>
+References: <20160318004832.GA18245@minnie.tuhs.org>
+ <alpine.BSF.2.11.1603181854360.15730@aneurin.horsfall.org>
+ <20160318084234.GB64087@server.rulingia.com>
+ <CAC20D2M_TUXCq+vESvKYriBpvpLcMyEezPER+U-uhRZun5nCzA@mail.gmail.com>
+ <24e7ae828a0086db2f79ea66165b80bf.squirrel@webmail.yaccman.com>
+ <1458323139.767071.553262498.2A8E1982@webmail.messagingengine.com>
+ <82f0876de76c486a95d1091c88279546.squirrel@webmail.yaccman.com>
+ <alpine.BSF.2.11.1603220035320.15730@aneurin.horsfall.org>
+ <20160321214355.GA86793@eureka.lemis.com>
+ <7f19bd2388c2ea3a5b4de8ec060f275f.squirrel@webmail.yaccman.com>
+ <alpine.BSF.2.11.1603240852200.15730@aneurin.horsfall.org>
+Message-ID: <001601d18564$9f79d2c0$de6d7840$@ronnatalie.com>
+
+
+> Closest I've ever been murdered was when I "accidentally" filled the local
+> 11/70 with an uninterruptible instruction sequence."
+
+SPL instruction.   The PDP-11 was odd that while SPL was a "privileged"
+instruction, rather that trapping if you did it in user mode, it just
+"ignored" it.
+Well, what it ignored was the actual change of the processor level.   What
+it still implemented was the side effect was that interrupts were locked out
+until the next instruction fetch.
+If you filled your instruction space up with SPLs you could lock up the
+computer so that even the HALT key didn't work (you had to do a bus RESET).
+
+In an attempt to do this in user mode in our hybrid-V6 system I tripped
+across another bug.   I did it during the day when there was a high load on
+the system and my process got swapped out.
+When it got swapped in, it rounded up the BRK to the next higher 64 bit
+chunk.   Of course this rolled around to zero.   It allocated zero bytes of
+memory getting zero and then did a DMA from our swap device to it.
+That was a bit more flamboyant.
+
+Fortunately , my mentor Mike Muuss tolerated these fiascos as long as I went
+and fixed the bug I had just exploited afterwards.
+
+
+
