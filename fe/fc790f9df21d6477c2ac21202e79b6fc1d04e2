@@ -1,0 +1,58 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Fri, 25 Mar 2016 01:35:24 +0100
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <9CBDF635-2FC9-4855-8419-0413EC0336A7@centurytel.net>
+References: <mailman.1.1458784801.4499.tuhs@minnie.tuhs.org>
+ <56F3BEAE.9060903@update.uu.se> <20160324225049.GA54792@server.rulingia.com>
+ <56F472FB.7020204@update.uu.se>
+ <9CBDF635-2FC9-4855-8419-0413EC0336A7@centurytel.net>
+Message-ID: <56F487CC.1060506@update.uu.se>
+
+On 2016-03-25 00:27, Milo Velimirovic wrote:
+>
+>> On Mar 24, 2016, at 6:06 PM, Johnny Billquist <bqt at update.uu.se> wrote:
+>>
+>> On 2016-03-24 23:50, Peter Jeremy wrote:
+>>> On 2016-Mar-24 11:17:18 +0100, Johnny Billquist <bqt at update.uu.se> wrote:
+>>>> It is the normal behavior of any instruction that interrupts are not
+>>>> recognized until the next instruction fetch. This is how the microcode
+>>>> works, and it is also pretty much the same in any processor today.
+>>> ...
+>>>> individual instructions. You still get a fetch between each instruction,
+>>>> at which point, interrupts will be recognized.
+>>>
+>>> Some instructions inhibit the "check for interrupts at the end of this
+>>> instruction" check.  I'm most familiar with the 8080 EI instruction,
+>>> which enabled interrupts after the following instruction (so things like
+>>> EI;HLT didn't have a window).  It seems the PDP-11 SPL behaves the same.
+>>
+>> I don't think it should on the PDP-11, and the documentation do not mention any such thing.
+>> There is a good reason the 8080 (and Z80, and others) have this property. The RETI instruction on these machines do not enable itnerrupts themselves, so just as you note, you need to both enable interrupts and return from interrupt atomically, or else you get into a mess.
+>>
+>> The PDP-11 RETI instruction changes the processor priority as a part of the instruction. You do not use SPL (whatever) before a RETI.
+>> Thus, it do not make sense that SPL on a PDP-11 would have this property. If if indeed do disable recognizing interrupts after an SPL, it sounds more like a bug. I guess I'll go and read the microcode so see if that mentions any of this, since I'm sortof into reading it anyway as I was trying to debug a problem on an 11/70 only a couple of months ago…
+>
+> The PDP-11 has no RETI instruction; it has a RTT (ReTurn from Trap) and a RTI (ReTurn from Interrupt) instructions, but you already knew that, right? In some cases it’s  problem that it’s not possible to determine which is appropriate or correct to use. According to the PDP11 Architecture Handbook the difference between them is in what happens when the RTx instruction loads a PSW that has the T bit set and when it forces a Trace trap. RTI - immediate trap, RTT traps after the instruction following the RTT.
+
+Oops. Yes, it's RTI and RTT. But the names are beside the point, and so 
+is the difference between these two. The point is that the 
+instruction(s) do set the processor priority level, and you do not use 
+SPL in combination with them, so it makes no sense to have SPL inhibit 
+interrupts for any length at all. (And yes, I did know that.)
+
+Oh, and as far as RTT vs. RTI goes, not it's not hard to know which one 
+you want. You want RTT for your debugger and RTI for everything else.
+The difference is about what happens after the return. With RTT, the 
+T-bit trap will not trap until another instruction has executed. With 
+RTI, you would never manage to step to the next instruction with the 
+T-bit, since every time you returned, you'd get another trap.
+But I bet you knew that as well... ;-)
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
