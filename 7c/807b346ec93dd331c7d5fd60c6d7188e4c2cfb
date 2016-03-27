@@ -1,0 +1,55 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Mon, 28 Mar 2016 01:07:42 +0200
+Subject: [TUHS] PDP-11/70 SPL
+In-Reply-To: <mailman.171.1459115387.15972.tuhs@minnie.tuhs.org>
+References: <mailman.171.1459115387.15972.tuhs@minnie.tuhs.org>
+Message-ID: <56F867BE.2080807@update.uu.se>
+
+On 2016-03-27 23:49, jnc at mercury.lcs.mit.edu  (Noel Chiappa) wrote:
+>
+>      > From: Johnny Billquist
+>
+>      > It would also be interesting if anyone can come up with a good reason
+>      > why SPL should work that way.
+>
+> So that when doing:
+>
+> 	SPL	0
+> 	WAIT
+>
+> you don't lose by having the interrupt happen between the SPL and the WAIT?
+
+Hmm. A good point. If you depend on WAIT waking you up at an interrupt, 
+then you need SPL to block here. But this also means that you must be at 
+SPL 7 before any of this, otherwise you are still exposed to this 
+problem (nothing says that the interrupt won't happen before the SPL as 
+well).
+
+In general, I would say that this is not the way I would write code, but 
+checking in RSX and 2.11BSD I can tell that RSX do not use this pattern, 
+and does a WAIT without any SPL, while 2.11BSD do an SPL 0 followed by 
+WAIT. And the routine in 2.11BSD is also called at SPL 7.
+
+So obviously, both ways have been done, and 2.11BSD will work 
+potentially with a slight degration if the SPL do not block interrupts. 
+It will still work fine, as you will, at a minimum, get an interrupt at 
+the next clock tick, which will wake it up. But it might possibly be 
+sitting in a WAIT slightly longer than required.
+
+RSX in fact just loops after the WAIT. If an interrupt should cause the 
+system to be able to do something more productive, it will not return to 
+the idle loop. So yes, it also detects in the interrupt exit processing, 
+that it was/is in the idle loop.
+
+I still haven't had time to investigate properly. But at least processor 
+and chip manuals do not say that SPL will block interrupts. But that is 
+no guarantee that it don't in reality.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
