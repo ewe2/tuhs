@@ -1,0 +1,34 @@
+From: random832@fastmail.com (Random832)
+Date: Mon, 28 Mar 2016 01:12:58 -0400
+Subject: [TUHS] Character sets
+In-Reply-To: <20160328015814.GC18027@mercury.ccil.org>
+References: <mailman.169.1459059516.15972.tuhs@minnie.tuhs.org>
+ <56F7B14A.7040201@update.uu.se>
+ <20160327112920.GH12921@mercury.ccil.org>
+ <56F7C85F.6060503@update.uu.se> <20160327214943.GS3766@eureka.lemis.com>
+ <56F8565C.3080704@update.uu.se>
+ <20160327233049.GA11617@mercury.ccil.org>
+ <1459128032.3939182.561077874.021FA249@webmail.messagingengine.com>
+ <20160328015814.GC18027@mercury.ccil.org>
+Message-ID: <1459141978.2176234.561172346.36763B9D@webmail.messagingengine.com>
+
+On Sun, Mar 27, 2016, at 21:58, John Cowan wrote:
+> Random832 scripsit:
+> 
+> > Sure it does, but replace that != " " with !isblank(*c), and it doesn't
+> > work anymore since it ignores multibyte characters. 
+> 
+> In which locales does isblank() actually return true on characters other
+> than space and tab?  (This is a straight question.)
+
+See, no, that's a trick question. None of the other blank class
+characters are single-byte, so of course isblank doesn't. The following
+characters return true on is*w*blank for me: U+00a0 U+1680 U+2000 U+2001
+U+2002 U+2003 U+2004 U+2005 U+2006 U+2007 U+2008 U+2009 U+200a U+200b
+U+202f U+205f U+3000 (Oddly enough, isblank(0xA0) is true even in the
+UTF-8 locale, though of course U+00a0 is actually a multibyte character
+"\xc2\xa0".) So, if what you _want_ is to find the next blank character,
+doing this loop with isblank won't work. If what you want is to find
+space or tab, sure. But that's why grep for patterns containing \s are
+so slow.
+
