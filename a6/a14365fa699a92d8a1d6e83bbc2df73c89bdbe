@@ -1,0 +1,90 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 30 Jun 2016 14:49:03 -0400
+Subject: [TUHS] 68000 vs. 8086 ( was Algol68 vs. C at Bell Labs)
+Message-ID: <CAC20D2Oc7Kfr_jVYf8yaBAX-cSAb_QWSVHynRB3uA70urST3Qw@mail.gmail.com>
+
+Steve almost right....mixing a few memories...see below..
+
+On Thu, Jun 30, 2016 at 1:17 PM, <scj at yaccman.com> wrote:
+
+> My memory was that the 68000 gave the 8086 a pretty good run for its
+> money,
+
+​Indeed - most of the UNIX workstations folks picked it because of the
+linear addressing.​
+
+
+but when Moto came out with a memory management chip it had some
+> severe flaws that made paging and fault recovery impossible, while the
+> equivalent features available on the 8086 line were tolerable.
+
+​Different issues...​
+
+​When the 68000 came out there was a base/limit register chip available,​
+who's number I forget (Moto offered to Apple for no additional cost if they
+would use it in the Mac but sadly they did not).    This chip was similar
+to the 11/70 MMU, as that's what Les and Nick were used to using (they used
+a 11/70 running Unix V6 has the development box and had been before the
+what would become the 68000 -- another set of great stories from Les, Nick
+and Tom Gunter).
+
+The problem with running a 68000 with VM was not the MMU, it was the
+microcode.   Nick did not store all of the needed information needed by the
+microcode to recover from a faulted instruction, so if a instruction could
+not complete, it could not be restarted without data loss.
+
+
+> There were
+> ​ ​
+> some bizarre attempts to page with the 68000 (I remember one product that
+> had two 68000 chips, one of which was solely to sit on the shoulder of the
+> other and remember enough information to respond to faults!).
+
+​This was referred to as Forest Baskett mode -- he did a early paper that
+described it.  I just did a quick look but did not see a copy in my shelf
+of Moto stuff.​   At least two commercial systems were built this way -
+Apollo and Masscomp.
+
+The two processors are called the "executor" and "fixer."  The trick is
+that when the MMU detects an fault will occur, the executor is sent "wait
+state" cycles telling it that the required memory location is just taking
+longer to read or write.   The fixer is then given the faulting address,
+which handles the fault.    When the page is finally filled, on the
+Masscomp system the cache is then loaded and the executor is allowed to
+complete the memory cycle.
+
+When Nick fixed the microcode for the processor, the updated chip was
+rebranded as the 68010.   In the case of the Masscomp MC-500 CPU board, we
+popped the new chip in as the executor and changed the PAL's so the fault
+was allowed to occur (creating the MPU board).   This allowed the executor
+to go do other work while the fixer was dealing with the fault.    We
+picked up a small amount of performance, but in fact it was not much.   I
+still have a system on my home network BTW (although I have not turned it
+on in a while -- it was working last time I tried it).
+
+Note the 68010 still needed an external MMU.  Apollo and Masscomp built
+their own, although fairly soon after they did the '10 Moto created a chip
+to replace the base/limit register scheme with one that handled 2-level
+pages.
+
+In Masscomp's case when we did the 5000 series which was based on the
+68020, use their MMU for their low end (300 series)  and our custom MMU on
+the larger systems (700 series).
+
+
+
+> By the time
+> ​ ​
+> Moto fixed it, the 8086 had taken the field...
+>
+​Well sort of.   The 68K definitely won the UNIX wars, at least until the
+386 and linear addressing would show up in the Intel line.​  There were
+some alternatives like the Z8000, NS32032, and AT&T did the 32100 which was
+used in the 3B2/3B5 et al. but 68K was the lion share.
+
+
+​Clem​
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160630/8cf1c389/attachment.html>
+
