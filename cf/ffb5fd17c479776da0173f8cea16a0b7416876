@@ -1,0 +1,55 @@
+From: mascheck@in-ulm.de (Sven Mascheck)
+Date: Fri, 29 Jul 2016 01:16:39 +0200
+Subject: [TUHS] environments/universes (was: Unix v6 problem with /tmp)
+In-Reply-To: <CAC20D2NymVJ=fxcwBUk3ObU_iwc+FieOXLpnt-d=PJwJuzdAeg@mail.gmail.com>
+References: <CADxT5N6Vxxw9GivitVF1LjzAHP6ac3dvHF4gCs83TNzup3OEUA@mail.gmail.com>
+ <57991A21.5030404@gmail.com>
+ <CAC20D2NymVJ=fxcwBUk3ObU_iwc+FieOXLpnt-d=PJwJuzdAeg@mail.gmail.com>
+Message-ID: <20160728231639.GA299581@lisa.in-ulm.de>
+
+On Wed, Jul 27, 2016 at 04:57:47PM -0400, Clem Cole wrote:
+> I created Conditionally Dependant Symlinks (CDSL) which I think only showed
+> up in Masscomp's RTU, Stellix and Tru64.   The were not only late binding,
+> but added the concept of a user settable context.   Very handy when trying
+> to create a "single system image" from multiple system.
+
+How did you implement it?
+
+> Also, around the same time that Dennis added symlinks, Apollo's Aegis (aka
+> Domain) guys came up with a cool idea where you can run application code
+> from a link - extensible types.    I remember talking to Dennis and Ken
+> about them at a SOSP IIRC, and toyed with putting them into one of the
+> Locus UNIX Kernels.   We proposed it for HP-UX and Tru64, but never got
+> funded to try it, although I think / believe others did some where else.
+
+I just wonder if and how the following are related to the above two.
+
+Sequent Dynix "universes" (idea picked up by Siemens Sinix) puts several
+targets in one symlink. Example:
+
+  ln -c ucb=.bin att=/usr/att/bin   /bin
+
+and the actual resolving (and usage of different default PATHs)
+is controlled by an environment variable, as far as I know
+(s.a. http://www.in-ulm.de/~mascheck/various/universes/)
+
+HP-UX 9 "context dependent files" (as early alternative to NFS) make use of
+the set uid bit on directories and work like this,
+
+  # mkdir /etc/inittab
+  # chmod +H /etc/inittab
+  # touch /etc/inittab+/node1 /etc/inittab+/default
+
+By accessing /etc/inittab, node1 will see the file node1, other systems
+will see default (s.a. http://www.in-ulm.de/~mascheck/various/permissions/)
+
+
+> [...]
+> You are right the BSD 4.2 made the world know about them but like
+> a number of things in BSD (such as networking) it was in some
+> cases a (better) integration of ideas others had played with before.
+
+F.i. #! also got widely known in 4.2BSD but was suggested by DMR before 8th ed.
+
+-Sven
+
