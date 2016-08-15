@@ -1,0 +1,40 @@
+From: random832@fastmail.com (Random832)
+Date: Mon, 15 Aug 2016 11:14:45 -0400
+Subject: [TUHS] fstat(2) on pipes?
+In-Reply-To: <20160815140450.C6CC618C0B3@mercury.lcs.mit.edu>
+References: <20160815140450.C6CC618C0B3@mercury.lcs.mit.edu>
+Message-ID: <1471274085.1099635.695741217.6472725F@webmail.messagingengine.com>
+
+On Mon, Aug 15, 2016, at 10:04, Noel Chiappa wrote:
+> But back to the original topic, it sounds like there's a huge amount
+> of variance in the semantics of doing fstat() on a pipe. V6 doesn't
+> special-case it in any way, but it sounds as if other systems do.
+
+I expect that the single important thing, the only thing that most
+applications will rely on, is it returning successfully and indicating
+that the file type is fifo. If your version of xv6 supports file
+permissions and if pipes are one-way it may be worthwhile to indicate
+which end of the pipe it is.
+
+In the standard: the use of the size field is explicitly unspecified for
+pipes - for any file type other than regular files, symbolic links, and
+shared/typed memory objects. Other than that, it's clear from the
+standard that it's intended to succeed and report a sensible file type
+for non-filesystem objects like pipes, shared memory objects, and
+sockets. However, there's no discussion of what, if anything, belongs in
+the dev/inode*, permissions, nlink, and timestamps.
+
+On Linux: st_dev is a device number specific to pipes and st_ino is a
+unique inode number. I haven't tested the timestamps thoroughly (my test
+only covered instantaneously opening and statting a pipe), but they are
+valid timestamps rather than being 0 or -1 or some garbage value.
+st_uid/gid are [probably, haven't tested complicated cases] the user
+that created it, st_nlink is 1, and the permissions are set to
+[user-only] the read or write mode the pipe is opened in.
+
+*Though, the standard's light on the meaning of device identifiers in
+the first place, and what it does say could easily be read as demanding
+a unique device/inode pair regardless of the nonexistence of a physical
+device, which naturally leads to the solution that I observed on Linux
+and that someone else mentioned on OSX.
+
