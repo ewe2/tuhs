@@ -1,0 +1,47 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Mon, 15 Aug 2016 16:56:45 +0000
+Subject: [TUHS] fstat(2) on pipes?
+In-Reply-To: <1471274085.1099635.695741217.6472725F@webmail.messagingengine.com>
+References: <20160815140450.C6CC618C0B3@mercury.lcs.mit.edu>
+ <1471274085.1099635.695741217.6472725F@webmail.messagingengine.com>
+Message-ID: <20160815165645.GE655@yeono.kjorling.se>
+
+On 15 Aug 2016 11:14 -0400, from random832 at fastmail.com (Random832):
+> On Mon, Aug 15, 2016, at 10:04, Noel Chiappa wrote:
+>> But back to the original topic, it sounds like there's a huge amount
+>> of variance in the semantics of doing fstat() on a pipe. V6 doesn't
+>> special-case it in any way, but it sounds as if other systems do.
+> 
+> I expect that the single important thing, the only thing that most
+> applications will rely on, is it returning successfully and indicating
+> that the file type is fifo.
+
+On Linux/glibc, based on the fstat(2) man page, it looks like the size
+field is undefined for a FIFO:
+
+> The st_size field gives the size of the file (if it is a regular
+> file or a symbolic link) in bytes. The size of a symbolic link is
+> the length of the pathname it contains, without a terminating null
+> byte.
+
+The mode field is used to hold the type of file:
+
+> The following POSIX macros are defined to check the file type using
+> the st_mode field:
+> 
+> ...
+>     S_ISFIFO(m) FIFO (named pipe)?
+> ...
+> 
+> The following flags are defined for the st_mode field:
+> ...
+>     S_IFIFO    0010000   FIFO
+> ...
+
+The above from Debian Wheezy.
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+                 “People who think they know everything really annoy
+                 those of us who know we don’t.” (Bjarne Stroustrup)
+
