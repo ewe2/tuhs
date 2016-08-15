@@ -1,0 +1,55 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Mon, 15 Aug 2016 13:47:03 -0400
+Subject: [TUHS] fstat(2) on pipes?
+Message-ID: <1471283229.3510.for-standards-violators@oclsc.org>
+
+I remember once, long ago--probably in the early 1980s--writing
+a program that expected fstat on a pipe to return the amount of
+data buffered in the pipe.  It worked on the system on which
+I wrote the code.  Then I tried it on another, related but
+different UNIX, and it didn't work.  So if POSIX/SUS don't
+prescribe a standard, I don't think one should pretend there
+is one, and (as I learned back then) it's unwise to depend
+on the result, except I think it's fair not to expect fstat
+to fail on any valid file descriptor.
+
+I'm pretty sure that in 7/e and earlier, fstat on a pipe
+reported a regular file with zero links.  There was a reason
+for this: the kernel in fact allocated an i-node from a
+designated pipe device (pipedev) file system, usually the
+root.  So the excuse that `there's no i-node' was just wrong.
+
+In last-generation Research systems, when pipes were streams
+(and en passant became full duplex, which caused no trouble
+at all but simplified life elsewhere--I think I was the one
+who realized that meant we didn't need pseudo-ttys any more),
+the system allocated a pair of in-core i-nodes when a pipe
+was created.  As long as such an i-node cannot be accidentally
+confused with one belonging to any disk file system, this
+causes no trouble at all, and since it is possible to have
+more than one disk file system this is trivially possible
+just by reserving a device number.  (In fact by then our
+in-core i-nodes were marked with a file system type as well,
+and pipes just became their own file system.)  stat always
+returned size 0 for (Research) stream pipes, partly because
+nobody cared enough, partly because the implementation of
+streams didn't keep an exact count of all the buffered data
+all along the stream, just a rough one sufficient for flow
+control.  Besides, with a full-duplex pipe, which direction's
+data should be counted?
+
+Returning to the original question, I'd suggest that:
+-- fstat(fd) where fd is a pipe should succeed
+-- the file should be reported to have zero links,
+since that is the case for a pipe (unless a named pipe,
+but if you support those you probably have something
+else to stat anyway)
+-- the file type should be IFIFO if that type exists
+in xv6 (which it wouldn't were it a real emulation of
+6/e, but I gather that's not the goal), IFREG otherwise
+-- permissions probably don't matter much, but for
+sanity's sake should be some reasonable constant.
+
+Norman Wilson
+Toronto ON
+
