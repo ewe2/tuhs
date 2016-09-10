@@ -1,0 +1,57 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Sat, 10 Sep 2016 09:13:07 +0000
+Subject: [TUHS] Shell control through external commands
+In-Reply-To: <20160910074508.GE5970@dnied%tiscali.it>
+References: <1468585644.26769.for-standards-violators@oclsc.org>
+ <20160910074508.GE5970@dnied%tiscali.it>
+Message-ID: <20160910091307.GE14636@yeono.kjorling.se>
+
+On 10 Sep 2016 09:45 +0200, from dnied at tiscali.it (Dario Niedermann):
+> Il 15/07/2016 alle 14:27, Norman Wilson ha scritto:
+>> lu$ cat /bin/cd
+>> #!/bin/sh
+>> builtin cd "$@"
+>> lu$ 
+> 
+> But doesn't this change the current dir only in the child shell?
+> Which then exits right after the second line, parent shell's $PWD
+> unaffected. I really don't see how this script is useful.
+
+It does appear rather useless. Curiously, Debian (checked on Wheezy =
+bash 4.2+dfsg-0.1+deb7u3 and Jessie = bash 4.3-11+b1) seems to not
+supply anything like that, so it would appear to be some kind of
+Fedora-ism rather than a part of anything upstream; that, or the
+Debian folks are actually paying attention to what they ship onto
+users' systems.
+
+Even more curious, check this out from Debian Wheezy (I suspect the
+Jessie system would behave identically):
+
+$ cat > /michael/home/bin/cd
+#!/bin/sh
+builtin cd "$@"
+^D
+$ chmod +x bin/cd
+$ echo $PATH
+/michael/home/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+$ type cd
+cd is a shell builtin
+$
+
+so not even the shell will use the script in the first place!
+
+If I force the shell to use the script I created (by saying ~/bin/cd
+instead of just cd), after fixing /bin/sh to /bin/bash because when
+run as sh the shell has no concept of "builtin", it behaves like you'd
+expect: the working directory changes _within_ the script, but $PWD is
+unchanged in the parent shell once the script finishes, turning it
+into a somewhat expensive no-op.
+
+Unless Fedora's shell has been specifically modified to pay attention
+to the child process' $PWD, of course...
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+                 “People who think they know everything really annoy
+                 those of us who know we don’t.” (Bjarne Stroustrup)
+
