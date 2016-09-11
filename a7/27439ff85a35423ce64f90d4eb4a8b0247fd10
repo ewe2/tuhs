@@ -1,0 +1,37 @@
+From: arnold@skeeve.com (arnold@skeeve.com)
+Date: Sat, 10 Sep 2016 23:01:49 -0600
+Subject: [TUHS] Shell control through external commands
+In-Reply-To: <alpine.BSF.2.11.1609111404230.78806@aneurin.horsfall.org>
+References: <201607151647.u6FGlqvW037575@tahoe.cs.Dartmouth.EDU>
+ <20160910174011.GF5970@dnied%tiscali.it>
+ <alpine.BSF.2.11.1609110842190.78806@aneurin.horsfall.org>
+ <006301d20bcb$43ae03b0$cb0a0b10$@ronnatalie.com>
+ <201609110239.u8B2dgDJ010272@freefriends.org>
+ <alpine.BSF.2.11.1609111404230.78806@aneurin.horsfall.org>
+Message-ID: <201609110501.u8B51nCK016335@freefriends.org>
+
+Dave Horsfall <dave at horsfall.org> wrote:
+
+> On Sat, 10 Sep 2016, arnold at skeeve.com wrote:
+>
+> > I think that the way the shell "recognized" scripts was by having exec 
+> > fail, otherwise how would it know?  I think we'll have to go grubbing in 
+> > the source archives to be sure.
+>
+> Correct; if the exec failed then the invoking shell assumed that it was a 
+> shell script, and spawned a shell to run it.
+
+I think this happened in the "spawned" shell - so the exec would fail and
+then this child shell would just run the script.
+
+	if ((pid = fork()) != 0)
+		wait for pid
+	else {
+		/* in the child */
+		exec /path/to/program
+		if (errno == ENOEXEC)	/* or whatever it is, I don't remember */
+			interpret the script directly
+	}
+
+Arnold
+
