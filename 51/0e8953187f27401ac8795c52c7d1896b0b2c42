@@ -1,0 +1,72 @@
+From: random832@fastmail.com (Random832)
+Date: Sun, 11 Sep 2016 18:13:19 -0400
+Subject: [TUHS] Shell control through external commands
+In-Reply-To: <20160911185053.GA901858@lisa.in-ulm.de>
+References: <201609111739.u8BHd2pV146715@tahoe.cs.Dartmouth.EDU>
+ <CAEoi9W62QMprW=AqXJ4aJuwxKnjydWfUgEpr7bRBQsWoc-gtkw@mail.gmail.com>
+ <20160911185053.GA901858@lisa.in-ulm.de>
+Message-ID: <1473631999.3825346.722456001.70CCA0C8@webmail.messagingengine.com>
+
+On Sun, Sep 11, 2016, at 14:50, Sven Mascheck wrote:
+> I tried to follow all the traces of #! and collected the results on
+> http://www.in-ulm.de/~mascheck/various/shebang/
+> I'd be happy to add and fix stuff, if somebody spots anything.
+
+DEMOS (the soviet version of Unix) seems to have an independent
+implementation that supports some features no-one else does
+
+- use $* to define where the passed-in arguments [including the script
+name] go between the interpreter-arguments specified on the #!-line
+- alternate magic "/*#!"
+
+I don't remember where I downloaded it from, I think maybe someone
+posted it here a few years ago.
+
+Relevant bits from sys1.c:
+
+# define SCRMAG  "#!"
+# define SCRMAG2 "/*#!"
+# define ARGPLACE "$*"
+
+     /* формат:
+         пусть есть файл   /.../.../x
+         со следующим содержимым:
+         -------------------------------
+         |#!CMD A1 A2 A3
+         | .......
+
+        Вызываем команду:
+                x B1 B2
+
+        Запустится на самом деле такая команда:
+                CMD A1 A2 A3 /.../.../x B1 B2
+
+        Один из аргументов Ai может иметь вид $*
+        Тогда аргументы запуска подставятся на это место, а не в конец:
+         -------------------------------
+         |#!CMD A1 $* A2 A3
+         | .......
+
+        Вызываем:
+                x B1 B2
+
+        Запустится:
+                CMD A1 /.../.../x B1 B2 A2 A3
+     */
+
+There's no comment describing the SCRMAG2 feature but you can see it
+used in code:
+
+        if (indir < NSYMLNK && u.u_offset > (off_t)2 ){
+            cp = (char *) &u.u_exdata;
+            if( !bcmp(cp, SCRMAG, 2 ))
+                off = (off_t) 2;
+            else if( u.u_offset > (off_t)4 && !bcmp( cp, SCRMAG2, 4))
+                off = (off_t) 4;
+
+
+Sole uses of these features in the source tree:
+
+cmd/OPQRS/spline.c,v:@/*#!/bin/cc -O $* -o spline
+cmd/EFGHIJK/glob.c,v:@/*#!/bin/cc -o glob
+
