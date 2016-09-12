@@ -1,0 +1,43 @@
+From: steffen@sdaoden.eu (Steffen Nurpmeso)
+Date: Mon, 12 Sep 2016 14:34:56 +0200
+Subject: [TUHS] BSD mail(1) line addressing
+In-Reply-To: <20160912004332.4362323.94475.6921@stanleylieber.com>
+References: <20160912004332.4362323.94475.6921@stanleylieber.com>
+Message-ID: <20160912123456.6xQx8sec1%steffen@sdaoden.eu>
+
+stanley lieber <sl at stanleylieber.com> wrote:
+ |Anyone know what considerations informed the decision (way back when) \
+ |to eschew ed-like line addressing and switch to the currently entrenched, \
+ |reversed 
+ |form?
+ |
+ |EXAMPLES
+ |
+ |V8 mail:
+ |
+ |1,5p # prints messages one through five
+ |
+ |BSD mail:
+ |
+ |p1-5 # prints messages one through five
+
+I cannot see any code that would parse the command line, let aside
+an ed-style one, in V7 usr/src/cmd/mail.c.  But interesting
+question, why that prefix-based command syntax has been thrown
+over board.  Maybe, even likely i would say, Kurt Shoens didn't
+even do so, what the question implies, but instead the message
+specification is the actual argument for the command, instead of
+being just an address constrained of it.
+
+For some commands this is a restriction, however, which is why the
+laststring() (former getcmd()) has been introduced in the nail
+fork.  It backward parses something off the end of the command
+line, to overcome ambiguities that would otherwise arise, e.g.,
+the `pipe' command takes a message-list and a command.  This is of
+course a very bad hack.  Parsing the message-list should be
+prepared for not failing once the shell command is reached, and
+the shell long has the "--" mechanism for such separating
+purposes.  nail(1) has not, maybe mailx(1) will, one day.
+
+--steffen
+
