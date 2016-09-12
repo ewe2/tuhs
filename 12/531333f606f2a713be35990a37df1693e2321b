@@ -1,0 +1,64 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Mon, 12 Sep 2016 14:32:43 -0400
+Subject: [TUHS] BSD/v8 TCP/IP (was Shell control through external
+	commands)
+In-Reply-To: <20160912072052.GB74856@eureka.lemis.com>
+References: <20160912013110.ECB3B4422E@lignose.oclsc.org>
+ <20160912044432.GA74856@eureka.lemis.com>
+ <CANCZdfpUicqxu-x-3AFo-h+0X-Grfje-74Kd0Ht0J60Q-zBxhw@mail.gmail.com>
+ <20160912072052.GB74856@eureka.lemis.com>
+Message-ID: <CAC20D2O-vtSHvqAVS9C5qSD1Lt-rkiBE4tt_hFZiNS3h-aFudw@mail.gmail.com>
+
+On Mon, Sep 12, 2016 at 3:20 AM, Greg 'groggy' Lehey <grog at lemis.com> wrote:
+
+> Right, the discussion was about 4.1c.  I just wanted to confirm that
+> it was, in fact, the first version with TCP/IP.
+>
+
+I'll take a side trip to answer this question....   4.1A was the first BSD
+version that had the beginning of the wnj rewrite of the BBN code, but did
+have an IP stack based on the BBN but with the beginnings of a new API.
+(Again, if I can get some tapes read, I used to have 4.1A and 4.1B tapes).
+
+FYI: straight 4.1 (GA code if you will) did have a IP stack - just not from
+UCB nor a new API to use it.   Please remember, UCB *did not have the
+contract* for networking support for DARPA, BBN did.  For an API, the BBN
+code used the Chaosnet trick in nami of leaving text chars at the next of
+the open call as parameters - i.e. open ("/dev/tcp/mumble") and the TCP
+device would take if their.  Hence with that hack, no new system calls were
+used (just the traditional open/close/read/write).
+
+Joy would create sockets/bind et al in response to the CMU Accent System
+that they were building for DARPA on the triple-drip PERQs.   But the IP
+stack itself was from BBN (Gurwitz code).  BTW: That's were the dreadful
+mbuf's code came from.  Bill also tried to get some other stacks besides IP
+inside of the sockets framework, such as XNS and the ISO code, but in fact
+that would take much hacking to sockets before it worked (in a sense).
+
+That said, it was the release of 4.1C to the DARPA contractors and some
+other specific places (such as Sun, Apollo, and Masscomp that I know) and
+later the GA of 4.2BSD that made the IP stack for UNIX spread.   With
+BSD4.2 came two things for networking the full sockets API and sendmail as
+its SMTP implementation (the BBN smtp was not used or released).
+
+FYI: BBN (Rob) had written a somewhat OS independant IP/TCP stack (mbufs
+were created so he could be independant of any specific OS kernel's memory
+scheme).  It ran in HP's 1000s and 3000's IIRC and a few other systems.
+This was the code that was spliced in 4.1, as was the user level code
+(telnet, ftp and smtp -- this without hacking BSD's delivermail stuff).
+BBN would take 4.2 back and do an update beyond that but for whatever
+reasons, few places ever really picked that code base up (we used it in
+Stellix as we found it easier to make it parallel then the BSD code base).
+
+Also, Eric Cooper and I put the BBN stack on the original 4.1 UCB CAD
+systems on a Xerox 3M ethernet before 4.1A was available.  IIRC Sam Leffler
+was actually using the BBN code base to write the rcp/rsh/rexec and routed
+stuff after seeing some of the XNS/PUP stuff at Xerox (routed is pretty
+much a direct "rip-off" of the XNS way of doing routing) and that got
+spliced into the wnj's stuff later.
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160912/102fca9f/attachment.html>
+
