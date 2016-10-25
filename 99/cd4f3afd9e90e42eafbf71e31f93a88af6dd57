@@ -1,0 +1,61 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Tue, 25 Oct 2016 10:16:43 -0400 (EDT)
+Subject: [TUHS] VTServer/etc for V6 Unix
+Message-ID: <20161025141643.8470A18C0AB@mercury.lcs.mit.edu>
+
+    > I'll start with getting VTServer to run under V6 (my only Unix, don't
+    > have anything later :-)
+
+So, I just got VTServer runnin under V6: it successfully loaded a memory
+diagnostic from the 'server', into the 'client', using 'vtboot' on the
+latter. (Both running on emulated machines, for the moment - I thought I'd
+take all the hardware-related variables out of the equation, until I have the
+software all running OK.)
+
+It didn't require as much work on VTServer as I thought it might: I had to
+convert the C to the V6 dialect (no '+=', etc), and some other small things
+(e.g. convert the TTY setup code), but in general, it was pretty smooth and
+painless.
+
+
+Note that it won't run under vanilla V6, which does not provide 8-bit input
+and output on serial lines. I had previously added 'LITIN' and 'LITOUT' modes
+(8-bit input and output) to my V6; since the mode word in stty/gtty was
+already full, I had to extend the device interface to support them. I didn't
+add ioctl() or anything later, I did an upward-compatible extension to
+stty/gtty. (I'm a real NIH guy. :-)
+
+My only real problem in getting VTServer running was with LITIN; I did it
+some while back, but had never actually tested it (I was only using LITOUT,
+for my custom program to talk to PDP-11 consoles, which also did downloads,
+so needed 8-bit output). So when I went to use it, it didn't work, and it was
+a real stumper! But I did eventually figure out what the problem was (after
+writing a custom program to reach into the kernel and dump the entire state
+of a serial line), and get it working.
+
+(I had taken the shortcut of not fully understanding how the kernel serial
+line code worked, just tried to install point fixes. This turned out not to
+work, because of a side-effect elsewhere in the code. Moral of the story: you
+can't change the operation of a piece of software without complete
+understanding of how it works...)
+
+
+Is there any interest in all this? If so, I can put together a web page with
+the V6-verion VTServer source, along with the modified V6 serial line stuff
+(including a short description of the extended stty/gtty interface), etc.
+
+
+    > so if you turn up whatever you used to boot V6, it would probably still
+    > be useful.
+
+So I guess my next step, if I don't hear shortly from someone who has
+previously used VTServer to install V6, is to start on actually getting
+a V6 file system created.
+
+I'm still vacillating over whether it would be better to go V6-style (and
+just transfer a complete, small existing V6 filesystem), or V7-style (and
+get stand-alone 'mkfs', etc running with V6-format file systems). Anyone
+have an opinion?
+
+	Noel
+
