@@ -1,0 +1,33 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Thu, 8 Dec 2016 20:44:13 +0100
+Subject: [TUHS] Unix & Memory Management Units (MMU)
+Message-ID: <49292DAA-5E7B-445E-8738-5D00028B8EF4@planet.nl>
+
+Finally took a look at the V1 source.
+
+Referring to http://minnie.tuhs.org/cgi-bin/utree.pl?file=V1/u2.s
+Toward the end of the sysexec function there is:
+
+	cmp	core,$405 / br .+14 is first instruction if file is
+			  / standard a.out format
+	bne	1f / branch, if not standard format
+	mov	core+2,r5 / put 2nd word of users program in r5; number of
+			  / bytes in program text
+	sub	$14,r5 / subtract 12
+	cmp	r5,u.count /
+	bgt	1f / branch if r5 greater than u.count
+	mov	r5,u.count
+	jsr	r0,readi / read in rest of user's program text
+	add	core+10,u.nread / add size of user data area to u.nread
+	br	2f
+1:
+	jsr	r0,readi / read in rest of file
+2:
+	mov	u.nread,u.break / set users program break to end of 
+				/ user code
+	add	$core+14,u.break / plus data area
+	jsr	r0,iclose / does nothing
+	br	sysret3 / return to core image at $core
+
+$core is equated to 040000 in another file (u0.s). In V1 apparently the a.out header was 6 words (http://minnie.tuhs.org/cgi-bin/utree.pl?file=V1/man/man5/a.out.5), not 8, and hence the magic for a standard executable was 0405. It was already used as magic to distinguish a.out format files from other executables. It also shows that indeed 'exec' jumped to the first word of the header (at location $core).
+
