@@ -1,0 +1,70 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Tue, 20 Dec 2016 12:23:44 -0800
+Subject: [TUHS] nm on Third Edition .o files?'
+In-Reply-To: <CAC20D2NwBn59HS6ne13OtcM9XPf6sM148+MSN8Kvca1F=_Dcwg@mail.gmail.com>
+Message-ID: <cdb1b6d289efeafdc8bce509b3e7996e217f8f23@webmail.yaccman.com>
+
+I had a funny and somewhat embarrassing experience around the whole
+issue of structure name spaces.  When types were spreading through C,
+we had a lot of discussion about whether we should require all
+programs to call structures with a structure pointer (which would
+allow a separate name space for structure members of each
+structure).   We all thought it was a good idea, but the problem was
+there was a lot of code out there that didn't conform, including a lot
+of OS code.  As we started to port Unix to the Interdata (a 32-bit
+machine), the situation became critical.  So I took a deep breath and
+implemented the following: the compiler would use the old style
+structure rules until I saw a "new style" structure reference in the
+code.  At that point I would start to enforce the new rules, which
+involved translating the symbol table, and starting to complain if the
+types didn't match.   This was a very ugly hack, and I had inserted
+many firewalls and assertions to check that the data structures were
+correct after this translation.
+
+Now, a word about error messages.  The PDP-11 didn't have much
+memory.  But at the same time it didn't have much of a debugger in
+those days.  So the main aim was to identify what went wrong in a
+small number of characters so you could put in print statements and
+run it again.  This meant that the message produced had to be short
+but also unique.  I was producing error checks at a great rate in
+this code and running out of synonyms for "corrupted" in my messages.
+
+I "published" the code, and everything seemed to be working for a
+couple of days.  Then Ken, who was working on the Interdata file
+system, tried to compile a structure declaration that contained a
+sizeof of a structure that was recursively declared inside of the
+sizeof, and my code gave up the ghost.  Ken came into my office with
+a strange look on his face and asked "What is a gummy structure?"
+
+----- Original Message -----
+From:
+ "Clem Cole" <clemc at ccc.com>
+
+To:
+"Larry McVoy" <lm at mcvoy.com>
+Cc:
+"TUHS main list" <tuhs at minnie.tuhs.org>, "Noel Chiappa"
+<jnc at mercury.lcs.mit.edu>
+Sent:
+Tue, 20 Dec 2016 11:21:41 -0500
+Subject:
+Re: [TUHS] nm on Third Edition .o files?'
+
+On Tue, Dec 20, 2016 at 11:09 AM, Larry McVoy <lm at mcvoy.com [1]>
+ wrote:
+
+I get that it doesn't scale but man, so nice when reading
+ code to know that s.st_size is a stat structure.
+
+​Amen!!!​
+
+ 
+
+Links:
+------
+[1] mailto:lm at mcvoy.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20161220/95e6a0a7/attachment.html>
+
