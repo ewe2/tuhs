@@ -1,0 +1,90 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 23 Dec 2016 13:25:05 -0500 (EST)
+Subject: [TUHS] Utility of C changes (Was: phototypesetter C)
+Message-ID: <20161223182505.44FD918C0BB@mercury.lcs.mit.edu>
+
+    > of course some [of the changes to C in this time period] might have been
+    > driven by general utility (e.g. the ability to initialize structures).
+
+I was thinking about this, with my memory of the changes refreshed by
+re-reading those 'changes to C' notes, and it's interested how many of them
+were ones I personally (and most of the people working with me) didn't use.
+
+Here is a list of the changes described in those 3 documents:
+
+'newstuff':
+
+- Longs 
+- Unsigneds
+- Blocks (locals declared inside a non-top-level {} pair)
+- Initialization of structures
+- Initialization of automatic variables
+- Bit fields
+- Macro functions
+- Macro conditionals (#ifdef)
+- Arguments in registers
+- Typedefs
+- 'Static' scope
+
+'Changes':
+
+- Multi-line macros
+- Undefine
+- Conditional expressions (#if)
+- Unions
+- Casts
+- Sizeof() on abstractions
+- '=' in initializations
+- Change binary operators from trailing to leading
+- 'extern' does not allocate storage
+
+(This note also includes unsigneds, blocks, and structure initializations,
+from the earlier? note.)
+
+'cchanges':
+
+- Structure assignment and argument/return-value
+- Enum
+
+
+Of these, I never really used quite a few: blocks, automatic initializations,
+typedefs, unions, structure assignment/etc, or enum. I'm not sure if I ever
+used bit fields, either. Some of these are understandable; e.g. automatic
+initializations are just syntactic sugar (as are register arguments, but I did
+use those).
+
+Typedef is also effectively syntactic sugar; you can always use a macro and
+get almost (entirely?) the same result. In fact, I devised an entire system of
+types to make the code I was working on (almost entirely networking code, so
+lots of packet headers from other machines, etc) more rigorous - and later it
+turned out it had made it much more portable; it all used macros, not typedef.
+I don't think I ever used typedef...
+
+(The details of that might be of some interest: instead of int, long, etc we
+had things of the form {type}{len}, where {type}pe} was 'int', 'uns', 'bit',
+etc and length was 'b', 's', 'l', or two other interesting ones 'w' and 'f' -
+'w' meant the machine's native word length, and 'f' meant whatever was fastest
+on the machine. So 'unsl' mean '32-bit unsigned'. Depending on the machine,
+the compiler couldn't always produce them all - e.g. the PDP-11 didn't have
+unsl - so sometimes you had to live with non-optimal replacements. There were
+also un-typed types, i.e. 'byte', 'swrd', 'lwrd' - 8, 16 and 32 bits - and
+'word' - the machine's native length.)
+
+Unions didn't get used much either, in our stuff, although one would think it
+would be useful in network code - you get a packet with a pile of bits inside
+it, which can be one of N different formats, seems like a perfect application
+for a union. The problemis that it tied two different subsystems intimately
+together. If you have protocol A and protocol B, if you use a union to define
+the header format, the union has to have both A and B in it. Now if you want
+to add protocol C, that requires modifying that union definition. It was much
+easier to just take a pointer to the outer packet's data area, and assign
+(with cast) it to a new pointer variable which was of the correct type for the
+header you were trying to process.
+
+Some of the new things were incredibly useful, though - or, in fact, one
+couldn't get by without them. Casts were incredibly useful once the compiler
+got pickier. Initialization of structures was huge - other than 'bdevsw'-like
+hacks, there was just no other way to do that.
+
+    Noel
+
