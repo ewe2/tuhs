@@ -1,0 +1,130 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 25 Dec 2016 18:39:47 +1000
+Subject: [TUHS] Musings on PDP-7 Unix
+Message-ID: <20161225083947.GA28327@minnie.tuhs.org>
+
+[ This whole article is just a flight of fancy; feel free to ignore it or
+  at least treat it as the whimsy that it is. ]
+
+The PDP-7 Unix system is the first step on the evolution of Unix as we know it.
+We have a snapshot of the system around the end of 1970/beginning of 1971 at
+http://www.tuhs.org/Archive/PDP-11/Distributions/research/McIlroy_v0/
+and a reconstructed and working partial system at
+https://github.com/DoctorWkt/pdp7-unix
+
+PDP-7 Unix was a playground for Ken, Dennis and others to try out ideas and
+implementations, and it was quickly superseded by 1st Edition PDP-11 Unix.
+Details of how it evolved are at https://www.bell-labs.com/usr/dmr/www/hist.html
+and https://www.bell-labs.com/usr/dmr/www/chist.html
+
+All fine and good. However, I keep wondering, how far could they have taken
+Unix on the PDP-7 platform?
+
+The Kernel
+----------
+The reconstructed kernel only occupies 3070 words of 4096 words available,
+so there is room left for more code. There is already an alternative
+reconstruction where the "dd" concept has been replaced with the ".."
+concept (see https://github.com/DoctorWkt/pdp7-unix/tree/master/src/alt).
+
+PDP-7 Unix doesn't have the concept of absolute or relative filenames
+(e.g. /usr/bin/ls or a/b/c or ../../file), Could the nami kernel function
+be modified to do this? It would probably mean changing from two characters
+packed into a word to a single character per word (to make searching for
+'/' easier), and this would turn it into something more recognisable as Unix.
+
+What about pipes? They should not be too hard to implement. Even sixteen
+pipes with a 16-word buffer each would only be 256+ extra data words in
+the kernel. And a hundred words of code?
+
+There are only a few special devices in the kernel: ttyin, ttyout, keyboard,
+display, pptin, pptout. What about a disk block device? Was there a PDP-7
+tape device, and if so, why not a tape driver and block device?
+
+Filesystem
+----------
+The implementation of the filesystem is, in some places, quite inefficient.
+The free block list is implemented as follows. In each block, there are
+10 free block numbers then a pointer to the next part of the free list.
+However, each block can hold 64 block numbers, so why are only 10 free
+block numbers stored in each block? By using the whole of a block to store
+free block numbers, there would actually be more free blocks to use!
+
+Each i-node (size 12 words, 7 of which are direct or indirect pointers)
+has one word which holds a unique value. This doesn't seem to be used at
+all. If it was reused as a block pointer, this would allow files to be
+up to 8*64=512 (small) or 8*64*64=32768 (large) words in length, instead of
+7*64=448 words (small) or 7*64*64=28672 (large) words.
+
+The system is set up to only use one side of the two-sided disk device.
+It looks like the other side was used to backup (snapshot) a working
+system in case of catastrophic filesystem corruption: they could simply
+copy the blocks from the "snapshot" side back to the working side. We
+could double the size of the filesystem quite easily.
+
+Macro Assembler
+---------------
+The kernel is written using fairly tight assembly code, and there probably
+isn't a way to translate it into a high-level language. The PDP-7 has an
+arcane instruction set, and the existing assembler syntax is nothing special.
+What about a macro assembler that makes it easier to write code, especially
+readable code? Here are some ideas based on the existing kernel:
+
+u.rq := 8	==> lac 8; dac u.rq
+
+function swap	==> swap: 0
+{
+  return; 	    jmp swap i
+}
+
+subroutine .fork ==> fork: line 1	// i.e. not a function
+{
+  line 1
+}
+
+loop		==> 1:
+{
+}			jmp 1b
+
+if (sad dm1)    ==> 	sad dm1
+{			  jmp 1f
+  code1			code1
+} else {	    1:  code2
+  code2
+}
+
+  betwen(o101,o132) ==> jms betwen; o101; o132
+
+There are probably a bunch more that could be added. The aim is to
+make the control structures easier to read and write. The programmer
+still has to grok the PDP-7 instruction set.
+
+
+B (or other) Language
+---------------------
+PDP-7 Unix has a B compiler while compiles source down to a virtual
+instruction set which is interpreted by the B interpreter. We have the
+B interpreter code, and Robert Swierczek managed to rewrite the B compiler,
+see https://github.com/DoctorWkt/pdp7-unix/blob/master/src/other/b.b
+
+At first glance, the PDP-7 architecture is not that amenable to high level
+languages, but it turns out that it is indeed possible to write a compiler for
+a C subset that targets the PDP-7, see https://github.com/DoctorWkt/a-compiler.
+So, could the B compiler be modified to actually output PDP-7 assembly code?
+If so, we could rewrite the utilities (cp, mv, ls etc.) in a high-level
+language and make the system easier to maintain. I would recommend treating
+int and char as the same and only storing one char per word.
+
+And then, even though the PDP-7 architecture doesn't support it, how hard
+would it be to add int/char types and bring the language one step closer to C?
+
+Conclusion
+----------
+All of this is pie in the sky. It can certainly be done, but a) who has
+the time and b) it would be a "tour de force", nothing really useful. But
+imagine if, at the beginning of 1970, Unix had a proper B or C compiler,
+utilities written in this high-level language, a kernel written in a semi-high
+level language, and a system with pipes and proper pathnames.
+
+Cheers, Warren
+
