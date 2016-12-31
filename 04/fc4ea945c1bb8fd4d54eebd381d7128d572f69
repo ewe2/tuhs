@@ -1,0 +1,57 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sat, 31 Dec 2016 21:27:48 +1100
+Subject: [TUHS] 2.11BSD on a Z180 (was: merry christmas)
+In-Reply-To: <CAAFR5pZc9CEhXxFH0hh24qyx_MtSXrJwDo1h_EjGyA1ONvs1XQ@mail.gmail.com>
+References: <mailman.1.1482976801.31902.tuhs@minnie.tuhs.org>
+ <c77e8050-faec-626d-9f11-644bad115bd2@update.uu.se>
+ <019c01d26200$3c30aa30$b491fe90$@ronnatalie.com>
+ <CAH1jEzZMqE1UvtLXQ1fkj5Tb7UV_gSExs9uVhW98a-O1YtTtaw@mail.gmail.com>
+ <CAAFR5pZc9CEhXxFH0hh24qyx_MtSXrJwDo1h_EjGyA1ONvs1XQ@mail.gmail.com>
+Message-ID: <CAH1jEzYwe56JiFJhrVkBHETt=_MyT+uMYy64DvuxARRva+QNhA@mail.gmail.com>
+
+Yes, I am aware of the concept, I had used a similar emulator to run CP/M
+binaries on MS-DOS, specifically Microsoft Macro-80, Link-80 and Basic-80
+compiler. Yes I was doing cash registers that far back :) :) It is really
+convenient having access to your host filesystem (compared with attaching a
+simh formatted emulated tape image, tarring to/from it, and converting
+to/rom simh format and plain binary as I did yesterday).
+
+I hadn't seen apout but it is a good idea, I was toying with doing the same
+thing by cross compiling the 2.11BSD kernel to create something like User
+Mode Linux (but then adding user mode PDP-11 CPU emulation since it does
+not make sense to compile x86-64 2.11BSD userspace executables even though
+it is theoretically possible). I don't know how stable is the ABI between
+Unix V7 and BSD or between BSD versions. I suspect it is very similar but
+there would be differences in things like struct stat which are bound to
+cause breakage. So I think it has to run the correct kernel to get the
+correct ABI, and in turn that kernel has to have null or pass thru drivers
+to access the host facilities. I do hope to get this working someday,
+especially since a full cross compile of 2.11BSD includes the f77 stuff
+which cannot reasonably be compiled on a modern system given the compiler
+is not written in C, I think it is PDP-11 assembly.
+
+For now I am trying to reduce the amount of stuff I need to change, so my
+idea is to modify simh to allow switching between Z80 and PDP-11
+instruction sets (I could use the PSW so that it can process an interrupt
+or syscall in PDP-11 mode and transparently return to Z80 mode when it
+restores the PSW) and then just convert little pieces at a time, I could
+compile a Z80 hello world program and then link it against the PDP-11 C
+library for instance. So this puts off having to deal with MMU or driver
+issues till later on. I am looking at changing /lib/c1 and /bin/as to add a
+.z80 directive and the z80 instruction set.
+
+cheers, Nick
+
+On 31/12/2016 5:19 PM, "Robert Swierczek" <rmswierczek at gmail.com> wrote:
+
+> Have you looked into apout?  It is a user level simulator for Unix
+> a.out binaries:
+> https://github.com/DoctorWkt/unix-jun72/tree/master/tools/apout
+>
+> I have used it successfully for running some standalone binaries such
+> as (~/v1/fs/root)/bin/as.
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20161231/8bb33261/attachment.html>
+
