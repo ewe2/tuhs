@@ -1,0 +1,154 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sun, 1 Jan 2017 17:48:24 +1100
+Subject: [TUHS] Unix stories
+In-Reply-To: <20170101050011.GQ5983@mcvoy.com>
+References: <20170101050011.GQ5983@mcvoy.com>
+Message-ID: <CAH1jEzaLux09LFYSXgSgf2Bo+kNp-E=ZG++p9wbD6H-oG60nbw@mail.gmail.com>
+
+I can never emphasize enough how much damage it does to just get people in
+on a contract and let them scribble all over the company's valuable IP.
+Soon they are gone but the damage lives on making the real programmers'
+lives very difficult. Luckily the thing that took the contract programmer
+months to do can usually be redone by the real programmer in a day or two,
+but if it's been released it takes careful planning and opportunism to get
+all the breakage out of the system. This was my life when I worked on cash
+registers since software was basically a pimple on the side of hardware, my
+bosses didn't understand software (or worse, thought they understood it and
+hence trivialized it) so this would happen a lot, the software was seen as
+more of a vehicle to get the hardware where it needed to go, rather than an
+end in itself. Working there and dealing with customer complaints and
+overseeing the expansion of what was originally a few BASIC programs to
+print a report of the day's transactions on the receipt printer... to a
+thousands and thousands of lines of code so the cash registers could
+participate in multiple networks, download software and price updates,
+report on takings and performances of different categories, order stock,
+track till balances etc etc etc... really taught me a MASSIVE respect for
+code quality, I almost never meet anyone who cares as much about code
+quality and careful analysis of the system's assumptions and invariants
+(like the assumption about drivers modifying a process' s signal mask in
+your example)... as I do.
+
+I can remember a conversation I had with a new hire in my research group
+later on (not cash registers this time)... this dude had a PhD and had
+written a hugely successful open source package that is still standard
+today for a lot of courses etc in our field... and was hired to rewrite
+some similar stuff created by our research group that was a bit of a dogs
+breakfast but nevertheless was in daily use and publicly disseminated. Well
+I had hacked on this dude's code a lot and I hated it, way overcomplicated
+and using a very awkward structure of millions of interdependent C++
+templates and what-have-you. He showed me his progress after some months
+and I showed him a competing implementation (very immature) that I had put
+together in my summer holiday using Python. So I tried to sell him the idea
+of doing it in Python and structuring it all for simplicity and
+maintainability... he was not having it. I could see his code would rapidly
+descend into a dogs breakfast as soon as it was used to solve any real
+world problem, because he was repeating all the same mistakes as in his
+open source package.
+
+So fast forward 5 years or so and he has a useable system, it is in daily
+use and is being publicly disseminated. It is not too bad, until one looks
+under the hood. I used it as a module in one of my major research tools and
+it is great that it's available, BUT, it falls over miserably when you
+stray away from the normal standard use cases that his group have tested
+and made to work by extensive layers of band-aid fixes, leaving the code in
+an incomprehensible state. I would spend days debugging and then send him a
+comprehensive report on my investigation including several proposals for
+short and long term fixes, he was initially enthusiastic about this but
+lately my reports get labelled "won't fix" with weak excuses about it being
+outside the common use cases. "Can't fix" would be more accurate. In the
+process of all this I looked at the changelogs for the releases. In the
+past 3 years there were a couple of feature releases and about 30 bugfix
+releases, each accompanied by a release note which just kind of casually
+passes this off as no big deal and implies the code is approaching a
+reliable state. Ha!!
+
+By contrast in May/June this year I decided to enter my tool in a
+competition run by my research group and open to outside entrants, I think
+about 20 groups entered including 3 or 4 internal entries like mine. Well
+my tool was far from perfect since I had embarked on a major rewrite of the
+frontend some months earlier and it was hard to produce anything working at
+all, let alone competition quality. Luckily I had help from the competition
+organizer, since internal entries are not eligible for prizes he was happy
+to alert me to any problems he found and let me submit fixes if it did not
+mess up his schedule. Well he found quite a few issues and I fixed them and
+ended up having the fastest and best tool in the competition even though it
+was not eligible for prizes. But now to the point of the story: The
+CHARACTER of the problems he found. So much do I care about code quality
+that it turns out most of the problems amounted to basically an oversight,
+a misplaced comma that was hard to see, a pointer violation that occurred
+because a realloc had moved some data during the evaluation of an
+expression, that sort of thing. The fix never required any significant
+restructuring of the code, except in one case where it was basically caused
+by my using that other broken software as a module and I had to work around
+it. I am so happy that my basic asusumptions and algorithms turned out to
+be robust, because this means that after some period of getting all the
+typos and minor oversights out, I will have a tool that is close to perfect
+despite its complexity and the things I still plan to refactor and rewrite.
+The guys who do not understand code quality will never experience this.
+
+cheers, Nick
+
+On 01/01/2017 4:00 PM, "Larry McVoy" <lm at mcvoy.com> wrote:
+
+> Inspired by:
+>
+> > Stephen Bourne after some time wrote a cron job that checked whether an
+> > update in a binary also resulted in an updated man page and otherwise
+> > removed the binary. This is why these programs have man pages.
+>
+> I want to tell a story about working at Sun.  I feel like I've sent this
+> but I can't find it in my outbox.  If it's a repeat chalk it up to old
+> age.
+>
+> I wanted to work there, they were the Bell Labs of the day, or as close
+> as you could get.
+>
+> I got hired as a contractor through Lachman (anyone remember them?) to do
+> POSIX conformance in SunOS (the 4.x stuff, not that Solaris crap that I
+> hate).
+>
+> As such, I was frequently the last guy to touch any file in the kernel,
+> my fingerprints were everywhere.  So when there was a panic, it was
+> frequently laid at my doorstep.
+>
+> So here is how I got a pager and learned about source management.
+>
+> Sun had two guys, who will remain nameless, but they were known as
+> "the SCSI twins".  These guys decided, based on feedback that "people
+> can interrupt sun install", to go into the SCSI tape driver and disable
+> SIGINT, in the driver.  The kernel model doesn't allow for drivers messing
+> with your signal mask so on exit, sometimes, we would get a "panic: psig".
+>
+> Somehow, I sure was because of the POSIX stuff, I ended up debugging this
+> panic.  It had nothing to with me, I'm not a driver person (I've written
+> a few but I pretty much suck at them), but it landed in my lap.
+>
+> Once I figured it out (which was not easy, you had to hit ^C to trigger it
+> so unless you did that, and who does that during an install) I tracked down
+> the code to SCSI twins.
+>
+> No problem, everyone makes mistakes.  Oh, wait.  Over the next few months
+> I'm tracking down more problems, that were blamed on me since I'm all over
+> the kernel, but came from the twins.
+>
+> Suns integration machines were argon, radon, and krypton.  I wrote
+> scripts, awk I think, that watched every update to the tree on all
+> of those machines and if anything came from the SCSI twins the script
+> paged me.
+>
+> That way I could go build and test that kernel and get ahead of the bugs.
+> If I could fix up their bugs before the rest of the team saw it then I
+> wouldn't get blamed for them.
+>
+> I wish I could have figured out something like Steve did that would have
+> made them not screw up so much but this was the next best thing.  I
+> actually
+> got bad reviews because of their crap.  My boss at the time, Eli Lamb, just
+> said "you are in kadb too much".
+>
+> --lm
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170101/7d161d25/attachment.html>
+
