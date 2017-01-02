@@ -1,0 +1,131 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 2 Jan 2017 17:25:16 +1100
+Subject: [TUHS] Unix stories
+In-Reply-To: <alpine.BSF.2.02.1701020058230.83335@frieza.hoshinet.org>
+References: <CAH1jEzaLux09LFYSXgSgf2Bo+kNp-E=ZG++p9wbD6H-oG60nbw@mail.gmail.com>
+ <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+ <CAH1jEzbnqCPYDfOqmAE+N=4jFG4YoitUf=+w29FUOP7wGw6KXg@mail.gmail.com>
+ <alpine.BSF.2.02.1701020058230.83335@frieza.hoshinet.org>
+Message-ID: <CAH1jEzbyL=H7ePZks_0FPjNk01JwsbkeVngQn3zV0htRDwFiGw@mail.gmail.com>
+
+Yes, I agree, I want to do exactly that. And, I know my ideas are
+probably also perceived as daft. But it's OK :)
+
+Unfortunately a C interpreter does not really work in principle,
+because of the fact you can jump into loops and other kinds of abuse.
+So the correct execution model is a bytecode. This means the C
+compiler is pretty much unchanged, so there are no real
+simplifications there. Also, you can cast a pointer and access
+individual bytes of a structure and that kind of abuse. So the data
+model is pretty much unchanged from a real machine's too, and there
+are no real simplifications there either. But in my opinion that's not
+the end of the story.
+
+What I would like to do is to implement pointer safety, I know this is
+a pretty big ask and will break compatibility with a big number of C
+applications out there. But it might be surprising how many actually
+do use pointers in a safe way. So my idea was something like this:
+
+Suppose there is "struct foo { char *p; int *q; long b; short a; };",
+well the user wouldn't be allowed to access the individual bytes of
+the pointers p and q. But they would be allowed to access the
+individual bytes of a and b since this does not introduce anything
+dangerous. Therefore the struct would be internally converted to
+"struct  foo { char *p; int *q; char data[6] };" allowing 4 bytes for
+the long and 2 for the short. Then, now suppose I call a function and
+I pass it "&a". This would be internally converted to "data + 4". But
+it would be passed as a triple (data, data + 4, data + 6) which gives
+the bounds of the underlying array. Or suppose the virtual machine was
+implemented in Java or Python or some such, it would be passed as a
+pair (data, 4) where data is a 6-byte array and 4 is an integer index
+into it.
+
+I was then going to make the compiler recognize some idiomatic C
+constructs like "struct foo *p = malloc(10 * sizeof(foo));" and
+internally translate them to something like "struct foo *p = new
+foo[10];". Hopefully there could eventually be discriminated unions so
+that I could declare something like "union foo { char *p; int *q; long
+b; short a; };" and this would be internally translated to "struct foo
+{ int which; union { char *, int *, data[4] } };" and the field
+"which" would be set to 0, 1 or 2 depending on whether a char *, an
+int *, or plain old data had been stored there. That way, when you
+access a given field of the union it can validate that the correct
+thing was stored there earlier. Also, with a little bit of syntactic
+sugar we could implement intptr_t as "union { void *p; int a; };" to
+increase compatibility with C.
+
+If we do it like this, then your P-system idea works quite well,
+because the memory space doesn't exist anymore, it's an OO database.
+
+cheers, Nick
+
+On Mon, Jan 2, 2017 at 5:01 PM, Steve Nickolas <usotsuki at buric.co> wrote:
+> On Mon, 2 Jan 2017, Nick Downing wrote:
+>
+>> What I want to do is go back to a REALLY SIMPLE unbloated system,
+>> which is why I am very interested in 2.11BSD (you probably saw my
+>> earlier posts about the 2.11BSD system and potential port to Z180 and
+>> so on). And then I want to define the ONE TRUE WAY(TM) of doing each
+>> thing. But before I do this I want to go right back to basics and look
+>> at the object model used in the operating system itself. For instance
+>> the stuff like the oft (open file table), inode table, the filesystem
+>> table (I mean Sun VFS which isn't in 2.11BSD AFAIK but eventually
+>> should be), the device table and so on. And also the user-visible
+>> objects like files, sockets etc which map to kernel objects.
+>>
+>> So once I have sorted all this out and created an object model that
+>> the kernel can use efficiently, with compiler support (like C++
+>> without the bloat, like java with internal pointers and ability to get
+>> at the bits and bytes of your objects, like C without all the void *
+>> stuff and with automatic handling of stuff like vtables), and
+>> converted the kernel and all drivers to use it, then I think I will
+>> have an object model that is useful in practice. So my idea then is to
+>> export it to userlevel, so that userland programs can be rewritten
+>> into this new C-like object oriented language and calls like: count =
+>> read(fd, buf, size) would change to: count = fd.read(buf, size) since
+>> kernel objects are objects. There would also be a compatibility layer
+>> that allows you to keep a table of integer fds and their kernel
+>> objects in userspace for porting.
+>>
+>> After this I would start to look at popular libraries like the C
+>> library or the X-Window system, and convert them to use the new object
+>> model, while also providing the compatibility layer as I did for the
+>> kernel interface. Ultimately the result would be a bit like Java, but
+>> using all the familiar Unix objects and familiar Unix calling
+>> conventions (such as argument passing by reference or malloc/memcpy
+>> stuff that Java can't do). Also without any header files or
+>> boilerplate of any description, which is one of my pet peeves with
+>> Java, C, C++ etc.
+>>
+>> I really think that the solution to bloat is to go through and rewrite
+>> everything to do things in a more standardized way with more reuse.
+>> Also I think that the massive amount of bloat arises to some extent
+>> because the environment lends itself to writing non maintainable code
+>> (for example you have to write loads of boilerplate and synchronize
+>> function definitions in various places, which discourages you from
+>> changing a function definition even if that's the right thing to do in
+>> a situation). So there's always the temptation to add another
+>> compatibility layer rather than dealing with the bloat. Rewriting
+>> things in a much more minimal and maintainable style is the answer.
+>>
+>> Another reason for bloat is that authors have to support millions of
+>> slightly different systems. My idea is to totally standardize it, like
+>> POSIX but much more drastically so. Think about Java, it defines a
+>> strict virtual machine so there's nothing to change when you port your
+>> code to another platform. I haven't totally decided how to handle
+>> word-size issues in this context, but I am sure there is a way.
+>
+>
+> This vaguely reminds me of an idea I had a couple years ago, but never
+> mentioned because I thought it might be perceived as daft.
+>
+> I had the idea of writing a virtual machine specifically tailored to running
+> C code, with a virtual operating system similar to Unix.  On the surface it
+> would probably feel like running Unix under an emulator, but the design
+> would probably be a bit less baroque, because everything would be designed
+> to work together cleanly.
+>
+> Like the mutant child of Unix and UCSD Pascal, I suppose.
+>
+> -uso.
+
