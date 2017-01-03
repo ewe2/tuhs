@@ -1,0 +1,63 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 2 Jan 2017 16:49:59 -0800
+Subject: [TUHS] Unix stories
+In-Reply-To: <42922C34-342F-4E86-83E2-3618129139B2@tfeb.org>
+References: <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+ <42922C34-342F-4E86-83E2-3618129139B2@tfeb.org>
+Message-ID: <20170103004959.GA29088@mcvoy.com>
+
+It's simply a lack of craftsmen level thinking.  Managers think that people
+are fungable, whatever that means, I think it means anyone can do this work.
+
+That's simply not the case, some people get the big picture and the details
+and some people don't.
+
+There is also a culture of the cool kids vs the not cool kids.  For example,
+at Sun, the kernel group was the top of the heap.  When I was doing nselite
+which begat Teamware then BitKeeper then Git et al, I was in the kernel 
+group.  They wanted me to go over to the tools group.  I looked over there
+and saw people that weren't as good as the kernel people and passed.
+
+Same thing with testing.  So many bad test harnesses.  Because testing
+isn't respected so they get the crappy programmers.  One of the best
+things I did at BitKeeper was to put testing on the same level as the 
+code and the documentation.  As a result, we have a kick ass testing
+harness.  Here's a sample t.file in our test harness:
+
+    echo $N Check that component rename is blocked ......................$NL
+    nested product
+    cd "$HERE/product"
+    bk mv gcc gccN 2>ERR && fail -f ERR
+    cat <<EOF >WANT
+    mvdir: gcc is a component
+    Component renaming is unsupported in this release
+    EOF
+    cmpfiles WANT ERR
+    echo OK
+
+The harness, which is all open source under the apache license at
+bitkeeper.org, let's you write tiny shell scripts, they either echo
+OK (pass), (bug) (pass but not really), or anything else and they 
+fail.
+
+The harness allows for parallel runs.  In the early days we ran the tests
+in alpha order, later we got a huge speed up by running them in most recently
+modified order (fastest time to failure).
+
+All of that is the result of me (semi good, setting it up) and Wayne Scott
+(crazy good, he made it work in parallel and bunch of other improvements)
+being the guys who worked on it.  We're $250K/year people on average.
+
+
+
+On Mon, Jan 02, 2017 at 11:23:47PM +0000, Tim Bradshaw wrote:
+> If you think open source is bad you haven't seen much closed-source software, because a lot of it is deeply terrible.  I claim that all large software systems which are not designed to be used by naive users are shit (and most systems which are are also shit).
+> 
+> > On 2 Jan 2017, at 02:03, Steve Johnson <scj at yaccman.com> wrote:
+> > 
+> > But how much longer can this go on?  What can we do to fight the exponential bloat of this and other open-souce projects.  All ideas cheerfully entertained...
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
