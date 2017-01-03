@@ -1,0 +1,94 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Tue, 03 Jan 2017 14:17:00 +0100
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <20170101203813.GV5983@mcvoy.com>
+References: <CAH1jEzav7rijjpvDrogQKS5dJb09azgnogdGtSsqmPpTHFL7Hg@mail.gmail.com>
+ <CAH1jEza_oXr33-mjKV7aOVO2U4E953OpQ7dqMABVUp-uix4pJQ@mail.gmail.com>
+ <CAH1jEzZqs6H9zCyLL1eveAHfEq3SminYBGDyLYwNUxE-h9nDng@mail.gmail.com>
+ <CAH1jEzb_28daq6EOV1GMg8g-OM_sevbf8_EVE7dprgaVvrMiqA@mail.gmail.com>
+ <CAH1jEzZ9TMjd56tAv10Orzof1NmHH7PHfzSY8ZOc4DR3UGvfGQ@mail.gmail.com>
+ <3564F094-9B31-4492-8FDD-716160F45E84@tfeb.org>
+ <02d201d2642f$2bcfe0d0$836fa270$@ronnatalie.com>
+ <95D6B274-6D3F-4610-873A-76F4707AE89B@tfeb.org>
+ <D2B69B82-DB28-489B-A7E4-744111F4624E@kdbarto.org>
+ <20170101202850.GF17848@wopr> <20170101203813.GV5983@mcvoy.com>
+Message-ID: <586ba44c.dnHd1Caeq6INr3FG%schily@schily.net>
+
+Larry McVoy <lm at mcvoy.com> wrote:
+
+> I'd like to know where you can get a better performing OS.  The file systems
+> scream when compared to Windows or MacOS, they know about SSDs and do the
+> right thing.  The processes are light weight, I regularly do "make -j"
+> which on my machines just spawns as many processs as needed.
+...
+
+> So if I size it to the number of CPUs it is slightly faster.  On the other
+> hand, when I tell it just spawn as many as it wants it peaks at about 267
+> processes running in parallel.
+>
+> Solaris, AIX, IRIX, HP-UX, MacOS would all thrash like crazy under that 
+> load, their context switch times are crappy.
+>
+> Source: author of LMbench which has been measuring this stuff since the
+> mid 1990s.
+
+Could you give a verification for this claim please?
+
+My experiences are different.
+
+From what I can tell, the filesystem concepts in Linux are slow and it is 
+usually not possible to tell what happened in a given time frame. It however
+creates the impression that it is fast if you are the only user on a system,
+but it makes it hard to gauge a time that is comparable to a time retrived 
+from a different OS. This is because you usually don't know what happened in
+a given time.
+
+If you e.g. use gtar to unpack a Linux kernel archive on your local disk, the 
+wall clock run time of gtar is low, but it takes some time before the first 
+disk I/O takes place and the disk I/O continues until a long time after gtar 
+already returned control to the shell.
+
+If you however use star for the same task and do not specify the "-no-fsync" 
+option, star takes 4x longer than gtar to return control to the shell. If you
+do the same on Solaris using the same hardware, a standard star extract (with 
+the default fsync) takes only 10% more real time with UFS compared to the time
+without fsync and the time is aprox. the same as the unpack time on Linux 
+using gtar. This is because on Solaris, disk I/O starts immediately even when 
+you use gtar and there is no time wasted with filling the kernel cache before 
+I/O starts.
+
+Aprox. 12 years ago, I converted the central web server for the OSS hosting 
+platform berlios.de (*) (at that time the second largest one) from Linux to 
+Solaris and the performance did increase ponderably.... Even worse, at the 
+same time, I did a test where I unpacked the Linux kernel archive using gtar
+and switched off the power just after gtar returned control to the shell. The 
+result was a rotten filesystem that could not be repaired by fsck.
+
+***
+So my question is: did you manage to find a method to gauge something 
+on Linux that is comparable to other platforms or do you also suffer from the
+problem that Linux tries to hide the real time needed for filesystem 
+operations?
+***
+
+BTW: ZFS has a similar problem as Linux: It is extremely slow when you ask it 
+to to things in a way that result in a known state. ZFS however does not result 
+in a rotten FS when you switch the system off while it is updating the FS.
+
+
+*) The reason for this conversion was that Linux completely stalled 3-4 times a 
+day and only a reset did help. There was no way to get the reason for that 
+problem using Linux debug tools. After the conversion to Solaris, it turned out 
+that memory overcommitment on Linux was the reason for the freeze. Since we had 
+two CPUs, the Linux kernel could copy on write pages faster than searching for 
+processes to kill in order to recover.
+
+
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+
