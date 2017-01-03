@@ -1,0 +1,56 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Tue, 3 Jan 2017 13:32:46 -0500
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <586be7b3.TVbwM5I7Y6v2DJC8%schily@schily.net>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <586bb9dc.iVkFRSLWnXd79ger%schily@schily.net>
+ <AEA71495-53ED-4A19-A1F1-4C8FB20627DB@kdbarto.org>
+ <586be7b3.TVbwM5I7Y6v2DJC8%schily@schily.net>
+Message-ID: <001001d265ef$c832d790$589886b0$@ronnatalie.com>
+
+
+> Microsoft still does and "True64" did use the ILP64 model. This allows
+lazy written software to work even though it does not the right data types
+for pointer arithmetic.
+ 
+Well, there's a predisposition in C for "int" to be the standard word size
+of the machine.    On designing for a 64-bit machine, one needs to think
+long and hard about the integral sizes.
+When we wrote the compilers for the Denelcor HEP, we had that problem.   The
+thing had 64-bit words and a partial word mode for 16 and 32 bits.   It
+didn't even have the concept of 8-bit math.
+We decided that rather than arbitrarily sizing an int to 32, so we had the
+char-short-int-long progression, we'd make it the word size.   This means we
+had to introduce another keyword for the 32-bit type.
+After dismissing "short long" or "long short" as a type, the suggestion was
+"medium," but we settled for int32 (this was before the language standards
+considered how to manage the system namespaces).
+
+An amusing thing we found basing our code on 4.2 BSD was that there was a
+really bad latent bug.     There was a kernel structure that looked like
+this:
+
+union  ptrs {
+      int* p_int;
+      short*  p_short;
+      char* p_char;
+      long* p_long;
+};
+   
+The kernel would store one sort of pointer in one element and then retrieve
+it from another.   This "conversion by union" didn't work on the HEP as the
+word pointers had the partial word size encoded in the low order bits.
+Reading out a short* where an int* was stored caused the processor to access
+the wrong sized entity (though roughly in the proper location).    I had to
+run all over the kernel changing those to a void* so that the generated code
+could properly convert to the right pointer type.
+
+
+Don't get me started on the inanity that states that "char" is the smallest
+addressable integer.   Char should have been divorced from the integer
+sizings and let be the native CHARACTER size alone.
+
+
