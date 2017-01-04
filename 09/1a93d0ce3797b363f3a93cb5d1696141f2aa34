@@ -1,0 +1,93 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Tue, 3 Jan 2017 22:50:18 -0500
+Subject: [TUHS] Mac OS X is Unix
+In-Reply-To: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+References: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+Message-ID: <CAEoi9W4BhWA-a1rZmF8kNQiuQeB5tFq3K-6PTrhJLrUU40U=8w@mail.gmail.com>
+
+On Tue, Jan 3, 2017 at 3:19 PM, Doug McIlroy <doug at cs.dartmouth.edu> wrote:
+
+> > keeping the code I work on portable between Linux and the Mac requires
+> > more than a bit of ‘ifdef’ hell.
+>
+> Curmudgeonly comment: I bristle at the coupling of "ifdef" and "portable".
+> Ifdefs that adjust code for different systems are prima facie
+> evidence of NON-portability. I'll buy "configurable" as a descriptor
+> for such ifdef'ed code, but not "portable".
+>
+
+Here, here.
+
+And, while I am venting about ifdef:
+> As a matter of sytle, ifdefs are global constructs. Yet they often
+> have local effects like an if statement. Why do we almost always write
+>
+> #ifdef LINUX
+>         linux code
+> #else
+>         default unix code
+> #endif
+>
+> instead of the much cleaner
+>
+>         if(LINUX)
+>                 linux code
+>         else
+>                 default unix code
+>
+> In early days the latter would have cluttered precious memory
+> with unfreachable code, but now we have optimizing compilers
+> that will excise the useless branch just as effectively as cpp.
+>
+
+Interesting, but I'm curious how this would work in the context of C (or a
+C-like variant)? The code must parse and type-check in accordance with the
+existing standard, no? So if the `if(LINUX)` branch referred to, say,
+Linux-specific structure members, then how would the compiler recognize
+that avoid spitting out a diagnostic/erroring out? The existing C language
+seems defined to expressly disallow this sort of thing.
+
+What might be interesting would be an additional lexical token that would
+tag a particular expression as, "compile-time evaluated" with the
+consequence that the compiler would ignore the following statement or block
+if it appeared in a conditional (or something along those lines). It would
+be an error if such a conditional did not evaluate to a compile-time
+constant. So one might say something along the lines of, `if #(LINUX) { ...
+}` (or whatever syntax was reasonable and allowable with respect to the
+existing language) and this would be ignored by the compiler on systems for
+which LINUX evaluated to logical false (0 or whatever the kids call it
+these days). I imagine this would open other cans of worms, though.
+
+Much as the trait of overeating has been ascribed to our
+> hunter ancestors' need to eat fully when nature provided,
+> so overuse of ifdef echos coding practices tuned to
+> the capabilities of bygone computing systems.
+>
+> "Ifdef hell" is a fitting image for what has to be one of
+> Unix's least felicitous contributions to computing. Down
+> with ifdef!
+>
+
+I've learned two hard lessons about #ifdef.
+
+First, one should strive to avoid them by programming to an abstract
+interface, with "system" specific implementations of that interface that
+are selected by the build system (make, mk, whatever). I've further found
+that one rarely needs complicated shell scripts for things like that.
+
+Second, if one cannot avoid them, one should #ifdef around a particular
+feature, not a system. For example, instead of `#if defined(__linux__) ||
+defined(__FreeBSD__) || defined(__OpenBSD__) || ... // Use mmap()` all over
+the place, one should just, `#ifdef PROJECT_USE_MMAP` and `#define
+PROJECT_USE_MMAP` for one's project somewhere (possibly based on system
+there or whatever). Then adding a new system is relatively easier: one
+defines a set of symbols for the new system, instead of trying to find
+every place where __linux__ is tested and adding to that.
+
+Ideally, one would avoid #if, though.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170103/4dd38998/attachment.html>
+
