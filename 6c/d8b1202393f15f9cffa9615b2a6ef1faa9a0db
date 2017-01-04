@@ -1,0 +1,100 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Wed, 04 Jan 2017 19:23:12 +0100
+Subject: [TUHS] the guy who brought up SVr4 on Sun machines
+In-Reply-To: <20170104175227.GH3405@mcvoy.com>
+References: <20170104024127.GN12264@mcvoy.com>
+ <CANCZdfpvFS+38sBpkACm0LgKC2xxDD3QvyAKOM+diHtPRX1t1Q@mail.gmail.com>
+ <CAEoi9W6gN42dT86kV4d5vaSZiZfK82Ue1o0kv94VJEDaVosyhA@mail.gmail.com>
+ <20170104033512.GA22116@mcvoy.com>
+ <CAP6exY+xDY8-16KDixzesrmp7xhybXUb1YEGtGhR5OQXh6Hq3g@mail.gmail.com>
+ <586d234d.vf4JCu1Ye3gumwfc%schily@schily.net>
+ <20170104164630.GA3405@mcvoy.com>
+ <586d2abb.A5j4GovJtyzlD+AQ%schily@schily.net>
+ <20170104171033.GC3405@mcvoy.com>
+ <586d334d.XcKOxzKwrzmvL326%schily@schily.net>
+ <20170104175227.GH3405@mcvoy.com>
+Message-ID: <586d3d90.oAzCBIUMx+CcWar6%schily@schily.net>
+
+Larry McVoy <lm at mcvoy.com> wrote:
+
+> > You did not make a backup while you worked at Sun?
+>
+> Apparently your ethics and my ethics differ.  It was Sun's property, not mine.
+
+You do not understand jokes?
+
+
+> > Hint: I have been told 
+> > from Sun employees that the Sun ZFS group did read my diploma thesis before 
+> > they started with ZFS even though it is written in German ;-)
+>
+> Huh, interesting.  I'll check that out.  Both Jeff Bonwick and Bill Moore
+> have worked for me.  Bonwick was one of my students at Stanford and I 
+> hired him into the kernel group.  Bill worked for me on BitKeeper.
+> I'll let you know what they say.
+
+I had a long discussion about this background in September 2004 with Jeff in 
+his office while we discussed how a new secure interface that does not need 
+root privileges could be added to support readin hole lists for files. This 
+resulted in the design of SEEK_HOLE/SEEK_DATA.
+
+Before (around 1992) I had a really long meeting with Wolfgang Thaler (he is 
+the designer and author of DDI/DKI) and after he mentioned that there are many 
+people inside Sun that understand German, mentioned that my dimploma thesis
+
+	http://cdrtools.sourceforge.net/private/WoFS.pdf
+
+is used by many Sun kernel engineers as there was no similar paper from Sun.
+
+
+> > There seems to be a general missunderstandings:
+> > 
+> > I do not call SunOS-4.x a "BSD based OS" as SunOS-4.0 introduced a new memory 
+> > management subsystem in the kernel. 
+>
+> I think we can stop here.  The rest of the world at the time described
+> SunOS as "a bug fixed BSD".  The mmap() interface was designed by Bill
+> Joy while at UCB and was documented but not implemented in 4.2 BSD [*]
+
+This is definitely a missunderstanding:
+
+Bill did create a mmap() interface for BSD while in UCB, but this was already 
+around 1984 and hard to use as there was no universal address space description
+inside the kernel.
+
+What you could do with the old interface that was also available in e.g. 
+SunOS-3.5 is to map user space addresses to VME addresses, but you first had to 
+valloc() the space before, to get a mmap() target address. After you then 
+called mmap(), you did waste all the swap space that was needed to hold the 
+address space description. We used this method at H.Berthold AG in 1986 for the 
+Berthold image processor to get direct access to the 256 MB of image memory in 
+the image proessor. We needed to waste a whole disk for swap to get the 
+initial mapping into the address space descriptor for the related userland 
+process. 
+
+For SunOS-4.0, Bill did a complete rewrite of the whole virtual memory 
+subsystem. This rewrite includes the filesystem and since SunOS-4.0, all file 
+access is done via mmap(). Even read() based file I/O basically maps the 
+related parts of a file into a transient kernel area from where a copyout() is 
+done. With SunOS-4.x, mmap() has been much easier to use as there now was an 
+object oriented linked list of address space descriptions.
+
+If you like to know why Sun could not donate the new virtual memory 
+implementation to BSD, this is because of the contract signed with AT&T in late 
+1987 - even before SunOS-4.0 was send to customers. AT&T did know from the 
+memory subsystem from a talk at USENIX in spring 1987.
+
+What I had to do when the Sparcstation came up was to write a segment driver to 
+support the MMU in our VME<->S-Bus adaptor in order to come around the 32 MByte 
+limitation for the addresses in an S-Bus slot.
+
+BTW: in order to avoid more missunderstandings, could you mention when you have 
+been in the Sun kernel group and what kind of things you did with the kernel?
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+
