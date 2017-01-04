@@ -1,0 +1,81 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Tue, 03 Jan 2017 16:13:54 -0800
+Subject: [TUHS] Mac OS X is Unix
+In-Reply-To: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+Message-ID: <74a6eaa2dc832b400b58a56a4fa1f4bc00398314@webmail.yaccman.com>
+
+Following on Doug's comment, when I wrote the portable C compiler my
+vision was to separate out the machine independent parts of the
+compiler (e.g, the lexer and parser) from the machine dependent parts
+(those parts involving stack frames, instructions, etc.).  Then to
+port the compiler, you could leave the machine independent code alone
+(much of which was rather hairy, involving symbol tables,
+optimizations, etc.) and simply describe the instructions and calling
+sequence in the machine dependent files.  The preprocessor was
+actually pretty important in carrying this out, because there were a
+fair number of machine characteristics ( such as byte order and word
+size) that were handled identically across different architectures but
+the actual values were different.  These were handled by defining
+some preprocessor macros.
+
+Several years later, I had moved to development and was responsible
+for shipping a variety of different compilers, most resting on the PCC
+base.  At one point, I was appalled to see that somebody had put some
+code into one of the machine-independent files that was bracketed with
+"# ifdef VAX".  There followed a most difficult conversation with the
+perpetrator who kept insisting that, after all, the code WAS the same
+on all machines...
+
+----- Original Message -----
+From: "Doug McIlroy" <doug@cs.dartmouth.edu>
+To:<tuhs at minnie.tuhs.org>
+Cc:
+Sent:Tue, 03 Jan 2017 15:19:08 -0500
+Subject:Re: [TUHS] Mac OS X is Unix
+
+ > keeping the code I work on portable between Linux and the Mac
+requires
+ > more than a bit of ‘ifdef’ hell.
+
+ Curmudgeonly comment: I bristle at the coupling of "ifdef" and
+"portable".
+ Ifdefs that adjust code for different systems are prima facie
+ evidence of NON-portability. I'll buy "configurable" as a descriptor
+ for such ifdef'ed code, but not "portable".
+
+ And, while I am venting about ifdef:
+ As a matter of sytle, ifdefs are global constructs. Yet they often
+ have local effects like an if statement. Why do we almost always
+write
+
+ #ifdef LINUX
+ linux code
+ #else
+ default unix code
+ #endif
+
+ instead of the much cleaner
+
+ if(LINUX)
+ linux code
+ else
+ default unix code
+
+ In early days the latter would have cluttered precious memory
+ with unfreachable code, but now we have optimizing compilers
+ that will excise the useless branch just as effectively as cpp.
+
+ Much as the trait of overeating has been ascribed to our
+ hunter ancestors' need to eat fully when nature provided,
+ so overuse of ifdef echos coding practices tuned to
+ the capabilities of bygone computing systems.
+
+ "Ifdef hell" is a fitting image for what has to be one of
+ Unix's least felicitous contributions to computing. Down
+ with ifdef!
+ Doug
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170103/4a996b9d/attachment-0001.html>
+
