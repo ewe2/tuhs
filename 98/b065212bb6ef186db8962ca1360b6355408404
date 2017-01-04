@@ -1,0 +1,69 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Wed, 4 Jan 2017 10:02:41 -0500
+Subject: [TUHS] Mac OS X is Unix
+In-Reply-To: <F1DC5B50-AE09-49E7-8406-4DB15483D4AB@tfeb.org>
+References: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+ <CAEoi9W4BhWA-a1rZmF8kNQiuQeB5tFq3K-6PTrhJLrUU40U=8w@mail.gmail.com>
+ <F1DC5B50-AE09-49E7-8406-4DB15483D4AB@tfeb.org>
+Message-ID: <CAEoi9W75CWcHvpOf9y9KJo7soFYVZtDwwhJnv5Ja_vejCfPJkw@mail.gmail.com>
+
+On Wed, Jan 4, 2017 at 7:26 AM, Tim Bradshaw <tfb at tfeb.org> wrote:
+
+> On 4 Jan 2017, at 03:50, Dan Cross <crossd at gmail.com> wrote:
+>
+> Interesting, but I'm curious how this would work in the context of C (or a
+> C-like variant)? The code must parse and type-check in accordance with the
+> existing standard, no? So if the `if(LINUX)` branch referred to, say,
+> Linux-specific structure members, then how would the compiler recognize
+> that avoid spitting out a diagnostic/erroring out? The existing C language
+> seems defined to expressly disallow this sort of thing.
+>
+> Common Lisp has a notion of 'suppressing the reader' which basically means
+> that the reader (which in CL is the thing which turns a stream of
+> characters into the data structure that is the source code of the language)
+> will do just enough to consume a form, but not any more than that.  In
+> particular it will ignore all sorts of things which would make it very
+> unhappy if it looked too closely at them.  And there are then read-time
+> conditionals which will cause the reader to suppress the following thing,
+> or not.  It seems to me that, even without defining how things work in the
+> very fine-grained way that CL does (where the data structure the reader
+> produces is defined and you can program the reader itself), a C-like
+> language could define what it means to 'suppress' a form, and support
+> conditionals which did that.  I think, reading again, that this might be
+> quite close to your compile-time-evaluated idea.
+>
+
+What I'm proposing is almost exactly like Common Lisp's `#-` and `#+`
+(these use reader suppression, of course). Delving further into the realm
+of reader macros and other Lisp-like reader things is, I think, a mistake:
+the complexity of the reader is arguably a wart on the side of Common Lisp.
+
+Of course, in C one doesn't have the notion of forms in the Lispy sense;
+it's a statement based language. So the syntactical construct consumed by a
+compile-time conditional would have to be specified to a greater level of
+precision (e.g., an `if` selection-statement in C is followed by general
+statement, in all of its richness). But the idea here is to create
+something that works with the syntax of the language, not separate from it,
+which is Lispy in character. A major problem of the preprocessor is that
+it's sort of bolted onto the side of the language and doesn't work with it
+very cleanly. On the other hand, it's kind of neat that one can use the
+preprocessor for things that aren't C.
+
+The thing to avoid is 'language in a string', where one language contains
+> another language in strings (or equivalent), because then you end up
+> putting the inner language together by concatenating strings, which can
+> cross-cut constructs in the inner language in a horrible way.  C is the
+> language in a string of the C preprocessor.  Where I work we use a tool
+> which has a deeply horrible preprocessor which has the main syntax as its
+> language in a string.  That syntax *in turn* has a whole other language in
+> its strings.  Every time I look at this I want to hit someone.
+>
+
+Precisely why I wouldn't want reader macros in all of their hideous glory.
+Consider LOOP. Ugh.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170104/720d9f8d/attachment-0001.html>
+
