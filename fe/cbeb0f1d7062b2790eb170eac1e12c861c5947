@@ -1,0 +1,43 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Wed, 4 Jan 2017 17:39:13 -0800
+Subject: [TUHS] What sparked lint? [Was: Unix stories]
+In-Reply-To: <CAJfiPzz-HegJOtjo524tusOhsu5LP2MTVGWBBM=nZbhHgpOB-g@mail.gmail.com>
+References: <CAJfiPzz-HegJOtjo524tusOhsu5LP2MTVGWBBM=nZbhHgpOB-g@mail.gmail.com>
+Message-ID: <20170105013907.GE6931@mcvoy.com>
+
+On Wed, Jan 04, 2017 at 08:30:48PM -0500, Nemo wrote:
+> On 4 January 2017 at 13:51, Steve Johnson <scj at yaccman.com> wrote (in part):
+> > These rules provided rich fodder for Lint, when it came along, [...]
+> 
+> All this lint talk caused me to reread your Lint article but no
+> history there.  Was there a specific incident that begat lint?
+
+That would be cool to know.  Another thing I wish they had put in was
+the ability to print the type (underlying type, not the typedef) names.
+
+My first job was porting /usr/src/cmd to the ETA-10 which had bit pointers.
+Yup, hardware pointers pointed at bits, not bytes.  The C compiler people
+had to decide what to do if you took an int and cast it into a C pointer.
+They choose to shift it from bit to byte.  So an int could countain an 
+address but it countained a bit address.  Consider this code:
+
+foo(size)
+{
+    char *p = (char*)malloc(size);      /* little white lie?  uh-uh. */
+    ....
+}
+
+If there is no #include <malloc.h> then the compiler thought that malloc
+returned an int. The conversion caused a 3 bit shift when it shouldn't.
+
+I wacked lint to print out the type names and any time I saw a ptr/int
+type mismatch I just #included all the header files like malloc.h et al.
+
+Turned a 6 month job into a 2 week job.
+
+I believe at some point System V made the same changes.  I'm sort of sure
+that I sent my diffs to Dennis, not positive.  They may have come up with
+the same idea on their own.
+
+Lint is a great tool.
+
