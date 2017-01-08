@@ -1,0 +1,40 @@
+From: ats@offog.org (Adam Sampson)
+Date: Sun, 08 Jan 2017 23:14:17 +0000
+Subject: [TUHS] Unix stories, Stephen Bourne and IF-FI in C code
+In-Reply-To: <22ec379e-4985-2ab5-9fa5-f932fa4de653@retro11.de> (Walter
+ F. J. Mueller's message of "Sun, 8 Jan 2017 21:37:41 +0100")
+References: <22ec379e-4985-2ab5-9fa5-f932fa4de653@retro11.de>
+Message-ID: <y2algul16wm.fsf@offog.org>
+
+"Walter F.J. Mueller" <w.f.j.mueller at retro11.de> writes:
+
+> [...] to enjoy C with an Algol-look.
+
+For those who enjoy Bournegol, can I also recommend the source code to
+David Turner's KRC, which was ported from (EMAS) BCPL to C using a
+similar approach. A sample from main.c:
+
+STATIC VOID
+DISPLAYCOM()
+{  TEST HAVEID()
+   THEN TEST HAVE(EOL)
+        THEN DISPLAY(THE_ID,TRUE,FALSE); OR
+        TEST HAVE((TOKEN)DOTDOT_SY)
+        THEN {  ATOM A = THE_ID; LIST X=NIL;
+                ATOM B = HAVE(EOL) ? (ATOM)EOL :>       // BUG?
+                        HAVEID() && HAVE(EOL) ? THE_ID :
+                        0;
+                TEST B==0 THEN SYNTAX();
+                OR X=EXTRACT(A,B);
+                UNTIL X==NIL
+                DO {  DISPLAY((ATOM)HD(X),FALSE,FALSE);
+                      X=TL(X);  }  } //could insert extra line here between groups 
+        OR SYNTAX();
+   OR SYNTAX();
+}  
+
+http://krc-lang.org/
+
+-- 
+Adam Sampson <ats at offog.org>                         <http://offog.org/>
+
