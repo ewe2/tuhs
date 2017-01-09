@@ -1,0 +1,58 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Mon, 9 Jan 2017 11:36:20 +0100
+Subject: [TUHS] History of select(2)
+In-Reply-To: <20170109023502.GA8507@minnie.tuhs.org>
+References: <20170109023502.GA8507@minnie.tuhs.org>
+Message-ID: <D2542D54-09B2-42B5-9589-289B243A97CD@planet.nl>
+
+On 9 Jan 2017, at 3:35 , Warren Toomey wrote:
+
+> Also, I came across this history of select(2) a while back:
+> 
+> https://idea.popcount.org/2016-11-01-a-brief-history-of-select2/
+> 
+> Cheers, Warren
+
+That is an interesting blog post, but I think it is a bit short on the history of things before 4.2BSD. Below my current understanding of what came before select().
+
+In March 1975 the first networked Unix was created at the University of Illinois, initially based on 5th edition, but soon ported to 6th edition. It is described in RFC681 and a paper by Greg Chesson. Note that UoI was the very first Unix licensee. Its primary authors were Steve Holmgren, Steve Bunch and Gary Grossman. Greg Chesson was also involved. Grossman had already done two earlier Arpanet implementations (the ANTS and ANTS II systems) on bare metal and had a deep understanding of what a good implementation needed.
+
+Their implementation was compact (about a thousand lines added to the kernel, and another thousand in the connection daemon) and - I'm my opinion at least - conceptually well integrated into the existing file API. It became the leading Unix Arpanet implementation with wide use from 1975 to 1981. Two things stand out: (i) no accept(); and (ii) no select(). The original authors are still with us, with the exception of Greg, and I asked for their input as well.
+
+(i) no accept()
+
+Listening sockets worked a bit different from today. If one opened a listening socket it would not return a descriptor but block instead; when a connection was made it would return with the listening socket now bound to the new connection. Server applications would open a listening socket and do a double fork for the client connection (i.e. getting process 1 as its parent); the main process would loop around and open a new listening socket (this can all be verified in surviving application sources). According to Steve Holmgren this was not perceived as a big problem at the time. Network speeds were still so low that the brief gap in listening did not matter much, and the double fork was just a few lines of code.
+
+This changed when the CSRG team moved from a long-haul, Arpanet, 56Kb/s context to a local, Ethernet, 3Mb/s context and Sam Leffler came up with the concept of accept(). In 4.1a BSD and 2.9BSD the queue of pending connections was fixed (possibly 1, I have to check). In 4.1c BSD listen() was introduced; before then whether a socket was active or listening was a flag to opening the socket. The second parameter to listen() specified the maximum number of pending connections [as an aside, note that I'm using 'socket' in the BSD sense; the term socket changed meaning several times between 1973 and 1983].
+
+(ii) no select()
+
+This was the real pain (Holmgren reconfirmed that). This is what Dennis must have referred to in his retrospect paper. Various solutions were thought of, but in Network Unix the model remained using separate processes for simultaneous reading and writing. Progress in this area came from two other places involved in Unix and Arpanet: Rand and BBN.
+
+In 1977 Rand was taking on this problem (see http://www.dtic.mil/dtic/tr/fulltext/u2/a044200.pdf and http://www.dtic.mil/dtic/tr/fulltext/u2/a044201.pdf). They considered a  solution with a new system call 'empty()' that would tell if there was any data available on a file descriptor, a crude form of non-blocking I/O if you like. As this would consume precious CPU cycles it proved inadequate. Instead they came up with "ports". A port was a (possibly named) pipe with multiple writers and a single reader, and it was created with a 'port()' system call. The reader would see each write preceded by a header block identifying the reader. The implementation (see second PDF) was simple, apparently only taking 200 words of kernel code. Rand ports are a simplistic version of the 'mpx' facility done by Greg Chesson at Bell Labs (in 1978?). I am not sure whether this was independent invention or that Greg was aware of Rand ports. Unfortunately we cannot ask him anymore.
+
+Later in 1977, over at BBN, Jack Haverty was doing an experimental TCP/IP stack for Unix (this was TCP 2.5, not TCP 4). He had a working stack written in PDP11 assembler for a different OS and was making this run on Unix. He was using Rand ports to connect clients to the network stack, but still lacked the required primitives to make this work properly. So he came up with the await() system call, a direct precursor to select(). It is documented in BBN report 3911 (http://bit.ly/2iU1TNK), including man pages. With the awtenb() and awtdis() one would manage the monitored descriptors (like the bit vectors going into a select), and await() would then wait for an event or time out.
+
+Related to this was the capac() system call, to get the 'capacity' of a descriptor. This returns the amount of data that can safely be written to or read from a descriptor. I suppose it is an improved version of empty(). There is no equivalent of that in the later BSD sockets, perhaps because non-blocking I/O in the current sense was about to arrive. With port(), await() and capac() it becomes possible to write single threaded network programs.
+
+An example may be found here, the first TCP/IP (version 4) stack in C for Unix, from early 1979: http://digital2.library.ucla.edu/viewItem.do?ark=21198/zz002gvzqg (scroll down past IMP stuff). It's documented in IEN98 (https://www.rfc-editor.org/ien/ien98.txt). I'm currently retyping this source so that it can be better studied.
+
+The await() call is not in the TCP/IP code done for 4.1 BSD by BBN. I'm puzzled by this as it is evidently useful and Jack Haverty and Rob Gurwitz worked in the same corridor at BBN at the time. In 4.1a the select() call appears and it seems to be an improved version of await(), with the need for awtenb() en awtdis() replaced by the use of bit vectors. I am not sure if Bill Joy was aware of await() or whether it was independent invention. Here we can ask, but I have no contact details.
+
+Hope the above is of interest. I'm still learning new things about these topics every day, so please advise if my above understanding is wrong.
+
+
+As a side note, I am still looking for:
+
+- surviving copies of UoI "Network Unix" (I'm currently no further than papers and bits of source that lingered in other code bases)
+
+- surviving copies of the 4.1a BSD distribution tape (Kirk McKusick's tape was damaged)
+
+- surviving source of the kernel code of port(), await() and capac(); (could possibly be recreated from documentation)
+
+Any and all help very much appreciated.
+
+Paul
+
+
+
