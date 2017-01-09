@@ -1,0 +1,106 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Mon, 09 Jan 2017 14:40:08 +0100
+Subject: [TUHS] the guy who brought up SVr4 on Sun machines
+In-Reply-To: <20170106020239.GI2588@mcvoy.com>
+References: <CAP6exY+xDY8-16KDixzesrmp7xhybXUb1YEGtGhR5OQXh6Hq3g@mail.gmail.com>
+ <586d234d.vf4JCu1Ye3gumwfc%schily@schily.net>
+ <20170104164630.GA3405@mcvoy.com>
+ <586d2abb.A5j4GovJtyzlD+AQ%schily@schily.net>
+ <20170104171033.GC3405@mcvoy.com>
+ <586d334d.XcKOxzKwrzmvL326%schily@schily.net>
+ <20170104175227.GH3405@mcvoy.com>
+ <586d3d90.oAzCBIUMx+CcWar6%schily@schily.net>
+ <20170104184448.GD3006@mcvoy.com>
+ <586e32fa.75dTuXajWSNmdzuM%schily@schily.net>
+ <20170106020239.GI2588@mcvoy.com>
+Message-ID: <587392b8.YVBYtdtMbIwoTw24%schily@schily.net>
+
+Larry McVoy <lm at mcvoy.com> wrote:
+
+> The VM system was ported from SunOS 4.x to System 5.  Your statements that
+> SVr4 is based on SunOS are flat out wrong.  SVr4 got a lot of SunOS goodness
+> but the starting point was ATT System V.
+
+This looks like a response made from gut.
+
+Let us check things that are verifiable, by looking at the basic elements
+of the OS kernel that together cover the majority of the kernel.
+
+		SVr3		SunOS-4		SVr4
+		=======================================
+TTY driver	V7/Svr0		STREAMS		STREAMS
+
+Networking	if: BSD		BSD		STREAMS
+				Networktap	New code written
+				allows STREAMS	by Lachman
+				testing
+
+Driver		Svr0		BSD based	SunOS-4 based
+interface
+
+Kernel virtual	V7/Svr0		SunOS-4		SunOS-4
+memory
+
+VFS		-		SunOS-4		SunOS-4 based
+
+
+There are few things in SVr4 that are not the same as in SunOS-4,
+e.g. the way parameters to ioctl() are copied to/from the kernel
+but this are minor parts.
+
+So why should someone start with the AT&T sources when the expected result
+is > 70% identical with SunOS-4?
+
+Even the TTY streams implementation is the one seen in SunOS4, and not
+a possible AT&T internal implementation, as this contains a design flaw
+that caused switching from/to coocked mode to loose data. This is not
+permitted by the UNIX definitions for the TTY driver and has been fixed
+by an enhencement that occured in SunOS-4 and is in Svr4 as well.
+
+BTW: My statements are from a talk from Bill Joy from the Sun User Group 
+meetings. Bill claimed that he was responsible for the Svr4 kernel and did this 
+on a new location in Denver Colorado that was as a joint venture from Sun and 
+AT&T.
+
+The SunOS-5 kernel and the Svr4 kernel still differ, but they are more close 
+together than Svr4 and Svr3. Note that I did not only write Joliet and 
+ISO9660:1999 support code for SunOS and SCO UnixWare but also for SCO 
+OpenServer that is based on Svr3. So I had legal access to SunOS, Svr4 and Svr3 
+based code. Did you have access to this code? Did you compare?
+
+
+> > Interesting: Do you mean "Bill Shannon"? Was he involved in SCCS or smoosh
+> > as well? I know Bill as the author of "cstyle" and I pushed him to make it OSS
+> > in 2001 already, before it appeared in OpenSolaris.
+>
+> Yup, that Shannon.
+
+OK, so he was also working on SCCS?
+
+> > In January 2015, I talked with Glenn Skinner about SCCS and smoosh and he 
+> > pointed me to his smoosh patent:
+> > 
+> > 	http://patentimages.storage.googleapis.com/pdfs/US5481722.pdf
+> > 
+> > that has been expired in late 2014. 
+>
+> The fact that Glenn didn't put me on that patent is a sore point.  Yes,
+> he wrote the lisp code that showed it could be done.  I wrote the C code
+> that did that in one pass (his stuff was N+M where N was how many deltas
+> were on the local side and M was how deltas were on the remote side).
+
+I have been told that a patent can be void if it does not list the right 
+inventors.
+
+I would guess that this was a decision made by the lawyer that helped to file 
+the patent.
+
+Are you responsible for the original idea?
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+
