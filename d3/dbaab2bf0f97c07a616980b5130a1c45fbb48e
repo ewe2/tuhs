@@ -1,0 +1,203 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Wed, 11 Jan 2017 19:54:44 -0800
+Subject: [TUHS] History of select(2)
+In-Reply-To: <D2542D54-09B2-42B5-9589-289B243A97CD@planet.nl>
+References: <20170109023502.GA8507@minnie.tuhs.org>
+ <D2542D54-09B2-42B5-9589-289B243A97CD@planet.nl>
+Message-ID: <CAC20D2PttOOr6kVLFxf7G-ZD+_jQWV6B8C3F=bCEY=g4Ufot1Q@mail.gmail.com>
+
+Paul -- this is a great stuff and fills in some pieces of my memories.
+
+
+FYI:   CMU had the the Rand Ports code including empty() in some
+implementations of kernels in use in the mid 1970s.   The later UNIX cu(1)
+program did not exist, and a couple of people hacked together a program
+called "connect" which was used to connect between serial ports for
+downloading PPT images to microprocessors such as a KIM-1 and communicating
+with it.   I say a "couple of people," because I do not remember who wrote
+the original version.   It could have been a number of us.  I know I hacked
+on it a good bit, as did others over the course of time (and we did not use
+source control in those days).   The sources were there for all to work
+with and we all added stuff as we though of things that would help us out.
+
+
+Anyway, besides microprocessor support, we also used connect(1) to
+"front-end" the serial lines from the PDP-10's in CS and were doing some
+rudimentary networking stuff over parallel DR-11C's, in the pre-TCP/IP
+world [a discussion a couple of us have had separately - more in a minute].
+  But the point is that the dates line up with my being there and what we
+were doing at the time.  One version of connect(1) used the empty() system
+call and Rand ports to do its thing.    I also remember reading the
+connect(1) code as an early education in network technology and concepts.
+We would later take hunks of into a TCP stack [3-4 years later Phil Karn
+would write the infamous KA9Q TCP stack and a few years later, Stan Smith
+and I would write the VMS TCP etc in BLISS but it model on some C network
+stuff from CMU... -- amazing circle].
+
+Anyway, around the same time (either sept 76 or 77 would be my guess) the
+late Ted Kowalski came to CMU for his OYOC time (I've forgotten which it
+was to be honest) and brought a pre-UNIX/TS system with him - TS begat V7.
+Ted brought that system up on the 11/34 in EE and I remember connect(1) was
+the most important program that immediately broke.   I also remember a
+large argument between Ted and one of the other hackers (I've forgotten
+whom), Ted saying we did not need it, it was wasteful, etc... and not in
+the official editions.   I remember he re-implemented the connect(1)
+program one night with multiple process and EE systems were from them on
+based on Ted's system [although, I would later get to know Chesson and Greg
+would give me the mpx() code a year or two later for some networking stuff
+I would work on but that is a different story].
+
+The point is that while I have no memory of capac(), but I can confirm that
+I definitely programmed with the empty() system call and Rand ports on a v6
+based kernel in the mid-1970s and that it was definitely at places besides
+Rand themselves.
+
+Another thing I want thank you  for it confirming something I have been
+saying for  few years and some people have had a hard time believing.   The
+specifications for what would become IP and TCP were kicking around the
+ARPAnet in the late 1970s.   We definitely had them at CMU and that's where
+I first was introduced to them, long before the planned cut over in the
+early 1980s.   I probably was not aware of the global politics involved
+outside of the ARPA community because I certainly thought at the time IP
+was we were headed and it was what we were thinking about and considering
+how to implement.
+
+Anyway - thanks again for a great piece of hunt up some good stuff.
+
+Clem
+
+On Mon, Jan 9, 2017 at 2:36 AM, Paul Ruizendaal <pnr at planet.nl> wrote:
+
+> On 9 Jan 2017, at 3:35 , Warren Toomey wrote:
+>
+> > Also, I came across this history of select(2) a while back:
+> >
+> > https://idea.popcount.org/2016-11-01-a-brief-history-of-select2/
+> >
+> > Cheers, Warren
+>
+> That is an interesting blog post, but I think it is a bit short on the
+> history of things before 4.2BSD. Below my current understanding of what
+> came before select().
+>
+> In March 1975 the first networked Unix was created at the University of
+> Illinois, initially based on 5th edition, but soon ported to 6th edition.
+> It is described in RFC681 and a paper by Greg Chesson. Note that UoI was
+> the very first Unix licensee. Its primary authors were Steve Holmgren,
+> Steve Bunch and Gary Grossman. Greg Chesson was also involved. Grossman had
+> already done two earlier Arpanet implementations (the ANTS and ANTS II
+> systems) on bare metal and had a deep understanding of what a good
+> implementation needed.
+>
+> Their implementation was compact (about a thousand lines added to the
+> kernel, and another thousand in the connection daemon) and - I'm my opinion
+> at least - conceptually well integrated into the existing file API. It
+> became the leading Unix Arpanet implementation with wide use from 1975 to
+> 1981. Two things stand out: (i) no accept(); and (ii) no select(). The
+> original authors are still with us, with the exception of Greg, and I asked
+> for their input as well.
+>
+> (i) no accept()
+>
+> Listening sockets worked a bit different from today. If one opened a
+> listening socket it would not return a descriptor but block instead; when a
+> connection was made it would return with the listening socket now bound to
+> the new connection. Server applications would open a listening socket and
+> do a double fork for the client connection (i.e. getting process 1 as its
+> parent); the main process would loop around and open a new listening socket
+> (this can all be verified in surviving application sources). According to
+> Steve Holmgren this was not perceived as a big problem at the time. Network
+> speeds were still so low that the brief gap in listening did not matter
+> much, and the double fork was just a few lines of code.
+>
+> This changed when the CSRG team moved from a long-haul, Arpanet, 56Kb/s
+> context to a local, Ethernet, 3Mb/s context and Sam Leffler came up with
+> the concept of accept(). In 4.1a BSD and 2.9BSD the queue of pending
+> connections was fixed (possibly 1, I have to check). In 4.1c BSD listen()
+> was introduced; before then whether a socket was active or listening was a
+> flag to opening the socket. The second parameter to listen() specified the
+> maximum number of pending connections [as an aside, note that I'm using
+> 'socket' in the BSD sense; the term socket changed meaning several times
+> between 1973 and 1983].
+>
+> (ii) no select()
+>
+> This was the real pain (Holmgren reconfirmed that). This is what Dennis
+> must have referred to in his retrospect paper. Various solutions were
+> thought of, but in Network Unix the model remained using separate processes
+> for simultaneous reading and writing. Progress in this area came from two
+> other places involved in Unix and Arpanet: Rand and BBN.
+>
+> In 1977 Rand was taking on this problem (see
+> http://www.dtic.mil/dtic/tr/fulltext/u2/a044200.pdf and
+> http://www.dtic.mil/dtic/tr/fulltext/u2/a044201.pdf). They considered a
+> solution with a new system call 'empty()' that would tell if there was any
+> data available on a file descriptor, a crude form of non-blocking I/O if
+> you like. As this would consume precious CPU cycles it proved inadequate.
+> Instead they came up with "ports". A port was a (possibly named) pipe with
+> multiple writers and a single reader, and it was created with a 'port()'
+> system call. The reader would see each write preceded by a header block
+> identifying the reader. The implementation (see second PDF) was simple,
+> apparently only taking 200 words of kernel code. Rand ports are a
+> simplistic version of the 'mpx' facility done by Greg Chesson at Bell Labs
+> (in 1978?). I am not sure whether this was independent invention or that
+> Greg was aware of Rand ports. Unfortunately we cannot ask him anymore.
+>
+> Later in 1977, over at BBN, Jack Haverty was doing an experimental TCP/IP
+> stack for Unix (this was TCP 2.5, not TCP 4). He had a working stack
+> written in PDP11 assembler for a different OS and was making this run on
+> Unix. He was using Rand ports to connect clients to the network stack, but
+> still lacked the required primitives to make this work properly. So he came
+> up with the await() system call, a direct precursor to select(). It is
+> documented in BBN report 3911 (http://bit.ly/2iU1TNK), including man
+> pages. With the awtenb() and awtdis() one would manage the monitored
+> descriptors (like the bit vectors going into a select), and await() would
+> then wait for an event or time out.
+>
+> Related to this was the capac() system call, to get the 'capacity' of a
+> descriptor. This returns the amount of data that can safely be written to
+> or read from a descriptor. I suppose it is an improved version of empty().
+> There is no equivalent of that in the later BSD sockets, perhaps because
+> non-blocking I/O in the current sense was about to arrive. With port(),
+> await() and capac() it becomes possible to write single threaded network
+> programs.
+>
+> An example may be found here, the first TCP/IP (version 4) stack in C for
+> Unix, from early 1979: http://digital2.library.ucla.e
+> du/viewItem.do?ark=21198/zz002gvzqg (scroll down past IMP stuff). It's
+> documented in IEN98 (https://www.rfc-editor.org/ien/ien98.txt). I'm
+> currently retyping this source so that it can be better studied.
+>
+> The await() call is not in the TCP/IP code done for 4.1 BSD by BBN. I'm
+> puzzled by this as it is evidently useful and Jack Haverty and Rob Gurwitz
+> worked in the same corridor at BBN at the time. In 4.1a the select() call
+> appears and it seems to be an improved version of await(), with the need
+> for awtenb() en awtdis() replaced by the use of bit vectors. I am not sure
+> if Bill Joy was aware of await() or whether it was independent invention.
+> Here we can ask, but I have no contact details.
+>
+> Hope the above is of interest. I'm still learning new things about these
+> topics every day, so please advise if my above understanding is wrong.
+>
+>
+> As a side note, I am still looking for:
+>
+> - surviving copies of UoI "Network Unix" (I'm currently no further than
+> papers and bits of source that lingered in other code bases)
+>
+> - surviving copies of the 4.1a BSD distribution tape (Kirk McKusick's tape
+> was damaged)
+>
+> - surviving source of the kernel code of port(), await() and capac();
+> (could possibly be recreated from documentation)
+>
+> Any and all help very much appreciated.
+>
+> Paul
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170111/5e07d4e9/attachment.html>
+
