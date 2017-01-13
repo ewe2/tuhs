@@ -1,0 +1,55 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Fri, 13 Jan 2017 07:31:58 -0500
+Subject: [TUHS] History of select(2)
+In-Reply-To: <7C71C8C7-AE29-4B64-894A-4913585B8763@planet.nl>
+References: <20170109023502.GA8507@minnie.tuhs.org>
+ <D2542D54-09B2-42B5-9589-289B243A97CD@planet.nl>
+ <CAC20D2PttOOr6kVLFxf7G-ZD+_jQWV6B8C3F=bCEY=g4Ufot1Q@mail.gmail.com>
+ <7C71C8C7-AE29-4B64-894A-4913585B8763@planet.nl>
+Message-ID: <034901d26d99$08b2dfd0$1a189f70$@ronnatalie.com>
+
+I have in a box somewhere a printed copy of the TCP/IP protocol book printed
+by SRI.  It's about 3" thick and has the essential protocol RFCs needed at
+the time the Arpanet went TCP/IP.   Another slightly smaller one had the
+mail RFCs in it.    Almost anybody who was working with these things had
+copies of these things on their desk.
+
+Understand that these networks were slow compared to modern standards.
+FTPing down that much data wasn't something you did casually.    My mind is
+hazy about where the RFPs were archived before the cut over but afterward
+they most certainly were in the FTP directory at the SRI-NIC host.   This
+was also where you downloaded the host table (though a later RFC made a
+non-FTP transfer available as well).
+
+An amusing historical tidbit on the host tables.    The table had entries
+that looked like this:
+    HOST : 10.0.0.73 : SRI-NIC,NIC : FOONLY-F3 : TENEX :NCP/TELNET,NCP/FTP,
+TCP/TELNET, TCP/FTP :
+
+Where you had the IP address, the names for the host, the hardware type, the
+OS, and a list of supported protocols.
+
+Now the BSD network code had their own format for /etc/hosts.    A small
+yacc program was used to convert the above format to /etc/hosts.    Then a
+routine, then just called rhost would look up in /etc/hosts.
+
+Now I thought this was silly.   So the BRL machines just used hosts.txt
+directly.   I modified rhost read it without the intermediary hosts.txt.
+To accomplish this I went to the appropriate RFC for the file format and
+implemented my own little parser.
+
+Now one day, we got our first networked attached laser printer.    We named
+it BRL-ZAP and for a CPU type I just put down 68000.   This was a legitimate
+thing to put in the host table.   Well, my parser read it fine as did the
+TENEX and other parsers, but there was an error in the yacc grammar on the
+BSD machines.   Every UNIX system on the net (other than mine) gagged trying
+to parse the BRL-ZAP entry.    When people complained I pointed out that
+using yacc was pretty silly.   That, gee, there might be some other
+important files on UNIX that uses a bunch of fields separated by colons
+first and then commas (/etc/passwd) and nobody had felt it necessary to
+write a yacc grammar to interpret those.     There was a strong feeling that
+I did this on purpose (the fact that I called the machine ZAP didn't help,
+but ZAPPING was what we called printing on the laser printers compared to
+the mechanical printers back then).
+
+
