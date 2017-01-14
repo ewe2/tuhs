@@ -1,0 +1,74 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sat, 14 Jan 2017 15:41:18 +1100
+Subject: [TUHS] 2.11BSD cross compiling update
+In-Reply-To: <CAH1jEzZ1t=A3JBCne1Qi9VhOviOZJQzw0Qq+G52PBDAbg3+jPQ@mail.gmail.com>
+References: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+ <1484337208.3105634.847053496.3432DDEC@webmail.messagingengine.com>
+ <CAH1jEzYcBatLzcU1VYRmNVaMde4xt2C5FrqszOLn4P+cbXjiXQ@mail.gmail.com>
+ <CAH1jEzZv3+ZE7JGm5UJbrkMpGi_zqBHMWTMiQCbMoQBbW=_=yA@mail.gmail.com>
+ <CAH1jEzaYbjA=kJQs7pscqiP-xAWa7Q0d9yHhCu9=Gm_FyXYQWg@mail.gmail.com>
+ <CAH1jEzY63qWLgoJERrSaD19T8L2wKRXVN97_cAN-wHqf54a9Rw@mail.gmail.com>
+ <CAH1jEzbAxghDUV+zdf5MA4+JR9jiNN3Xci3JsAmeT+7p4XO_xQ@mail.gmail.com>
+ <CAH1jEzZtXfEnHTfKtCzq2AOWCgxiWbAjq1C+puOi=dXSbyGHvQ@mail.gmail.com>
+ <CAH1jEzbqRX=+XLVov+cXU2FWarun2gm8i6nxRRUJSEy0D=PF-Q@mail.gmail.com>
+ <CAH1jEzYzt+5ANeGM5nBZY0uHFnFsLt-QyPSLnazCVbxzjfEQ8A@mail.gmail.com>
+ <CAH1jEzbjFqie_KwAw5Qa3b__17hdqbLnHw2KPQEffTokvXS4Fw@mail.gmail.com>
+ <CAH1jEzZ1t=A3JBCne1Qi9VhOviOZJQzw0Qq+G52PBDAbg3+jPQ@mail.gmail.com>
+Message-ID: <CAH1jEzbvu3tpc573pAq-JpRn3LJNqBn=Yu+q=iCQDFfS974C4A@mail.gmail.com>
+
+I see, no I had not realized that code is still in use, I would have
+thought it had been replaced by a whole lot of POSIX bloat. Admittedly the
+2.11BSD ctime/asctime/localtime/timezone stuff is simplistic and doesn't
+address complicated cases but it's good enough.
+
+However I have to resist the temptation to improve or update stuff in
+2.11BSD, I went down that path many times (with the Makefiles project for
+instance) and because everything is interdependent you always introduce
+more problems and get deeper and deeper enmeshed. In order to stay in
+control I only fix essentials and apply a rule of minimal change, period.
+This applies until I have a baseline that builds exactly the same binary
+system image as the native build. Then I might proactively improve parts of
+the system but I will not do it reactively if you follow.
+
+As I see it the zic behaviour is not a bug since time_t is 32 bits on
+2.11BSD and has no unreasonable values, and localtime() is BSD not POSIX
+compliant and is not allowed to return NULL.
+
+cheers, Nick
+
+On 14/01/2017 6:53 AM, "Random832" <random832 at fastmail.com> wrote:
+
+On Fri, Jan 13, 2017, at 12:57, Nick Downing wrote:
+> I then ended up doing a fair bit of re-engineering, how this came
+> about was that I had to port the timezone compiler (zic) to run on the
+> Linux cross compilation host, since the goal is eventually to build a
+> SIMH-bootable disk (filesystem) with everything on it. This was a bit
+> involved, it crashed initially and it turned out it was doing
+> localtime() on really small and large values to try to figure out the
+> range of years the system could handle. On the Linux system this
+> returns NULL for unreasonable time_t values which POSIX allows it to
+> do. Hence the crash. It wasn't too obvious how to port this code. (But
+> whatever I did, it had to produce the exact same timezone files as a
+> native build).
+
+You know that the timezone file format that it uses is still in use
+today, right? There's extra data at the end in modern ones for 64-bit
+data, but the format itself is cross-platform, with defined field widths
+and big-endian byte order.
+
+What do you get when you compare the native built timezone files with
+one from your linux host's own zic? It *should* only differ by the
+version number in the header [first five bytes "TZif2" vs "TZif"] and
+the 64-bit section, if you're giving it the same input files. And I bet
+you could take the current version of the code from IANA and, if it
+matters to you, remove the parts that output the 64-bit data. If nothing
+else, looking at the modern code and the version in 2.11BSD side-by-side
+will let you backport bug fixes.
+
+(Note: Technically, the version present in most Linux systems is a fork
+maintained with glibc rather than the main version of the code from
+IANA)
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170114/add3fb8e/attachment.html>
+
