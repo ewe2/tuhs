@@ -1,0 +1,43 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Sat, 14 Jan 2017 02:17:23 -0500
+Subject: [TUHS] 2.11BSD cross compiling update
+In-Reply-To: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+References: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+Message-ID: <CAEoi9W7x+G1r5BEctWkhFTRY96do=MKBUHVo-VfeNGDjvRHm2A@mail.gmail.com>
+
+On Fri, Jan 13, 2017 at 12:57 PM, Nick Downing <downing.nick at gmail.com>
+wrote:
+
+> [snip]
+>
+> So what I ended up doing was to port a tiny subset of 2.11BSD libc to
+> Linux, including its types. I copied the ctime.c module and prefixed
+> everything with "cross_" so there was "cross_time_t" and so forth, and
+> "#include <time.h>" became "#include <cross/time.h>", in turn this
+> depends on "#include <cross/sys/types.h>" and so on. That way, the
+> original logic worked unchanged.
+>
+> I decided to also redo the cross compilation tools (as, cc, ld, nm,
+> ranlib and so on) using the same approach, since it was conceptually
+> elegant. This involved making e.g. "cross_off_t" and "struct
+> cross_exec" available by "#include <cross/a.out.h>", and obviously the
+> scheme extends to whatever libc functions we want to use. In
+> particular we use floating point, and I plan to make a "cross_atof()"
+> for the C compiler's PDP-11-formatted floating-point constant
+> handling, etc. (This side of things, like the cross tools, was
+> working, but was not terribly elegant before).
+>
+> So then I got to thinking, actually this is an incredibly powerful
+> approach. [snip]
+>
+
+That sounds incredibly tedious. Can you specify a compiler flag to disable
+searching the host /usr/include? Then you could set your own include path
+and not have conflicts with headers from the host system. With, say, GCC
+one could use `-ffreestanding` or `-nostdinc` and the like.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170114/ebd869d8/attachment.html>
+
