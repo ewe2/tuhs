@@ -1,0 +1,141 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sat, 14 Jan 2017 19:05:28 +1100
+Subject: [TUHS] 2.11BSD cross compiling update
+In-Reply-To: <CAEoi9W7x+G1r5BEctWkhFTRY96do=MKBUHVo-VfeNGDjvRHm2A@mail.gmail.com>
+References: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+ <CAEoi9W7x+G1r5BEctWkhFTRY96do=MKBUHVo-VfeNGDjvRHm2A@mail.gmail.com>
+Message-ID: <CAH1jEzawMCvf=iVscnwRTOMC9tMwLa=5zd8ZNV_Wff19grUrGg@mail.gmail.com>
+
+Yes, you are right, it is quite tedious. And yes, your idea is a good
+one, and it echoes more or less the direction my thoughts have been
+going in recent days. Originally I thought I'd only use the "cross_"
+prefix where there were clear system-to-system differences (like in
+the a.out stuff and the timezone stuff), then later I thought I'd use
+the "x_" prefix everywhere, but I have realized as you say, this is
+going to get annoying very quickly. It would be much better to be able
+to work on the non-prefixed files, as it would feel much more natural.
+
+So, in hindsight, given my decision that it's turned out to be too
+much work and for too little benefit to port the cross toolchain to
+glibc (as opposed to porting to gcc which is a given), it might have
+been better to tackle it how you say. But on the other hand my "x_"
+approach does have certain good points, which I will explain. Let's
+consider the "stat" system call which some of the cross tools use.
+Under my scheme I'll provide a prefixed version of "stat". Checking
+"x_stat.h" in the 43bsd.git repo that I mentioned in my previous post,
+I see this:
+
+struct  x_stat
+{
+        x_dev_t x_st_dev;
+        x_ino_t x_st_ino;
+        x_unsigned_short x_st_mode;
+        x_short x_st_nlink;
+        x_uid_t x_st_uid;
+        x_gid_t x_st_gid;
+        x_dev_t x_st_rdev;
+        x_off_t x_st_size;
+        x_time_t        x_st_atime;
+        x_int   x_st_spare1;
+        x_time_t        x_st_mtime;
+        x_int   x_st_spare2;
+        x_time_t        x_st_ctime;
+        x_int   x_st_spare3;
+        x_long  x_st_blksize;
+        x_long  x_st_blocks;
+        x_long  x_st_spare4[2];
+}
+
+There are also some defines like "x_S_IFMT" which I will ignore for
+brevity, but anyway the prefixed "stat" call will look something like:
+
+#include <sys/x_stat.h>
+#include <sys/stat.h>
+
+x_int x_stat(char *x_pathname, struct x_stat *x_statbuf) {
+        struct stat statbuf;
+        if (stat(x_pathname, &statbuf) == -1) {
+                x_errno = (x_int)errno;
+                return -1;
+        }
+        x_statbuf->x_st_dev = (x_dev_t)statbuf.st_dev;
+        x_statbuf->x_st_ino = (x_ino_t)statbuf.st_ino;
+        ... fill in all other fields ...
+        return 0;
+}
+
+Obviously, this gets a bit tedious too, and it also ignores issues
+like converting the errno or what if ino_t is wider than x_ino_t...
+but I think it will work sufficiently well for the cross toolchain.
+With your suggestion I have no good way of creating a translation stub
+like the above, because both "struct stat" will have the same name...
+there are also lots more issues, like for instance some modules would
+be compiled with "-nostdinc" and the like, plus other modules being
+the translation stubs, would not... then all would be linked together,
+the translation stubs would pull in the regular C library and there
+would be conflicts everywhere. I think the "x_" prefix is the way to
+go, but as you say it's a bit tedious, so I'll probably create
+something like "x_cc" which automatically "xifies" the given C sources
+to /tmp and then runs "gcc".
+
+For the standalone utilities like "restor" it is less of an issue
+since they are going to be compiled into a kernel subset and
+everything will use the same "struct x_stat" so no translation will be
+necessary. In the latter case, I'll provide emulated disk and tape
+drivers which have an "x_" prefixed entry point to be called from the
+kernel, but then revert to non-prefixed code which uses the native
+Linux system calls like open(), read() and so on, and which I will
+lift out of SIMH. So although the emulation backend is much simpler in
+this case (it only has a few entry points, it doesn't need to provide
+system-call-like services), it will still be much easier to write if I
+have access to the "xification".
+
+Another issue is the C types, since most code is written to use
+"short", "int" and "long", a nice feature of the "xifier" is that it
+changes this to "x_int" and therefore lets me change the width. It's
+not a perfect emulation since pointers are still a different size and
+the automatic promotions will be wrong (and varargs functions need
+some massaging because of this). But it still substantially cuts down
+the porting work that I have to do. I manually fixed up all this stuff
+in the C compiler before, it was a big job and I still can't say
+definitely it's robust.
+
+cheers, Nick
+
+So,
+
+On Sat, Jan 14, 2017 at 6:17 PM, Dan Cross <crossd at gmail.com> wrote:
+> On Fri, Jan 13, 2017 at 12:57 PM, Nick Downing <downing.nick at gmail.com>
+> wrote:
+>>
+>> [snip]
+>>
+>> So what I ended up doing was to port a tiny subset of 2.11BSD libc to
+>> Linux, including its types. I copied the ctime.c module and prefixed
+>> everything with "cross_" so there was "cross_time_t" and so forth, and
+>> "#include <time.h>" became "#include <cross/time.h>", in turn this
+>> depends on "#include <cross/sys/types.h>" and so on. That way, the
+>> original logic worked unchanged.
+>>
+>> I decided to also redo the cross compilation tools (as, cc, ld, nm,
+>> ranlib and so on) using the same approach, since it was conceptually
+>> elegant. This involved making e.g. "cross_off_t" and "struct
+>> cross_exec" available by "#include <cross/a.out.h>", and obviously the
+>> scheme extends to whatever libc functions we want to use. In
+>> particular we use floating point, and I plan to make a "cross_atof()"
+>> for the C compiler's PDP-11-formatted floating-point constant
+>> handling, etc. (This side of things, like the cross tools, was
+>> working, but was not terribly elegant before).
+>>
+>> So then I got to thinking, actually this is an incredibly powerful
+>> approach. [snip]
+>
+>
+> That sounds incredibly tedious. Can you specify a compiler flag to disable
+> searching the host /usr/include? Then you could set your own include path
+> and not have conflicts with headers from the host system. With, say, GCC one
+> could use `-ffreestanding` or `-nostdinc` and the like.
+>
+>         - Dan C.
+>
+
