@@ -1,0 +1,45 @@
+From: random832@fastmail.com (Random832)
+Date: Mon, 16 Jan 2017 10:35:19 -0500
+Subject: [TUHS] Article on 'not meant to understand this'
+In-Reply-To: <20170116112616.GA40162@indra.papnet.eu>
+References: <20170116014444.GA32261@minnie.tuhs.org>
+ <alpine.DEB.2.11.1701161116110.7102@grey.csi.cam.ac.uk>
+ <20170116112616.GA40162@indra.papnet.eu>
+Message-ID: <1484580919.560182.849267968.097C1979@webmail.messagingengine.com>
+
+On Mon, Jan 16, 2017, at 06:26, Angelo Papenhoff wrote:
+> I don't think it's the context switching in general that we're not
+> expected to understand, since it's pretty much the same in v7 but the
+> comment is gone. Dmr actually explained the problem on his website
+> (https://www.bell-labs.com/usr/dmr/www/odd.html). savu is used to save
+> the current call stack, retu is used to switch to a saved call stack.
+> The problem is that the function which did the savu was not necessarily
+> the same as the function that does the retu, so after retu the function
+> could have the call stack of a different function. As dmr explained,
+> this worked with the PDP-11 compiler but not with the interdata
+> compiler. In V7 the stack switching was moved into separate functions,
+> save and resume. save retured 0 and resume returned 1 so that an if
+> statement could be used to check if the return from save was actually
+> that of resume after the stack switch (the same trick as that of fork).
+> This way the code that was to be executed after a stack switch was in
+> the same function and stack frame as the one that did the save (as
+> opposed to swtch).
+
+My impression was that the 'magic' part was that it relied on the C both
+process's stacks containing registers saved by the C function prologue
+routine [csv, the kernel version can be found in conf/m*.s], and that
+the return statement in swtch [which calls cret] restores those
+registers. Ritchie alludes to this with "This worked on the PDP-11
+because its compiler always used the same context-save mechanism; with
+the Interdata compiler, the procedure return code differed depending on
+which registers were saved. ", and, well, there's a reason the FreeBSD
+cpu_switch function the article mentions is written in assembly rather
+than C.
+
+> Note that Lions doesn't explain this either, he assumed that the
+> difficulty was with with u_rsav and u_ssav, but those are still in v7
+> with the comment gone (he probably wasn't that wrong though, it really
+> is confusing, but it's just not what the comment refers to)
+> 
+> aap
+
