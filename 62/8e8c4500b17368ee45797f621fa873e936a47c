@@ -1,0 +1,59 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 16 Jan 2017 12:16:27 -0500 (EST)
+Subject: [TUHS] Article on 'not meant to understand this'
+Message-ID: <20170116171627.45F3318C085@mercury.lcs.mit.edu>
+
+    > From: Angelo Papenhoff
+
+    > The problem is that the function which did the savu was not necessarily
+    > the same as the function that does the retu, so after retu the function
+    > could have the call stack of a different function. As dmr explained,
+    > this worked with the PDP-11 compiler but not with the interdata
+    > compiler.
+
+To put it slightly differently, in PDP-11 C all stack frames look identical,
+but this is not true of other machines/compilers. So if routine A called
+savu(), and routine B called aretu(), when the call to aretu() returned,
+procedure B is still running, but on procedure A's stack frame. So on machines
+where A's stack frame looks different from B's, hilarity ensues.
+
+(Note that aretu() was significantly different from retu() - the latter
+switched to a different process/stack, whereas aretu() did a 'non-local goto'
+[technically, switched to a different stack frame on the current stack] in the
+current process.)
+
+
+    > Note that Lions doesn't explain this either, he assumed that the
+    > difficulty was with with u_rsav and u_ssav .. (he probably wasn't that
+    > wrong though, it really is confusing, but it's just not what the comment
+    > refers to)
+
+Right. There are actually _three_ sets of saved stack info:
+
+	int	u_rsav[2];	/* save r5,r6 when exchanging stacks */
+	int	u_qsav[2];	/* label variable for quits and interrupts */
+	int	u_ssav[2];	/* label variable for swapping */
+
+and it was the interaction among the three of them that I found very hard to
+understand - hence my (incorrect) memory that the 'you are not' comment
+actually referred to that, not the savu/aretu stuff!
+
+Calls to retu(), the primitive to switch stacks/processes, _always_ use
+rsav. The others are for 'non-local gotos' inside a process.
+
+Think of qsav as a poor man's exception handler for process software
+interrupts. When a process is sleeping on some event, when it is interrupted,
+rather than the sleep() call returning, it wakes up returning from the
+procedure that did the savu(qsav). (That last is because sleep() - which is
+the procedure that's running when the call to aretu(qsav) returns - does a
+return immediately after restoring the stack to the frame saved in qsav.)
+
+And I've forgotten exactly how ssav worked - IIRC it was something to do with
+how when a process is swapped out, since that can happen in a number of
+ways/places, the stack can contains calls to various things like expand(),
+etc; when it's swapped back in, the simplest thing to do is to just throw that
+all away and have it go back to where it was just before it was decided to
+swap it out.
+
+       Noel
+
