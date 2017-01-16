@@ -1,0 +1,55 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 16 Jan 2017 10:17:45 -0500 (EST)
+Subject: [TUHS] Early Internet work (Was: History of select(2))
+Message-ID: <20170116151745.1B12018C085@mercury.lcs.mit.edu>
+
+    > From: Tony Finch
+
+This is getting a bit far afield from Unix, so my apologies to the list for
+that. But to avoid dumping it in the Internet-History list abruptly, let me
+answer here _briefly_ (believe it or not, the below _is_ brief).
+
+    > AIUI there were two major revisions to the IPv4 addressing architecture:
+
+Not quite (see below). First, one needs to understand that there are two
+different timelines for changes to addressing: in the hosts, and in the
+routers (called 'gateways' originally). To start with, they were tied
+together, but as of RFC-1122, they were formally separated: hosts no longer
+fully understood the syntax/semantics of addresses, just (mostly) treated them
+as opaque 32-bit quantities.
+
+    > subnetting (RFC 917, October 1994 ... RFC 950, August 1985), and
+    > classless routing (RFC 1519, September 1993)
+
+Originally, network numbers were 8 bits, and the 'rest' (local) part was 24.
+Mapping from IP addresses to physical network addresses was some with direct
+mapping - ARP did not exist - the actual local address (e.g. IMP/Port) was
+contained in the 'rest' field - each network had a document which specified
+the mapping. (Which is part of the interoperability issue with old
+implementations.)
+
+As some point early on, it was realized that 8 bits of network number were not
+enough, and the awful A/B/C kludge was added (it was dropped on the community,
+not discussed before-hand). Subnetting was indeed the next change.  Then the
+host/router split happened.
+
+Classless routing (which effectively extended addesses, for path-computation
+purposes, to 32+N bits - since you couldn't look at a 32-bit IP address and
+immediately tell which was the 'network' part any more, you _had_ to have the
+mask as well, to tell you how many bits of any given address were the network
+number) was more of a process than a single change - the inter-AS routing
+(BGP) had to change, but so did IGP's (OSPF, IS-IS), etc, etc.
+
+    > originally called supernetting (RFC 1338, June 1992).
+
+There was this effort called ROAD which produced RFC-1338 and 1519, and IIRC
+there was an intermediate, involving blocks of network numbers (1338), and
+that slowly evolved into arbitrary blocks (1519).
+
+One should also note that the term "super-netting" comes from a proposal by
+Carl-Hubert ("Roki") Rokitansky which did not, alas, make it to RFC. (His
+purpose was different, but it used the same mechanism.) Alas, the authors of
+1338/1519 failed to properly acknowledge his earlier work.
+
+	  Noel
+
