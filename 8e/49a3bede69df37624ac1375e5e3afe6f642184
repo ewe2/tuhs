@@ -1,0 +1,126 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Tue, 17 Jan 2017 16:30:35 +1100
+Subject: [TUHS] 2.11 pcc with ANSI?
+In-Reply-To: <201701170332.v0H3WnQ3019483@freefriends.org>
+References: <20170116181107.B08D7400D8@vsta.org>
+ <57d7c379b914dd1b23590d7e114bf9a970662e93@webmail.yaccman.com>
+ <20170116202246.GB16532@minnie.tuhs.org>
+ <201701170332.v0H3WnQ3019483@freefriends.org>
+Message-ID: <CAH1jEzZssoSs1ysMmKABQ75JZnsaT=qCRhrbSTqSby033-vA4A@mail.gmail.com>
+
+I have a fair bit of experience in this area, I only recently started to
+look at PCC but I have been in the guts of the Ritchie compiler for quite a
+while. And, my first thought was exactly the same as yours -- OMG this is
+archaic! This is unreadable! This is irritating! Modernize! Modernize!
+
+So I have put huge efforts into exactly that, every now and again I create
+a new repo and start the various conversions anew... having learned so much
+about the structure of the code on the previous attempts and what
+modernizations are appropriate/workable... however over the years I have
+come to see that this, the "obvious" approach for people who love the early
+PDP-11 systems and consider them more than just a toy/curiosity... is quite
+misguided on a number of levels.
+
+Firstly, there is always a lot of talk here about SysV being standardized
+over BSD and blah bleh... I think a lot of people agree that BSD is/was
+quite spare and elegant as compared with SysV being quite bloated and
+clunky... result of being designed by committee rather than a few
+passionate perfectionist engineer types. But what I don't see is the
+equivalent discussion about why ANSI C was standardized over K&R. Like
+everyone I took ANSI C more or less for granted and despite having briefly
+used K&R on a Z80 when I first encountered C, I regarded ANSI C as a more
+beautiful, more evolved, more useable/reliable language.
+
+Recently I have applied a bit more analysis and have completely changed my
+view, as I will explain. It seems to me the killer feature of ANSI C is
+prototypes, so that argument conversions can be applied automatically if
+you call another module passing unusual arguments (an int instead of a long
+etc) and indeed the automatic conversions like pointer to/from int can be
+curbed as being too eager (and they might be different sizes). This is
+quite a good reason to use ANSI C, since arguably if it saves you an hour's
+debugging time here and there, then it has paid for itself. But, it is
+still debateable.
+
+On the downside with ANSI C is the amount of useless new syntax and
+keywords it introduces... char *const *restrict p; anyone?? It's hard to
+think of more examples since these features are almost never used, but I
+think you will find an ANSI C yacc grammar has twice as many productions
+as, say, PCC's K&R grammar. The preprocessor gets a lot more bloat that
+addresses rare corner cases and specialized usages... the added features
+across the board are basically little more than convenience features and
+syntactic sugar, yet they come at a huge cost IMO in terms of bloat, by
+basically changing C compiler writing from something lots of people can
+creatively hack on, into something that is usually only undertaken by well
+funded commercial labs in practice.
+
+To see what I mean consider Wirth's way of assessing language or compiler
+features, he firstly assumes the compiler will be written in itself, then
+asks whether the overall complexity of the system is improved or worsened
+by a proposed feature. As I see it, It might save a line of code in 100
+programs that use the compiler, but if the cost is 100 extra lines in the
+compiler the net gain is zero. As a thought experiment consider taking
+4.3BSD and then dropping GCC 5.0 into its /usr/src/lib directory, I think
+you can agree the resulting system would be hopelessly out of balance since
+there would be like 50,000 lines of code for kernel and utilities plus
+another 250,000 for the compiler, more if you consider dependencies like
+the assembler, linker, probably would need glibc too, etc etc. I would
+say... NOT WORTHWHILE.
+
+So in summary I think the self containedness of Unix is far more valuable
+than anything ANSI C brings to the table. Plus if you think about it, Unix
+already had lint, so ANSI C just solved the same problem differently while
+forcing you to add reams of stupid boilerplate to your code whether you
+want their solution or not. Much the same thing has happened with const
+pointers, they have never to my knowledge statically flagged a bug in my
+code, but they sure have ruined many edit/compile/link cycles by detecting
+spurious or non problems. Plus the code is so much more verbose written
+with const, it just isn't worth it considering the tininess of any gains.
+Prototypes again... well if you think about it they introduce a clunky new
+syntax that is only used in special places and is not consistent with the
+rest of C...
+
+So I am happily exploring an alternate universe in which C and Unix were
+never standardized or the "right" version was standardized... and finding
+it quite nice.
+
+cheers, Nick
+
+On 17/01/2017 2:33 PM, <arnold at skeeve.com> wrote:
+
+> Warren Toomey <wkt at tuhs.org> wrote:
+>
+> > On Mon, Jan 16, 2017 at 10:52:04AM -0800, Steve Johnson wrote:
+> > >    It's been done.  Anders Magnusson has done quite a bit to port pcc
+> and
+> > >    add both ANSI and selected GCC features.
+> >
+> > A quick google search reveals:
+> >
+> > http://pcc.ludd.ltu.se/
+> > and https://www.openbsd.org/papers/magnusson_pcc.pdf
+> > which is a set of slides on the work done.
+> >
+> > I've been itching to rewrite PDP-7 Unix in a higher level language.
+> > I've already designed the language and written a compiler for the PDP-7
+> > (see https://github.com/DoctorWkt/h-compiler), but the generated code
+> sucks.
+> > Maybe I should try to retarget PCC, it would be slightly ironic :-)
+> >
+> > Cheers, Warren
+>
+> That would be neat.
+>
+> For those of us who have moved on from CVS, I have mirror of the
+> code at https://github.com/arnoldrobbins/pcc-revived.
+>
+> I tend to sync it with the CVS about once a week.  There hasn't been
+> much activity on it in the past few weeks.
+>
+> It's noticeably faster than GCC but I wouldn't say 100x. :-)
+>
+> Arnold
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170117/ecb4ab5a/attachment.html>
+
