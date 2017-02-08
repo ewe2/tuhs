@@ -1,0 +1,102 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Wed, 8 Feb 2017 23:57:13 +1100
+Subject: [TUHS] Code bloat
+In-Reply-To: <90190d89aaeefbf0b540a28436468835@xs4all.nl>
+References: <CAC20D2O8dXan9hX5Sv6LyBD6dEFPwpV5wYZJ_XsFCHtVw6Gb3Q@mail.gmail.com>
+ <930c52a0c279cdd7d44953aa403a504a8622bb83@webmail.yaccman.com>
+ <20170208025538.GE65698@eureka.lemis.com>
+ <CAH1jEzbpOUC2OFjZ9oHodg0DdzQUk2R+3XPdn0RgE9dX7yD5nA@mail.gmail.com>
+ <F2A7F638-CC2F-4D0E-B191-0F301DDDA46F@superglobalmegacorp.com>
+ <CAH1jEza0j2wLwOY7QpW=T0CMoseNmhmBV8Qp-5gU-W+buE1z2Q@mail.gmail.com>
+ <90190d89aaeefbf0b540a28436468835@xs4all.nl>
+Message-ID: <CAH1jEzb9miz4Nopf12fMN-Gb34TATmwh4otxnOnB23ZE7KKCyQ@mail.gmail.com>
+
+Yes, thanks Jacob, I realized after posting that I had oversimplified
+things since definitely 386BSD was based on NET/2 as you say. Anyway,
+it's a very good thing that all is now unencumbered, I remember
+working on 2.11BSD 6~8yrs back and always having a strong concern in
+the back of my mind that it would be enormously complicated to sort
+out the licensing should I ever have an actual release.
+
+Warren, I hadn't realized that DoctorWkt = Dr Warren K. Toomey haha.
+Yes well actually I was aware of Xinu although I didn't realize there
+was an already-done Apple II port or that you had created it. I will
+certainly load it up. However the idea in my mind is to have the OS
+written in C, since I have some ideas for a simple but globally
+optimizing compiler which I hope makes 6502 a bit more C-friendly.
+
+I hadn't heard of xv6 but I will look into it. However, for me,
+compatibility is a huge concern, and there are so many little corner
+cases -- what happens if XXX signal arrives during YYY, does it
+ERESTART or EINTR... what happens if a directory is setgid and sticky
+and XXX operation is performed... I guess for V7 these kinds of
+questions are not too vexing, but when you get to BSD with process
+groups and job control and EUIDS and so on... it's just too hard to
+try to recreate it and have it still be compatible in all these tiny
+details. If I was happy with that, I would have persevered with UZI
+(Unix Z-80 Implementation), but I kept finding little bugs and/or
+differences.
+
+As to Contiki, yes it's quite an amazing piece of software, I picked
+it up when I first got into 2.11BSD (maybe 6~8 yrs ago) which is also
+when I started to realize UZI would be too much work to make
+acceptably Unix-like. I briefly got excited about Contiki. The reason
+I did not persevere with Contiki, was to do with its proto-threads
+concept. It's basically event-driven, a task proceeds through the
+system by receiving callbacks in which it does a bit of processing and
+then goes to sleep by registering for some other callback at a later
+time.
+
+But, there's a compatibility issue, since you have to rewrite all your
+software. Ordinary code like say, an ftp client with a main() function
+that calls socket() and read() and write(), doesn't work under this
+model, and can't be made to work without a complete rewrite. More
+seriously though, it's a pretty unfriendly way to write code, at least
+without significant compiler support. I know this because as a
+teenager I used to do work for local SysOps running TheMajorBBS, which
+was also stackless in order to serve hundreds of incoming modem
+connections on 286 or (later on) 386 hardware. Every MajorBBS app or
+menu was written like a state machine and it got really tedious after
+a while. Thinking about it, Ken Thompson and Dennis Ritchie could
+certainly have chosen this model for implementing the Unix syscalls,
+to save on the space required for the kernel stack, however they did
+not, and as a result the system is vastly simplified.
+
+However, given the TCP/IP stack is nearly always implemented as a
+state machine, the Contiki TCP/IP stack could be useful to my project.
+Thanks a lot for the alert. I am not even sure if it had TCP/IP at all
+when I last looked at it, although it definitely had windowing.
+
+cheers, Nick
+
+On Wed, Feb 8, 2017 at 11:29 PM, Jacob Goense <dugo at xs4all.nl> wrote:
+> On 2017-02-08 12:21, Nick Downing wrote:
+>>
+>> Yes, NetBSD and 386BSD are interesting. They could well form a good
+>> basis for a minimal but fully functional OS for a modern platform. One
+>> reservation I have though, is as follows: When 386BSD and its
+>> derivatives like OpenBSD, NetBSD, FreeBSD came out, Unix was still
+>> encumbered and thus they had to be based on 4.4BSD Lite (not even
+>> NET/2 was safe). Nobody made an unencumbered version of say 4.3BSD or
+>> even NET/2, even though it was theoretically possible, by examining
+>> what had to be taken out/added to produce 4.4BSD Lite.
+>
+>
+> The 386BSD porting started on 4.3BSD-Reno with patches being fed back
+> to BSD. Stuff was being thrown out of BSD at the same time for the Net
+> releases. Must have been difficult. First release was Net/2 + missing
+> bits and pieces. ftp://ftp.funet.fi/pub/unix/4.3bsd/i386-jolitz/diffs/
+> Note that Jolitz was never sued for using Net/2 ;)
+>
+> NetBSD and FreeBSD started as 386bsd 0.1 + patchkits. To "unencumber"
+> NetBSD the 0.8 release was scrubbed from the net and a pile of files
+> in cvs were replaced with the text "revision x.y intentionally removed"
+> and rewritten or taken from a cleaner BSD release.
+> List of files at http://oldbsd.org/removed.txt
+>
+> FreeBSD claiming to be 4.4BSD-Lite based is, I think, a legal fiction.
+> I could be wrong, but it is far more likely they did it the same way
+> as NetBSD after the FreeBSD 1.1.5.1 release. I don't believe they
+> restarted with a clean 4.4BSD-Lite tape, but the FreeBSD handbook
+> claims that is what they did for the 2.0 release.
+
