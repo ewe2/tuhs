@@ -1,0 +1,216 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Wed, 8 Feb 2017 14:56:21 +0100
+Subject: [TUHS] Code bloat (was: How Unix brings people together,
+	or it's a small...)
+In-Reply-To: <CAH1jEza0j2wLwOY7QpW=T0CMoseNmhmBV8Qp-5gU-W+buE1z2Q@mail.gmail.com>
+References: <CAC20D2O8dXan9hX5Sv6LyBD6dEFPwpV5wYZJ_XsFCHtVw6Gb3Q@mail.gmail.com>
+ <930c52a0c279cdd7d44953aa403a504a8622bb83@webmail.yaccman.com>
+ <20170208025538.GE65698@eureka.lemis.com>
+ <CAH1jEzbpOUC2OFjZ9oHodg0DdzQUk2R+3XPdn0RgE9dX7yD5nA@mail.gmail.com>
+ <F2A7F638-CC2F-4D0E-B191-0F301DDDA46F@superglobalmegacorp.com>
+ <CAH1jEza0j2wLwOY7QpW=T0CMoseNmhmBV8Qp-5gU-W+buE1z2Q@mail.gmail.com>
+Message-ID: <B747F0D5-A896-4088-A506-B7F63063DD21@planet.nl>
+
+Nick,
+
+If you want to work with LSX, you might have a look at the LSX port I did for the TI990 mini computer: http://1587660.websites.xs4all.nl/cgi-bin/9995/dir?ci=1c38b1fc8792c80b&name=lsx
+It is a further development from the work that was done for BKUNIX by Leonid Broukhis (https://sourceforge.net/p/bkunix/code/HEAD/tree/).
+
+You get stuff converted to a dialect of C acceptable by modern compilers, and some kludges like using 'char*' for 'unsigned' and 'int a[2]' for 'long a' are cleaned up.
+
+The repository also has a V6 kernel with similar clean up and some V7 compatibility ('lseek' instead of 'seek', etc.). My next step would be to move to a V7 kernel and add TCP/IP capability. This is how I got interested in the history of sockets and TCP/IP. I have found that the BSD stack (as found in e.g. ULTRIX-11) will not fit in 64KB (note: just the network stack). The BBN stack appears to fit in 56KB, with 15KB of buffers available; I think it could be integrated with a V7 kernel as a second kernel process.
+
+Paul
+
+On 8 Feb 2017, at 12:21 , Nick Downing wrote:
+
+> Yes, NetBSD and 386BSD are interesting. They could well form a good
+> basis for a minimal but fully functional OS for a modern platform. One
+> reservation I have though, is as follows: When 386BSD and its
+> derivatives like OpenBSD, NetBSD, FreeBSD came out, Unix was still
+> encumbered and thus they had to be based on 4.4BSD Lite (not even
+> NET/2 was safe). Nobody made an unencumbered version of say 4.3BSD or
+> even NET/2, even though it was theoretically possible, by examining
+> what had to be taken out/added to produce 4.4BSD Lite.
+> 
+> Given that Unix is now unencumbered I believe there is no point
+> adopting 4.4, or even 4.3Reno, because the main thing done in those
+> releases as far as I know, is to add partial POSIX compliance. But if
+> you want POSIX compliance you will not achieve minimality. As an
+> example consider the BSD sigvec() routine. POSIX calls this
+> sigaction(), the old SV_ONSTACK flag becomes SA_ONSTACK, the old
+> integer mask becomes a sigset_t and so on... and in any reasonable
+> POSIX compliant BSD the two calls are gonna have to coexist, etc.
+> 
+> As to 32V, I appreciate your idea, as I was having some similar
+> thoughts myself. However I personally wouldn't use 32V as a basis for
+> any serious porting work, because I would assume V7 and 4.3 are much
+> more stable and well tested, since they ran in a lot of installations
+> over a long time. That's not to denigrate the huge achievement in
+> porting V7 to the VAX and producing 32V, but it probably has some
+> rough edges that were smoothed out over time to produce the 4BSDs. The
+> situation is a bit different for kernel/toolchain/other userspace.
+> 
+> As to the kernel I have been trying to make a detailed comparison
+> between 32V and the BSDs, but have been a bit put off by the fact that
+> all files moved around and may have been renamed, I will figure it all
+> out eventually though. As to the toolchain I have compared it quite
+> carefully with 4.3BSD, and I conclude you should use the later
+> toolchain as there is no disadvantage and some advantages to doing so.
+> As to the rest of the userspace, I BELIEVE that it's stock V7 with any
+> 32-bit issues fixed, but I suspect somewhat hastily and superficially.
+> 
+> Producing a 32V-like kernel from 4.3BSD sources would probably be
+> quite difficult, it would be relatively easy to disable added system
+> calls, but harder to disable things like setpgrp() or the associated
+> support in the TTY drivers. More seriously the memory management would
+> have to change, I am planning however to make virtual memory optional
+> in the 4.3BSD kernel, by maybe putting the 32V code back in, protected
+> by #ifndef VM or some such (somewhat like Steven Schultz has done in
+> porting 4.3BSD to PDP-11 to produce 2.11BSD).
+> 
+> On the other hand producing a 32V-like userland from the 4.3BSD
+> sources would be pretty easy, I think just delete the sources for any
+> executables that weren't distributed with 32V and possibly, if any of
+> the tools seem particularly bloated, comment out any command line
+> switches or features that weren't in 32V. Going to this level of
+> effort would likely be pointless though. Another option would be
+> taking V7 and re-porting it (except the toolchain) over to a 32-bit
+> environment and kernel. I have developed over the past months, tools
+> that make this relatively straightforward, and in the process would
+> rediscover any 32-bit issues that were fixed in creating 32V. So I
+> wouldn't use 32V.
+> 
+> On a slightly different tack, I also have been for some time
+> investigating the idea of an Apple II port of Unix, there are massive
+> technical issues to be solved, but I think I got a bit closer the
+> other night when I decided to collect all information and resources I
+> could find about Mini-Unix and LSX (LSI Unix). Both are
+> self-supporting V6-based environments, the compiler can only compile
+> small programs but it is nonetheless possible for each Unix to
+> recomple itself. LSX I believe could run from floppies (dunno about
+> 140K floppies) in less than 64K.
+> 
+> So, you know, true minimality is a relative term. We want something
+> LSX-like for an Apple II, something 2.11BSD-like for an IBM PC/XT or
+> 286 (as Peter Jeremy noted, it's a good fit, and I'd be interested to
+> know more), something 4.3BSD-like for a VAX or 386... something a bit
+> more fully featured for a modern 64-bit multi-gigabyte system... but
+> just not as bloated as what we currently rely on. Hmm well it's hard.
+> What I do know, is that I have a lot of old hardware with <16M RAM and
+> Linux won't run on it anymore, and this annoys me very greatly.
+> 
+> In talking about FreeBSD/Linux bloat I forgot to mention the packet
+> filter, iptables (Linux) or pf (FreeBSD). I have a bit of experience
+> with this, since I regularly used to put 2 Ethernet cards in my home
+> server and make it Internet facing through one of them and share the
+> connection using NAT through the other card. But I've come to the
+> conclusion this is stupid, and moreover, that putting a complete
+> mini-language into the kernel just for this purpose is utterly stupid.
+> Programming the thing from userspace is incredibly intricate, and all
+> this complexity serves no purpose.
+> 
+> I recently found out about SLIRP (userspace packet rewriting) and I
+> think this would be a good way to implement NAT on servers or routers
+> that actually need to do NAT -- just make a userspace process that
+> runs something SLIRP-like and has a raw socket to the second Ethernet
+> card, and Bob's your uncle.
+> 
+> But this got me thinking along pretty productive lines in terms of the
+> tiny Apple II port -- I have been wanting to put the 2.11BSD network
+> stack into an Apple II for a long time, but I've now realized this is
+> not necessary. A much better approach for those Mini-Unix or LSX or
+> even V7 systems, would be to have a userspace library that does SLIP
+> and contains its own TCP, UDP, IP drivers, resolver and so on. Then if
+> you run a userspace program like say, ftp, which is linked to the
+> userspace TCP library, it would basically just open /dev/ttyXX, bring
+> up the SLIP link itself, do any necessary downloads etc, then close
+> the TTY and stop responding to any IP stuff coming over the SLIP link
+> whilst you quit to the prompt, until another program reopens it.
+> 
+> cheers, Nick
+> 
+> On Wed, Feb 8, 2017 at 2:56 PM, Jason Stevens
+> <jsteve at superglobalmegacorp.com> wrote:
+>> What about NetBSD 1.1 or even 386BSD?
+>> 
+>> There never was a 4.2 or 4.3 for i386 was there?
+>> 
+>> I'd guess the 32v userland could be built on early 4.4BSD Lite/NET2 greatly
+>> reducing its footprint.
+>> 
+>> 
+>> 
+>> 
+>> On February 8, 2017 11:47:03 AM GMT+08:00, Nick Downing
+>> <downing.nick at gmail.com> wrote:
+>>> 
+>>> This is an issue that interests me quite a bit, since I was running
+>>> FreeBSD in an effort to get around Linux bloat problems discussed.
+>>> Well not that I really mind Linux as a user interface / runtime
+>>> environment / main development machine, but I think it probably
+>>> shouldn't be used as a "least common denominator" for development
+>>> since you end up introducing unwanted dependencies on a whole lot of
+>>> stuff.
+>>> 
+>>> So I was running FreeBSD as a more minimal *nix. I did quite a lot of
+>>> interesting stuff with FreeBSD such as setting up diskless
+>>> workstations in my home, etc. I spent a lot of time tinkering around
+>>> in the kernel code. I was planning to do some serious development on
+>>> 4.4BSDLite or FreeBSD to create an operating system more to my liking.
+>>> So, I was looking carefully at differences since ancient *nixes.
+>>> 
+>>> And, I can say that FreeBSD is pretty bloated. Umm well they've added
+>>> SMP, at the time it was using the Giant Lock although that could be
+>>> fixed by now. They've added VFS and NFS of course. They've added an
+>>> entire subsystem for block devices IIRC that handles partitioning and
+>>> possibly some other sophisticated stuff, which I believe is their own
+>>> design. Umm the kqueues and I believe they have their own
+>>> implementation of kernel threading or lightweight processes including
+>>> some sort of idle daemon. The network stack is heavily upgraded, to
+>>> the extent I looked into it, the added features are things you would
+>>> want (syncookies = DOS protection, etc) but also could not possibly be
+>>> called minimal, and would preclude running it on other than a
+>>> multi-megabyte machine. They have multiple ABIs so the kernel can
+>>> accept Linux or BSD syscalls or whatever else (I used it to run
+>>> Acrobat Reader Linux on my FreeBSD desktop). Umm I am pretty sure they
+>>> have kernel modules ala Linux. Lots and lots and lots of stuff... and
+>>> that's only considering the kernel. If you look in the ports
+>>> collection you see they have incredible amounts of bloat there too...
+>>> for instance GNOME, Libreoffice, LATEX, gcc, python... not that I'm
+>>> denigrating these tools, since they do invaluable work and I use them
+>>> every day, but the point is, you CANNOT call them minimal.
+>>> 
+>>> The quest for a clean minimal system goes on ->. FreeBSD is not the
+>>> answer. In fact I believe 4.3BSD-Reno and 4.4 go strongly offtrack.
+>>> 
+>>> cheers, Nick
+>>> 
+>>> On Wed, Feb 8, 2017 at 1:55 PM, Greg 'groggy' Lehey <grog at lemis.com>
+>>> wrote:
+>>>> 
+>>>> On Tuesday,  7 February 2017 at 15:38:40 -0800, Steve Johnson wrote:
+>>>>> 
+>>>>> Looking back, the social dynamics of the Unix group helped a lot in
+>>>>> keeping the bloat small.   The rule was, whoever touches something
+>>>>> last becomes its owner.  Of course, we were all free to complain
+>>>>> about things, and did, but the amalgamation of tinkerings that
+>>>>> characterizes most of the Linux commands just didn't happen.
+>>>> 
+>>>> 
+>>>> Out of interest: where do you (or others) consider that the current
+>>>> BSD projects it in this comparison?
+>>>> 
+>>>> Greg
+>>>> --
+>>>> Sent from my desktop computer.
+>>>> Finger grog at lemis.com for PGP public key.
+>>>> See complete headers for address and phone numbers.
+>>>> This message is digitally signed.  If your Microsoft mail program
+>>>> reports problems, please read http://lemis.com/broken-MUA
+>> 
+>> 
+>> --
+>> Sent from my Android device with K-9 Mail. Please excuse my brevity.
+
+
