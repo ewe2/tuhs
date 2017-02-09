@@ -1,0 +1,77 @@
+From: steffen@sdaoden.eu (Steffen Nurpmeso)
+Date: Thu, 09 Feb 2017 14:46:28 +0100
+Subject: [TUHS] Unix stories
+In-Reply-To: <1483547711.1607300.837230857.4B111F27@webmail.messagingengine.com>
+References: <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+ <42922C34-342F-4E86-83E2-3618129139B2@tfeb.org>
+ <20170103004959.GA29088@mcvoy.com>
+ <20170104130434.NQFzLGpVU%steffen@sdaoden.eu>
+ <1483538831.1573798.837053385.2EB8CAC9@webmail.messagingengine.com>
+ <20170104162238.qUWzAcIu7%steffen@sdaoden.eu>
+ <1483547711.1607300.837230857.4B111F27@webmail.messagingengine.com>
+Message-ID: <20170209134628.99Q--%steffen@sdaoden.eu>
+
+Hello,
+
+Random832 <random832 at fastmail.com> wrote:
+ |On Wed, Jan 4, 2017, at 11:22, Steffen Nurpmeso wrote:
+ |> Random832 <random832 at fastmail.com> wrote:
+ |>|On Wed, Jan 4, 2017, at 08:04, Steffen Nurpmeso wrote:
+ |>|> terrible aliasing and "sequence point" rules, where i think it is
+ |>|> clear what i mean when i write "i = j + ++i" (i believe this is
+ |>|> undefined behaviour).
+ |>|
+ |>|I assume you're imagining it as being equivalent to i = j + i + 1, with
+ |>|a redundant store operation.
+ |>|
+ |>|But why couldn't it equally well mean
+ |> 
+ |> No i don't,
+ |
+ |Then I guessed wrong. Again. (So much for "clear", I suppose). But
+ |you're the one who "think[s] it's clear what [you] mean by it"; so you
+ |simply *must* have a meaning in mind. Why not explain what it is?
+
+so now i really got this a few minute ago after adding negative
+history number support (to count from history top):
+
+  tty.c: In function 'c_history':
+  tty.c:4157:13: warning: operation on 'entry' may be undefined [-Wsequence-point]
+         entry = isneg ? --entry : (siz_t)a_tty.tg_hist_size - entry;
+         ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And in my opinion this is just plain terrible?  I think it is
+absolutely clear what i intend, there is not even a dereferenced
+pointer involved, the lhv is either a register or if all fails
+a stack location.  I don't understand why i have to write
+
+      if(isneg)
+         --entry;
+      else
+         entry = (siz_t)a_tty.tg_hist_size - entry;
+
+to get over this, it is exactly the same?  And it is not that easy
+as blaming the compiler (except that gcc often comes over with
+terrible warnings, but this is a different issue, and of course,
+these are huge codebases and i guess you stumble along and fix the
+test warnings that occur when a step turned on some red lights
+somewhere else; ok, but while i am in rant mode, i recently had to
+introduce a useless enum to turn
+
+ #ifdef HAVE_DEVEL /* Avoid gcc warn cascade since n_ignore is defined locally */
+ -n_CTAV(-(uintptr_t)n_IGNORE_TYPE - n__IGNORE_ADJUST == 0);
+
+into
+
+  +n_CTAV(-n__IGNORE_TYPE - n__IGNORE_ADJUST == 0);
+
+where n_IGNORE_TYPE was '#define n_IGNORE_TYPE ((struct
+n_ignore*)-3)', and if that is not an integer then, what).  
+No, in my opinion this is because of overly construed standard
+text of an increasingly unclean standard.  Digging in the dirt is
+my whole life anyway, even i don't read newspapers, and i really
+would like to see C not becoming just an equal soup of muddy
+waters.  Just my one cent.
+
+--steffen
+
