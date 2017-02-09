@@ -1,0 +1,87 @@
+From: steffen@sdaoden.eu (Steffen Nurpmeso)
+Date: Thu, 09 Feb 2017 18:15:59 +0100
+Subject: [TUHS] Unix stories
+In-Reply-To: <1486652148.1670510.875683520.3DDF9622@webmail.messagingengine.com>
+References: <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+ <42922C34-342F-4E86-83E2-3618129139B2@tfeb.org>
+ <20170103004959.GA29088@mcvoy.com>
+ <20170104130434.NQFzLGpVU%steffen@sdaoden.eu>
+ <1483538831.1573798.837053385.2EB8CAC9@webmail.messagingengine.com>
+ <20170104162238.qUWzAcIu7%steffen@sdaoden.eu>
+ <1483547711.1607300.837230857.4B111F27@webmail.messagingengine.com>
+ <20170209134628.99Q--%steffen@sdaoden.eu>
+ <1486652148.1670510.875683520.3DDF9622@webmail.messagingengine.com>
+Message-ID: <20170209171559.K5qcB%steffen@sdaoden.eu>
+
+Random832 <random832 at fastmail.com> wrote:
+ |On Thu, Feb 9, 2017, at 08:46, Steffen Nurpmeso wrote:
+ |> so now i really got this a few minute ago after adding negative
+ |> history number support (to count from history top):
+ |> 
+ |>   tty.c: In function 'c_history':
+ |>   tty.c:4157:13: warning: operation on 'entry' may be undefined
+ |>   [-Wsequence-point]
+ |>          entry = isneg ? --entry : (siz_t)a_tty.tg_hist_size - entry;
+ |>          ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ |> 
+ |> And in my opinion this is just plain terrible?  I think it is
+ ...
+ |What's wrong with entry = isneg ? entry-1 : (siz_t)a_tty.tg_hist_size -
+ |entry;
+
+Another example:
+
+  spam.c: In function '_spam_rate2score':
+  spam.c:1137:38: warning: to be safe all intermediate pointers in cast from 'char **' to 'const char **' must be 'const' qualified [-Wcast-qual]
+      ids = n_idec_ui32_cp(&m, buf, 10, (char const**)&buf);
+
+To satisfy we need in fact a temporary variable, since you cannot
+apply cast operators on non-lvalues:
+
+  spam.c: In function '_spam_rate2score':
+  spam.c:1137:38: error: lvalue required as unary '&' operand
+      ids = n_idec_ui32_cp(&m, buf, 10, &(char const*)buf);
+
+And yeah, you need to do something about:
+
+  spam.c: In function '_spam_rate2score':
+  spam.c:1137:38: warning: passing argument 6 of 'n_idec_buf' from incompatible pointer type [-Wincompatible-pointer-types]
+      ids = n_idec_ui32_cp(&m, buf, 10, &buf);
+                                        ^
+  nailfuns.h:319:63: note: in definition of macro 'n_idec_ui32_cp'
+      n_idec_buf(RP, CBP, UIZ_MAX, B, (n_IDEC_MODE_LIMIT_32BIT), CLP)
+                                                                 ^~~
+  nailfuns.h:303:22: note: expected 'const char **' but argument is of type 'char **'
+   FL enum n_idec_state n_idec_buf(void *resp, char const *cbuf, uiz_t clen,
+
+I would buy that the other way around, i.e., if "buf" would be
+constant and the function expects something non-constant.
+
+ |Same number of characters (two more if you put spaces around the minus
+ |sign, but hardly a huge burden in any case).
+
+Ok you're right, this special case is not a huge burden.
+With a good font l-1-i may also be no problem, but could.  I mean,
+some people even use garbage collectors because they are afraid of
+memory holes and such, and then such l-1-i problems which are
+known to outperform human visual capabilities except at eleven
+thirty in the morning are good to go?  This!  Come on.
+
+ |You're basically asking for the standard to carve out an exception for
+ |the cases, and precisely only those cases, where the meaning can be seen
+ |to be 100% unambiguous (i.e. that the two values being assigned to a
+ |variable are provably the same value, and there are no other reads) -
+ |which would limit it exclusively to the prefix operator (and assignment
+ |operators, I suppose, "x = x += 1" is as unambiguous as it is
+ |pointless), and only when there is no other expression involved except
+ |for the conditionals (you couldn't have "--entry + x", for example).
+
+Oh yes, i do.  To me the above basically looks like
+a reassignment, a creation of a completely new variable.  The
+value is assigned after it has been computed.  The compiler may be
+clever enough to realize that in certain cases this can end up as
+something like "inc eax" or the like.
+But all this surely off-topic.
+
+--steffen
+
