@@ -1,0 +1,51 @@
+From: random832@fastmail.com (Random832)
+Date: Thu, 09 Feb 2017 09:55:48 -0500
+Subject: [TUHS] Unix stories
+In-Reply-To: <20170209134628.99Q--%steffen@sdaoden.eu>
+References: <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+ <42922C34-342F-4E86-83E2-3618129139B2@tfeb.org>
+ <20170103004959.GA29088@mcvoy.com>
+ <20170104130434.NQFzLGpVU%steffen@sdaoden.eu>
+ <1483538831.1573798.837053385.2EB8CAC9@webmail.messagingengine.com>
+ <20170104162238.qUWzAcIu7%steffen@sdaoden.eu>
+ <1483547711.1607300.837230857.4B111F27@webmail.messagingengine.com>
+ <20170209134628.99Q--%steffen@sdaoden.eu>
+Message-ID: <1486652148.1670510.875683520.3DDF9622@webmail.messagingengine.com>
+
+On Thu, Feb 9, 2017, at 08:46, Steffen Nurpmeso wrote:
+> so now i really got this a few minute ago after adding negative
+> history number support (to count from history top):
+> 
+>   tty.c: In function 'c_history':
+>   tty.c:4157:13: warning: operation on 'entry' may be undefined
+>   [-Wsequence-point]
+>          entry = isneg ? --entry : (siz_t)a_tty.tg_hist_size - entry;
+>          ~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> 
+> And in my opinion this is just plain terrible?  I think it is
+> absolutely clear what i intend, there is not even a dereferenced
+> pointer involved, the lhv is either a register or if all fails
+> a stack location.  I don't understand why i have to write
+> 
+>       if(isneg)
+>          --entry;
+>       else
+>          entry = (siz_t)a_tty.tg_hist_size - entry;
+> 
+> to get over this, it is exactly the same?
+
+What's wrong with entry = isneg ? entry-1 : (siz_t)a_tty.tg_hist_size -
+entry;
+
+Same number of characters (two more if you put spaces around the minus
+sign, but hardly a huge burden in any case).
+
+You're basically asking for the standard to carve out an exception for
+the cases, and precisely only those cases, where the meaning can be seen
+to be 100% unambiguous (i.e. that the two values being assigned to a
+variable are provably the same value, and there are no other reads) -
+which would limit it exclusively to the prefix operator (and assignment
+operators, I suppose, "x = x += 1" is as unambiguous as it is
+pointless), and only when there is no other expression involved except
+for the conditionals (you couldn't have "--entry + x", for example).
+
