@@ -1,0 +1,55 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Thu, 9 Feb 2017 10:19:27 +0100
+Subject: [TUHS] Code bloat (was: How Unix brings people together,
+	or it's a small...)
+In-Reply-To: <CAH1jEzZ9d4ZEWMdx_R5_TZ4CFYFzrG-V83rS21S1z-LPC0fMCw@mail.gmail.com>
+References: <CAC20D2O8dXan9hX5Sv6LyBD6dEFPwpV5wYZJ_XsFCHtVw6Gb3Q@mail.gmail.com>
+ <930c52a0c279cdd7d44953aa403a504a8622bb83@webmail.yaccman.com>
+ <20170208025538.GE65698@eureka.lemis.com>
+ <CAH1jEzbpOUC2OFjZ9oHodg0DdzQUk2R+3XPdn0RgE9dX7yD5nA@mail.gmail.com>
+ <F2A7F638-CC2F-4D0E-B191-0F301DDDA46F@superglobalmegacorp.com>
+ <CAH1jEza0j2wLwOY7QpW=T0CMoseNmhmBV8Qp-5gU-W+buE1z2Q@mail.gmail.com>
+ <B747F0D5-A896-4088-A506-B7F63063DD21@planet.nl>
+ <CAH1jEzZqRPYenwzBbUwFVanA-NVvWMGzYiADVoAXCDOqnUrMrg@mail.gmail.com>
+ <CAH1jEzZ9d4ZEWMdx_R5_TZ4CFYFzrG-V83rS21S1z-LPC0fMCw@mail.gmail.com>
+Message-ID: <C7E0FD3B-59FD-4E51-BCB9-01A14DB7FB99@planet.nl>
+
+
+On 9 Feb 2017, at 4:02 , Nick Downing wrote:
+
+> As to moving to a V7 kernel and then adding TCP/IP I'm not sure if
+> this is adviseable, as I was saying earlier I think it might be best
+> to keep that functionality outboard from the kernel.
+
+That approach was taken in various early implementations, with varying
+degrees of success.
+
+The best one seems to have been the 3Com stack, which puts IP in the
+kernel and TCP in a daemon. By the way, this implementation is also
+where SLIP seems to have originated.
+
+http://bitsavers.informatik.uni-stuttgart.de/pdf/3Com/3Com_UNET_Nov80.pdf
+
+> and (2) does it have to respond to ping or incoming
+> connections at any time.
+
+I'm not sure economizing on ICMP support is the best approach. Perhaps
+economizing on fragmentation and and window management is better. For
+example, the 1979 Wingfield implementation discards out of order packets
+and simply waits for retransmission of the expected packet; this
+simplifies the code and greatly reduces the need for buffer space.
+
+Arguably, the handling of incoming connections does not require much code
+or data.
+
+---
+
+A TCP connection spends most of its time in the 'established' state. I
+wonder if just putting the code for this state in the kernel and handling
+only the state changes and other states in a daemon is perhaps the best
+split on constrained hardware. I'm not aware of any historical
+implementation having that design, so perhaps it is flawed thinking.
+
+Paul
+
+
