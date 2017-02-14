@@ -1,0 +1,36 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Wed, 15 Feb 2017 01:18:29 +1100
+Subject: [TUHS] Another odd comment in V6
+In-Reply-To: <868tp8kgxo.fsf@molnjunk.nocrew.org>
+References: <378063CD-9B94-4AE3-B4BB-F41D2F6BFBF6@planet.nl>
+ <CAH1jEzZsHqxEJpiMizkg6-cLDaaEhzjb9vzicrK0AJaRQT8muQ@mail.gmail.com>
+ <868tp8kgxo.fsf@molnjunk.nocrew.org>
+Message-ID: <CAH1jEzYCWh7ZGMfhFKeObdkSJN09AO9PUq6S-3Npv_Jdvndvsg@mail.gmail.com>
+
+Excellent paper, well that makes it completely clear what the MIT guy
+means by restarting a system call. It is interesting that in their
+approach they restart a read() or write() call or whatever they call
+it in their system, with the buffer advanced and the count reduced.
+This is a bit like what would happen in x86 if it gets interrupted in
+a REP MOVSB instruction, it returns into REP MOVSB with SI/DI advanced
+and CX reduced. However it would not work exactly right in unix due to
+the return value from read()/write() being wrong. Anyway, I like the
+unix way, it is nice and simple. I have never found it to be a problem
+when devices return a "short read" or "short write", although it is an
+interesting semantic that if you opened the file yourself and you're
+doing lseek on it, it cannot be a TTY, and short reads/writes do not
+occur. Having a hypothetical system with a very slow disk (or fast
+CPU) in which disk accesses are blocking, would break many programs.
+cheers, Nick
+
+On Wed, Feb 15, 2017 at 1:03 AM, Lars Brinkhoff <lars at nocrew.org> wrote:
+> Nick Downing <downing.nick at gmail.com> writes:
+>> By contrast the MIT guy probably was working with a much smaller/more
+>> economical system that didn't maintain a kernel stack per process.
+>
+> No.  PCLSRing is a feature of MIT' ITS operating system, and it does
+> have a separate stack for the kernel.
+>
+> Here is a copy of Alan Bawdens paper about PCLSRing:
+> http://fare.tunes.org/tmp/emergent/pclsr.htm
+
