@@ -1,0 +1,76 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Tue, 14 Feb 2017 09:14:24 -0500 (EST)
+Subject: [TUHS] Another odd comment in V6
+Message-ID: <20170214141424.A5BC518C0A2@mercury.lcs.mit.edu>
+
+    > From: Paul Ruizendaal
+
+    > There's an odd comment in V6, in tty.c, just above ttread():
+    > ...
+    > That comment is strange, because it does not describe what the code
+    > does.
+
+I can't actually find anyplace where the PC is backed up (except on a
+segmentation fault, when extending the stack)?
+
+So I suspect that the comment is a tombstone; it refers to what the code did
+at one point, but no longer does.
+
+    > The comment isn't there in V5 or V7.
+
+Which is consistent with it documenting a temporary state of affairs...
+
+
+    > I wonder if there is a link to the famous Gabriel paper
+
+I suspect so. Perhaps they tried backing up the PC (in the case where a system
+call is interrupted by a software interrupt in the user's process), and
+decided it was too much work to do it 'right' in all instances, and punted.
+
+The whole question of how to handle software interrupts while a process is
+waiting on some event, while in the kernel, is non-trivial, especially in
+systems which use the now-universal approach of i) writing in a higher-level
+stack oriented language, and ii) 'suspending' with a sub-routine call chain on
+the kernel stack.
+
+Unix (at least, in V6 - I'm not familiar with the others) just trashes the
+whole call stack (via the qsav thing), and uses the intflg mechanism to notify
+the user that a system call was aborted. But on systems with e.g. locks, it
+can get pretty complicated (try Googling Multics crawl-out). Many PhD theses
+have looked at these issues...
+
+
+    > Actually, research Unix does save the complete state of a process and
+    > could back up the PC. The reason that it doesn't work is in the syscall
+    > API design, using registers to pass values etc. If all values were
+    > passed on the stack it would work.
+
+Sorry, I don't follow this?
+
+The problem with 'backing up the PC' is that you 'sort of' have to restore the
+arguments to the state they were in at the time the system call was first
+made. This is actually easier if the arguments are in registers.
+
+I said 'sort of' because the hard issue is that there are system calls (like
+terminal I/O) where the system call is potentially already partially executed
+(e.g.  a read asking for 10 characters from the user's console may have
+already gotten 5, and stored them in the user's buffer), so you can't just
+simply completely 'back out' the call (i.e. restore the arguments to what they
+were, and expect the system call to execute 'correctly' if retried - in the
+example, those 5 characters would be lost).
+
+Instead, you have to modify the arguments so that the re-tried call takes up
+where it left off - in the example above, tries to read 5 characters, starting
+5 bytes into the buffer). The hard part is that the return value (of the
+number of characters actually read) has to count the 5 already read! Without
+the proper design of the system call interface, this can be hard - how does
+the system distinguish between the _first_ attempt at a system call (in which
+the 'already done' count is 0), and a _later_ attempt? If the user passes in
+the 'already done' count, it's pretty straightforward - otherwise, not so
+much!
+
+Alan Bawden wrote a good paper about PCLSR'ing which explores some of these
+issues.
+
+	Noel
+
