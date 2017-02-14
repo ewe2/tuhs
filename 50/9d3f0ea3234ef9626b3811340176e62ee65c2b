@@ -1,0 +1,65 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Tue, 14 Feb 2017 11:06:20 -0500
+Subject: [TUHS] Another odd comment in V6
+In-Reply-To: <1487087293.1746007.880694176.29A6CC14@webmail.messagingengine.com>
+References: <20170214141424.A5BC518C0A2@mercury.lcs.mit.edu>
+ <1487087293.1746007.880694176.29A6CC14@webmail.messagingengine.com>
+Message-ID: <CAEoi9W5sC1jbMVkuF76En82=A7+JXTRR9cnD8FF3Y60+xSTWuw@mail.gmail.com>
+
+On Tue, Feb 14, 2017 at 10:48 AM, Random832 <random832 at fastmail.com> wrote:
+
+> On Tue, Feb 14, 2017, at 09:14, Noel Chiappa wrote:
+> > Without the proper design of the system call interface, this can be hard
+> - how
+> > does the system distinguish between the _first_ attempt at a system call
+> (in
+> > which the 'already done' count is 0), and a _later_ attempt? If the user
+> passes
+> > in the 'already done' count, it's pretty straightforward - otherwise,
+> not so
+> > much!
+>
+> You could return the address of the last character read, and let the
+> user code do the math.
+>
+> I'm a bit confused though from a practical point of view where this
+> comes up. If the terminal is in raw/cbreak mode, the user code must
+> handle a "partial" read anyway, so returning five bytes is fine. If it's
+> in canonical mode, the system call does not copy characters into the
+> user buffer until they have pressed enter. Maybe there's some other case
+> other than reading from a terminal that it makes sense for, but I
+> couldn't think of any while writing this post.
+>
+
+Reading is sort of a bad example; the mechanism shines much more brightly
+when one considers the write case.
+
+Consider typing a file out to a (slow - recall these systems were designed
+in the 70s when 300 BAUD terminals were considered fast and 1200 was
+downright zippy) terminal device. The user may interrupt and suspend the
+file-printing program in order to do something else for a time, and then
+want to resume output where it left off. The beauty of the ITS PCLSR
+mechanism is that it handles this case transparently: the system backs up
+the PC and adjusts the system call arguments so that when the program is
+resumed it automatically re-invokes the system call such that it continues
+printing where it left off, with no need for the application to care.
+
+An aside: The Gabriel papers elaborated on this, discussing the tradeoff
+between the Unix approach and ITS and suggesting that the Unix approach has
+better survivability characteristics. It's easier to get the Unix mechanism
+"right", whereas ITS's implementation took many pages of assembly language
+code (I recall him having a quip along the lines of, "and it probably isn't
+all right").
+
+One of the interesting things about Gabriel's writing is that he
+acknowledges that the definition of "correct" varies and is subjective and
+takes into account a good deal of taste and other "soft" characteristics.
+The MIT folks who worked on ITS preferred their approach because they saw
+it as being more obviously "correct", while the Unix folks felt the same
+way, despite the obvious differences between the two.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170214/499f1760/attachment.html>
+
