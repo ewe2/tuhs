@@ -1,0 +1,146 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Wed, 22 Feb 2017 10:10:05 +1100
+Subject: [TUHS] Mach for i386 / Mt Xinu or other
+In-Reply-To: <20170221214913.1843B18C117@mercury.lcs.mit.edu>
+References: <20170221214913.1843B18C117@mercury.lcs.mit.edu>
+Message-ID: <CAH1jEzZQg=s=QygbCVv-kqDHAmc-Dea1yOuj1QzxLDTAnCXWKQ@mail.gmail.com>
+
+I'm just going to jump in about the philosophical "everything is a
+file" Unix concept.
+
+I reckon this works very well for things that are "file like" in
+nature. The genius of Thompson and Ritchie was to realize that a file
+is a sequence of characters, and so is a TTY (or at least one
+direction of a TTY). And of course it is REALLY REALLY HANDY, to have
+things like an ad-hoc scripting ability (redirect a file to a program
+that's expecting a TTY) and all the other combinations that are
+possible.
+
+At the same time, files have an additional capability which is
+seeking. So did they implement some crazy ad-hoc scheme where you have
+to write an escape sequence to the file in order to effect a seek? No
+they did not. They added a seek(), or later lseek() system call, which
+sensibly returns an error code if the thing receiving the command is
+not capable of doing a seek. That is, they made it object-oriented.
+
+As well, terminals have additional capabilities, like setting the
+baudrate, changing the interrupt character, etc. And, in the  same
+vein, they added an ioctl() system call, which sensibly returns an
+error code (ENOTTY) if the thing receiving the command is not a TTY.
+
+Same thing for pipes, except now another object-oriented feature comes
+into the mix: Constructors. Once created, a pipe does not have any
+interesting extra capabilities, indeed it acts like a base class of
+files and terminals since it does not support lseek() OR ioctl(),
+however the interesting thing is that pipes (ignoring named pipes) are
+not created with open(), they have their own constructor function
+pipe().
+
+The BSD sockets interface is nice because it exactly follows the same
+philosophy: Sockets are like terminals except that instead of ioctl()
+they have slightly different capabilities (setting buffer size,
+checking for out-of-band data, etc), and they also have some
+interesting new characteristics like being bidirectional. But the most
+interesting thing with sockets is the elaborate set of
+constructors/factories for them.
+
+Now, along comes Plan 9 and what do they do? Completely reverse all
+this and force everyone to go through open() in the filesystem, which
+is NOT object-oriented, can you imagine C++ without constructors? And,
+in my understanding at least (it's a while since I looked at this),
+you do things like opening sockets by echoing strings to various
+places in the filesystem. This is nice if you're shell scripting.
+
+To explain why I think this is a bad thing I'm going to digress
+slightly. Let's consider the AT command set for modems. Well it's nice
+because it's human readable, and it was also a decent engineering
+solution to a problem where a programmable device was connected
+through a dumb terminal interface. Likewise, the ANSI command set for
+terminals, pretty much the same thing -- a good idea at the time.
+
+But what I most emphatically DO NOT agree with, is when a modem is
+built into the system, and still emulates an AT command set. Or when a
+terminal is built into the system (xterm, say), and still emulates an
+ANSI command set. It IS nice in some respects: (1) compatibility, and
+(2) shell scripting / expect type stuff. But as an engineering
+solution it's really bad. It's wasteful since any other program, such
+as say a dialer, is encoding the commands into AT commands, and then
+they are immediately getting decoded and executed. Same thing with
+xterm and the ANSI command sequences. It's nice to be able to put
+escape sequences in your prompt to change the colour of your prompt,
+but something like the curses library should NOT have to encode
+everything into ANSI when it's then decoded immediately.
+
+So, in my humble opinion the best way to handle such issues is, to
+provide a programmatic API where you tell the device what you want it
+to do, and then if it's something like an xterm or an internal modem,
+it immediately does what you ask it to do, whereas if it's something
+like an actual ANSI terminal or an external modem, the driver takes
+care of encoding your commands into ANSI or AT commands and then
+untangling the results, and reports to you in a machine-readable way
+(rather than a human-readable way) whether it succeeded etc.
+
+So, my philosophy is quite opposite to the Plan 9 philosophy, and
+that's why I don't use Plan 9. I don't believe in trying to put square
+pegs in round holes basically. What I would like to see is basically
+every device to implement the common functionality like read() and
+write() but ONLY IF THAT IS SENSIBLE, and to expose a programmatic
+interface through ioctl() or similar. Note that I have actually come
+to believe that overloading everything onto ioctl() is a bit
+undesirable since ioctl() was originally intended only for terminals.
+It would be better if each thing that a user process can hold a "fd"
+to, could define its own syscalls, but ioctl() is okay as an
+encapsulation for such syscalls.
+
+I also don't really agree with things like the /proc filesystem. For
+its intended and original purpose, it's fine -- it was supposed to be
+a collection of files named for the pids of running processes in the
+system, so that debuggers and such like, could read/write the
+process's address space. Personally I think it should have its own
+constructor, like say: fd = openaddressspace(pid, O_RDWR); which would
+be equivalent to something like: sprintf(buf, "/proc/%d", pid); fd =
+open(buf, O_RDWR); since there's no good reason to put it in the
+filesystem in my opinion. Having said that, there's no real harm in
+putting it in the filesystem, especially as it's hardly ever used.
+What I DO NOT agree with, is all the pseudo-files, where you do
+something like: echo 1 >/proc/sys/some/silly/function from the shell
+to turn stuff on or off.
+
+So now having explained my basic philosophy I will touch on the SCSI
+driver and burning CDs/DVDs/BDs. We can look at it two ways, either we
+can build a high level interface into the system so that writing
+software doesn't need to know how the drive is connected. This is a
+bit like my proposal for xterms vs. ANSI terminals and internal vs
+external modems. Then if it HAPPENS to be a SCSI drive then the driver
+should communicate with the drive in SCSI language, etc. BUT: This is
+a huge amount of work, because the SCSI specification is very
+complicated. Moreover, it's highly unlikely that any device will be
+built in the foreseeable future that burns CDs/DVDs/BDs and does not
+understand SCSI. (It might be iSCSI, it might be SCSI encapsulated
+into IDE or SATA, or whatever, but it still understands SCSI). In my
+opinion then, there is no need for a high level driver. It's like the
+situation with ANSI terminals or external models BEFORE things like
+xterms or internal modems were ever invented. So why would you need an
+extra level of abstraction? Just provide access to the TTY.
+
+cheers, Nick
+
+On Wed, Feb 22, 2017 at 8:49 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+>     > From: Larry McVoy
+>
+>     > The DOS file system, while stupid, was very robust in the face of
+>     > crashes
+>
+> I'm not sure it's so much the file system (in the sense of the on-disk
+> format), as how the system _used_ it (although I suppose one could consider
+> that part of the FS too).
+>
+> The duplicated FAT, and the way file sectors are linked using it, is I suppose
+> a little more robust than other designs (e.g. the way early Unixes did it,
+> with indirect blocks and free lists), but I think a lot of it must have been
+> that DOS wrote stuff out quickly (as opposed to e.g. the delayed writes on
+> early Unix FS's, etc). That probably appoximated the write-ordering of more
+> designed-robust FS's.
+>
+>         Noel
+
