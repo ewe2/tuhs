@@ -1,0 +1,53 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Tue, 21 Feb 2017 14:23:48 -0500
+Subject: [TUHS] Another odd comment in V6
+Message-ID: <1487705031.29325.for-standards-violators@oclsc.org>
+
+Noel:
+
+  Instead, you have to modify the arguments so that the re-tried call takes up
+  where it left off - in the example above, tries to read 5 characters, starting
+  5 bytes into the buffer). The hard part is that the return value (of the
+  number of characters actually read) has to count the 5 already read! Without
+  the proper design of the system call interface, this can be hard - how does
+  the system distinguish between the _first_ attempt at a system call (in which
+  the 'already done' count is 0), and a _later_ attempt? If the user passes in
+  the 'already done' count, it's pretty straightforward - otherwise, not so
+  much!
+
+====
+
+Sometime in the latter days of the Research system (somewhere
+between when the 9/e and 10/e manuals were published), I had
+an inspiration about that, and changed things as follows:
+
+When a system call like read is interrupted by a signal:
+-- If no characters have been copied into the user's
+buffer yet, return -1 and set errno to EINTR (as would
+always have been done in Heritage UNIX).
+-- If some data has already been copied out, return the
+number of characters copied.
+
+So no data would be lost.  Programs that wanted to keep
+reading into the same buffer (presumably until a certain
+terminator character is encountered or the buffer is full
+or EOF) would have to loop, but a program that didn't loop
+in that case was broken anyway: it probably wouldn't work
+right were its input coming from a pipe or a network connection.
+
+I don't remember any programs breaking when I made that change,
+but since it's approaching 30 years since I did it, I don't
+know whether I can trust my memory.  Others on this list may
+have clearer memories.
+
+All this was a reaction to the messy (both in semantics and
+in implementation) compromise that had come from BSD, to
+have separate `restart the system call' and `interrupt the
+system call' states.  I could see why they did it, but was
+never satisfied with the result.  If only I'd had my inspiration
+some years earlier, when there was a chance of it getting out
+into the real world and influencing POSIX and so on.  Oh, well.
+
+Norman Wilson
+Toronto ON
+
