@@ -1,0 +1,59 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Mon, 27 Feb 2017 11:24:47 +0100
+Subject: [TUHS] Emacs and undump
+In-Reply-To: <mailman.342.1488180370.3779.tuhs@minnie.tuhs.org>
+References: <mailman.342.1488180370.3779.tuhs@minnie.tuhs.org>
+Message-ID: <145bd49e-7390-034b-f8c3-002e6e6f15fe@update.uu.se>
+
+On 2017-02-27 08:26, Lars Brinkhoff <lars at nocrew.org> wrote:
+> Tim Bradshaw wrote:
+>>> David wrote:
+>>> I remember that GNU Emacs launched the first time and then dumped
+>>> itself out as a core file. Each subsequent launch would then ‘undump’
+>>> itself back into memory. All this because launching emacs the first
+>>> time required compiling all that lisp code.
+>> It still works like that.  Indeed that's the conventional way that
+>> Lisp systems tend to work for delivering applications
+> Emacs came from ITS, and many Lisps derive from Maclisp which also came
+> from ITS.  In ITS, it was common for applications to be dumped into a
+> loadable core image, even if they were written in assembly language.
+
+Not only i ITS. This is how things work in OS/8, for example. I believe 
+it is also how things work in TOPS-10 and quite possible also in TOPS-20.
+Not sure about RT-11, but I wouldn't be surprised if that's the way 
+there too.
+
+Essentially, the linker leaves the image in memory. It does not write it 
+to a file. And then, the command decode have a command for dumping your 
+memory to disk, as a runable image. There is some information kept 
+around that the linker sets up, which means you don't normally have to 
+tell the command decoder which parts of memory to save, or what the 
+start address is, and so on. But you can also give that information in 
+your save command.
+
+One of the nice things of this approach is that you can load an image 
+into memory, and then use the debugger to look around in it, change it, 
+or run it. And if the program exists, it is still in memory, including 
+all data, which means you can check the state of everything at exit 
+time. And of course, if you want to, you can load a program, patch 
+around in it, in memory, and then run it. And, of course, you can load a 
+program, run some part of it, and dump it to disk at that stage, so all 
+initializations have been done.
+
+Your memory is always around, and is not tied to a process that comes 
+and goes.
+
+Of course, the back side of that is that you can't really run several 
+programs at once.
+
+But it's not hard to see that RMS and GNU Emacs (coming from these 
+systems) wanted the same thing again. It do have some points.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
