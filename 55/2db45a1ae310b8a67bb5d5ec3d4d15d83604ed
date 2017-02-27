@@ -1,0 +1,73 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Mon, 27 Feb 2017 21:09:33 +0100
+Subject: [TUHS] Emacs and undump
+In-Reply-To: <mailman.346.1488208394.3779.tuhs@minnie.tuhs.org>
+References: <mailman.346.1488208394.3779.tuhs@minnie.tuhs.org>
+Message-ID: <31f9e532-c59a-2d3d-1e9b-cef9a216d68e@update.uu.se>
+
+Ooo. Fun. We're talking PDP-10s on a Unix list... :-)
+
+On 2017-02-27 16:13, Arthur Krewat <krewat at kilonet.net> wrote:
+> In TOPS-10, you could detach from your current job, login again, and
+> keep going. Then, attach to the previous job, and go back and forth
+> endlessly.
+
+Right. But that is a different thing. Each terminal session only have 
+one job. The fact that you can detach that, and log in as a new session 
+is a different concept.
+
+> As for keeping memory around, it was very common on TOPS-10 to put code
+> in a "hiseg" that would stick around, and was shareable between "jobs".
+
+Yes. Again, that is a different thing as well. Hisegs are more related 
+to shared memory.
+
+I assume you know all this, so I'm not going to go into details.
+But having the memory around for a program, even if it is not running, 
+is actually sometimes very useful. If ITS could handle that, while 
+treating them as separate processes, all associated to one terminal, and 
+let you select which one you were currently fooling around in, while the 
+others stayed around, that is something I don't think I've seen elsewhere.
+
+> For something like EMACS, it would be very efficient to have the first
+> person run it "compile" all the LISP, leave it in the hiseg, and other
+> jobs can then run that code.
+
+That would work, but it would then require that all other users be 
+suspended until the first user actually completes the initialization, 
+and after that, all the memory must be readonly.
+
+> Not knowing anything about EMACS, I'm not sure that compiled code was
+> actually shareable if it was customized, just thinking out loud.
+
+You can certainly customize and save your own image. But the general 
+bootstrapping of Emacs consists of starting up the core system, and then 
+loading a whole bunch of modules and configurations. All that loading 
+and parsing of those files into data structures in memory is quite cpu 
+intensive.
+Once all that processing is finished, you can start editing.
+Each person essentially wants all that work done, no matter what they'd 
+like to do later. So, Emacs does it once, and then saves the state at 
+the point where you can start editing.
+
+But it does not mean that the memory is shareable. It's full of various 
+data structures, and code, and that will change as you go along editing 
+things as well.
+
+> But even without leveraging the hiseg capability, it was relatively easy
+> to save an entire core image back to a .SAV or .LOW or later a .EXE. I
+> don't remember how easy it was to do that programmatically, but it was
+> easy from the terminal and if it saves a lot of processor time (and
+> elapsed time) people would have been happy to do it manually.
+
+Indeed. Like I said, Tops-10 have the same concept as Emacs does today. 
+But there it was essentially what you always did.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
