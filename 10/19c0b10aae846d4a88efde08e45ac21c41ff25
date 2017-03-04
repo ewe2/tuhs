@@ -1,0 +1,80 @@
+From: dugo@xs4all.nl (Jacob Goense)
+Date: Sat, 04 Mar 2017 12:09:30 +0100
+Subject: [TUHS] Need your help for 2019
+In-Reply-To: <CFD98956-0935-4E51-BAA3-C21AD5AD6099@planet.nl>
+References: <20170304031608.GB1715@minnie.tuhs.org>
+ <CFD98956-0935-4E51-BAA3-C21AD5AD6099@planet.nl>
+Message-ID: <c87626a1b0551334bb1ebeb96bcab835@xs4all.nl>
+
+On 2017-03-04 04:16, Warren Toomey wrote:
+> - these connected to real/emulated Unix systems either locally or via a
+>   terminal server and telnet to remotely emulated systems
+
+Getting Arpanet back up is tricky. I think only KLH10 has decent IMP
+support. Not much of UNIX history runs on that.
+
+There is the H316 emulator in simh, but its IMP-host interface would
+need to be fleshed out and the corresponding host cards do not exist
+yet in the simh VAX/PDP emulators.
+
+> - emulated systems: V1 to V7 Unix, 32V, the BSDs etc. In fact there are
+>   plenty of Unix versions that we could run in emulated mode.
+> 
+> - Unix of course was one of the systems used to implement the Arpanet
+>   protcols, so it would be interesting to get some of the real/emulated
+>   systems networked together
+
+On 2017-03-04 09:21, Paul Ruizendaal wrote:
+> Maybe Google, Facebook and other "internet" companies are willing
+> to throw their weight behind some commemoration if it can be made
+> relevant to a wider audience.
+
+Archive.org maybe? Like they have done with piles of games? What
+Jason Scott pushed was the emscripten port of MESS/MAME into JSMESS.
+
+> Perhaps emulators for these old systems that can run in a browser
+> (or as an app) with instructions clear enough for today's web
+> developer is a good way to pay homage.
+> 
+> It would be a big job though, probably to big to do in 2.5 years.
+
+Yes, they can run in the browser, the whole TUHS archive should
+run in the browser, interconnected. There are several routes open.
+
+Simh can be ported to emscripten or PNaCl, I vaguely remember
+getting it to boot in the browser with one of those. Subsequent
+fixing of the terminal output and websockification of the network
+interfaces was way over my head though, so I tossed that route.
+
+There is jor1k and v86, these are javascript emulators capable of
+running Linux complete with networking over websockets. You can run
+simh in these. I ran into some speed issues and chrome now throttling
+it, but the concept works.
+
+Bring a fast machine, recent browser in a separate window and a lot
+of patience and watch paint dry, eh, v6 install at
+http://oldbsd.org/unixv6install.html  I'll try same with pdp7-unix
+and a faux KSR-33 to hide the speed issues.
+
+The 3 modern BSDs can boot up in v86, I didn't try the 08./0.9/1.0
+versions and daddy 386BSD yet but it looks doable.
+
+Thanks to websockproxy ethernet over websockets is a thing and makes
+it possible to tie everything together.
+
+For UUCP style networking there is a modem cable emulator kernel,
+module for Linux (nmdm in FreeBSD) that can bridge simh serial devices
+to TCPSER. TCPSER then looks like a modem to simh. You can map phone
+numbers to sockets where another TCPSER is listening for inbound
+"calls".
+
+To develop cool disk images from the material in TUHS there is EXPECT/
+SEND in current simh. What's very nice about this, is that it can be
+used to make reproducible installations. An EXPECT/SEND simh ini file
+fits nicely into your favourite version control software and you don't
+have to keep many blobs around.
+
+Another route would be implementing emulators in javascript. I have
+seen a few PDP-11/PDP-8 implementations, PCjs is now adding the -10,
+but that sounds like a big job indeed.
+
