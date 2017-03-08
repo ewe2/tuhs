@@ -1,0 +1,63 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Wed, 08 Mar 2017 23:03:36 +0100
+Subject: [TUHS] Help request: uucp, mail on 4.2BSD
+In-Reply-To: <20170307070941.GA2012@minnie.tuhs.org>
+References: <20170307070941.GA2012@minnie.tuhs.org>
+Message-ID: <58c07fb8.F7Cd/seulkX9W1t/%schily@schily.net>
+
+Warren Toomey <wkt at tuhs.org> wrote:
+
+> Hi all, as part of my effort to recreate part of a simulated Usenet,
+> I'm trying to bring up uucp, then mail, then C-news on 4.2BSD boxes.
+> I've got a hardwired serial port between them, and I can see a basic
+
+In case it is if interest...
+
+I used modems between 1986 and january 1993 (when I started to use a self 
+built ISDN adaptor that was connected as a piggy back to the Sun-3/50 or 
+Sun-3/60 EPROM socket).
+
+During that "modem" time, I started with a 2400 baud modem and soon upgraded 
+to a US-Robotics modem. It turned out that UUCP had several issues and was not 
+very effective with high speed modems.
+
+For this reason, I started with the BSD-4.2 UUCP sources and created a new 
+protocol that I called "s" protocol. This protocol was based on the "g" 
+protocol but used larger packet sizes. Here is my comment header for "sio.c":
+
+/*
+ * High speed modem protocol with flow control.
+ *
+ * The s protocol was designed to be used with high speed modems which
+ * have no built in protocol spoofing for the g protocol.
+ *
+ * The s protocol is almost the g protocol with a greater packetsize
+ * and some mapping, to allow software flow control to work.
+ * If the operating system is able to do hardware/software flow control
+ * which is not 8-bit transparent, the s protocol will use the
+ * 8-bit data path. If the data path is only 7-bit wide on one or both
+ * directions the s protocol will use additional mapping in the
+ * appropriate direction to ensure an overall 8-bit wide datapath.
+ *
+ * The s protocol relies on a packet driver with some minor changes.
+ *
+ * The modifications on the packet driver are:
+ *      -       some minor bug-fixes, so packet sizes > 128 bytes will work.
+ *      -       allow to specify transport routines different from read/write
+ *              to enable the mapping of flow control characters.
+ *
+ * These changes will not stop the g protocol to work.
+ *
+ * Author:
+ *      J. Schilling, Berlin 1990
+ *
+ * N.B.: The main code was stolen from the g-protocol.
+ */
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+
