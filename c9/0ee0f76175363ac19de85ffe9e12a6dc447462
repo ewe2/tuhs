@@ -1,0 +1,86 @@
+From: pepe@naleco.com (Josh Good)
+Date: Thu, 9 Mar 2017 21:26:30 +0100
+Subject: [TUHS] Help request: uucp, mail on 4.2BSD
+In-Reply-To: <b168fb4f-cd4d-8d01-42b4-72aca663c2d5@kilonet.net>
+References: <20170308214231.DBB1340F7@lod.com>
+ <b168fb4f-cd4d-8d01-42b4-72aca663c2d5@kilonet.net>
+Message-ID: <20170309202628.GA27536@naleco.com>
+
+On 2017 Mar  8, 17:59, Arthur Krewat wrote:
+> On 3/8/2017 4:42 PM, Corey Lindsly wrote:
+> >On my installation, it was enabled by default. What does your
+> >/etc/inetd.conf look like? Is inetd running?
+> >
+> >http://lod.com/sco-screenshot-1.jpg
+> >
+> >--corey
+> >
+> >
+> 
+> Mine too. Maybe it was a package we both chose to install? Server tools?
+> 
+> 
+> telnet vuw21
+> Trying 199.89.231.143...
+> Connected to vuw21.kilonet.net.
+> Escape character is '^]'.
+> 
+> 
+> UnixWare 2.1 (vuw21) (pts/2)
+> 
+> login: krewat
+> Password:
+> UnixWare 2.1
+> vuw21
+> Copyright 1996 The Santa Cruz Operation, Inc.  All Rights Reserved.
+> Copyright 1984-1995 Novell, Inc.  All Rights Reserved.
+> Copyright 1987, 1988 Microsoft Corp.  All Rights Reserved.
+> U.S. Pat. No. 5,349,642
+> Last login: Sat Mar  4 09:40:07 2017 on pts000
+> 
+> You have mail
+> Display Desktop (y/n)? n
+> $
+
+Yeah, you are both right, I was fooled by not seeing telnetd in the ps
+output. Turns out telnetd is invoked throught the inetd daemon.
+
+	$ grep telnet /etc/inetd.conf
+	# Ftp and telnet are standard Internet services.
+	telnet  stream  tcp     nowait  root    /usr/sbin/in.telnetd in.telnetd
+
+And by the way, the two user limit in the "Personal Edition" of UnixWare
+2.1 seems to be real:
+
+	$ telnet 172.27.101.128
+	Trying 172.27.101.128...
+	Connected to 172.27.101.128.
+	Escape character is '^]'.
+
+
+	UnixWare 2.1 (gollum1) (pts/2)
+
+	login: jgood
+	Password:
+	UnixWare 2.1
+	gollum1
+	Copyright 1996 The Santa Cruz Operation, Inc.  All Rights
+	Reserved.
+	Copyright 1984-1995 Novell, Inc.  All Rights Reserved.
+	Copyright 1987, 1988 Microsoft Corp.  All Rights Reserved.
+	U.S. Pat. No. 5,349,642
+	Last login: Tue Mar  9 20:57:05 1999 on pts000
+	telnetd: set_id() failed: Too many users
+	.
+	Connection closed by foreign host.
+
+
+This thing was released in 1996. Obviously, with this limitation it could
+not hold a candle to the emerging Linux tsunammi full of free source code.
+
+Regards,
+
+-- 
+Josh Good
+
+
