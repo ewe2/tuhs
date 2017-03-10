@@ -1,0 +1,82 @@
+From: henry.r.bent@gmail.com (Henry Bent)
+Date: Fri, 10 Mar 2017 16:30:06 -0500
+Subject: [TUHS] C-news is built
+In-Reply-To: <CAH1jEzaFjN91CfgG1w10k2RO1hTZNSqpf6VcrDoRO-ZoG5xT4A@mail.gmail.com>
+References: <20170310094919.GA22414@minnie.tuhs.org>
+ <CAL4LZyiH0PGVRqa_ZfD=aztrfoZcoCuiWfxekajxx0KB3xCf-w@mail.gmail.com>
+ <CAH1jEzaFjN91CfgG1w10k2RO1hTZNSqpf6VcrDoRO-ZoG5xT4A@mail.gmail.com>
+Message-ID: <CAEdTPBdiL2jKiSsHnLK+LP-fL3LtMJqDOxX4OS8O_DGhAe4Cpw@mail.gmail.com>
+
+This method seems unnecessarily complex.  If you have libpcap networking,
+attach xu (4.3bsd de0) to your ethernet interface and you can bring it up
+(ifconfig de0) and talk to any machine on the local network except the one
+hosting the SIMH instance. If you set up SIMH tap networking you can talk
+to the hosting machine (
+https://github.com/simh/simh/blob/master/0readme_ethernet.txt).  If you set
+up your router (route add default x.x.x.x 1) you can talk to any host on
+the internet numerically.  Now you can get files via ftp, rcp, etc.
+
+You could also attach a tar file as any block device - RQ, RL, whatever -
+and have tar read directly from the block device, which does not require
+any sort of padding or modification of the original file.
+
+I believe that 4.3's tar will understand most tar files, but if you have
+problems you can always create (or recreate) a tar file using the "o"
+option to output as an old style archive.
+
+-Henry
+
+On 10 March 2017 at 16:14, Nick Downing <downing.nick at gmail.com> wrote:
+
+> To get files into a 4.3BSD SIMH system the easiest way is with a Python
+> script that blockifies the file by outputting a 32 bits length (say 0x400),
+> then that many bytes, then the length again, and repeat for next block
+> until done. There is also a Perl version floating around which is popular
+> for canned SIMH scripts/packages. Then you mount this file on tm0 (if I
+> recall) in SIMH and then in the emulated system it appears at /dev/mt0. I
+> normally use tar in conjunction but it's not necessary (note star is a
+> highly compatible tar implementation, I think it is by Joerg from this
+> list, although I use actual 4.3BSD tar compiled for Linux and I think gnu
+> tar also works mostly). I can send the details later, I am using phone atm.
+> Nick
+>
+> On Mar 11, 2017 4:52 AM, "John Floren" <john at jfloren.net> wrote:
+>
+>> Thanks Warren and Geoff,
+>>
+>> Two problems:
+>>
+>> 1. 403 forbidden on that tarball
+>>
+>> 2. What's the best way to get these files into a running 4.3 system?
+>>
+>> Thanks!
+>>
+>> John
+>>
+>> On Fri, Mar 10, 2017 at 2:49 AM, Warren Toomey <wkt at tuhs.org> wrote:
+>> > OK, Geoff Collyer has built the C-News binaries for the 4.2 emulated
+>> > systems. They are temporarily at http://minnie.tuhs.org/Y5/Cnews/
+>> >
+>> > Does someone want to try and get them up and running on an emulated
+>> system?
+>> >
+>> > Also, I've build a 4.3BSD version of the emulated uucp systems. It's a
+>> > separate branch at https://github.com/DoctorWkt/4bsd-uucp. You can get
+>> it
+>> > by doing:
+>> >
+>> > git clone https://github.com/DoctorWkt/4bsd-uucp.git \
+>> >         --branch 4.3BSD --single-branch
+>> >
+>> > Once it's solid enough I will make this the default branch, but I'll
+>> > leave the 4.2BSD branch there as well.
+>> >
+>> > Thanks Geoff!
+>> >         Warren
+>>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170310/c51a4822/attachment-0001.html>
+
