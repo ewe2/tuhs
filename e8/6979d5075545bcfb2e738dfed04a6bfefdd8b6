@@ -1,0 +1,141 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Tue, 14 Mar 2017 15:14:40 +0100
+Subject: [TUHS] Does this mean Linux is now "officially branded UNIX"?
+In-Reply-To: <CAJfiPzxTo4wN9X0d7Hg-LWxsuWogicv+oHt5MU5Pb-tzo9fJeA@mail.gmail.com>
+References: <20170312150410.GH27536@naleco.com>
+ <58c6714f.IBfM/wqgeKrLugki%schily@schily.net>
+ <CAJfiPzxTo4wN9X0d7Hg-LWxsuWogicv+oHt5MU5Pb-tzo9fJeA@mail.gmail.com>
+Message-ID: <58c7fad0.H3V/v3UHdCpwwB0E%schily@schily.net>
+
+Nemo <cym224 at gmail.com> wrote:
+
+> On 13 March 2017 at 06:15, Joerg Schilling <schily at schily.net> wrote (in part):
+> > Given that there have been many problems last time, there was a collaboration
+> > between the Linux people and the OpenGroup:
+> >
+> >         http://www.opengroup.org/personal/ajosey/tr20-08-2005.txt
+> >
+> > I would guess that this company dod modify software inorder to become compliant.
+>
+> As they note (http://developer.huawei.com/ict/en/site-euleros ):
+> Derived from the source-code for the CentOS distribution.  In due
+> course, I may try it.  If this actually works back to most
+> distributions, it *may* one day become possible to actually have
+> Linux-distro-derived code compile on Unix systems.
+
+In case people write POSIX compliant code...
+
+BTW: passing the POSIX certification does not verify that the system is POSIX 
+compliant.
+
+The Linux kernel does e.g. not correctly implement the waitid() syscall and the 
+POSIX validation test suite does not yet check for the deviation.
+
+On a real POSIX system, the following test program passes, but this currently 
+only applies to Solaris, SCO UnixWare, recent FreeBSD and recent NetBSD:
+
+/*--------------------------------------------------------------------------*/
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdio.h>
+/*
+ * Non-standard compliant platforms may need
+ * #include <signal.h> or something similar
+ * in addition to the include files above.
+ */
+
+extern	void	handler(int sig, siginfo_t *sip, void *context);
+extern	void	dosig(void);
+
+pid_t		cpid;
+
+int
+main()
+{
+	siginfo_t	si;
+	pid_t		pid;
+	int		ret;
+
+	dosig();
+	if ((pid = fork()) < 0)
+		exit(1);
+	cpid = pid;
+	if (pid == 0) {
+		_exit(1234567890);
+	}
+	ret = waitid(P_PID, pid, &si, WEXITED);
+	printf("                ret: %d si_pid: %ld si_status: %d si_code: %d\n",
+		ret,
+		(long) si.si_pid, si.si_status, si.si_code);
+	if (pid != si.si_pid)
+		printf("si_pid in struct siginfo should be %ld but is %ld\n",
+			(long) pid, (long) si.si_pid);
+	if (si.si_status != 1234567890)
+		printf("si_status in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			1234567890, 1234567890, si.si_status, si.si_status);
+	if (si.si_code != CLD_EXITED)
+		printf("si_code in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			CLD_EXITED,  CLD_EXITED, si.si_code, si.si_code);
+	if (CLD_EXITED != 1)
+		printf("CLD_EXITED is %d on this platform\n", CLD_EXITED);
+	return (0);
+}
+
+/*
+ * Include it here to allow to verify that #include <sys/wait.h>
+ * makes siginfo_t available
+ */
+#include <signal.h>
+
+void
+handler(int sig, siginfo_t *sip, void *context)
+{
+	printf("received SIGCHLD (%d), si_pid: %ld si_status: %d si_code: %d\n",
+		sig, (long) sip->si_pid, sip->si_status, sip->si_code);
+
+	if (sip->si_pid != cpid)
+		printf("SIGCHLD: si_pid in struct siginfo should be %ld but is %ld\n",
+			(long) cpid, (long) sip->si_pid);
+
+	if (sip->si_status != 1234567890)
+		printf("SIGCHLD: si_status in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			1234567890, 1234567890, sip->si_status, sip->si_status);
+
+	if (sip->si_code != CLD_EXITED)
+		printf("SIGCHLD: si_code in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			CLD_EXITED,  CLD_EXITED, sip->si_code, sip->si_code);
+}
+
+void
+dosig()
+{
+	struct sigaction sa;
+
+	sa.sa_sigaction = handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART|SA_SIGINFO;
+
+	sigaction(SIGCHLD, &sa, NULL);
+}
+/*--------------------------------------------------------------------------*/
+
+On Solaris, this prints something like:
+
+received SIGCHLD (18), si_pid: 11860 si_status: 1234567890 si_code: 1
+                ret: 0 si_pid: 11860 si_status: 1234567890 si_code: 1
+
+On Linux, it prints something like:
+
+received SIGCHLD (17), si_pid: 5434 si_status: 210 si_code: 1
+SIGCHLD: si_status in struct siginfo should be 1234567890 (0x499602d2) but is 210 (0xd2)
+                ret: 0 si_pid: 5434 si_status: 210 si_code: 1
+si_status in struct siginfo should be 1234567890 (0x499602d2) but is 210 (0xd2)
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+
