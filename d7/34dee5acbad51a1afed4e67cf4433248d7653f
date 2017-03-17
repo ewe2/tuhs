@@ -1,0 +1,127 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Fri, 17 Mar 2017 12:15:19 +1100
+Subject: [TUHS] X, Suntools, and the like
+In-Reply-To: <CAAFR5pYtwrGh+DCMBjpVvuxg3kAV1-CRrtuk8jipiLtKEX3c7A@mail.gmail.com>
+References: <CAH1jEzb9Rv+iER45NSCGfFerrXaD1v8PN=j92iOg7oU=4q62Rw@mail.gmail.com>
+ <CAH1jEzav9Y0vM75GaVqVBj=0nXmjdjucF+mx=FBkRO4QP8Soeg@mail.gmail.com>
+ <CAH1jEzZrXT=6+Qu1=o60_aJ6z0zCxW7Vfvbpxh0TKU+aYOvhKw@mail.gmail.com>
+ <4227EA32-12C2-46D1-B683-88812D1E5168@tfeb.org>
+ <CAH1jEzb7tKSa5H_k-pCT_7x6xzJHdavm4dZySnhkmYL7WG2HEA@mail.gmail.com>
+ <CAH1jEza9jmb09SDvQi5cQV_g6oO97dgx-VsQobMG=RddqRBxsA@mail.gmail.com>
+ <CAH1jEzbfXtLavUQ_K5DV8Mp3dk9tvpqiX3q5r8_yw=35yCfzjg@mail.gmail.com>
+ <3B3776C9-1B22-4143-A4F5-0BEA13C79505@tfeb.org>
+ <CAH1jEzaKhLTDgvKSUxdfPATzBZ05_a88b1y8cQNgSMbm6VVEPA@mail.gmail.com>
+ <20170315164006.GC26286@wopr> <20170316230455.GA21805@naleco.com>
+ <CAAFR5pYtwrGh+DCMBjpVvuxg3kAV1-CRrtuk8jipiLtKEX3c7A@mail.gmail.com>
+Message-ID: <CAH1jEza3P0ja9QLi68f_TFRFxb8CBrj96LoHsK5Go1tSnJEExA@mail.gmail.com>
+
+I think the main difference being discussed here is 3 approaches to
+remote logins:
+(1) the user has a single login session, effectively a console, and
+can connect to it/view it/interact with it from anywhere
+(2) the user creates a new login session whenever they connect to the
+server from a new station (or separately from the same station)
+(3) the user has a local GUI console and login session, but windows
+can be created in it that connect to remotely running apps
+I would say that VNC, RDP are cases of type (1) whereas standard X
+remoting (where a display manager runs on a diskless client, say) is
+type (2) and "ssh -X" type X remoting is type (3).
+
+Ignoring type (3) for the moment, I would say these approaches have
+the following advantages/disadvantages:
+- (1) is failsafe to dropped connections, etc, where (2) is not
+- (1) is helpful for remote assistance since multiple parties can view
+or interact with the desktop, where (2) is not
+- (2) should be IMO more efficient since all context is maintained in
+the terminal and the running applications can store stuff in offscreen
+memory, invoke complex drawing primitives, etc, where (1) lends itself
+more naturally to doing the drawing operations locally and then
+sending bitmap "patches" to the changed areas of the screen (this is
+what gives it the failsafe nature and also why apparently some people
+see it running faster, because of bitmap compression)
+- (2) is more powerful and scriptable IMO since a new session doesn't
+hurt or depend on any other session, it seems more unix-like
+considering how we use ssh and subshells and so on, basically
+multiuser facilities being used single-user, whereas the type (1) IMO
+seems limited in scalability and might also run into performance
+problems with super high resolution displays, or lesser hardware that
+can't compress bitmaps quickly.
+
+Types 1 and 2 have a direct analogue to console terminal sessions: (1)
+is where the user runs "screen" (or something like "nohup") whereas
+(2) is where the user does an "ssh" to the server causing the sshd to
+fork a new session.
+
+Personally, I think the type (2) should be extended to handle the use
+cases of type (1) since I believe it is more efficient for context to
+be stored in the terminal and drawing operations carried out there. So
+the ideal way I believe to handle these cases in a "new generation,
+de-bloatified X" would be to provide an optional utility like "screen"
+which caches any state which has been sent to the terminal, keeping
+dirty flags etc to indicate whether such state has also been forwarded
+onto the real terminal, and re-generate the protocol and all drawing
+commands having sent any dependencies such as offscreen bitmaps first.
+That way, you could have a type (2) system, but log into shared
+sessions and/or re-log into dropped sessions, migrate sessions and so
+on. But since the "screen" like program would be a separately
+installed, optional package, it wouldn't impact on the simplified base
+system unless you wanted this function.
+
+cheers, Nick
+
+
+
+On Fri, Mar 17, 2017 at 10:29 AM, Robert Swierczek
+<rmswierczek at gmail.com> wrote:
+> Here is my 2 cents to add: I think both approaches have their pro's
+> and con's.  This is what I would like to see in an ideal remote GUI
+> environment (I'll use the X11 convention for display server and
+> application client):
+>
+> Mostly stateless as in VNC, little or no round-tripping of messages.
+>
+> Client application contains a very small library (not a whole GUI
+> rendering library as needed by remote desk-topping).  Lighter than
+> Xlib.  Maybe on the order of curses.  Suitable for embedded devices.
+>
+> Client should be tolerant of server going down and reconnecting (as in
+> VNC) because of a crash or migration.
+>
+> User should see their application rendered in the servers widget scheme.
+>
+> Server can be implemented natively or in a browser.
+>
+> Some form of remote OpenGL supported (as in JS/WebGL)
+>
+>
+> On Thu, Mar 16, 2017 at 7:04 PM, Josh Good <pepe at naleco.com> wrote:
+>> On 2017 Mar 15, 09:40, Kurt H Maier wrote:
+>>>
+>>> Your usage habits are not natural laws.  I'm a systems administrator
+>>> too, and I use X11 forwarding every single day, on dozens of different
+>>> programs.
+>>>
+>>> It's all very well for X11's networking tools to be useless for you.
+>>> That doesn't make them useless in general, and it doesn't mean the
+>>> functionality should be deleted.
+>>
+>> I don't use X11 forwarding because it works bad/slow over WAN links,
+>> but RDP/ICA works just fine over the same. Also, in X11 forwarding any
+>> network hiccup means the X11 app you are remoting just crashes, that
+>> does not happen in the RDP/ICA world.
+>>
+>> The real problem is that X11 predates the "GUI desktop metaphor". In X11
+>> forwarding you remote bitmaps (or vectors or primitives or whatever)
+>> which belong to an app, whereas in RDP you remote bitmaps (and only
+>> bitmaps, and never anything more than bitmaps) which belong to a "full,
+>> self-contained, GUI desktop".
+>>
+>> In my opinion, X11 is not appropriate for desktops --it is designed more
+>> for a scientific workstation kind of thing--, but currently there is
+>> just no mature alternative in the Unix/Linux world (except for Mac OS X,
+>> of course).
+>>
+>> --
+>> Josh Good
+>>
+
