@@ -1,0 +1,46 @@
+From: fair-tuhs@netbsd.org (Erik E. Fair)
+Date: Sat, 18 Mar 2017 00:09:02 -0700
+Subject: [TUHS] pathalias and sendmail experience?
+In-Reply-To: <20170318034025.GA792@minnie.tuhs.org>
+Message-ID: <7484.1489820942@cesium.clock.org>
+
+I still have the sendmail.cf construction kit that I put together in the 1980s
+and used into the 1990s at Apple and which I made available for FTP long ago
+at SRI-NIC.ARPA - I was amused to find it was in use at Microsoft also ...
+
+Would that help?
+
+The key lines from those cf files appear to be:
+
+# our pathalias database
+Op/usr/lib/mail/paths
+
+IIRC, sendmail had a generic ${lookup-key$} based on dbm(3) added to it. Before
+ndbm(3) which could handle multiple databases in the same program, dbm(3)
+could only handle one. Which explains these old production rules:
+
+S8
+# magic UUCP shit
+R$*<@$-.UUCP>		$:${$2$}!$1		look up UUCP site in maps
+R$+!%s!$*		$:$1!$2			remove %s database cruft
+R$-.$+!$+		$@$3<@$1.$2>		do.main!user
+R$-!$+			$@$2<@$1.UUCP>		host!user
+
+Again, IIRC, the dance was process the UUCP maps through pathalias, feed that
+to a generic dbm(3) database constructor program (dbm(1)?), and give the base
+filename of the resulting dbm database to the "p" option of sendmail(8) in
+the cf file, as above, which then would process queries with ${key$} and
+substituting the result of the lookup.
+
+My kit has sendmail.cf for pure Internet-only, pure UUCP-only, and gateways
+like Apple was when I ran it. The Apple one also has some hysterical ... I
+mean historical stuff with how we handled BITNET and an early gateway to
+AppleLink through DASNET if anyone remembers that gross hack.
+
+It was fun to revisit this and read comments. Let me know if you want the full
+kit, and I'll put it up in my web server.
+
+	Erik Fair
+	formerly postmaster at apple.com
+	formerly {ucbvax,ihnp4,decwrl,amd70,seismo,zehntel}!dual!fair
+
