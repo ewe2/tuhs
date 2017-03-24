@@ -1,0 +1,60 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 24 Mar 2017 09:55:23 -0400
+Subject: [TUHS] Were all of you.. Hippies?
+In-Reply-To: <75699103-DFF1-485E-A1C0-63D62F11A62C@tfeb.org>
+References: <20170320214858.TIJoR%steffen@sdaoden.eu>
+ <alpine.BSF.2.20.1703210907060.42626@aneurin.horsfall.org>
+ <009301d2a1c9$cb604c70$6220e550$@ronnatalie.com>
+ <CAP6exY+DHdf2BZYy=40wLjYabtkeKOtbp3aWMkwdaDmLFYhR2A@mail.gmail.com>
+ <20170321202839.GG21805@naleco.com>
+ <alpine.NEB.2.20.1703231512420.1796@neener.bl.org>
+ <CAP6exYJTHnR2FGL+quJ48R_x9Dg2nXN9dnx7QM8vAJMMSSp39w@mail.gmail.com>
+ <20170324001832.GA13511@naleco.com> <20170324002754.GW23802@mcvoy.com>
+ <CAP6exYK__gOcSb8YSz_3KYZvG5DEV0cvDAqqEdtJ95TF=tG+kQ@mail.gmail.com>
+ <75699103-DFF1-485E-A1C0-63D62F11A62C@tfeb.org>
+Message-ID: <1490363723.1727942.922198848.7E13EB12@webmail.messagingengine.com>
+
+On Fri, Mar 24, 2017, at 06:21, Tim Bradshaw wrote:
+> And if, for instance, I have a regular need to enumerate various
+> properties of the avatars of the PCI devices in the filesystem, I might
+> decide to write a program which does that, rather than patching together
+> some arcane mass of cat | sed |awk each time (if even the contents of the
+> avatars isn't some awful binary blob, which I think it should not be but
+> whether that's a Unixism or not I am not sure).
+
+If you think parsing a binary blob can't be done in a shell script,
+you're not trying hard enough. Relevant tools include dd [with the seek
+and skip], od, head and tail [in byte count mode of course]. For
+creating binary data, printf is sufficient.
+
+If you think that parsing a binary blob *shouldn't* be done in a shell
+script, and the suggestion is absolutely horrifying, you're of course
+correct.
+
+> (None of this is meant to imply that systems which have such commands
+> have got this right -- I completely agree that they should present things
+> in the filesystem -- just that they could have got it right and the
+> command might still exist.)
+
+List of files opened by lspci:
+/sys/bus/pci/devices
+/sys/bus/pci/devices/{each
+subdirectory}/{resource,irq,vendor,device,class}
+/sys/bus/pci/devices/{each subdirectory}/{config,label}
+/sys/bus/pci/slots
+/usr/share/misc/pci.ids{.gz,}
+/etc/passwd and various other files that libc's "nsswitch" getpw* is to
+blame for, to locate the home directory for the following
+~/.pciids-cache
+/etc/udev/udev.conf
+{various directories}/hwdb.bin
+
+Honestly I'm not sure how anyone can be aware of how extensive Linux's
+/proc and /sys filesystems are and assume that tools like lspci etc are
+doing anything but collating data found in them.
+
+The content of all of those files [well, all the /proc ones that are
+actually device avatars - i suspect hwdb.bin is not] is textual (often a
+single hexadecimal constant), and it's therefore probably possible to
+write it in sh and awk if you had to. But what's wrong with C?
+
