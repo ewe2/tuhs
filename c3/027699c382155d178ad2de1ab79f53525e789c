@@ -1,0 +1,209 @@
+From: andreww591@gmail.com (Andrew Warkentin)
+Date: Fri, 24 Mar 2017 18:41:12 -0600
+Subject: [TUHS] Were all of you.. Hippies?
+In-Reply-To: <20170324034915.GA23802@mcvoy.com>
+References: <alpine.BSF.2.20.1703210907060.42626@aneurin.horsfall.org>
+ <009301d2a1c9$cb604c70$6220e550$@ronnatalie.com>
+ <CAP6exY+DHdf2BZYy=40wLjYabtkeKOtbp3aWMkwdaDmLFYhR2A@mail.gmail.com>
+ <20170321202839.GG21805@naleco.com>
+ <alpine.NEB.2.20.1703231512420.1796@neener.bl.org>
+ <CAP6exYJTHnR2FGL+quJ48R_x9Dg2nXN9dnx7QM8vAJMMSSp39w@mail.gmail.com>
+ <20170324001832.GA13511@naleco.com> <20170324002754.GW23802@mcvoy.com>
+ <CAP6exYK__gOcSb8YSz_3KYZvG5DEV0cvDAqqEdtJ95TF=tG+kQ@mail.gmail.com>
+ <CAD-qYGrpzBxBGKrnDn8eokhO2CAaoUC8Xo=QpXZdNizyh9RYbQ@mail.gmail.com>
+ <20170324034915.GA23802@mcvoy.com>
+Message-ID: <CAD-qYGrYog+GQE_h1OMNbuoGpj=KP9rhH8Z5wtMMLFZ+Ci-r9Q@mail.gmail.com>
+
+On 3/23/17, Larry McVoy <lm at mcvoy.com> wrote:
+>
+> I only know a tiny amount about Plan 9, never dove into deeply.  QNX,
+> on the other hand, I knew quite well.  I was pretty good friends with
+> one of the 3 or 4 people who were allowed to work on the microkernel, Dan
+> Hildebrandt.  He died in 1998, but before then he and I used to call each
+> other pretty often to talk about kernel stuff, how stuff ought to be done.
+> The calls weren't jerk off sessions, they were pretty deep conversations,
+> we challenged each other.  I was very skeptical about microkernels,
+> I'd seen Mach and found it lacking, seen Minix and found it lacking
+> (though that's a little unfair to Minix compared to Mach).  Dan brought
+> me around to believing in the microkernel but only if the kernel was
+> actually a kernel.  Their kernel didn't use up a 4K instruction cache,
+> it left room for the apps and the processes that did the rest.  That's
+> why only a few people were allowed to work on the kernel, they counted
+> every single instruction cache footprint.
+>
+> So tell me more about your OS, I'm interested.
+
+Where do I start? I've got much of the design planned out. I've
+thought about the design for many years now and changed my plans on
+some things quite a few times. Currently the only code I have is a
+bootloader that I've been working on somewhat intermittently for a
+while now, as well as a completely untested patch for seL4 to add
+support for QNX-ish single image boot. I am planning to borrow Linux
+and BSD code where it makes sense, so I have less work to do.
+
+It will be called UX/RT (for Universally eXtensible Real Time
+operating system, although it's also a kind of a nod to QNX originally
+standing for Quick uNiX), and it will be primarily intended as a
+workstation and embedded OS (although it would be also be good for
+servers where security is more important than I/O throughput, and also
+for HPC). It will be a microkernel-based multi-server OS.
+
+Like I said before, it will superficially resemble QNX in its general
+architecture (for example, much like QNX, the lowest-level user-mode
+component will be a single root server called "proc", which will
+handle process management and filesystem namespace management),
+although the specifics of the IPC model will be somewhat different. I
+will be using seL4 and/or Rux as the microkernel (so unlike that of
+QNX, UX/RT's process server will be a completely separate program).
+proc and most other first-party components will be mostly written in
+Rust rather than C, although there will still be a lot of third-party
+C code. The network stack, disk filesystems, and graphics drivers will
+be based on the NetBSD rump kernel and/or LKL (which is a
+"librarified" version of the Linux kernel; I'll probably provide both
+Linux and NetBSD implementations and allow switching between them and
+possibly combining them) with Rust glue layers on top. For
+performance, the disk drivers and disk filesystems will run within the
+same server (although there will be one disk server per host adapter),
+and the network stack will also be a single server, much like in QNX
+(like QNX, UX/RT will mostly avoid intermediary servers and will
+usually follow a process-per-subsystem architecture rather than a
+process-per-component one like a lot of other multi-sever OSes, since
+intermediary servers can hurt performance).
+
+As I said before, UX/RT will take file-oriented architecture even
+further than Plan 9 does. fork() and some thread-related APIs will be
+pretty much the only APIs implemented as non-file-based primitives.
+Pretty much the entire POSIX/Linux API will be implemented although
+most non-file-based system calls will have file-based implementations
+underneath (for example, getpid() will do a readlink() of /proc/self
+to get the PID). Even process memory like the process heap and stack
+will be implemented as files in a per-process memory filesystem (a bit
+like in Multics) rather than being anonymous like on most other OSes.
+ioctl() will be a pure library function for compatibility purposes,
+and will be implemented in terms of read() and write() on a secondary
+file.
+
+Unlike other microkernel-based OSes, UX/RT won't provide any way to
+use message passing outside of the file-based API. read() and write()
+will use kernel calls to communicate directly with the process on the
+other end (unlike some microkernel Unices in which they go through an
+intermediary server). There will be APIs that expose the underlying
+transport (message registers for short messages and a shared per-FD
+buffer for long ones), although they will still operate on file
+descriptors, and read()/write() and the low-level messaging APIs will
+all use the same header format so that processes don't have to care
+which API the process on the other
+end uses (unlike on QNX where there are a few different incompatible
+messaging APIs). There will be a new "message special" file type that
+will preserve message boundaries, similar to SEQPACKET Unix-domain
+sockets or SCTP (these will be ideal for RPC-type APIs).
+
+File descriptors will be implemented as sets of kernel capabilities,
+meaning that servers won't have to check permissions like they do on
+QNX. The API for servers will be somewhat socket-like. Each server
+will listen on a "port" file in a special filesystem internal to the
+process server, sort of like /mnt on Plan 9 (although it will be
+possible for servers to export ports within their own filesystems as
+well).  Reads from the port will produce control messages which may
+transfer file descriptors. Each client file descriptor will have a
+corresponding file descriptor on the server side, and servers will use
+a superset of the regular file API to transfer data. Device numbers as
+such will not exist (the device number field in the stat structure
+will be a port ID that isn't split into major and minor numbers), and
+device files will normally be exported directly by their server,
+rather than residing on a filesystem exported by one driver but being
+serviced by another as in conventional Unix. However, there will be a
+sort of similar mechanism, allowing a server to export "firm links"
+that are like cross-filesystem hard links (similar to in QNX).
+
+Per-process namespaces like in Plan 9 will be supported. Unlike in
+Plan 9, it will be possible for processes with sufficient privileges
+to mount filesystems in the namespaces of other processes (to allow
+more flexible scoping of mount points). Multiple mounts on one
+directory will produce a union like in both QNX and Plan 9. Binding
+directories as in Plan 9 will also be supported. In addition to the
+per-process root on / there will also be a global root directory on //
+into which filesystems are mounted. The per-process name spaces will
+be constructed by binding directories from // into the / of the
+process (neither direct mounts under / nor bindings in // will be
+supported, but bindings between parts of / will of course be
+supported).
+
+The security model will be based on a per-process default-deny ACL
+(which will be purely in memory; persisting process ACLs will be
+implemented with an external daemon). It will be possible for ACL
+entries to explicitly specify permissions, or to use the permissions
+from the filesystem with (basically) normal Unix semantics. It will
+also be possible for an entry to be a wildcard allowing access to all
+files in a directory. Unlike in conventional Unix, there will be no
+root-only system calls (anything security-sensitive will have a
+separate device file to which access can be controlled through process
+ACLs), and running as root will not automatically grant a process full
+privileges. The suid and sgid bits will have no effect on executables
+(the ACL management daemon will handle privilege escalation instead).
+
+The native API will be mostly compatible with that of Linux, and a
+purely library-based Linux compatibility layer will be available. The
+only major thing the Linux compatibility layer specifically won't
+support will be stuff dealing with logging users in (since it won't be
+possible to revert to traditional Unix security, and utmp/wtmp won't
+exist). The package manager will be based on dpkg and apt with hooks
+to make them work in a functional way somewhat like Nix but using
+per-process bindings, allowing for multiple environments or universes
+consisting of different sets of packages (environments will be able to
+be either native UX/RT or Linux compatibility environments, and it
+will be possible to create Linux environments that aren't managed by
+the UX/RT package manager to allow compatibility environments for
+non-dpkg Linux distributions).
+
+The init system will have some features in common with SMF and
+systemd, but unlike those two, it will be modular, flexible, and
+lightweight. System initialization such as checking/mounting
+filesystems and bringing up network interfaces will be script-driven
+like in traditional init systems, whereas starting daemons will be
+done with declarative unit files that will be able to call (mostly
+package-independent) hook scripts to set up the environment for the
+daemon.
+
+Initially I will use X11 as the window system, but I will replace it
+with a lightweight compositing window server that will export
+directories providing a low-level DRI-like interface per window.
+Unlike a lot of other compositing window systems, UX/RT's window
+system will use X11-style central client-side window management. I was
+thinking of using a default desktop environment based on GNUstep
+originally but I'm not completely sure if I'll still do that (a long
+time ago I had wanted to put together a Mac OS X-like or NeXTStep-like
+Linux distribution using a GNUstep-based desktop, a DPS-based window
+server, and something like a fork of mkLinux with a stable module ABI
+for a kernel, but soon decided I wanted to write a QNX-like OS
+instead).
+
+>
+> Sockets are awesome but I have to agree with you, they don't "fit".
+> Seems like they could have been plumbed into the file system somehow.
+>
+
+Yeah, the almost-but-not-quite-file-based nature of the socket API is
+my biggest complaint about it. UX/RT will support the socket API but
+it will be implemented on top of the normal file system.
+
+> Can't speak to your plan 9 comments other than to say that the fact
+> that you are looking for provided value gives me hope that you'll get
+> somewhere.  No disrespect to plan 9 intended, but I never saw why it
+> was important that I moved to plan 9.  If you do something and there
+> is a reason to move there, you could be worse but still go farther.
+
+I'd say a major problem with Plan 9 is the way it changes things in
+incompatible ways that provide little advantage over the traditional
+Unix way of doing things (for example, instead of errno, libc
+functions set a pointer to an error string instead, which I don't
+think provides enough of a benefit to break compatibility). Another
+problem is that some facilities Plan 9 provides aren't general enough
+(e.g. the heavy focus on SSI clustering, which never really was widely
+adopted, or the rather 80s every-window-is-a-terminal window system).
+
+UX/RT will try to be compatible with conventional Unices and
+especially Linux wherever it is reasonable, since lack of applications
+would significantly hold it back. It will also try to be as general as
+possible without overcomplicating things.
+
