@@ -1,0 +1,82 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sun, 26 Mar 2017 15:46:40 +1100
+Subject: [TUHS] Were all of you.. Hippies?
+In-Reply-To: <CAH1jEzb=ZzPMT6YWg9pbR4T=s_ckB4YFsBJnefj8AEatdBY_MQ@mail.gmail.com>
+References: <20170326013520.86B8E18C097@mercury.lcs.mit.edu>
+ <20170326014544.GA66751@wopr>
+ <CAH1jEzb=ZzPMT6YWg9pbR4T=s_ckB4YFsBJnefj8AEatdBY_MQ@mail.gmail.com>
+Message-ID: <CAH1jEzbzL+GiYoLN=Yw0eip1UCEm+anOsoWTbEJpB0kvpcw-GA@mail.gmail.com>
+
+I think Noel put it very well, when I saw the read()/write()  vs
+recvfrom()/sendto() stuff mentioned earlier I was going to say that part of
+the contract of read()/write() is that they are stream oriented thus things
+like short reads and writes should behave in a predictable way and have the
+expected recovery semantics. So having it be boundary preserving or having
+a header on the data would in my view make it not read()/write() even if
+the new call can be overlaid on read()/write() at the ABI level. I think
+the contract of a syscall is an important part of its semantics even if it
+may be an "unwritten rule". However, Noel said it better: If it's not
+file-like then a file-like interface may not be appropriate.
+
+Having said that, Kurt raises an equally valid point which is that the
+"every file is on a fast locally attached harddisk" traditional unix
+approach has serious problems. Not that I mind the simplicity: contemporary
+systems had seriously arcane file abstractions that made file I/O useless
+to all but the most experienced developer. I come from a microcomputer
+background and I am thinking of Apple II DOS 3.3, CP/M 2.2 and its FCB
+based interface and MSDOS 1.x (same). When MSDOS 2.x came along with its
+Xenix-subset file API it was seriously a revelation to me and others.
+Microcomputers aside, my understanding is IBM 360/370 and contemporary DEC
+OS's were also complicated to use, with record based I/O etc.
+
+So it's hard to criticize unix's model, but on the other hand the lack of
+any nonblocking file I/O and the contract against short reads/writes (but
+only for actual files) and the lack of proper error reporting or recovery
+due to the ASSUMPTION of a write back cache, whether or not one is actually
+used in practice... makes the system seriously unscaleable, in particular
+as Kurt points out, the system is forced to try to hide the network
+socket-like characteristics of files that are either on slow DMA or
+PIO/interrupt based devices (think about a harddisk attached by serial
+port, something that I actually encountered on a certain cash register
+model and had to develop for back in the day), or an NFS based file, or
+maybe a file on a SAN accessed by iSCSI, etc.
+
+Luckily I think there is an easy fix, have the OS export a more socket-like
+interface to files and provide a userspace compatibility library to do
+things like detecting short reads/writes and retrying them, and/or blocking
+while a slow read or write executes. It woukd be slightly tricky getting
+the EINTR semantics correct if the second or subsequent call of a multipart
+read or write was interrupted, but I think possible.
+
+On the other hand I would not want to change the sockets API one bit, it is
+perfect. (Controversial I know, I discussed this in detail in a recent
+post).
+
+Nick
+
+On Mar 26, 2017 12:46 PM, "Kurt H Maier" <khm at sciops.net> wrote:
+
+On Sat, Mar 25, 2017 at 09:35:20PM -0400, Noel Chiappa wrote:
+>
+> For instance, files, as far as I know, generally don't have timeout
+> semantics. Can the average application that deals with a file, deal
+reasonably
+> with the fact that sometimes one gets half-way through the 'file' - and
+things
+> stop working?  And that's a _simple_ one.
+
+The unwillingness to even attempt to solve problems like these in a
+generalized and consistent manner is a source of constant annoyance to
+me.  Of course it's easier to pretend that never happens on a "real"
+file, since disks never, ever break.
+
+Of course, there are parts of the world that don't make these
+assumptions, and that's where I've put my career, but the wider IT
+industry still likes to pretend that storage and networking are
+unrelated concepts.  I've never understood why.
+
+khm
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170326/daa64e6b/attachment.html>
+
