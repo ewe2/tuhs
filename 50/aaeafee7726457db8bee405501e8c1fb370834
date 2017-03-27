@@ -1,0 +1,88 @@
+From: usotsuki@buric.co (Steve Nickolas)
+Date: Mon, 27 Mar 2017 19:33:35 -0400 (EDT)
+Subject: [TUHS] Happy birthday, PDP-8!
+In-Reply-To: <0df17a82-af22-69b3-912e-88f3a4d51169@update.uu.se>
+References: <mailman.1.1490580001.4973.tuhs@minnie.tuhs.org>
+ <0df17a82-af22-69b3-912e-88f3a4d51169@update.uu.se>
+Message-ID: <alpine.BSF.2.02.1703271932540.44054@frieza.hoshinet.org>
+
+On Tue, 28 Mar 2017, Johnny Billquist wrote:
+
+> Essentially, you pass parameters in memory, as a part of the code stream. 
+> Also, the PDP-8 certainly do have index registers.
+>
+> The first thing one must do is stop thinking of the AC as a register. The 
+> accumulator is the accumulator. Memory is registers.
+>
+> Some memory locations autoincrement when used indirectly, they are called 
+> index registers.
+>
+> That said, then. A simple example of a routine passing two parameters (well, 
+> three):
+>
+> First the calling:
+>
+>        CLA
+>        TAD   (42        / Setup AC with the value 42.
+>        JMS   COUNT
+>        BUFPTR
+>        BUFSIZ
+>        .                / Next instruction executed, with AC holding number 
+> of matching words in buffer.
+>        .
+>
+> Now, this routine is expected to count the number of occurances of a specific 
+> word in a memory buffer with a specific size.
+> At calling, AC will contain the word to search for, while the address 
+> following the JMS holds the address, and the following address holds the 
+> size.
+>
+> The routine:
+>
+> COUNT,  0
+>        CIA
+>        DCA    CHR        / Save the negative of the word to search for.
+>        CMA
+>        TAD I  COUNT
+>        DCA    PTR        / Setup pointer to the address before the buffer.
+>        ISZ    COUNT      / Point to next argument.
+>        TAD I  COUNT
+>        CIA
+>        DCA    CNT        / Save negative value of size.
+>        DCA    RESULT     / Clear out result counter.
+> LOOP,   TAD I  PTR        / Get next word in buffer.
+>        TAD    CHR        / Compare to searched for word.
+>        SNA               / Skip if they are not equal.
+>        ISZ    RESULT     / Equal. Increment result counter.
+>        ISZ    CNT        / Increment loop counter.
+>        JMP    LOOP       / Repeat unless end of buffer.
+>        CLA               / All done. Get result.
+>        TAD    RESULT
+>        JMP I  COUNT      / Done.
+>
+> PTR=10
+> CNT=20
+> CHR=21
+> RESULT=22
+>
+>
+> Addresses 10-17 are the index registers, so the TAD I PTR instruction will 
+> autoincrement the pointer everytime, and the increment happens before the 
+> defer, which is why the initial value should be one less than the buffer 
+> pointer.
+>
+> Hopefully this gives enough of an idea, but unless you know the PDP-8 well, 
+> you might be a little confused by the mnemonics.
+>
+> As you can see, the return address at the start is used for more than just 
+> doing a return. It's also your argument pointer.
+>
+>  Johnny
+>
+>
+
+Actually, that reminds me of ProDOS-8 on the Apple ][, which uses a 
+similar mechanism to pass parameters.
+
+-uso.
+
