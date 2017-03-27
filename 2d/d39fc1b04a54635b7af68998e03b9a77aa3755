@@ -1,0 +1,101 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Tue, 28 Mar 2017 01:49:22 +0200
+Subject: [TUHS] Happy birthday, PDP-8!
+In-Reply-To: <alpine.BSF.2.02.1703271932540.44054@frieza.hoshinet.org>
+References: <mailman.1.1490580001.4973.tuhs@minnie.tuhs.org>
+ <0df17a82-af22-69b3-912e-88f3a4d51169@update.uu.se>
+ <alpine.BSF.2.02.1703271932540.44054@frieza.hoshinet.org>
+Message-ID: <21464af8-6a47-e49d-9e07-ef7e7b007e95@update.uu.se>
+
+And, as usual I have to correct myself a little, but I'll also tie in a 
+bit with (almost) Unix in doing so. :-)
+
+On 2017-03-28 01:33, Steve Nickolas wrote:
+> On Tue, 28 Mar 2017, Johnny Billquist wrote:
+>
+
+[...]
+
+>> The routine:
+>>
+>> COUNT,  0
+>>        CIA
+>>        DCA    CHR        / Save the negative of the word to search for.
+>>        CMA
+>>        TAD I  COUNT
+>>        DCA    PTR        / Setup pointer to the address before the
+>> buffer.
+>>        ISZ    COUNT      / Point to next argument.
+>>        TAD I  COUNT
+>>        CIA
+>>        DCA    CNT        / Save negative value of size.
+>>        DCA    RESULT     / Clear out result counter.
+>> LOOP,   TAD I  PTR        / Get next word in buffer.
+>>        TAD    CHR        / Compare to searched for word.
+>>        SNA               / Skip if they are not equal.
+
+I knew I felt that something wasn't right, but it wasn't until I looked 
+at your reply, Steve, that I found what it was.
+This SNA should have been SNA CLA...
+
+>>        ISZ    RESULT     / Equal. Increment result counter.
+>>        ISZ    CNT        / Increment loop counter.
+>>        JMP    LOOP       / Repeat unless end of buffer.
+>>        CLA               / All done. Get result.
+
+and CLA should not have been there.
+
+>>        TAD    RESULT
+>>        JMP I  COUNT      / Done.
+>>
+>> PTR=10
+>> CNT=20
+>> CHR=21
+>> RESULT=22
+>>
+>>
+>> Addresses 10-17 are the index registers, so the TAD I PTR instruction
+>> will autoincrement the pointer everytime, and the increment happens
+>> before the defer, which is why the initial value should be one less
+>> than the buffer pointer.
+>>
+>> Hopefully this gives enough of an idea, but unless you know the PDP-8
+>> well, you might be a little confused by the mnemonics.
+>>
+>> As you can see, the return address at the start is used for more than
+>> just doing a return. It's also your argument pointer.
+>>
+>>  Johnny
+>>
+>>
+>
+> Actually, that reminds me of ProDOS-8 on the Apple ][, which uses a
+> similar mechanism to pass parameters.
+
+Interesting. Since the Apple ][ used the 6502, I would have assumed it 
+used the stack, but I've never used the 6502 much, so I don't know if it 
+possibly can make sense to write code this way on that processor.
+
+Speaking of which, when the PDP-11 was introduced, it wasn't obvious 
+that this style of coding wasn't sometimes appropriate, so the PDP-11 
+have the means of doing this as well.
+If anyone ever wondered about the strangeness of the JSR instruction of 
+the PDP-11, it is precisely because of this.
+What it does is that it pushes the argument register on the stack, loads 
+the PC into the argument register, and then sets the new PC.
+So, if you use some other register than R7 as the argument to JSR, that 
+register then points to the word following the JSR, where you can have 
+your arguments. And you fetch them with indirect autoincrement, and at 
+the end you do an RTS with that same register, which at that point 
+points beyond the arguments you had. And the register used for the 
+argument pointer is restored by the RTS.
+
+I've used it once or twice on a PDP-11, but this whole scheme only works 
+if I-space and D-space are the same, so there are limitations.
+
+I doubt Unix ever used this, but maybe someone know of some obscure 
+inner kernel code that do. :-)
+
+	Johnny
+
+
