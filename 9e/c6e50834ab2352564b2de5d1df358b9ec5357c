@@ -1,0 +1,145 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 30 Mar 2017 11:55:25 -0400
+Subject: [TUHS] Ethernet in /dev (was Re:  Were all of you.. Hippies?)
+Message-ID: <1490889329.23882.for-standards-violators@oclsc.org>
+
+Josh Good:
+
+  Which brings up a question I have: why didn't UNIX implement ethernet
+  network interfaces as file names in the filesystem? Was that "novelty" a
+  BDS development straying away from AT&T UNIX?
+
+======
+
+Remember that UNIX has long been a family of systems;
+it's risky to make blanket statements!
+
+The following is from memory; I haven't looked at this
+stuff for a while and am a few kilometers from my
+manuals as I type this.  I can dig out the complete
+story later if anyone wants it; for now, this is just
+the flavour and the existence proof.
+
+Research UNIX, once it supported Ethernet at all, did
+so using devices in /dev; e.g. /dev/qe0[0-7] were the
+conventional names for the first DEQNA/DELQA device on a
+MicroVAX.  There were eight subdevices per physical
+device, each a channel that might receive datagrams
+of a particular 16-bit type, programmed by an ioctl.
+
+To set up what we now call an IP interface, one did
+the following:
+
+a.  Open an unused channel for the proper Ethernet
+physical device.  (I think the devices were exclusive-
+open to make this easier: open /dev/qe00, then qe01,
+and so on until one succeeds.)
+
+b.  Issue the ioctl to set the desired datagram type,
+usually 0x800.
+
+c.  Push the IP stream line discipline onto the open file.
+
+d.  Issue an ioctl to inform that IP instance of its
+address and netmask.
+
+Now datagrams of the specified type arriving on that
+device are fed to the IP subsystem, and the IP
+subsystem uses the IP address and mask and possibly
+other information to decide which datagrams to route
+to that IP instance, which sends them out that physical
+device.
+
+I forget how ARP and Ethernet encapsulation fit in.
+I know that they were someone more naive early on,
+and that in the 10/e systems I can now admit I have
+running at home I made things a bit smarter and less
+brittle.  But that's the basic architecture.
+
+So how does one actually make, say, a TCP connection?
+Another layer of the same sort:
+
+There are devices /dev/ipX, served by an IP device
+driver that is part of the IP subsystem.  Originally
+minor device X was hard-connected to IP protocol X;
+I later changed that to be ioctl-configured as well.
+
+To make TCP usable:
+
+a.  Open /dev/ip6 (old school), or find an unused
+/dev/ipX (again they are exclusive-open) and configure
+it to accept protocol 6.
+
+b.  Push the TCP stream line discipline onto the
+open file.
+
+c.  There are probably things one could then configure,
+but I don't remember them offhand.
+
+To make a TCP call, open an unused /dev/tcpNN device;
+write something to it (or maybe it was an ioctl) with
+the desired destination address; wait for an error or
+success.  On success, writes to the file descriptor send
+to the network, encapsulated as a TCP stream; reads
+receive.
+
+To receive a TCP call, open an unused /dev/tcpNN device,
+and write something (or ioctl) to say `I want to listen
+on this local port.'  Then read the file.  When a call
+arrives, you will read a message saying who's calling,
+and what /dev/tcpXX device you should open to accept the
+call.
+
+Notice the general scheme: for both TCP and IP (and there
+was a primitive UDP at one point, but it has fallen out
+of use on my systems), the protocol implementation
+comprises:
+
+1.  A line discipline: push it onto devices that will
+transport your data.
+
+2.  A device driver: use those devices to send and
+receive calls.
+
+The two are inextricably coupled inside the operating
+system, of course.
+
+There are all sorts of unfortunate details surrounding
+communications; e.g. the TCP code knows it is talking
+to IP, and constructs datagrams with partly-filled-in
+IP headers.  (It is not clear one can do better than
+that in practice, because the protocols themselves really
+are linked, but I still think it's unfortunate.)
+
+On the other hand, that the junctions between plumbing
+are accessible makes some things very simple.  I wrote
+a PPP implementation in user mode, with no kernel
+changes: to plug itself into IP, it just pushed the
+IP line discipline onto one end of a pipe, and read
+and wrote datagrams on the other.  I later extended it
+to PPPoE by having it open an Ethernet device set to
+the proper datagram types (there is one for data and
+another for connection setup).
+
+On the other other hand, there are no permissions on
+stream line disciplines, so an untrustworthy person
+(if I allowed such on my systems) could push the IP
+line discipline onto his own pipe and send whatever
+datagrams he liked.  This is decidedly a flaw.
+
+Those familiar with the original stream-system
+implementation have already spotted a lesser flaw:
+the file descriptor with IP pushed on (or TCP, or
+whatever) must remain open; when it is closed,
+everything shuts down.  In practice it is usually
+useful to have a daemon listening to that file anyway;
+that's a good way for the system to report errors or
+confusion.  In practice, TCP incalls and outcalls
+all went through a special daemon anyway, so that
+programs didn't have to be full of TCP-specific crap;
+that's what Dave Presotto's `connection server' is
+all about.
+
+Norman Wilson
+Toronto ON
+
