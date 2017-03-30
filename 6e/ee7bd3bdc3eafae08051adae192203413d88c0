@@ -1,0 +1,54 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 30 Mar 2017 15:24:25 -0400
+Subject: [TUHS] Ethernet in /dev (was Re:  Were all of you.. Hippies?)
+Message-ID: <1490901871.26986.for-standards-violators@oclsc.org>
+
+Ron Natalie:
+
+  It's a violation of the network layering concept to require or even allow
+  the user to bind the application data streams to a physical device.
+
+=====
+
+Oh, come on.
+
+If you mean an applications programmer shouldn't have to wallow
+in low-level network details, I agree.  That's one of the reasons
+I think the socket interface now standard in nearly every UNIX
+is an abomination.  It reminds me of the binary data structures
+you had to assemble just to open a file in TOPS-10, only
+ten times worse.
+
+But if you mean it's a violation of layering for the kernel to
+expose the pieces and let user-mode code to the work, I strongly
+disagree.  By that argument, the very idea of inetd is an abomination.
+Possibly even the ifconfig command.  And don't even get the
+hypothetical you started on microkernels.  User-mode code for device
+drivers or file systems?  Outrageous violation of layering!  Send
+in the New Jersey Inquisition!!
+
+Or perhaps you misunderstand how it all works.  Device files
+for Ethernet devices, /dev/ip*, and so on are like those for
+disk devices: you could allow anyone to read and write them,
+but in practice you probably wouldn't: you'd restrict access
+to the super-user and perhaps a special group to admit some
+sort of privilege reduction (like the group allowed to read
+disks on some systems, or to read /dev/kmem).
+
+That parts of the stack are assembled in user mode is a feature,
+not a bug.
+
+The one glaring flaw, as I said, is that no permissions are
+checked when pushing a stream line discipline onto a file.
+I think that happened because when Dennis first wrote the
+code, he was thinking about modules to implement canonical-tty
+semantics, or to invoke the very-different Datakit networking
+model.  It's a fundamental flaw, though.  I have had thoughts
+about fixing it, but never enough time nor enough motivation.
+(My technical mind is pretty much filled up by what I am
+paid to do these days; I haven't done much hobby computing
+in years.)
+
+Norman Wilson
+Toronto ON
+
