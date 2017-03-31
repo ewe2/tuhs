@@ -1,0 +1,71 @@
+From: beebe@math.utah.edu (Nelson H. F. Beebe)
+Date: Fri, 31 Mar 2017 16:31:15 -0600
+Subject: [TUHS] 8th Edition Research Unix on SIMH
+Message-ID: <CMM.0.96.0.1490999475.beebe@gamma.math.utah.edu>
+
+I was pleased to see the announcement from David du Colombier
+<0intro at gmail.com> of a SIMH VAX image for the newly-released 8th
+Edition Research Unix, and I had it downloaded and running in short
+order.
+
+I compiled and ran the traditional hello-world test in C,
+successfully, but the C++ and Fortran companions would not link:
+
+        # cat hello.cpp
+        #include <stream>
+
+        int 
+        main(void)
+        {
+          cout << "Hello, world...this is C++" << endl;
+          return (0);
+        }
+
+        # CC hello.cpp
+        cc    hello.cpp -lC
+        ld:hello.cpp: bad magic number
+
+I also tried extensions .C, .cxx, and .cc, with the same error.
+
+With Fortran, I get 
+
+        # cat hello.f
+              print *,'hello ... This is a Fortran 77 program!'
+              end
+
+        # f77 hello.f
+        hello.f:
+           MAIN:
+        Undefined:
+        __bufendtab
+        _setvbuf
+
+The missing symbols do not appear to be defined anywhere in /lib or
+/usr/lib, suggesting that some V8 libraries have been lost.
+
+David reports privately that he sees the same issues that I see.
+
+Can anyone on this list identify the problem?  Normally, Unix
+compilers should supply the necessary libraries for
+standard-conforming code, and f77 would silently add -lI77 and -lF77.
+
+The C++ compiler issue seems to be quite different: adding the -v
+(trace) option shows what it does:
+
+	# CC -v hello.cpp
+	cc    -v hello.cpp -lC
+	+ ld -X /lib/crt0.o hello.cpp -lC -lc 
+	ld:hello.cpp: bad magic number
+
+The source code, rather than the object code, is passed to the loader.
+This may have to do with the choice of extension: what did early C++
+compilers expect for filenames?
+
+-------------------------------------------------------------------------------
+- Nelson H. F. Beebe                    Tel: +1 801 581 5254                  -
+- University of Utah                    FAX: +1 801 581 4148                  -
+- Department of Mathematics, 110 LCB    Internet e-mail: beebe at math.utah.edu  -
+- 155 S 1400 E RM 233                       beebe at acm.org  beebe at computer.org -
+- Salt Lake City, UT 84112-0090, USA    URL: http://www.math.utah.edu/~beebe/ -
+-------------------------------------------------------------------------------
+
