@@ -1,0 +1,51 @@
+From: andreas.kahari@icm.uu.se (Andreas Kusalananda =?iso-8859-1?B?S+Ro5HJp?=)
+Date: Wed, 19 Apr 2017 10:35:34 +0200
+Subject: [TUHS] Bourne shell and comments
+In-Reply-To: <DBD26EB7-FFAE-472F-9C71-27ECAC2A085E@orthanc.ca>
+References: <20170418204834.GA22198@minnie.tuhs.org>
+ <020a01d2b885$94bd49c0$be37dd40$@ronnatalie.com>
+ <DBD26EB7-FFAE-472F-9C71-27ECAC2A085E@orthanc.ca>
+Message-ID: <20170419083534.tsphyyq56klgrsln@box.local>
+
+On Tue, Apr 18, 2017 at 05:50:05PM -0700, Lyndon Nerenberg wrote:
+> > Ron said:
+> 
+> > I still remember using : for a comment in the V6 shell.   Was also the label
+> > for goto.
+> 
+> What's cool about ':' vs. '#' is:
+> 
+> -----8<-----8<-----8<-----8<-----8<-----8<-----
+> 
+> function cd {
+>         command cd "$@" && setprompt
+> }
+> 
+> function setprompt {
+>         PS1=": "`id -un`@`hostname|sed 's;\..*$;;'`:'${PWD}; '; export PS1
+> }
+> 
+> setprompt
+> 
+> -----8<-----8<-----8<-----8<-----8<-----8<-----
+> 
+> Stick that in your .env and you get a snarf-and-barf'able shell prompt that evals as a noop.  Blatantly ripped off from plan9port IIRC.  I run this across all manner of *BSD and Solaris and Linux and it just works.
+> 
+> --lyndon
+> 
+> 
+
+I don't want to get into an argument in an off-topic sub-thread, but PS1
+doesn't need to be exported, and since the shell evaluates the string,
+you may as well use
+
+LOGNAME=$(id -un)       # should already be set
+HOSTNAME=$(hostname -s) # -s is fairly portable (not on Solaris tho)
+PS1=': $LOGNAME@$HOSTNAME: $PWD; '
+
+This saves having to execute id and hostname on every new prompt.
+
+Also note that this has nothing to do with the : command.
+
+Cheers
+
