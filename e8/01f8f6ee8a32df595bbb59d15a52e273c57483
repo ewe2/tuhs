@@ -1,0 +1,45 @@
+From: khm@sciops.net (Kurt H Maier)
+Date: Mon, 24 Apr 2017 17:18:29 -0700
+Subject: [TUHS] There is turmoil in Linux-land - When did rm first avoid
+ going upwards?
+In-Reply-To: <05b101d2bd57$cb86f6f0$6294e4d0$@ronnatalie.com>
+References: <20170424220603.883CB18C0D0@mercury.lcs.mit.edu>
+ <20170424221840.GB4966@naleco.com> <20170424232328.GB27654@wopr>
+ <05b101d2bd57$cb86f6f0$6294e4d0$@ronnatalie.com>
+Message-ID: <20170425001829.GC27654@wopr>
+
+On Mon, Apr 24, 2017 at 08:06:28PM -0400, Ron Natalie wrote:
+> 
+> 
+> > rm in V6 outsources globbing to /etc/glob, which appears to report
+> > no-match if the first character is .
+> 
+> Actually, it's the shell that calls glob.   Glob then invokes the command
+> (in this case rm).
+> 
+> Anyhow, that doesn't do what you think it does.    It ignores directory
+> entries that begin with '.' if the search string doesn't begin with ..
+> 
+> ".*"  will indeed match ".."
+> 
+> Of course, the calamity depends on whether you have /tmp on it's own
+> filesystem.   V6 didn't go .. off the top of the filesystem, the root ..
+> just linked back to the inode 1 (the root itself).
+> 
+> 
+
+Thanks for correcting my hasty conclusions.  /usr/source/s2/rm.c has an
+execl call in the rm() function, but I didn't dig further into the
+calling mechanism.  
+
+V7's /usr/src/cmd/rm.c definitely explicitly has a check for '..' and 
+an error message dedicated to the task.  
+
+So I think we can conclude that unix got this protection sometime
+between V6 and V7 -- in other words, sometime in the late 1970s. 
+
+And systemd is now catching up.  "Those who do not study unix" etc
+
+khm
+
+
