@@ -1,0 +1,51 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 24 Apr 2017 20:59:15 -0400 (EDT)
+Subject: [TUHS] There is turmoil in Linux-land - When did rm first avoid
+	going upwards?
+Message-ID: <20170425005915.1249018C0D0@mercury.lcs.mit.edu>
+
+    > From: "Ron Natalie"
+
+    > Actually, it's the shell that calls glob.
+
+Yes, in the initial expansion of the command line, but V6 'rm' also uses
+'glob' internally; if the '-r' flag is given, and the current name in the
+command argument list is a directory, viz.:
+
+	if ((buf->mode & 060000) == 040000) {
+		if (rflg) {
+			...
+			execl("/etc/glob", "glob", "rm", "-r", 
+					    fflg? "-f": "*", fflg? "*": p, 0);
+			printf("%s: no glob\n", arg);
+			exit();
+			}			
+
+(where 'p' is 0 - no idea why the writer didn't just say '"*": 0, 0').
+
+So "rm -f foo*", where the current directory contains file 'foo0 foo1 foo2'
+and directoty 'foobar', and directory 'foobar' contains 'bar0 bar1 bar2', the
+first instance of 'glob' (run by the shell) expands the 'foo0 foo1 foo2 foobar'
+and the second instance (run by 'rm') expands the 'bar0 bar1 bar2'.
+
+
+     > Glob then invokes the command (in this case rm).
+
+I don't totally grok 'glob', but it is prepared to exec() either the command
+name, /bin/{command} or /usr/bin/{command}; but if that file is not executable
+it tries feeding it to the shell, on the assumption it must be a shell command
+list:
+	   
+	execv(file, arg);
+	if (errno==ENOEXEC) {
+		arg[0] = file;
+		*--arg = "/bin/sh";
+		execv(*arg, arg);
+		}
+
+I guess (too lazy to look) that the execv() must return a different error
+number if the file doesn't exist at all, so it only tries the shell if the
+file existed, but wasn't executable.
+
+	Noel
+
