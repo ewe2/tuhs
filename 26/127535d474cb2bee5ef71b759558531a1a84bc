@@ -1,0 +1,28 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Mon, 24 Apr 2017 20:06:28 -0400
+Subject: [TUHS] There is turmoil in Linux-land - When did rm first avoid
+	going upwards?
+In-Reply-To: <20170424232328.GB27654@wopr>
+References: <20170424220603.883CB18C0D0@mercury.lcs.mit.edu>
+ <20170424221840.GB4966@naleco.com> <20170424232328.GB27654@wopr>
+Message-ID: <05b101d2bd57$cb86f6f0$6294e4d0$@ronnatalie.com>
+
+
+
+> rm in V6 outsources globbing to /etc/glob, which appears to report
+> no-match if the first character is .
+
+Actually, it's the shell that calls glob.   Glob then invokes the command
+(in this case rm).
+
+Anyhow, that doesn't do what you think it does.    It ignores directory
+entries that begin with '.' if the search string doesn't begin with ..
+
+".*"  will indeed match ".."
+
+Of course, the calamity depends on whether you have /tmp on it's own
+filesystem.   V6 didn't go .. off the top of the filesystem, the root ..
+just linked back to the inode 1 (the root itself).
+
+
+
