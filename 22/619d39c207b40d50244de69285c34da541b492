@@ -1,0 +1,122 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Tue, 25 Apr 2017 10:56:34 -0700
+Subject: [TUHS] was turmoil, moving to rm -rf /
+In-Reply-To: <CAEoi9W7_caF5y0ofR8xNU-y5aH2vLzEoC-xJZVDbHbwyHWj8jA@mail.gmail.com>
+References: <20170424220603.883CB18C0D0@mercury.lcs.mit.edu>
+ <20170424221840.GB4966@naleco.com> <20170424232328.GB27654@wopr>
+ <20170424235930.GB24499@mcvoy.com>
+ <CAC20D2NNp6eCJZGxZyQcM84aZV4-6UXCj3mQtkqjDQrssPndFQ@mail.gmail.com>
+ <20170425140853.GD24499@mcvoy.com>
+ <CAC20D2OZknn5R=0HJm8C26hwWwboekEQMK_YHV73iVby_WVTkw@mail.gmail.com>
+ <CAEoi9W7_caF5y0ofR8xNU-y5aH2vLzEoC-xJZVDbHbwyHWj8jA@mail.gmail.com>
+Message-ID: <A1DF590F-461C-47FE-8D0D-671CF3C17C3F@bitblocks.com>
+
+I once had to rebuild the root directory using ROM based disk IO and memory peek and poke commands!  At this late date I don’t recall many details but at least the root block was trashed during some last minute testing. Unlikely it was “rm -rf / something” as that would’ve done far more damage.
+
+The situation was this:
+1. We had *one* working hardware system[1].
+2. At that time we only had working floppy controller and driver[2].
+3. Our devel system was a VAX running 4.1BSD. no support for the floppy drive so everything had to be downloaded over a 9600 serial link.
+4. The backup floppy either didn’t exist or wasn’t readable.
+5. We had custom stuff that was done for a show and not backed up anywhere.
+
+Luckily, due to earlier debugging sessions I knew what the file system layout was — this was on a version 7 system, with 16 byte dir entries, 2 bytes inode #, followed by and 14 byte name. IIRC inode 0 was not used, inode 1 was used as a temp during fsck based recovery and inode 2 was for the real root. So I read in the root inode, found the disk address of its data block, read it in, using fixed up “.” and “..” and “/bin” entries — usually inode #3 was bin, wrote it back to the floppy and rebooted. I think the unix image was in /bin. On reboot fsck worked and reconnected all the lost directories, which were easy to figure out and rename.
+
+The back story is that this happened on a Saturday just before the Fall Comdex 1981, where we were going to show our system for the first time and we had to take a working system to Las Vegas by Sunday[3]. We were able to fly out on time and the Comdex show was a success, with thousands of leads generated.
+
+In terms of lessons, I don’t know what we learned. I guess it pays to be intimately familiar with the system as we were in an extreme bootstrap situation with very little working reliably. Seems often startups end up doing acrobatics without a net!
+
+— bakul
+
+[1]  Two actually, but the second was a wire wrapped prototype. This was at an early Unix workstation startup; our main app was “word processing”.
+
+[2] Later we hooked up a Western Digital ST506 controller via parallel port and I was very happy when my disk driver could do 25 KB/s! No DMA so had to do programmed IO.
+
+[3] Rob Warnock (whom some of you may know from his SGI days) was our very hands-on CTO, and he was/is great at debugging/problem solving. I don’t know why they waited for me rather than call Rob. a) I was a junior engineer as that my first job with C & Unix  (6 months at that time) and b) I had already worked about 80+ hours that week and gone home to sleep at 9AM on Saturday. May be Rob was smart enough to not answer his phone!
+
+> On Apr 25, 2017, at 8:28 AM, Dan Cross <crossd at gmail.com> wrote:
+> 
+> On Tue, Apr 25, 2017 at 10:18 AM, Clem Cole <clemc at ccc.com <mailto:clemc at ccc.com>> wrote:
+> Problem was /etc has been burned too...  so the mknod command is off the table.
+> 
+> Either boot into standalone media like some kind of miniroot (that hopefully has a copy of mknod) or look for some kind of shell builtin? E.g., if the shell provides some mechanism to make a raw system call, you can do it. E.g., an escape hatch to syscall() or indir(). If a copy of `mkdir` survived, then on older systems where directory creation was done by calling mknod(), one might be able to modify `mkdir` enough to create device file for a tape device to launch a restore off of. I thought some systems came with a syscall(1) utility, but it does't seem to be current anymore and I can't find any references to it so perhaps I'm misremembering.
+> 
+> I once messed up a NeXT machine by "mv"'ing the system shared libraries to an unexpected path. Oops. I had to boot off the CD to fix it, but that's child's play compared to some of the esoterica you guys are talking about.
+> 
+>         - Dan C.
+> 
+> 
+> On Tue, Apr 25, 2017 at 10:08 AM, Larry McVoy <lm at mcvoy.com <mailto:lm at mcvoy.com>> wrote:
+> Whoever was the genuis that put mknod in /etc has my gratitude.
+> We had other working Masscomp boxen but after I screwed up that
+> badly nobody would let me near them until I fixed mine :)
+> 
+> And you have to share who it was, I admitted I did it, I think
+> it's just a thing many people do..... Once :)
+> 
+> On Tue, Apr 25, 2017 at 10:02:26AM -0400, Clem Cole wrote:
+> > Larry,
+> >
+> > I had to laugh when I read that because what you don't know is it was part
+> > of my old Unix wizards test which was left over from a the day when one of
+> > our hackers (whom I think you would later get to know so I'll not name him)
+> > accidentally typed: rm -rf . as root from his / on his workstation.
+> >
+> > Because /bin/rmdir had been lost, he started getting errors when rmdir  was
+> > forked.  So he hit  ^C, but he had already lost:  /bin, /dev, /etc, /lib,
+> > most of /usr.  He was a developer in the networking group so he was working
+> > on network code which we could not trust would not panic (in fact we
+> > disconnected the node from the ethernet immediately just in case).   But we
+> > did have pretty much everything in /usr/bin/[s-z]* -- that is we think it
+> > was deleting files in /usr/bin when he stopped it.
+> >
+> > We obviously had another working Masscomp box just like it. And of course
+> > the shell was working on the machine that was in trouble.   We recovered
+> > the system as it was.   Hint the key item is you have to start by putting
+> > /dev back together and the solution to that problem has had been discussed
+> > on this list.
+> >
+> > Clem
+> >
+> > On Mon, Apr 24, 2017 at 7:59 PM, Larry McVoy <lm at mcvoy.com <mailto:lm at mcvoy.com>> wrote:
+> >
+> > > This is gonna seem like I'm tooting my own horn, and I am a little, but
+> > > here's an rm -rf / story.
+> > >
+> > > Clem will be amused because I was a junior or senior in college and a sys
+> > > admin for a Masscomp with a 40MB disk with 20 users.  And I did some
+> > > version
+> > > of rm -rf /, realized part way through that I screwed up, and killed it.
+> > > But /bin and /dev were gone so putting things back together was hard.
+> > >
+> > > But I did it and wrote up this little note for the people who came after
+> > > me, if I was stupid enough to do this someone else would, was my thinking.
+> > > You can get a sense of how scared I was in it if you read it carefully.
+> > > It was a very long night.
+> > >
+> > > For an undergrad, I think it's not bad?  Maybe?  I dunno, I look at how
+> > > much I needed to have understood to get the system back up, that's a lot
+> > > of reading, playing, experience.  Love that Geophysics department, they
+> > > pushed me.
+> > >
+> > > And it was during my (brief) foray into the *roff -me macros (I went
+> > > -ms and never looked back).  Roff source on request to anyone who is
+> > > twisted enough to want it.
+> > >
+> > > http://mcvoy.com/lm/masscomp-restore.pdf <http://mcvoy.com/lm/masscomp-restore.pdf>
+> > >
+> > > Complete with all the typos.
+> > >
+> > > --lm
+> > >
+> 
+> --
+> ---
+> Larry McVoy                  lm at mcvoy.com <http://mcvoy.com/>             http://www.mcvoy.com/lm <http://www.mcvoy.com/lm>
+> 
+> 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170425/f5103d5c/attachment.html>
+
