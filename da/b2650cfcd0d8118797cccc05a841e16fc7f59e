@@ -1,0 +1,108 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Sat, 6 May 2017 21:45:19 +0000
+Subject: [TUHS] Discuss of style and design of computer programs from a
+In-Reply-To: <alpine.BSF.2.02.1705061554080.4621@frieza.hoshinet.org>
+References: <20170506144011.GF28787@mcvoy.com>
+ <20170506150913.57571411A@lod.com>
+ <20170506152053.GI12539@yeono.kjorling.se>
+ <alpine.BSF.2.02.1705061554080.4621@frieza.hoshinet.org>
+Message-ID: <20170506214519.GN12539@yeono.kjorling.se>
+
+On 6 May 2017 16:00 -0400, from usotsuki at buric.co (Steve Nickolas):
+> In 6502 code, it's not uncommon to do something like
+> 
+> foo1:     lda      #$00
+>           .byte    $2C       ; 3-byte BIT
+> foo2:     lda      #$01
+>            .
+>            .
+>            .
+> 
+> to save a byte (and probably still done for the few who write in
+> ASM). The "2C" operand would cause it to disassemble as something
+> like...
+> 
+> 1000-     LDA      #$00
+> 1002-     BIT      $01A9
+> 
+> which is the route you'd go down if you called "foo1".  Apart
+> diddling a few CPU flags, and an unneeded read on $01A9, harmless.
+
+You could do something quite similar on the 8086, which I am somewhat
+more familiar with. For example, in some kind of pseudo 8086
+assembler, with $ denoting the value of the instruction pointer at the
+beginning of the current instruction:
+
+        jmp short $+3
+        int 90h ; hex: cd 90
+
+would almost certainly decompile to the above, if the decompiler
+doesn't barf when it can't create a jump target label mid-instruction,
+but it would certainly _execute_ as
+
+        jmp short l1
+        db 0cdh ; dummy byte
+    l1: nop ; hex: 90
+
+resulting in a jump over one byte followed by a no-op instruction. Of
+course, invoking interrupt 90h would be a perfectly legal thing to do,
+assuming that your interrupt tables are set up correctly. If you want
+to mess with someone trying to figure out what the code is doing,
+write a (nonsense or meaningful) value to interrupt vector 90h before
+you do that. For example, assuming that it isn't being used, you could
+point interrupt 90h at the reboot jump location, which IIRC on the IBM
+PC would mean point it at FFFFh:FFF0h or absolute address FFFF0h.
+Anyone trying to actually execute the INT 90h instruction would see
+their computer reboot, but anyone actually executing the code would
+see little more than a CPU cache flush due to the jump.
+
+Or, something slightly more "useful"
+
+        jmp short $+3
+        int 0 ; hex: cd 00
+        db 0
+        jz somewhere
+
+which, again IIRC, would clear the accumulator (AX) register because
+0000 hex is XOR AX,AX, which as a side effect sets the zero flag
+because the result is zero, and then executes a conditional jump if
+the zero flag is set (which it will be). In other words, it _executes_
+as
+
+        jmp short l1
+        db 0cdh ; dummy byte
+    l1: xor ax,ax ; hex: 00 00
+        jz somewhere
+
+but a naiive decompiler will see the CDh byte after the jump and take
+that as the first byte of the two-byte interrupt instruction. I don't
+know what 00 followed by the first byte of the JZ instruction would
+be, but probably a register/register XOR with a register store. Make
+it a far jump and you have a few extra bytes to play with, to befuddle
+anyone trying to figure out just what on Earth your code is really
+doing.
+
+The above, of course, is really just scratching the surface. With how
+many variable-length instructions the x86 has, with careful selection
+of opcodes and possibly use of undocumented but functionally valid
+combinations, I wouldn't be the least bit surprised if it's
+technically possible to write a 8086 program that does one thing when
+started normally, and something utterly different but still useful
+when started at an offset that results in execution beginning in the
+middle of an instruction. Bonus points if the first thing that program
+does is jump into itself _at that offset_. Now, the _work involved in
+doing so_, never mind maintaining it...
+
+Of course, I wouldn't do anything like the above in any real-world
+code base meant to run on modern systems unless obfuscation really
+_was_ a design goal. Honest. If I was tasked to write something that
+really needed to do something non-trivial in 16 KiB RAM on an original
+IBM 5150 PC or clone? I'd probably spend quite a bit of time in front
+of the whiteboard and with reference manuals before writing even one
+line of code...
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+                 “People who think they know everything really annoy
+                 those of us who know we don’t.” (Bjarne Stroustrup)
+
