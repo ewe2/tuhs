@@ -1,0 +1,40 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Thu, 11 May 2017 16:37:29 -0400
+Subject: [TUHS] The evolution of Unix facilities and architecture
+In-Reply-To: <CAC20D2Ndb54AqUx=qn48Rkc37b7pr9rwEVs+m+Aq1zR6ALjw6w@mail.gmail.com>
+References: <20170511140729.2262B18C09A@mercury.lcs.mit.edu>
+ <CAC20D2MDG0Mc3jJcbvZYXCo_FZcswt_no=3ajqvx45r-q9gKow@mail.gmail.com>
+ <CANCZdfrbxzkMesjPPX3A0qcHL-Hz_g+k1F2PtBicOkZv3JB5Cw@mail.gmail.com>
+ <CAC20D2Ndb54AqUx=qn48Rkc37b7pr9rwEVs+m+Aq1zR6ALjw6w@mail.gmail.com>
+Message-ID: <013b01d2ca96$6901b370$3b051a50$@ronnatalie.com>
+
+I remember the pre-fsck days.   It was part of my test to become an operator at the UNIX site at JHU that I could run the various manual checks.
+
+The V6 file system wasn’t exactly stable during crashes (lousy database behavior), so there was almost certainly something to clean up.
+
+ 
+
+The first thing we’d run was icheck.   This runs down the superblock freelist and all the allocated blocks in the inodes.     If there were missing blocks (not in a file or the free list), you could use icheck –s
+
+to rebuild it.    Similarly, if you had duplicated allocations in the freelist or between the freelist and a single file.   Anything more complicated required some clever patching (typically, we’d just mount readonly, copy the files, and then blow them away with clri).
+
+ 
+
+Then you’d run dcheck.   As mentioned dcheck walks the directory path from the top of the disk counting inode references that it reconciles with the link count in the inode.   Occasionally we’d end up with a 0-0 inode (no directory entires, but allocated…typically this is caused by people removing a file while it is still open, a regular practice of some programs for their /tmp files.).    clri again blew these away.
+
+ 
+
+Clri wrote zeros all over the inode.   This had the effect of wiping out the file, but it was dangerous if you got the i-number wrong.    We replaced it with “clrm” which just cleared the allocated bit, a lot easy to reverse.
+
+ 
+
+If you really had a mess of a file system, you might get a piece of the directory tree broken off from a path to the root.   Or you’d have an inode that icheck reported dups.   ncheck would try to reconcile an inumber into an absolute path.
+
+ 
+
+After a while a program called fsdb came around that allowed you to poke at the various file system structures.    We didn’t use it much because by the time we had it, fsck was fast on its heals.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170511/929937aa/attachment.html>
+
