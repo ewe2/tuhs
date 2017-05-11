@@ -1,0 +1,77 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 11 May 2017 15:25:47 -0700
+Subject: [TUHS] The evolution of Unix facilities and architecture
+In-Reply-To: <013b01d2ca96$6901b370$3b051a50$@ronnatalie.com>
+References: <20170511140729.2262B18C09A@mercury.lcs.mit.edu>
+ <CAC20D2MDG0Mc3jJcbvZYXCo_FZcswt_no=3ajqvx45r-q9gKow@mail.gmail.com>
+ <CANCZdfrbxzkMesjPPX3A0qcHL-Hz_g+k1F2PtBicOkZv3JB5Cw@mail.gmail.com>
+ <CAC20D2Ndb54AqUx=qn48Rkc37b7pr9rwEVs+m+Aq1zR6ALjw6w@mail.gmail.com>
+ <013b01d2ca96$6901b370$3b051a50$@ronnatalie.com>
+Message-ID: <20170511222547.GJ4341@mcvoy.com>
+
+This is one place where I think Linux kicked Unix's ass.  And I am not
+really sure how they did it, I have an idea but am not positive.  Unix
+file systems up through UFS as shipped by Sun, were all vulnerable to
+what I call the power out test.  Untar some big tarball and power off
+the machine in the middle of it.  Reboot.  Hilarity ensues (not).
+
+You were dropped into some stand alone shell after fsck threw up its
+hands and it was up to you to fix it.  Dozens and dozens of errors.
+It was almost always faster to go to backups because figuring that 
+stuff out, file by file (which I have done more than once), gets you
+to the point that your run "fsck -y" and go poke at lost+found when
+fsck is done, realize that there is no hope, and reach for backups.
+
+Try the same thing with Linux.  The file system will come back, starting
+with, I believe, ext2.
+
+My belief is that Linux orders writes such that while you may lose data
+(as in, a process created a file, the OS said it was OK, but that file 
+will not be in the file system after a crash), but the rest of the file 
+system will be consistent.  I think it's as if you powered off the
+machine a few seconds earlier than you actually did, some stuff is in
+flight and until they can write stuff out in the proper order you may
+lose data on a hard reset.
+
+But it doesn't leave your file system in a mess and it's not the brute
+force slow way that DOS does it.
+
+I copied Ted, who had his fingers deep in that code, maybe he can correct
+me where I got it wrong.  Details aside, I think this is a place where
+Linux moved the state of the art significantly forward.  There are other
+places but this one is a big deal IMHO, maybe the biggest deal.
+
+--lm
+
+On Thu, May 11, 2017 at 04:37:29PM -0400, Ron Natalie wrote:
+> I remember the pre-fsck days.   It was part of my test to become an operator at the UNIX site at JHU that I could run the various manual checks.
+> 
+> The V6 file system wasn???t exactly stable during crashes (lousy database behavior), so there was almost certainly something to clean up.
+> 
+>  
+> 
+> The first thing we???d run was icheck.   This runs down the superblock freelist and all the allocated blocks in the inodes.     If there were missing blocks (not in a file or the free list), you could use icheck ???s
+> 
+> to rebuild it.    Similarly, if you had duplicated allocations in the freelist or between the freelist and a single file.   Anything more complicated required some clever patching (typically, we???d just mount readonly, copy the files, and then blow them away with clri).
+> 
+>  
+> 
+> Then you???d run dcheck.   As mentioned dcheck walks the directory path from the top of the disk counting inode references that it reconciles with the link count in the inode.   Occasionally we???d end up with a 0-0 inode (no directory entires, but allocated???typically this is caused by people removing a file while it is still open, a regular practice of some programs for their /tmp files.).    clri again blew these away.
+> 
+>  
+> 
+> Clri wrote zeros all over the inode.   This had the effect of wiping out the file, but it was dangerous if you got the i-number wrong.    We replaced it with ???clrm??? which just cleared the allocated bit, a lot easy to reverse.
+> 
+>  
+> 
+> If you really had a mess of a file system, you might get a piece of the directory tree broken off from a path to the root.   Or you???d have an inode that icheck reported dups.   ncheck would try to reconcile an inumber into an absolute path.
+> 
+>  
+> 
+> After a while a program called fsdb came around that allowed you to poke at the various file system structures.    We didn???t use it much because by the time we had it, fsck was fast on its heals.
+> 
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
