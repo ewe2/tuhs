@@ -1,0 +1,59 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Thu, 11 May 2017 18:41:47 -0400
+Subject: [TUHS] C declarations.
+In-Reply-To: <20170511223232.GM4341@mcvoy.com>
+References: <015401d2caa0$79762650$6c6272f0$@ronnatalie.com>
+ <68E8DC0A-D1B8-4FF0-AD26-ACDC57E308AF@pobox.com>
+ <20170511223232.GM4341@mcvoy.com>
+Message-ID: <015b01d2caa7$c658c020$530a4060$@ronnatalie.com>
+
+
+>  I'm curious as to what is busted about arrays in C?  To me they just
+seemed like a way to define how to look at a wad of memory and they seem to
+work for me.  
+
+The problem is they don't work like every other type.    Somewhere around
+the phototypesetter release or V7, they fixed structs to be
+assignable/passable to functions.
+They didn't do that for arrays.   They retained their half-assed
+quasipointer status.    It would have been easy to bite the bullet back in
+those days before people codified the inane behavior.
+
+For example:
+
+struct foo {
+    int a;
+    int b;
+};
+
+struct foo x;
+x.a = 1;
+x.b = 1;
+struct foo y;
+y = x; // works fine.
+
+struct foo myfunc(struct foo arg) {
+    arg.a = 5;
+    return 5;
+}
+y = myfunc(x);   // does not modify x
+
+
+Now look at arrays:
+
+char x[4] = { 1, 2, 3, 4};
+
+char y[4];
+y = x ; // illegal
+
+void myfunc(char arg[4]) {
+    arg[0] = 1000;
+}
+
+myfunc(x);  // CHANGES X!
+
+If had my way, y = x and passing and returning arrays by value would work
+just like every other C type.
+
+
+
