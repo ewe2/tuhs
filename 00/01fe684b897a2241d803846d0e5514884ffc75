@@ -1,0 +1,108 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Sat, 13 May 2017 12:20:50 +0000
+Subject: [TUHS] C declarations.
+In-Reply-To: <025701d2cb92$ec8182a0$c58487e0$@ronnatalie.com>
+References: <015401d2caa0$79762650$6c6272f0$@ronnatalie.com>
+ <68E8DC0A-D1B8-4FF0-AD26-ACDC57E308AF@pobox.com>
+ <20170511223232.GM4341@mcvoy.com>
+ <015b01d2caa7$c658c020$530a4060$@ronnatalie.com>
+ <20170513012415.GZ4341@mcvoy.com>
+ <025701d2cb92$ec8182a0$c58487e0$@ronnatalie.com>
+Message-ID: <20170513122050.GF9980@yeono.kjorling.se>
+
+On 12 May 2017 22:45 -0400, from ron at ronnatalie.com (Ron Natalie):
+> About the only thing it would have broken (and would still break today), is
+> the fact that function parameters that are defined to be arrays, really pass
+> pointers.
+> 
+> char x[4];
+> void foo(char a[4]);
+> foo(x);
+> 
+> would be costlier than it is now doing the pass by value.
+
+Correct me if I am wrong, but _pass by value_ as opposed to _pass by
+reference_ requires making a copy, no? That's the whole point, to
+allow the callee to poke at the value it is given at will. At the very
+least, it would require making a copy when a part of the passed value
+is modified. Where is that memory going to come from, when even
+malloc() isn't a part of the language but rather a part of the
+standard library? Where is all that going to come from if you pass a
+large array on a memory-constrained system of specs common back in the
+days when C was designed, especially one that lacks virtual memory
+support?
+
+What if (yes, somewhat contrived example) we had pass by value
+semantics, and foo() is implemented as
+
+    void foo(char a[4])
+    {
+        a[8] = 123;
+    }
+
+What exactly should happen? The function delcaration says we are
+interested in four char, but the function uses far more than that. You
+could of course invoke the almighty term _undefined behavior_, but you
+really have to say _something_. And of course, nothing stops us from
+calling that function as
+
+    char x[100];
+    foo(x);
+
+To reliably prevent that, it seems to me you'd need to at least amend
+arrays to know their own size, especially if you don't want the
+compiler to throw its hands in the air as soon as it sees a malloc()
+(and recognizes it).
+
+Now consider instead something like
+
+    struct foo_t { char a[4]; char b[10]; };
+    union foo_u { char[14] x; struct foo_t s; };
+    void foo(foo_u u)
+    {
+        u.s.a[8] = 123;
+    }
+
+(Please excuse any syntax errors there; unions have never been my
+strong side.)
+
+While I agree that _you shouldn't be doing that in the first place_,
+the fact remains that doing it is not _disallowed_ by the language. It
+could be disallowed by the language if the array knows its size, but
+to reliably disallow it, you'd need to be able to detect it at compile
+time. That would seem to significantly increase the complexity of the
+compiler, which of course we wouldn't want on a low-spec system. (I
+have a strong suspicion that my microwave oven has more computing
+power and memory than some of the systems C was designed to run on...)
+
+
+> Of course you
+> could always fudge if you wanted to pass the pointer by actually doing it
+> that way...
+> char x[4]
+> void foo(char *a);
+> foo(x);
+
+...in which case you need to know from somewhere else whether foo()
+wants a zero-terminated char array or not. Not impossible -- we
+already have a similar situation with, say, memcmp() and strncmp() --
+but unless you're willing to introduce some additional syntax, it
+seems to me that you lose expressiveness in the language by lumping
+the two cases together.
+
+All the above said, _please don't get me wrong_. Pass by value
+semantics is a really nice feature to have, and I have been known to
+curse at certain languages more than once where the normal behavior is
+pass by reference and pass by value requires a good deal of extra
+code. But for potentially large (or even undefined-size) types, pass
+by value comes at a significant cost in terms of memory, and even the
+copying itself. Copy-on-write solves some of that but requires
+elaborate bookkeeping instead, to know what goes where (it's at least
+one additional layer of indirection), and risks fragmentation. For
+simplicity and predictability, it's hard to beat pass by reference.
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+                 “People who think they know everything really annoy
+                 those of us who know we don’t.” (Bjarne Stroustrup)
+
