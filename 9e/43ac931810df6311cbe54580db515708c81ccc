@@ -1,0 +1,49 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 12 May 2017 18:17:02 -0700
+Subject: [TUHS] The evolution of Unix facilities and architecture
+In-Reply-To: Your message of "Fri, 12 May 2017 20:51:43 -0400."
+ <1494636703.1615694.975085000.13626EAC@webmail.messagingengine.com>
+Message-ID: <201705130117.v4D1H26I087121@elf.torek.net>
+
+>Ah.  There's the other piece.  You start the SUID program under
+>the debugger, and rather than kicking off the debugger, it simply
+>starts it non-suid.  *However*, in the presence of shared text
+>(either of the two cases being checked for in the other place),
+>you can make changes to the text image (e.g.  put whatever code
+>you want at the entry point), which will be reused the *next*
+>time it is started *without* the debugger.
+
+Right.  Some of this was not a problem with demand-paged files
+(4.xBSD) since you would not share swap images.  But there's more,
+or rather, *was* more, once people added PT_ATTACH and new system
+calls or behavior ... specifically, the setreuid / setregid calls
+from 4.2BSD or the saved setuid behavior in System V.  This is one
+I personally touched.
+
+Suppose a process starts out setuid or setgid.  This means it has
+alternative privileges (maybe super-user, maybe not).  With these
+it can do things like open some files or transit some directories.
+Afterward, using setreuid() and setregid() in 4.2BSD, the process
+can swap its real and effective IDs, or give up its effective UID
+or GID entirely, to give up its privileges.  So some program
+could, for instance, chdir past a "lock" directory -- this was the
+MDQS trick -- and now exist in a tree that it had no access to, or
+open a file with secrets, that it no longer has permission to
+open.
+
+Once a process had given up any special privileges, though, it
+could be ptraced again (via PT_ATTACH).  Now you can swap file
+descriptor variables around in it, or otherwise make it do bad
+things with the privileges it gained while it was setuid.  On
+SysV, with "saved setuid", it is even worse: you can make the
+process *regain* privileges and do whatever you want.
+
+The fix we used was an extra bit in the process flags: "process
+has had or used privileges". Once set (cleared only on exec()),
+the process could no longer be ptraced except by root.  Processes
+did -- and still do -- have to be careful about files they may
+leave open, or other entities that survive exec().  (One should
+also consider mmap() and shared regions.)
+
+Chris
+
