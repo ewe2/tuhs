@@ -1,0 +1,48 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 12 May 2017 21:25:30 -0400 (EDT)
+Subject: [TUHS] The evolution of Unix facilities and architecture
+Message-ID: <20170513012530.EF62518C099@mercury.lcs.mit.edu>
+
+    > From: Random832
+
+    > It seems to me that this check is central to being able to (or not)
+    > modify the in-core image of any process at all other than the one being
+    > traced (say, by attaching to a SUID program that has already dropped
+    > privileges, and making changes that will affect the next time it is
+    > run).
+
+Right, good catch: if you have a program that was _both_ sticky and SUID, when
+the system is idle (so the text copy in the swap area won't get recycled),
+call up a copy under the debugger, patch it, exit (leaving the patched copy),
+and then re-run it without the debugger.
+
+I'd have to check the handling of patched sticky pure texts - to see if they
+are retained or not.
+
+{Checks code.}
+
+Well, the code to do with pure texts is _very_ different between V6 and
+PWB1.
+
+The exact approach above might not work in V6, because the modified (in-core)
+copy of pure texts are simply deleted when the last user exits them. But it
+might be possible for a slight variant to work; leave the copy under the
+debugger (which will prevent the in-core copy from being discarded), and then
+run it again without the debugger. That might do it.
+
+Under PWB1, I'm not sure if any variant would work (very complicated, and I'm
+fading). There's an extra flag bit, XWRIT, which is set when a pure text is
+written into; when the last user stops using the in-code pure text, the
+modified text is written to swap.  (It lools like the in-core copy is always
+discarded when the last user stops using it.) But the check for sticky would
+probably stop a sticky pure-text being modified? But maybe the approach that
+seems like it would work under V6 (leave the patched, debugger copy running,
+and start a new instance) looks like it should work here too.
+
+So maybe the sticky thing is irrelevant? On both V6 and PWB1, it just needs a
+pure text which is SETUID: start under the debugger, patch, leave running, and
+start a _new_ copy, which will run the patched version as the SUID user.
+
+      Noel
+
+
