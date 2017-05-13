@@ -1,0 +1,58 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Fri, 12 May 2017 22:45:02 -0400
+Subject: [TUHS] C declarations.
+In-Reply-To: <20170513012415.GZ4341@mcvoy.com>
+References: <015401d2caa0$79762650$6c6272f0$@ronnatalie.com>
+ <68E8DC0A-D1B8-4FF0-AD26-ACDC57E308AF@pobox.com>
+ <20170511223232.GM4341@mcvoy.com>
+ <015b01d2caa7$c658c020$530a4060$@ronnatalie.com>
+ <20170513012415.GZ4341@mcvoy.com>
+Message-ID: <025701d2cb92$ec8182a0$c58487e0$@ronnatalie.com>
+
+There's no performance "hit" because it doesn't work now.    There's really
+no difference performance or computational complexity wise for
+
+char x[4], y[4];
+x = y;
+and
+struct { char a[4]; } x, y;
+x = y;
+
+About the only thing it would have broken (and would still break today), is
+the fact that function parameters that are defined to be arrays, really pass
+pointers.
+
+char x[4];
+void foo(char a[4]);
+foo(x);
+
+would be costlier than it is now doing the pass by value.    Of course you
+could always fudge if you wanted to pass the pointer by actually doing it
+that way...
+char x[4]
+void foo(char *a);
+foo(x);
+
+-----Original Message-----
+From: Larry McVoy [mailto:lm@mcvoy.com] 
+Sent: Friday, May 12, 2017 9:24 PM
+To: Ron Natalie
+Cc: 'Larry McVoy'; 'David Arnold'; 'The Eunuchs Hysterical Society'
+Subject: Re: [TUHS] C declarations.
+
+On Thu, May 11, 2017 at 06:41:47PM -0400, Ron Natalie wrote:
+> If had my way, y = x and passing and returning arrays by value would 
+> work just like every other C type.
+
+Maybe, just maybe, now that makes sense.  But even now that would be a perf
+hit unless you added some magical copy on write semantics like Tcl has so it
+can have pass by value semantics but pass by reference performance.
+
+Back then, I think the perf hit would have been so bad everyone would be
+passing arrays as a reference anyway.
+--
+---
+Larry McVoy            	     lm at mcvoy.com
+http://www.mcvoy.com/lm 
+
+
