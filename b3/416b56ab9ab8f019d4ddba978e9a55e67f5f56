@@ -1,0 +1,93 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 14 May 2017 17:44:19 -0400 (EDT)
+Subject: [TUHS] The evolution of Unix facilities and architecture
+Message-ID: <20170514214419.EFC1618C0A2@mercury.lcs.mit.edu>
+
+    > From: Random832
+
+    > Ah. There's the other piece. You start the SUID program under the
+    > debugger, and ... it simply starts it non-suid. *However*, in the
+    > presence of shared text ...  you can make changes to the text image
+    > ... which will be reused the *next* time it is started *without* the
+    > debugger.
+
+So I actually tried to do this (on a V6 system running on an emulator), after
+whipping up a tiny test program (which prints "1", and the real and current
+UIDs): the plan was to patch it to print a different number.
+
+However, after a variety of stubbed toes and hiccups (gory details below, if
+anyone cares), including a semi-interesting issue with the debugger and pure
+texts), I'm punting: when trying to set a breakpoint in a pure text, I get the
+error message "Can't set breakpoint", which sort of correlates with the
+comment in the V6 sig$ptrace(): "write user I (for now, always an error)".
+
+So it's not at all clear that the technique we thought would work would, in
+fact, work - unless people weren't using a stock V6 system, but rather one
+that had been tweaked to e.g. allow use of debuggers on pure-text programs
+(including split I+D).
+
+It's interesting to speculate on what the 'right' fix would be, if somehow the
+techique above did work. The 'simple' fix, on systems with a PWB1-line XWRIT
+flag, would be to ignore SETUID bits when doing an exec() of a pure text that
+had been modified. But probably 'the' right fix would be to give someone
+debugging a pure-text program their own private copy of the text. (This would
+also prevent people who try to run the program from hitting breakpoints while
+it's being debugged. :-)
+
+
+But anyway, it's clear that back when, when I thought I'd found the bug, I
+clearly hadn't - which is why when I looked into the source, it looked like it
+had been 'already' been fixed. (And why Jim G hemmed and hawed...)
+
+But I'm kind of curious about that mod in PWB1 that writes a modified pure
+text back to the swap area when the last process using it exits. What was the
+thinking behind that? What's the value to allowing someone to patch the
+in-core pure text, and then save those patches? And there's also the 'other
+people who try and run a program beind debugged are going to hit breakpoints'
+issue, if you do allow writing into pure texts...
+
+
+	Noel
+
+
+--------
+
+
+For the gory details: to start with, attempting to run a pure-text program
+(whether SUID or not) under the debugger produced a "Can't execute
+{program-name} Process terminated."  error message.
+
+'cdb' is printing this error message just after the call to exec() (if that
+fails, and returns). I modified it to print the error number when that
+happens, and it's ETXTBSY. I had a quick look at the V6 source, to see if I
+could see what the problem is, and it seems to be be (in sys1$exec()):
+
+    if(u.u_arg[1]!=0 && (ip->i_flag&ITEXT)==0 && ip->i_count!=1) {
+		     u.u_error = ETXTBSY;
+			       goto bad;
+			       }
+
+What that code does is a little obscure; I'm not sure I understand it. The
+first term checks to see if the size of the text segment is non-zero (which it
+is not, in both 0407 and 0410 files). The second is, I think, looking to see
+if the inode is marked as being in use for a pure text (which it isn't, until
+later in exec()). The third checks to make sure nobody else is using the file.
+
+So I guess this prevents exec() of a file which is already open, and not for a
+pure text. (Why this is the Right Thing is not instantly clear to me...)
+
+Anyway, the reason this fails under 'cdb' is that the debugger already has it
+open (to be able to read the code). So I munged the debugger to close it
+before doing the exec(), and then the error went away.
+
+Then I ran into a long series of issues, the details of which are not at all
+interesting, connected with the fact that the version of 'cdb' I was using
+(one I got off a Tim Shoppa modified V6 disk) doesn't correspond to either of
+the sources I have for 'cdb'.
+
+When I switched to the latest source (so I could fix the issue above), it had
+some bug where it wouldn't work unless there was a 'core' file. But eventually
+I kludged it enough to get the 'can't set breakpoints' message, at which point
+I threw in the towel.
+
+
