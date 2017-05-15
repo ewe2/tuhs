@@ -1,0 +1,71 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Mon, 15 May 2017 11:47:51 -0700
+Subject: [TUHS] C declarations.
+In-Reply-To: &lt;030d01d2cd06$c44e2840$4cea78c0$@ronnatalie.com&gt;
+Message-ID: <c993682baa397327f63f0a1dd43b1be698281791@webmail.yaccman.com>
+
+
+
+	Some interesting comments:
+
+	    "You all are missing the point as to what the cost of passing
+arrays by value or what other languages do"
+
+	I don't think so.  To me the issues is that the model of what it
+means to compute has changed since the punch-card days.  When you
+submitted a card deck in the early days, you had to include both the
+function definition and the data--the function was compiled, the data
+was read, and, for the most part there were no significant side
+effects (just a printout, and maybe some stuff on mag tape).
+
+	This was a model that had served mathematics well for centuries, and
+it was very easy to understand.  Functional programming people still
+like it a lot...
+
+	However, with the introduction of permanent file systems, a new
+paradigm came into being.  Now, interactions with the computer looked
+more like database transactions:  Load your program, change a few
+lines, put it back, and then call 'make'.  Trying to describe this
+with a purely functional model leads to absurdities like:
+
+	     file_system = edit( file_system, file_selector,
+editing_commands );
+
+	In fact, the editing commands can change files, create new ones, and
+even delete files.  There is no reasonable way to handle any
+realistic file systems with this model (let alone the Internet!)
+
+	In C's early days, we were just getting into the new world.  Call by
+value for arrays would have been expensive or impossible on the
+machine with just a few kilobytes of memory for program + data.  So
+we didn't do it.
+
+	Structures were initially handled like arrays, but the compiler chose
+to make a local copy when passed a structure pointer.  This copy was,
+at one time, in static memory, which caused some problems.  Later, it
+went on the stack.  It wasn't much used...
+
+	This changed when the Blit terminal project was in place.  It was
+just too attractive on a 68000 to write
+
+	    struct pt = {  int x;  int y }        /* when int was
+16-bits */
+
+	and I made PCC pass small structures like this in registers, like
+other arguments.  I seem to remember a dramatic speedup (2X or so)
+from doing this...
+
+"(did) Dennis / Brian/ Ken regret this design choice?
+
+	Not that I recall.  Of course, we all had bugs in this area.  But I
+think the lack of subscript range checking was a more serious problem
+than using pointers in the first place.  And, indeed, for a few of
+the pioneers, BCPL had done exactly the same thing.  
+
+	Steve
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170515/3b53b088/attachment.html>
+
