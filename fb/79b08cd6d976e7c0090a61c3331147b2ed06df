@@ -1,0 +1,63 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Fri, 26 May 2017 21:08:23 +0200
+Subject: [TUHS] Early Unix Spider network
+Message-ID: <29939564-F3EC-461E-BA74-BBD4AB8FAA50@planet.nl>
+
+
+Progressed a little further:
+
+[1] The 'ufs' command was a variation on the 'nfs' command. The man page
+that Noel provided for nfs includes the paragraph:
+
+"There is a command /usr/usg/tom/ufs which transfers files to
+the USG Unix systems.  The option letter 7 for the 11/70 or
+4 for the 11/45 should be used.  Otherwise 'ufs' is similar to
+'nfs'."
+
+This means there must have been a Unix based File Store (server).
+Does anybody have a suggestion who 'tom' at USG might have been?
+
+[2] The V5 man pages in the archive have a man page for 'npr',
+in section VI. It says:
+
+NAME
+	npr - print file on Spider line-printer
+
+SYNOPSIS
+	npr file …
+
+DESCRIPTION
+	Npr prints files on the line, printer in the Spider room,
+	sending them over the Spider loop. If there are no arguments,
+	the standard input is read and submitted. Thus npr may be used
+	as a filter.
+
+FILES
+	/dev/tiu/d2 tiu to loop
+
+It suggests that the printer was hooked up to the Spider switch and that
+channel 2 was hardcoded to it.
+
+[3] Upon closer inspection, the tiu.c driver is a character mode device,
+the use of disk buffers and a strategy() routine had me confused.
+It is just a reflection of the fact that it uses DMA hardware.
+
+The code for tiu.c in NSYS/V4 is rather different from the code in
+the SRI-NOSC tree: thinking on how to select channels seems to have
+changed in between these two versions.
+
+[4] Also I found the below post that mentions the snstat() call:
+http://minnie.tuhs.org/pipermail/tuhs/2015-December/006286.html
+The object code for snstat() is in libc.a in the dmr's V5 image.
+Reconstructed, the source code is here:
+http://chiselapp.com/user/pnr/repository/Spider/artifact/a93175746bd9f94f
+
+In short, snstat() is a modified stty call, an evolution in the direction of
+the later ioctl() system call.
+
+No progress as yet on the early history of 'alarm()'.
+
+Paul
+
+
+
