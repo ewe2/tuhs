@@ -1,0 +1,45 @@
+From: w.f.j.mueller@retro11.de (Walter F.J. Mueller)
+Date: Mon, 5 Jun 2017 16:12:47 +0200
+Subject: [TUHS] 211bsd: kernel panic after a 'here document' in tcsh
+Message-ID: <c5345a44-82e9-7aca-a754-6b09c73e9c44@retro11.de>
+
+Hi,
+
+I'm using 211bsd (Version 447) and found that a 'here document' in tcsh
+leads to a kernel panic. It's absolutely reproducible on my system, both
+when run it on my FPGA PDP-11 or in simh. Just doing
+
+   tcsh
+   cat << EOF
+
+is enough, and I get
+
+     ka6 31333 aps 147472
+     pc 161324 ps 30004
+     ov 4
+     cpuerr 20
+     trap type 0
+     panic: trap
+     syncing disks... done
+
+looking at the crash dump gives
+
+   cd /etc/crash
+   ./why 4
+     Backtrace:
+     0147372: _boot(05000,0100) from    ~panic+072
+     0147414: _etext(011350) from ~trap+0350
+     0147450: ~trap() from call+040
+     0147516: _psignal(0101520,0160750) from ~trap+0364
+     0147554: ~trap() from call+040
+
+so the crash is in psignal, which is afaik the kernel internal
+mechanism to dispatch signals.
+
+Questions:
+   1. has anybody seen this before ?
+   2. any idea what the reason could be ?
+
+
+		With best regards, 	Walter
+
