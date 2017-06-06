@@ -1,0 +1,115 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Tue, 6 Jun 2017 21:15:23 +0200
+Subject: [TUHS] 211bsd: kernel panic after a 'here document' in tcsh
+In-Reply-To: <mailman.1.1496714401.14870.tuhs@minnie.tuhs.org>
+References: <mailman.1.1496714401.14870.tuhs@minnie.tuhs.org>
+Message-ID: <e6cd2354-8d02-1c5d-4402-9444c11e0677@update.uu.se>
+
+On 2017-06-06 04:00, Michael Kjörling <michael at kjorling.se> wrote:
+>
+> On 5 Jun 2017 16:12 +0200, from w.f.j.mueller at retro11.de (Walter F.J. Mueller):
+>> I'm using 211bsd (Version 447) and found that a 'here document' in tcsh
+>> leads to a kernel panic. It's absolutely reproducible on my system, both
+>> when run it on my FPGA PDP-11 or in simh. Just doing
+>>
+>>   tcsh
+>>   cat << EOF
+> I'm curious whether the same thing happens if you try that in some
+> other shell? (Not sure how widely here documents were supported back
+> then, but I'm asking anyway.)
+
+Not sure if any of the other shells have this. We're basically talking 
+csh, sh and ksh unless I remember wrong.
+But it's a good question. If noone else have tried it by tomorrow, I 
+could check.
+
+>> is enough, and I get
+>>
+>>     ka6 31333 aps 147472
+>>     pc 161324 ps 30004
+>>     ov 4
+>>     cpuerr 20
+>>     trap type 0
+>>     panic: trap
+>>     syncing disks... done
+>>
+>> looking at the crash dump gives
+>>
+>>   cd /etc/crash
+>>   ./why 4
+>>     Backtrace:
+>>     0147372: _boot(05000,0100) from    ~panic+072
+>>     0147414: _etext(011350) from ~trap+0350
+>>     0147450: ~trap() from call+040
+>>     0147516: _psignal(0101520,0160750) from ~trap+0364
+>>     0147554: ~trap() from call+040
+>>
+>> so the crash is in psignal, which is afaik the kernel internal
+>> mechanism to dispatch signals.
+> The PC value in the panic report ("pc 161324") strikes me as high, but
+> 161324 octal is 58068 decimal, so it's not excessively so, and perhaps
+> in line with what one might expect to see with a kernel pinned near
+> top of memory. Are the offsets in the backtrace constant, i.e. does it
+> always crash on the same code?
+
+161324 is way high. This is in kernel mode, and that is in the I/O page. 
+Basically no code lives in the I/O page (some boot roms and hardware 
+diagnostics excepted). This smells like corrupted memory (pointer or 
+stack), or something else very funny.
+
+> Not knowing what cpuerr 20 is specifically doesn't help, and at least
+> http://www.retro11.de/ouxr/29bsd/usr/src/sys/sys/trap.c.html#n:112
+> (which doesn't seem to be too far from what you are running) isn't
+> terribly enlightening; CPUERR is simply a pointer into a memory-mapped
+> register of some kind, as seen at
+> http://www.retro11.de/ouxr/29bsd/usr/include/sys/iopage.h.html#m:CPUERR,
+> and at least pdp11_cpumod.c from the simh source code at
+> http://simh.trailing-edge.com/interim/pdp11_cpumod.c wasn't terribly
+> enlightening, though of course I could be looking in entirely the
+> wrong place.
+
+Like others said - the cpu error register is documented in the processor 
+handbook.
+
+020 means Unibus Timeout, which is consistent with trying to access 
+something in the I/O page, where there is no device configured to 
+respond to that address.
+
+I just tried the same thing on a simh system here, and I do not get a 
+crash. This on 2.11BSD at patch level 449, running on an emulated 11/94.
+
+I do however get tcsh to crash.
+
+simh:/home/bqt> su -
+Password:
+erase, kill ^U, intr ^C
+# tcsh
+simh:/# cat << EOF
+Illegal instruction - core dumped
+#
+Suspended (tty input)
+simh:/home/bqt>
+simh:/home/bqt> cat /VERSION
+Current Patch Level: 448
+Date: January 5, 2010
+
+
+Yes, it says patch level 448, but it really is 449. This was the system 
+where I worked together with Steven when doing the 449 patch set, but I 
+never got around to actually updating the VERSION file itself.
+
+Also, this was while running on the console.
+
+
+
+Could you (Walter) try the latest version of 2.11BSD and see if you 
+still get that crash?
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
