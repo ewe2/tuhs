@@ -1,0 +1,123 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Fri, 9 Jun 2017 00:29:13 +0200
+Subject: [TUHS] 211bsd: kernel panic after a 'here document' in tcsh
+In-Reply-To: <mailman.884.1496866451.3779.tuhs@minnie.tuhs.org>
+References: <mailman.884.1496866451.3779.tuhs@minnie.tuhs.org>
+Message-ID: <078af6e5-fa47-c66f-1d30-b4265277419a@update.uu.se>
+
+On 2017-06-07 22:14, "Walter F.J. Mueller"<w.f.j.mueller at retro11.de> wrote:
+
+> Hi,
+> 
+> a few remarks on the feedback on the kernel panic after a 'here document' in tcsh.
+> 
+> To Michael Kjörling question:
+>   > I'm curious whether the same thing happens if you try that in some
+>   > other shell? (Not sure how widely here documents were supported back
+>   > then, but I'm asking anyway.)
+> And Johnny Billquist remark
+>   > Not sure if any of the other shells have this.
+> 
+> 'here documents' are available and work fine in sh and csh.
+> And are in fact used, examples
+
+Ah. Thanks. Too lazy to check.
+
+> To Michael Kjörling remark
+>   > The PC value in the panic report ("pc 161324") strikes me as high
+> and Johnny Billquist remark
+>   > This is in kernel mode, and that is in the I/O page.
+> 
+> 211bsd uses split I/D space and uses all 64 kB I space for code.
+
+D'oh! Color me stupid. I should have thought of that.
+
+> The top 8 kB are in fact  the overlay area, and the crash happened
+> in overlay 4 (as indicated by ov 4). With a simple
+> 
+>     nm /unix | sort | grep " 4"
+> 
+> one gets
+> 
+>     161254 t ~psignal 4
+>     162302 t ~issignal 4
+> 
+> so the crash is just 050 bytes after the entry point of psignal. So the
+> PC address is fine and not the problem. For psignal look at
+> 
+>     http://www.retro11.de/ouxr/211bsd/usr/src/sys/sys/kern_sig.c.html#s:_psignal
+> 
+> the crash must be one of the first lines. psignal is an internal kernel
+> function, called from
+> 
+>     http://www.retro11.de/ouxr/211bsd/usr/src/sys/sys/kern_sig.c.html#xref:s:_psignal
+> 
+> and has nothing to do with the libc function psignal
+> 
+>     http://www.retro11.de/ouxr/211bsd/usr/man/cat3/psignal.0.html
+>     http://www.retro11.de/ouxr/211bsd/usr/src/lib/libc/gen/psignal.c.html
+
+The libc function would be in user mode, so that one was pretty clear.
+
+Ok. Digging through this a little for real then.
+
+psignal gets called with a signal from the trap handler. The actual 
+signal is weird. It would appear to be 0160750, which would be -7704 if 
+I'm counting right. That does not make sense as a signal.
+
+The psignal code pulls a value based on the signal number, which is the 
+line:
+         prop = sigprop[sig];
+
+which uses the signal number as an index. With a random, weird signal 
+number, this access wherever that might end up. Which is when you get 
+the crash.
+
+On my system, sigprop is at address 0012172, which, with a signal of 
+-7704 ends up at address 0173142, which by (un)luck happens to be in the 
+middle of the diagnostics bootstrap rom space. So I don't get a Unibus 
+timeout error, while you do. Probably because sigprop is at a slightly 
+different address in your kernel.
+
+So, the real question is how trap can be calling psignal with such a 
+broken signal number.
+
+I might dig further down that question another day. But unless you 
+already got this far, I might have saved you a few minutes of digging. I 
+did start looking into the trap code, which is in pdp/trap.c, but this 
+is not entirely straight forward. It goes through a bunch of things 
+trying to decide what signal to send, before actually calling psignal.
+
+> To Johnny Billquist remark
+>   > Could you (Walter) try the latest version of 2.11BSD and see if you
+>   > still get that crash?
+> 
+> very interesting that you see a core dump of tcsh rather a kernel panic.
+
+Indeed.
+
+> Whatever tcsh does, it should not lead to a kernel panic, and if it does,
+> it is primarily a bug of the kernel. It looks like there are two issues,
+> one in tcsh, and one in the kernel. I've a hunch were this might come from,
+> but that will take a weekend or two to check on.
+
+Agree that the kernel should not crash on this.
+
+Also, tcsh should not really crash either, but it's a separate issue, 
+even though one might have triggered the other here.
+But yes, there are two bugs in here.
+If you can recreate the kernel crash on the latest version, that would 
+be good.
+
+But it smells like trap.c have some path where it does not even set what 
+signal to deliver, and then calls psignal with whatever the variable i 
+got at the function start. Which would be some random stuff on the stack.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
