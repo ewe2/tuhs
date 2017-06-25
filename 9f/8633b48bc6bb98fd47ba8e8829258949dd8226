@@ -1,0 +1,56 @@
+From: w.f.j.mueller@retro11.de (Walter F.J. Mueller)
+Date: Sun, 25 Jun 2017 18:25:25 +0200
+Subject: [TUHS] 211bsd: kernel panic after a 'here document' in tcsh
+Message-ID: <bcb14f39-d341-c438-ab84-d566900aea73@retro11.de>
+
+Hi,
+
+two remarks on the issues around FPSIM and tcsh:
+
+I of course wondered by a line like
+
+    mov     $4..,r0
+
+is accepted by 'as', I naively expected that this should cause an error.
+I didn't locate the 211bsd 'as' manual, so checked 7th Edition manuals,
+which can be found under
+
+   https://wolfram.schneider.org/bsd/7thEdManVol2/
+
+The assembler manual, see
+   https://wolfram.schneider.org/bsd/7thEdManVol2/assembler/assembler.pdf
+
+states
+
+    6.1  Expression  operators
+         The operators are:
+            (blank)     when there  is  no  operand  between  operands,
+                        the  effect  is  exactly  the  same  as  if  a
+                        ‘+’ had  appeared.
+
+So the lexer sees two tokens
+
+   $4.    --> number
+   .      --> symbol for location counter
+
+and, because the default operator is '+', interprets this as
+
+    mov     $4. + . , r0
+
+which ends up being a number in the 160000 to 177777 range.
+
+So 'as' is not to blame, works as designed.
+
+Noel Chippa wrote:
+ > I'm fairly amazed that apparently nobody has run across one of these 4 before!
+ > (Or, at least, not bothered to report it.)
+ > I wonder how long that bug has been in the code?
+
+The answer is: this bug was in 211bsd all the time.
+Steven Schultz told me that that they simply didn't have a way to
+test FPSIM because all machines had FPP, and the only way of testing
+would have been to physically remove the FP11 from a 11/70.
+
+
+		With best regards,   Walter
+
