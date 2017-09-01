@@ -1,0 +1,163 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 31 Aug 2017 19:27:15 -0700
+Subject: [TUHS] Why Pascal is Not My Favorite Programming Language -
+ Unearthed!
+In-Reply-To: <6D07E768-A4CA-42F5-9D32-E8ECAAB4CB96@bitblocks.com>
+References: <CAJc6K3Wy_GqX4MV631hsEzFZFBFy4n3Ywh5XnCPd811bmOMo2Q@mail.gmail.com>
+ <CANCZdfoY-t2hyJ6QRPKyAPjTrV47y5Fk8O3P0EUkwfjbktx5Yg@mail.gmail.com>
+ <20170831175120.GM11202@mcvoy.com>
+ <CAC20D2NT-z_an3vPsj3F+xLcVOYqnMLFT5FZnMctWmM+23UXyQ@mail.gmail.com>
+ <58653222-af68-ba25-bc87-3dc9f36b6c7a@telegraphics.com.au>
+ <F08D5B2F-2CD6-4708-A18B-4F3F9F4209E5@cheswick.com>
+ <20170831214608.GS11202@mcvoy.com>
+ <E69CA2DD-44E3-43C9-8480-3D061C450AA6@bitblocks.com>
+ <20170901012655.GH448@mcvoy.com>
+ <6D07E768-A4CA-42F5-9D32-E8ECAAB4CB96@bitblocks.com>
+Message-ID: <20170901022715.GL448@mcvoy.com>
+
+No offense intended but I pretty much dealt with all of this in L.
+little-lang.org
+
+I'll freely admit it is not perfect but it certainly touches on your
+comments and would not be hard to bring into C.
+
+On Thu, Aug 31, 2017 at 07:22:10PM -0700, Bakul Shah wrote:
+> 
+> > On Aug 31, 2017, at 6:26 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> > 
+> > On Thu, Aug 31, 2017 at 06:22:41PM -0700, Bakul Shah wrote:
+> >> 
+> >>> On Aug 31, 2017, at 2:46 PM, Larry McVoy <lm at mcvoy.com> wrote:
+> >>> 
+> >>> On Thu, Aug 31, 2017 at 04:37:17PM -0400, William Cheswick wrote:
+> >>>> I look to the likes of go and rust to get us back on track.  C is a pretty good assembly language.
+> >>> 
+> >>> So what chaps my grumpy old hide is why the heck do a whole new language
+> >>> when you have one that is pretty good?  Suppose we took C and added a
+> >>> dialect via options:
+> >>> 
+> >>> 	--no-ptrs	// use arrays and indices, you get bounds checking
+> >>> 	--strings	// system managed memory for strings, like tcl
+> >>> 	--perlisms	// if (buf =~ /re/) and unless (it_worked())
+> >> 
+> >> Such a language would stop being C.
+> > 
+> > Indeed.  But it builds on C.
+> > 
+> >> In Go you can use slices instead of arrays (but slices are only one dimensional).
+> >> Ptrs are relatively safe as memory is garbage collected so e.g. a function can
+> >> return &local_variable. No perlism.
+> >> 
+> >> Go provides other features which are quite useful: concurrency, channels,
+> >> interfaces, packages.
+> >> 
+> >> People who like C tend to like Go. But Go is not low-level enough. No one
+> >> is writing a kernel in it! Or doing bare metal programming. AFAIK.
+> > 
+> > Exactly.
+> > 
+> >>> etc.  Why create an entirely new language, new syntax, new linkage, etc,
+> >>> instead of fixing C's shortcomings?
+> >> 
+> >> C has too many problems. If you try fixing them, none of the "dusty decks"
+> >> would run on such a compiler + the new language would be severely
+> >> hampered in its evolution due to its C legacy.
+> > 
+> > So I'd need to understand more to believe that claim.  And for the record,
+> > what I'm going for is a new C that is still C enough to be useful but
+> > fixes the problems enough to be a new language.  Someone asked about
+> > C++ and D, nope.  Too far from C.  I just want a C that fixes enough
+> > of the problems that it is more acceptable to modern programmers but
+> > is still C.  Not sure if I'm explaining that well enough.
+> 
+> See below. I think it would be not easy to build a simpler language
+> that is consistent and regular. I just touched on a couple of things
+> but there would be many more such small decisions....
+> 
+> 1. Ptrs. If you remove them completely, functions can become
+>    pure and can not change anything. Most likely you'd end up
+>    adding "ref" parameter, which would be sorta like Pascal's
+>    var parameters.
+> 
+>        int f(var int x) {
+>                 x++;
+>                 return x
+>        }
+> 
+>         ...
+>         int z = 1;
+>         int y = f(z);   // y should be 2
+>         int x = f(z);   // x should be 3
+> 
+>    The benefit is that now you can not clobber the ptr but
+>    otherwise the same result.
+> 
+>    Do you allow declaring refs? You should for consistency.
+> 
+>         int x1;
+>         ref int x2 = x1;
+> 
+>    But if you allow this, either this assignment behaves
+>    differently from a ref int parameter or it would crash
+>    since x2 doesn't really point anywhere on initialization.
+>    So now you will be tempted to say
+> 
+>         ref int x2 = ref x1;
+> 
+>    This is almost exactly like
+> 
+>         int *x2 = &x1;
+> 
+>    A bit ugly.  IIRC Algol68 had something similar and well
+>    defined rules for how multi level refs were handled.
+> 
+> 2. Passing Arrays. Now you need a way to pass subarrays.
+> 
+>         int z[] = {1,2,3,4};
+>         int g(int x[]) {
+>             ...
+>         }
+>         ...
+>         int x = g(z[3:5]);      // g.x[0] = z[3]; g.x[1] = z[4].
+> 
+>    Now you need a way to iterate through the array in g.
+> 
+>         int g(int x[]) int {
+>             int sum = 0;
+>             for (int i = 0; i < len(x); i++) sum += x[i];
+>             return sum;
+>         }
+> 
+>    But what happens if in g you change x[i]? Does z change?
+>    If you don't allow this, x[] becomes a constant but a
+>    scalar variable can be changed. So this is inconsistent.
+> 
+>    If you allow this, int x[] almost acts like var int x[]!
+>    For consistency with scalars you should copy z[3:5] but
+>    that can be expensive for large arrays. So now you will be
+>    tempted to use const (now a ref can be impllicitly passed
+>    since array won't be written over).
+> 
+>    Then there is the issue of multidimensional arrays.
+> 
+>         int z[4][5];
+>         int h(int x[][]) {
+>             ...
+>         }
+>         int w = g(z[2:4][1:3]);
+> 
+>    If you are fixing arrays, you may as well do them right
+>    so that fortran code can be easily ported.  So what about
+> 
+>         int h(int x[][]) {
+>                 int s = g(x[1][]);
+>         }
+> 
+>    Here we're passing a column of z as a vector to g.
+>    You'd end up with a illife vector or something! But
+>    if you do this, vector access can slow down...
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
