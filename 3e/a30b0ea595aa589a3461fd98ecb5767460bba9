@@ -1,0 +1,74 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 01 Sep 2017 16:33:07 -0700
+Subject: [TUHS] Future Languages (was Pascal not Favorite...)
+In-Reply-To: Your message of "Fri, 01 Sep 2017 18:43:47 -0000."
+ <CAP6exYK6EdXeTSn7Hj9Lj-g=oMnbYgwjiLVCXcDQEAhB32rO9Q@mail.gmail.com>
+Message-ID: <201709012333.v81NX7jU020037@elf.torek.net>
+
+>What I have found interesting, in the several Go projects I've
+>been on, is how quickly people walk away from the CSP-like ideas
+>(goroutines and chans) to all the old school shared memory
+>techniques, mutexs, linked lists, and such, based on
+>microbenchmarks.
+
+Well, "Go channels are bad" :-)
+http://www.jtolds.com/writing/2016/03/go-channels-are-bad-and-you-should-feel-bad/
+
+Seriously, the above article is really quite good.  It shows you how
+nice channels are, and also how annoying they are for real world
+code.
+
+(There's also some annoyances colleagues using Go have hit, but I
+have not actually used Go for anything.)
+
+I was going to mention something that others have covered: TeX
+papered over Pascal's inadequacies using Knuth's Tangle.  When you
+ported the Pascal-ish TeX to your own system, you:
+
+ - defined your system-specific methods of accessing files
+ - defined your Pascal compiler's default-case keyword (`otherwise`
+   or `else` or `default` or whatever it was)
+
+and so on, in a system-specific file.  Tangle would read your
+system-specific definitions, mix them in with the TeX source, and
+produce a `.p` (or whatever name) file to compile.  It was like
+having a somewhat klunky variant of the C preprocessor.
+
+Along similar yet different lines ...
+
+For current $job, I've been reading up on Rust.  There is a lot to
+like here: it's like C++ in terms of compile time type safety, and
+the language attempts, with lifetime declarations and annotations
+and the idea of memory ownership, to guarantee memory safety and
+even thread safety.
+
+(The build system also handles versioning directly.  This seems to
+be a big vacuum in the Go ecosystem.)
+
+There is a lot to dislike too.  The syntax is klunky in several
+places and there's a fair amount of bondage-and-discipline that
+can be handled easily with appendages like ".unwrap", which is
+fine but quite verbose.  The type and lifetime inference rules are
+a bit arcane, and don't work for all the desirable cases.  (E.g.,
+instead of C++'s solution that "x = &&(expr)" extends the lifetime
+of the temporary holding the expression to the entire function,
+Rust, well, just doesn't, and then complains that the expression
+evaporates too soo, even though the reference to it evaporates
+just a moment later, and holding the expression for just a bit
+longer would have solved the problem.)
+
+I'm not far enough along yet to decide how I feel overall, but it
+is definitely a big *syntactic* improvement over C++ (which I am
+also using for current $job), and the semantics actually seem less
+klunky.  (C++17 is trying to improve this but they're painted into
+many corners simultaneously, so adding allocator decorations and
+better variable forwarding and so on is just nightmarish.  The
+lvalue / rvalue / prvalue / glvalue / xvalue stuff, yikes.  All
+because it's such a big deal to avoid copying heavy temporaries...)
+
+(See: http://en.cppreference.com/w/cpp/language/value_category
+http://en.cppreference.com/w/cpp/language/implicit_conversion
+especially the "since C++11" and "since C++17" sections)
+
+Chris
+
