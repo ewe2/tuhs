@@ -1,0 +1,154 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Fri, 1 Sep 2017 12:22:20 -0400
+Subject: [TUHS] Why Pascal is Not My Favorite Programming Language -
+	Unearthed!
+In-Reply-To: <ada36aea-dc85-71b1-8a68-5210a003ae27@telegraphics.com.au>
+References: <201708301234.v7UCYsPQ002608@freefriends.org>
+ <20170831011339.9465B124AEA5@mail.bitblocks.com>
+ <20170831144852.GK11202@mcvoy.com>
+ <CAJc6K3Wy_GqX4MV631hsEzFZFBFy4n3Ywh5XnCPd811bmOMo2Q@mail.gmail.com>
+ <CANCZdfoY-t2hyJ6QRPKyAPjTrV47y5Fk8O3P0EUkwfjbktx5Yg@mail.gmail.com>
+ <20170831175120.GM11202@mcvoy.com>
+ <CAC20D2NT-z_an3vPsj3F+xLcVOYqnMLFT5FZnMctWmM+23UXyQ@mail.gmail.com>
+ <58653222-af68-ba25-bc87-3dc9f36b6c7a@telegraphics.com.au>
+ <CAEoi9W5FPUihmWh8p8sCKb8k57YvM=tJJQzxWaWJid84yXG-0w@mail.gmail.com>
+ <ada36aea-dc85-71b1-8a68-5210a003ae27@telegraphics.com.au>
+Message-ID: <CAEoi9W6BZAZT3BZ==P4s6kt_ALW9jsc8A3kvT-gMkooxqaifMA@mail.gmail.com>
+
+On Fri, Sep 1, 2017 at 10:43 AM, Toby Thain <toby at telegraphics.com.au>
+wrote:
+
+> On 2017-08-31 10:38 PM, Dan Cross wrote:
+> [snip]
+> > While most of the
+> > languages we use are Turing complete (I suppose that in the limit one
+> > can write a Common Lisp implementation in C, for example), it is
+> > unarguable that some languages make it *easier* to express some things
+> > than other languages. In some cases this is deliberate: consider
+> > languages with strong, static type systems versus dynamic but strongly
+> > typed languages (or statically but weakly typed). Here the language
+> > designers have intentionally made it hard to escape the tyranny of the
+> > type system in order to prevent bugs.
+>
+> (Tyranny is not the word I would use. A more modern viewpoint would
+> include topics like parametric polymorphism, typeclasses and so on.)
+
+
+The specific use of the word "tyranny" was meant to be tongue-in-cheek.
+Apologies if it did not come across.
+
+> Anyway, I wonder if Knuth would have produced the same TeX and METAFONT
+> > had he started in Pascal; perhaps he would have, but maybe he would have
+> > given up on some of the more ambitious parts of both because the
+> > language made it much less convenient (not knowing SAIL, I'm
+>
+> It seems inconceivable to me that there are "ambitious parts" of TeX and
+> METAFONT that Professor Knuth had to omit because he was using Pascal.
+>
+
+But he wasn't using Pascal. The point was to wonder whether TeX and
+METAFONT would be different programs if he were. Clem seemed to imply that
+he thought that was unlikely, based on his previous use of SAIL.
+
+[snip]
+>
+> I have not compared the codebases but wouldn't one expect that the final
+> production TeX rewrite is *more* ambitious than the early SAIL version?
+> (By the time I began using/porting TeX in the 1980s, the older version
+> was completely obsolete.)
+
+
+I don't know, but that's besides the point: the question was more about how
+the initial programming language shaped the design of the program.
+Specifically, had Knuth *started* in Pascal instead of SAIL, would TeX have
+been different? To put it another way, to what extent was he constrained,
+freed, or otherwise influenced by his medium?
+
+> speculating). Perhaps having gone through the exercise of producing TeX
+> > in SAIL gave him insight that inspired him to work around Pascal's
+> > expressive limitations. Or perhaps the opposite is true.
+>
+> I honestly don't know what limitations you mean. If you mean "different
+> style of expression," sure. (Maybe if SAIL had lexically scoped lambda
+> closures, there'd be a difference worth talking about...)
+
+
+Formally speaking, Pascal is no more limited than any other Turing-complete
+language. But there's a difference between *formal* expressiveness and
+*informal* expressiveness. Some languages require proportionally more
+effort to produce the same program than others. I'm told that sed is
+Turing-complete; I'd sure hate to write TeX in it.
+
+The specific "limitations" I'm referring to are mostly covered in the BLTR
+#100; things like array length being part of the array object's type; lack
+of compile-time initializers, statics, etc.
+
+As an illustrative example, consider the case of a simple dispatch loop
+where I want to do some work based on the entry of some string key. In C,
+one might write something like this:
+
+typedef struct Cmd Cmd;
+struct Cmd {
+        const char *cmd;
+        int (*thunk)(void);
+};
+
+int acmd(void);
+int bcmd(void);
+// Etc....
+
+Cmd cmds[] = {
+    {"a", acmd},
+    {"b", bcmd},
+    // ...etc...
+};
+
+#define nelem(A) (sizeof(A)/sizeof((A)[0]))
+
+int
+dispatch(const char *cmd)
+{
+        for (size_t k = 0; k < nelem(cmds); k++) {
+                if (strcmp(cmds[k].cmd, cmd) == 0)
+                        return cmds[k].thunk();
+        }
+        return -1;
+}
+
+But how would one write this in Pascal? For a completely unrelated task, I
+actually tried to write something like this in Pascal a few weeks ago and
+found the lack of compile-time initializers to be an impediment. It struck
+me that I could create a record type of some kind or another and
+dynamically create a dispatch table via an initialization procedure (say,
+building up a linked list or create an array of pointers to functions), but
+it struck me that it was possibly more work than just avoiding the
+table-driven approach and having a bunch of hard-coded test cases inside of
+a loop. Etc.
+
+> Regardless, comparing the work of a Knuth to the industry average is
+> > more than a bit unfair. :-)
+> >
+> >     I suppose Apple's Pascal and Object Pascal -- used for Lisa and
+> >     Macintosh applications and systems software -- comes under the "so
+> >     people fixed it" category?
+> >
+> >
+> > Object Pascal, Delphi and Free Pascal (which seeks to implement the best
+> > of both) seem to have definitely fallen into that category.
+>
+> I'm not sure if the Apple compiler used circa 1983 was *Object* Pascal
+> but it was certainly extended with many intrinsics, casts, and pointer
+> operations, bringing it essentially into parity with C for systems and
+> application programming.
+
+
+This confuses me; Apple Pascal and Object Pascal are distinct but related
+languages. I specifically referred to Object Pascal, Delphi and Free Pascal
+but not Apple Pascal. It strikes me in re-reading what I wrote earlier that
+my comments were a bit of a non-sequitur. My bad.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170901/97391328/attachment-0001.html>
+
