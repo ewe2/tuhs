@@ -1,0 +1,45 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Mon, 4 Sep 2017 13:44:21 -0400
+Subject: [TUHS] Line Terminators in Text Files [Was: Re: Why Pascal is
+ Not My Favorite Programming Language - Unearthed!]
+In-Reply-To: <cfb786623cc4a7df90c6009394bfff527b31f440@webmail.yaccman.com>
+References: <alpine.BSF.2.21.1709031252120.48526@aneurin.horsfall.org>
+ <cfb786623cc4a7df90c6009394bfff527b31f440@webmail.yaccman.com>
+Message-ID: <CABH=_VRUjy5ntNMgSijUBuUfZ9tWcYhgBfJ4G0w9tBXoeetqnA@mail.gmail.com>
+
+On 9/3/17, Steve Johnson <scj at yaccman.com> wrote:
+> I think the reason for this is pretty obvious.  At the time -- for
+> many of the paper terminals, line feed simply rotated the platen, and
+> the print head stayed at the same column position.  Carriage return
+> returned the print head to the first column without advancing the
+> paper (remember overstriking?).  But there were also some terminals
+> that both advanced the paper and returned the print head (I'm hazy
+> about this, but I think the IBM Selectric was one...).
+
+IIRC, you're right about this.  I'm pretty sure I remember the IBM
+2741 and friends (the Selectric terminals) operating this way.
+>
+> I do remember one guy who wrote his program to output LF/CR instead of
+> CR/LF.   The teletype driver would do a LF and then space out to the
+> previous column and then do a carriage return.  Pretty painful at 300
+> baud!
+
+At 110 baud, the model 33 Teletype took up to two character times to
+return the typeball to the left margin when executing a CR.  You
+needed to follow CR with two non-printing characters to avoid
+erroneously striking a character in the middle of the line.  With
+CR/LF, the LF served as one of these non-printables.  CR/LF/NUL was
+the common sequence used to return the carriage and advance the
+platen.  If you did LF/CR you'd need LF/CR/NUL/NUL, thus wasting one
+character time.  So just about everyone implemented newline as CR/LF
+rather than LF/CR.
+>
+> Doug might remember better than I but I suspect some terminal did the
+> combined CR/LF only, so that's why Unix adopted it.
+
+I suspect UNIX used LF as EOL for two reasons:  [1] as just mentioned,
+nearly everyone did CR/LF vs LF/CR, and [2] breaking lines on the LF
+allowed for overstriking.
+
+-Paul W.
+
