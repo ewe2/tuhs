@@ -1,0 +1,81 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 4 Sep 2017 14:59:24 -0700
+Subject: [TUHS] Future Languages
+In-Reply-To: <d58d7b6933bca6fcce5a3019ad4f8aee7df564fc@webmail.yaccman.com>
+References: <1504450095.23320.for-standards-violators@oclsc.org>
+ <d58d7b6933bca6fcce5a3019ad4f8aee7df564fc@webmail.yaccman.com>
+Message-ID: <20170904215924.GE14353@mcvoy.com>
+
+On Mon, Sep 04, 2017 at 02:28:23PM -0700, Steve Johnson wrote:
+> A particularly vivid example for me is string handling -- I mean real
+> strings, with concatenation and the ability to add characters onto the
+> beginning, middle or end of the string .?? At one point in the past,
+> Bell Labs and Xerox Parc were two groups that had produced some
+> impressive programs.?? I spent some time at Parc, and ended up envious
+> about the ability of LISP programmers to dynamically add on to almost
+> anything with a high degree of safety.?? This really changed the way
+> one thought about some programs.?? Doing strings in C usually involves
+> pointers pointing at small things, which, given how easy it is to
+> index past the end, was like playing with razor blades.???? C++
+> allowed you to surround such things with safety nets, but sometimes
+> the performance impact was unfortunate.???? A similar example?? is the
+> ability to grow an array.?? This plays very badly with C's pointers --
+> if you move the array, then anybody pointing to it (and, often, there
+> are many such) has a stale pointer-bomb that could go off at any time
+> without warning.?? If you don't move the array, but add on additional
+> pieces, then it is no longer contiguous, so some operations (like
+> scanning all the elements) get very complicated as well.
+
+So we have some source (that you can have as well, Apache license)
+that handles not strings but vectors of strings (or structs or whatever).
+
+I need to write up how it works, it's sort of clever.  It stores both
+the size of the vector (always a power of 2) in part of the bits of the
+first entry and the actual length in the other part.  Because we can
+express powers of two in very little space we can support both values
+in a 32 bit unsigned with a max length of used space of around 134M.
+
+So the vector is
+
+	[0] = [size, used]
+	[1] = first element
+	[2] = second element
+	...
+	[0.used] = last element (I might be off by one)
+
+You use it like so
+
+	char	*v = 0;
+	char	buf[MAXLINE];
+
+	while (fgets(buf, sizeof(buf), stdin)) {
+		/*
+		 * v starts as null, the first one will reset it to a vector,
+		 * as it grows, if realloc fails then the value of v will
+		 * change.
+		 */
+		v = addLine(v, strdup(buf));
+    	}
+
+There are interefaces to do all the perl stuff, push, pop, shift,
+unshift, sort, join, search, remove, insert, sort, reverse.  There is a
+split that takes a blob and returns a vector, there is a shellSplit that
+splits the way the bourne shell would, there is an interface to spawn a
+program and return a vector, there is one to slurp a file into a vector
+and the other way, etc.  There is pretty much everything you could want,
+we used this everywhere in BitKeeper so it's very old, tested, stable.
+
+It should be pretty easy to lift all that stuff out and stick it in a
+library.  It's handy as heck and pleasant in that it's pretty small for
+small stuff but scales up nicely for larger stuff.  I suppose you could
+think of it as Lisp's list, i was never a Lisp fan, I think of it as 
+Perl lists plus the supporting stuff.
+
+lines.h:
+
+http://repos.bkbits.net/bk/dev/src/libc/lines.h?PAGE=anno&REV=574729199TRQBrjF_tJiHFtKPHiJzQ
+
+lines.c:
+
+http://repos.bkbits.net/bk/dev/src/libc/utils/lines.c?PAGE=anno&REV=56cf7e34BTkDFx47E54DPNG51B2uCA
+
