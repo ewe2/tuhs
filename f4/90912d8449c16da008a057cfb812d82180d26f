@@ -1,0 +1,33 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon,  4 Sep 2017 18:44:07 -0400 (EDT)
+Subject: [TUHS] Line Terminators in Text Files [Was: Re: Why Pascal is
+	Not My Favorite Programming Language - Unearthed!]
+Message-ID: <20170904224407.C7BB218C0B2@mercury.lcs.mit.edu>
+
+    > From: Chris Torek
+
+    > termcap has entries for the number of NUL characters to insert after
+    > carriage return.
+
+Actually, the stock terminal driver in V6 Unix (here:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/sys/dmr/tty.c
+
+if anyone wants to see the actual code; it's in ttyoutput()) had some pretty
+complex code to do just the right amount of delay (in clock ticks) for a large
+number of different motion contral characters (TAB, etc, in addition to LF and
+CR), and then uses the system timer to delay that amount of real time after
+sending such a character (see the very bottom of ttstart()).
+
+E.g. for a NL, it used the fact that it 'knew' which column the print head was
+in to calculate the exact return time.
+
+Clever, but alas, it did this by sticking 'characters' in the buffered output
+stream with the high bit set, and the delay required in the low 0177 bits,
+which the output start routine interpreted; as the code drolly notes, "thus
+(unfortunately) restricting the transmission path to 7 bits". Which was a real
+PITA recently when I tried to download a binary file to an LSI-11 from a V6
+running in Ersatz-11! I had to tweak the TTY driver to allow 8-bit output...
+
+   Noel
+
