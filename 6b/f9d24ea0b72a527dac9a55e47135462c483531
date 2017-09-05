@@ -1,0 +1,74 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Tue, 5 Sep 2017 07:40:52 -0700
+Subject: [TUHS] It is time to modernise "groff"
+In-Reply-To: <DD806FB4-A62F-49DA-9253-2225D09046D7@quintile.net>
+References: <201709051137.v85BbGTU005695@coolidge.cs.Dartmouth.EDU>
+ <DD806FB4-A62F-49DA-9253-2225D09046D7@quintile.net>
+Message-ID: <20170905144052.GN14353@mcvoy.com>
+
+So for those who want WYSIWYG this little script helps.  I call it "g"
+and you run it like so
+
+	g groff -ms -t my_tables.ms
+
+in a terminal (or use &) and it will pop up gv on the processed file[s].
+It sits in a loop and stats all the files and if any have changed it
+reruns the roff and tells gv.
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+-------------- next part --------------
+#!/usr/bin/perl
+
+# Run the command into PS
+# Run gv with the -watch option
+# go into a loop watching the file and rerun command whenever the file
+# has changed.
+
+use POSIX ":sys_wait_h";
+
+$usage = "usage: $0 comand -args -args file [file ...]\n";
+
+foreach $file (@ARGV) {
+	next unless -f $file;
+	push(@files, $file);
+}
+die $usage unless $#files > -1;
+$cmd = "@ARGV > PS.$ENV{USER}";
+$gv = "gv -spartan -antialias PS.$ENV{USER}";
+$gv = "gv --spartan --antialias --media=letter PS.$ENV{USER}";
+
+system "$cmd";
+$pid = fork;
+if ($pid == 0) {
+	exec $gv;
+	die $gv;
+}
+# Read all the files looking for .so's so we catch the implied list.
+# I dunno if groff catches nested .so's but we don't.
+foreach $file (@files) {
+	$stat{$file} = (stat($file))[9];
+	open(F, $file);
+	while (<F>) {
+		next unless /^\.so\s+(.*)\s*$/;
+		$stat{$1} = (stat($1))[9];
+	}
+	close(F);
+}
+while (1) {
+	select(undef, undef, undef, .2);
+	$kid = waitpid($pid,&WNOHANG);
+	exit 0 if (kill(0, $pid) != 1);
+	$doit = 0;
+	foreach $f (keys %stat) {
+		if ($stat{$f} != (stat($f))[9]) {
+			$stat{$f} = (stat($f))[9];
+			$doit = 1;
+		}
+	}
+	if ($doit) {
+		system $cmd;
+		kill(1, $pid);
+	}
+}
+
