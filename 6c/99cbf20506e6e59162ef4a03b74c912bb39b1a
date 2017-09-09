@@ -1,0 +1,167 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Sat, 9 Sep 2017 08:41:51 -0700
+Subject: [TUHS] Happy birthday, Dennis Ritchie!
+In-Reply-To: <alpine.BSF.2.21.1709091456220.48526@aneurin.horsfall.org>
+References: <alpine.BSF.2.21.1709090646420.48526@aneurin.horsfall.org>
+ <b45b9e23-aaa4-4f54-9480-ff0aaac36cc6.maildroid@localhost>
+ <CAE49LG=cE=y0aEQ9NCgSD3wfX3464yQivpd5-btn4suuXLRo4Q@mail.gmail.com>
+ <bd1e3335-26b5-44e0-a2bc-2dfa716c9923.maildroid@localhost>
+ <alpine.BSF.2.21.1709091456220.48526@aneurin.horsfall.org>
+Message-ID: <20170909154151.GK3143@mcvoy.com>
+
+On Sat, Sep 09, 2017 at 03:13:30PM +1000, Dave Horsfall wrote:
+> On Fri, 8 Sep 2017, William Pechter wrote:
+> 
+> >Perhaps the Prime OS or perhaps Domain OS from Apollo would have been the
+> >workstation of the tech world.
+> 
+> I almost worked for Pr1me once (I worked next door to them in North Sydney);
+> what stopped me was their notion that "1" was a prime number (yes, I'm a
+> mathematician)...
+> 
+> >Apollo had a lead on Sun back in the day.
+> 
+> I used to work for Sun, and we hated Apollo :-)
+
+Mr Yacc might like this story.
+
+Before I worked for Sun I worked for Lachman (porting Unix to the ETA-10)
+and the dev environment there was apollos served by a Sun 3/280 file
+server.
+
+I was fresh out of school, interviewed with Lachman for this job, they
+sort of let me believe I'd be doing the VM system for this weird ass
+machine that was basically a cluster with a huge (at the time) 2GB
+"shared" memory that was bcopy only.  Seemed like a fun project.
+
+I got there and they said "Um, you know, we have someone with more
+than zero years of experience working on the VM system.  How about you
+port all the commands?"  Crushed me was like "Really?" They said "Really".
+
+Sigh, whatever.  So what I quickly learned was weird about this machine
+was that native pointers pointed at bits.  The compiler writers were all
+like "fuck that, we point at bytes" but they had to have a way to get to
+real pointers so they decided that if you did 
+
+	char	*p = &whatever;
+	int	i = (int)p;
+
+the assignment of a pointer into an int did the shift to point at the first
+bit of that byte, and the other way shifted the other way.  Got it?  Ints
+held "real" pointers and pointers held byte aligned pointers.  It was weird,
+yes.
+
+The unfortunate side effect is that 
+
+	char	*p = malloc(10);
+
+caused a shift if you didn't include malloc.h.  Because the compiler thought
+malloc was returning a bit pointer so it "kindly" did the shift for us.
+
+This quickly became a pattern.  Here is what I did:
+
+First, and this is the apollo part, I ported the cross compiler from the
+apollo environment to SunOS.  Because compiling on the file server was
+faster in two ways: (a) local file system instead of NFS and (b) the Sun
+was way way faster than those stupid apollo machines.  And the Sun was
+real Unix.  The port caused all sorts of fuss because I wasn't part of
+the compiler team, I had to write a tool that diffed the binaries produced
+by the Sun with the ones produced by the apollos to show that the only
+difference was in the a.out header that had a timestamp or something.
+
+Second, and this is the part that Steve might like, I hacked lint suck
+that when it complained about type mismatches it wandered around until
+it got to the base types and printed out
+
+	type mismatch: "INT" vs "POINTER"
+
+which wasn't that easy, I didn't really understand the guts of lint.
+I think those changes did wind their way back into Sys V lint somehow,
+I had nothing to do with it, maybe someone from Lachman fed them back
+or maybe the Sys V people redid them on their own.
+
+OK, so now I lint all of /usr/src/cmd and I wrote an awk script (perl
+wasn't around yet and awk worked fine) that looked for any int/pointer
+mismatch, edited the file, and included every header I could think of
+that declared some library function that returned a pointer, string.h,
+malloc.h, etc.  I iterated a few times (this was an overnight thing,
+I'd come in in the morning and see that I forgot some more, add them
+to the list, restart the script).
+
+Finally I get a clean lint run and I start up a compile run, fix up
+a few remaining things (there were surprisingly few, it was an easy
+port) and I've got a built /usr/src/cmd installed on piper1, my
+test machine.  I go to my boss and say "I'm done".  Note that all of
+this stuff, getting onboarded, porting the compiler, wacking lint,
+linting, compiling, took about 3 weeks.  I was a busy little beaver :)
+
+My boss goes "yeah, right.  Hey, Mike, go look at piper1 and see what
+kind of a mess we have".  Mike goes off and comes back, gives me a
+weird look, and says "He's right, he's done".  Sort of, we didn't have
+tty's yet so vi didn't work, we didn't have a kmem driver so ps didn't
+work (which was *really* annoying), etc.  But awk worked, find worked,
+ls worked, all that stuff worked.
+
+My boss says "get out of here, let me think about this".
+
+I come back in the next day, go to my boss (Bob Palm if any of you
+know him, great guy) and he says "You can go home, we'll just pay
+you".  Turns out that Lachman had budgeted for 6 months to do the
+/usr/src/cmd port and it didn't look good to have me sitting around
+doing nothing.
+
+I, being the nerd that I am, said "Do you mind if I stick around if
+I'm doing work?"  Bob says "Go for it, you can do whatever you want
+if you look busy".
+
+And there began the most awesome 6 months of my life.  I wrote
+my own version of ps and a /dev/ps driver that was a dumbed down
+version of /dev/kmem, because I was too clueless to write a kmem
+driver.  People used that ps for a long time until someone did a 
+real kmem driver.
+
+I wrote the Unix side of the disk driver, which sounds hard but 
+wasn't, this thing had I/O channels that had their own processor
+so it was more like writing a http client or something, just in 
+the kernel.  The real driver was in the I/O channel, all I had to
+do was learn how to talk to the I/O channel.  And it was a polling
+driver, no interrupts, there was some hardware glitch with interrupts
+or something, whatever the reason, I just polled so it was easy.
+Shitty perf but easy.
+
+I ported all of the Lachman STREAMS TCP stack.  If I recall correctly
+shorts weren't shorts, they were u32.  So all the 
+
+	unsigned short	port;
+
+became
+
+	unsigned short	port:16;
+
+I remember the stack being the biggest job, there were some things
+that turned out to be tricky, long forgotten.  Oh, I bet anything
+a lot of it was the networking drivers.  I know some of it was 
+me banging on stuff but I think there were some driver issues as
+well, I didn't work on those, I'm not much of a device driver person.
+
+After all this I got sent to Japan with 3 source tapes, the base system
+that included all of /usr/src/cmd and everyone else's stuff that had 
+sort of been approved for integration, a version of the tree with big
+pages, and the version of the tree that had the networking stack in it.
+
+I was sent to the Tokyo Institute of Technology (TIT) and I was the techy
+guy, they sent me with another Sun 3/280 and two Sun 3/50 (screw that
+apollo crud) and told me to set up a dev environment and merge those
+source trees.  So of course the server was installed as "bigtit" and
+the 3/50's as "lefttit" and "righttit" which lasted until the Japanese
+folks figured out what those meant.
+
+I was there for 3 months, doing the merge wasn't easy and then other
+problems cropped, again with the drivers if I remember correctly.
+So the folks back in St Paul were sending me stuff, I was merging it,
+building, installing, testing, reporting back what didn't work, and
+that went on for quite a while.  Eventually it worked and home I 
+went.  Lost a bunch of weight because I didn't like sushi at the 
+time and there weren't a lot of good alternatives that kept my
+weight up.  Fun times.
+
