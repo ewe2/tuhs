@@ -1,0 +1,74 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Sun, 17 Sep 2017 13:55:32 -0400
+Subject: [TUHS] Weird nix? Regulus
+In-Reply-To: <601911ED-162B-47E6-ADB5-4BB31EE6D733@kdbarto.org>
+References: <mailman.1029.1505658197.3779.tuhs@minnie.tuhs.org>
+ <601911ED-162B-47E6-ADB5-4BB31EE6D733@kdbarto.org>
+Message-ID: <000901d32fde$28a036f0$79e0a4d0$@ronnatalie.com>
+
+I was involved in a few supercomputer UNIXes.     The one for most obnoxious
+for writing applications was the Cray X-MP which had only had one numerical
+data size, 64 bits.     The thing had 24 bit pointers.    My attempts to
+guess appropriate sizes in our portable application failed (though it
+complied).   I had sent a junior programmer over to try the port and it
+printed "You've got to be kidding" when it ran.    He calls up and says "I
+think that's one of your messages."
+
+The other port I was intimately familiar with having designed some of the
+hardware (the I/O system) was the Denelcor HEP.   The US Army BRL had this
+thing built to do fluid dynamics problems.   It started out being an analog
+computer project and then moved to hybrid and finally to an all-digital
+Multi-Instruction Multi-Data parallel process built all out of 10800 MECL.
+The neat thing that in addition to running 40 or so concurrent threads it
+could also keep track of like 1024 threads that it hardware scheduled.
+Each memory word had a "full-empty" bit that it would semaphore instructions
+like "Read when Full, Set Empty."
+
+Mike Muuss was the head of our group at the time and when the thing was
+destined to be delivered without an OS, he did his usual "We can put UNIX on
+it."  The brass took us up on the offer.   We ported 4.2 BSD to the thing
+(we'd just come off bringing up a couple of the George Gobel @ Purdue Dual
+VAXes so we figured we knew our way around the MP aspects).
+
+The HEP was the first machine we had four different integral sizes: 8, 16,
+32, and 64.   We wanted 64 to be the "int" size so we were trying to figure
+out what to call the 32 bit type.    Medium was a prime contender.    I
+suggested "short long."   We settled for a new int32 (or some variant
+keyword).    Anyhow, since I was the linker and I/O guy on the project I
+discovered a hideous bug in 4BSD.   The HEP had two addressing modes:
+character (which is what you'd expect) and "word".    The word encoded the
+word size in the low order bits in an unusual fashion.
+
+0x1000 would be the 64 bit value at 0x1000.
+0x1002 would be the 32 bit value at 0x1000.
+0x1006 would be the 32 bit value at 0x1004
+0x1001,1003,1005, 1007 would be the 16 bit values at 1000, 1002, 1004, and
+1006 respectively.
+0x1004 gave you a 64 bit value at 0x1000 (for no useful reason).
+
+There was places all over the 4BSD kernel where what I call "conversion by
+union" was taking place.    There was a type that looked like this
+
+union any {
+      char*    c;
+      short * s;
+      int *I;
+     long *l;
+};
+
+And it would store things into one union accessor and retrieve it from
+another.    This would end up NOT converting the pointer and fun happens
+when the compiler and the hardware were unclear of the actual word size.
+I chased down all this nonsense replacing them with void* so that the proper
+type conversion could be performed.
+
+Neat thing about this machine is for I/O it had 32 individual Unibuses
+gatewayed to it's main memory switch.    Initially, the control logic for
+that used a feature very aptly named "the low speed bus" primarily designed
+for getting the thing configured to boot up.     After realizing that the
+thing was only doing about ten I/O's  a second, we decided we needed to come
+up with something better.   HEP designer Burton Smith and I sat down at the
+local steak house and literally drew up a new design on the napkins that we
+could build out of the spares we had lying around.
+
+
