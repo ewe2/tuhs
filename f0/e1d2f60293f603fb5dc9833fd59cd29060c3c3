@@ -1,0 +1,38 @@
+From: torek@torek.net (Chris Torek)
+Date: Mon, 18 Sep 2017 13:08:05 -0700
+Subject: [TUHS] PDP-10 UNIX?
+In-Reply-To: Your message of "Mon, 18 Sep 2017 13:25:41 -0400."
+ <CAC20D2O3KDoNSHsarY6HDZfrzdTx1UuMz9QCpJ+4XNmERE-idQ@mail.gmail.com>
+Message-ID: <201709182008.v8IK85Ie043490@elf.torek.net>
+
+>> After the first time, there is little to learn, and the tedium of
+>> debugging a compiler and OS on a bare machine, when the documentation of
+>> the machine was hastily written and often incomplete, was frustrating
+>> almost beyond describing.
+
+>+1  And the HW does [not] quite work the way it claimed too....
+>It's fun ... once  :-)
+
+I've done more than one, although it was the "same machine" in
+various ways: SPARC v7, v8, and v9, on sun4c, sun4m, and sun4u.
+
+The sun4u was the most frustrating hardware-bug-wise.  The
+architecture book specifically said that the indexing in the cache
+(left vs right half, as it were) was strictly based on the virtual
+address bits, but in fact, this wasn't true: the hardware looked
+in both halves and would return data from the "wrong half" if it
+was still present there.  (It would only store *new* cache entries
+in the correct half, so if you did eager flush it would work the
+same way, but if you did lazy flush like we did, well...)
+
+There was also an ALU forwarding bug.  If you took a trap, and in
+the trap handler, computed values in the right (wrong) order, a
+register could get the wrong result stored in it.  This only
+happened after traps, but I proved it using a software trap.  It
+was hitting my interrupt handler about 1 out of every few hundred
+thousand times (resulting in kernel panic); using the software trap
+I could see it less dramatically, and prove that re-ordering the
+instructions or adding a NOP in the pipeline would fix it.
+
+Chris
+
