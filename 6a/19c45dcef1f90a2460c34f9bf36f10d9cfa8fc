@@ -1,0 +1,173 @@
+From: steffen@sdaoden.eu (Steffen Nurpmeso)
+Date: Tue, 19 Sep 2017 15:53:59 +0200
+Subject: [TUHS] Happy birthday,
+ Dennis Ritchie! [ really sun vs dec/apollo --> X and NeWS ]
+In-Reply-To: <20170919025031.GA25650@mcvoy.com>
+References: <f05f5fe905a5279e242c1ff265f43c690eb4052e@webmail.yaccman.com>
+ <1505782328.3172479.1110519744.63D53ACC@webmail.messagingengine.com>
+ <20170919025031.GA25650@mcvoy.com>
+Message-ID: <20170919135359.G38me%steffen@sdaoden.eu>
+
+Larry McVoy <lm at mcvoy.com> wrote:
+ |On Mon, Sep 18, 2017 at 08:52:08PM -0400, Random832 wrote:
+ |> On Thu, Sep 14, 2017, at 15:37, Steve Johnson wrote:
+ |>> I wrote a paper on error messages at one point.?? I had examples from
+ |>> bad to best.?? In a nutshell (worst to best):
+ |>> 
+ |>>  * <program aborts, leaving the world in an unknown state>
+ |>>  * "internal error",?? "beta table overflow", "operation failed"
+ |>>  * "Writing the output file failed"
+ |>>  * "File xxx could not be opened for writing."
+ |>>  * "File xxx could not be opened for writing: check the file location
+ |>> and permissions"
+ |>> 
+ |>>  * "Writing the output file xxx caused an error.?? See <link> for
+ |>> possible reasons and corrections" 
+ |>> 
+ |>> Most git messages fall between 2 and 3.?? But there are occasional 4's
+ |>> and 5's.
+ |> 
+ |> Just out of curiosity, where does perror(filename), quite possibly the
+ |> *most* common error message on Unix as a whole, fall on your scale? It
+ |> says which of the file location or permissions (or whatever else) it is,
+ |> but not whether it was attempting to open it for reading or writing.
+ |
+ |So in the BitKeeper source, perror is redifined to my_perror which is
+ |this:
+ |
+ |void    
+ |my_perror(char *file, int line, char *msg)
+ |{
+ |        char    *p = 0;
+ |        int     save = errno;
+ |
+ |        if (p = getenv("_BK_VERSION")) {
+ |                if (strneq(p, "bk-", 3)) p += 3;
+ |                fprintf(stderr, "%s:%d (%s): ", file, line, p);
+ |} else {
+ |                fprintf(stderr, "%s:%d: ", file, line);
+ |}
+ |        if (p = strerror(errno)) {
+ |                fprintf(stderr, "%s: %s\n", msg, p);
+ |} else {
+ |                fprintf(stderr, "%s: errno=%d\n", msg, errno);
+ |}
+ |        errno = save;   
+ |}
+ |
+ |libc should do that.
+
+That really made me wonder why "save" is not used, errno may
+eventually change along the way.  Ok ok, but.. well.
+I have had a Txt::FormatEncoder which was the sole implementation
+of a format codec (plus FormatDecoder), which supported %m
+
+  * "%m"
+  * Print the description of the \SF Errno which was active at setup() time,
+  * if it's value has an assigned description
+  * (otherwise a message is printed which says that this value is unknown).
+  * This always prints the original english string \ldots
+
+mostly for debugging and developers thus, but why not, except for
+inter-dependencies, thus optional at least, support of
+a # modifier could have been added.
+The encoder could be used for finite (CP::) as well as resizable
+buffers (CString, ([Sys::]IO::TextWriter, etc.) as in
+
+  static void _MyAddVFmt(
+          CString                 &_str,
+          const char              *_fmt,
+          void                    *_valist)
+  {
+          ui32                    grow, olen;
+          auto Txt::FormatEncoder fe;
+          // use special case+update() for better code flow
+          (void)fe.setup(NIL, 0, _fmt, _valist);
+          for(grow=80-1;  ;  ) {
+                  olen = _str.length();
+                  (void)fe.update(_str.reserve(grow).data()+olen, grow)
+                          .call();
+                  // resize insufficient? nothing changed!
+                  if(fe.isInsufficient()) {
+                          (void)_str.truncate(olen);
+                          grow <<= 1;
+                  } else {
+                          (void)_str.truncate(olen + fe.count());
+                          if(fe.isFinished())
+                                  break;
+                          grow = 80-1;
+                  }
+          }
+          return;
+  }
+
+Terrible: no overflow protection.  And camel case.
+Plus a [Sys::]Log and [Sys::]Log::Domain with vWrite() and
+
+  pub static void write(Priority _prio, const char *_fmt, ...);
+
+That was for the builtin Domain only, which needs to be created
+to overcome the no-op state, optionally SMP safe:
+
+  pub static void createBuiltinDomain(IO::Device *_dev,
+                    SMP::Mutex *_mtx=NIL);
+  pub static Domain *getBuiltinDomain(void){ return(s_bdom); }
+
+Optionally in [Sys::]POSIX there also was
+
+  pub static Log::Domain *createSyslogDomain(
+                            SyslogFacility _facility=user,
+                            boolean _includepid=tru1,
+                            const char *_intro=NIL,
+                            boolean _enabled=tru1,
+                            Log::Priority _prio=Log::debug);
+
+but that cannot be used as the main log domain.  I have forgotten
+why.  It also used a shared internal socket connection and mutex
+for all domains created like that, but can (re)use
+CP::fromVFormat() to actually prepare the written messages in
+the 1 KB stack buffer for syslog purposes.  At least.  All this of
+course very inconvenient in a main():
+
+          Mem::Cache::enableStatistics();
+          Mem::Cache::configure(Mem::Cache::conf_trash, tru1);
+          Std::createChannels(tru1, tru1, tru1);
+  No standard streams by default.
+          Log::setEnabled(tru1);
+          Log::setPriority(Log::debug);
+          Log::createBuiltinDomain(Std::ferr);
+  No logging by default.
+          (void)Misc::NYD::setDumpChannel(Std::ferr);
+  And NotYetDead chirps or profiling needs to be charged, too.
+
+But despite all faulty design decisions, implementation
+shortcomings, missing focus on security details, etc., at least
+you can exactly specify what is going on.  And get that and
+nothing else.
+
+Unfortunately C++ has become overly huge, and i am not rich enough
+to go for a C+ / C-- / C-w-C.  Well.  There is i think a German
+who did something i think nice, Python style source code,
+transformed to C which then is compilable as such.  But with
+garbage collection and all that stuff that interpreted languages
+ship, and inclusive a runtime.  Now called Nim, Nimrod no longer.
+I have just looked, in the meantime also compiles to JavaScript.
+Getting real grip it seems, on github etc.  Well.  Never used it,
+but sounds very interesting to me.
+
+The NetBSD getenv() uses a fast tree i think to speed up lookups.
+I think especially in massive parallel object-based programs any
+sort of perror() is likely overchallenged and needs to attach to
+more context.  Then again i have no idea better than "CTX1: CTX2:
+CTX3: message" either, and always get a headache when i see
+OpenSSL error messages which exactly go this route.  So you need
+two programs, one to do the work, and the other to interpret the
+error messages of the first...
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
+
