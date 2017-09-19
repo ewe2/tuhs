@@ -1,0 +1,57 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 18 Sep 2017 19:50:31 -0700
+Subject: [TUHS] Happy birthday,
+ Dennis Ritchie! [ really sun vs dec/apollo --> X and NeWS ]
+In-Reply-To: <1505782328.3172479.1110519744.63D53ACC@webmail.messagingengine.com>
+References: <f05f5fe905a5279e242c1ff265f43c690eb4052e@webmail.yaccman.com>
+ <1505782328.3172479.1110519744.63D53ACC@webmail.messagingengine.com>
+Message-ID: <20170919025031.GA25650@mcvoy.com>
+
+On Mon, Sep 18, 2017 at 08:52:08PM -0400, Random832 wrote:
+> On Thu, Sep 14, 2017, at 15:37, Steve Johnson wrote:
+> > I wrote a paper on error messages at one point.?? I had examples from
+> > bad to best.?? In a nutshell (worst to best):
+> > 
+> > 	* <program aborts, leaving the world in an unknown state>
+> > 	* "internal error",?? "beta table overflow", "operation failed"
+> > 	* "Writing the output file failed"
+> > 	* "File xxx could not be opened for writing."
+> > 	* "File xxx could not be opened for writing: check the file location
+> > and permissions"
+> > 
+> > 	* "Writing the output file xxx caused an error.?? See <link> for
+> > possible reasons and corrections" 
+> > 
+> > Most git messages fall between 2 and 3.?? But there are occasional 4's
+> > and 5's.
+> 
+> Just out of curiosity, where does perror(filename), quite possibly the
+> *most* common error message on Unix as a whole, fall on your scale? It
+> says which of the file location or permissions (or whatever else) it is,
+> but not whether it was attempting to open it for reading or writing.
+
+So in the BitKeeper source, perror is redifined to my_perror which is
+this:
+
+void    
+my_perror(char *file, int line, char *msg)
+{
+        char    *p = 0;
+        int     save = errno;
+
+        if (p = getenv("_BK_VERSION")) {
+                if (strneq(p, "bk-", 3)) p += 3;
+                fprintf(stderr, "%s:%d (%s): ", file, line, p);
+        } else {
+                fprintf(stderr, "%s:%d: ", file, line);
+        }
+        if (p = strerror(errno)) {
+                fprintf(stderr, "%s: %s\n", msg, p);
+        } else {
+                fprintf(stderr, "%s: errno=%d\n", msg, errno);
+        }
+        errno = save;   
+}
+
+libc should do that.
+
