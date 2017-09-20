@@ -1,0 +1,57 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Tue, 19 Sep 2017 20:13:12 -0700
+Subject: [TUHS] Happy birthday,
+ Dennis Ritchie! [ really sun vs dec/apollo --> X and NeWS ]
+In-Reply-To: <1505843808.1332176.1111446696.14AB97E4@webmail.messagingengine.com>
+References: <f05f5fe905a5279e242c1ff265f43c690eb4052e@webmail.yaccman.com>
+ <1505782328.3172479.1110519744.63D53ACC@webmail.messagingengine.com>
+ <20170919025031.GA25650@mcvoy.com>
+ <20170919135359.G38me%steffen@sdaoden.eu>
+ <20170919135652.GN25650@mcvoy.com>
+ <1505843808.1332176.1111446696.14AB97E4@webmail.messagingengine.com>
+Message-ID: <20170920031312.GJ25650@mcvoy.com>
+
+On Tue, Sep 19, 2017 at 01:56:48PM -0400, Random832 wrote:
+> On Tue, Sep 19, 2017, at 09:56, Larry McVoy wrote:
+> > On Tue, Sep 19, 2017 at 03:53:59PM +0200, Steffen Nurpmeso wrote:
+> > >  |void    
+> > >  |my_perror(char *file, int line, char *msg)
+> > >  |{
+> > >  |        char    *p = 0;
+> > >  |        int     save = errno;
+> > >  |
+> > >  |        if (p = getenv("_BK_VERSION")) {
+> > >  |                if (strneq(p, "bk-", 3)) p += 3;
+> > >  |                fprintf(stderr, "%s:%d (%s): ", file, line, p);
+> > >  |} else {
+> > >  |                fprintf(stderr, "%s:%d: ", file, line);
+> > >  |}
+> > >  |        if (p = strerror(errno)) {
+> > >  |                fprintf(stderr, "%s: %s\n", msg, p);
+> > >  |} else {
+> > >  |                fprintf(stderr, "%s: errno=%d\n", msg, errno);
+> > >  |}
+> > >  |        errno = save;   
+> > >  |}
+> > >  |
+> > >  |libc should do that.
+> > > 
+> > > That really made me wonder why "save" is not used, errno may
+> > > eventually change along the way.  Ok ok, but.. well.
+> > 
+> > Huh?  save is set with errno and then errno is restored to save.   The 
+> > point of save is to do the library calls (which do syscalls which 
+> > could in theory change errno) and leave it the same as it was on
+> > the way in.
+> 
+> I think his point was that you should be passing save (rather than
+> errno) to the strerror and the last printf, because the preceding
+> library calls may have changed errno.
+
+Thanks for that insight.  That code has been working for decades but I
+think the reason it works is if it works then errno doesn't change and
+if it doesn't work then we're not going to see the output.  So passing
+save is technically correct but not sure it is practically correct.
+
+Anyone have an opinion?
+
