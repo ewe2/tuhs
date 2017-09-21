@@ -1,0 +1,92 @@
+From: torek@torek.net (Chris Torek)
+Date: Thu, 21 Sep 2017 13:36:38 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: Your message of "Thu, 21 Sep 2017 09:17:44 -0700."
+ <20170921161744.GD25650@mcvoy.com>
+Message-ID: <201709212036.v8LKac1u063236@elf.torek.net>
+
+>... I've never been fond of the socket API though I
+>am sympathetic, it's easy to do the easy parts as /dev/tcp but as I
+>recall there are all sorts of weird cases that don't fit.
+
+There's no reason it could not be done literally with entries
+similar to /dev ones, since each socket() takes some arguments
+(domain, type, protocol) which could be represented as directly
+as:
+
+    /socket/domain/type/protocol_or_default
+
+for instance.  For the typical s = socket(PF_INET, SOCK_STREAM, 0)
+you would open "/socket/inet/stream/tcp".  To distinguish
+between UDP and RDP you'd open "/socket/inet/dgram/udp" vs
+"/socket/inet/dgram/rdp".  Of course these days there's a
+<type> constant for reliable datagram, and some of these are
+just overcomplicating things: /socket/inet/tcp, /socket/inet/icmp,
+etc., would actually suffice, but there's an obvious one
+to one mapping from "socket" arguments to strings under
+"/socket" or whatever top level name you want.
+
+More fundamentally, a socket itself is only "half initialized".
+It's neither bound to any local address, nor connected to any
+remote address.  The BSD kernel interface introduced two
+system calls, bind() and connect(), to let you specify these
+two halves.  But these two calls are wrong!  It needs to be
+*one* call, that does both operations simultaneously, so as to
+allow you to specify that you want the system to provide the
+local or remote address.  You supply one or both.  To supply
+only one, pass in a NULL for the other one.
+
+ * You supply only the remote address: "I want to connect to
+   someone and I know their address, so just pick a local one
+   that works."  This is currently written as connect().
+
+ * You supply only the local address: "I want to be a server."
+   This is currently written as bind() followed by listen()
+   followed by a series of accept()s.  There's no reason for
+   a separate listen() call (it takes a "backlog" argument but
+   in practice everyone defaults it and the kernel does strange
+   manipulations on it.)  This also knocks out the need for
+   SO_REUSEADDR, because the kernel can tell at the time of
+   the call that you are asking to be a server.  Either someone
+   else already is (error) or you win (success).
+
+ * You supply both halves at the same time.  (This is the
+   special case FTP requires.)  "I want to connect to someone
+   and I know he expects me to be address <L>.")
+
+   This is a rare special case.  We need a way to reserve an
+   address.  But it's rare, let's make *it* the complicated one.
+
+   If you supply both halves at the same time, you can pass
+   pointers to two all-zero addresses, both local and remote.
+   This is different from passing in a NULL ("I don't care"): it
+   means "I do care, get me an address" (reserving it) along with
+   "I can't actually connect yet".
+
+   Now you have the "3/4ths done" socket.  You know what your
+   local address will be.  You give this to the remote, and
+   call the system call again with the other guy's IP address
+   this time.
+
+   That's not optimal (sometimes the local address you want to
+   use depends on the remote address you will use), but it's what
+   the existing system calls give you anyway, as you can't call
+   connect() first, you must call bind() first.
+
+Also, the profusion of system calls (send, recv, sendmsg, recvmsg,
+recvfrom) is quite unnecessary: at most, one needs the equivalent
+of sendmsg/recvmsg.
+
+So we could right away do this:
+
+   bind(), listen(), connect()     =>     setconn()
+   send(), sendmsg()               =>     sendmsg()
+   recv(), recvfrom(), recvmsg()   =>     recvmsg()
+
+even without figuring out how to properly implement /dev/tcp
+or whatever.
+
+Of course, it's a bit late. :-)
+
+Chris
+
