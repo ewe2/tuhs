@@ -1,0 +1,48 @@
+From: rminnich@gmail.com (ron minnich)
+Date: Thu, 21 Sep 2017 20:15:42 +0000
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: <AE3CB5A3-EF97-480E-8D6C-050EBF606FB3@bitblocks.com>
+References: <20170921160112.ctpv4a52t5rjcqzg@matica.foolinux.mooo.com>
+ <201709211613.v8LGDcuN015299@darkstar.fourwinds.com>
+ <20170921185705.2A31A156E523@mail.bitblocks.com>
+ <081D35B4-094C-490E-981D-0ABC9D808EE9@quintile.net>
+ <AE3CB5A3-EF97-480E-8D6C-050EBF606FB3@bitblocks.com>
+Message-ID: <CAP6exYJd9NNiLhRtnYa5ZeNoykAE+8UEgZY8PQXRmTnF4coZ9Q@mail.gmail.com>
+
+you can go back and find an early RFC which discusses the notion of
+/dev/tcp etc. I think I referenced it the last time this question came up.
+
+In that rfc, the idea of /dev/tcp and so on was advanced. To connect to
+harv, one might create /dev/tcp/harv, for example. It was not quite right.
+How do you name a port? What file system operation in Unix corresponds to
+what socket operation? There were lots of efforts from 77 or so on to get
+sockets APIs done in a Unix style, i.e. not the style we ended up with, but
+AFAIK nobody really worked it out until Plan 9 did it.
+
+While it is true that socket()/bind/listen/accept/connect have stood the
+test of time, I know when they were introduced many people thought of that
+API as the first break in the Unix model, and a wrong turn, one that was
+never fixed.
+
+It's very easy to create a "file system" model for the network in a way
+that doesn't make sense, e.g. if I have /dev/tcp/harv, and mv it to
+/dev/tcp/prep, does that mean I close the connection to harv and open one
+to prep? And so on. These issues were covered really nicely in a talk Rob
+Pike gave in the 90s, but I can't find those slides any more and neither
+can he. They're probably still on the venti server in the Unix room ... :-)
+
+For an example of (IMHO) not getting it right, see:
+http://www.cs.vu.nl/~herbertb/papers/osreview2008-2.pdf
+
+I think anyone looking to put something like a network stack in the name
+space should study on what Plan 9 did, not because it's the "right" or
+"only' way to do it, but it's a way that worked.
+
+But overall, in the 1977 timeframe, when (IIRC) there were no synthetic
+file systems, I think we did not know how to think about "networks in the
+file system" and we got what we got. By the time it was worked out, well,
+it was too late to change.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170921/143613a4/attachment.html>
+
