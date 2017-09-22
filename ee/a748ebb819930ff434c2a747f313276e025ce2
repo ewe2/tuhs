@@ -1,0 +1,130 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Fri, 22 Sep 2017 12:36:34 +0200
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: <mailman.1105.1506026200.3779.tuhs@minnie.tuhs.org>
+References: <mailman.1105.1506026200.3779.tuhs@minnie.tuhs.org>
+Message-ID: <14E85999-B179-48C7-A93F-63D942207525@planet.nl>
+
+Gentlemen,
+
+Below some additional thoughts on the various observations posted
+about this. Note that I was not a contemporary of these developments,
+and I may stand corrected on some views.
+
+> I'm pretty sure the two main System V based TCP/IP stacks were STREAMS
+> based: the Lachman one (which I ported to the ETA-10 and to SCO Unix)
+> and the Mentat one that was done for Sun.  The socket API was sort of
+> bolted on top of the STREAMS stuff, you could get to the STREAMS stuff
+> directly (I think, it's been a long time).
+
+
+Yes, that is my understanding too. I think it goes back to the two
+roots of networking on Unix: the 1974 Spider network at Murray Hill and
+the 1975 Arpanet implementation of the UoI.
+
+It would seem that Spider chose to expose the network as a device, whereas
+UoI chose to expose it as a kind of pipe. This seems to have continued in
+derivative work (Datakit/streams/STREAMS and BBN/BSD sockets respectively).
+
+When these systems were developed networking was mostly over serial lines,
+and to use serial drivers was not illogical (i.e. streams->STREAMS). By 1980
+fast local area networks were spreading, and the idea to see the network as
+a serial device started to suck.
+
+Much of the initial modification work that Joy did on the BBN code was to
+make it perform on early ethernet -- it had been designed for 50 kbps arpanet
+links. Some of his speed hacks (such as trailing headers) were later
+discarded.
+
+Interestingly, Spider was conceived as a fast network (1.5 Mbps); the local
+network at Murray Hill operated at that speed, and things were designed to
+work over long distance T1 connections as well. This integrated fast LAN/WAN
+idea seems to have been abandoned in Datakit. I have a question out to Sandy
+Fraser to ask about the origins of this, but have not yet received a reply.
+
+> The sockets stuff was something Joy created to compete with the CMU Accent
+> networking system.  [...]  CMU was developing Accent on the Triple Drip
+> PascAlto (aka the Perq) and had a formal networking model that was very clean
+> and sexy.  There were a lot of people interested in workstations, the Andrew
+> project (MIT is about to start Athena etc). So Bill creates the sockets
+> interface, and to show that UNIX could be just as modern as Accent.
+
+I've always thought that the Joy/Leffler API was a gradual development of
+the UoI/BBN API. The main conceptual change seem to have been support for
+multiple network systems (selectable network stack, expansion
+of the address space to 14 bytes).
+
+I don't quite see the link to Accent and Wikipedia offers little help here
+https://en.wikipedia.org/wiki/Accent_kernel
+Could you elaborate on how Accent networking influenced Joy's sockets?
+
+> * There's no reason for
+>   a separate listen() call (it takes a "backlog" argument but
+>   in practice everyone defaults it and the kernel does strange
+>   manipulations on it.)
+
+Perhaps there is. The UoI/BBN API did not have a listen() call;
+instead the open() call - if it was for a listening connection - blocked until
+a connection occurred. The server process would then fork of a worker process
+and re-issue the listening open() call for the next connection. This left a
+time gap where the server would not be 'listening'.
+
+The listen() call would create up to 'backlog' connection blocks in the
+network code, so that this many clients could connect simultaneously
+without user space intervention. Each accept() would hand over a (now
+connected) connection block and add a fresh unconnected one to the backlog
+list. I think this idea came from Sam Leffler, but perhaps he was inspired
+by something else (Accent?, Chaos?)
+
+Of course, this can be done with fewer system calls. The UoI/BBN system
+used the open() call, with a pointer to a parameter data block as the 2nd
+argument. Perhaps Joy/Leffler were of the opinion that parameter data
+blocks were not very Unix-y, and hence spread it out over
+socket()/connect()/bind()/listen() instead.
+
+The UoI choice to overload the open() call and not create a new call
+(analogous to the pipe() call) was entirely pragmatic: they felt this
+was easier for keeping up with the updates coming out of Murray Hill
+all the time.
+
+> In particular, I have often thought that it would have been a better
+> and more consistent with the philosophy to have it implemented as
+> open("/dev/tcp") and so on.
+
+I think this is perhaps an orthogonal topic: how does one map network names
+to network addresses. The most ambitious was perhaps the "portal()" system
+call contemplated by Joy, but soon abandoned. It may have been implemented
+in the early 90's in BSD, but I'm not sure this was fully the same idea.
+
+That said, making the the name mapping a user concern rather than a kernel
+concern is indeed a missed opportunity.
+
+Last and least, when feeling argumentative I would claim that connection
+strings like "/dev/tcp/host:port" are simply parameter data blocks encoded
+in a string :^)
+
+>   This also knocks out the need for
+>   SO_REUSEADDR, because the kernel can tell at the time of
+>   the call that you are asking to be a server.  Either someone
+>   else already is (error) or you win (success).
+
+Under TCP/IP I'm not sure you can. The protocol specifies that you must
+wait for a certain period of time (120 sec, if memory serves my right)
+before reusing an address/port combo, so that all in-flight packets have
+disappeared from the network. Only if one is sure that this is not an
+issue one can use SO_REUSEADDR.
+
+> Also, the profusion of system calls (send, recv, sendmsg, recvmsg,
+> recvfrom) is quite unnecessary: at most, one needs the equivalent
+> of sendmsg/recvmsg.
+
+Today that would indeed seem to make sense. Back in 1980 there seems
+to have been a lot of confusion over message boundaries, even in
+stream connections. My understanding is that originally send() and
+recv() were intended to communicate a borderless stream, whereas
+sendmsg() and recvmsg() were intended to communicate distinct
+messages, even if transmitted over a stream protocol.
+
+Paul
+
+
