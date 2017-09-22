@@ -1,0 +1,52 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 22 Sep 2017 11:00:41 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: Your message of "Fri, 22 Sep 2017 12:36:34 +0200."
+ <14E85999-B179-48C7-A93F-63D942207525@planet.nl>
+Message-ID: <201709221800.v8MI0fSM069953@elf.torek.net>
+
+[I said]
+>> This also knocks out the need for SO_REUSEADDR ...
+
+>Under TCP/IP I'm not sure you can. The protocol specifies that you must
+>wait for a certain period of time (120 sec, if memory serves my right)
+>before reusing an address/port combo, so that all in-flight packets have
+>disappeared from the network. Only if one is sure that this is not an
+>issue one can use SO_REUSEADDR.
+
+That's independent of this issue.  The problem is that when you
+call bind(), the system does not know if you are doing it as
+the first half of bind()/connect(), or as the first half of
+bind()/listen( (followed by an accept() loop).
+
+If you are going to do the latter, you are declaring that you want
+to serve *new* SYN requests.  This is when you (currently) must set
+SO_REUSEADDR, because bind() checks your local address against the
+universe of all local/remote pairs.  But if the system knows that
+your call (which, remember, isn't bind() anymore) is your
+declaration of intent to be a server, the OS can just check
+whether there's already someone declared as "the server".
+
+If you intend to "serve" one specific foreign address (FTP):
+
+   bind_and_connect(fd, local, remote);
+
+the test is: "does <local,remote> specify a unique address"
+(and possibly "does <local> match what we already suggested
+to you and reserved for you).  If you intend to serve "*":
+
+   bind_and_connect(fd, local, NULL);
+
+the test is: "is there already a <local,*>".
+
+In the server case any existing 2MSL timeouts are irrelevant;
+what matters is whether you are competing with another server.
+
+(Note that libc will probably have various convenience wrappers
+atop the system call, kind of like libc has system() atop
+fork/exec.  Most programs just want to create and bind_and_connect
+a socket in one pass.)
+
+Chris
+
+
