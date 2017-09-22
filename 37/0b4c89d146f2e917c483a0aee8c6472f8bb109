@@ -1,0 +1,31 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 22 Sep 2017 13:57:48 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: Your message of "Fri, 22 Sep 2017 15:08:10 -0400."
+ <efe20dae-1828-1a55-a322-1801e776d444@case.edu>
+Message-ID: <201709222057.v8MKvmQ0070727@elf.torek.net>
+
+>In that sense, job control and process groups *are* independent of
+>the terminal device.
+>
+>The complication arises when you have to multiplex one terminal
+>between several different jobs in an interactive shell. Setting
+>the terminal process group correctly -- the only way to accomplish
+>that -- is fragile and the consequences of setting it to the wrong
+>value are inconvenient, to say the least.
+
+Sure, but here again you can have the shell hang on to the
+(kernel allocated) pgroup, and any control operation amounts
+to, e.g., "set tty pgroup to the one for my pgroupid X".
+Since the shell is waiting for everything in the pipeline
+to exit, the shell knows when to close its "pgid descriptor".
+
+(If you abandon the pipeline entirely, you also abandon the
+ability to attach it to a tty.  There should be some way to
+"rejoin" pgroups, which would let you attach them to new tty
+sessions, which is something that is missing from the current
+system.  But that's another thing entirely.)
+
+Chris
+
+
