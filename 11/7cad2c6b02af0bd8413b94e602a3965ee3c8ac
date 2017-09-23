@@ -1,0 +1,74 @@
+From: beebe@math.utah.edu (Nelson H. F. Beebe)
+Date: Sat, 23 Sep 2017 17:39:15 -0600
+Subject: [TUHS] UNIX of choice these days?
+Message-ID: <CMM.0.95.0.1506209954.beebe@gamma.math.utah.edu>
+
+Dario Niedermann <dario at darioniedermann.it> wrote on Sat, 23 Sep 2017
+11:17:04 +0200:
+
+>> I just can't forgive FreeBSD for abandoning the proc filesystem  ...
+
+It can be there, if you wish.
+
+Here are two snippets from a recent log of a recent "pkg update -f ;
+pkg upgrade" run on a one of my many *BSD family systems, this one
+running FreeBSD 11.1-RELEASE-p1:
+
+	Message from openjdk8-8.131.11:
+	======================================================================
+
+	This OpenJDK implementation requires fdescfs(5) mounted on
+	/dev/fd and procfs(5) mounted on /proc.
+
+	If you have not done it yet, please do the following:
+
+		mount -t fdescfs fdesc /dev/fd mount -t procfs proc
+		/proc
+
+	To make it permanent, you need the following lines in
+	/etc/fstab:
+
+		fdesc /dev/fd fdescfs rw 0 0 proc /proc procfs rw 0 0
+
+	======================================================================
+
+	Message from rust-1.18.0:
+	======================================================================
+
+	Printing Rust backtraces requires procfs(5) mounted on /proc .
+	If you have not already done so, please do the following:
+
+		mount -t procfs proc /proc
+
+	To make it permanent, you need the following lines in /etc/fstab:
+
+		proc    /proc           procfs          rw      0       0
+
+	======================================================================
+
+I've seen such messages in many package installations in the *BSD
+family, and I generally add the suggested lines to /etc/fstab.
+
+Perhaps others more familiar with BSD internals might comment on
+whether it is many non-BSD software, like the Java Developer's Kit,
+and Mozilla's rust language, that mostly would like /proc support, or
+whether there are plenty of native-BSD packages that expect it too.
+
+The second edition of
+
+	Marshall Kirk McKusick, George V. Neville-Neil, and Robert N. M. Watson
+	The Design and Implementation of the FreeBSD Operating System
+	ISBN 0-201-70245-2 (hardcover), 0-321-96897-2 (hardcover)
+
+has 5 pages with mention of the /proc filesystem, and nothing that
+suggests that it is in any way deprecated.
+
+-------------------------------------------------------------------------------
+- Nelson H. F. Beebe                    Tel: +1 801 581 5254                  -
+- University of Utah                    FAX: +1 801 581 4148                  -
+- Department of Mathematics, 110 LCB    Internet e-mail: beebe at math.utah.edu  -
+- 155 S 1400 E RM 233                       beebe at acm.org  beebe at computer.org -
+- Salt Lake City, UT 84112-0090, USA    URL: http://www.math.utah.edu/~beebe/ -
+-------------------------------------------------------------------------------
+
+
