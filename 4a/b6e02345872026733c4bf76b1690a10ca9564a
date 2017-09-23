@@ -1,0 +1,63 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Sat, 23 Sep 2017 23:24:42 +0100
+Subject: [TUHS] Happy birthday,
+	Dennis Ritchie! [ really sun vs dec/apollo --> X and NeWS ]
+In-Reply-To: <20170920031312.GJ25650@mcvoy.com>
+References: <f05f5fe905a5279e242c1ff265f43c690eb4052e@webmail.yaccman.com>
+ <1505782328.3172479.1110519744.63D53ACC@webmail.messagingengine.com>
+ <20170919025031.GA25650@mcvoy.com> <20170919135359.G38me%steffen@sdaoden.eu>
+ <20170919135652.GN25650@mcvoy.com>
+ <1505843808.1332176.1111446696.14AB97E4@webmail.messagingengine.com>
+ <20170920031312.GJ25650@mcvoy.com>
+Message-ID: <20170923222442.1CD59201DF@orac.inputplus.co.uk>
+
+Hi Larry,
+
+> > > > > void    
+> > > > > my_perror(char *file, int line, char *msg)
+> > > > > {
+> > > > >         char    *p = 0;
+> > > > >         int     save = errno;
+> > > > > 
+> > > > >         if (p = getenv("_BK_VERSION")) {
+> > > > >                 if (strneq(p, "bk-", 3)) p += 3;
+> > > > >                 fprintf(stderr, "%s:%d (%s): ", file, line, p);
+> > > > >         } else {
+> > > > >                 fprintf(stderr, "%s:%d: ", file, line);
+> > > > >         }
+> > > > >         if (p = strerror(errno)) {
+> > > > >                 fprintf(stderr, "%s: %s\n", msg, p);
+> > > > >         } else {
+> > > > >                 fprintf(stderr, "%s: errno=%d\n", msg, errno);
+> > > > >         }
+> > > > >         errno = save;   
+> > > > > }
+>
+> I think the reason it works is if it works then errno doesn't change
+> and if it doesn't work then we're not going to see the output.
+
+Unless the failure under fprintf(3) is transient?
+
+> So passing save is technically correct but not sure it is practically
+> correct.
+
+Passing `save' would also stop readers wondering why it's not being
+passed.  :-)
+
+Also, `p = strerror(errno)' is always going to be true;  strerror(3)
+doesn't return NULL.  To check for strerror() errors one must errno=0
+and then check errno afterwards;  strerror() can kick off LC_MESSAGES
+stuff so errors are possible.  Yes, how does one then report that
+error...
+
+Another option when in dire straits, e.g. about to _exit() and trying
+hard to get *something* to FD 2, is to writev(2) since the iov[] will be
+a fixed size and the only formatting issue in the above code is the
+`%d' and the space needed by its sprintf(3) can be found at compile
+time.
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+
+
