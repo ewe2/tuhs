@@ -1,0 +1,58 @@
+From: chet.ramey@case.edu (Chet Ramey)
+Date: Sun, 24 Sep 2017 14:04:10 -0400
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: <201709222057.v8MKvmQ0070727@elf.torek.net>
+References: <201709222057.v8MKvmQ0070727@elf.torek.net>
+Message-ID: <daa3b80c-9a88-dcef-d686-ed4b0cc267a1@case.edu>
+
+On 9/22/17 4:57 PM, Chris Torek wrote:
+>> In that sense, job control and process groups *are* independent of
+>> the terminal device.
+>>
+>> The complication arises when you have to multiplex one terminal
+>> between several different jobs in an interactive shell. Setting
+>> the terminal process group correctly -- the only way to accomplish
+>> that -- is fragile and the consequences of setting it to the wrong
+>> value are inconvenient, to say the least.
+> 
+> Sure, but here again you can have the shell hang on to the
+> (kernel allocated) pgroup, and any control operation amounts
+> to, e.g., "set tty pgroup to the one for my pgroupid X".
+> Since the shell is waiting for everything in the pipeline
+> to exit, the shell knows when to close its "pgid descriptor".
+
+That's not the problem this solves. The problem with allocating
+process groups in the shell (and making them equal to the process id
+of the pgrp leader) is that you end up with a race condition when
+trying to add subsequent processes in a pipeline to that pgrp.
+It forces you to artifically prevent the process group leader from
+running or exiting until you're finished setting up the entire
+pipeline.
+
+The shell has to set the terminal process group to arbitrary process
+groups, not just its own: that's how `fg' has to work. For that purpose,
+tcsetpgrp is fine. You just have to make sure that you only call it
+when the shell is in the foreground.
+
+As for other processes, I'm not sure exactly what you mean by `control
+operation', but you surely would want a background process to get stopped
+if it tries to set the terminal attributes.
+
+
+> (If you abandon the pipeline entirely, you also abandon the
+> ability to attach it to a tty.  There should be some way to
+> "rejoin" pgroups, which would let you attach them to new tty
+> sessions, which is something that is missing from the current
+> system.  But that's another thing entirely.)
+
+This is something that would be nice to have, but there are security
+considerations that make it tricky. Not unsolvable, but tricky to get
+right.
+
+Chet
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet at case.edu    http://cnswww.cns.cwru.edu/~chet/
+
+
