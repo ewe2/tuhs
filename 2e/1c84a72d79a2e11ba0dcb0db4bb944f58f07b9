@@ -1,0 +1,55 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 25 Sep 2017 08:18:27 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <CAC20D2MKMVozxARuwYQ2WgwWYJhfSdyU2t7YP1X5sf5PaTNseA@mail.gmail.com>
+References: <1506341239.18395.for-standards-violators@oclsc.org>
+ <CAC20D2MKMVozxARuwYQ2WgwWYJhfSdyU2t7YP1X5sf5PaTNseA@mail.gmail.com>
+Message-ID: <20170925151827.GP28606@mcvoy.com>
+
+On Mon, Sep 25, 2017 at 10:16:11AM -0400, Clem Cole wrote:
+> So what I'm asking us to try to do, is not just look at the technology in a
+> vacuum.   Why was it not interesting to /proc for BSD.   Clearly, Linux
+> added it (differently than Eighth Edition of course and the 4.4
+> implementation was much more like V8 that Linux would settle).   People did
+> do the work to use it.
+
+Linux's /proc was hugely different than the AT&T /proc, in a good way in
+my opinion.  It's sort of Tcl like :-), everything is a string.  So you
+can look at the files with cat.  I think plan 9 went this way as well.
+
+And the Linux /proc did and does so much more than AT&T /proc.  You 
+can tune the system, debug the system, here's an example.  You know
+something is holding something open, you want to know what.  
+
+	$ ps 
+	  PID TTY          TIME CMD
+	 2668 pts/8    00:00:00 bash
+	14153 pts/8    00:00:00 ps
+	$ cd /proc/2668/fd
+	$ ls -l
+	total 0
+	lrwx------ 1 lm lm 64 Sep 23 21:16 0 -> /dev/pts/8
+	lrwx------ 1 lm lm 64 Sep 23 21:16 1 -> /dev/pts/8
+	lrwx------ 1 lm lm 64 Sep 23 21:16 2 -> /dev/pts/8
+	lrwx------ 1 lm lm 64 Sep 23 21:39 255 -> /dev/pts/8
+
+Now isn't that pleasant?  (Yes, I know about lsof).
+
+One could make an argument that for debugging you need a lighter weight
+way to get the info, and maybe ptrace is lighter, I dunno.  But for most
+stuff the Linux /proc (it's really /system because it's about way way
+more than processes) is super pleasant.
+
+> So why did *BSD not bring those versions of the utilities back?
+> 
+> My >>guess<< while they had added some things (like /proc) it was different
+> again and we got into the BSD != Linux stuff - which has been the UNIX war
+> all over again.
+
+Yeah, I don't see the two being compat.  They could overlap but when you get
+into specific tuning variables they won't match.
+
+I suspect that no /proc in BSD is simple, there wasn't anyone who wanted to
+put in the time to evolve it and maintain it.
+
+
