@@ -1,0 +1,135 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Mon, 25 Sep 2017 14:55:10 -0400
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: <1506362230.23809.for-standards-violators@oclsc.org>
+References: <1506362230.23809.for-standards-violators@oclsc.org>
+Message-ID: <CAC20D2NWgL2Dn3ceDOW6jgybOM_nS5YAT8tJy9Xohv0rG18eDQ@mail.gmail.com>
+
+Norman - thanks - fair enough, but I stand by my original statement.
+
+Greg, Dennis, Presetto, Sam and couple of others spent an evening
+discussing it all at USENIX one night; early before Dennis has finished the
+original implementation.    I'm very much sure, that while it was used for
+networking, the TTY handler and low speed I/O was the driver.
+
+On Mon, Sep 25, 2017 at 1:57 PM, Norman Wilson <norman at oclsc.org> wrote:
+
+> Clem Cole:
+>
+>   It was never designed for it.  dmr designed Streams to replace the
+>   tty handler.   I never understood  why the Summit guys insisted on
+>   forcing networking into it.
+>
+> ======
+>
+> You've mistaken.
+
+​Maybe -- its possible, but as I said, I certainly talked to Dennis and
+Greg about this at length.​  It was a hot topic a number of times.   Greg
+could get sort of animated ;-)
+
+
+
+
+>   The point of the stream I/O setup with
+> stackable line disciplines, rather than the old single
+> line-discipline switch, was specifically to support networking
+> as well as tty processing.
+>
+
+TTY, I 100% agree - this was exactly the problem that was trying to be
+solved. - being able to handle networking was a side effect.
+
+>
+> ​...
+>
+>
+> The problem Dennis wanted to solve was that tty handling
+> and network protocol handling interfered with one another;
+> you couldn't ask the kernel to do both, because there was
+> only one line discipline at a time.
+
+​This was an issue, but  don't think this was as important as...
+the desire for stackable so we could mix and match line disc​iplines period.
+
+
+
+
+> Hence the stackable
+> ​ ​
+> modules.
+
+​Right ...  that was a driver ....​
+
+
+
+> ​...
+>  which
+> expected its own special `new tty' line discipline, so the
+> network code would have to know which tty driver to call.
+> It made more sense to stack the modules instead, so the tty
+> code was there only if it was needed, and different tty
+> drivers could exist without the network code knowing or caring.
+>
+​Exactly....​
+
+
+
+>
+> When I arrived at the Labs in 1984, the streams code was in
+> use daily by most of us in 1127.  The terminals on our desks
+> were plugged into serial ports on Datakit (like what we call
+> a terminal server now).
+
+​Right... exactly what Greg and Dennis were trying to fix.​
+
+How the top half of the tty handler had various needs and how to
+efficiently implement it.
+Some tty handlers had become quite sophisticated... UCB's line discipline
+was just the start.
+
+For instance, Steve Zimmerman did a version that was sort of combination of
+UCB, ITS and TENEX that Masscomp would pick up (which I sometimes miss).
+IIRC the argument, Greg's position was that we should be able to create
+something that was user providable ultimately, that could make things as
+fancy or as plain as an application needed.
+
+Instead of doing stty/gtty calls to turn on cbreak or the like, an
+application like emac/vi or whatever could ask for a very simple path
+[Domain referred to the as 'borrowing' the path IIRC].   Other programs,
+say the ed and Bourne shell might want something fairly fancy under the
+covers.
+
+The stacking scheme was so that we could easily define how chars would be
+handled and which layer would handle them.
+The problem, as you point out, was the transitions between different
+'modes' - which the original line discipline code had trouble with and
+stacking and unstacking only made worse.   But I digress.
+
+
+
+
+>
+> Later there was a TCP/IP that used the stream mechanism.
+
+​Yup....   but was an afterthought .... look what I can do.
+My point, it was a secondary effect... it was there and worked.
+
+
+
+> ​....​
+>
+> All this is very different from the socket(2) way of thinking,
+> and it has its vices, but it also has its virtues.
+>
+
+And yes, sockets had not (yet) completely taken over.
+These were some of the experiments to see what would happen.
+
+Now, what caused it to fail as a networking interface?
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170925/3ff51944/attachment.html>
+
