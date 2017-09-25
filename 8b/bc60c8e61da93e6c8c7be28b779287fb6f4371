@@ -1,0 +1,114 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Mon, 25 Sep 2017 10:51:42 -0600
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <CANCZdfrX3T4TC1QbzhEZPBB8zBXMaWb9_=TVfwTmzUMVKuPjsQ@mail.gmail.com>
+References: <1506341239.18395.for-standards-violators@oclsc.org>
+ <CAC20D2MKMVozxARuwYQ2WgwWYJhfSdyU2t7YP1X5sf5PaTNseA@mail.gmail.com>
+ <CANCZdfrX3T4TC1QbzhEZPBB8zBXMaWb9_=TVfwTmzUMVKuPjsQ@mail.gmail.com>
+Message-ID: <CANCZdfobaTGxLkQBJo7Wqvn8NbdQk8uU8SeVyfKR9KTcm-c8iQ@mail.gmail.com>
+
+On Mon, Sep 25, 2017 at 9:13 AM, Warner Losh <imp at bsdimp.com> wrote:
+
+>
+>
+> On Mon, Sep 25, 2017 at 8:16 AM, Clem Cole <clemc at ccc.com> wrote:
+>
+>>
+>>
+>> On Mon, Sep 25, 2017 at 8:07 AM, Norman Wilson <norman at oclsc.org> wrote:
+>>
+>>> ​...​
+>>>
+>>> I too am saddened to see such a retrograde step, but perhaps
+>>> I'm biased.  When I arrived in 1127, the kernel had /proc but
+>>> still had ptrace as well.  Why?  Because no one was brave enough
+>>> to wade into sdb and adb.
+>>>
+>>> ​...
+>>>
+>>>
+>>> I can sympathize with FreeBSD excuse someone cited elsewhere,
+>>> that nobody used the code so it should go--I'm always in favour
+>>> of improving programs by chopping sutff out--but I think the
+>>> decision here was backwards.  The proper answer would have been
+>>> to teach ps et al to use /proc, not to invent a new complex of
+>>> system calls.
+>>>
+>> ​+1 that was my point.   If the application code had been available @
+>> UCB earlier before the proliferation,
+>> I think and /proc has been part of 4.2 or at least 4.3 not 4.4, I think
+>> there would have been a better chance
+>> of it being used.
+>>
+>> I also agree about garbage collection, but this is a case where the right
+>> solution would have been to try to get people to use the new interface.​
+>> The problem was ptrace was 'good enough' and there was no incentive so no
+>> one did it.
+>>
+>
+> In the case of procfs and FreeBSD, the issues were more complicated and
+> nuanced. The original /proc code came from 4.4BSD, and interacted with a
+> number of kernel subsystems. These subsystems were undergoing evolution at
+> the time (including a rather concerted rewrite of the VM to unify the
+> buffer cache). This churn there lead to inevitable changes being needed to
+> procfs to keep up with the new interfaces and such. Over time, there grew
+> the feeling that there some something quite wrong with procfs (rightly or
+> wrongly). There was a belief there were a number of unanticipated security
+> issues that were lingering in the code, but due to the changes not only in
+> API to the other sub-systems, but also in semantics. Kernel hackers that
+> studied the problem came away with an uneasy feeling, but nothing
+> actionable. This was the back-drop that slowed its adoption into new
+> utilities in the FreeBSD tree and kept people from wanting to push it
+> further until these misgivings could be explored and addressed. In the end,
+> it was easier to have a better understood code base (ptrace) that had an
+> icky interface over one that was cleaner, but that had clouds over it. As
+> fewer and fewer things used /proc, it became easier and easier to ignore,
+> and at some point people started worrying that this code that was basically
+> unused could be an attack vector on the systems, so it was retired.
+>
+
+
+
+
+> It's been a number of years since all this went down, so my memory of it
+> may be clouded. Plus, I was FreeBSD's security officer for a time, and I'm
+> purposely not going back to my notes from the time since I promised to keep
+> all that business confidential (and I'm not exactly sure where they are).
+> So, there may be the odd detail wrong, or imprecision of language, but the
+> main thrust is there: new with issues that are hard to quantify, but have
+> potential for embarrassment should the misgivings bear fruit militates for
+> staying with the old. It also didn't help there were no strong supporters
+> willing to stand behind the code, which didn't help with the misgivings.
+> Had it not exited the tree then, the push to MP would have counted it as a
+> casualty absent a strong maintainer to make it MP safe.
+>
+
+OK. I've done some software archeology and the above isn't quite right.
+Sorry for the misinformation.
+
+FreeBSD still has /proc. It's still actively maintained.
+
+We removed /proc from the default kernel and installation years ago due to
+security concerns (and not just misgivings, there were several SAs in that
+area). I was remembering the 'opt-in' discussions... Should have consulted
+the notes...
+
+The ctl interface in the referenced commit message is part of the debugging
+interface. It wasn't as feature rich as gdb, and nothing used it so it was
+removed. There's other parts of the debugging interface that still persist,
+but those are in the process of being de-orbited. There are several
+debuggers that use the ptrace interface, and making them all use /proc was
+seen as rowing against the tide and not completely useful since /proc
+wasn't enabled by default due to security concerns.
+
+The rest of /proc is still around, but you have to really want it.
+
+Kinda highlights, though, problems with the kitchen-sink approach. There's
+bits of /proc that are quite useful, but since it was so expansive, it
+represented a big security threat and so is off by default.
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170925/8b7d7171/attachment.html>
+
