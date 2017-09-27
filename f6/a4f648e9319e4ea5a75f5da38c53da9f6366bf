@@ -1,0 +1,55 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Wed, 27 Sep 2017 07:17:06 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <4e49a311-704d-6b70-92b3-27c6565f8aa0@case.edu>
+References: <20170925151827.GP28606@mcvoy.com>
+ <alpine.BSF.2.21.1709260948560.42298@aneurin.horsfall.org>
+ <646c7556-8300-d4ab-47fd-633352ea18e7@case.edu>
+ <20170926145326.GX28606@mcvoy.com>
+ <alpine.BSF.2.21.1709270720520.42298@aneurin.horsfall.org>
+ <a0a43777-6f0d-bf94-c07d-369c29c6adf9@tnetconsulting.net>
+ <alpine.BSF.2.21.1709271050070.47452@aneurin.horsfall.org>
+ <b7814add-ee06-af8e-0947-ed4cbff4d83d@case.edu>
+ <20170927020214.GG28606@mcvoy.com>
+ <4e49a311-704d-6b70-92b3-27c6565f8aa0@case.edu>
+Message-ID: <20170927141706.GI28606@mcvoy.com>
+
+On Wed, Sep 27, 2017 at 09:50:10AM -0400, Chet Ramey wrote:
+> On 9/26/17 10:02 PM, Larry McVoy wrote:
+> 
+> >>> Yeah, but still doesn't answer the question, application-wise.?? I'm gonna
+> >>> guess (without digging through the source) that it's a "dup2(0, 255)*" or
+> >>> something, to "save" a copy of stdin/out/err for some obscure reason.
+> >>
+> >> I already answered this.
+> > 
+> > OK, I'm gonna be that guy because I've learned when I ask, I learn.  
+> > 
+> > You answered but I didn't get any insight.  Why have an extra fd talking
+> > to the tty?  bash has 0, 1, 2 talking to it.   If it were redirected 
+> > would it have 255 pointing to some random tty?  I don't get the reason
+> > for the extra fd.
+> 
+> OK. The only way to guarantee you have a descriptor open to your
+> controlling terminal is to open /dev/tty yourself. You can run `bash -im'
+> and have yourself an interactive shell with job control enabled no matter
+> where stdin/stdout/stderr point, and they can be redirected at any point
+> during execution, so you can't count on them. But why do you have to have
+> the fd in the first place?
+
+All the tty stuff wasn't my question, I get all that, I did POSIX conformance
+in SunOS, there was a time when I dreamed about setsid() et al :)
+
+> ksh93 uses fd 2 no matter what, so you don't get job control if you
+> redirect stderr away from the terminal.)
+
+So that's the behaviour I'm used to (dating myself but this is TUHS so...)
+
+My question really was why use an extra fd?  If I run 
+
+	bash something > /dev/null 2>&1
+
+duh.  ksh93 wouldn't let you ^Z that, eh?  OK, makes sense, I hadn't 
+thought it through.  Sorry for the brain fart.
+
+
