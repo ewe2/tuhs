@@ -1,0 +1,87 @@
+From: chet.ramey@case.edu (Chet Ramey)
+Date: Wed, 27 Sep 2017 09:50:10 -0400
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <20170927020214.GG28606@mcvoy.com>
+References: <1506341239.18395.for-standards-violators@oclsc.org>
+ <CAC20D2MKMVozxARuwYQ2WgwWYJhfSdyU2t7YP1X5sf5PaTNseA@mail.gmail.com>
+ <20170925151827.GP28606@mcvoy.com>
+ <alpine.BSF.2.21.1709260948560.42298@aneurin.horsfall.org>
+ <646c7556-8300-d4ab-47fd-633352ea18e7@case.edu>
+ <20170926145326.GX28606@mcvoy.com>
+ <alpine.BSF.2.21.1709270720520.42298@aneurin.horsfall.org>
+ <a0a43777-6f0d-bf94-c07d-369c29c6adf9@tnetconsulting.net>
+ <alpine.BSF.2.21.1709271050070.47452@aneurin.horsfall.org>
+ <b7814add-ee06-af8e-0947-ed4cbff4d83d@case.edu>
+ <20170927020214.GG28606@mcvoy.com>
+Message-ID: <4e49a311-704d-6b70-92b3-27c6565f8aa0@case.edu>
+
+On 9/26/17 10:02 PM, Larry McVoy wrote:
+
+>>> Yeah, but still doesn't answer the question, application-wise.?? I'm gonna
+>>> guess (without digging through the source) that it's a "dup2(0, 255)*" or
+>>> something, to "save" a copy of stdin/out/err for some obscure reason.
+>>
+>> I already answered this.
+> 
+> OK, I'm gonna be that guy because I've learned when I ask, I learn.  
+> 
+> You answered but I didn't get any insight.  Why have an extra fd talking
+> to the tty?  bash has 0, 1, 2 talking to it.   If it were redirected 
+> would it have 255 pointing to some random tty?  I don't get the reason
+> for the extra fd.
+
+OK. The only way to guarantee you have a descriptor open to your
+controlling terminal is to open /dev/tty yourself. You can run `bash -im'
+and have yourself an interactive shell with job control enabled no matter
+where stdin/stdout/stderr point, and they can be redirected at any point
+during execution, so you can't count on them. But why do you have to have
+the fd in the first place?
+
+My initial message said you need it for "job control and other terminal
+operations." Here's what that means.
+
+You initially need a handle to your controlling terminal to determine
+whether or not you have one and whether you're in the background. If you
+don't have a controlling terminal, job control is impossible. You need the
+terminal's process group to determine whether or not you're in the
+foreground, and to get that you need a handle to the controlling tty. Every
+shell does this.
+
+Once you've determined the original tty pgrp, you need to become a process
+group leader if you're not one already and set the terminal's process group
+to your own so you can stay in the foreground. If you don't, you can't read
+from the terminal. If you can't change the terminal's process group, you
+can't enable job control. You need the handle to call tcsetpgrp(). Again,
+this is something every shell does.
+
+Now that you've set up job control, and you have a handle to your
+controlling terminal, you might as well keep it around -- your controlling
+terminal is not going to change throughout the life of the process.
+You'll need that handle every time you want to set the terminal's process
+group, and that's the essence of job control: setting the terminal's
+process group to the process group ID of whatever you've determined is the
+foreground job (which, most of the time, is yourself). So bash saves it
+to an fd that is unlikely to collide with anything else, which is essential
+because bash allows the file descriptor numbers used in redirections to
+consist of multiple digits. (I explained the algorithm bash uses; other
+shells do something different. dash and zsh use fd 10. mksh uses 24 (?).
+ksh93 uses fd 2 no matter what, so you don't get job control if you
+redirect stderr away from the terminal.)
+
+There is another "terminal operation" for which the controlling terminal
+is required: saving and restoring terminal state. Bash fetches the terminal
+attributes before running an external command, and restores the attributes
+if a process exits with a non-zero status or is stopped. The former is a
+useful convenience; the latter is required. You need the handle for the
+calls to tcgetattr()/tcsetattr().
+
+You can get away without all of this stuff, of course. But that makes job
+control harder and less efficient.
+
+Chet
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet at case.edu    http://cnswww.cns.cwru.edu/~chet/
+
+
