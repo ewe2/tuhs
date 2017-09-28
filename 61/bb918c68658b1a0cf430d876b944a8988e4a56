@@ -1,0 +1,41 @@
+From: tytso@mit.edu (Theodore Ts'o)
+Date: Thu, 28 Sep 2017 10:09:06 -0400
+Subject: [TUHS] RFS was: Re: UNIX of choice these days?
+In-Reply-To: <20170928125354.CE4E318C088@mercury.lcs.mit.edu>
+References: <20170928125354.CE4E318C088@mercury.lcs.mit.edu>
+Message-ID: <20170928140906.3nzz4bi6cy76qfxu@thunk.org>
+
+On Thu, Sep 28, 2017 at 08:53:54AM -0400, Noel Chiappa wrote:
+>     > From: Theodore Ts'o
+> 
+>     > when a file was truncated and then rewritten, and "truncate this file"
+>     > packet got reordered and got received after the "here's the new 4k of
+>     > contents of the file", Hilar[i]ty Enused.
+> 
+> This sounds _exactly_ like a bad bug found in the RVD protocol (Remote Virtual
+> Disk - a simple block device emulator). Disks kept suffering bit rot (damage
+> to the inodes, IIRC). After much suffering, and pain trying to debug it (lots
+> of disk writes, how do you figure out the one that's the problem), it was
+> finally found (IIRC, it wasn't something thinking about it, they actually
+> caught it). Turned out (I'm pretty sure my memory of the bug is correct), if
+> you had two writes of the same block in quick sucession, and the second was
+> lost, if the first one's ack was delayed Just Enough...
+
+At least at Project Athena, we only used RVD as a way to do read-only
+dissemination of system software, since RVD couldn't provide any kind
+of file sharing, which was important at Athena.  So we used NFS
+initially, and later on, transitioned to the Andrew File System (AFS).
+
+The fact that with AFS you could do live migration of a user's home
+directory, in the middle of day, to replace a drive that was making
+early signs of failure --- was such that all of our ops people
+infinitely preferred AFS to NFS.  NFS meant coming in late at night,
+after scheduling downtime, to replace a failing disk, where as with
+AFS, aside from a 30 second hiccup when the AFS volume was swept from
+one server to another, was such that AFS was referred to as "crack
+cocaine".  One ops people had a sniff of AFS, they never wanted to go
+back to NFS.
+
+						- Ted
+
+
