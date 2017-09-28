@@ -1,0 +1,86 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Thu, 28 Sep 2017 13:00:42 -0700
+Subject: [TUHS] RFS was: Re: UNIX of choice these days?
+In-Reply-To: <20170928140700.GN28606@mcvoy.com>
+References: <CALMnNGgMSmqQ56r7xTRNdrDYfRiMieQ48kuZfWtSKd+yjmP2tg@mail.gmail.com>
+ <CAP6exYKxC2g06dSRiM8-0BLN08AEWyO-8a0VAcy3vP4H3-8o8A@mail.gmail.com>
+ <CAC20D2MKSzQEfmD0dnKYv-0V00TkL6f_-Dv4Gs1diOrBLS8x3Q@mail.gmail.com>
+ <b6e8b71c-ba04-bbfb-00db-c371ee62cdb8@kilonet.net>
+ <CAC20D2PYANmz2=oWCHX6h3jM5bxFBbzQZHDZXP00idyw+fwDZw@mail.gmail.com>
+ <201709270844.v8R8i2kd021180@freefriends.org>
+ <CAK7dMtBkpreyncAoc-CPsUgFeMvQpdBEynX3pmS-8Z0KXn8Y1A@mail.gmail.com>
+ <CAC20D2NU6ErExdOuT6PNucf4VhuLKwW1=AcbaOdKtV3vocrFkg@mail.gmail.com>
+ <CAK7dMtCER7LZ+WmQNRNH-YwYspD6jL7W370Q67Vou0Rp+YWv=Q@mail.gmail.com>
+ <201709281349.v8SDnHp2005910@freefriends.org>
+ <20170928140700.GN28606@mcvoy.com>
+Message-ID: <2BFDC7A5-109E-4045-8B40-4ECC11F8DE45@bitblocks.com>
+
+
+
+> On Sep 28, 2017, at 7:07 AM, Larry McVoy <lm at mcvoy.com> wrote:
+> 
+> On Thu, Sep 28, 2017 at 07:49:17AM -0600, arnold at skeeve.com wrote:
+>> Kevin Bowling <kevin.bowling at kev009.com> wrote:
+>> 
+>>> I guess alternatively, what was interesting or neat, about RFS, if
+>>> anything?  And what was bad?
+>> 
+>> Good: Stateful implementation, remote devices worked.
+> 
+> I'd argue that stateful is really hard to get right when machines panic
+> or reboot.  Maybe you can do it on the client but how does one save all
+> that state on the server when the server crashes?
+> 
+> NFS seems simple in hindsight but like a lot of things, getting to that
+> simple wasn't chance, it was designed to be stateless because nobody
+> had a way to save the state in any reasonable way.
+
+I have some first hand experience with this.... in 1984.
+
+Valid Logic Systems Inc, an early VLSI design vendor hired me
+as a contractor to fix bugs in this funky ethernet driver they
+had (from Lucas films, IIRC) that did some remote file
+operations. I proposed that instead I do a "proper" networked
+file system and to my amazement they agreed to let me build a   
+prototype.
+ 
+I first built an RPC layer (ethertype 1600 -- see RFC 1700!)
+and then EFS (extended FS) that allowed access to remote 
+files.  Being a one man team I punted on generality. Just
+hand-built separate marshall/unmarshall function for each
+remote procedure.  No mounts. Every node's FS was visible to
+everyone else (subject to Unix permissions). /net/ path prefix
+was for remote files.
+ 
+All this took about 2-3 months. Performance was decent for a
+1984 era workstation. Encouraged by the progress I suggested
+we add in missing functionality such as the ability to chdir 
+to a remote dir etc. Yes, state! And complications!
+ 
+On bootup every node advertized its presence & a "generation"
+number (incremented by 1 from the last gen) so that other
+nodes can drop old outstanding state -- not unlike a disk 
+dying but still messy to clean things up. Next had to make
+scheduling priority for remote operations to be interruptible.
+People didn't like "cd /net/foo" hanging indefinitely! unlink
+and mv were a problem (machine A wouldn't know if machine B    
+did this). rm was easy to fix -- just add a refcount for every
+remote machine with an open. mv not so. I don't think I ever
+solved this. Local FS read/write are atomic so I tried very
+hard to make the remote read/writes atomic as well. This can
+get interesting in presence of a node crashing....
+ 
+At about this time, Sun gave a presentation on NFS to Valid.
+I suspect Valid also realized that doing this properly was
+a much bigger than a one man project. Result: they terminated
+the project. It was a fun project while it lasted. The fact
+this much was done was thanks to a lot of invaluable help
+from my friend Jamie Markevitch (also a contractor @ Valid
+at that point).
+
+At the time I thought all of these stateful problems were
+solvable given more time but now I am not so sure. But as
+a result of that belief I never really liked NFS. I felt
+they took the easy way out.
+
+
