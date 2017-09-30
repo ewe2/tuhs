@@ -1,0 +1,88 @@
+From: kevin.bowling@kev009.com (Kevin Bowling)
+Date: Sat, 30 Sep 2017 15:37:57 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <7E337D3A-984E-444B-BE8F-7AFCBE7F50DF@bitblocks.com>
+References: <1506784652.28254.for-standards-violators@oclsc.org>
+ <CAK7dMtAwcZB0UTMTaiYghLnuHqtyDf9kXPL3=YoVoHsvXoxFVQ@mail.gmail.com>
+ <7E337D3A-984E-444B-BE8F-7AFCBE7F50DF@bitblocks.com>
+Message-ID: <CAK7dMtD-89CZ-rtKqaroNMXVaELZvu3_MC0Rnej5+Gy-+3HaMg@mail.gmail.com>
+
+To understand the Linux sysfs, you have to understand what problem
+they are trying to solve.  It is self inflicted, but it solves a
+problem in a way the community values.  Because the kernel is an
+independent project versus libc (glibc, musl, Bionic, etc), and
+because the base system is from others as well (coreutils, busybox,
+systemd), Linus has become fanatical about ABI stability.  The simple
+text interfaces allow the kernel to change haphazardly without much
+planning, and still retain binary compatibility.  In terms of code
+churn and needless KPI proliferation, Torvald's "masturbating monkeys"
+insult toward OpenBSD holds up pretty well for his own crew :)
+
+Operating systems (using subtle terminology that excludes "Linux"
+without more specification) don't have that problem.
+
+I haven't played with Plan9 at all.  Read some code, the TCP stack was
+cute but unrealistically simplistic.  I need to take it for a spin.
+
+Regards,
+
+On Sat, Sep 30, 2017 at 2:56 PM, Bakul Shah <bakul at bitblocks.com> wrote:
+>
+> On Sep 30, 2017, at 1:29 PM, Kevin Bowling <kevin.bowling at kev009.com> wrote:
+>
+>> I seem to recall proc is loosely deprecated in Linux anyway in favor
+>> of sysfs.  GregKH mentioned people misuse both, for instance making
+>> them output pretty histograms instead of simple text values, that
+>> defeat the fundamental design tenants of these interfaces -- which is
+>> to try and maintain a stable API.
+>
+>> One thing I think Linux did pretty well is the whole object
+>> orientation in C thing with kobject, and that nets you automatic sysfs
+>> directories and nodes for pretty much everything.
+>
+> The Linux /sys fs is truly bizarre. On a RaspberryPi running Linux 4.4.21+:
+>
+> $ find /sys | wc # total entries
+> 11448
+> $ find /sys -type l | wc # count of symlinks
+> 1077
+> $ find /sys -type f | wc  # count of "regular" files
+> 8931
+>
+> I am not sure exposing most everything via a namespace in this
+> manner is such a good idea (or at least in "good taste" :-)
+> Interfaces should be lean.
+>
+> Similarly the /proc fs is quite strange. Why does it have any
+> non process subdirectory?
+>
+> $ echo /proc/[0-9]* | wc -w # count of processes
+> 142
+> $ echo /proc/[^0-9]* | wc -w  # count of non-process directories
+> 58
+>
+> Compare:
+>
+> Linux (raspberryPi + X windows):
+> $ echo /proc/[0-9]* |wc -w # how many processes
+> 142
+> $ find /proc/[0-9]* | wc -l # how many proc related files+dirs
+> 66153
+>
+> FreeBSD (10.3 amd64+zfs+4 lightweight jails):
+> $ echo /proc/[0-9]* | wc -w # how many processes
+> 123
+> $ find /proc/[0-9]* | wc -l # how many proc related files+dirs
+> 1075
+>
+> Plan9 (mostly quiescent):
+> $ echo /proc/[0-9]* | wc -w
+> 64
+> $ du -a /proc/[0-9]* | wc -l
+> 1235
+>
+> Anyone feeling sad about /proc in FreeBSD should consider
+> the alternative!
+>
+>
+
