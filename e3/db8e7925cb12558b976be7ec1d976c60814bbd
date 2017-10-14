@@ -1,0 +1,62 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 14 Oct 2017 00:03:04 -0500
+Subject: stty erase '^?' in v7
+In-Reply-To: <1507955945.3625743.1138420416.3859F903@webmail.messagingengine.com>
+References: <8de0efc7-0a45-02f2-5db3-7b3bbbe4b815@gmail.com>
+ <1507955945.3625743.1138420416.3859F903@webmail.messagingengine.com>
+Message-ID: <35ca5cb3-b2ec-8573-ee94-b710d6c61e9f@gmail.com>
+
+On 10/13/17 11:39 PM, Random832 wrote:
+> On Fri, Oct 13, 2017, at 22:59, Will Senn wrote:
+>> Does anyone know why stty won't accept '^?' in v7? It will accept '^h',
+>> but then the shell expects ^h to "backspace". I am trying to get the
+>> delete key on my mac to do the backing up and it's '^?'. # isn't my
+>> favorite since it's used in C programs, but pressing CTRL-h to backup is
+>> a pain too. If you've read this far, I have three more questions:
+> First, you'd need to remove it as the *interrupt* character, which I
+> don't think the stty command in V7 can do, though the kernel supports it
+> with TIOCSETC. Signal characters are processed before input control
+> ones.
+>
+> #include <sgtty.h>
+> struct sgttyb buf;
+> main() {
+> ioctl(1, TIOCSETC, "\3\34\21\23\4\377");
+> gtty(1, &buf);
+> buf.sg_erase = 0177;
+> buf.sg_kill = 025;
+> stty(1, &buf);
+> }
+>
+> Also, it won't actually erase the character (unless your terminal
+> interprets an echoed ^? that way - to my knowledge only putty does) -
+> the crterase flag [and feature], which echoes space-backspace-space on
+> erase was added later than V7.
+Yeeha, I actually understood your answer :). I didn't know that the 
+delete key served a purpose, interrupt, which is good to know. The code 
+works, but it's odd without the backing up and erasing, I may just stick 
+with # and @.
+>
+>> 1. How do you escape # in order to write a C program if # is the erase
+>> character in the terminal?
+> IIRC, it doesn't have effect on the first character of the line, which
+> is enough for C. Looking through the TTY driver, it looks like there's
+> code for backslash to escape it.
+Great answer, didn't even cross my mind, but of course a # at the start 
+of a line is ignored, the backslash is obvious in retrospect too.
+>> 2. How do you enter a literal character in the v7 shell (I am used to
+>> CTRL-v CTRL-DEL to enter the delete character on other unices)?
+>> 3. Is there a way to echo the ascii value of a keypress in v7?
+> You could probably put something together with stty raw, od, and sed q
+> (head didn't exist in v7, and you need *something* to cut things off
+> because ctrl-d won't work with stty raw), but it may be easier to figure
+> out what all your keys produce outside of your classic unix environment.
+
+I'll go with easier :).
+
+Thanks!
+
+-- 
+GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+
+
