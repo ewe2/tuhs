@@ -1,0 +1,36 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 15 Oct 2017 10:39:54 -0400 (EDT)
+Subject: stty erase '^?' in v7
+Message-ID: <20171015143954.C507218C0BB@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > All that cooked and raw stuff is gobbledegook that I'll have to read up
+    > on.
+
+The raw/cooked stuff isn't the source of the worst hair in the TTY driver;
+that would be delays (on the output side), and delimiter processing (on the
+input side).
+
+The delays are for mechanical terminals, because they need delays after a
+motion command (e.g. NL, CR, etc) before the next printing character is sent;
+differing for different motion control commands, further complexified by the
+current print head position - a Carriage Return from column 70 taking a lot
+longer than one from column 10. The driver keeps track of the current column,
+so it can calculate this! It does the delays by putting in the output queue a
+chacter with the high bit set, and the delay in the low bits; the output start
+routine looks for these, and does the delay.
+
+On the input side, every time it sees a delimiter (NL, EOF), it inserts a 0xFF
+byte in the input queue, and increments a counter to keep track of how many it
+has inserted. I _think_ this is so that any given read call on a 'cooked'
+terminal will return at most one line of input (although I don't know why they
+don't just parse the buffer contents at read time - although I guess they need
+the delimiter count so the read call will wait if there is not a complete line
+there yet).
+
+I should look and see how the MIT TTY driver (which also supported 8-bit input
+and output) dealt with these...
+
+    Noel
+
