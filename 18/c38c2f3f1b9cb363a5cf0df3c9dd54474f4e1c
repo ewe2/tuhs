@@ -1,0 +1,64 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Sun, 22 Oct 2017 21:11:25 -0400
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: <201710222300.v9MN0dN4135736@tahoe.cs.Dartmouth.EDU>
+References: <201710222300.v9MN0dN4135736@tahoe.cs.Dartmouth.EDU>
+Message-ID: <CAEoi9W4e_jp3LQ-haRp037v8u=AgzH4KDfj60+bFq1CxHhHwtQ@mail.gmail.com>
+
+On Sun, Oct 22, 2017 at 7:00 PM, Doug McIlroy <doug at cs.dartmouth.edu> wrote:
+>> macOS requires you to have a data section aligned to 4K, even if you
+>> don't use it. The resulting binary is a little over 8K; again, mostly
+>> zeros.
+>
+> Not quite. The classic empty executable file for /bin/true works
+> on OS X. That is not just a clever trick;it's a natural consequence
+> of Kernighan's ancient prrecept: do nothing gracefully. Conceivably
+> the 4K data section is, too--if the page has no physical presence
+> until it is accessed.
+
+Oh sure! Sorry; the mention of the 4K data section was meant to be
+orthogonal to the empty-shell file thing. However, one still cannot
+'exec' an empty shell script, even on OS X:
+
+: hurricane; mkdir t
+: hurricane; cd t
+/Users/dcross/t
+: hurricane; touch true
+: hurricane; cat>dotrue.c
+int main() { execl("./true", "true", 0); write(2, "Boo\n", 4); return 1; }
+: hurricane; chmod +x ./true
+: hurricane; ./true
+: hurricane; echo $?
+0
+: hurricane; make dotrue
+cc     dotrue.c   -o dotrue
+dotrue.c:1:14: warning: implicit declaration of function 'execl' is
+invalid in C99 [-Wimplicit-function-declaration]
+int main() { execl("./true", "true", 0); write(2, "Boo\n", 4); return 1; }
+             ^
+dotrue.c:1:42: warning: implicit declaration of function 'write' is
+invalid in C99 [-Wimplicit-function-declaration]
+int main() { execl("./true", "true", 0); write(2, "Boo\n", 4); return 1; }
+                                         ^
+2 warnings generated.
+: hurricane; ./dotrue
+Boo
+: hurricane; echo $?
+1
+: hurricane; cp /usr/bin/true .
+: hurricane; ./dotrue
+: hurricane; echo $?
+0
+: hurricane; file true
+true: Mach-O 64-bit executable x86_64
+: hurricane; ls -l true
+-rwxr-xr-x  1 dcross  eng  17760 Oct 22 21:08 true
+: hurricane; cd ..
+/Users/dcross
+: hurricane; rm -fr t
+: hurricane;
+
+(The system-provided /usr/bin/true is >16KB!!)
+
+        - Dan C.
+
