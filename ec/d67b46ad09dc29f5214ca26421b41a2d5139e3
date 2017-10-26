@@ -1,0 +1,71 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 26 Oct 2017 10:27:35 -0700
+Subject: [TUHS] Charles Forsyth on putting Unix on a diet.
+In-Reply-To: <CAEoi9W7LBMZ3ZC-uy8Z2d-dg6NFubdmArBNqNkj0RgS5pY7baw@mail.gmail.com>
+References: <CAEoi9W7LBMZ3ZC-uy8Z2d-dg6NFubdmArBNqNkj0RgS5pY7baw@mail.gmail.com>
+Message-ID: <20171026172735.GG3206@mcvoy.com>
+
+On Tue, Oct 24, 2017 at 10:51:17PM -0400, Dan Cross wrote:
+> I've always enjoyed this paper; recently I found occasion to thumb
+> through it again. I thought I'd pass it on; I'm curious what some on
+> the list think about this given their first-hand knowledge of relevant
+> history (Larry, I'm looking at you; especially with respect his
+> comments on the VM system).
+> 
+>         - Dan C.
+> 
+> http://www.terzarima.net/doc/taste.pdf
+
+OK, I've read it.  This could have been a great paper if he had included
+some performance results.  As it is, I'm sorry that his ideas didn't take
+hold, or at least get some discussion.
+
+The paging stuff is neat but it doesn't address the file system page cache
+so far as I tell.  It's process based so unless the process had the file
+mmap-ed it wouldn't take care of it.  And mmap didn't exist at the time,
+so I'm not sure how he handed the page cache.  
+
+He was fixated on code size, and yeah, on 4MB machines, you need to
+be even on 8 you need to be (at Sun we called EMACS Eight Megs And
+Constantly Swapping).  But I'd like to know if his paging scheme worked.
+I went through a period where I wrote over a dozen different pageout
+daemons in an effort to do a better job; none did.  They had certain
+use cases where they did better but then other work loads made them
+perform worse.  That global pageout daemon is still around, it's
+depressingly hard to do better than that.  If he succeeded it would
+be nice to have numbers.
+
+His pageout scheme could have all forward pointers if he had them in
+the vnode along with the process.
+
+I agree with him on fork, there is no reason not do do vfork in fork
+that I can think of (other than wnj's hack of putting stats in the 
+parent process by the child in csh and that was just gross).
+
+His comments on the file system switch vs VFS sort of miss the point
+that the VFS was put in place to allow file systems that don't have
+Unix semantics (NFS being the biggest example).  But I agree that 
+there perhaps could have been a better approach, this is why it 
+would have been nice to have his stuff get a broader audience.
+
+I disagree on the streams/STREAMS stuff, that shit has no place in
+anything that wants performance.  I'm working with netflix, trying
+to do better than this:
+
+https://news.ycombinator.com/item?id=15367421
+
+which is a discussion of their writeup of how they managed to push
+~100Gbit/sec of movies on a single machine.  Sticking STREAMS in the
+middle of that was a bad idea back in the day and a worse idea today.
+
+But all in all, an interesting paper.  It's pretty amazing how many of
+the people in the references I know, lots of them I've worked with, Steve
+Kleiman was my mentor at Sun, Rosenthal and I had tons of OS discussions.
+I toyed with going to HP Labs to work with John Wilkes, etc.  Definitely
+a trip down memory lane and makes me feel super lucky to have gotten to
+work with people of that caliber.
+
+Thanks for the pointer.
+
+--lm
+
