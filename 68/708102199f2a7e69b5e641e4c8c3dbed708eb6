@@ -1,0 +1,385 @@
+From: don@DonHopkins.com (Don Hopkins)
+Date: Thu, 2 Nov 2017 18:57:29 +0100
+Subject: [TUHS] Happy birthday, Morris Worm!
+In-Reply-To: <C24C5492-33AD-431E-9F13-C4C289DCD682@gmail.com>
+References: <1509630411.25641.for-standards-violators@oclsc.org>
+ <7335deff-4c63-51d9-ec9b-7435a32ae3c7@gmail.com>
+ <20171102150019.GC1495@h-174-65.A328.priv.bahnhof.se>
+ <4AC59DB7-BCDC-4F0C-9989-ED635884F9AB@tfeb.org>
+ <C24C5492-33AD-431E-9F13-C4C289DCD682@gmail.com>
+Message-ID: <A2820480-64A1-4376-9943-630A935727DE@gmail.com>
+
+Inspired by RTM’s Internet Worm and the Iran Contra Scandal, I wrote an OPS-5 program for my CMSC421 AI project that simulated breaking into Oliver North’s Intimus-007s paper shredder and posting some incriminating documents to the email => talk.rumor gateway at ucbvax. 
+
+It (pretend) started out my (real) AI professor’s (Jim Hendler) Sun (pretend) workstation dormouse, then got into the (pretend) CS department VAX mimsy through his .rhosts file.  
+
+It just so happened that (for real) mimsy.cs.umd.edu <http://mimsy.cs.umd.edu/> had a lot of courtesy “network contact” users who worked for the NSA at Fort Mead, since we had a MILNET connection through the infamous NSA IMP 57 (which you were not supposed to say in public). (The fact that mimsy.cs.umd.edu <http://mimsy.cs.umd.edu/> and dockmaster.ncsc.mil had similar ip addresses kind of gave it away.)
+
+http://multicians.org/site-dockmaster.html <http://multicians.org/site-dockmaster.html>
+
+Then it used the IFS hack to get root on (pretend) mimsy, and then (pretend) spread as far as it could by (pretend) chaining through .rhosts files and other various (pretend) hacks, (pretend) user name / password guessing, (pretend) rms’ing into prep, etc. OPS-5 is really great at that kind of stuff (for real)! 
+
+https://en.wikipedia.org/wiki/OPS5 <https://en.wikipedia.org/wiki/OPS5>
+
+It eventually (pretend) found its way to (pretend) tycho, which was (for real) one of NSA’s unix machines, PDP-11 running version 6 unix (which nobody was supposed to say in public, otherwise they were forced to publicly apologize and endorse the official NSA cover story that very few employees of NSA are even aware that USENET exist). 
+
+https://groups.google.com/forum/#!topic/net.net-people/pavX0NDLSjA <https://groups.google.com/forum/#!topic/net.net-people/pavX0NDLSjA>
+
+Fortunately (pretend) Oliver North had an account on (pretend) tycho, so it was able to (pretend) break into his (pretend) basement server in the White House, and then into his (pretend) Intimus-007s paper shredder ("the ace of security paper shredders” — which is the model he had for real), where it found some interesting (pretend) documents that it (pretend) posted to (pretend) Usenet! 
+
+Check out this baby, isn’t it a beauty:
+
+http://www.the-shredder-warehouse.com/intimus-007sf <http://www.the-shredder-warehouse.com/intimus-007sf>
+
+-Don
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; A useful OPS-5 program
+; Don Hopkins, University of Maryland
+; CMSC421, Project 6
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(literalize user
+	user
+	password
+	first
+	last
+	host)
+
+(literalize file
+	name
+	owner
+	writable
+	host)
+
+(literalize goal
+	status
+	type
+	file
+	user
+	password
+	host
+	ruser
+	rhost)
+
+(literalize rhosts
+	user
+	host
+	ruser
+	rhost)
+
+(literalize session
+	user
+	host)
+
+(literalize log
+	user
+	host
+	status
+	serial)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(p crack1
+	(session ^user <user> ^host <host>)
+	(rhosts ^user <ruser> ^host <rhost>
+		^ruser <user> ^rhost <host>)
+	(user ^user <ruser> ^host <rhost>)
+	-(session ^user <ruser> ^host <rhost>)
+    -->
+	(make goal ^type rlogin ^status active
+		   ^user <ruser> ^host <rhost>
+		   ^ruser <user> ^rhost <host>))
+
+(p crack2
+	(session ^user <user> ^host <host>)
+	(user ^user <ruser> ^password none ^host <rhost>)
+	-(session ^user <ruser> ^host <rhost>)
+    -->
+	(make goal ^type telnet ^status active
+	           ^user <user> ^host <host>
+		   ^ruser <ruser> ^password none ^rhost <rhost>))
+
+(p crack3
+        (session ^user <user> ^host <host>)
+    {	(goal ^type telnet ^status active
+	      ^user <user> ^host <host>
+	      ^ruser <ruser> ^password <password> ^rhost <rhost>) <g3> }
+	(user ^user <ruser> ^host <rhost>)
+    -->
+	(write (crlf) ... from <user> at <host> ... telnet <rhost> 
+	       (crlf) ... login <ruser> password <password>)
+	(make goal ^type login ^status active
+	           ^user <ruser> ^host <rhost> ^password <password>)
+	(modify <g3> ^status satisfied))
+
+(p crack4
+	(session ^user <user> ^host <host>)
+	-(session ^user root ^host <host>)
+    -->
+	(make goal ^type crack ^status active ^host <host>))
+
+(p crack5
+        (session ^user root ^host <host>)
+    {	(goal ^type su ^status active
+	      ^user <user> ^host <host>) <g5> }
+	(user ^user <user> ^host <host> ^password <password>)
+	-(session ^user <user> ^host <host>)
+    -->
+	(write (crlf) ... su from root to <user> at <host>)
+	(make goal ^type login ^status active
+	           ^user <user> ^host <host> ^password <password>)
+	(modify <g5> ^status satisfied))
+
+(p crack6
+	(session ^user root ^host <host>)
+	(user ^user <user> <> root ^host <host>)
+	-(session ^user <user> ^host <host>)
+    -->
+	(make goal ^type su ^status active
+		   ^user <user> ^host <host>))
+
+(p crack7
+	(session ^user sysdiag ^host <host>)
+	(user ^user root ^host <host> ^password <password>)
+    {	(goal ^type crack ^status active ^host <host>) <g7> }
+	-(session ^user root ^host <host>)
+    -->
+	(write (crlf) ... sysdiag at <host> is equivalent to root)
+	(make goal ^type login ^status active
+	           ^user root ^host <host> ^password <password>)
+	(modify <g7> ^status satisfied))
+
+(p crack8
+    {	(goal ^type rlogin ^status active
+	      ^user <ruser> ^host <rhost>
+	      ^ruser <user> ^rhost <host>) <g8> }
+	(session ^user <user> ^host <host>)
+	(user ^user <ruser> ^host <rhost> ^password <password>)
+	(rhosts ^user <ruser> ^host <rhost>
+		^ruser <user> ^rhost <host>)
+	-(session ^user <ruser> ^host <rhost>)
+    -->
+	(write (crlf) ... from <user> at <host>
+	       ... rlogin to <ruser> at <rhost>)
+	(make goal ^type login ^status active
+	           ^user <ruser> ^host <rhost> ^password <password>)
+	(modify <g8> ^status satisfied))
+
+(p crack9
+	(session ^user <user> ^host <host>)
+	(file ^user passwd ^writable yes ^host <host>)
+    {	(user ^user root ^password <> none ^host <host>) <g9> }
+	(goal ^type crack ^status active ^host <host>)
+    -->
+	(write (crlf) ... passwd file is writable on <host>
+	       ... removing root password)
+	(modify <g9> ^password none))
+
+(p crack10
+    {	(goal ^type login ^status active
+	      ^user <user> ^host <host>
+	      ^password <password>) <g10> }
+	(user ^user <user> ^host <host> ^password <password>)
+    -->
+	(bind <serial>)
+	(write (crlf) ... audit <serial> of OK login <user> at <host>
+	       password <password>)
+	(make session ^user <user> ^host <host>)
+	(make log ^user <user> ^host <host>
+	      ^status OK ^serial <serial>)
+	(modify <g10> ^status satisfied))
+
+(p crack11
+    {	(log ^user <user> ^host <host> ^serial <serial>) <g11> }
+	(session ^user root ^host <host>)
+	(goal ^type covert)
+    -->
+	(write (crlf) ... cleaning up audit <serial> of login <user> at <host>)
+	(remove <g11>))
+
+(p crack12
+    {	(session ^user <user> ^host <host>) <g12> }
+	(goal ^type crack ^status active ^host <host>)
+	(file ^name preserve ^host <host>)
+	-(goal ^type ifs-hack ^host <host>)
+    -->
+	(write (crlf) ... trying IFS hack and logging out from
+	       <user> at <host>)
+	(make goal ^type ifs-hack ^status active ^host <host>)
+	(remove <g12>))
+
+(p crack13
+    {	(user ^user root ^host <host>) <g13a> }
+    {	(goal ^type ifs-hack ^status active ^host <host>) <g13b> }
+	(file ^name preserve ^host <host>)
+    -->
+	(write (crlf) ... IFS hack succeeded in removing root password
+	       at <host>)
+	(modify <g13a> ^password none)
+	(modify <g13b> ^status satisfied))
+
+(p crack14
+	(session ^user <user> ^host <host>)
+	(file ^name <name> ^owner <user> ^host <host>)
+    {	(goal ^type mail ^status active ^file <name>
+	      ^ruser <ruser> ^rhost <rhost>) <g14> }
+    -->
+	(write (crlf) ... found <name> belonging to <user> at <host>
+	       (crlf) ... mailing <name> to <ruser> at <rhost>)
+	(modify <g14> ^status satisfied))
+
+(p crack15
+	(session ^user <user> ^host <host>)
+	(goal ^type mail ^status satisfied)
+	(goal ^type covert)
+    -->
+	(make goal ^type logout ^status active
+	           ^user <user> ^host <host>))
+
+(p crack16
+	(goal ^type mail ^status satisfied)
+	-(session)
+    -->
+	(write (crlf) ... time to stop fooling around and
+	       go read some netnews)
+	(halt))
+
+(p crack17
+    {	(goal ^type login ^status active
+	      ^user <user> ^host <host>
+	      ^password <password>) <g17> }
+	(user ^user <user> ^host <host> ^password <> <password>)
+    -->
+	(bind <serial>)
+	(write (crlf) ... audit <serial> of BAD login <user> at <host>
+	       password <password>)
+	(make log ^user <user> ^host <host>
+	      ^status BAD ^serial <serial>)
+	(modify <g17> ^status satisfied))
+
+(p crack18
+        (session ^user <user> ^host <host>)
+	(user ^user <ruser> ^host <host>
+	      ^first {<first> <> nil})
+	-(session ^user <ruser> ^host <host>)
+	-(goal ^type covert)
+	-(goal ^type telnet ^status satisfied
+	       ^ruser <ruser> ^rhost <host> ^password <first>)
+    -->
+	(write (crlf) ... guessing user <ruser> at <host>
+	       password <first>)
+	(make goal ^type telnet ^status active
+	           ^user <user> ^host <host>
+	           ^ruser <ruser> ^rhost <host> ^password <first>))
+
+(p crack19
+	(session ^user <user> ^host <host>)
+	(user ^user <ruser> ^host <host>
+	      ^last {<last> <> nil})
+	-(session ^user <ruser> ^host <host>)
+	-(goal ^type covert)
+	-(goal ^type telnet ^status satisfied
+	       ^ruser <ruser> ^rhost <host> ^password <last>)
+    -->
+	(write (crlf) ... guessing user <ruser> at <host>
+	       password <last>)
+	(make goal ^type telnet ^status active
+	           ^user <user> ^host <host>
+		   ^ruser <ruser> ^rhost <host> ^password <last>))
+
+(p crack20
+    {	(session ^user <user> ^host <host>) <g20a> }
+    {	(goal ^type logout ^status active
+	      ^user <user> ^host <host>) <g20b> }
+    -->
+	(write (crlf) ... logging out from <user> at <host>)
+	(remove <g20a>)
+	(modify <g20b> ^status satisfied))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(p t1
+	(start 1)
+    -->
+	(make goal ^type covert)
+	(make start 2))
+
+(p t2
+	(start 2)
+    -->
+	; host tycho
+	(make file ^name preserve ^owner root ^host tycho)
+	(make user ^user root ^password unknown ^host tycho)
+	(make user ^user casper ^password unknown ^host tycho)
+	(make rhosts ^user casper ^host tycho
+	             ^ruser casper ^rhost mimsy)
+	(make user ^user ollie ^password unknown ^host tycho)
+	(make rhosts ^user ollie ^host tycho
+	             ^ruser ollie ^rhost basement)
+
+	; host basement
+	(make user ^user root ^password ron ^host basement
+	           ^first ron ^last reagan)
+	(make user ^user casey ^password bill ^host basement
+	           ^first bill ^last casey)
+	(make user ^user fawn ^password unknown ^host basement
+	           ^first fawn ^last hall)
+	(make rhosts ^user fawn ^host basement
+	             ^ruser fawn ^rhost intimus-007s)
+	(make user ^user iatollah ^password unknown ^host basement
+	           ^first guest ^last iranian)
+	(make rhosts ^user iatollah ^host basement
+	             ^ruser allah ^rhost persia)
+	(make user ^user ollie ^password unknown ^host basement)
+	(make rhosts ^user ollie ^host basement
+	             ^ruser ollie ^rhost tycho)
+	(make file ^name notes ^owner ollie ^host basement)
+
+	; host intimus-007s ("the ace of security paper shredders")
+	(make user ^user fawn ^password unknown ^host intimus-007s)
+	(make rhosts ^user fawn ^host intimus-007s
+	             ^ruser fawn ^rhost basement)
+	(make user ^user ollie ^password north ^host intimus-007s
+	           ^first ollie ^last north)
+	(make file ^name diary ^owner ollie ^host intimus-007s)
+
+	; host mimsy
+	(make file ^name passwd ^writable yes ^owner root ^host mimsy)
+	(make user ^user root ^password unknown ^host mimsy)
+	(make user ^user casper ^password unknown ^host mimsy)
+	(make rhosts ^user casper ^host mimsy
+	             ^ruser casper ^rhost tycho)
+	(make user ^user hendler ^password unknown ^host mimsy)
+	(make rhosts ^user hendler ^host mimsy
+	             ^ruser hendler ^rhost dormouse)
+
+	; host dormouse
+	(make user ^user root ^password unknown ^host dormouse)
+	(make user ^user sysdiag ^password none ^host dormouse)
+	(make user ^user hendler ^password unknown ^host dormouse)
+	(make rhosts ^user hendler ^host dormouse
+		     ^ruser hendler ^rhost mimsy)
+
+	; host prep
+	(make user ^user rms ^password rms ^host prep)
+
+	; give ourselves a meaning in life ...
+	(make goal ^type mail ^status active
+	           ^file diary ^ruser post-talk-rumor ^rhost ucbvax)
+	(make goal ^type mail ^status active
+	           ^file notes ^ruser post-talk-rumor ^rhost ucbvax)
+
+	; and point us in the right direction ...
+	(make session ^user nobody ^host nowhere)
+	(make goal ^type telnet ^status active
+	           ^user nobody ^host nowhere
+		   ^ruser rms ^password rms ^rhost prep))
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171102/cc9044f1/attachment-0001.html>
+
