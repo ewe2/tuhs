@@ -1,0 +1,42 @@
+From: drb@msu.edu (Dennis Boone)
+Date: Tue, 07 Nov 2017 04:07:23 -0500
+Subject: [TUHS] Literal character escapes in v7
+In-Reply-To: (Your message of Mon, 06 Nov 2017 22:21:12 -0600.)
+ <b72ba3f2-5f38-6194-4925-b3b9e0caf4b9@gmail.com>
+References: <b72ba3f2-5f38-6194-4925-b3b9e0caf4b9@gmail.com> 
+Message-ID: <20171107090723.F2CC3A585D1@yagi.h-net.msu.edu>
+
+ > I'm not looking for code review, but the code is intended to replace
+ > the tabs and backspaces with \t and \b respectively, but I haven't
+ > been able to test it because I can't seem to make a backspace
+ > character appear in input. In later unices, ^V followed by the
+ > backspace would work, but that's not part of v7. Backspace itself is
+ > my erase character, so anytime I just type it, it backspaces :).
+
+This bit from the middle of sys/dev/tty.c seems to indicate that you
+escape it with \:
+
+	} else {
+		mc = maptab[c];
+		if (c==tp->t_erase || c==tp->t_kill)
+			mc = c;
+		if (mc && (mc==c || (tp->t_flags&LCASE))) {
+			if (bp[-2] != '\\')
+			c = mc;
+			bp--;
+		}
+	}
+
+On my test v7 system if I type backslash control-h:
+
+	# stty
+	speed 0 baud
+	erase = '^H'; kill = '^U'
+	even -nl echo -tabs
+	# echo \^H | od -c
+	0000000  \b  \n
+	0000002
+	#
+
+De
+
