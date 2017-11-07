@@ -1,0 +1,51 @@
+From: beebe@math.utah.edu (Nelson H. F. Beebe)
+Date: Tue, 7 Nov 2017 08:34:46 -0700
+Subject: [TUHS] origins of void* -- Apology!
+Message-ID: <CMM.0.95.0.1510068886.beebe@gamma.math.utah.edu>
+
+Arthur Krewat <krewat at kilonet.net> writes on Mon, 6 Nov 2017 19:34:34 -0500
+
+>> char (at least these days) is signed. So really, it's 7-bit ASCII.
+
+I decided last night to investigate that statement, and updated my
+C/C++ features tool to test the sign and range of char and wchar_t.  
+
+I ran it in our test lab with physical and virtual machines
+representing many different GNU/Hurd, GNU/Linux, *BSD, macOS, Minix,
+Solaris, and other Unix family members, on ARM, MIPS, PowerPC, SPARC,
+x86, and x86-64 CPU architectures.  Here is a summary:
+
+	% cat *.log | grep '^ char type is' | sort | uniq -c
+	    157         char type is          signed
+	      3         char type is          unsigned
+
+The sole outliers are 
+
+	* Arch Linux ARM on armv7l
+	* IBM CentOS Linux release 7.4.1708 on PowerPC-8
+	* SGI IRIX 6.5 on MIPS R10000-SC
+
+for which I found these log data:
+
+	Character range and sign...
+		CHAR_MIN                        =   +0
+		CHAR_MAX                        = +255
+		SCHAR_MIN                       = -128
+		SCHAR_MAX                       = +127
+		UCHAR_MAX                       = +255
+		char type is          unsigned
+		signed char type is   signed
+		unsigned char type is unsigned
+
+The last two lines are expected, but my program checked for an
+incorrect result, and would have produced the string "WRONG!" in the
+output; no system had that result.
+
+-------------------------------------------------------------------------------
+- Nelson H. F. Beebe                    Tel: +1 801 581 5254                  -
+- University of Utah                    FAX: +1 801 581 4148                  -
+- Department of Mathematics, 110 LCB    Internet e-mail: beebe at math.utah.edu  -
+- 155 S 1400 E RM 233                       beebe at acm.org  beebe at computer.org -
+- Salt Lake City, UT 84112-0090, USA    URL: http://www.math.utah.edu/~beebe/ -
+-------------------------------------------------------------------------------
+
