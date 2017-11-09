@@ -1,0 +1,70 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu,  9 Nov 2017 10:09:36 -0500 (EST)
+Subject: [TUHS] margins and indenting, and arbitrary c rules
+Message-ID: <20171109150936.F3A1718C0BC@mercury.lcs.mit.edu>
+
+    > From: Steve Simon
+
+    > At the risk of stirring up another hornets nest...
+
+I usually try not to join in to non-history threads (this list has too much
+random flamage on current topics, IMNSHO), but I'll make an exception here...
+
+    > this means my code is usually fairly narrow.
+
+I have what I think are somewhat unusual thoughts on nesting depth, etc, which
+are: keep the code structure as simple as possible. That means no complex
+nested if/then/else structures, etc (more below).
+
+I'd been moving in this direction for a while, but something that happened a
+long time ago at MIT crystalized this for me: a younger colleague brought me a
+routine that had a complex nested if/etc structure in it, which had a bug; I
+don't recall if he just wanted advice, or what, but I recall I fixed his
+problem by..... throwing away half his code. (Literally.)
+
+That really emphasized to me the downside of complexity like that; it makes it
+harder to understand, harder to debug, and harder for someone else (or you
+yourself, once you've been away from it for a while) to modify it. I've been
+getting more formal about that ever since.
+
+
+So, how did I throw away half his code? I have a number of techniques. I try
+not to use 'else' unless it's the very best way to do something. So instead
+of:
+
+    if (some-conditional) {
+       <some code>;
+       }
+      else {
+       <some other code>;
+       }      
+
+(iterated, recursively) do:
+
+    if (some-conditional) {
+       <some code>;
+       xxx;
+       }
+
+    <some other code>;
+
+where xxx is a 'return', or a 'break', or a 'continue'. That way, you can
+empty your brain once you hit that, and start with a clean slate.
+
+This is also an example of another thing I do, which is use lots of simple
+flow-control primitives; not go-tos (which I abhor), but loop exits, restarts,
+etc. Again, it just makes things simpler; once you hit it, you can throw away
+all that context/state in your mind.
+
+
+Keep the control flow structure as simple as possible. If your code is several
+levels of indent deep, you have much bigger problems than fitting it on the
+screen.
+
+
+I wrote up a complete programming style guide for people at Proteon working on
+the CGW, which codified a lot of this; if there's interest, I'll see if I can
+find a copy (I know I have a hardcopy _somewhere_).
+
+     Noel
+
