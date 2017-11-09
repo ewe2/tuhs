@@ -1,0 +1,30 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Thu, 09 Nov 2017 15:04:56 +0000
+Subject: [TUHS] redirection wildness in v7
+In-Reply-To: <3c417dcc-d3b4-0128-737a-7e510c6d0ffc@gmail.com>
+References: <3c417dcc-d3b4-0128-737a-7e510c6d0ffc@gmail.com>
+Message-ID: <20171109150456.7D0B1203B0@orac.inputplus.co.uk>
+
+Hi Will,
+
+> Why does the first of these incantations not present text, but the
+> second does (word is a file)? Neither errors out.
+>
+> $ <word | sed 20q
+> $ <word sed 20q
+
+That's still the case with modern-day sh(1).
+
+http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_09_01
+explains that a simple command doesn't need to result in a command name
+to execute.  In your first pipeline, there's nothing to copy the data
+from the first subshell's stdin redirected from ./word to the subshell's
+stdout that's pipes into sed's stdin.  Adding a command to do the copy
+works.
+
+    <word cat | sed 20q
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+
