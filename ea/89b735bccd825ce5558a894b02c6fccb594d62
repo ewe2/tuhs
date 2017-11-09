@@ -1,0 +1,68 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 09 Nov 2017 12:19:28 -0400
+Subject: [TUHS] pre-more pager?
+Message-ID: <1510244372.15725.for-standards-violators@oclsc.org>
+
+Random832:
+
+  ... and "p" (which is very minimalistic, despite using a few
+  V8-specific library features, but V8 isn't in the web-accessible source
+  archive) from Version 8 research unix.
+
+====
+
+p actually originated outside Bell Labs.  I think it was
+written in the late 1970s at the University of Toronto.
+
+I first saw it at Caltech, on the UNIX systems in the
+High Energy Physics group that I ran for four years.
+The first few of those systems were set up by Rob Pike,
+who was at Caltech working on his masters degree (in
+astrophysics, I think); p was there because Rob brought
+it.
+
+For those who don't know it, p has quite an elegant
+design.  Its default page size is 22 lines, which
+nicely fit the world of its time: allowed a couple
+of lines of context between pages on a 24-line CRT;
+evenly divided the 66-line pages (still!) output
+by nroff and pr.  It uttered no prompt and required
+neither raw nor cbreak nor even no-echo mode: it
+printed the final line of each page sans newline;
+to continue, you typed return, which was echoed,
+completing that line before the next was printed.
+It buffered text internally to allow backing up a few
+pages, so it was possible to back up even when input
+didn't come from a file (something I'm not sure the
+more of the time could do).
+
+Internally the buffering was done with a standalone
+library that could have been used in other programs,
+though I don't know whether it ever was.
+
+p also led me to an enlightening programming story.
+One day I was looking over the code, trying to understand
+just how the buffering worked; part of it made no sense
+to me.  To figure it out, I decided to write my own
+simple, straightforward version with the same interface;
+test and debug it carefully; then lay printouts of the
+two implementations side-by-side, and walk through some
+test cases.  This revealed that the clever code I couldn't
+make out in the original was actually buggy: it scrambled
+data (I forget the details) when read returned less than
+a full buffer.
+
+p (my version) is one of the several programs I bring along
+to every new UNIX-derivative environment.  I use it daily.
+I have also recently noticed a new bug: on OpenBSD, it
+sometimes scrambles the last few lines of a file.  I have
+figured out that that has something to do with whether
+fclose (my version uses stdio) is called explicitly or
+by exit(3), but I don't know yet whether it's the library's
+fault or my own.
+
+Even the simplest programs have things to teach us.
+
+Norman Wilson
+Toronto ON
+
