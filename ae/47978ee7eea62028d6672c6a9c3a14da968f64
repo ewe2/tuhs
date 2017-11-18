@@ -1,0 +1,51 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Sat, 18 Nov 2017 17:53:34 -0500
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <367c50cf-8bee-e050-1c0c-0bd960621f37@gmail.com>
+References: <20171118183451.CF48218C0F0@mercury.lcs.mit.edu>
+ <367c50cf-8bee-e050-1c0c-0bd960621f37@gmail.com>
+Message-ID: <CAC20D2OLpMzRy6aFnh5BW0U4dm9inH6MxeFQPSJapFTJNZdOiQ@mail.gmail.com>
+
+On Sat, Nov 18, 2017 at 4:07 PM, Will Senn <will.senn at gmail.com> wrote:
+
+>
+>> I thought disk (RK05) and tape (magtape) blocks were different...
+
+​For simh they are, but not once UNIX sees them.​
+
+
+Physically 7/9-tapes were variable formatt
+​ed and could have multiple 'files' on them.  UNIX reveals all of this to
+user (as do most OSs), so you need put in the simh 'virtual' tape format
+support for the size of the 'blocks' and all of the extra things that the
+HW supports.
+
+But after the simh 'mounts' the 'virtual tape file' on the host when it
+reads the 'tape', simh strips the meta-data out and presents on the blocks
+to the OS. Or on write, simh takes the raw blocks, adds the simulated
+metadata and writes that to host file system as a 'virtual tape file.'
+
+In the old days disks physically could also be different formats.    But
+the 'controller' was used to format the disk.   Each disk block included
+metadata that the controller used.    On DEC (and most other systems of the
+day), the disk controller had some way to set this up, usually with the
+diagnostic system.   The OS saw the disk after formatting (as we do now).
+ The diagnostics would have decided how big a block was etc...    DEC
+standardized on 512 bytes per block.
+
+simh could have taken the approach like disks, and then 'virtual disks'
+would need the meta data; but could have supported all sorts of file
+formats (like Apollo's and Xerox's).  But the simulated disk controller
+would then need to handle the meta data.
+
+Since, most OSs just looked at disk as 'block streams' simh only needs to
+provide for the OS to work properly, is map a UNIX file of bytes into 512
+byte blocks.   This works for most OSs.  As I said, it will not work for
+Aegis or any of the Xerox systems which put some of what the OS normally
+did in the microcode of the disk controller.
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171118/2186d530/attachment.html>
+
