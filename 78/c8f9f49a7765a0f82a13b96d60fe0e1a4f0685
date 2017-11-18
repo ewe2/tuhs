@@ -1,0 +1,59 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Sat, 18 Nov 2017 16:09:09 +0000
+Subject: [TUHS] ed(1) and Pipes.
+In-Reply-To: <1510784211.17586.for-standards-violators@oclsc.org>
+References: <1510784211.17586.for-standards-violators@oclsc.org>
+Message-ID: <20171118160909.D33E32139E@orac.inputplus.co.uk>
+
+Hi Norman,
+
+> > ed(1) pre-dates pipes.  When pipes came along, stderr was needed,
+> > and lots of new idioms were found to make use of them.  Why didn't
+> > ed gain a `filter' command to accompany `r !foo' and `w !bar'?
+>
+> I sometimes wonder that too.
+>
+> When I use `ed,' it is usually really qed, an extended ed written by
+> the late-1970s UNIX crowd here at U of T.
+...
+> -- The ability to send part or all of a buffer to a shell command, to
+> read data in from a shell command, or to send data out and replace it
+> with that from the shell command:
+>
+>     >mail user ...
+>     <ps -ef
+>     |tr a-z A-Z
+
+Thanks for the pointer.
+
+I dug a little.  7th Ed. ed doesn't have the `:[rw] !foo' form.  It was
+in "PDP-11 3+2", 1983-01, in filename().
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=pdp11v/usr/src/cmd/ed/ed.c
+Xqt is the global flag that says the `!' was present.
+
+By the time of ex, that did have a filter, the `:w !foo' applied the
+`:se nu list' settings to the output of the command, and ex also appends
+a LF if the command's output doesn't end with one.  The effect, if not
+the implementation, is as if the command's output was in a temporary
+buffer than was `%p'-ed.  Here's ex-reimplementation nvi 1.79's attempt
+at POSIX's
+http://pubs.opengroup.org/onlinepubs/9699919799/utilities/ex.html#tag_20_40_13_48
+
+    :se nu list
+    :a
+	 1  foo	bar
+	 2  xyzzy
+	 3  .
+    :w !head -c 10
+    foo^Ibar
+    xy
+    !
+
+So the line numbers are missing, but it's partly done the `se list' by
+showing the tab, though `$' to mark the EOF is missing, and it has added
+the LF.
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+
