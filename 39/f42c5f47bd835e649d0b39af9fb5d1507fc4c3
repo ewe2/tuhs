@@ -1,0 +1,56 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 19 Nov 2017 12:49:19 -0500 (EST)
+Subject: [TUHS] Determining what was on a tape back in the day
+Message-ID: <20171119174919.166D018C0F5@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > I think I understand- the bytes that we have on hand are not device
+    > faithful representations, but rather are failthful representations of
+    > what is presented to the OS. That is, back in the day, a tape would be
+    > stored in various formats as would disks, but unix would show these
+    > devices as streams of bytes, and those are the streams of bytes are what
+    > have been preserved.
+
+Yes and no.
+
+To start with, one needs to differentiate three different levels; i) what's
+actually on the medium; ii) what the device controller presented to the CPU;
+and iii) what the OS (Unix in this case) presented to the users.
+
+With the exception of magtapes (which had some semantics available through
+Unix for larger records, and file marks, the details of which escape me - but
+try looking at the man page for 'dd' in V6 for a flavour of it), you're correct
+about what Unix presented to the users.
+
+
+As to what is preserved; for disks and DECtapes, I think you are broadly
+correct. For magtapes, it depends.
+
+E.g. SIMH apparently can consume files which _represent_ magtape contents (i,
+above), and which include 'in band' (i.e. part of the byte stream in the file)
+meta-data for things like file marks, etc. At least one of the people who
+reads old media for a living, when asked to read an old tape, gives you back
+one of these files with meta-data in it. Here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/pdp11/tools/rdsmt.c
+
+is a program which reads one of those files and convert the contents to a file
+containing just the data bytes. (I had a tape with a 'dd' save of a
+file-system on it, and wanted just the file-system image, on which I deployed
+a tool I wrote to grok 4.2 filesystems.)
+
+
+Also, for disks, it should be remembered that i) and ii) were usually quite
+different, as what was actually on the disk included thing like preambles,
+headers, CRCs, etc, none of which the CPU usually could even see. (See here:
+
+  http://gunkies.org/wiki/RX0x_floppy_drive#Low-level_format
+
+for an example. Each physical drive type would have its own specific low-level
+hardware format.) So what's preserved is just an image of what the CPU saw,
+which is, for disks and DECtapes, generally the same as what was presented to
+the user - i.e. a pile of bytes.
+
+     Noel
+
