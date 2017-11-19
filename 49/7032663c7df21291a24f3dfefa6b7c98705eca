@@ -1,0 +1,76 @@
+From: steve@quintile.net (Steve Simon)
+Date: Sun, 19 Nov 2017 20:46:57 +0000
+Subject: [TUHS] Determining what was on a tape back in the day
+Message-ID: <5f0bd241efdcba81c747ed0355de9f52@quintile.net>
+
+It can be hard to visualise what is on a tape when you have no idea
+what is on there.
+
+Attached is a simple tool I wrote "back then", shamlessly copying an
+idea by Paul Scorer at Leeds Poly (My video systems lecturer).
+
+It is called tm (tape mark).
+
+-Steve
+-------------- next part --------------
+/* tm.c - read tape marks */
+#include <stdio.h>
+#include <signal.h>
+
+int halt = 0;
+void intr();
+
+
+int main(int argc, char *argv[])
+{
+	int fd;
+	static char buf[BUFSIZ * 128];
+	int got = 0, data = 0, mark = 0, was = -1;
+	char *dev = "/dev/tape";
+
+	if (argc > 1)
+		dev = argv[1];
+
+	if ((fd = open(dev, 0)) == -1){
+		perror(dev);
+		return(-1);
+	}
+
+	signal(SIGINT, intr);
+
+	do {
+		got = read(fd, buf, sizeof(buf));
+		got = (halt)? -1: got;		/* check for restarted system call */
+		mark = (was == 0)? mark +1: 0;
+		data = (was >  0)? data +1: 0;
+
+		if (got != was && was > 0){
+			printf("%-6d X %-6d\n", data, was);
+			mark = 0;
+		}
+
+		if (got != was && was == 0){
+			printf("tm     X %-6d\n", mark);
+			data = 0;
+		}
+
+		was = got;
+	} while(got != -1);
+	close(fd);
+
+	if (halt){
+		puts("Interupted");
+	}
+	else{
+		fflush(stdout);
+		perror("EOF");
+	}
+
+	return(0);
+}
+
+void intr()
+{
+	halt = 1;
+}
+
