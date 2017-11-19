@@ -1,0 +1,107 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Sun, 19 Nov 2017 16:19:21 -0500
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <7AA20D14-571A-4AAD-96D0-45057F5B81DD@jctaylor.com>
+References: <20171119134109.59F3018C0F5@mercury.lcs.mit.edu>
+ <EC9F5ECB-D02A-435B-8AB6-93F484908F99@ccc.com>
+ <7AA20D14-571A-4AAD-96D0-45057F5B81DD@jctaylor.com>
+Message-ID: <CA4CC953-EA9D-48CB-95AE-881FC1577466@ronnatalie.com>
+
+You could actually mkfs a DECtape and mount it but the system would stall while rewinding to write the superblock. 
+
+Sent from my iPhone
+
+> On Nov 19, 2017, at 4:00 PM, William Corcoran <wlc at jctaylor.com> wrote:
+> 
+> My first exposure to Unix was a Motorola S2000 model 290.  This was introduced in the year I graduated high school, 1985.
+> 
+> This box was based upon the Motorola 68000 chip as I recall.   This system was unique in that the primary OS was called ISOS and System III UNIX would actually exist as a process under ISOS.   The bus was a precursor to VME.  The entire system consisted of several small towers strapped together by a 50 pin SCSI bus.  The first tower was the CPU, called a data processing unit (“DPU”).  The remaining small towers would include a QIC tape drive, a 50 MB disk drive, another 50 MB disk drive, and a 5 MB removable disk drive.   This entire arrangement was called a supermicrocomputer.  
+> 
+> The 50 MB drives were 5.25” form factor full height mechanisms.  Yet, they had a very unique property. Instead of voice coil technology, I think they used a stepper motor because the drives would make a relatively loud click sound when accessed.  During boot, say after a panic,  fsck would kick off and I will never forget the sound of these drives as they would chatter like crazy!  
+> 
+> Now, turning to the subject at hand, eventually system III was upgraded to system V in 1986.  Well, one of the coolest things this little beast had was a QIC tape drive that would stream quite nicely with very little under-runs during backup and restore. 
+> 
+> But, the QIC tape driver had a unique property:  You could treat the QIC tape cartridge as a block device.  First, there was a utility to create a limited file system on the tape.   Next,  once the tape was inserted, you could mount the tape—-just like a disk.  
+>  
+> Then, you could “cd” into the mount point of the tape.   You could use “/bin/cp” to copy files into the tape.   You could “/bin/ls” as well.  In fact, you could even “mkdir” into the QIC tape as well.  There was limit to the number of nested folders. 
+> 
+> While mounting a QIC tape into the tree of life was in interesting concept, it was totally impractical.  Tape based operations on the QIC cartridge were slow.  Worse, the tape driver couldn’t stream when treated as a block device.  This resulted in “shoe shining” the tape heads for responding to the simplest of commands like “ls.”
+> 
+> Finally, if any of our good members here has any Information in the Motorola S2000 model 290 supermicro, I would love to know.  I have searched for years to get my hands on this unit or its documentation.  I did locate and obtain a DPU.  But, it was in very bad shape.  
+> 
+> No one forgets their first UNIX box!
+> 
+> Truly,
+> 
+> Bill Corcoran
+> 
+> 
+> On Nov 19, 2017, at 9:57 AM, Clem cole <clemc at ccc.com> wrote:
+> 
+>> Noel is correct. DECtape (aka linctape) was a block oriented technology.  Traditional 1/2” mag tape which had 5, 7 or 9 tracks is a stream oriented technology.   
+>> 
+>> DECtape was used liked disk in the late 60s.  It was comparably cheap and very reliable.  The joke was you could unroll it and run over it with a car and then roll it back up and it would still work.  
+>> 
+>> Magtape was traditional back up scheme.  Cost per bit was low and good for archiving.  But you could only add to the end of a tape.  You can do funny things like change recording techniques between files (not recommended as it can confuse many tape controllers but is technically allowed and was done). 
+>> 
+>> Because of the variable nature of things the OS needs a way to support these behaviors.  Unix makes it pretty easy by letting the user do it all in user space and passing info to the driver.  Other OSs do a lot of work when ‘mounting’ a tape.  But either way simh needs to support these type of functions.  Hence the idea of the virtual tape format that includes meta data to describe things like the size of each block written.  A ‘file mark’ can be read/written (which is special) besides data blocks    
+>> 
+>> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not quite. 
+>> 
+>> On Nov 19, 2017, at 8:41 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+>> 
+>>>> From: Will Senn
+>>> 
+>>>> I don't quite no how to investigate this other than to pore through the
+>>>> pdp11/40 instruction manual.
+>>> 
+>>> One of these:
+>>> 
+>>> https://www.ebay.com/itm/Digital-pdp-Programming-Card-8-Pages/142565890514
+>>> 
+>>> is useful; it has a list of all the opcodes in numerical order; something none
+>>> of the CPU manuals have, to my recollection. Usually there are a flock of
+>>> these "pdp11 Programming Cards" on eBait, but I only see this one at the
+>>> moment.
+>>> 
+>>> If you do any amount of work with PDP-11 binary, you'll soon find yourself
+>>> recognizing the common instructions. E.g. MOV is 01msmr (octal), where 'm' is
+>>> a mode specifier, and s and r are source and destination register
+>>> numbers. (That's why PDP-11 people are big on octal; the instructions are easy
+>>> to read in octal.) More here:
+>>> 
+>>> http://gunkies.org/wiki/PDP-11_architecture#Operands
+>>> 
+>>> So 0127xx is a move of an immediate operand.
+>>> 
+>>> 
+>>>>> You don't need to mount it on DECTape drive - it's just blocks. Mount
+>>>>> it as an RK05 image, or a magtape, or whatever.
+>>> 
+>>>> I thought disk (RK05) and tape (magtape) blocks were different...
+>>> 
+>>> Well, you need to differentiate between DECtape and magtape - very different
+>>> beasts.
+>>> 
+>>> DECtape on a PDP-11 _only_ supports 256 word (i.e. 512 byte) blocks, the same
+>>> as most disks. (Floppies are an exception when it comes to disks - sort
+>>> of. The hardware supports 128/256 byte sectors, but the usual driver - not in
+>>> V6 or V7 - invisibly makes them look like 512-byte blocks.)
+>>> 
+>>> Magtapes are complicated, and I don't remember all the details of how Unix
+>>> handles them, but the _hardware_ is prepared to write very long 'blocks', and
+>>> there are also separate 'file marks' which the hardware can write, and notice.
+>>> 
+>>> But a magtape written in 512-byte blocks, with no file marks, can be treated
+>>> like a disk; that's what the V6 distribution tapes look like:
+>>> 
+>>> http://gunkies.org/wiki/Installing_UNIX_Sixth_Edition#Installation_tape_contents
+>>> 
+>>> and IIRC 'tp' format magtape tapes are written the same way, hardware-wise (so
+>>> they look just like DECtapes).
+>>> 
+>>>    Noel
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171119/2e6854dc/attachment.html>
+
