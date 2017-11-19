@@ -1,0 +1,85 @@
+From: krewat@kilonet.net (Arthur Krewat)
+Date: Sun, 19 Nov 2017 13:35:58 -0500
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <20171119174919.166D018C0F5@mercury.lcs.mit.edu>
+References: <20171119174919.166D018C0F5@mercury.lcs.mit.edu>
+Message-ID: <055c3e7f-6da9-497d-149a-16f230f55391@kilonet.net>
+
+When reading magtapes, or any tapes for that matter, I usually dd the 
+"files" on the tape into separate files on disk. This doesn't preserve 
+the actual blocking factor on the tape, but I used other methods to 
+determine that - usually experimenting with dd and small block sizes 
+until I got to the point where it no longer errors.
+
+One of my favorite pastimes was to read until the soft EOT (usually a 
+double EOF), and then do a "mt fsf". Depending on the tape drive, this 
+could advance the tape beyond the soft EOT where more data might be 
+saved. The idea being that a tape had been overwritten from the 
+beginning, but with less data overall.
+
+So it would look like this: |data|EOF|data|EOF|data|EOT|short 
+data|EOF|data|EOF|data|EOT|blank|Hard-EOT
+
+I used this method to rescue a TOPS-10 6.03A install monitor from a 
+backup set that was past the soft EOT on one of my own personal tapes. 
+I've rescued a lot of other data that way too.
+
+For anyone reading old tapes, I implore you to attempt to read data past 
+the soft EOT ;)
+
+
+
+On 11/19/2017 12:49 PM, Noel Chiappa wrote:
+>      > From: Will Senn
+>
+>      > I think I understand- the bytes that we have on hand are not device
+>      > faithful representations, but rather are failthful representations of
+>      > what is presented to the OS. That is, back in the day, a tape would be
+>      > stored in various formats as would disks, but unix would show these
+>      > devices as streams of bytes, and those are the streams of bytes are what
+>      > have been preserved.
+>
+> Yes and no.
+>
+> To start with, one needs to differentiate three different levels; i) what's
+> actually on the medium; ii) what the device controller presented to the CPU;
+> and iii) what the OS (Unix in this case) presented to the users.
+>
+> With the exception of magtapes (which had some semantics available through
+> Unix for larger records, and file marks, the details of which escape me - but
+> try looking at the man page for 'dd' in V6 for a flavour of it), you're correct
+> about what Unix presented to the users.
+>
+>
+> As to what is preserved; for disks and DECtapes, I think you are broadly
+> correct. For magtapes, it depends.
+>
+> E.g. SIMH apparently can consume files which _represent_ magtape contents (i,
+> above), and which include 'in band' (i.e. part of the byte stream in the file)
+> meta-data for things like file marks, etc. At least one of the people who
+> reads old media for a living, when asked to read an old tape, gives you back
+> one of these files with meta-data in it. Here:
+>
+>    http://ana-3.lcs.mit.edu/~jnc/tech/pdp11/tools/rdsmt.c
+>
+> is a program which reads one of those files and convert the contents to a file
+> containing just the data bytes. (I had a tape with a 'dd' save of a
+> file-system on it, and wanted just the file-system image, on which I deployed
+> a tool I wrote to grok 4.2 filesystems.)
+>
+>
+> Also, for disks, it should be remembered that i) and ii) were usually quite
+> different, as what was actually on the disk included thing like preambles,
+> headers, CRCs, etc, none of which the CPU usually could even see. (See here:
+>
+>    http://gunkies.org/wiki/RX0x_floppy_drive#Low-level_format
+>
+> for an example. Each physical drive type would have its own specific low-level
+> hardware format.) So what's preserved is just an image of what the CPU saw,
+> which is, for disks and DECtapes, generally the same as what was presented to
+> the user - i.e. a pile of bytes.
+>
+>       Noel
+>
+
+
