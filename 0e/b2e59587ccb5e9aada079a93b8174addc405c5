@@ -1,0 +1,40 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Mon, 20 Nov 2017 11:56:18 -0800
+Subject: [TUHS] UNIX on S/370
+In-Reply-To: <CABH=_VQ=gDZ7RHzN8jTRy8A0FH9JwxFq92tvYawA+aZwbsFHvQ@mail.gmail.com>
+References: <CAJfiPzxnwNdAHLRV4+QUF-k-ib4tuFj5BLy-r-jL9W7zHHziQw@mail.gmail.com>
+ <201711200350.vAK3omwQ013495@freefriends.org>
+ <CAC20D2Mtp1+fPP5W8TP8HRiu7EKJGfWPVADDRwydVwv2UEXheQ@mail.gmail.com>
+ <CAP6exYK_4TOPsi3DLK4jaR4aB0Ms9L3sm7Fa9NPCexVmT=FoZQ@mail.gmail.com>
+ <CAC20D2NYq5o2WY1JsXAzXdC4s9U0QT8Y5k3j6HzHEJon7GazaA@mail.gmail.com>
+ <CABH=_VQ=gDZ7RHzN8jTRy8A0FH9JwxFq92tvYawA+aZwbsFHvQ@mail.gmail.com>
+Message-ID: <20171120195618.GK9146@mcvoy.com>
+
+On Mon, Nov 20, 2017 at 02:44:03PM -0500, Paul Winalski wrote:
+> System/360/370 had a radically different I/O model.  I/O devices and
+> their control units were connected to specialized coprocessors called
+> I/O channels.  Devices were addressed via a number with three hex
+> digits, the first of which was the channel number.  The CPU had an
+> instruction called start I/O (SIO) that took as parameters a device
+> address and the address of a series of channel command words (CCWs)
+> that indicated to the channel the I/O operation to perform and its
+> parameters (such as the address of the I/O buffer in main memory).
+> The CPU was notified of I/O termination by three interrupts:
+> channel-end (the I/O channel reached the end of its channel program),
+> control-unit-end (the I/O control unit completed a command), and
+> device-end (the I/O device completed a command).
+
+Yep, familiar with this model.  I wrote a device driver for the Unix 
+side of an I/O channel (talking to an Ibis disk if I recall correctly).
+I didn't find it hard, the I/O channel processor did all the real work,
+talking to it was sort of like doing networking.
+
+Truth be told, it was a polling driver, this was early on in the ETA-10
+days and interrupts on the I/O channel didn't work.  So that simplified
+the driver to the point that it was almost trivial.
+
+I get that PDP-11 and VAX used memory mapped I/O but was that somehow
+exposed above the device driver layer?  If so, I missed that, because
+I had no conceptual or technical problem with talking to an I/O channel,
+it was pretty easy.  And I suck at writing drivers.
+
