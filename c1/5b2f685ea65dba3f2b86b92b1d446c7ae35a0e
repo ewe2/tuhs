@@ -1,0 +1,40 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 27 Nov 2017 11:11:41 -0500 (EST)
+Subject: [TUHS] Harvard and Von Neumann Architectures and Unix
+Message-ID: <20171127161141.2C9E318C08F@mercury.lcs.mit.edu>
+
+    > From: Doug McIlroy
+
+    > But if that had been in D space, it couldn't have been executed.
+
+Along those lines, I was wondering about modern OS's, which I gather for
+security reasons prevent execution of data, and prevent writing to code.
+
+Programs which emit these little 'custom code fragments' (I prefer that term,
+since they aren't really 'self-modifying code' - which I define as 'a program
+which _changes_ _existing_ instructions) must have some way of having a chunk
+of memory into which they can write, but which can also be executed.
+
+
+    > Where is the boundary between changing one instruction and changing them
+    > all? Or is this boundary a figment of imagination?
+
+Well, the exec() call only overwrites existing instruction memory because of
+the semantics of process address space in Unix - there's only one, so it has
+to be over-written. An OS operating in a large segmented single-level memory
+could implement an exec() as a jump....
+
+BTW, note that although exec() in a single address-space OS is conventionally
+something the OS does, this functionality _could_ be moved into the user
+space, provided the right address space primitives were provided by the OS,
+e.g. 'expand instruction space'. So the exec() code in user space would i)
+find the executable, ii) see how much of each kind of memory it needs, iii)
+get the OS to give it a block of memory/address space where the exec() code
+can live while it's reading in the new code, iv) move itself there, v) use
+standard read() calls to read the new image in, and then vi) jump to it.
+
+Yes, it's probably simpler to implement it in the OS, but if one's goal is to
+minimize the functionality in the kernel...
+
+	 Noel
+
