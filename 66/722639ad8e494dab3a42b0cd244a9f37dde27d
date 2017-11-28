@@ -1,0 +1,84 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Tue, 28 Nov 2017 14:09:36 -0500
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: <CANCZdfrT7PH61=uoy_9p=ORudi+qFwCuipW6Q=N=+w_WQCgBig@mail.gmail.com>
+References: <009a01d348e9$e3dce200$ab96a600$@ronnatalie.com>
+ <CAJfiPzy6S75+8Ob67Uojgw2vSuxqWvRe=mOCvSJ_bUXQ9WsmRw@mail.gmail.com>
+ <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+ <CAEoi9W4Xkk7pfP=q+WV_v=vfFy9PRq9bmjxH4n-mmt=PMOoRbw@mail.gmail.com>
+ <CANCZdfrT7PH61=uoy_9p=ORudi+qFwCuipW6Q=N=+w_WQCgBig@mail.gmail.com>
+Message-ID: <CAEoi9W4ZDOAJ1KHym6yRbyJh7mAdL3FVD9f292A3R8UYhHKOdw@mail.gmail.com>
+
+On Tue, Nov 28, 2017 at 1:41 PM, Warner Losh <imp at bsdimp.com> wrote:
+>
+> On Tue, Nov 28, 2017 at 11:26 AM, Dan Cross <crossd at gmail.com> wrote:
+>
+>> On Tue, Nov 28, 2017 at 12:56 PM, Warner Losh <imp at bsdimp.com> wrote:
+>>>
+>>> Ah, the tyranny of  static analysis tools... _exit(0) should be marked
+>>> such that the tools know it does not return. This means the /*NOTREACHED*/
+>>> isn't needed. And since there's no real exit path out of  main, the return
+>>> (0) is equally bogus (because main can't return). Yet lint and other tools
+>>> have ushered in this insanity.
+>>>
+>>
+>> Hmm; in what way can main() not return? Surely this is true if `_exit(0)`
+>> is called as this calls the exit system call, which cannot -- by definition
+>> -- return. But main() itself can return to whatever calls it (usually
+>> `start`, I'd imagine). For that matter, I'm not aware of any prohibition
+>> against calling `main()` recursively.
+>>
+>
+> Ture but completely irrelevant. If exit happens, the process is done. main
+> isn't going to return because control never returns back to main. That's
+> what makes the messages completely bogus. Execution simply stops. _exit()
+> doesn't cause main() to return to _start(), the process stops executing at
+> that point.
+>
+
+I think perhaps we are talking past one another.
+
+You had written '(because main can't return)' and it seems (if you'll
+forgive me putting words in your mouth, so to speak) that you either
+intended to say that _exit() can't return, or that main can't return *in
+this context* (because it invoked exit). Exit obviously cannot return, as
+you and I both explicitly mentioned, but I was addressing the comment that
+*main* cannot return. main() absolutely can return, just not _here_.
+
+This is much smaller than the binary for the assembler program I posted for
+>> macOS earlier in this thread: the result there was much larger (but due to
+>> the requirement to have a non-empty data segment in the executable; this
+>> ends up being page-aligned and filled with zeros).
+>>
+>> Contrast that with FreeBSD's /usr/bin/true:
+>>> -r-xr-xr-x  1 root  wheel  4624 Nov 20 11:56 /usr/bin/true
+>>>   text   data   bss    dec     hex   filename
+>>>   1540    481     8   2029   0x7ed   /usr/bin/true
+>>>
+>>> which is little more than return(0), but also has a fair amount of
+>>> copyright and SCCS data.
+>>>
+>>
+>> Is the copyright data actually present in the object file? I see some RCS
+>> $Id$ strings (in the guise of $FreeBSD:$ stuff) but no copyright strings in
+>> /usr/bin/true on my system.
+>>
+>
+> Ah yes, I read the source, but hadn't checked the final binary... Most of
+> the data seems to be other things...  It used to get the copyright data
+> with gcc a long time ago...
+>
+
+There is, perhaps, some debugging value in embedding ident strings in
+object code: one can see which versions of which sources were used to
+construct a given binary. I suspect the incremental value of such things is
+diminishing with faster computers and fast (relatively) compilation; it's
+easier to simply construct a binary from known versions of source files
+than to extrapolate versions of files from a known binary. I can't think of
+a great use case for embedding copyright data into an object file, however.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171128/80a8cb23/attachment.html>
+
