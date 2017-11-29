@@ -1,0 +1,96 @@
+From: charles.unix.pro@gmail.com (Charles Anthony)
+Date: Wed, 29 Nov 2017 12:29:42 -0800
+Subject: [TUHS] Dash options
+In-Reply-To: <20171129140326.6298D18C096@mercury.lcs.mit.edu>
+References: <20171129140326.6298D18C096@mercury.lcs.mit.edu>
+Message-ID: <CANV78LTLK5ybLfMuCL65-QXt7k2abDRLf+fM8aMSTnLhc-vgJQ@mail.gmail.com>
+
+On Wed, Nov 29, 2017 at 6:03 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Charles Anthony
+>
+>     > Entry points are usually defined as "foo$bar", where "foo" is the
+>     > segment name, and "bar" an entry point in the segment symbol table. I
+>     > believe that the degerate case of "foo$" is treated as "foo$foo" by
+> the
+>     > shell.
+>
+> So I'm curious about how this, and additional names, interact. (For those
+> who
+> aren't familiar with Multics, a segment [file, sort of] can have multiple
+> names. This is sort of like 'hard links' in Unix, except that in Multics
+> one
+> name, the "primary name" is very slightly preeminent. See here:
+>
+>   http://web.mit.edu/multics-history/source/Multics/mdds/mdd006.compout
+>
+> page 2-5, for more, if you're interested.)
+>
+>
+They are also different in an important way: the additional name is part of
+the segment, not of the directory. If the segment is moved to a different
+directory, the names move with it.
+
+
+> So if I have a segment with primary name 'foo', and additional names 'bar'
+> and
+> 'zap', and I say 'zap' to the Multics shell, I assume it does a call to
+> zap$zap, which finds the segment with the primary name 'foo', and calls the
+> 'zap' entry therein?
+>
+> Turns out that it does (I thought it didn't, but I checked first).
+
+Multics has a search path mechanism (like $PATH); the directories listed
+therein are searched for a matching segment name or additional name.
+
+For the hello$world example, the command "an hello world" would add the
+name "world" to the "hello" segment and then the command "world" would
+become equivalent to "hello$world".
+
+For the case of "bound" segments, (several object segments linked together
+in a single segment, and the intersegment links "pre-snapped", the binder
+control file (similar to ld's ifile) would list the entry points that were
+to be made externally visible, and the binder automatically adds those
+names to the the bound segment:
+
+Eg, teco lines in "bound_teco"; the "ls" command sees that "teco" is a name
+of the "bound_teco" segment.
+
+ls >tools>teco
+
+Segments = 1, Lengths = 9.
+
+re     9  bound_teco_
+          teco_ssd
+          teco
+          teco_get_macro_
+          teco_error
+          teco_error_mode
+          get_temp_seg_
+          assign_temp_seg_id_
+          release_temp_seg_
+          release_temp_segs_all_
+          get_seg_ptr_
+          get_seg_ptr_arg_
+          get_seg_ptr_full_path_
+          get_seg_ptr_search_
+          release_seg_ptr_
+
+
+
+
+>
+>     > Multics rulez; UNIX droolz
+>
+> Dude, you clearly have Very Large brass ones to send that to this list! :-)
+>
+>
+Thank you (I think). Should be a nice change from the Microsoft fan boys,
+tho.
+
+-- Charles
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171129/891bef77/attachment.html>
+
