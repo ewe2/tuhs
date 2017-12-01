@@ -1,0 +1,48 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Fri, 1 Dec 2017 09:24:06 -0700
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171201154448.GL3924@mcvoy.com>
+References: <20171201154448.GL3924@mcvoy.com>
+Message-ID: <CANCZdfpYy3nTzFC77exx1q0XV-VhHevah3WypNNPO6cKE1UUxA@mail.gmail.com>
+
+On Fri, Dec 1, 2017 at 8:44 AM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> Does anyone remember the reason that processes blocked in I/O don't catch
+> signals?  When did that become a thing, was that part of the original
+> design or did that happen in BSD?
+>
+> I'm asking because I'm banging on FreeBSD and I can wedge it hard, to
+> the point that it won't recover, by just beating on tons of memory.
+>
+
+It depends on the I/O, really, if the signal will work. If we're waiting
+for I/O to arrive at a character device, for example, you can signal all
+day long (the TTY driver depends on this, for example).
+
+In old-school BSD, processes in disk wait state were blocked in the
+filesystem layer (typically) waiting for an I/O to complete. I don't know
+which came first, but I know the code is quite dependent on the I/O not
+returning half-baked. There's no way cancel the I/O once it's started. And
+the I/O can also be decoupled from the original process if it's being done
+by one of the system threads, so you could be waiting on an I/O to complete
+so a page is valid that may have been started by someone else. Tracking
+back which process to signal in such circumstances is tricky. The
+filesystem code assumes the buffer cache actually caches the page, so the
+pages are invalid while the I/O is in progress.
+
+Plus pages are wired for the I/O, and generally marked as invalid so any
+access on them faults. Processes receiving signals in that state may need
+to exit, but couldn't until those pages are unwired, so even SIGKILL there
+would be useless until the I/O completed.
+
+But I think your issues aren't so much I/O as free pages. You need free
+pages in order to make progress in running your process. W/o them, you bog
+down badly. The root cause is poor page laundering behavior: the system
+isn't able to clean enough pages to keep up with the demand. I'm not so
+sure it's signals, per se...
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171201/053539b6/attachment-0001.html>
+
