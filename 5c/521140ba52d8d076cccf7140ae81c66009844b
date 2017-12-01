@@ -1,0 +1,61 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Fri, 1 Dec 2017 09:33:49 -0700
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171201161810.GM3924@mcvoy.com>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+Message-ID: <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+
+On Fri, Dec 1, 2017 at 9:18 AM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> On Fri, Dec 01, 2017 at 11:11:56AM -0500, Clem Cole wrote:
+> > It's hard because if I/O (like DMA) is in progress, what are the proper
+> > semantics to exit/roll back?   When do you stop the transfer and what
+> > happens.   When doing direct to/from disk (like a in a real-time system),
+> > this can get tricky.
+>
+> So at first blush, what it seems like is you need a barrier to starting
+> more
+> DMA's.  You take the signal, the signal changes state to say to the I/O
+> system "finish what you are doing but then no more".
+>
+
+The I/O subsystem is great at knowing disks, pages and buffers. Lousy at
+knowing processes. It has no hooks into, well, anything apart from
+FOOstrategy (and if you are lucky first open and last close). And
+FOOstrategy is far removed from anything that the process knows about. It
+knows about vmpages and open file descriptors. You'd need to plumb
+something into the vnode code that could take a request for a signal. Then
+that signal would need to go down to the driver somehow. And you'd need to
+know what I/O was pending for pages that are in that process, and somehow
+have an ID to cancel just those requests. With the layering involved, it
+would be extremely tricky. Many of the io completion routines cause more
+I/O to happen, especially when swapping.
+
+Plus, modern disks have a hardware queue depth. There is no way to do say
+'finish this and do no more' because there's stuff in the hardware queue.
+SCSI is sensible and you may be able to selectively cancel I/O
+transactions, but ATA is not sensible: you cancel the whole queue and cope
+with the fallout (usually by rescheduling the I/Os).
+
+
+> Or what you do is kill the process, tear down all of the pages except those
+> that are locked for I/O, leave those in the process and wait for the I/O to
+> get done.  That might be simpler.
+>
+
+Perhaps. Even that may have issues with cleanup because you may also need
+other pages to complete the I/O processing since I think that things like
+aio allocate a tiny bit of memory associated with the requesting process
+and need that memory to finish the I/O. It's certainly not a requirement
+that all I/O initiated by userland have no extra state stored in the
+process' address space associated with it. Since the unwinding happens at a
+layer higher than the disk driver, who knows what those guys do, eh?
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171201/6d82c24d/attachment.html>
+
