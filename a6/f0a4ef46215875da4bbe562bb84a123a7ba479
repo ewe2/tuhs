@@ -1,0 +1,28 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 1 Dec 2017 09:26:03 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+Message-ID: <20171201172603.GO3924@mcvoy.com>
+
+On Fri, Dec 01, 2017 at 09:33:49AM -0700, Warner Losh wrote:
+> > Or what you do is kill the process, tear down all of the pages except those
+> > that are locked for I/O, leave those in the process and wait for the I/O to
+> > get done.  That might be simpler.
+> 
+> Perhaps. Even that may have issues with cleanup because you may also need
+> other pages to complete the I/O processing since I think that things like
+> aio allocate a tiny bit of memory associated with the requesting process
+> and need that memory to finish the I/O. It's certainly not a requirement
+> that all I/O initiated by userland have no extra state stored in the
+> process' address space associated with it. Since the unwinding happens at a
+> layer higher than the disk driver, who knows what those guys do, eh?
+
+Yeah, it's not an easy fix but the problem we are having right now is that
+the system is thrashing.  Why the OOM code isn't fixing it I don't know.
+It just feels busted.
+
