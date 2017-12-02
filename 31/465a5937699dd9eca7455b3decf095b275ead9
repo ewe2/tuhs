@@ -1,0 +1,86 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 1 Dec 2017 16:48:50 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171201234230.F33D4156E523@mail.bitblocks.com>
+References: <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+ <20171201172603.GO3924@mcvoy.com>
+ <BADECBD9-D2B4-4788-8308-87EBF93D555A@bitblocks.com>
+ <20171201223859.GX3924@mcvoy.com>
+ <20171201230302.0DC351FA41@orac.inputplus.co.uk>
+ <20171201230934.GA24335@mcvoy.com>
+ <20171201234230.F33D4156E523@mail.bitblocks.com>
+Message-ID: <20171202004850.GB24335@mcvoy.com>
+
+On Fri, Dec 01, 2017 at 03:42:15PM -0800, Bakul Shah wrote:
+> On Fri, 01 Dec 2017 15:09:34 -0800 Larry McVoy <lm at mcvoy.com> wrote:
+> Larry McVoy writes:
+> > On Fri, Dec 01, 2017 at 11:03:02PM +0000, Ralph Corderoy wrote:
+> > > Hi Larry,
+> > > 
+> > > > > So OOM code kills a (random) process in hopes of freeing up some
+> > > > > pages but if this process is stuck in diskIO, nothing can be freed
+> > > > > and everything grinds to a halt.
+> > > >
+> > > > Yep, exactly.
+> > > 
+> > > Is that because the pages have been dirty for so long they've reached
+> > > the VM-writeback timeout even though there's no pressure to use them for
+> > > something else?  Or has that been lengthened because you don't fear
+> > > power loss wiping volatile RAM?
+> > 
+> > I'm tinkering with the pageout daemon so I'm trying to apply memory
+> > pressure.  I have 10 25GB processes (25GB malloced) and the processes just
+> > walk the memory over and over.  This is on a 256GB main memory machine
+> > (2 socket haswell, 28 cpus, 28 1TB SSDs, on loan from Netflix).
+> 
+> How many times do processes walk their memory before this condition
+> occurs? 
+
+Until free memory goes to ~0.  That's the point, I'm trying to 
+improve things when there is too much pressure on memory.
+
+> So what may be happening is that a process references a page,
+> it page faults, the kernel finds its phys page has been paged
+> out, so it looks for a free page and once a free page is
+> found, the process will block on page in. Or if there is no
+> free page, it has to wait until some other dirty page is paged
+> out (but this would be a different wait queue).  As more and
+> more processes do this, the system runs out of all free pages.
+
+Yeah.
+
+> Can you find out how many processes are waiting under what
+> conditions, how long they wait and how these queue lengths are
+> changing over time?  
+
+So I have 10 processes, they all run until the system starts to
+thrash, then they are all in wait mode for memory but there isn't
+any (and there is no swap configured).
+
+The fundamental problem is that they are sleeping waiting for memory to
+be freed.  They are NOT in I/O mode, there is no DMA happening, this is
+main memory, it is not backed by swap, there is no swap.  So they are
+sleeping waiting for the pageout daemon to free some memory.  It's not
+going to free their memory because there is no place to stash (no swap).
+So it's trying to free other memory.
+
+The real question is where did they go to sleep and why did they sleep
+without PCATCH on?  If I can find that place where they are trying to
+alloc a page and failed and they go to sleep there, I could either
+
+a) commit seppuku because we are out of memory and I'm part of the problem
+b) go into a sleep / wakeup / check signals loop
+
+I am reminded by you all that we ask the process to do it to itself but
+there does seem to be a way to sleep and respect signals, the tty stuff
+does that.  So if I can find this place, determine that I'm just asking
+for memory, not I/O, and sleep with PCATCH on then I might be golden.
+
+Where "golden" means I can kill the process and the OOM thread could do
+it for me.
+
+Thoughts?
+
