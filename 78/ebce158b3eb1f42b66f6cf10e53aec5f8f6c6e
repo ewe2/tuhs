@@ -1,0 +1,40 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Sun, 03 Dec 2017 13:50:18 +0000
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171202004850.GB24335@mcvoy.com>
+References: <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+ <20171201172603.GO3924@mcvoy.com>
+ <BADECBD9-D2B4-4788-8308-87EBF93D555A@bitblocks.com>
+ <20171201223859.GX3924@mcvoy.com>
+ <20171201230302.0DC351FA41@orac.inputplus.co.uk>
+ <20171201230934.GA24335@mcvoy.com>
+ <20171201234230.F33D4156E523@mail.bitblocks.com>
+ <20171202004850.GB24335@mcvoy.com>
+Message-ID: <20171203135018.D01CA1F977@orac.inputplus.co.uk>
+
+Hi Larry,
+
+> The fundamental problem is that they are sleeping waiting for memory
+> to be freed.  They are NOT in I/O mode, there is no DMA happening,
+> this is main memory, it is not backed by swap, there is no swap.  So
+> they are sleeping waiting for the pageout daemon to free some memory.
+> It's not going to free their memory because there is no place to stash
+> (no swap).  So it's trying to free other memory.
+
+Right.
+
+> The real question is where did they go to sleep
+
+Reading through from vm_fault(), is it vm_waitpfault()?
+http://fxr.watson.org/fxr/source/vm/vm_page.c?im=3?v=FREEBSD55#L2749
+
+Or, chase down where some of sysctl(3)'s CTL_VM constants are used to
+see how their behaviour is effected?
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+
