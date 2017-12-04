@@ -1,0 +1,59 @@
+From: krewat@kilonet.net (Arthur Krewat)
+Date: Mon, 4 Dec 2017 11:58:20 -0500
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <201712041636.vB4GaFEp017803@freefriends.org>
+References: <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+ <20171201172603.GO3924@mcvoy.com>
+ <BADECBD9-D2B4-4788-8308-87EBF93D555A@bitblocks.com>
+ <20171201223859.GX3924@mcvoy.com>
+ <20171201230302.0DC351FA41@orac.inputplus.co.uk>
+ <20171201230934.GA24335@mcvoy.com>
+ <20171201234230.F33D4156E523@mail.bitblocks.com>
+ <20171202004850.GB24335@mcvoy.com>
+ <201712041636.vB4GaFEp017803@freefriends.org>
+Message-ID: <1348e3ef-9bb3-ad85-6a84-ad8bec0f887f@kilonet.net>
+
+I've had some strange experiences with Solaris 11, where if I didn't 
+have enough swap, I'd get OOM issues with Oracle databases (SGA) on 
+startup and other various things.
+
+While Oracle docs say it's OK to have a small swap area if you have 
+plenty of RAM, I've experienced the exact opposite. If the ZFS arc is 
+large (and it always is), and something needs memory, if there isn't 
+enough swap to "guarantee" the allocation, the allocation will fail. 
+(Disregarding the fact that the ZFS arc can be tuned, and now Solaris 
+11.3 has an even better setting, user_reserve_hint_pct). It won't wait 
+to flush out ZFS arc to make room, it'll just fail outright.
+
+With a huge swap area that's at least half the size of RAM (in boxes 
+that range from 96GB to 256GB), even though it'll never touch the swap, 
+it works just fine.
+
+Now, I understand your issue is with BSD, but if it's ZFS, perhaps 
+there's something not-so-different about the two environments.
+
+$.02
+
+On 12/4/2017 11:36 AM, arnold at skeeve.com wrote:
+> Larry McVoy <lm at mcvoy.com> wrote:
+>
+>> So I have 10 processes, they all run until the system starts to
+>> thrash, then they are all in wait mode for memory but there isn't
+>> any (and there is no swap configured).
+> Um, pardon me for asking the obvious question, but why not just configure
+> a few gigs of swap to give the OS some breathing room?
+>
+> Most modern systems let you use a regular old file in the filesystem
+> for swap space, instead of having to repartition your disk and using a
+> dedicated partition. I'd be suprised if your *BSD box didn't let you do
+> that too.  It's a little slower, but a gazillion times more convenient.
+>
+> Just a thought,
+>
+> Arnold
+>
+
+
