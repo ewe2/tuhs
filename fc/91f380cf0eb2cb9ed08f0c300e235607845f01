@@ -1,0 +1,54 @@
+From: random832@fastmail.com (Random832)
+Date: Wed, 13 Dec 2017 22:07:35 -0500
+Subject: [TUHS] Date madness
+In-Reply-To: <201712131912.vBDJCb3a120561@tahoe.cs.Dartmouth.EDU>
+References: <201712131912.vBDJCb3a120561@tahoe.cs.Dartmouth.EDU>
+Message-ID: <1513220855.2223106.1204498584.3CB1C63A@webmail.messagingengine.com>
+
+On Wed, Dec 13, 2017, at 14:12, Doug McIlroy wrote:
+> >  Flipping it to unsigned int was the quickest way out to kick the can until Sun Feb 6 06:28:15 2106.  If you have source it’s incredibly trivial to change, and nothing changes size wise.
+> 
+> Easy, but perhaps unwise. The sign bit is a potential escape hatch for
+> times, just as it is for characters in UTF-8.
+> 
+> Doug
+
+I'm not sure what you're suggesting - UTF-8 works because it's a
+variable length encoding - a variable length timestamp might be
+interesting as an academic exercise, but there's no way for time() to
+specify how much space is needed, or be informed of how much space is
+allocated
+
+Anyway, making it use an "unsigned" 32-bit value is a bit less trivial
+on V7 (where AIUI there's an unsigned type and a long type, but not
+both), but the following works - not tested on actual V7 yet, but works
+with the values as int16_t/int32_t on a modern system
+
+        /*
+         * break initial number into days
+         */
+        hms = *tim % 86400;
+        day = *tim / 86400;
+        if(*tim < 0) {
+            hms += 109696;
+            day += 49709 + hms / 86400;
+            hms %= 86400;
+        }
+
+47909 days + 109696 seconds = 2^32 seconds. The "extra day" is to ensure
+hms is positive.
+
+This is instead of the existing hms < 0 clause
+
+Making V6 do it (no long *or* unsigned type) is a bit more involved, but
+I'm close to something viable. Incidentally, one gotcha I've run into is
+that the code as-is passes the year minus 1900 to dysize, whereas modern
+dysize implementations that respect the 100 and 400 year rules require
+the full year.
+
+My current attempt to extend it to more bits without resorting to
+floating point relies on the fact that 86400=675*128 to eke out an extra
+seven bits without implementing a general purpose division algorithm,
+which gets it as far as the year ~10680 (~19391 unsigned). Though
+without a long for the day count, V6 can only get to 2149.
+
