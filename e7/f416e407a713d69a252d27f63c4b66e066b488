@@ -1,0 +1,49 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 16 Dec 2017 11:11:59 -0500
+Subject: [TUHS] Date madness
+In-Reply-To: <201712161050.vBGAojbd027976@coolidge.cs.Dartmouth.EDU>
+References: <201712161050.vBGAojbd027976@coolidge.cs.Dartmouth.EDU>
+Message-ID: <1513440719.1943285.1207178784.050ABA15@webmail.messagingengine.com>
+
+On Sat, Dec 16, 2017, at 05:50, Doug McIlroy wrote:
+> Like UTF-8, a variable-length time would be something normal
+> programs aren't supposed to see--it would be a format for
+> external media (i.e. file systems). Times in inodes would be
+> variable-length. Times returned by stat() and time() would
+> be full length. Only the kernel needs to know the encoding.
+> 
+> One may note that inodes already use a variable-length
+> encoding for the list of physical block addresses, so there 
+> is nothing radical here.
+> 
+> I admit, though, that if the kernel can tell "old" from "new"
+> inodes, then they could have different time encodings rather
+> than one variable-length encoding.
+
+
+I actually thought about this some more since making my previous post,
+though I hadn't connected it to your post since I'd thought we were
+still talking about the userspace interface.
+
+One way the kernel could tell old from new inodes is by reserving the
+high bit of one of the current 32-bit fields (either time, or size since
+IIRC an existing inode can't actually hold a 2GB file) as a flag. My
+initial thought was to simply encode in place (stealing some bits from
+atime for the flag and high bits of ctime, and exploiting the
+relationship that ctime<=mtime<=atime)
+
+Or a whole "extended inode", that occupies two (or more) inodes on disk,
+either adjacent to each other or by stealing a whole field as an inode
+pointer.
+
+Speaking of the address list, it looks like there's an unused byte in
+the on-disk address list, which is 40 bytes for 13*3=39 bytes of
+addresses
+
+(The above is for V7 - V6 inodes are smaller and have less unused space)
+
+Making this robust to being mounted by old kernels (and preventing old
+kernels from creating files that would appear to new kernels to have
+extended inodes) is the hard part, and I haven't thought any about what
+the format of an extended inode would be.
+
