@@ -1,0 +1,48 @@
+From: random832@fastmail.com (Random832)
+Date: Sun, 17 Dec 2017 12:54:58 -0500
+Subject: [TUHS] Date madness
+In-Reply-To: <BD315513-6F4C-4F12-9EDD-61BA04973524@cheswick.com>
+References: <20171212180117.BFB5918C087@mercury.lcs.mit.edu>
+ <alpine.BSF.2.21.1712141146420.35694@aneurin.horsfall.org>
+ <3DB85765-AFE5-4356-8E26-DDD0A2805116@cheswick.com>
+ <024c01d37752$c30d03b0$49270b10$@ronnatalie.com>
+ <BD315513-6F4C-4F12-9EDD-61BA04973524@cheswick.com>
+Message-ID: <1513533298.4100251.1207907264.55A36789@webmail.messagingengine.com>
+
+On Sun, Dec 17, 2017, at 11:33, William Cheswick wrote:
+> No, these weren’t seconds updates (though Plan 9 has a list it
+> applies.) These were off-by-one-hour problems at each time shift.
+> There would be a sudden flurry of hard, indignant work, then repeat
+> next time shift.  This was in V10 Unix.
+
+That'd be daylight savings, then, not leap years. 1987 was the year that
+the US changed the date of the time shift from the last sunday of April
+to the first.
+
+The V10 source in the archive has an "octime.c" and "ctime.c", which
+differ in the "sunday" function:
+
+ /*
+  * The argument is a 0-origin day number.
+- * The value is the day number of the last
+- * Sunday before or after the day.
++ * The value is the day number of the next
++ * Sunday after the day.
+  */
+ static
+ sunday(t, d)
+ register struct tm *t;
+ register int d;
+ {
+ 	if (d >= 58)
+ 		d += dysize(t->tm_year) - 365;
+-       return(d - (d - t->tm_yday + t->tm_wday + 700) % 7);
++       return(d + 7 - (d - t->tm_yday + t->tm_wday + 700) % 7);
+ }
+
+The "daytab" table itself (read in from /lib/dst) is not available in
+the archive - and even if it were, we can't know the history of how it
+was maintained or whether the 'flurry of hard work' involved maintaining
+this file, making that change to the ctime routine, or recompiling
+programs that needed it (and had been missed in a previous round).
+
