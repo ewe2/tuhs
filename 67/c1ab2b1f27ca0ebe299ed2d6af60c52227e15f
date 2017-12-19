@@ -1,0 +1,55 @@
+From: don@DonHopkins.com (Don Hopkins)
+Date: Tue, 19 Dec 2017 08:07:30 +0100
+Subject: [TUHS] pre-UNIX legacy in UNIX?
+In-Reply-To: <7wd13bdypo.fsf@junk.nocrew.org>
+References: <CACCFpdx0UamZwaXf=LaAjFU=SfBx6RQJirj3qcGz49zDi_L=Mw@mail.gmail.com>
+ <7wd13bdypo.fsf@junk.nocrew.org>
+Message-ID: <F505CC59-D36B-446B-BF63-E3D86DC4DC3E@gmail.com>
+
+On ITS, you could pass a job back and forth between users, like a joint! ;) It was a very social operating system. 
+
+http://victor.se/bjorn/its/ddt.html#Sophisticated <http://victor.se/bjorn/its/ddt.html#Sophisticated>
+
+:DISOWN
+
+$$^K
+"disowns" the current job. The job continues to exist, and if it was running continues to run, but it ceases to be DDT's inferior. Any information DDT has about the job that is not actually in the job itself is lost (for example, the starting address and symbols of the program). When a job has been disowned it no longer has a terminal, and if it tries to read from or print on its terminal it will halt. Disowning allows a job to continue to exist after the DDT that created it has logged out or been killed. It makes it possible to leave a job running without tying up a terminal.
+A disowned job can be reowned by selecting it with :JOB. What's more, any user can reown a job no matter who disowned it, using the :UJOB command and specifying the UNAME of the disowned job, as in :UJOB FOOSH TECO to reown the TECO that user FOOSH disowned. This makes it possible to hand a job to another user. 
+
+:UJOB <uname> <jname>
+
+Selects the specified job (which can be any job in the system) for examination. If the job is disowned, it will have it's UNAME changed to your UNAME and will be reowned. Otherwise it will remain a foriegn job, i.e. can be examined but not modified or proceeded. 
+
+:DETACH
+
+detaches the user's whole job-tree. The console becomes free just as if it had logged out, but the jobs are not destroyed. They remain in the system without a console. A detached job is just like a disowned job (see :DISOWN), but got that way differently. The opposite of detaching is attaching. There is a :ATTACH command which performs that operation, but it is too primitive to be convenient in the usual case (don't use it without reading the reference section). However, after logging in DDT automatically checks for the existence of a detached tree and offers to attach to it. After a <space> is typed, the formerly detached tree will be connected to the console (which need not be the same one it was detached from). The new DDT that did the attaching will no longer exist.
+If something "goes wrong" with the console, a tree may be detached automatically by the system. For example, if a user coming over the ARPA network closes his connection, his tree will be detached. The same thing happens to all users of TV terminals if the TV front-end PDP-11 crashes. When this happens, the detached tree will be destroyed by the system after an hour goes by, unless it is attached first. As described above, logging back in will automatically tell the new DDT to look for the old detached one and offer to attach it.
+
+There is a program called REATTACH designed specifically for detaching jobs from consoles and attaching jobs to consoles. It can be used to move your jobs to another console, from either the old console, the new console, or someone else's console. :REATTACH HELP<cr> will print its documentation.
+
+:ATTACH
+
+makes the current job (which must be running) become the top level job, in place of DDT. That job's name is changed to HACTRN, and the existing HACTRN job (containing DDT) is killed, along with any other inferiors it may have. :ATTACH is very dangerous for that reason. Its main use is to set up a program other than DDT as the top-level command processor. It is possible to use :ATTACH to do the opposite of :DETACH. Just reown the detached former HACTRN (now called HACTRO or HACTRP or ...) using :JOB, and then :ATTACH it. However, it is probably safer to use the REATTACH program. Type :REATTACH ?<cr> for information. 
+
+:SNARF <jname>
+
+When a HACTRN is detached because of trouble with the terminal, but is still basically healthy, it can be attached. When a HACTRN is detached because of fatal errors, it stops running and can't be attached (and, having run into such trouble, it would probably be useless if it were attached). However, its inferiors are likely to be unharmed. The :SNARF command exists to rescue those inferiors from under the sinking DDT. It is meant to be used after reowning that DDT as a subjob of a new, healthy DDT. The dead DDT should be the current job. :SNARF takes away the current job's inferior named <jname> and makes it a direct inferior of the DDT executing the :SNARF. Thus, after a HACTRN dies while having a TECO under it (and thus changes to a HACTRO), one can do (in a new HACTRN) :JOB HACTRO to reown the dead DDT, and :SNARF TECO<cr> to take the TECO away from it. The job TECO is then an inferior of the new HACTRN, and the HACTRO job can be killed without harm to the TECO. If you try to :SNARF a nonexistent job, a "No such job" error will result. :SNARF works by writing into the current job a program to disown any inferior named <jname>, and then doing a :JOB <jname>. Thus, :SNARF can garbage the job snarfed from. This is small loss when the job is already dead. 
+
+-Don
+
+
+> On 19 Dec 2017, at 07:21, Lars Brinkhoff <lars at nocrew.org> wrote:
+> 
+> Nigel Williams wrote:
+>> Aside from the influence of Multics and other things on UNIX design
+>> are there other tangible[1] manifestations of non-UNIX operating
+>> system things like the GECOS field that were carried forward intact in
+>> later UNIX implementations?
+> 
+> Job control was inspired by ITS job control capabilities.  Control-Z
+> does pretty much the same thing in both operating systems.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171219/fa10fbd5/attachment.html>
+
