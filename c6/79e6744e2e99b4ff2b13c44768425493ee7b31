@@ -1,0 +1,122 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 21 Dec 2017 17:30:50 -0500
+Subject: [TUHS] SYSTEM V R1 HELP
+In-Reply-To: <8157BC46-2833-48D5-B224-B9E488A4B8F0@jctaylor.com>
+References: <8157BC46-2833-48D5-B224-B9E488A4B8F0@jctaylor.com>
+Message-ID: <CAC20D2NyL8x+YpdhWW2DkwB2HGtU=v_r-t4MQFsQYMtn=7SU6g@mail.gmail.com>
+
+Bill, in the debugger, for both cpio and tar, follow the string ptrs in
+fprintf and see if you can figure out where its dying.  Also see what value
+errno is, hopefully it has not been lost.  Neither program should be using
+printf except for messages to the console, so I'm guessing this is an error
+message trying to be output from an error the kernel returned.   See if you
+can find the message from cpio/tar and the error code and that might give
+you a hint to look in the kernel.
+
+Could you be running out of open files, maybe.
+
+Another thing to try, is:  cd /
+find . -print
+​ > /tmp/file.lst
+cpio -ocvB > /dev/null
+​ < /tmp/file.lst
+
+See if that changes anything.   It should remove some of pressure on the
+kernel tables.
+
+​Clem​
+
+​
+ᐧ
+
+On Thu, Dec 21, 2017 at 5:12 PM, William Corcoran <wlc at jctaylor.com> wrote:
+
+> Hello Team TUHS:
+>
+> I am having a problem with my PDP-11 SVR1 running under a recent SIMH
+> build.  My problem occurs on both MAC OS X and FreeBSD.
+>
+> First, I created a six disk (RP06) and eight port TTY (DZ) kernel, with
+> swap placed on drive 1.  The system behaves beautifully as FSCK reports
+> clean.  Eight users can login with no problem.
+>
+> Second, I reverted to a pristine PDP-11 SVR1 with one drive (RP06) and no
+> DZ and booted the default kernel (gdtm) and I see the same problem
+> described below.
+>
+> Third, when using the tape driver instead of /dev/null i get the same
+> results.
+>
+> Next, here is the issue:
+>
+> cd /
+> find . -print | cpio -ocvB > /dev/null
+>
+> It runs for a short while and then shitz a core:
+> I am using /dev/null to take the tape driver out of the equation.
+>
+> Here is the backtrace for cpio:
+>
+> $c
+> __strout(053522,043,0,053012)
+> __doprnt(046652,0177606,053012)
+> _fprintf(053012,046652,053522)
+> ~main(02,0177636)
+>
+>
+> Now, interestingly,  I run into a similar issue when using tar:
+>
+> cd  /usr
+> tar -cvf /dev/null .
+>
+> Again, this will run for a while, then drops a core.  Here is the
+> backtrace for tar:
+>
+> $c
+> __strout(043123,02,0,045506)
+> __doprnt(043123,0167472,045506)
+> _fprintf(045506,043123,0170600)
+> ~putfile(0170600,0170641)
+> ~putfile(0171654,0171704)
+> ~putfile(0172730,0172745)
+> ~putfile(0174004,0174016)
+> ~putfile(0175060,0175066)
+> ~putfile(0176134,0176136)
+> ~putfile(0177672,0177672)
+> ~dorep(0177632)
+> ~main(04,0177630)
+>
+> This really bugging me since my SVR1 is otherwise working flawlessly.  I
+> was able to remake the entire system and custom kernels that boot with no
+> problem.
+> Also, I configured my main port to run inside the AWS Lightsail and now I
+> have access to SVR1 from anywhere in the world!
+>
+> I was also wondering if doing a CPIO or TAR on the entire system was
+> overflowing some link tables and maybe this is expected behavior for the
+> minimal resource of the PDP-11?
+>
+> Thank you for any help.
+>
+> Would you expect tar or cpio to dump core if you attempted to copy large
+> filesystems  (or the entire system) on a PDP-11?
+> Note: All of my testing has been in single user mode.
+>
+>
+> Truly,
+>
+> Bill Corcoran
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171221/76ff7e19/attachment.html>
+
