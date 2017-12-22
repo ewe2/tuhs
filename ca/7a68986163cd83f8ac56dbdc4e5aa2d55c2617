@@ -1,0 +1,22 @@
+From: random832@fastmail.com (Random832)
+Date: Thu, 21 Dec 2017 20:55:09 -0500
+Subject: [TUHS] SYSTEM V R1 HELP
+In-Reply-To: <95F61863-C025-469A-9577-D2F8E75A813A@jctaylor.com>
+References: <8157BC46-2833-48D5-B224-B9E488A4B8F0@jctaylor.com>
+ <CAC20D2NyL8x+YpdhWW2DkwB2HGtU=v_r-t4MQFsQYMtn=7SU6g@mail.gmail.com>
+ <95F61863-C025-469A-9577-D2F8E75A813A@jctaylor.com>
+Message-ID: <1513907709.986360.1212983624.321F957E@webmail.messagingengine.com>
+
+On Thu, Dec 21, 2017, at 19:34, William Corcoran wrote:
+> echo $?
+> 
+> 1003
+> 
+> Now, I thought all return values were 8 bit?    What is that all about?
+
+In the Bourne shell, when a process exits a signal, $? is set to sig|SIGFLG, which is, for some unknown reason, defined to 1000 (Yes, as in 0x3E8. As in 1000|11 == 1000|3 == 1003) - a value that no other version before or since SVR1 (at least not SysIII or SVR4) seems to have - every other one I checked has 0200.
+
+I can only guess that the reason is to make it easier to read the signal number, and whoever it is only tested with SIGINT and SIGQUIT or they would have presumably changed it to sig+SIGFLG. Then at some point before a later SysV release, it was reverted to 0200.
+
+POSIX for its part only guarantees a value above 128, not any particular value or distinct values per signal.
+
