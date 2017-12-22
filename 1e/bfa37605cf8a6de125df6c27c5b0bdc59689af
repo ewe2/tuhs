@@ -1,0 +1,68 @@
+From: wlc@jctaylor.com (William Corcoran)
+Date: Fri, 22 Dec 2017 03:47:01 +0000
+Subject: [TUHS] SYSTEM V R1 HELP
+In-Reply-To: <1513911314.999748.1213050656.486E2E9E@webmail.messagingengine.com>
+References: <8157BC46-2833-48D5-B224-B9E488A4B8F0@jctaylor.com>
+ <CAC20D2NyL8x+YpdhWW2DkwB2HGtU=v_r-t4MQFsQYMtn=7SU6g@mail.gmail.com>
+ <95F61863-C025-469A-9577-D2F8E75A813A@jctaylor.com>
+ <77B078BE-E3CD-4AFF-93B4-20AF4C8664FD@jctaylor.com>
+ <1513911314.999748.1213050656.486E2E9E@webmail.messagingengine.com>
+Message-ID: <8C7D7E48-C9E5-4F75-A76F-3E9D7F651A6F@jctaylor.com>
+
+Hello Random832,  
+
+Yes, I make a mistake, the issue is with STDERR.  
+
+The pipeline: 
+
+find . -print | cpio -ocvB >/dev/null 2>/tmp/ERRFILE
+
+will drop core: 
+
+ERRFILE will have exactly 32769 bytes (no more and no less). 
+
+STDOUT is redirected to /dev/null and there is no problem with STDOUT.  
+
+For example: 
+
+find . -print | cpio -ocB > /dev/null 
+
+Succeeds because nothing (or close to nothing) is written to STDERR before cpio successfully terminates.   
+
+STDOUT is fine and CPIO and tar can write thousands of blocks cleanly on STDOUT.  Normally, as you know, STDOUT would be redirected to the tape device and not /dev/null.  
+
+Here is my take: 
+
+This may be a latent defect in that early releases may not have realized the very large amounts of data that can be written to STDERR.  
+
+In this case, each file  that is backed up with cpio is represented as a single line in STDERR.  When STDERR exceeds 32768 bytes, it blows up.  
+
+fprintf returns an int that is the number of bytes in the stream.  For some reason, when this overflows, it is not wrapping around, instead it causes a segmentation violation.  
+
+Could the issue be with fprintf or doprnt.c?  
+
+I thought STDERR was unbuffered?   Please forgive me.  
+
+Thank you for all of your help.  
+
+
+
+On Dec 21, 2017, at 9:55 PM, Random832 <random832 at fastmail.com> wrote:
+
+On Thu, Dec 21, 2017, at 20:51, William Corcoran wrote:
+> Okay, I think I am on to something… 
+> 
+> Whenever tar or cpio dumps core, it is always when 32769 bytes have been 
+> written to stdout.  
+
+Is that 32769 bytes to the tape (which is not stdout in your tar invocation), or 32769 bytes of printed output? Is it exactly 32769, or just some value above 32768 by some small amount?
+
+> I looked at fprintf and there is a register int called “count.” 
+
+Your crash is in _strout, two calls deep before that variable is written since the adjust parameter is 0, the only thing of note in _strout is a putc loop. putc is a macro so it won't appear in the stack trace - that _flsbuf does not appear in the stack trace means this is happening in the 'ordinary' buffered I/O case.
+
+Strange, though, I can't see anything inside putc/flsbuf that seems like anything should be any different on the 32770th character than the 514th or 1026th.
+
+What are the strings being printed? (second argument to printf, and first argument to strout)?
+
+
