@@ -1,0 +1,105 @@
+From: krewat@kilonet.net (Arthur Krewat)
+Date: Sat, 23 Dec 2017 12:44:35 -0500
+Subject: [TUHS] Old tar bug in SVR4.2 was: SYSTEM V R1 HELP
+Message-ID: <7c41dbcc-ab26-8dcf-a1c1-716e24ee8a88@kilonet.net>
+
+Somewhat tangentially related to the other thread...
+
+So, back in the days when I was using Consensys SVR4.2, I found a bug in 
+tar. It goes like this:
+
+If there is a symbolic link in the tree that you are taring, the first 
+one works fine. If a second symbolic link has a shorter destination name 
+than the first, the extra characters from the first symbolic link 
+destination are appended to the end of the second. So for example:
+
+a -> abcdef
+b -> zyx
+
+Tar will actually tar these symbolic links as:
+
+a -> abcdef
+b -> zyxdef
+
+Being that I happen to have found, on the Internet, the sources to AT&T 
+SVR4.2, and some other System V variants, I went and investigated.
+
+The relevant piece from AT&T SVR4.2 tar.c (broken):
+
+Jan 25  1993 ./ATT/ATT-SYSVr4/cmd/tar/tar.c
+
+         case S_IFLNK:
+                 <SNIP>
+                 i = readlink(shortname, filetmp, NAMSIZ - 1);
+                 if (i < 0) {
+                         vperror(0, "can't read symbolic link %s", 
+longname);
+                         return;
+                 }
+
+ From USL-4.2 (apparently fixed):
+
+Jan 22  1994 ./USL/usl-4.2-source/src/i386/cmd/tar/tar.c
+
+         case S_IFLNK:
+                 <SNIP>
+                 i = readlink(shortname, filetmp, NAMSIZ - 1);
+                 if (i < 0) {
+                         vperror(0, ":462:Cannot read symbolic link %s", 
+longname);
+                         return;
+                 }
+                 else
+                         filetmp[i] = '\0';   /* since readlink does not 
+supply a '\0' */
+
+ From Solaris 2.5:
+
+         case S_IFLNK:
+                 <SNIP>
+                 i = readlink(shortname, filetmp, NAMSIZ - 1);
+                 if (i < 0) {
+                         vperror(0, gettext(
+                         "can't read symbolic link %s"), longname);
+                         if (aclp != NULL)
+                                 free(aclp);
+                         return;
+                 } else {
+                         filetmp[i] = 0;
+                 }
+
+
+
+BSD 4.4:
+
+         case S_IFLNK:
+                 <SNIP>
+                 i = readlink(shortname, dblock.dbuf.linkname, NAMSIZ - 1);
+                 if (i < 0) {
+                         fprintf(stderr,
+                             "tar: can't read symbolic link %s: %s\n",
+                             longname, strerror(errno));
+                         return;
+                 }
+                 dblock.dbuf.linkname[i] = '\0';
+
+
+Anyone know when/why/how tar diverged between the two branches? Note the 
+readlink directly into dblock.dbuf, while the SVR4 variants use a temp 
+string and then sprintf it in later.
+
+From: http://www.catb.org/esr/faqs/usl-bugs.txt
+
+17. tar(1) fails to restore adjacent symbolic links properly
+   Arthur Krewatt <...!rutgers!mcdhup!kilowatt!krewat> reports:
+   SVR4 tar has another strange bug. Seems if when restoring files, you
+restore one file that is a link, say "a ->/a/b/c/d/e" and there is another
+link just after it called "b ->/a/b/c" tar will restore it as "b ->/a/b/c/d/e"
+This just seems to be a lack of the NULL at the end of the string, like
+someone did a memmov or memcpy(dest,src,strlen(src)); where it should be
+strlen(src)+1 to include the NULL.
+    Esix cannot reproduce this under 4.0.4 or 4.0.4.1, they think it's fixed.
+
+
+
+
