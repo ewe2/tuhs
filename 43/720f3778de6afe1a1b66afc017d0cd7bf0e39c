@@ -1,0 +1,106 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Fri, 29 Dec 2017 17:06:34 -0800
+Subject: [TUHS] origin of C header files
+In-Reply-To: <CAC20D2OEHZ8X4BUSaR9WgahawM81guaxzCFEzAvR5FeWyC9eXw@mail.gmail.com>
+Message-ID: <fd3b30a3c9531404ba67c9abcfcd2581ddc9aa2c@webmail.yaccman.com>
+
+I was told once that McIlroy and Morris invented macro instructions
+for assembly language.   And certainly they wrote the definitive
+paper on macros, with, as I recall, something like 10 decisions you
+needed to make about a macro processor and you could generate 1024
+different macro systems that way.  I wonder if that ever got
+published -- it blew my mind when I encountered it at the beginning of
+my career...
+
+There were two features of the C preprocessor that were, I think,
+unique to the labs for some time.  One was a problem that came up
+with program generators.  In RATFOR, for example, an IF statement on
+line 50 might get translated to become line 125 of the output FORTRAN
+program.   And if when there was an error, it could be very painful
+to discover where it came from.  I ran into the same problem in
+spades with Yacc.  When someone wrote a Yacc program (especially when
+using a makefile), an error on line 50 in foo.y could easily be
+reported as being on line 125 in foo.c.   The natural thing was to
+fix the error in foo.c.   And lo, it compiled and ran.  Until the
+next time you changed foo.y, and  then it reappeared in all its
+glory.   I begged Dennis for a solution, and he came up with #line,
+which allowed you to say to the C compiler "treat the next line as if
+it were line nnn in file fff, and following lines as successor lines
+in file fff.  It instantly solved the problem, and was used multiple
+times for various applications (probably most notably cfront).  So
+far as I know, many languages including FORTRAN, Pascal and Python do
+not have such a mechanism, making it awkward to use them as
+preprocessor targets.
+
+The other thing that I think was pretty unique was the search path for
+include files (-I on the compilers).   When writing the portable C
+compiler, I had a directory of source and header files that were
+machine independent, and other directories that were specific to
+different target architectures.   Just by changing the command line
+you could compile for any desired architecture.  This would have been
+a maintenance nightmare if I'd had to make different makefiles for
+each desired language and keep them all in sync.
+
+Steve
+
+----- Original Message -----
+From:
+ "Clem Cole" <clemc at ccc.com>
+
+To:
+"Paul Winalski" <paul.winalski at gmail.com>
+Cc:
+"TUHS main list" <tuhs at minnie.tuhs.org>
+Sent:
+Fri, 29 Dec 2017 15:31:54 -0500
+Subject:
+Re: [TUHS] origin of C header files
+
+On Fri, Dec 29, 2017 at 2:28 PM, Paul Winalski
+<paul.winalski at gmail.com [1]>
+ wrote:
+
+ When higher-level languages came along, programmers moving from
+ assembly code to a HLL would want the same sort of preprocessor
+ functionality.  I know that IBM PL/I had %include, and I suspect
+that
+ other HLLs of the day had similar features.
+
+ What's very clear is that C did not invent include files or
+ conditional compilation, it merely carried on existing tradition.
+
+​I'll +1 Paul's comment and add a couple of observations. 
+ Languages such a PL/1 and FORTRAN would could support a preprocessor
+and conditional compilation, were more easy to use to build 'products'
+- as opposed to Pascal.    Folks did splice an backwards
+conditi​onal compiling scheme with include files into some Pascal
+flavors but it was non-standard.
+
+Fortran folks used tools like RATFOR or m4, but the key was the there
+was some why to preprocess code for different targets.   In a
+production shop, particularly where your 'target' customer was
+different, this ability becomes more and more of an requirement.
+
+I've always said as contemporary production systems programming
+languages, while BLISS had a better Macro system then C, the include
+file and conditional scheme worked much better/was much cleaner - to
+the point that ifdef is abused and the cause of much pain in actual
+code.   But the truth is that is a success problem.   When used
+properly, the C header scheme, while not invented by the BTL crew, was
+pretty much what people needed.   No too fancy, but all the features
+you really needed and has been lasting.
+
+Clem
+
+ᐧ
+
+ 
+
+Links:
+------
+[1] mailto:paul.winalski at gmail.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171229/c2b8ab7a/attachment.html>
+
