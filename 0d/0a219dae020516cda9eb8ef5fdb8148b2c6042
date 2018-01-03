@@ -1,0 +1,83 @@
+From: tytso@mit.edu (Theodore Ts'o)
+Date: Wed, 3 Jan 2018 18:40:25 -0500
+Subject: [TUHS] OT: critical Intel design flaw
+In-Reply-To: <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+References: <20180103134358.3F16818C098@mercury.lcs.mit.edu>
+ <CAC20D2NEvx_3R_HjzO6r3h6OaAcrpkmWuTRNX7-ApoEz8+KxTg@mail.gmail.com>
+ <C30F8795-EBB0-4734-8550-0BE2B77F07F0@bitblocks.com>
+ <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+Message-ID: <20180103234025.GA23371@thunk.org>
+
+On Wed, Jan 03, 2018 at 01:27:19PM -0500, Clem Cole wrote:
+> > This slowdown (which is not much -- L4 shows it is about 5% or so)
+> >
+> ​I agree.   We came to the same conclusion in the early/mid 1990's  with
+> Mach and Chorus.   In fact, the UI 'requirements for modern OS' document
+> (which is part of why AT&T got behind Chorus for the never completed
+> SVR5/R6 stuff - I'll see if I can find a copy) was based on that work.
+> 
+> The OS weenies at the time felt that the cost was low enough and hardware
+> cheap enough that of course kernels would be the way to go.
+
+It's possible to keep the slowdown at 5%, but how much extra
+engineering work does it take to get the performance gap down to that
+level?  And during that time while the micro kernel team is playing
+catchup, if the OS with the monolithic kernel adds new features to the
+OS, how much additional time does it take to add those features to the
+OS?  (Regardless of whether the features are implemented in userspace,
+or in the kernel, or some combination of the two.)
+
+> Similarly, Microsoft since Windows (not OS/2) was the UI for NT in the end;
+> Microsoft had to put hacks into the make user code word and NT became a
+> hybrid (like Mach 2.x) and never pushed the pure kernel that Mica (NT's
+> origin had been). To do so would have broken code which at the time was
+> something they were loath to do.
+
+Actually, at least part of the problem was that graphics performance
+was *terrible*.  So in NT 4.0 they moved it into the kernel for
+performance reasons.  One could argue that with enough effort, the
+graphics performance perhaps could have been improved while keeping
+within the microkernel design principles.  But in the commercial
+marketplace, timing is everything; and even being six months late to
+the game can be enough to lose the battle for mindshare.
+
+(There are those who have argued that the *BSD's were delayed by
+around six months due to the AT&T / Berkeley lawsuit, and if it were
+but for that, Linux would not have gained the prominence that it
+had/has.  I'm not completely sure I buy that; there were *BSD
+developers in the Boston area, and it was primarily because of a
+certain toxic personality that they failed to lure me to the *BSD side
+of the force --- and I got my start working kernels with BSD 4.3+ at
+MIT Project Athena.  Despite how people like to complain about Linus's
+shortcomings in that department, let's just say that IMHO there are
+*far* worse personalities in the open source OS world, and leave it at
+that.)
+
+> The hope is a new disruptive market -- as you say.  Maybe Arm/Cell phones
+> will be that.  I would not bet against them, but then again.   IBM/Intel *et
+> al *have a history of recovering.    It is going to be interesting to both
+> watch and play the game for the next few years -- UNIX is hardly dead nor
+> traditional complex systems that run on them, nor the HW that delivers it
+> :-)
+
+Well, Fuchsia is based on a microkernel, and one interesting thing
+about it is that full POSIX compatibility is *not* a goal.  The team
+is apparently not worried about legacy support (where they consider
+Linux and Unix "legacy") and performance on HDD's is also a legacy
+issue.  (It's the 21st century, except for big data centers at Google,
+Facebook, Microsoft, et. al, who uses disk drives in this day and
+age?)
+
+There will be rough POSIX compatibility, but it is refreshing that
+they don't consider horrendous design decisions (e.g., such as telldir
+and seekdir) things that they are bound to support.
+
+Of course this means no X11, no GNOME, no KDE, etc.  (And because
+there is no telldir/seekdir, no Samba support, either.  Oh, well.  Who
+needs to serve CIFS, anyway?)  All graphical applications that want to
+run on Fuchsia have to be rewritten to use graphics SDK called
+"Flutter".  It'll be interesting to see what happens with this
+approach, and whether it can supplant the Linux/Unix ecosystem.
+
+       		   	    		   - Ted
+
