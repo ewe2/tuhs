@@ -1,0 +1,56 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Wed, 3 Jan 2018 12:24:40 -0800
+Subject: [TUHS] OT: critical Intel design flaw
+In-Reply-To: <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+References: <20180103134358.3F16818C098@mercury.lcs.mit.edu>
+ <CAC20D2NEvx_3R_HjzO6r3h6OaAcrpkmWuTRNX7-ApoEz8+KxTg@mail.gmail.com>
+ <C30F8795-EBB0-4734-8550-0BE2B77F07F0@bitblocks.com>
+ <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+Message-ID: <C507BCDC-B7D1-4B54-9708-F4F07DC9392E@bitblocks.com>
+
+On Jan 3, 2018, at 10:27 AM, Clem Cole <clemc at ccc.com> wrote:
+> 
+> I have personally hoped that something like L4/seL4 with a clean UNIX/Plan9-ish style upper layer might some day be the thing that really wins.   Maybe be written in something else - Rust/Go/Kotlin whatever ...   But I suspect that will happen long after I'm gone.
+
+It may be sooner than you think. Now it is much harder to
+produce faster processors than to produce processors with
+larger and larger number of cores.  For most tasks not *all*
+of these cores have to work in tandem -- more likely you will
+run a set of loosely coupled diverse tasks on such a machine.
+In this scenario it is not clear to me that centralized OSes
+like like unix/windows can use these cores efficiently. Not
+even plan9 will do well. In the "cloud" we have already given 
+up on such centralization (though present solutions seem
+clunky and inefficient).
+
+IMHO what we need a much more composable architecture. In
+Barrelfish, a research OS based on L4, each core has its own
+ukernel that can be independently brought up. This may be a
+direction worth exploring[1]. If done right + an orchestration
+protocol can provide the basis for clean, secure, scalable
+and resilient distributed systems.
+
+> We keep reinventing the great work Ken, Dennis and Team did years ago and sadly not really doing a good job of learning from our mistakes.
+
+a) Actually we don't reinvent their work -- we just keep
+   fiddling at the edges!
+b) IMHO their work is better thought of as a compositional
+   architecture or service protocol. That is, in a ukernel
+   arch., different user processes can implement different
+   Unix "system call" protocols. There is no reason to stuff
+   all that in a single "kernel". This model actually fits
+   in with what you said (L4/seL4 with a clean UNIX/Plan9-ish
+   style upper layer).
+
+[1] My real bias is that even ukernels shouldn't exist! That
+is, the very core OS function of thread and protection switch
+should be done in h/w via a few instructions. The *policy* of 
+this is implemented in s/w. Then an OS is just a (set of)
+shared libraries and a set of initial services. Thinking this
+way, it is clear that a ukernel is merely implementing this
+model in s/w and it makes perfect sense for each core to have
+its own emulation layer!
+
+None of above has anything to do with the "intel design flow".
+
+
