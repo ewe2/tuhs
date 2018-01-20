@@ -1,0 +1,18 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 20 Jan 2018 14:22:27 -0500
+Subject: [TUHS] Kernel Sizes
+In-Reply-To: <CANCZdfoG5nEBtYefo=W3nOEY4FSoqixRMPh_4JncY=JyPAR8Lw@mail.gmail.com>
+References: <CANCZdfoG5nEBtYefo=W3nOEY4FSoqixRMPh_4JncY=JyPAR8Lw@mail.gmail.com>
+Message-ID: <1516476147.3105555.1242251720.684D327E@webmail.messagingengine.com>
+
+On Sat, Jan 20, 2018, at 13:11, Warner Losh wrote:
+> For a presentation I'm doing this summer on FreeBSD, I thought it would be
+> cool to get the kernel sizes for various old flavors of Unix. I see numbers
+> for v5, v6 and v7 in the tuhs tree view, and it appears these versions are
+> complete enough for me to extract the kernels themselves. However, I see
+> nothing prior to that.
+
+There is a possibly V2 era kernel (two, actually) on the s1-bits tape image, but it's been too long since I looked at this and I don't recall exactly how to extract them. I posted about this at the time, but there wasn't any interest - I'd determined that s1 was in fact an "init tape" as described in V1 boot.7 and V3 bproc.8. Those manpages do mention the size that was allocated on disk/tape for each kernel in those eras: 6K and 7-8K words [so twice that number of bytes], respectively.
+
+To determine how much headroom was in this allocation, I just now went through and checked the s1-bits file for empty 512-byte blocks. It consists of 25 blocks of data (12800 bytes), followed by 4 blocks of zeros. I think that region of the tape was the bootloaders followed by the "cold boot" kernel. Then there are 22 blocks (11264 bytes) of data [then 10 blocks zeros], which was IIRC the other kernel (the "warm boot" kernel, which did not contain code for reinitializing the filesystem). The rest of the tape (not kernel images) is 490 blocks (245 KB) of data, followed by 27 blocks of 0xFF.
+
