@@ -1,0 +1,62 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Mon, 22 Jan 2018 20:27:16 -0800
+Subject: [TUHS] origin of C header files
+In-Reply-To: <CABH=_VTdaxXqsoi=YUAwChtY3=5HvPeoX4vxmpOmiTjkiYW0TQ@mail.gmail.com>
+Message-ID: <c3bcb691945ad61d9d9c04be089498902c28749d@webmail.yaccman.com>
+
+Well, the problem is not unique to C.   If Python has such a
+mechanism it doesn't seem to be used by TensorFlow.   If a TF
+operation finds an error, in execution, there is, so far as I know, no
+way for the error to refer back to the source Python code, or even the
+variable names involved.  You have to say "name=..." for any op for
+which you want to know the name -- otherwise, TensorFlow gives them
+internal names that, for large designs, can be very hard to decode. 
+(Of course, in TensorFlow, most of the heavy lifting is done by C++
+called by a Python wrapper, that further "enhances" the debugging
+experience)
+
+Steve
+
+----- Original Message -----
+From: "Paul Winalski" <paul.winalski@gmail.com>
+To:"Steve Johnson" <scj at yaccman.com>
+Cc:"Clem Cole" <clemc at ccc.com>, "TUHS main list"
+<tuhs at minnie.tuhs.org>
+Sent:Fri, 29 Dec 2017 20:52:00 -0500
+Subject:Re: [TUHS] origin of C header files
+
+ On 12/29/17, Steve Johnson <scj at yaccman.com> wrote:
+ > I begged Dennis for a solution, and he came up with #line,
+ > which allowed you to say to the C compiler "treat the next line as
+if
+ > it were line nnn in file fff, and following lines as successor
+lines
+ > in file fff. It instantly solved the problem, and was used multiple
+ > times for various applications (probably most notably cfront). So
+ > far as I know, many languages including FORTRAN, Pascal and Python
+do
+ > not have such a mechanism, making it awkward to use them as
+ > preprocessor targets.
+
+ Language processing systems where the preprocessor functionality is
+ implemented as a part of the compiler itself never had the "associate
+ the error message with the line in the original source" problem that
+ you described. The compiler could keep an internal table mapping the
+ lexical output of the preprocessor to the source lines/files that
+went
+ into the preprocessor phase. Most (all?) of DEC's and IBM's compilers
+ operate this way.
+
+ In keeping with UNIX's philosophy of "one image/one purpose", C's
+ preprocessor functionality was in a separate image from the compiler
+ itself. There are many advantages to this design, including that cpp
+ can then be used for other languages than C. But is has the
+ disadvantage of introducing the source correlation problem that
+ required the introduction of #line.
+
+ -Paul W.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180122/a4331c36/attachment.html>
+
