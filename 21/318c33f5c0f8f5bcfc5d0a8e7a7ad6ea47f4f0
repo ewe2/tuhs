@@ -1,0 +1,89 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Wed, 7 Feb 2018 11:34:21 -0500
+Subject: [TUHS] Device special files
+In-Reply-To: <ec74c580-34f7-794b-815c-d3a5949a7f5a@kilonet.net>
+References: <CAP6exYLTp1bOBAaewKuv0VGTAckvR86bjROUic10u64rd3u+DA@mail.gmail.com>
+ <1517946499.3717582.1261737872.3DC598F2@webmail.messagingengine.com>
+ <20180207012556.GL30690@eureka.lemis.com>
+ <alpine.BSF.2.21.1802071239090.50080@aneurin.horsfall.org>
+ <CAEoi9W4YORBdVT1OgGobNqtjhGexT05uSqTOGL22q1D0pvpTsw@mail.gmail.com>
+ <ec74c580-34f7-794b-815c-d3a5949a7f5a@kilonet.net>
+Message-ID: <CAEoi9W5EP1PX0Pz_9fTBKV6RkcN4xMxt4UTsWDXFL=ik1YFc2Q@mail.gmail.com>
+
+On Wed, Feb 7, 2018 at 11:24 AM, Arthur Krewat <krewat at kilonet.net> wrote:
+
+> medusa# mount | egrep '^/dev'
+> /devices on /devices read/write/setuid/devices/rstchown/dev=9640000 on
+> Fri Jan 19 16:33:07 2018
+> /dev on /dev read/write/setuid/devices/rstchown/dev=9680000 on Fri Jan 19
+> 16:33:07 2018
+> /dev/fd on fd read/write/setuid/devices/rstchown/dev=9940001 on Fri Jan
+> 19 16:33:22 2018
+> medusa# ls -l /dev/rdsk/c1t*d0
+> lrwxrwxrwx   1 root     root          65 Jan  2  2015 /dev/rdsk/c1t0d0 ->
+> ../../devices/pci at 0,0/pci8086,340b at 4/pci1028,1f10 at 0/sd at 0,0:wd,raw
+> lrwxrwxrwx   1 root     root          65 Jan  2  2015 /dev/rdsk/c1t1d0 ->
+> ../../devices/pci at 0,0/pci8086,340b at 4/pci1028,1f10 at 0/sd at 1,0:wd,raw
+> medusa# uname -a
+> SunOS medusa 5.11 11.3 i86pc i386 i86pc
+>
+
+Some more commentary would be useful here, but yeah: Solaris went pretty
+crazy with the cheez-whiz on this stuff. /devices was the "this is what we
+found from autoconfiguration at boot time" thingy, and /dev was the "and
+here are a bunch of symlinks to those things." I don't really remember why
+they chose to do it that way.... Linux and BSD's devfs (as in 4.4 and its
+descendants) was rather simpler (pretty much what I described until udev
+came around and elaborated on the theme).
+
+        - Dan C.
+
+
+On 2/6/2018 9:06 PM, Dan Cross wrote:
+>
+> On Tue, Feb 6, 2018 at 8:48 PM, Dave Horsfall <dave at horsfall.org> wrote:
+>
+>> On Wed, 7 Feb 2018, Greg 'groggy' Lehey wrote:
+>>
+>>> V3 and earlier still *called* them special files, but it seems they were
+>>>> essentially just magic inode numbers (there was no physical file on disk,
+>>>> just any directory entry with the given inode would be the special file).
+>>>>
+>>>
+>>> Isn't that still the case?
+>>>
+>>
+>> Wasn't that "devfs" (which Penguin/OS calls "udev")?  I've never grokked
+>> that concept.
+>>
+>
+> No. devfs was (is?) a pseudo-filesystem where only special files
+> corresponding to the devices enumerated by the kernel during
+> autoconfiguration are present. The contents are synthesized at boot time
+> and the filesystem is mounted at some canonical location (like /dev), but
+> is otherwise ephemeral. This is in contrast to the older /dev, which is
+> usually just a directory on the root filesystem, wherein one created a
+> number of device files that may (or may not) correspond to an actual
+> hardware device in the system (remember the old dance of, "cd /dev &&
+> ./MAKEDEV foo" when you added a "foo" onto your system?). The inodes and
+> directory entries for those files actually exist in the disk-resident
+> filesystem structures (though of course data blocks aren't allocated to
+> those files and the inode doesn't refer to any data blocks).
+>
+> My understanding is that udev is an elaboration on devfs on Linux that
+> includes a rules engine that supports things like assigning set names to
+> specific devices, setting permissions, group/user ownership and the like.
+> For example, one can configure a rule so that when USB UART device with
+> serial number 0xdeadbeef gets attached to the system, it appears as
+> /dev/console_for_foo, owned by group "fooadmin" and mod 660. Presumably
+> whoever configured that knows that that serial device is physically
+> connected to the serial console for "foo".
+>
+>         - Dan C.
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180207/1cc5d6c7/attachment-0001.html>
+
