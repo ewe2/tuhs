@@ -1,0 +1,47 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Tue, 06 Feb 2018 18:13:50 -0800
+Subject: [TUHS] Device special files
+In-Reply-To: Your message of "Wed, 07 Feb 2018 12:48:35 +1100."
+ <alpine.BSF.2.21.1802071239090.50080@aneurin.horsfall.org>
+References: <CAP6exYLTp1bOBAaewKuv0VGTAckvR86bjROUic10u64rd3u+DA@mail.gmail.com>
+ <1517946499.3717582.1261737872.3DC598F2@webmail.messagingengine.com>
+ <20180207012556.GL30690@eureka.lemis.com>
+ <alpine.BSF.2.21.1802071239090.50080@aneurin.horsfall.org>
+Message-ID: <20180207021405.CF19B156E812@mail.bitblocks.com>
+
+On Wed, 07 Feb 2018 12:48:35 +1100 Dave Horsfall <dave at horsfall.org> wrote:
+Dave Horsfall writes:
+> On Wed, 7 Feb 2018, Greg 'groggy' Lehey wrote:
+> 
+> >> V3 and earlier still *called* them special files, but it seems they 
+> >> were essentially just magic inode numbers (there was no physical file 
+> >> on disk, just any directory entry with the given inode would be the 
+> >> special file).
+> >
+> > Isn't that still the case?
+> 
+> Wasn't that "devfs" (which Penguin/OS calls "udev")?  I've never grokked 
+> that concept.
+
+In the old days where a limited types of devices were
+available for a particular kind of machine, they could be
+statically assigned a major dev number (matching their index
+in the {b,c}devsw table). To make them accessible to users you
+did
+
+    mknod <name> <b or c> <major> <minor>
+
+Usually via /dev/MAKEDEV.  But this soon fell apart on PCs
+where you any number of devices can be attached. Even on
+Fortune Systems (pre PC) the system had an IO bus and static
+assignments listing out every possible device would've needed
+a lot of inodes. Recall that on a floppy space taken by each
+inode matters so we had to find a way!  IIRC, the kernel
+essentially returned a list of mknod commands which was then
+run at boot time.
+
+So the point of devfs is to avoid having to do mknod manually
+and yet provide access to all found devices from the userland.
+As a side effect you can also use it for programs that run in
+their own sandbox or for jails and require access to a device.
+
