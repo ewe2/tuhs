@@ -1,0 +1,60 @@
+From: davida@pobox.com (David Arnold)
+Date: Thu, 15 Feb 2018 09:45:47 +1100
+Subject: [TUHS] Do Interface specifications such POSIX or the LSB Still
+ Matter
+In-Reply-To: <CAC20D2PqfaQcHLZ9QCrRxAXM7rYeFBO1nLb2cwoj=sNvu=mYRw@mail.gmail.com>
+References: <CAC20D2PqfaQcHLZ9QCrRxAXM7rYeFBO1nLb2cwoj=sNvu=mYRw@mail.gmail.com>
+Message-ID: <781FBCD1-A2D9-4F6A-A0CF-452C243900E8@pobox.com>
+
+Purely from my own perspective, and perhaps a little round about … 
+
+As an ISV, the best customer experience comes from having your software provided in the distribution’s repositories.  That implies that your product be both gratis and libre (to some definition).  At that point, it’s an ‘apt’, ‘yum’, etc away.
+
+Second best is in the distribution’s secondary repositories (Universe, Extras, EPEL, etc).  A customer potentially has to fiddle with their enabled repositories, but that’s a one-off, and afterwards plain sailing.  This mostly requires source availability unless your product is something that’s very widely demanded, and the source not feasibly made available (eg. Adobe Flash player browser plugins, or similar).  Note that for some customers, they are not permitted (by their internal compliance people) to enable eg. EPEL.
+
+Third best is where you host package repositories yourself for a selection of distributions you care about.  This is basically the best customer experience possible for commercially-licensed binary-only distribution.  The end-user has to import your repository definition, approve your certificate, etc, but that’s a one-off thing, fairly simple to do, and thereafter they can install and update anything you publish with minimal effort.  Compliance-wise, this is actually easier than the vendors’ secondary repos, because it’s limited to one company with whom there’s a contractual relationship.
+
+In that context …
+
+POSIX matters largely as an historical artefact: it means that Linux and macOS are mostly compatible.  But new features are added relatively frequently, and there’s apparently minimal value placed on compatibility with others.  The bulk of your application code is compatible (ie. all the POSIX stuff), but corner cases need compatibility handling.  The UI, the filesystem, etc, often ends up being entirely different.
+
+LSB had numerous issues:
+* It was too minimal, not including much beyond basic POSIX.  IIRC, it didn’t include even OpenSSL, for example (at least in earlier editions)
+* It was often an optional package, needing to be installed before LSB-based applications would work
+* It then had different versions, and vendors were late to implement the later (more broad) requirements, so in practice you could only rely on the base set
+* After all of that, an LSB-based package was still typically installed and maintained differently from everything else on the system, so the end-user’s experience was pretty bad
+
+In my experience, you were actually better off just building on glibc and making a minimal (POSIX-ish) set of assumptions about installed utilities and filesystem layout).  That way at least you avoided the issues of needing to install LSB-compatibility packages, versioning of the LSB packages, etc.
+
+Implicit in all of this is that the market for commercial Unix and the BSDs is negligible, and has been for basically 10 years.  Aside from a brief uptick for Solaris 10, that was pretty-much true from about Solaris 7 onwards.  RHEL3+ and SLES9+, and then later Ubuntu LTS, and perhaps Darwin/Mac OS X/macOS covered enough of the market.  Today, macOS is the worst to support, since it doesn’t have a system package manager so you have to handle the patching/update process yourself, AND it’s a different kernel, C runtime, and vendor userland libraries.  RHEL/CentOS and Ubuntu LTS cover most customers.  SLES still has a few niches, but it's dying.  macOS is used only as a client, and mostly that doesn’t matter since applications are using a web UI on a Linux backend anyway.
+
+I think the bigger question is really … is there really still a market for commercially-licensed installable software packages?  The set of things that cannot be delivered via the web, and are not available as Free/Open Source is ever-shrinking.
+
+The operating system as we know it has become a substrate.  Linux has won, and the battle has moved on to the services layer.
+
+
+
+d
+
+> On 15 Feb 2018, at 07:53, Clem Cole <clemc at ccc.com> wrote:
+> 
+> I've send a couple of you private messages with some more details of why I ask this, but I'll bring the large question to debate here:
+> 
+> ​Have POSIX and​ LSB lost ​their usefulness/relevance?  If so, we know ISV’s like Ansys are not going to go ‘FOSS’ and make their sources available (ignore religious beliefs, it just is not their business model); how to we get that level of precision to allow ​the part of the market ​ that will be 'binary only' continue to create applications?
+> 
+> Seriously, please try to stay away from religion on this​ question.   Clearly, there are a large number of ISVs have traditionally used interface specifications.  To me it started with things like the old Cobol and Fortran standards for the languages.   That was not good enough since the systems diverge, and /usr/group then IEEE/ANSI/ISO did Posix.  
+> 
+> 
+> Clearly, Posix enabled Unix implementations such a Linux to shine, although Linux does not doggedly follow it.  Apple was once Posix conformant, but I'd not think they worry to much about it.   Linux created LSB, but I see fewer and fewer references to it.
+> 
+> I worry that without a real binary definition, it's darned hard (at least in the higher end of the business that I live day-to-day) to get ISV's to care.
+> 
+> What do you folks think?
+> 
+> Clem
+> 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180215/668088be/attachment.html>
+
