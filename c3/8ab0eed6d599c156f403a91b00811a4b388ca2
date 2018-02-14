@@ -1,0 +1,32 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed, 14 Feb 2018 12:47:29 -0500 (EST)
+Subject: [TUHS] Oddness in V6 'mv'
+Message-ID: <20180214174729.5147518C09E@mercury.lcs.mit.edu>
+
+So, in:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/s2/mv.c
+
+what's the point of this piece of code:
+
+	p = place;
+	p1 = p;
+	while(*p++ = *argp3++);
+	p2 = p;
+	while(*p++ = *argp4++);
+	execl("/bin/cp","cp", p1, p2, 0);
+
+I mean, I get that it's copying the two strings pointed to by 'argp3' and
+'argp4' into a temporary buffer at 'place', and leaving 'p1' and 'p2' as
+pointers to the copies of said strings, but... why is it doing that?
+
+I at first thought that maybe the execl() call was smashing the stack (and
+thus the copies pointed to by 'argp3' and 'argp4'), or something, but I don't
+think it does that. So why couldn't the code have just been:
+
+	execl("/bin/cp","cp", argp3, argp4, 0);
+
+Is this code maybe just a left-over from some previous variant?
+
+	Noel
+
