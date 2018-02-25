@@ -1,0 +1,30 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sat, 24 Feb 2018 19:53:13 -0500
+Subject: [TUHS]  EOF on pipes?
+Message-ID: <1519519996.29346.for-standards-violators@oclsc.org>
+
+  Many years ago (when the dinosaurs were using V6), I had a crazy idea[*] 
+  that a write(fd, 0, NULL) would somehow signal EOF to the reader i.e. a 
+  subsequent read would wait for further data instead of ENOTOBACCO.
+
+  Did any *nix ever implement that?  I have no idea how it would be done.
+
+Have an ENOGORILLA.
+
+To answer the real question: stream pipes, which became the only
+sort of pipe in the Research stream (sic) sometime between the
+8/e and 9/e manuals.
+
+The implementation was trivial, because from the beginning the
+metadata within a stream admitted delimiters: markers that meant
+`when this object reaches read(2) at the head end, return from
+read with whatever has already been delivered.'  Empty messages
+(two consecutive delimiters) were explicitly allowed.
+
+If a stream was marked as using delimeters (and pipes always
+were), a delimeter was inserted after every write(2).  So
+write(2) generated an empty message, and read(2) returned it.
+
+Norman Wilson
+Toronto ON
+
