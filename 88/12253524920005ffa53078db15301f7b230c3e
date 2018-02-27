@@ -1,0 +1,25 @@
+From: dave@horsfall.org (Dave Horsfall)
+Date: Tue, 27 Feb 2018 16:48:38 +1100 (EST)
+Subject: [TUHS] EOF on pipes?
+In-Reply-To: <CAMYpm87ugxnUne3pwxhdt3YYiLP+i5FgqyQytHoVKgKizuVW+w@mail.gmail.com>
+References: <CAMYpm87ugxnUne3pwxhdt3YYiLP+i5FgqyQytHoVKgKizuVW+w@mail.gmail.com>
+Message-ID: <alpine.BSF.2.21.1802271638180.20297@aneurin.horsfall.org>
+
+On Tue, 27 Feb 2018, Rudi Blom wrote:
+
+> By using pipe() you create a FIFO pipe with certain limitations 
+> (including 5120 write limit). When you open the streams device twice and 
+> ioctl() two file descriptors together you have more flexibility.
+
+There's always been a limit on the write until the reader got around to 
+it; that's why you had to take care to avoid deadlocks.
+
+Heck, I fell into a deadlock the other day with Perl; I thought that "say 
+<$reader_pipe>" (to echo whatever was read) as a neat shortcut would 
+work...  It deadlocked, because "<>" was evaluated in list context 
+(because of "say") and hence waited for the EOF that would never arrive so 
+that I could close the writer end.
+
+-- 
+Dave Horsfall DTM (VK2KFU)  "Those who don't understand security will suffer."
+
