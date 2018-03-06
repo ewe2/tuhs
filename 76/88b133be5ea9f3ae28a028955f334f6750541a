@@ -1,0 +1,49 @@
+From: dave@horsfall.org (Dave Horsfall)
+Date: Wed, 7 Mar 2018 04:58:01 +1100 (EST)
+Subject: [TUHS] Sleep()y musings
+Message-ID: <alpine.BSF.2.21.1803070411380.36136@aneurin.horsfall.org>
+
+Back when the dinosaurs were using card readers (and yes, I've used a card 
+reader on Unix; I think it was a desktop CDC model, and the driver would 
+handle two modes: strict 80-column i.e. one 12-bit column per 16-bit word 
+and you got 80 of 'em on a DMA channel, or ASCII NL-terminated after last 
+non-blank column, and no, I have no idea whether it handled EBCDIC or CDC 
+etc, but I digress as usual).
+
+Where was I?  Oh yes, sleeps...
+
+Back when sleep(3) was sleep(2) (yes, Virginia, sleep() used to be a 
+system call, then it became alarm()/pause(), and now it seems to be 
+nanosleep(), and I'm wandering again), you never called sleep(1) because 
+its granularity was +/-1 second (and all the way up to +infinity, 
+actually, on a really busy machine), thus it could return right away, with 
+ensuing hilarity.
+
+So, I'm curious:
+
+When did sleep(2) become sleep(3)?  Was it V7, or some BSD?  Or Babbage 
+help me, SysVile?
+
+When did the caveat about sleeping for 1 second become known?  I don't 
+think that I ever saw it documented, but was one of those "lore" things 
+passed around at Unix conferences and the like.
+
+And when did it start using nanosleep() instead of alarm()/pause()?  I see 
+that my Penguin box has a bet both ways; it "may" use SIGALRM[a] (thus 
+"mixing calls to alarm(2) and sleep() is a bad idea" (well, I've used 
+both), and also refers to nanosleep().
+
+[a]
+Alpine's spell-checker suggested "SICKROOM" here; pretty close when 
+dealing with timed-out reads on a TTY connection[ii] :-)
+
+[ii]
+Have you tried this with Perl?  You can't rely on EINTR[3], so you have to 
+use eval{} blocks instead, and it starts getting pretty fugly...
+
+[3]
+And here it suggested "ENTREE".
+
+-- 
+Dave Horsfall DTM (VK2KFU)  "Those who don't understand security will suffer."
+
