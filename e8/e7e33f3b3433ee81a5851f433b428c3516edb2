@@ -1,0 +1,77 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 18 Mar 2018 17:38:57 -0400 (EDT)
+Subject: [TUHS] PDP-11 DIV instruction lossage
+Message-ID: <20180318213857.8EE9918C089@mercury.lcs.mit.edu>
+
+So, I have discovered, to my astonishment, that the double-word version of the
+DIV instruction on the PDP-11 won't do a divide if the result won't fit into
+15 bits. OK, I can understand it bitching if the quotient wouldn't fit into 16
+bits - but what's the problem with returning an unsigned quotient?
+
+And, just for grins, the results left in the registers which hold the quotient
+and remainer is different in the -11/23 (KDF11-A) and the -11/73 (KDJ11-A).
+(Although, to be fair, the PDP-11 Architecture Manual says 'register contents
+are unpredictable if there's an overflow'.)
+
+Oh well, guess I'll have to redo my kludgy fix to gmtime() (the distributed
+version of which in V6 qhas a problem when the number of 8-hour periods since
+the epoch overflows 15 bits)! I guess I'll have to fix it for real, instead of
+my kludgy fix (which extended it to work for 16-bit results). :-)
+
+
+I discovered this when I plugged in an -11/73 to make sure the prototype QSIC
+(our RK11/etc emulator for the QBUS) worked with the -11/73 as well as the
+-11/23 (which is what we'd mostly been using - when we first started working
+on the DMA and interrupts, we did try them both). I noticed that with the
+-11/73, the date printed incorrectly:
+
+  Sun Mar 10 93:71:92 EST 1991
+
+After a certain amount of poking and prodding, I discovered the issue - and
+on further reading, discovered the limitation to 15-bit results.
+
+
+For those who are interested in the details, here's a little test program that
+displays the problem:
+
+       r = ldiv(a, b, d);
+       m = ldivr;
+
+       printf("a: 0%o %d.  b: 0%o %d.  d: 0%o %d.\n", a, a, b, b, d, d);
+       printf("q: 0%o %d.  r: 0%o %d.\n", r, r, m, m);
+
+and, for those who don't have V6 source at hand, here's ldiv():
+
+        mov     2(sp),r0
+        mov     4(sp),r1
+        div     6(sp),r0
+        mov     r1,_ldivr
+        rts     pc
+
+So here are the results, first from a simulator:
+
+  tld 055256 0145510 070200
+  a: 055256 23214.  b: 0145510 -13496.  d: 070200 28800.
+  q: 0147132 -12710.  r: 037110 15944.
+
+This is _mathematically_ correct: 055256,0145510 = 1521404744., 070200 =
+28800., and 1521404744./28800. = 0147132.
+
+And on the -11/23:
+
+  a: 055256 23214.  b: 0145510 -13496.  d: 070200 28800.
+  q: 055256 23214.  r: 037110 15944.
+
+Note that the returned 'quotient' is simply the high part of the dividend.
+
+And on the -11/73:
+
+  a: 055256 23214.  b: 0145510 -13496.  d: 070200 28800.
+  q: 055256 23214.  r: 037110 15944.
+
+Note that in addition to the quotient behaviour, as with the /23, the
+'remainder' is the low part of the dividend.
+
+	    Noel
+
+
