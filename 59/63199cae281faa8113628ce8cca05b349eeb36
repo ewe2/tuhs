@@ -1,0 +1,85 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Tue, 20 Mar 2018 22:30:27 -0600
+Subject: [TUHS] daemons are not to be exorcised
+In-Reply-To: <20180321023125.GC6850@thunk.org>
+References: <CAFCBnZsS8Si6YGD4w_3W_znf3J5nVZGThkHVuQm5nD+FFm0DOg@mail.gmail.com>
+ <94366db0-293b-214a-23a3-c7c895e4d30b@spamtrap.tnetconsulting.net>
+ <alpine.BSF.2.02.1803200023360.43136@frieza.hoshinet.org>
+ <98451f10-9b1b-049b-61ed-fd73586572fd@spamtrap.tnetconsulting.net>
+ <20180321023125.GC6850@thunk.org>
+Message-ID: <CANCZdfrm8gkZO6nDmyM=NqnEk92X0Lh=bpLxH4CzRCT8RbsP2Q@mail.gmail.com>
+
+On Tue, Mar 20, 2018 at 8:31 PM, Theodore Y. Ts'o <tytso at mit.edu> wrote:
+
+> On Mon, Mar 19, 2018 at 10:40:44PM -0600, Grant Taylor via TUHS wrote:
+> >
+> > I think many people working on Linux are genuinely trying to make it
+> better.
+> > They just have no conceptual history to guide them.
+>
+> There are also ways in which Unix is just simply deficient.  For
+> example, take syslog.  It's simple, sure, but it has an extremely
+> simple structure, and it's not nearly flexible enough for more
+> sophisticated use cases.  As a result, *many* commercial Unix systems
+> have tried reinventing an event logging system which had more structure.
+>
+
+At Netflix, we log JSON entries and scrape the logs to upload to our data
+base.... Simple syslogd can work, but I've often seen other packets layered
+upon its simple protocol...
+
+Early NetBSD and FreeBSD systems required a reboot when you inserted a
+> PCMCIA card, and would crash if you ever tried to eject a PCMCIA card.
+>
+
+To be fair, the earliest versions of Linux's PC Card support did likewise.
+Like the BSDs, the initial drivers were network or serial that were hacks
+on existing drivers that "reached over" and configured the PCIC so the
+device could probe. Those hacks were later replaced with better code that
+allowed for a wider array of drivers, as well as allowing them to come and
+go. The first hacks for hot-plug PCI also followed a similar trajectory:
+some hack to let people boot with the hardware in place, either in the
+driver itself, or in the bridges, followed months or years later by proper
+hot-plug support. USB was similar, but plug and unplug were well-trodden
+paths by the time it came along, so there was no lag...
+
+
+> You may not like Linux's solution for supporting these sorts of
+> hardware --- but tell me: How would you hack V7 Unix to support them?
+>
+
+Much the same way that FreeBSD has gone: to move away form the hand-tweaked
+config tables with lots of ifdefs in v7 to having each driver self
+contained with an init function that registers other interesting things and
+a way to add to the tree dynamically after boot. But maybe I'm biased,
+though it is approximately the model that Linux's device discovery evolved
+into after trying a couple of different strategies out first...
+
+But there's many things that v7 never had to deal with: multiple CPU
+(everybody did that differently), dynamic devices, thousands of different
+devices supported by hundreds of drivers (it supports like 10 or 15 major
+ones), cope with large memory systems, deal with devices that had widely
+varying performance (all disks were the same: you submitted the request and
+tens of milliseconds later you got the results: no imbalances if you had a
+system with both NVMe with microsecond response time and tens of thousands
+of queue entires along with spinning rust with 10ms response time and maybe
+a few dozen). v7 didn't have to cope with devices that were very smart, so
+it didn't have to deal with dynamically balancing system resources to cope.
+It didn't have to deal with demand paging, or pages of different sizes. It
+didn't have to cope with cache coherency issues. It didn't even bother with
+shared libraries, nor did it require a MMU, though there were performance
+and security benefits. Oh, and it didn't deal with security very well by
+today's standards.
+
+Even so, the code is very simple to read and understand. And now that's
+it's available, it makes so many other decisions and design patterns make
+so much more sense than even finely written prose describing them. The
+simple elegance of its ideas and implementation afforded a clarity of
+design that allowed one to see the basics and hold it all in your head with
+not too much study. The same cannot be said for any modern OS.
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180320/befef091/attachment.html>
+
