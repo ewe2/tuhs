@@ -1,0 +1,127 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Fri, 30 Mar 2018 18:42:09 -0400
+Subject: [TUHS] shared objects in Unix
+In-Reply-To: <be27e8d3-8549-a056-9a1f-0fb31fca4eab@gmail.com>
+References: <CABH=_VQvhHKemfOOvVFSu9K+Go1LB5e2Ck214KdLJvtE--z8Hg@mail.gmail.com>
+ <alpine.BSF.2.21.1803301009140.3361@aneurin.horsfall.org>
+ <20180329232409.GH8921@mcvoy.com>
+ <CAC20D2ORfP-bCTZiM0rxYywGmF7QpsORTtCGx86++tzeyjRwbw@mail.gmail.com>
+ <20180330014642.GI8921@mcvoy.com>
+ <048A69EA-7B2C-4D2C-A69B-76CE8E082826@ccc.com>
+ <be27e8d3-8549-a056-9a1f-0fb31fca4eab@gmail.com>
+Message-ID: <CAC20D2P3FXPeC-Vy+rpuNh9j9vcNfca=ASDLYMK2HM4k+vSn-g@mail.gmail.com>
+
+On Fri, Mar 30, 2018 at 4:52 PM, Jon Forrest <nobozo at gmail.com> wrote:
+
+> [Larry McVoy said ...]
+>
+>> CMU's Mach, mem,
+>>> ​...
+>>>  NOTHING like Sun's
+>>> VM system, I mean, nothing.
+>>>
+>>
+> ​...
+>
+
+
+> Most research projects suffer because the goal of the people who
+> ​ ​
+> work on it is to hack on it to get their research done,
+
+
+​Two things...
+
+1.) I think we are in complete agreement wrt to code quality - and I think
+LM is probably correct that Sun had the first real quality implementation.
+2.) Paul's question was a little different and I was able to chat with him
+about it at lunch today.    Until a year or so ago, Paul was a
+compiler/linker guy and was interested less in the OS extension to support
+shared libraries, but more when did different tool chains start to support
+it. * i.e.* How did we get from a.out to ELF.
+
+The key is that make shared libraries real for the tool chain, you need OS
+support for shared memories.    It turns out that Joy's BSD Unix took its
+shared memory API (mmap) from Tenex's 'PMAP JSYS' (which BTW, the '72 Tenex
+CACM paper calls out shared libraries modelled after Multics - I was trying
+to google the API specific and failed - I think its darned near 1x1).  I'm
+also pretty sure that PMAP influenced the VMS shared memory call that
+Cutler would build in the mid 70s.  Not only that, In Rashid's 81 Accent
+paper, he too referenced Tenex's PMAP too (more in a minute).
+
+Also, please remember, that BSD's mmap was not the first shared memory call
+for any UNIX.  Horton & Johnson can correct me, but I think Dale's team in
+Columbus had a shared memory in a  PDP-11 ??PWB 1.0?? style system - that
+would eventually begat the System V shmem call (i've got a hard copy of it
+somewhere in my archives).
+
+What I do not remember, and this is where someone like Steve might know,
+was could COFF use the Columbus shmem to do shared libs?   Certainly by
+that time, shared libraries for UNIX was being heavily discussed both in
+and out of AT&T.  I remember that either V.2 or V.3 had a shared lib scheme
+that put the libraries at a static address as the System V kernel support
+was not very flexible.   But to Paul's question, was that AT&T had started
+to put shared libs into their flavor around the same time?   *i.e. *when
+did Summit start to support it.
+
+I was trying to get an account of which versions of which OS
+distributions/releases had some sorts of kernel extensions that allowed
+shared libraries and that also supported tool chains that could provide
+them -- *i.e.* what Paul was asking about.  I was not commenting on who's
+kernel to support same was good or bad.  I did comment on the file format.
+COFF was a dead end because of the way Summit's management introduced it to
+larger Unix community, even if it was 'better' and solved some of the
+earlier issues with a.out.
+
+Macho was already there for instance, and it was an 'extensible' version of
+a.out and had some level of support for architecture of the binary
+contained within.   How v6/v7 a.out got extended to support shared libs,
+had varied widely by different manufacturers tool chains.   Originally,
+most manufacturers still called it a.out and just hacked on their own
+version of the toolchain.  CMU gave it a different name (macho) and IIRC made
+the kernel handle both *i.e. *still supported the original BSD a.out but
+you were limited in what could be done with it to only the 4.1BSD api.
+Remember, Mach 1.0, reacting to Accent' failure, was BSD4.1++ so they
+wanted to be able to run BSD binaries, at least on Vaxen.  In fact the way
+you installed Mach1.0 was build a new kernel boot it on your 4.1BSD system.
+Binary compatibility was sort of new concept for the University community
+--- in fact, around that time at UCB I remember Joy once saying he thought
+it was good to force people to recompile as it ensured the code was not
+stale.
+
+
+So moving forward, AT&T's COFF had tried to repair the many different
+a.outs, but AT&T made other major non-technical missteps so only firms that
+were late in the Unix world bothered with it.  And even after trying to be
+'common', it too,  got extended in N different incompatible (uncommon) ways.
+
+As I said, I am not sure how ELF really became the universal format, other
+than timing.   AT&T for whatever reason did not have a fit when it was
+reimplemented by Gnu - but by the Gnu guys doing that, and the FOSS
+community switching to that version of the compiler, ELF did win in the
+long run.   And fortunately, the Gnu version of ELF and the SVR4 version
+seems/appears to be were pretty close [as far as I know they matched, but
+if someone knows otherwise, I defer to them].
+
+As for the kernel stuff, my other point is that >>idea<< of mmap/pmap was
+kicking around the Unix community by numerous folks hacking on the kernel
+for a longer time then when it was finally implemented.  LM reminds us that
+you need something for memory sharing to implement shared libraries.  But
+memory sharing added to Unix before shared libraries was added to the tool
+chains.
+
+ I do find it interesting the UCB mmap API call pretty much was all of the
+Unix kernel implementation agreed to be the memory sharing API and that it
+happens to be pretty much the same call as Tenex's PMAP.   As Paul
+mentioned at lunch today for him, VMS, Tenex/TOP-20 and eventually Unix it
+was pretty much the same call for him implementing the user space
+linker/loader calls, which is part of why he was asking when did the tools
+start to support it all.
+
+Clem
+ᐧ
+ᐧ
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180330/2341c230/attachment.html>
+
