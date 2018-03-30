@@ -1,0 +1,61 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Fri, 30 Mar 2018 19:29:03 -0400
+Subject: [TUHS] shared objects in Unix
+In-Reply-To: <CAC20D2P3FXPeC-Vy+rpuNh9j9vcNfca=ASDLYMK2HM4k+vSn-g@mail.gmail.com>
+References: <CABH=_VQvhHKemfOOvVFSu9K+Go1LB5e2Ck214KdLJvtE--z8Hg@mail.gmail.com>
+ <alpine.BSF.2.21.1803301009140.3361@aneurin.horsfall.org>
+ <20180329232409.GH8921@mcvoy.com>
+ <CAC20D2ORfP-bCTZiM0rxYywGmF7QpsORTtCGx86++tzeyjRwbw@mail.gmail.com>
+ <20180330014642.GI8921@mcvoy.com>
+ <048A69EA-7B2C-4D2C-A69B-76CE8E082826@ccc.com>
+ <be27e8d3-8549-a056-9a1f-0fb31fca4eab@gmail.com>
+ <CAC20D2P3FXPeC-Vy+rpuNh9j9vcNfca=ASDLYMK2HM4k+vSn-g@mail.gmail.com>
+Message-ID: <CABH=_VRNbkVvMduP4L5m3+BCi=uf3qLnXkRo2f3k59un7qWqJw@mail.gmail.com>
+
+Regarding the various object/program image formats on Unix:
+
+a.out ZMAGIC had three sections (.text, .data, BSS) and .text was
+read-only and therefore shareable between processes running the same
+image.  And if .text and .data started on a page boundary, you could
+do demand paging of them from the a.out file on disk (you'd of course
+need to do copy-on-write of .data to space in a page file).  I can see
+how, with mmap, one could map multiple ZMAGIC images to the same
+address space, thus implementing shared objects, but there isn't
+anything in ZMAGIC to direct the runtime loader as to which images
+need to be so mapped or where to map them.
+
+MACH-O was a big advance over a.out in that it was extensible--you
+could have up to 16 sections.  MacOS-X indeed uses some of the extra
+sections to implement its shared memory scheme.
+
+COFF was another step forward.  One now had a lot more sections to
+play with.  But a lot of the meta-data needed by the runtime loader to
+do shared image binding was in auxiliary data structures outside such
+as the optional header (which in practice is anything but optional).
+And, as Clem pointed out, it suffered from a dialect problem.
+Microsoft adopted COFF as the object and image format for Windows NT.
+But as MS does so often, they took a "embrace and extend" approach to
+it.  When I had to implement object file writing support in DEC's GEM
+back end for Microsoft PECOFF, I found it significantly different from
+Tru64 Unix's COFF.  I found myself putting so many "if (is_pecoff)"
+conditionals in the code that I gave up on that and wrote a separate
+module for PECOFF (just as the VMS OBJ support had its own module).
+The two COFF-based shared object designs I'm familiar with (Tru64 Unix
+and Windows NT) both hung the data structures for shared object
+loading off of the optional header.
+
+ELF is the cleanest and the easiest to work with, from a compiler
+writer's point of view.  Everything is a section.  The one mistake
+they made was using a 16-bit field for the section number, thus
+limiting each file to 64K sections.  The grouped communal sections for
+C++ can blow through that limit quite easily.  A hack was later added
+to ELF to support 32-bit section numbers.  It's not as clean as it
+would have been if section numbers had been 32 bits from the get-go,
+but it does mean that only modules that need a grossly large number of
+sections incur the file bloat from the larger section numbers.  ELF is
+nice enough that when VMS did their port to Itanium, they decided to
+use ELF rather than try to add Itanium's extensive set of relocations
+to the OBJ format in use on Alpha.
+
+-Paul W.
+
