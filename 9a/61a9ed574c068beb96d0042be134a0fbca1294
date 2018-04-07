@@ -1,0 +1,86 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Sat, 7 Apr 2018 16:41:28 -0400
+Subject: [TUHS] long lived programs
+In-Reply-To: <1522962186.9871.for-standards-violators@oclsc.org>
+References: <1522962186.9871.for-standards-violators@oclsc.org>
+Message-ID: <CABH=_VRr05LFd0xMHiqrHBT-u+3LP2uY+FvM79PqK0Hm-uRtkQ@mail.gmail.com>
+
+On 4/5/18, Norman Wilson <norman at oclsc.org> wrote:
+
+[regarding streams implementation of pipes]
+>
+> But the System V folks were very nervous about it anyway, and
+> wrote a planning document in which they proposed to create a
+> new, different system call to make stream pipes.  pipe(2) would
+> make an old-fashioned pipe; spipe(2) (or whatever it was called,
+> I forget the name) had to be called to get a stream.  The document
+> didn't really explain the justification for this.  To us in
+> Research it just sounded crazy.
+
+Sometimes critical code can have unintended dependencies on buggy or
+undocumented behavior of system features.  I ran into something of
+this sort in the Unix C runtime when I did the linker for VAX Fortran
+for Ultrix.  The VAX Fortran runtime was written in several source
+languages, and there was no common back end for the compilers for
+these languages, so we decided that the easiest way to get the whole
+mess ported to Ultrix was to port the VAX/VMS linker to Ultrix and to
+teach it to understand a.out files and ar archives.  To prevent any
+copyright or other IP problems, we did the project without reference
+to the Unix sources or anything other than publicly published
+documents.
+
+All went well until we got to testing, where we got a curious test
+failure.  The cause of the failure was the allocation of the C RTL's
+iob structure, which is an array that holds the file descriptors
+associated with stdin, stdout, and stderr.  The program was dying
+because it was accessing iob[2] (stderr), but my Ultrix linker had
+only allocated 8 bytes, not 12, for the iob array.  ld, on the other
+hand, allocated 12 bytes.  All of the objects that participated in the
+link had iob declared as an 8-byte common symbol, so I couldn't for
+the life of me understand why ld allocated 12 bytes for it.
+
+In desperation I looked at the source code for ld.  a.out common
+symbols have the "external" bit specified, but unlike global reference
+symbols they have a non-zero value field.  If there is a global
+definition for the name, the common symbol is resolved against that
+(i.e., it behaves like a global reference).  If not, the linker
+allocates space in bss for the symbol, using the value field as the
+number of bytes to allocate.  If common symbols of the same name from
+different object files have different sizes, the linker allocates the
+largest size.  The other significant feature of common symbols is that
+if an archive member contains a common symbol that resolves a global
+reference, that isn't enough to cause the archive member to be loaded,
+as would be the case with a global definition.
+
+The root cause of my problem was a feature of the ranlib program.
+When ranlib built the archive index of global symbols, it merely
+looked at the "external" bit--it indexed common symbols as well as
+global definitions.  So if a linker sees a name it's looking for in
+the ranlib index, it has to actually process the module's symbol table
+to make sure that it is a "hard" definition and not a common symbol.
+My ported VMS linker was very careful to do a pre-scan of each module
+before loading so as to prevent common symbols causing a load.  ld
+took a different approach--it loaded the module and then processed its
+symbol table.  If it found that a common symbol had provoked the load,
+it said "oops" and unloaded the module.  But by then it had already
+maximized the sizes of any common symbols that were in the module--the
+new sizes didn't get backed out.  So for common symbols ld would
+allocate not the largest size for the symbol in any module
+participating in the link, but the largest size IN ANY MODULE THAT LD
+SAW while doing the link!
+
+It turned out that there was a module in the Unix C runtime declared
+iob as a two-element array, but the code accessed iob[2].  They got
+away with this bug because ld always saw modules where iob was a
+three-element array when it processed libc.a and thus always allocated
+12 bytes for it.  My linker processed only the symbols in the modules
+that actually were brought in from libc.a, and hence it ended up
+allocating only 8 bytes.
+
+One of Murphy's laws of programming is that if a facility has
+undocumented side effects, there will be an important program that
+depends on them.  Hence the reluctance of many software engineers to
+make radical changes to how a feature is implemented.
+
+-Paul W.
+
