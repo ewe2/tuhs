@@ -1,0 +1,45 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Tue, 24 Apr 2018 01:44:06 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <mailman.125.1524526228.3788.tuhs@minnie.tuhs.org>
+References: <mailman.125.1524526228.3788.tuhs@minnie.tuhs.org>
+Message-ID: <9a5e49bb-f235-4b87-445b-1532d8facd2f@update.uu.se>
+
+On 2018-04-24 01:30, Grant Taylor <gtaylor at tnetconsulting.net> wrote:
+
+> On 04/23/2018 04:15 PM, Warner Losh wrote:
+>> It's weird. These days lower LBAs perform better on spinning drives.
+>> We're seeing about 1.5x better performance on the first 30% of a drive
+>> than on the last 30%, at least for read speeds for video streaming....
+> I think manufacturers have switched things around on us.  I'm used to
+> higher LBA numbers being on the outside of the disk.  But I've seen
+> anecdotal indicators that the opposite is now true.
+
+That must have been somewhere in the middle of history in that case. Old 
+(proper) drives had/have track 0 at the outer edge. The disk loaded the 
+heads after spin up, and that was at the outer edge, and then you just 
+locked on to track 0, which should be near.
+Heads had to be retracted for the disk pack to be replaced.
+
+But this whole optimization for swap based on transfer speeds makes no 
+sense to me. The dominating factor in spinning rust is seek times, and 
+not transfer speed. If you place the swap at one end of the disk, it 
+won't matter much that transfers will be faster, as seek times will on 
+average be much longer, and that will eat up any transfer gain ten times 
+over before even thinking. (Unless all your disk ever does is swapping, 
+at which time the heads can stay around the swapping area all the time.)
+
+Which is also why the file system for RSX (ODS-1) placed the index file 
+(equivalent of the inode table) at the middle of the disk by default.
+
+Not sure if Unix did that optimization, but I would hope so. (Never dug 
+into that part of the code.)
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
