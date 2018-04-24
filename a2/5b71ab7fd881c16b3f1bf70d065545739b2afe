@@ -1,0 +1,58 @@
+From: rudi.j.blom@gmail.com (Rudi Blom)
+Date: Tue, 24 Apr 2018 14:10:35 +0700
+Subject: [TUHS] /dev/drum
+Message-ID: <CAMYpm85NP4dnUzaDXZ=K64Q+HBXVi5iY8koD+cuSNcW53Q-04w@mail.gmail.com>
+
+>Date: Mon, 23 Apr 2018 13:51:07 -0400
+>From: Clem Cole <clemc at ccc.com>
+>To: Ron Natalie <ron at ronnatalie.com>
+>Cc: Tim Bradshaw <tfb at tfeb.org>, TUHS main list <tuhs at minnie.tuhs.org>
+>Subject: Re: [TUHS] /dev/drum
+>Message-ID:
+>        <CAC20D2PEzAayjfaQN+->kQS=H7npcEZ_OKXL1ffPxak5b2ENv4Q at mail.gmail.com>
+>Content-Type: text/plain; charset="utf-8"
+
+... some stuff removed ...
+
+>​Exactly...   For instance an RK04 was less that 5K blocks (4620 or some
+>such - I've forgotten the actually amount).  The disk was mkfs'ed to the
+>first 4K and the left over was give to the swap system.   By the time of
+>4.X, the RP06 was 'partitioned' into 'rings' (some overlapping).  The 'a'.
+>partition was root, the 'b' was swap and one fo the others was the rest.
+>Later the 'c' was a short form for copying the entire disk.
+
+Wondered why, but I guess now I know that's the reason Digital UNIX on
+alpha used the same disk layout. From a AlphaServer DS10 running
+DU4.0g, output "disklabel -r rz16a"
+
+# /dev/rrz16a:
+type: SCSI
+disk: BB009222
+label:
+flags:
+bytes/sector: 512
+sectors/track: 168
+tracks/cylinder: 20
+sectors/cylinder: 3360
+cylinders: 5273
+sectors/unit: 17773524
+rpm: 7200
+interleave: 1
+trackskew: 66
+cylinderskew: 83
+headswitch: 0		# milliseconds
+track-to-track seek: 0	# milliseconds
+drivedata: 0
+
+8 partitions:
+#          size     offset    fstype   [fsize bsize   cpg]      #
+NOTE: values not exact
+  a:     524288          0     AdvFS                    	# (Cyl.    0 - 156*)
+  b:    1572864     524288      swap                    	# (Cyl.  156*- 624*)
+  c:   17773524          0    unused        0     0       	# (Cyl.    0 - 5289*)
+  d:          0          0    unused        0     0       	# (Cyl.    0 - -1)
+  e:          0          0    unused        0     0       	# (Cyl.    0 - -1)
+  f:          0          0    unused        0     0       	# (Cyl.    0 - -1)
+  g:    4194304    2097152     AdvFS                    	# (Cyl.  624*- 1872*)
+  h:   11482068    6291456     AdvFS                    	# (Cyl. 1872*- 5289*)
+
