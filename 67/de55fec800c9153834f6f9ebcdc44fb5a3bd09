@@ -1,0 +1,76 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Tue, 24 Apr 2018 08:57:22 -0600
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180424062248.9D2FE156E510@mail.bitblocks.com>
+References: <mailman.125.1524526228.3788.tuhs@minnie.tuhs.org>
+ <9a5e49bb-f235-4b87-445b-1532d8facd2f@update.uu.se>
+ <e91f3dba-c563-f8f1-44a9-f7beffc08e7c@spamtrap.tnetconsulting.net>
+ <20180424044941.7C703156E510@mail.bitblocks.com>
+ <CANCZdfqhSVs-TT9vrtAg3TiNBTzHZJJVaG1ceRHJGAJaCpa-HA@mail.gmail.com>
+ <20180424062248.9D2FE156E510@mail.bitblocks.com>
+Message-ID: <CANCZdfqpwzVDMW6T-dBcazET15N=Hwj14wE3CoXMTRkxMCe43w@mail.gmail.com>
+
+On Tue, Apr 24, 2018 at 12:22 AM, Bakul Shah <bakul at bitblocks.com> wrote:
+
+> On Mon, 23 Apr 2018 22:59:19 -0600 Warner Losh <imp at bsdimp.com> wrote:
+> > >         ...
+> > >         Not_Zoned       # Zone Mode <<== this seems wrong.
+> > >
+> >
+> > That's right. This is for BIO_ZONE stuff, which has to do with host
+> managed
+> > and host aware SMR drive zones. That's different than the zones you are
+> > talking about.
+>
+> Ah. Thanks! Does host management of SMR zones provide better
+> throughput for sequential writes? Enough to make it worht it?
+> [I guess this may be something you guys may care about?]
+> Haven't had a chance to work on storage stuff for ages.  [Last
+> I played with Ceph was 5 years ago and at a higher level than
+> disks.]
+
+
+Right now, I don't think that we do anything in stock FreeBSD with the
+zones. I've looked at trying to create some kind of FS that copes with the
+large granularity writes blocks that host managed SMR drives would need to
+do and changes we'd need to a write-in-place FS to take advantage of it.
+It's possible, but it would turn UFS from a write-in-place system to a
+write-in-place, but only for meta-data, and different free block allocation
+methods. So far, it hasn't been enough of a win to be worth bothering with
+for our application (eg, we can get 10-20% more storage, but that delta is
+likely to remain constant, and the effort to make it happen is high enough
+that the savings isn't there to pay for the development).
+
+> Yes. This matches our experience where we get 1.5x better on the low LBAs
+> > than the high LBAs. We're looking to 'short stroke' the drive to the
+> first
+> > part of it to get better performance... Toss a filesystem on top of it,
+> and
+> > have a more random workload and it's down to about 30% better than using
+> > the whole drive....
+>
+> Is the tradeoff worth it? Now you have choices like Sata vs
+> SAS vs SDD vs PCIe....
+>
+
+We have a multi-tiered storage architecture. When you want to play a video
+from our service, we see if any of the close, fast boxes has a copy we can
+use. If they are too busy, we go back to slower, but more complete tiers.
+The last tier is made up of machines with lots of spinning disks. Some
+catalogs are small enough that only using 1/2 the drive, but getting 30%
+better throughput is the right engineering decision since it would improve
+network utilization w/o needing to deploy more servers. We use all those
+technologies in the different tiers: our fastest 100G boxes are NVMe, the
+40G boxes we have are JBOD of SSDs, the 10G storage boxes are spinning
+rust. We use SATA for SSDs since the SAS SSDs are super pricy, but we use
+SAS HDDs since we need the deeper queues and other features of SAS that are
+absent from SATA. We also sometimes oversubscribe PCIe lanes to get better
+storage density at a cheaper price point.
+
+There's lots of tradeoffs that can be made....
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180424/8050d0d9/attachment.html>
+
