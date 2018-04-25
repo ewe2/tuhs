@@ -1,0 +1,40 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Wed, 25 Apr 2018 14:55:29 -0700
+Subject: [TUHS] Disk data layout (was: /dev/drum)
+In-Reply-To: <CABH=_VRWFy7wESGkTNLnZTWmyc3XR0zDKG4hS1TzZfqT6j8YPg@mail.gmail.com>
+References: <CAEoi9W7YJZ3Tbb7fvoBtZMG6gb+H7FBDDS2w3BfQ_P+MrwTWmQ@mail.gmail.com>
+ <7wfu3nuqeb.fsf@junk.nocrew.org>
+ <CAC20D2O54yWV5PMX8dpYe4=L7SoUz01rny4rY6hOEZ_tWtAi8w@mail.gmail.com>
+ <3A18DFEC-42B7-4234-9DD1-367733270D50@tfeb.org>
+ <0abe01d3db28$b6573660$2305a320$@ronnatalie.com>
+ <CAC20D2PEzAayjfaQN+-kQS=H7npcEZ_OKXL1ffPxak5b2ENv4Q@mail.gmail.com>
+ <fb83b29a-29cf-c46b-076b-9f8d4eda76da@spamtrap.tnetconsulting.net>
+ <E069E9E4-5217-4233-8CFC-7A9D2B70BC3F@tfeb.org>
+ <CANCZdfqnUzeegesen6bcUD8BXBoCStydZakOWEP8BdiCQ3wHdg@mail.gmail.com>
+ <866bbea1-3a26-20a4-e233-1b8dc0ea2683@spamtrap.tnetconsulting.net>
+ <20180425013134.GM31055@eureka.lemis.com>
+ <CABH=_VRWFy7wESGkTNLnZTWmyc3XR0zDKG4hS1TzZfqT6j8YPg@mail.gmail.com>
+Message-ID: <E3553ABD-DABC-4C8E-B4C8-61044408D288@bitblocks.com>
+
+@Fortune Systems we kept a forwarding map of bad blocks. This was
+stored in a file at inode#1 IIRC. To read/write block n you check if n was in
+the list. If not, you read/write disk block n. Else you use the mapped block.
+The last N blocks were reserved for this. Actually we had to keep some
+state. A block that gave an error on read was marked bad so that further
+reads errored out. But a write to such a block would allocate a new block and
+add an entry in the bad block forwarding map. Further read/writes would then
+Go to this block. I also kept soft (correctable) error stats. These blocks were
+more likely to go bad so periodically a background task would preemptively
+forward these blocks. To test this logic I used to build the v7 kernel on a very unreliable disk! But this slowed things down a lot - having to seek to the end
+zone and then back for the next block. I think in later disk drives an extra block
+per track was reserved for this and the drive took care of this.
+
+It would’ve made more sense to avoid this forwarding by exposing bad blocks
+to the file system layer so that it can avoid allocating them but this would’ve
+complicated the interface.
+
+> On Apr 25, 2018, at 2:17 PM, Paul Winalski <paul.winalski at gmail.com> wrote:
+> 
+> How does/did Unix handle bad block replacement?
+
+
