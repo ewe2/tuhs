@@ -1,0 +1,63 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 26 Apr 2018 00:54:02 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <mailman.139.1524690859.3788.tuhs@minnie.tuhs.org>
+References: <mailman.139.1524690859.3788.tuhs@minnie.tuhs.org>
+Message-ID: <a531de43-cdc8-9ced-8e69-f51df5a24a19@update.uu.se>
+
+On 2018-04-25 23:14, Paul Winalski <paul.winalski at gmail.com> wrote:
+
+> On 4/25/18, Ronald Natalie 
+> <ron at ronnatalie.com> wrote:
+>> The fun argument is what is Virtual Memory.    Typically, people align that
+>> with paging but you can stretch the definition to cover paging.
+>> This was a point of contention in the early VAX Unix days as the ATT (System
+>> III, even V?) didn’t support paging on the VAX where as BSD did.
+> In my book, virtual memory is any addressing scheme where the
+> addresses that the program uses are different from the physical memory
+> addresses.  Nowadays most OSes use a scheme where each process has its
+> own virtual address space, and virtual memory is demand-paged from
+> backing store on disk.  But there have been other schemes.
+
+Yeah...
+
+> Some PDP-11 models had a virtual addressing feature called PLAS
+> (Program Logical Address Space).  The PDP-11 had 16-bit addressing,
+> allowing for at most 64K per process.  To take advantage of physical
+> memory larger than 64K, PLAS allowed multiple 64K virtual address
+> spaces to be mapped to the larger physical memory.  Sort of the
+> reverse of the usual virtual addressing scheme, where there is more
+> virtual memory than physical memory.
+
+Note that PLAS is not a PDP-11 hardware thing. PLAS was the name for the 
+mechanism provided by the OS for applications to be able to access more 
+than 64K of memory while still be limited by the virtual address space 
+limit of 64K.
+PLAS is in one way very similar to mmap, except that it's not backed by 
+a file. But you create a memory region though the OS (giving it a name 
+and a size, which can be more than 64K), and then you can map to it, 
+specifying the offset into it and window size, as well as where to map 
+to in your virtual address space.
+This is realized by just using the pages of the MMU of the PDP-11 map to 
+different parts and things.
+Any OS that had the PLAS capability by necessity had to have an MMU, 
+which was the hardware part that allowed this to be implemented.
+So, all PDP-11s with an MMU could allow the OS running on it to provide 
+the PLAS capabilities.
+
+A PDP-11 in general is "reversed" in that the physical address space is 
+much larger than the virtual one. Although, the same was also true on 
+the VAX in the last iteration where the NVAX implementation allowed for 
+a 34 bit physical address, while the virtual address space was still 
+only 32 bits.
+
+But that doesn't make the virtual memory any less virtual.
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
