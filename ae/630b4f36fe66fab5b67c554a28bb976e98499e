@@ -1,0 +1,122 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 3 May 2018 23:22:32 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180503113956.EFE4F18C08A@mercury.lcs.mit.edu>
+References: <20180503113956.EFE4F18C08A@mercury.lcs.mit.edu>
+Message-ID: <0ce4a7c8-9ced-4e06-46c3-f5f9816bbfcc@update.uu.se>
+
+On 2018-05-03 13:39, Noel Chiappa wrote:
+>      > That would be a pretty ugly way to look at the world.
+> 
+> 'Beauty is in the eye of the beholder', and all that! :-)
+
+That is true... Still, would you consider such a view anything close to 
+nice, usable or a good reflection of the hardware? :-)
+
+>      > Not to mention that one segment silently slides over into the next one
+>      > if it's more than 8K.
+> 
+> Again, precedent; IIRC, on the GE-645 Multics, segments were limited to 2^N-1 pages,
+> precisely because otherwise incrementing an inter-segment pointer could march off
+> the end of one, and into the next! (The -645 was implemented as a 'bag on the side'
+> of the non-segmented -635, so things like this were somewhat inevitable.)
+
+Right. But such a limitation does not exist on the PDP-11. You in fact 
+normally do have several "chunks" concatenated, so that you have your 
+linear virtual address space.
+
+>      > wouldn't you say that the "chunks" on a PDP-11 are invisible to the
+>      > user? Unless you are the kernel of course. Or run without protection.
+> 
+> No, in MERT 'segments' (called that) were a basic system primitive, which
+> users had access to. (Very cool system! I really need to get moving on trying
+> to recover that...)
+
+But you say that MERT ran with memory protection and users not directly 
+able to access the MMU? In such case then, the hardware is not really 
+visible, but the OS gives you some construct which can easily be mapped 
+on to the hardware.
+
+Or else I am missing something you are saying.
+
+The PLAS directives that were mentioned earlier, which various DEC OSes 
+implemented, could be said to reflect segments. In the same way you 
+could say that mmap() under Unix gives you a segment. But that is not a 
+strict reflection of the hardware.
+
+>      > *Demand* paging is definitely a separate concept from virtual memory.
+> 
+> Hmmm. I understand your definitions, and like breaking things up into 'virtual
+> addressing' (which I prefer as the term, see below), 'non-residence' or
+> 'demand loaded', and 'paging' (breaking into smallish, equal-sized chunks),
+> but the problem with using "virtual memory" as a term for the first is that to
+> most people, that term already has a meaning - the combination of all three.
+
+It's actually not my definition. Demand paging is a term that have been 
+used for this for the last 40 years, and is not something there is much 
+contention about. I must admit that I'm rather surprised if the term 
+really is unknown to you.
+Locate any good text on operating system concepts, and you should find 
+demand paging properly described. (Or go to Wikipedia, even though there 
+is some disdain around it here, it does contain a bunch of information 
+and references that are not all useless.)
+
+Virtual memory usually have been equally uncontroversial, but there it 
+has started to change in the last 10 years or so. I guess it's partly a 
+result of the monoculture we now face, where you have lots of people who 
+have never seen or used anything but x86 and Linux, if they have done 
+anything close to the memory management. And that in addition with more 
+and more people without proper CS educations fooling around in this 
+area, and having a somewhat incomplete understanding of the concepts.
+
+>      > There is no real connection between virtual memory and memory
+>      > protection. One can exist with or without the other.
+> 
+> Virtual addressing and memory protection; yes, no connection. (Although the
+> former will often give you the latter - if process A can't see, or name,
+> process B's memory, it can't damage it.)
+
+Right. Separation of memory can be seen as a form of memory protection 
+as well. But that is really just a side effect of not even having the 
+ability to refer to the memory, and is not explicitly any form of 
+protection.
+(Hello, virtual memory once more...)
+
+>      > Might have been just some internal early attempt that never got out of DEC?
+> 
+> Could be; something similar seems to have happened to the 'RK11-B':
+> 
+>    http://gunkies.org/wiki/RK11_disk_controller
+
+Which also begs the question - was there also a RK11-A?
+
+>      >> I don't have any problem with several different page sizes, _if it
+>      >> engineering sense to support them_.
+> 
+>      > So, would you then say that such machines do not have pages, but have
+>      > segments?
+>      > Or where do you draw the line? Is it some function of how many different
+>      > sized pages there can be before you would call it segments? ;-)
+> 
+> No, the number doesn't make a difference (to me). I'm trying to work out what
+> the key difference is; in part, it's that segments are first-class objects
+> which are visible to the user; paging is almost always hidden under the
+> sheets.
+> 
+> But not always; some OS's allow processes to share pages, or to map file pages
+> into address spaces, etc. Which does make it complex to separate the two..
+
+And the "chunks" on a PDP-11, running Unix, RSX or RSTS/E, or something 
+similar is also totally invisible. You can expand memory, or even 
+through mechanisms as shared memory and PLAS directives have your memory 
+space mapping different "objects", but the MMU page registers details 
+are totally invisible to you there.
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
