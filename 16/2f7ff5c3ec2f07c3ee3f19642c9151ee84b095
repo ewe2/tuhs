@@ -1,0 +1,74 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu,  3 May 2018 07:39:56 -0400 (EDT)
+Subject: [TUHS] /dev/drum
+Message-ID: <20180503113956.EFE4F18C08A@mercury.lcs.mit.edu>
+
+    > That would be a pretty ugly way to look at the world.
+
+'Beauty is in the eye of the beholder', and all that! :-)
+
+    > Not to mention that one segment silently slides over into the next one
+    > if it's more than 8K.
+
+Again, precedent; IIRC, on the GE-645 Multics, segments were limited to 2^N-1 pages,
+precisely because otherwise incrementing an inter-segment pointer could march off
+the end of one, and into the next! (The -645 was implemented as a 'bag on the side'
+of the non-segmented -635, so things like this were somewhat inevitable.)
+
+
+    > wouldn't you say that the "chunks" on a PDP-11 are invisible to the
+    > user? Unless you are the kernel of course. Or run without protection.
+
+No, in MERT 'segments' (called that) were a basic system primitive, which
+users had access to. (Very cool system! I really need to get moving on trying
+to recover that...)
+
+
+    > *Demand* paging is definitely a separate concept from virtual memory.
+
+Hmmm. I understand your definitions, and like breaking things up into 'virtual
+addressing' (which I prefer as the term, see below), 'non-residence' or
+'demand loaded', and 'paging' (breaking into smallish, equal-sized chunks),
+but the problem with using "virtual memory" as a term for the first is that to
+most people, that term already has a meaning - the combination of all three.
+
+(I have painful memories of this sort of thing - the term 'locator' was
+invented after we gave up trying to convince people one could have a network
+architecture in which not all packets contained addresses. That caused a major
+'does not compute' fault in most people's brains! And 'locator' has since been
+perverted from its original definition. But I digress.)
+
+
+    > There is no real connection between virtual memory and memory
+    > protection. One can exist with or without the other.
+
+Virtual addressing and memory protection; yes, no connection. (Although the
+former will often give you the latter - if process A can't see, or name, 
+process B's memory, it can't damage it.)
+
+
+    > Might have been just some internal early attempt that never got out of DEC?
+
+Could be; something similar seems to have happened to the 'RK11-B':
+
+  http://gunkies.org/wiki/RK11_disk_controller
+
+
+    >> I don't have any problem with several different page sizes, _if it
+    >> engineering sense to support them_.
+
+    > So, would you then say that such machines do not have pages, but have 
+    > segments?
+    > Or where do you draw the line? Is it some function of how many different 
+    > sized pages there can be before you would call it segments? ;-)
+
+No, the number doesn't make a difference (to me). I'm trying to work out what
+the key difference is; in part, it's that segments are first-class objects
+which are visible to the user; paging is almost always hidden under the
+sheets.
+
+But not always; some OS's allow processes to share pages, or to map file pages
+into address spaces, etc. Which does make it complex to separate the two..
+
+     Noel
+
