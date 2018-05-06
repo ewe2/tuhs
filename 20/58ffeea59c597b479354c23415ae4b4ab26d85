@@ -1,0 +1,82 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Sun, 6 May 2018 17:57:23 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180506130738.E59A618C079@mercury.lcs.mit.edu>
+References: <20180506130738.E59A618C079@mercury.lcs.mit.edu>
+Message-ID: <09e3b413-9b30-1763-6679-1cc11451e8b6@update.uu.se>
+
+On 2018-05-06 15:07, Noel Chiappa wrote:
+>      > From: Johnny Billquist
+> 
+>      >> "A logical segment is a piece of contiguous memory, 32 to 32K 16-bit
+>      >> words long [which can grow in increments of 32 words]"
+> 
+>      > But then it is not actually giving programs direct access and
+>      > manipulation of the hardware. It is a software construct and service
+>      > offered by the OS, and the OS might fiddly around with various hardware
+>      > to give this service.
+> 
+> I don't understand how this is significant: most time-sharing OS's don't give
+> the users access to the memory management control hardware?
+
+Right. I would probably say that no time-sharing OS with any kind of 
+protection between processes will allow direct access to the hardware.
+
+My point being that (I think we agreed) pages are invisible to the 
+process, while segments are very visible. And here we talk from a 
+hardware point of view.
+
+So why would it not be significant? It's what the whole definition was 
+about.
+
+>      > So the hardware is totally invisible after all.
+> 
+> Not quite - the semantics available for - and _visible_ to - the user are
+> constrained by the mechanisms of the underlying hardware.
+
+That is not the same thing as being visible. The OS gives you some 
+mechanisms or services. The OS might base that design on restrictions 
+imposed by the underlying hardware, but the underlying hardware is in 
+fact totally invisible. A user process use services provided by the OS, 
+and does not try to manipulate, or is even aware of the underlying hardware.
+
+> Consider a machine with a KT11-B - it could not provide support for very small
+> segments, or be able to adjust the segment size with such small quanta. On the
+> other side, the KT11-B could support starting a 'software segment' at any
+> 512-byte boundary in the virtual address space, unlike the KT11-C which only
+> supports 8KB boundaries.
+
+Yes. But a user program running under some OS with protection, would not 
+allow you to access the hardware anyway.
+
+Anything like the MERT segments can in fact be provided with both types 
+of memory management. And the program will not be aware of which 
+hardware is involved, or how to set this up. The OS deals with all of that.
+
+There might be some constraints on where the segment can appear in your 
+virtual address space, but that does not change the fact that the 
+service can be provided by the OS with either hardware.
+
+Or, to take RSX PLAS directives as an example. When you create a region 
+(which is the equivalent to a segment), it can have alignment on either 
+a 64B resolution, or a 512B resolution. And the OS will try to 
+accomodate. And where it appears in your virtual memory space, and what 
+offsets to use and so on can be requested, but the OS will then give you 
+something as close as it can to this, based on hardware restrictions.
+
+All of this is so similar to mmap() that we could in fact be having this 
+exact discussion based on mmap() instead, if that were to help.
+I don't see you claiming that every machine use a segmented model, but 
+running any modern Unix on any hardware will give you this exact same 
+tools. Read up on the mmap() system call, if you don't already know it.
+Now, would you say that this system call makes the hardware directly 
+visible and manipulated by the user program?
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
