@@ -1,0 +1,108 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Wed, 9 May 2018 00:39:36 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <mailman.1.1525744802.16322.tuhs@minnie.tuhs.org>
+References: <mailman.1.1525744802.16322.tuhs@minnie.tuhs.org>
+Message-ID: <56c4a8d3-c4dc-5876-7ca3-acda31ee9dc7@update.uu.se>
+
+On 08.05.18 04:00, jnc at mercury.lcs.mit.edu  (Noel Chiappa) wrote:
+>      > From: Johnny Billquist
+> 
+>      > My point being that ... pages are invisible to the process segments are
+>      > very visible. And here we talk from a hardware point of view.
+> 
+> So you're saying 'segmentation means instructions explicitly include segment
+> numbers, and the address space is a two-dimensional array', or 'segmentation
+> means pointers explicitly include segment numbers', or something like that?
+
+Not really. I'm trying to understand your argument.
+
+You said:
+"BTW, this reminds me of another key differentiator between paging and
+segments, which is that paging was originally _invisible_ to the user 
+(except
+for setting the total size of the process), whereas segmentation is 
+explicitly
+visible to the user."
+
+And then you used MERT as an example of this.
+
+My point then is, how is MERT any different from mmap() under Unix? 
+Would you then say that the paging is visible under Unix, meaning that 
+this is then segmentation?
+
+In my view, you are talking about a software concept. And as such, it 
+has no bearing on whether a machine have pages or segments, as that is a 
+hardware thing and distinction, while anything done as a service by the 
+OS is a completely different, and independent question.
+
+> I'm more interested in the semantics that are provided, not bits in
+> instructions.
+
+Well, if we talk semantics instead of the hardware, then you can just 
+say that any machine is segmented, and you can say that any machine is 
+have pages. Because I can certainly make it appear both ways from the 
+software point of view for applications running under an OS.
+And I can definitely do that on a PDP-11. The OS can force pages to 
+always be 8K in size, and the OS can (as done by lots of OSes) provide a 
+mechanism that gives you something you call segments.
+
+> It's true that with a large address space, one can sort of simulate
+> segmentation. To me, machines which explicitly have segment numbers in
+> instructions/pointers are one end of a spectrum of 'segmented machines', but
+> that's not a strict requirement. I'm more concerned about how they are used,
+> what the system/user gets.
+
+So, again. Where does mmap() put you then?
+And, just to point out the obvious, any machine with pages have a page 
+table, and the page table entry is selected based on the high bits of 
+the virtual address. Exactly the same as on the PDP-11. The only 
+difference is the number of pages, and the fact that the page on the 
+PDP-11 do not have a fixed length, but can be terminated earlier if wanted.
+So, pages are explicitly numbered in pointers on any machine with pages.
+
+> Similarly for paging - fixed sizes (or a small number of sizes) are part of
+> the definition, but I'm more interested in how it's used - for demand loading,
+> and to simplify main memory allocation purposes, etc.
+
+I don't get it. So, in which way are you still saying that a PDP-11 
+don't have pages?
+
+>      >> the semantics available for - and_visible_  to - the user are
+>      >> constrained by the mechanisms of the underlying hardware.
+> 
+>      > That is not the same thing as being visible.
+> 
+> It doesn't meet the definition above ('segment numbers in
+> instructions/pointers'), no. But I don't accept that definition.
+
+I'm trying to find out what your definition is. :-)
+And if it is consistent and makes sense... :-)
+
+>      > All of this is so similar to mmap() that we could in fact be having this
+>      > exact discussion based on mmap() instead .. I don't see you claiming
+>      > that every machine use a segmented model
+> 
+> mmap() (and similar file->address space mapping mechanisms, which a bunch of
+> OS's have supported - TENEX/TOP-20, ITS, etc) are interesting, but to me,
+> orthagonal - although it clearly needs support from memory management hardware.
+
+Can you explain how mmap() is any different from the service provided by 
+MERT?
+
+> And one can add 'sharing memory between two processes' here, too; very similar
+> _mechanisms_  to mmap(), but different goals. (Although I suppose two processes
+> could map the same area of a file, and that would give them IPC mapping.)
+
+That how a single copy of shared libraries happen under Unix.
+Exactly what happens if you modify the memory depends on what flags you 
+give to mmap().
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
