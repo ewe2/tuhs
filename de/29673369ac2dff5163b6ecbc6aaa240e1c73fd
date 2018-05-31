@@ -1,0 +1,107 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 31 May 2018 17:02:27 +0200
+Subject: [TUHS] Control-T (was top)
+In-Reply-To: <mailman.1.1527732002.17884.tuhs@minnie.tuhs.org>
+References: <mailman.1.1527732002.17884.tuhs@minnie.tuhs.org>
+Message-ID: <f237df92-45a8-6820-8f74-fc4ec7ae34e0@update.uu.se>
+
+On 31.05.18 04:00, Pete Turnbull<pete at dunnington.plus.com> wrote:
+> On 30/05/2018 23:10, Johnny Billquist wrote:
+>> On 30.05.18 02:19, Clem cole wrote:
+>>> 1). If you grab ^s/^q from the alphabet it means you can send raw 8
+>>> bit data because they are valid characters (yes you can use escape
+>>> chars but it gets very bad)
+>> But this has nothing to do with 8 bit data.
+> [...]
+>> What you are talking about is simply the problem when you have inband
+>> signalling, and is a totally different problem than 8bit data.
+> True, but what I believe Clem meant was "binary data".  He did write
+> "raw data".
+
+Clem originally said:
+"And the other issue was besides not enough buffering DZ11s and the TU58 
+assumes  software (^S/^Q) for the flow control (DH11s with the DM11 
+option has hardware (RTS/CTS) to control the I/O rate.  So this of 
+course made 8bit data diificult too."
+
+And that is what I objected to. If we're talking about just getting data 
+through a communications channel cleanly, then obviously inband 
+signalling like XON/XOFF is a problem, but that was not what Clem claimed.
+
+By the way, while I'm on this topic. The TU58 (aka DECtape II - curse 
+that name) initially did have overrun problems, and that was because the 
+protocol did not have proper handshaking. There is flow control when the 
+TU58 sends data to the host, but there is no handshaking, which 
+amplifies the problem with flow control on that device. The protocol the 
+TU58 uses is called RSP, for Radial Serial Protocol. DEC realized the 
+problem, and modified the protocol, which were then called MRSP, or 
+Modified Radial Serial Protocol, which addressed the specific problem of 
+handshaking when sending data to the host.
+
+But in addition to the lack of handshaking, the TU58 is normally always 
+expected to be connected to a DL11, and the DL11 is the truly stupid, 
+simple device that only have a 1 character buffer. So that interface can 
+easily drop characters on reception. Flow control or not. And the TU58 
+is not really to blame. And if you have an updated TU58 which uses MRSP, 
+you are better off.
+
+>> RTS/CTS signalling is certainly a part of the standard, but it is not
+>> meant for flow control. It is for half duplex and the way to signal when
+>> you want to change the direction of communication.
+>>
+>> It is meant for*half duplex*  communication. Not flow control.
+> Actually, for both, explicitly in the standard.  The standard (which I
+> have in front of me, RS232C August 1969 reaffirmed June 1981) does
+> indeed explain at length how to use it for half duplex turnaround but
+> also indicates how to use it for flow control.  It states the use on
+> one-way channels and full-duplex channels to stop transmission in a
+> paragraph before the paragraph discussing half duplex.
+
+Using RTS/CTS for flow control have eventually made it into the 
+standard, but this only happened around 1990 with RS-232E-E. See 
+https://groups.google.com/forum/#!original/comp.dcom.modems/iOZRZkTKc-o/ZcdcMgUmBDkJ 
+for some background story on that.
+
+And that obviously is way after DEC was making any of these serial 
+interfaces.
+
+Wikipedia have a pretty decent explanation of how these signals were 
+defined back in the day:
+"The RTS and CTS signals were originally defined for use with 
+half-duplex (one direction at a time) modems such as the Bell 202. These 
+modems disable their transmitters when not required and must transmit a 
+synchronization preamble to the receiver when they are re-enabled. The 
+DTE asserts RTS to indicate a desire to transmit to the DCE, and in 
+response the DCE asserts CTS to grant permission, once synchronization 
+with the DCE at the far end is achieved. Such modems are no longer in 
+common use. There is no corresponding signal that the DTE could use to 
+temporarily halt incoming data from the DCE. Thus RS-232's use of the 
+RTS and CTS signals, per the older versions of the standard, is asymmetric."
+
+See Wikipedia itself if you want to get even more signals explained.
+
+If you have a copy of the 1969 standards document, could you share it? I 
+was trying to locate a copy now, but failed. I know I've read it in the 
+past, but have no recollection on where I had it then, or where I got it 
+from.
+
+>> The AT "standard" was never actually a standard. It's only a defacto
+>> standard, but is just something Hayes did, as I'm sure you know.
+> Except for ITU-T V.250, which admittedly is a Recommendation not a Standard.
+
+This also becomes a question of who you accept as an authority to 
+establish standards. One could certainly in one sense say that the Hayes 
+AT commands were a standard. But all of that also happened long after 
+DEC made these interfaces, and as such are also pretty irrelevant. The 
+link to the post in news back in 1990 is from the standards 
+representative from Hayes, by the way. So they were certainly working 
+with the standards bodies to establish how to do things.
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
