@@ -1,0 +1,128 @@
+From tuhs-bounces@minnie.tuhs.org Thu Jun 28 14:51:46 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 982ab432
+	for <ml@inbox.vuxu.org>;
+	Thu, 28 Jun 2018 14:51:46 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 50D4EA1845; Fri, 29 Jun 2018 00:51:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D29DFA1816;
+	Fri, 29 Jun 2018 00:51:28 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D521BA1816; Fri, 29 Jun 2018 00:51:25 +1000 (AEST)
+X-Greylist: delayed 475 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Fri, 29 Jun 2018 00:51:25 AEST
+Received: from hacklheber.piermont.com (hacklheber.piermont.com [166.84.7.14])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 071A39EDF1
+ for <tuhs@minnie.tuhs.org>; Fri, 29 Jun 2018 00:51:25 +1000 (AEST)
+Received: from snark.cb.piermont.com (localhost [127.0.0.1])
+ by hacklheber.piermont.com (Postfix) with ESMTP id 02A84294;
+ Thu, 28 Jun 2018 10:43:30 -0400 (EDT)
+Received: from jabberwock.cb.piermont.com (jabberwock.cb.piermont.com
+ [10.160.2.107])
+ by snark.cb.piermont.com (Postfix) with ESMTP id D8C872DED5B;
+ Thu, 28 Jun 2018 10:43:29 -0400 (EDT)
+Date: Thu, 28 Jun 2018 10:43:29 -0400
+From: "Perry E. Metzger" <perry@piermont.com>
+To: "Theodore Y. Ts'o" <tytso@mit.edu>
+Message-ID: <20180628104329.754d2c19@jabberwock.cb.piermont.com>
+In-Reply-To: <20180628141538.GB663@thunk.org>
+References: <af780f9fb5c14e37f12ce5c2a4e40376669c730f@webmail.yaccman.com>
+ <81277CC3-3C4A-49B8-8720-CFAD22BB28F8@bitblocks.com>
+ <20180628141538.GB663@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] PDP-11 legacy, C, and modern architectures
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, 28 Jun 2018 10:15:38 -0400 "Theodore Y. Ts'o" <tytso@mit.edu>
+wrote:
+> I'll note that Sun made a big bet (one of its last failed bets) on
+> this architecture in the form of the Niagra architecture, with a
+> large number of super "wimpy" cores.  It was the same basic idea
+> --- we can't make big fast cores (since that would lead to high
+> ILP's, complex register rewriting, and lead to cache-oriented
+> security vulnerabilities like Spectre and Meltdown) --- so instead,
+> let's make lots of tiny wimpy cores, and let programmers write
+> highly threaded programs!  They essentially made a bet on the
+> web-based microservice model which you are promoting.
+>
+> And the Market spoke.  And shortly thereafter, Java fell under the
+> control of Oracle....  And Intel would proceed to further dominate
+> the landscape.
+
+I'll be contrary for a moment.
+
+Huge numbers of wimpy cores is the model already dominating the
+world. Clock rates aren't rising any longer, but (in spite of claims
+to the contrary) Moore's law continues, very slightly with shrinkage
+of feature size (which is about to end) and more dominantly with
+increasing the number of transistors per square mil by going into
+3D. Dynamic power usage also scales as the square of clock rate, so
+larger numbers of lower clocked cores save a boatload of heat, and at
+some point you have too many transistors in too small an area to take
+heat out if you're generating too much.
+
+Some data points:
+
+1. All the largest compute platforms out there (Google, Amazon, etc.)
+   are based on vast numbers of processors integrated into a giant
+   distributed system. You might not see this as evidence for the
+   trend, but it is. No one can make a single processor that's much
+   faster than what you get for a few hundred bucks from Intel or AMD,
+   so the only way to get more compute is to scale out, and this is
+   now so common that no one even thinks of it as odd.
+
+2. The most powerful compute engines out there within in a single box
+   aren't Intel microprocessors, they're GPUs, and anyone doing really
+   serious computing now uses GPUs to do it. Machine learning,
+   scientific computing, etc. has become dependent on the things, and
+   they're basically giant bunches of tiny processors. Ways to program
+   these things have become very important.
+
+   Oh, and your iPhone or Android device is now pretty lopsided. By
+   far most of the compute power in it comes from its GPUs, though
+   there are a ridiculous number of general purpose CPUs in these
+   things too.
+
+3. Even "normal" hacking on "normal" CPUs on a singe box now runs on
+   lots of fairly wimpy processors. I do lots of compiler hacking
+   these days, and my normal lab machine has 64 cores, 128
+   hyperthreads, and a half T of RAM. It rebuilds one system I need to
+   recompile a lot, which takes like 45 minutes to build on my laptop,
+   in two minutes. Note that this box is both on the older side, the
+   better ones in the lab have a lot more RAM, newer and better
+   processors and more of them, etc.
+
+   This box also costs a ridiculously small fraction of what I cost, a
+   serious inversion of the old days when I started out and a machine
+   cost a whole lot more compared to a human.
+
+   Sadly my laptop is stalled out and hasn't gotten any better in
+   forever, but the machines in the lab still keep getting
+   better. However, the only way to take advantage of that is
+   parallelism. Luckily parallel builds work pretty well.
+
+Perry
+-- 
+Perry E. Metzger		perry@piermont.com
