@@ -1,0 +1,130 @@
+From tuhs-bounces@minnie.tuhs.org Thu Jun 28 14:31:45 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e38e60ca
+	for <ml@inbox.vuxu.org>;
+	Thu, 28 Jun 2018 14:31:45 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 22D35A1840; Fri, 29 Jun 2018 00:31:44 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A51E1A1816;
+	Fri, 29 Jun 2018 00:31:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C4BC3A1816; Fri, 29 Jun 2018 00:31:25 +1000 (AEST)
+X-Greylist: delayed 367 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Fri, 29 Jun 2018 00:31:25 AEST
+Received: from hacklheber.piermont.com (hacklheber.piermont.com [166.84.7.14])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 226F79EDF1
+ for <tuhs@tuhs.org>; Fri, 29 Jun 2018 00:31:25 +1000 (AEST)
+Received: from snark.cb.piermont.com (localhost [127.0.0.1])
+ by hacklheber.piermont.com (Postfix) with ESMTP id 1CBF52A3
+ for <tuhs@tuhs.org>; Thu, 28 Jun 2018 10:25:17 -0400 (EDT)
+Received: from jabberwock.cb.piermont.com (jabberwock.cb.piermont.com
+ [10.160.2.107])
+ by snark.cb.piermont.com (Postfix) with ESMTP id ED3DB2DED5B
+ for <tuhs@tuhs.org>; Thu, 28 Jun 2018 10:25:16 -0400 (EDT)
+Date: Thu, 28 Jun 2018 10:25:16 -0400
+From: "Perry E. Metzger" <perry@piermont.com>
+To: tuhs@tuhs.org
+Message-ID: <20180628102516.0aa3e3f4@jabberwock.cb.piermont.com>
+In-Reply-To: <20180626090539.GB96296@accordion.employees.org>
+References: <20180622145402.GT21272@mcvoy.com>
+ <20180622151751.BEK9i%steffen@sdaoden.eu>
+ <b6ef82de-739a-ed8e-0e91-3abfa2fb5f07@spamtrap.tnetconsulting.net>
+ <20180622192505.mfig_%steffen@sdaoden.eu>
+ <89e5ae21-ccc0-5c84-837b-120a1a7d9e26@spamtrap.tnetconsulting.net>
+ <20180623144959.M9byU%steffen@sdaoden.eu>
+ <ce6f617c-cf8e-63c6-8186-27e09c78020c@spamtrap.tnetconsulting.net>
+ <alpine.NEB.2.20.1806231615130.17586@neener.bl.org>
+ <alpine.BSF.2.21.999.1806251240100.68981@aneurin.horsfall.org>
+ <201806250615.w5P6FgHA018820@freefriends.org>
+ <20180626090539.GB96296@accordion.employees.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Subject: [TUHS] email filtering (was Re:  off-topic list)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Jun 25, 2018 at 12:15:42AM -0600, arnold@skeeve.com wrote:
+>
+> So what is the alternative?
+
+I subscribe to a truly ridiculous number of email lists, and I run my
+own mail server, so I thought I'd mention my Rube Goldberg style setup
+given that it's being discussed. For those that don't like how long
+this is, the main keys are "IMAP + sieve for filing all mailing lists
+into their own IMAP folder". The rest is pretty boring.
+
+Boring part:
+
+0) My MTA is Postfix, which allows even a relatively small site to get
+pretty damn good anti-spam capabilities. It's also really well written
+(it's a flock of small tools each of which does only one thing well)
+and quite secure, which is important. I have most of the interesting
+bells and whistles (like opportunistic TLS) turned on.
+
+1) Email for me goes through procmail to run it through a logging
+system, then spam assassin to tag whatever spam got past Postfix, and
+finally it's passed to Dovecot's "sieve" system for final filing in
+the IMAP server.
+
+2) Sieve breaks up my incoming email into many, many
+mailboxes. There's a box for every mailing list I'm on, so I can read
+them more or less like newsgroups. I don't put any email for a list
+into my main inbox, which gets only mail addressed to me personally so
+I can reply to such messages very fast.
+
+Sieve is a nice, standardized language for mailbox filtering, and the
+Dovecot implementation works quite well. It's flexible enough that I
+can deal with the fact that many mailing lists are hard to pick out
+from the mail stream thanks to their operators not following standards.
+
+Spam that made it past Postfix into Spam Assassin might or might not
+really be spam, so I have Spam Assassin tag it rather than deleting
+it, and Sieve is instructed to file that into its own box just in
+case. A cron job expires spam after a couple of weeks so that mailbox
+doesn't get too large.
+
+3) As I hinted, my email is stored in an IMAP server, specifically
+Dovecot. This allows me to read my mail with a dozen different tools,
+including my phone, a couple different MUAs on the desktop, etc. I
+dislike (see below) that this limits my choice in tools to process the
+mail, but I really need the multi-MUA setup, and I can't afford to
+move the mail onto any of my diverse end systems because I need to be
+able to read it on all of them.
+
+4) I used MH for many years, and I really wish MH/NMH worked with IMAP
+properly, because like others here, I really loved its scriptability,
+but the need to use multiple MUAs trumps it at this point. It's also
+necessary to communicate with muggles/mundanes/ordinary folk too often
+and most of them use HTML email and so I need to be able to read it
+even if I don't generate it, which means some use of GUI emailers.
+
+5) As for the future, I'm hoping at some point to have something that
+works sort of like MH did but which can speak native IMAP, and I'm
+hoping to start using Emacs as an MUA most of the time if I can find a
+client that will handle HTML email + IMAP a bit better than most of
+them do. (Stop looking at me that way for saying Emacs =E2=80=94 I've been
+using it as my editor since 1983 and my fingers just don't know any
+better any more.)
+
+Perry
+--=20
+Perry E. Metzger		perry@piermont.com
