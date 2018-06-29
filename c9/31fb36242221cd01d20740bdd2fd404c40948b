@@ -1,0 +1,67 @@
+From tuhs-bounces@minnie.tuhs.org Fri Jun 29 16:27:42 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id b4d62296
+	for <ml@inbox.vuxu.org>;
+	Fri, 29 Jun 2018 16:27:42 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C541BA1B2E; Sat, 30 Jun 2018 02:27:41 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E366FA181B;
+	Sat, 30 Jun 2018 02:27:33 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6A0C9A181B; Sat, 30 Jun 2018 02:27:32 +1000 (AEST)
+Received: from smtp-out-2.mxes.net (smtp-out-2.mxes.net [67.222.241.118])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 16A96A1815
+ for <tuhs@minnie.tuhs.org>; Sat, 30 Jun 2018 02:27:32 +1000 (AEST)
+Received: from mua (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id 4B6C32755E
+ for <tuhs@minnie.tuhs.org>; Fri, 29 Jun 2018 12:27:30 -0400 (EDT)
+From: <ron@ronnatalie.com>
+To: "'TUHS main list'" <tuhs@minnie.tuhs.org>
+Date: Fri, 29 Jun 2018 12:27:29 -0400
+Message-ID: <012201d40fc6$137b3590$3a71a0b0$@ronnatalie.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: AdQPxZslhwx2bCMXTdWmiwxSc1lc1A==
+Content-Language: en-us
+X-Sent-To: <dHVoc0BtaW5uaWUudHVocy5vcmc=>
+Subject: [TUHS] C Threading
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Thread local storage and starting threads up is largely a rather
+inconsequential implementation detail.   When it comes down to actual
+parallel programming, of which I have done more than a little, the big thing
+is thread synchronization.    It's rather hardware dependent.    You can
+pretty much entirely wipe out any parallism gains with a synchronization
+call that results in a context switch or even a serious cache impact.    On
+one side you have machines like the Denelcor HEP where every memory word had
+a pair of semaphores on it and the instructions could stall the process
+while waiting for them and the hardware would schedule the other threads.
+On the other hand you have your x86, which you can do a few clever things
+with some atomic operations and inlined assembler but a lot of the
+"standard" (boost, pthread, etc...) synchs will kill you.
+
+
