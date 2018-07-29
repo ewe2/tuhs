@@ -1,0 +1,119 @@
+From tuhs-bounces@minnie.tuhs.org Sun Jul 29 06:03:40 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 421bc51a
+	for <ml@inbox.vuxu.org>;
+	Sun, 29 Jul 2018 06:03:40 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 26FA594BBA; Sun, 29 Jul 2018 16:03:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 363CB94BAA;
+	Sun, 29 Jul 2018 16:02:56 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6948C94BAA; Sun, 29 Jul 2018 16:02:53 +1000 (AEST)
+Received: from freefriends.org (freefriends.org [96.88.95.60])
+ by minnie.tuhs.org (Postfix) with ESMTP id A9D5794BA9
+ for <tuhs@tuhs.org>; Sun, 29 Jul 2018 16:02:51 +1000 (AEST)
+X-Envelope-From: arnold@skeeve.com
+Received: from freefriends.org (localhost [127.0.0.1])
+ by freefriends.org (8.14.9/8.14.9) with ESMTP id w6T62knV018360;
+ Sun, 29 Jul 2018 00:02:46 -0600
+Received: (from arnold@localhost)
+ by freefriends.org (8.14.9/8.14.9/submit) id w6T62jr1018355;
+ Sun, 29 Jul 2018 06:02:45 GMT
+From: arnold@skeeve.com
+Message-Id: <201807290602.w6T62jr1018355@freefriends.org>
+X-Authentication-Warning: frenzy.freefriends.org: arnold set sender to
+ arnold@skeeve.com using -f
+Date: Sun, 29 Jul 2018 00:02:45 -0600
+To: tuhs@tuhs.org, doug@cs.dartmouth.edu
+References: <201807282231.w6SMVcWT097678@tahoe.cs.Dartmouth.EDU>
+In-Reply-To: <201807282231.w6SMVcWT097678@tahoe.cs.Dartmouth.EDU>
+User-Agent: Heirloom mailx 12.4 7/29/08
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] Doug McIlroy's C++ regular expression library (mostly)
+ revived
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: rsc@swtch.com
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Dr. McIlroy,
+
+Much thanks for this!  If you don't object, I will add this note to the
+repo as it provides insight into the wherefores of the package.
+
+At this point, I must also give credit where credit is due:
+
+* Chet Ramey, who suggested that I ask Russ Cox to take a look at the package,
+* Russ Cox, who fixed the major problems and got all the tests to pass,
+* Rares Aioanei, who volunteered to tackle fixing things but did not get
+  to do so before Russ beat him to it.
+
+As implied by the above, the package is now up-to-date and functional!
+I hope it's of interest to the broader community.
+
+My own reason for seeking this out is that I have (likely vain) hopes
+of one day finding a better regex package to use for gawk.  But
+regular expressions are interesting in their own right. Russ Cox has
+a series of papers on his web site about them that are worth reading.
+
+Finally, thanks again to Dr. McIlroy for humoring me and giving me
+his code to play with.
+
+Arnold
+
+
+Doug McIlroy <doug@cs.dartmouth.edu> wrote:
+
+> Why would anyone be interested in an old regex package that never was
+> a part of any Unix distro?
+>
+> The driving force was Posix, whose regex spec was quite inscrutable. Could
+> there be a reference implementation? It was easy to fool every
+> implementation I could get my hands on, including Gnu's over-the-top
+> 9000-line implementation.
+>
+> But as I got into it, I got fascinated by regexes per se. In making a
+> recognizer, there's a tradeoff between contruction time and execution
+> time. Linear execution can be achieved, but at a potentially exponential
+> cost in construction time (and space). Backreferencing takes the regex
+> languages out of the class of regular languages.
+>
+> Recalling that regular languages are closed under intersection and
+> negation, I wondered about how to implement new regex operators, &
+> and -. I came up with a scheme for this optional non-Posix feature that
+> involved layering continuation-passing over more traditional methods. And
+> while I was at it, I broke out smaller sublanguages for special treatment
+> (as does Gnu), all the way down to Knuth-Morris-Pratt for expressions
+> in which the only operation is catenation.
+>
+> And finally, having followed the development of C++ from its infancy,
+> I wanted to try out its new template facility, so there's a bit of
+> that in the package, too. Arnold has discovered that not only has C++
+> evolved, but also that without the discipline of -Wall to force clean
+> code, I was rather cavalier about casting, both explicitly and implicitly.
+>
+> The only real customer the code ever had was the AST project, which
+> translated it to C. After the C++ had sat idle for a half-dozen years, I
+> thought to revive it in Linux, but found it riddled with incompatibilities
+> with that new environment and gave up. Arnold deserves a citation for
+> bravery in pushing that through 15 years further on.
+>
+> Doug
