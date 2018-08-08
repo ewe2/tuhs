@@ -1,0 +1,224 @@
+From tuhs-bounces@minnie.tuhs.org Wed Aug  8 12:59:28 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIMWL_WL_MED autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id cff50c01
+	for <ml@inbox.vuxu.org>;
+	Wed, 8 Aug 2018 12:59:28 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C2F61A1B1E; Wed,  8 Aug 2018 22:59:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 27584A19DD;
+	Wed,  8 Aug 2018 22:59:12 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=donhopkins-com.20150623.gappssmtp.com header.i=@donhopkins-com.20150623.gappssmtp.com header.b=GbdVra+6;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0E864A19DD; Wed,  8 Aug 2018 22:59:10 +1000 (AEST)
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com
+ [209.85.208.41])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2653FA19D7
+ for <tuhs@minnie.tuhs.org>; Wed,  8 Aug 2018 22:59:09 +1000 (AEST)
+Received: by mail-ed1-f41.google.com with SMTP id s24-v6so1197943edr.8
+ for <tuhs@minnie.tuhs.org>; Wed, 08 Aug 2018 05:59:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=donhopkins-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:subject:from:in-reply-to:date:cc:message-id:references
+ :to; bh=x/YR4FvauRY+vJrPQ3q7IPvRkyCx/5v/s5gvv+SM6oU=;
+ b=GbdVra+6Bjx55pvWmNno2TzhNsoJVSXJFIfV2pZrhxOuyhAMeAo3S2nCeaDzYOMkzp
+ 8nt3y4eO2kD7xh54QRrv6F7ArjMmxshWng7gsjD96TbTh90vPktxzBrqhXBu0mczoOiy
+ TFd9MEsegbLs4hrMVTxd5GHEe8X29zSVjbY8+ygfg7hpPa19wf9rj9jfRSd0+qR2oday
+ cGosBokqVFUeS8leoRHJbEFd3C0NR/vYkBa7ZZFq/lQdo7AJwzGtHusyW8X4328oVPsD
+ TjG0YKU+3mocGpyb2IMbkHJCc8/bmqjItwxoAKbbeOCFX3vv68oqqWPE7IkCqrDVTCkU
+ j41w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
+ :message-id:references:to;
+ bh=x/YR4FvauRY+vJrPQ3q7IPvRkyCx/5v/s5gvv+SM6oU=;
+ b=XcRp9aAdpXqvhnZHq8EWJioifbZow1ZLlieOLpINTKtblqL/2C617CNrck7p6y1Q7o
+ Deg7ZXyl3U975AerZXKZeZzxq7i/YxV7MG6rBduaLT854P9X6yVKYFoUjAgrp9at6rCk
+ ChY4lFBOtgoM4KhXK39SOgJ9PHilsXMZTV7RwhCLMgq+Ic5xt7glW++4iqmhF8GZNk1r
+ EJvzA/V6e7D2Ajt6cfFxcvkdYS9trLEG3mkTEbJCP7aERapD1iIhF3y1rZpAigimXhrc
+ AMKSWcP8+fghlndqaQKe61+o3NUZ4n17jaqnnsnyuIMBZWux5CVmn169Tmh5jt7+rux6
+ jmUA==
+X-Gm-Message-State: AOUpUlEjywMPvO17FH566bNu5l9rCLZtgv3agK2uOEiKtV576SytD4DM
+ fxtX03r7dgMbUVh4rznU1TmCvZBqnlw=
+X-Google-Smtp-Source: AA+uWPzApTU3TTvzfhPtGU5VJOmSgF77Mr1pFHg0A+CrO5HW1vtTtKwX97VzmznXZn7mTi4Wx9C4uA==
+X-Received: by 2002:a50:b2a6:: with SMTP id
+ p35-v6mr3257220edd.215.1533733147756; 
+ Wed, 08 Aug 2018 05:59:07 -0700 (PDT)
+Received: from [192.168.0.52] (i36138.upc-i.chello.nl. [62.195.36.138])
+ by smtp.gmail.com with ESMTPSA id l30-v6sm2478281edc.70.2018.08.08.05.59.07
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Wed, 08 Aug 2018 05:59:07 -0700 (PDT)
+Content-Type: multipart/alternative;
+ boundary="Apple-Mail=_9BF23242-BB6B-4631-A209-B0EF45F812BE"
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+From: Don Hopkins <don@donhopkins.com>
+X-Priority: 3
+In-Reply-To: <20180808123229.86FD5E465F@mailuser.nyi.internal>
+Date: Wed, 8 Aug 2018 14:59:06 +0200
+Message-Id: <6EBCF9E5-4600-42D6-9F83-3E2966140540@donhopkins.com>
+References: <mailman.2.1533693601.12251.tuhs@minnie.tuhs.org>
+ <DBB67EE8-D7D4-4622-BF04-6F037C7B2859@gmail.com>
+ <20180808123229.86FD5E465F@mailuser.nyi.internal>
+To: "Sijmen J. Mulder" <ik@sjmulder.nl>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] TUHS Digest, Vol 33, Issue 7
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: "tuhs@minnie.tuhs.org" <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--Apple-Mail=_9BF23242-BB6B-4631-A209-B0EF45F812BE
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+I strongly dislike something as trivial as a prompt taking up my TIME =
+and ATTENTION. I have room for many more lines in my terminal emulator =
+and emacs shell window than I have time and attention or patience for =
+carefully pointing and clicking and editing out prompts (or even talking =
+about half-assed kludges when there=E2=80=99s a simple obvious solution =
+to the problem), and much better things to do with my time and energy.=20=
+
+
+To me, there is virtually no cost to having an extra line in my terminal =
+or shell window, while the repeated cost of all the time and effort I =
+have to waste working around the clutter of the prompt, integrated over =
+the hundreds of times per day I use the command line, totally overwhelms =
+any aesthetic considerations of disliking prompts taking up a line (or =
+insisting on a clear line before it -- I don=E2=80=99t understand why =
+you would suggest such a straw man, which is not what I was advocating). =
+I=E2=80=99m not trying to paint the Mona Lisa in ASCII art, I=E2=80=99m =
+simply trying to save time and effort.=20
+
+What=E2=80=99s the downside to the prompt taking up a full line (and as =
+a result, the command taking up a whole line without being polluted with =
+a prompt), other than strongly disliking things you=E2=80=99re not used =
+to? Is your terminal emulator configured to only remember 24 lines? And =
+why are you so averse to clutter, yet have no problem with the prompt =
+cluttering up your input, which causes real non-aesthetic problems?=20
+
+I used to use a shitty HP 2640 terminal in high school that only had a =
+half a page of screen memory (but didn=E2=80=99t store the spaces at the =
+end of the lines, so you could fit 12 80-character lines on the screen, =
+or 24 40-character lines), so if you printed out long lines, it would =
+start scrolling before there was a full screen of text. At least the 300 =
+baud modem gave you time to ponder over those few lines before they =
+scrolled off the screen. In that scenario, lines of text were precious, =
+although the HP terminals charge by characters, not lines. But I don=E2=80=
+=99t think anybody in their right mind uses terminals like that any =
+more.=20
+
+-Don
+
+
+> On 8 Aug 2018, at 14:32, Sijmen J. Mulder <ik@sjmulder.nl> wrote:
+>=20
+> > Decades ago I made my prompt simply end with a newline, which =
+perfectly
+> > and cleanly solves the problem of making it easy to copy and paste a
+> > whole line
+> =20
+> I never considered setting a copy/paste-friendly prompt but I strongly
+> dislike prompts taking up a line. Admittedly it's nice to have some =
+room
+> for extra information but then you'll want a clear line above it too =
+for
+> visual structure and that's all just too much clutter for me.
+
+
+--Apple-Mail=_9BF23242-BB6B-4631-A209-B0EF45F812BE
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" class=3D"">I =
+strongly dislike something as trivial as a prompt taking up my TIME and =
+ATTENTION. I have room for many more lines in my terminal emulator and =
+emacs shell window than I have time and attention or patience for =
+carefully pointing and clicking and editing out prompts (or even talking =
+about half-assed kludges when there=E2=80=99s a simple obvious solution =
+to the problem), and much better things to do with my time and =
+energy.&nbsp;<div class=3D""><br class=3D""></div><div class=3D"">To me, =
+there is virtually no cost to having an extra line in my terminal or =
+shell window, while the repeated cost of all the time and effort I have =
+to waste working around the clutter of the prompt, integrated over the =
+hundreds of times per day I use the command line, totally overwhelms any =
+aesthetic considerations of disliking prompts taking up a line (or =
+insisting on a clear line before it -- I don=E2=80=99t understand why =
+you would suggest such a straw man, which is not what I was advocating). =
+I=E2=80=99m not trying to paint the Mona Lisa in ASCII art, I=E2=80=99m =
+simply trying to save time and effort.&nbsp;<div class=3D""><br =
+class=3D""></div><div class=3D"">What=E2=80=99s the downside to the =
+prompt taking up a full line (and as a result, the command taking up a =
+whole line without being polluted with a prompt), other than strongly =
+disliking things you=E2=80=99re not used to? Is your terminal emulator =
+configured to only remember 24 lines? And why are you so averse to =
+clutter, yet have no problem with the prompt cluttering up your input, =
+which causes real non-aesthetic problems?&nbsp;</div><div class=3D""><br =
+class=3D""></div><div class=3D"">I used to use a shitty HP 2640 terminal =
+in high school that only had a half a page of screen memory (but =
+didn=E2=80=99t store the spaces at the end of the lines, so you could =
+fit 12 80-character lines on the screen, or 24 40-character lines), so =
+if you printed out long lines, it would start scrolling before there was =
+a full screen of text. At least the 300 baud modem gave you time to =
+ponder over those few lines before they scrolled off the screen. In that =
+scenario, lines of text were precious, although the HP terminals charge =
+by characters, not lines. But I don=E2=80=99t think anybody in their =
+right mind uses terminals like that any more.&nbsp;</div><div =
+class=3D""><br class=3D""></div><div class=3D""><div =
+class=3D"">-Don</div><div class=3D""><br class=3D""><div><br =
+class=3D""><blockquote type=3D"cite" class=3D""><div class=3D"">On 8 Aug =
+2018, at 14:32, Sijmen J. Mulder &lt;<a href=3D"mailto:ik@sjmulder.nl" =
+class=3D"">ik@sjmulder.nl</a>&gt; wrote:</div><br =
+class=3D"Apple-interchange-newline"><div class=3D""><div =
+class=3D"WordSection1" style=3D"page: WordSection1; caret-color: rgb(0, =
+0, 0); font-family: LucidaSans; font-size: 16px; font-style: normal; =
+font-variant-caps: normal; font-weight: normal; letter-spacing: normal; =
+text-align: start; text-indent: 0px; text-transform: none; white-space: =
+normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
+text-decoration: none;"><div style=3D"margin: 0cm 0cm 0.0001pt; =
+font-size: 11pt; font-family: Calibri, sans-serif;" class=3D"">&gt; =
+Decades ago I made my prompt simply end with a newline, which =
+perfectly</div><div style=3D"margin: 0cm 0cm 0.0001pt; font-size: 11pt; =
+font-family: Calibri, sans-serif;" class=3D"">&gt; and cleanly solves =
+the problem of making it easy to copy and paste a</div><div =
+style=3D"margin: 0cm 0cm 0.0001pt; font-size: 11pt; font-family: =
+Calibri, sans-serif;" class=3D"">&gt; whole line</div><div =
+style=3D"margin: 0cm 0cm 0.0001pt; font-size: 11pt; font-family: =
+Calibri, sans-serif;" class=3D""><o:p class=3D"">&nbsp;</o:p></div><div =
+style=3D"margin: 0cm 0cm 0.0001pt; font-size: 11pt; font-family: =
+Calibri, sans-serif;" class=3D"">I never considered setting a =
+copy/paste-friendly prompt but I strongly</div><div style=3D"margin: 0cm =
+0cm 0.0001pt; font-size: 11pt; font-family: Calibri, sans-serif;" =
+class=3D"">dislike prompts taking up a line. Admittedly it's nice to =
+have some room</div><div style=3D"margin: 0cm 0cm 0.0001pt; font-size: =
+11pt; font-family: Calibri, sans-serif;" class=3D"">for extra =
+information but then you'll want a clear line above it too for</div><div =
+style=3D"margin: 0cm 0cm 0.0001pt; font-size: 11pt; font-family: =
+Calibri, sans-serif;" class=3D"">visual structure and that's all just =
+too much clutter for me.</div></div></div></blockquote></div><br =
+class=3D""></div></div></div></body></html>=
+
+--Apple-Mail=_9BF23242-BB6B-4631-A209-B0EF45F812BE--
