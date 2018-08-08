@@ -1,0 +1,1656 @@
+From tuhs-bounces@minnie.tuhs.org Wed Aug  8 12:12:46 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.9 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8003d737
+	for <ml@inbox.vuxu.org>;
+	Wed, 8 Aug 2018 12:12:45 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AF905A1A3C; Wed,  8 Aug 2018 22:12:44 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DCF6DA19CD;
+	Wed,  8 Aug 2018 22:10:45 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b=F6Njinae;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 758CCA19CD; Wed,  8 Aug 2018 22:10:42 +1000 (AEST)
+Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com
+ [209.85.208.53])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C134CA19CC
+ for <tuhs@minnie.tuhs.org>; Wed,  8 Aug 2018 22:10:37 +1000 (AEST)
+Received: by mail-ed1-f53.google.com with SMTP id e19-v6so1130017edq.7
+ for <tuhs@minnie.tuhs.org>; Wed, 08 Aug 2018 05:10:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=sender:from:mime-version:subject:date:references:to:in-reply-to
+ :message-id; bh=YK4wYGyklh/ptuWox65HTZEIIq3TElcW1BQYI2hTeYk=;
+ b=F6Njinae/yWmaajRNpg2HS0btjK23NSAjKhCE27SAxOfBazyGz6RwUQZnCYTO1n+u0
+ bG84OsswoFUoXR9fRK+X4JgXbvrYgoTqykFpH1plrtDWTvRDikOp1CcwTY6tlZ8Fx7ZF
+ b7OwvPlMKOOQQ6AmLIo1AhowvaLm2bD5ejdHaxYmP+nX/4H27gxKgEnNriM2a4PclzeK
+ pdgjS8Petadwc1HPF7RMn+pUeMZqrzCArkHNZXCz1A7y+b3ppoGeirV9Vfn72bHu0X6N
+ 1CihcVlz1Qyd0H/fy/k7+hfZ2Qmd4s2EvjOA78JuFBtYUGl71luHGuo9xsdvo7cvFMS9
+ TrSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:sender:from:mime-version:subject:date:references
+ :to:in-reply-to:message-id;
+ bh=YK4wYGyklh/ptuWox65HTZEIIq3TElcW1BQYI2hTeYk=;
+ b=cM2AVh4O8Iz+eGNa3qIqQlysNSnxNuaay6h7IIyL20qH1UtXrKpLr//dB/9oV4Kg2d
+ YRsyzB5QWLNAMredW+r3y6iN4xyO8law4JlSttZlfKHohyFrk+R2W8G+8cFZxRUNi5vs
+ 2cZMTfPtZYBgY4Lh+zvEwgcoyZftlUJZTHxwnt3c0UG/r5EiqF9v19JfyKPMeXI6k3/e
+ TFbLNTUz4hXFyr6vwlQObbvM9w0BcjTx1H5LYMF0TJFs4EC2nlXqXZXnjzMXAnIUpeRk
+ 2/JIJYg+FcpqWgyUMaSA7h08UqRIHjsnO9QUbjp/wjz8cyaXDsDdbkWOlh+aKWDTG4yL
+ Udbw==
+X-Gm-Message-State: AOUpUlEmr1UIUkG79EYTx7mk7fdSWdanOAh600A7hO6sbJTEwqMrfwlx
+ 5gvEBTwoGZP3Go4SHROsIrU10ZAb
+X-Google-Smtp-Source: AA+uWPyZt5KoZEIWNv18sWbwf0jCnJBcuGQKRHOXbVU54gayTg4j3U9lhdxiMm/nXVPJG0tDTAxGcA==
+X-Received: by 2002:a50:8921:: with SMTP id
+ e30-v6mr2976680ede.213.1533730235747; 
+ Wed, 08 Aug 2018 05:10:35 -0700 (PDT)
+Received: from [192.168.0.52] (i36138.upc-i.chello.nl. [62.195.36.138])
+ by smtp.gmail.com with ESMTPSA id b58-v6sm4399624ede.37.2018.08.08.05.10.33
+ for <tuhs@minnie.tuhs.org>
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Wed, 08 Aug 2018 05:10:34 -0700 (PDT)
+From: Don Hopkins <don@DonHopkins.com>
+X-Google-Original-From: Don Hopkins <SimHacker@gmail.com>
+Content-Type: multipart/alternative;
+ boundary="Apple-Mail=_671DFDFE-B9BD-4A37-87A5-907FB3046664"
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Date: Wed, 8 Aug 2018 14:10:32 +0200
+References: <mailman.2.1533693601.12251.tuhs@minnie.tuhs.org>
+To: tuhs@minnie.tuhs.org
+In-Reply-To: <mailman.2.1533693601.12251.tuhs@minnie.tuhs.org>
+Message-Id: <DBB67EE8-D7D4-4622-BF04-6F037C7B2859@gmail.com>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] TUHS Digest, Vol 33, Issue 7
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--Apple-Mail=_671DFDFE-B9BD-4A37-87A5-907FB3046664
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+Decades ago I made my prompt simply end with a newline, which perfectly =
+and cleanly solves the problem of making it easy to copy and paste a =
+whole line by multiple clicking in a terminal emulator to select the =
+line, or by using line oriented commands in an emacs shell (or moving to =
+the line and hitting return, which Emacs often regularly fucks up with =
+its idiotic kludges to identify the prompt with invisible marks and =
+regular expressions), without injecting any garbage characters into the =
+beginning of the command line or requiring any extra mouse clicks, =
+precision cursor targeting, or extra keystrokes.
+
+Using =E2=80=9C;=E2=80=9D or any other character as a prompt is an ugly =
+hack, and doesn=E2=80=99t solve the problem thoroughly or cleanly. No =
+matter what character you use as a prompt at the beginning of the line, =
+it=E2=80=99s going to cause some problems, like semicolons building up =
+each time you re-enter the line, or conflicts with built-in shell syntax =
+(retch!), so the only logical (and most obvious) solution is not to use =
+any characters at the beginning of the line at all, and just put the =
+prompt on a line above on its own. There is no downside to that, unless =
+it somehow offends your sense of aesthetics. (In which case you should =
+get over it.)=20
+
+That=E2=80=99s the cleanest solution without any unpleasant side =
+effects. I don=E2=80=99t understand why that solution isn=E2=80=99t the =
+first thing shell users think of, and the default used by the shell =E2=80=
+=94 it=E2=80=99s so obvious. Maybe because people used to the shell are =
+just so accustomed to having to deal with mashing together unpleasant =
+hackey kludgy incompatible competing ad-hoc syntax that it would never =
+occur to them that it=E2=80=99s possible to solve a problem by REMOVING =
+punctuation and noise characters instead of ADDING more of them.=20
+
+-Don
+
+
+> On 8 Aug 2018, at 04:00, tuhs-request@minnie.tuhs.org wrote:
+>=20
+> Send TUHS mailing list submissions to
+> 	tuhs@minnie.tuhs.org
+>=20
+> To subscribe or unsubscribe via the World Wide Web, visit
+> 	https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs
+> or, via email, send a message with subject or body 'help' to
+> 	tuhs-request@minnie.tuhs.org
+>=20
+> You can reach the person managing the list at
+> 	tuhs-owner@minnie.tuhs.org
+>=20
+> When replying, please edit your Subject line so it is more specific
+> than "Re: Contents of TUHS digest..."
+> Today's Topics:
+>=20
+>   1. Re: Origins of shell prompt suffixes % $ > # (Michael Kj=C3=B6rling=
+)
+>   2. Re: Origins of shell prompt suffixes % $ > # (Kurt H Maier)
+>   3. Re: Origins of shell prompt suffixes % $ > # (arnold@skeeve.com)
+>   4. Re: Origins of shell prompt suffixes % $ > # (Bakul Shah)
+>   5. Re: Origins of shell prompt suffixes % $ > # (Michael Kj=C3=B6rling=
+)
+>   6. Re: Origins of shell prompt suffixes % $ > # (Dave Horsfall)
+>   7. Re: Origins of shell prompt suffixes % $ > # (KatolaZ)
+>   8. Re: TUHS Digest, Vol 33, Issue 5 (Steve Johnson)
+>   9. Re: Origins of shell prompt suffixes % $ > # (Tony Finch)
+>  10. Re: Origins of shell prompt suffixes % $ > # (Pete Turnbull)
+>  11. Re: Origins of shell prompt suffixes % $ > # (Doug McIlroy)
+>  12. Re: Origins of shell prompt suffixes % $ > # (Brian Zick)
+>  13. Re: Origins of shell prompt suffixes % $ > # (John P. Linderman)
+>  14. Re: Origins of shell prompt suffixes % $ > # (Lyndon Nerenberg)
+>  15. Re: Origins of shell prompt suffixes % $ > # (C=C3=A1g)
+>  16. Re: Origins of shell prompt suffixes % $ > # (arnold@skeeve.com)
+>  17. Re: Origins of shell prompt suffixes % $ > # (C=C3=A1g)
+>  18. Re: Origins of shell prompt suffixes % $ > # (Brian Zick)
+>=20
+> From: Michael Kj=C3=B6rling <michael@kjorling.se>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 08:54:54 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On 6 Aug 2018 21:53 +0100, from brian@zick.io (Brian Zick):
+>> rc uses ;
+>=20
+> Not sure what came first, and not up to digging out the history books,
+> but these days, a plain `;` for a prompt has a distinct advantage in
+> that you can copy the whole line and paste it into another shell, and
+> the shell will do The Right Thing (tm) as long as (as is, I believe,
+> done by all of the major shells at least) it uses `;` for command
+> separation.
+>=20
+> --=20
+> Michael Kj=C3=B6rling =E2=80=A2 https://michael.kjorling.se =E2=80=A2 =
+michael@kjorling.se
+>  =E2=80=9CThe most dangerous thought that you can have as a creative =
+person
+>              is to think you know what you=E2=80=99re doing.=E2=80=9D =
+(Bret Victor)
+>=20
+>=20
+>=20
+>=20
+> From: Kurt H Maier <khm@sciops.net>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 09:31:36 CEST
+> To: Brian Zick <brian@zick.io>
+> Cc: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On Mon, Aug 06, 2018 at 09:53:33PM +0100, Brian Zick wrote:
+>>=20
+>> rc uses ;
+>=20
+> Does it?  10th edition Unix and Plan 9 rc both have ('% ' ' ') as the  =
+=20
+> default value of $prompt.  At least that's how it's described in the
+> manual.  None of the v8/9/10 tarballs in the archive contain rc code,
+> but some contain manual source, and those describe % prompts.
+>=20
+> I've seen other references to ; (presumably  ('; ' ' ')) as the rc=20
+> prompt but I've never seen it in the wild.  Does anyone here know what=20=
+
+> the story is?
+>=20
+> khm
+>=20
+>=20
+>=20
+>=20
+> From: arnold@skeeve.com
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 09:50:21 CEST
+> To: khm@sciops.net, brian@zick.io
+> Cc: tuhs@minnie.tuhs.org
+>=20
+>=20
+> Kurt H Maier <khm@sciops.net> wrote:
+>=20
+>> On Mon, Aug 06, 2018 at 09:53:33PM +0100, Brian Zick wrote:
+>>>=20
+>>> rc uses ;
+>>=20
+>> Does it?  10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+ =20
+>> default value of $prompt.  At least that's how it's described in the
+>> manual.  None of the v8/9/10 tarballs in the archive contain rc code,
+>> but some contain manual source, and those describe % prompts.
+>>=20
+>> I've seen other references to ; (presumably  ('; ' ' ')) as the rc=20
+>> prompt but I've never seen it in the wild.  Does anyone here know =
+what=20
+>> the story is?
+>>=20
+>> khm
+>=20
+> I believe that Tom Duff's rc does indeed use ('% ' ' '). But I think =
+that
+> Byron Rakitsis's version changed the default to ('; ' ' ') exactly for
+> the reason that it's copyable/pastable.
+>=20
+> HTH,
+>=20
+> Arnold
+>=20
+>=20
+>=20
+>=20
+> From: Bakul Shah <bakul@bitblocks.com>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 09:57:11 CEST
+> To: Kurt H Maier <khm@sciops.net>
+> Cc: Brian Zick <brian@zick.io>, tuhs@minnie.tuhs.org
+>=20
+>=20
+> On Tue, 07 Aug 2018 00:31:36 -0700 Kurt H Maier <khm@sciops.net> =
+wrote:
+>> On Mon, Aug 06, 2018 at 09:53:33PM +0100, Brian Zick wrote:
+>>>=20
+>>> rc uses ;
+>>=20
+>> Does it?  10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+ =20
+>> default value of $prompt.  At least that's how it's described in the
+>> manual.  None of the v8/9/10 tarballs in the archive contain rc code,
+>> but some contain manual source, and those describe % prompts.
+>>=20
+>> I've seen other references to ; (presumably  ('; ' ' ')) as the rc=20
+>> prompt but I've never seen it in the wild.  Does anyone here know =
+what=20
+>> the story is?
+>=20
+> The es shell (by Haar and Rakitzis) used ; - the reason (as
+> per the man page)is that a user can cut-n-paste a previous
+> line to rexecute it (for the same reason people use term% and
+> cpu% functions to execute their args).  Es syntax was derived
+> from rc, which may be why the confusion.
+>=20
+>=20
+>=20
+>=20
+> From: Michael Kj=C3=B6rling <michael@kjorling.se>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 10:02:56 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On 7 Aug 2018 06:54 +0000, from michael@kjorling.se (Michael =
+Kj=C3=B6rling):
+>> the shell will do The Right Thing (tm)
+>=20
+> I suspect I must stand corrected on this. Turns out that at least GNU
+> bash 4.4.12(1) seems to not like a `;` at the beginning of the command
+> line.
+>=20
+>    $ /bin/bash --version | head -n1
+>    GNU bash, version 4.4.12(1)-release (x86_64-pc-linux-gnu)
+>    $ /bin/bash
+>    $ ; true
+>    bash: syntax error near unexpected token `;'
+>    $ echo $?
+>    2
+>    $
+>=20
+> Hopefully other shells are more sane.
+>=20
+> --=20
+> Michael Kj=C3=B6rling =E2=80=A2 https://michael.kjorling.se =E2=80=A2 =
+michael@kjorling.se
+>  =E2=80=9CThe most dangerous thought that you can have as a creative =
+person
+>              is to think you know what you=E2=80=99re doing.=E2=80=9D =
+(Bret Victor)
+>=20
+>=20
+>=20
+>=20
+> From: Dave Horsfall <dave@horsfall.org>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 10:23:37 CEST
+> To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+>=20
+>=20
+> On Tue, 7 Aug 2018, Michael Kj=C3=B6rling wrote:
+>=20
+>> Hopefully other shells are more sane.
+>=20
+> The MacBook here runs GNU bash, version 3.2.57(1)-release =
+(x86_64-apple-darwin16) and is equally busted, as is plain "sh" on both =
+the Mac and FreeBSD (I can't be bothered checking the Penguin); I use =
+ZSH on FreeBSD and it does The Right Thing (tm), as does ZSH on the Mac.
+>=20
+> -- Dave
+>=20
+>=20
+> From: KatolaZ <katolaz@freaknet.org>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 10:37:23 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On Tue, Aug 07, 2018 at 06:23:37PM +1000, Dave Horsfall wrote:
+>> On Tue, 7 Aug 2018, Michael Kj=C3=B6rling wrote:
+>>=20
+>>> Hopefully other shells are more sane.
+>>=20
+>> The MacBook here runs GNU bash, version 3.2.57(1)-release
+>> (x86_64-apple-darwin16) and is equally busted, as is plain "sh" on =
+both the
+>> Mac and FreeBSD (I can't be bothered checking the Penguin); I use ZSH =
+on
+>> FreeBSD and it does The Right Thing (tm), as does ZSH on the Mac.
+>>=20
+>> -- Dave
+>=20
+> I have tried all the shells I have on my linux box. It turns out that
+> only ksh and zsh like a ";" at the beginning of the line. Otherwise,
+> bash, busybox, ash/dash, mksk, posh, and yash can't bear it.
+>=20
+> I really don't see the point of using ";", especially if you need to
+> make it clear if a command needs to be run by root.
+>=20
+> $ ;-P
+> sh: 1: Syntax error: ";" unexpected
+>=20
+>=20
+> --=20
+> [ ~.,_  Enzo Nicosia aka KatolaZ - Devuan -- Freaknet Medialab  ] =20
+> [     "+.  katolaz [at] freaknet.org --- katolaz [at] yahoo.it  ]
+> [       @)   http://kalos.mine.nu ---  Devuan GNU + Linux User  ]
+> [     @@)  http://maths.qmul.ac.uk/~vnicosia --  GPG: 0B5F062F  ]=20
+> [ (@@@)  Twitter: @KatolaZ - skype: katolaz -- github: KatolaZ  ]
+>=20
+>=20
+>=20
+> From: "Steve Johnson" <scj@yaccman.com>
+> Subject: Re: [TUHS] TUHS Digest, Vol 33, Issue 5
+> Date: 6 August 2018 at 23:19:31 CEST
+> To: "Hellwig Geisse" <hellwig.geisse@mni.thm.de>, tuhs@minnie.tuhs.org
+>=20
+>=20
+> I take a somewhat more relaxed view of what a spec should be:
+> It should describe a program with enough completeness that a competent
+> programmer could write it from the spec alone.
+> Each section of the spec should be capable of being tested.
+> If all the tests for all the sections pass, then the program is ready
+> for general use.
+>=20
+> The formal systems I have seen would roll over and die when presented =
+with
+> even a simple compiler.  Additionally, being able to specify that a =
+particular
+> function be carried out by a heapsort, for example, would require that =
+the
+> formalism could describe the heapsort and prove it correct.  These =
+don't
+> grow on trees...
+>=20
+> Steve
+>=20
+>=20
+>=20
+> ----- Original Message -----
+> From: "Hellwig Geisse" <hellwig.geisse@mni.thm.de>
+> To:<tuhs@minnie.tuhs.org>
+> Cc:
+> Sent:Mon, 06 Aug 2018 18:30:30 +0200
+> Subject:Re: [TUHS] TUHS Digest, Vol 33, Issue 5
+>=20
+>=20
+> On Mo, 2018-08-06 at 08:52 -0700, Bakul Shah wrote:
+> >=20
+> > What counts as a "formal spec"? Is it like Justice Potter Stewart's
+> > "I know it when I see it" definition or something better?
+> >=20
+>=20
+> For me, a "formal spec" should serve two goals:
+> 1) You can reason about the thing that is specified.
+> 2) The spec can be "executed" (i.e., there is an
+>    interpreting mechanism, which lets the spec behave
+>    like the real thing).
+>=20
+> Hellwig
+>=20
+>=20
+>=20
+> From: Tony Finch <dot@dotat.at>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 12:45:37 CEST
+> To: Michael Kj=C3=B6rling <michael@kjorling.se>
+> Cc: tuhs@minnie.tuhs.org
+>=20
+>=20
+> Michael Kj=C3=B6rling <michael@kjorling.se> wrote:
+>>=20
+>> I suspect I must stand corrected on this. Turns out that at least GNU
+>> bash 4.4.12(1) seems to not like a `;` at the beginning of the =
+command
+>> line.
+>=20
+> This is a consequence of the POSIX shell grammar, which doesn't allow
+> empty commands.
+>=20
+> =
+http://pubs.opengroup.org/onlinepubs/9699919799.2013edition/utilities/V3_c=
+hap02.html#tag_18_10
+>=20
+> The prompt I have used since about 1997 (and I can't remember where I =
+got
+> it from - somewhere on Usenet, probably) in its most distilled form is
+>=20
+> :;
+>=20
+> although in practice I have a load of extra fluff for username, =
+hostname,
+> CWD, etc. usw.
+>=20
+> Tony.
+> --=20
+> f.anthony.n.finch  <dot@dotat.at>  http://dotat.at/
+> Fair Isle, Faeroes: South or southwest 4 or 5, occasionally 6 for a =
+time.
+> Slight or moderate, occasionally rough for a time. Showers. Moderate =
+or good.
+>=20
+>=20
+>=20
+> From: Pete Turnbull <pete@dunnington.plus.com>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 13:24:20 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On 07/08/2018 09:02, Michael Kj=C3=B6rling wrote:
+>> On 7 Aug 2018 06:54 +0000, from michael@kjorling.se (Michael =
+Kj=C3=B6rling):
+>>> the shell will do The Right Thing (tm)
+>> I suspect I must stand corrected on this. Turns out that at least GNU
+>> bash 4.4.12(1) seems to not like a `;` at the beginning of the =
+command
+>> line.
+>>     $ /bin/bash --version | head -n1
+>>     GNU bash, version 4.4.12(1)-release (x86_64-pc-linux-gnu)
+>>     $ /bin/bash
+>>     $ ; true
+>>     bash: syntax error near unexpected token `;'
+>>     $ echo $?
+>>     2
+>>     $
+>> Hopefully other shells are more sane.
+>=20
+> ksh and sh on an IRIX system don't like it either:
+>=20
+> $ ;
+> ksh: syntax error: `;' unexpected
+> $
+>=20
+> csh and tcsh don't mind.
+>=20
+> Of course it works in rc itself, which is the point, really, and I =
+wonder how often anyone pasted from one shell into another.  All the rc =
+use I've seen did indeed use "; " as the prompt, but that was all at the =
+University of York, starting in 1993.
+>=20
+> --=20
+> Pete
+> Pete Turnbull
+>=20
+>=20
+>=20
+>=20
+> From: Doug McIlroy <doug@cs.dartmouth.edu>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 14:34:16 CEST
+> To: tuhs@tuhs.org
+>=20
+>=20
+>> The Bourne shell (V7) had setable PS1 (start of command) and PS2 =
+(continuation prompts)
+>=20
+> When PS2 came on the scene, Bob Morris noticed that it most often =
+appeared
+> because of a missing close quote. Therefore he set PS2=3D"hit =
+interrupt".
+>=20
+>=20
+>=20
+>=20
+> From: Brian Zick <brian@zick.io>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 17:15:07 CEST
+> To: Kurt H Maier <khm@sciops.net>
+> Cc: tuhs@minnie.tuhs.org
+>=20
+>=20
+>>> rc uses ;
+>>=20
+>> Does it?  10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+ =20
+>> default value of $prompt.  At least that's how it's described in the
+>> manual.=20
+>=20
+> In NetBSD 7 the default is ';', but I don't see any reference to a =
+default $prompt in the manual on that system. I wonder if this was a =
+change unique to Berkeley.
+>=20
+> B
+>=20
+>=20
+>=20
+>=20
+> From: "John P. Linderman" <jpl.jpl@gmail.com>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 17:52:57 CEST
+> To: Brian Zick <brian@zick.io>
+> Cc: Kurt H Maier <khm@sciops.net>, tuhs@minnie.tuhs.org
+>=20
+>=20
+> On vacation, with just an iPad keyboard, so I apologize for not doing =
+more digging.  As I noted, when taking the blame for the Great Echo =
+Schism, my early exposure to a hp2640 terminal that allowed =E2=80=9Crentr=
+y=E2=80=9D of a previous command was partly to blame. It also led me to =
+use a PS1 ending in @, the default line-kill. When I reentered a =
+command, the @ wiped out the prompt stuff, and only the command =
+survived.=20
+>=20
+> On Tue, Aug 7, 2018 at 10:15 AM Brian Zick <brian@zick.io =
+<mailto:brian@zick.io>> wrote:
+> > > rc uses ;
+> >       =20
+> > Does it?  10th edition Unix and Plan 9 rc both have ('% ' ' ') as =
+the  =20
+> > default value of $prompt.  At least that's how it's described in the
+> > manual.=20
+>=20
+> In NetBSD 7 the default is ';', but I don't see any reference to a =
+default $prompt in the manual on that system. I wonder if this was a =
+change unique to Berkeley.
+>=20
+> B
+>=20
+>=20
+>=20
+> From: Lyndon Nerenberg <lyndon@orthanc.ca>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 19:35:49 CEST
+> To: Tony Finch <dot@dotat.at>
+> Cc: Michael Kj=C3=B6rling <michael@kjorling.se>, tuhs@minnie.tuhs.org
+>=20
+>=20
+>> The prompt I have used since about 1997 (and I can't remember where I =
+got
+>> it from - somewhere on Usenet, probably) in its most distilled form =
+is
+>>=20
+>> :;
+>=20
+> I forget where I stole this from. It lives in $home/lib/profile on my =
+Plan9 machines:
+>=20
+> # /n/sources/contrib/lyndon/prompt.rc
+> fn : {}
+> fn setprompt {
+>        prompt =3D (': '^`{cat /dev/user}^@^`{cat =
+/dev/sysname}^':'^`{pwd}^'; '  '        ')
+> }
+> fn cd { builtin cd $* && setprompt }
+> setprompt
+>=20
+>=20
+>=20
+>=20
+>=20
+> From: C=C3=A1g <ca6c@bitmessage.ch>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 20:09:51 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> Brian Zick wrote:
+>=20
+>> In NetBSD 7 the default is ';', but I don't see any reference to a
+>> default $prompt in the manual on that system.
+>=20
+> It's not. '$' is default for sh and ksh, and '%' for csh. I think
+> it maybe has never been ';'.
+>=20
+> --
+> ca=C3=B3c
+>=20
+>=20
+>=20
+>=20
+>=20
+> From: arnold@skeeve.com
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 20:51:52 CEST
+> To: tuhs@minnie.tuhs.org, ca6c@bitmessage.ch
+>=20
+>=20
+> C??g <ca6c@bitmessage.ch> wrote:
+>=20
+>> Brian Zick wrote:
+>>=20
+>>> In NetBSD 7 the default is ';', but I don't see any reference to a
+>>> default $prompt in the manual on that system.
+>>=20
+>> It's not. '$' is default for sh and ksh, and '%' for csh. I think
+>> it maybe has never been ';'.
+>>=20
+>> --
+>> ca??c
+>>=20
+>=20
+> Brian was referring to rc(1) in NetBSD.  I suspect it's Byron's rc
+> and I think the default there is ';'.
+>=20
+> Arnold
+>=20
+>=20
+>=20
+>=20
+> From: C=C3=A1g <ca6c@bitmessage.ch>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 21:00:22 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> arnold wrote:
+>=20
+>> Brian was referring to rc(1) in NetBSD.  I suspect it's Byron's rc
+>> and I think the default there is ';'.
+>=20
+> rc is not shipped with NetBSD. There's Byron's rc in pkgsrc, so it =
+could
+> be that.
+>=20
+> --
+> ca=C3=B3c
+>=20
+>=20
+>=20
+>=20
+>=20
+> From: Brian Zick <brian@zick.io>
+> Subject: Re: [TUHS] Origins of shell prompt suffixes % $ > #
+> Date: 7 August 2018 at 21:06:03 CEST
+> To: tuhs@minnie.tuhs.org
+>=20
+>=20
+> On Tue, Aug 7, 2018, at 8:00 PM, C=C3=A1g wrote:
+>> arnold wrote:
+>>=20
+>>> Brian was referring to rc(1) in NetBSD.  I suspect it's Byron's rc
+>>> and I think the default there is ';'.
+>>=20
+>> rc is not shipped with NetBSD. There's Byron's rc in pkgsrc, so it =
+could
+>> be that.
+>=20
+> Yes, I was referring to the rc in pkgsrc.
+>=20
+> B
+>=20
+>=20
+>=20
+>=20
+>=20
+> _______________________________________________
+> TUHS mailing list
+> TUHS@minnie.tuhs.org
+> https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs
+
+
+--Apple-Mail=_671DFDFE-B9BD-4A37-87A5-907FB3046664
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D"">Decades ago I made my prompt simply end with a newline, which =
+perfectly and cleanly solves the problem of making it easy to copy and =
+paste a whole line by multiple clicking in a terminal emulator to select =
+the line, or by using line oriented commands in an emacs shell (or =
+moving to the line and hitting return, which Emacs often regularly fucks =
+up with its idiotic kludges to identify the prompt with invisible marks =
+and regular expressions), without injecting any garbage characters into =
+the beginning of the command line or requiring any extra mouse clicks, =
+precision cursor targeting, or extra keystrokes.<div class=3D""><br =
+class=3D""></div><div class=3D"">Using =E2=80=9C;=E2=80=9D or any other =
+character as a prompt is an ugly hack, and doesn=E2=80=99t solve the =
+problem thoroughly or cleanly. No matter what character you use as a =
+prompt at the beginning of the line, it=E2=80=99s going to cause some =
+problems, like semicolons building up each time you re-enter the line, =
+or conflicts with built-in shell syntax (retch!), so the only logical =
+(and most obvious) solution is not to use any characters at the =
+beginning of the line at all, and just put the prompt on a line above on =
+its own. There is no downside to that, unless it somehow offends your =
+sense of aesthetics. (In which case you should get over =
+it.)&nbsp;</div><div class=3D""><br class=3D""></div><div =
+class=3D"">That=E2=80=99s the cleanest solution without any unpleasant =
+side effects. I don=E2=80=99t understand why that solution isn=E2=80=99t =
+the first thing shell users think of, and the default used by the shell =
+=E2=80=94 it=E2=80=99s so obvious. Maybe because people used to the =
+shell are just so accustomed to having to deal with mashing together =
+unpleasant hackey kludgy incompatible competing ad-hoc syntax that it =
+would never occur to them that it=E2=80=99s possible to solve a problem =
+by REMOVING punctuation and noise characters instead of ADDING more of =
+them.&nbsp;</div><div class=3D""><br class=3D""></div><div class=3D""><div=
+ class=3D"">-Don</div><div class=3D""><br class=3D""><div><br =
+class=3D""><blockquote type=3D"cite" class=3D""><div class=3D"">On 8 Aug =
+2018, at 04:00, <a href=3D"mailto:tuhs-request@minnie.tuhs.org" =
+class=3D"">tuhs-request@minnie.tuhs.org</a> wrote:</div><br =
+class=3D"Apple-interchange-newline"><div class=3D"">Send TUHS mailing =
+list submissions to<br class=3D""><span class=3D"Apple-tab-span" =
+style=3D"white-space:pre">	</span><a =
+href=3D"mailto:tuhs@minnie.tuhs.org" =
+class=3D"">tuhs@minnie.tuhs.org</a><br class=3D""><br class=3D"">To =
+subscribe or unsubscribe via the World Wide Web, visit<br class=3D""><span=
+ class=3D"Apple-tab-span" style=3D"white-space:pre">	=
+</span>https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs<br =
+class=3D"">or, via email, send a message with subject or body 'help' =
+to<br class=3D""><span class=3D"Apple-tab-span" style=3D"white-space:pre">=
+	</span>tuhs-request@minnie.tuhs.org<br class=3D""><br =
+class=3D"">You can reach the person managing the list at<br =
+class=3D""><span class=3D"Apple-tab-span" style=3D"white-space:pre">	=
+</span>tuhs-owner@minnie.tuhs.org<br class=3D""><br class=3D"">When =
+replying, please edit your Subject line so it is more specific<br =
+class=3D"">than "Re: Contents of TUHS digest..."<br class=3D"">Today's =
+Topics:<br class=3D""><br class=3D""> &nbsp;&nbsp;1. Re: Origins of =
+shell prompt suffixes % $ &gt; # (Michael Kj=C3=B6rling)<br class=3D""> =
+&nbsp;&nbsp;2. Re: Origins of shell prompt suffixes % $ &gt; # (Kurt H =
+Maier)<br class=3D""> &nbsp;&nbsp;3. Re: Origins of shell prompt =
+suffixes % $ &gt; # (arnold@skeeve.com)<br class=3D""> &nbsp;&nbsp;4. =
+Re: Origins of shell prompt suffixes % $ &gt; # (Bakul Shah)<br =
+class=3D""> &nbsp;&nbsp;5. Re: Origins of shell prompt suffixes % $ &gt; =
+# (Michael Kj=C3=B6rling)<br class=3D""> &nbsp;&nbsp;6. Re: Origins of =
+shell prompt suffixes % $ &gt; # (Dave Horsfall)<br class=3D""> =
+&nbsp;&nbsp;7. Re: Origins of shell prompt suffixes % $ &gt; # =
+(KatolaZ)<br class=3D""> &nbsp;&nbsp;8. Re: TUHS Digest, Vol 33, Issue 5 =
+(Steve Johnson)<br class=3D""> &nbsp;&nbsp;9. Re: Origins of shell =
+prompt suffixes % $ &gt; # (Tony Finch)<br class=3D""> &nbsp;10. Re: =
+Origins of shell prompt suffixes % $ &gt; # (Pete Turnbull)<br class=3D"">=
+ &nbsp;11. Re: Origins of shell prompt suffixes % $ &gt; # (Doug =
+McIlroy)<br class=3D""> &nbsp;12. Re: Origins of shell prompt suffixes % =
+$ &gt; # (Brian Zick)<br class=3D""> &nbsp;13. Re: Origins of shell =
+prompt suffixes % $ &gt; # (John P. Linderman)<br class=3D""> &nbsp;14. =
+Re: Origins of shell prompt suffixes % $ &gt; # (Lyndon Nerenberg)<br =
+class=3D""> &nbsp;15. Re: Origins of shell prompt suffixes % $ &gt; # =
+(C=C3=A1g)<br class=3D""> &nbsp;16. Re: Origins of shell prompt suffixes =
+% $ &gt; # (arnold@skeeve.com)<br class=3D""> &nbsp;17. Re: Origins of =
+shell prompt suffixes % $ &gt; # (C=C3=A1g)<br class=3D""> &nbsp;18. Re: =
+Origins of shell prompt suffixes % $ &gt; # (Brian Zick)<br class=3D""><br=
+ class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Michael Kj=C3=B6rling &lt;michael@kjorling.se&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 08:54:54 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">On 6 Aug 2018 =
+21:53 +0100, from brian@zick.io (Brian Zick):<br class=3D""><blockquote =
+type=3D"cite" class=3D"">rc uses ;<br class=3D""></blockquote><br =
+class=3D"">Not sure what came first, and not up to digging out the =
+history books,<br class=3D"">but these days, a plain `;` for a prompt =
+has a distinct advantage in<br class=3D"">that you can copy the whole =
+line and paste it into another shell, and<br class=3D"">the shell will =
+do The Right Thing (tm) as long as (as is, I believe,<br class=3D"">done =
+by all of the major shells at least) it uses `;` for command<br =
+class=3D"">separation.<br class=3D""><br class=3D"">-- <br =
+class=3D"">Michael Kj=C3=B6rling =E2=80=A2 https://michael.kjorling.se =
+=E2=80=A2 michael@kjorling.se<br class=3D""> &nbsp;=E2=80=9CThe most =
+dangerous thought that you can have as a creative person<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&n=
+bsp;is to think you know what you=E2=80=99re doing.=E2=80=9D (Bret =
+Victor)<br class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Kurt H Maier &lt;khm@sciops.net&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 09:31:36 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Brian Zick =
+&lt;brian@zick.io&gt;<br class=3D""></span></div><div style=3D"margin-top:=
+ 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" =
+class=3D""><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif; color:rgba(127, 127, 127, 1.0);" =
+class=3D""><b class=3D"">Cc: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">tuhs@minnie.tuhs.org<br class=3D""></span></div><br =
+class=3D""><br class=3D"">On Mon, Aug 06, 2018 at 09:53:33PM +0100, =
+Brian Zick wrote:<br class=3D""><blockquote type=3D"cite" class=3D""><br =
+class=3D"">rc uses ;<br class=3D""></blockquote><br class=3D"">Does it? =
+&nbsp;10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+&nbsp;&nbsp;<br class=3D"">default value of $prompt. &nbsp;At least =
+that's how it's described in the<br class=3D"">manual. &nbsp;None of the =
+v8/9/10 tarballs in the archive contain rc code,<br class=3D"">but some =
+contain manual source, and those describe % prompts.<br class=3D""><br =
+class=3D"">I've seen other references to ; (presumably &nbsp;('; ' ' ')) =
+as the rc <br class=3D"">prompt but I've never seen it in the wild. =
+&nbsp;Does anyone here know what <br class=3D"">the story is?<br =
+class=3D""><br class=3D"">khm<br class=3D""><br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">arnold@skeeve.com<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Subject: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D""><b class=3D"">Re: [TUHS] =
+Origins of shell prompt suffixes % $ &gt; #</b><br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 09:50:21 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">khm@sciops.net, =
+brian@zick.io<br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Cc: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">Kurt H Maier =
+&lt;khm@sciops.net&gt; wrote:<br class=3D""><br class=3D""><blockquote =
+type=3D"cite" class=3D"">On Mon, Aug 06, 2018 at 09:53:33PM +0100, Brian =
+Zick wrote:<br class=3D""><blockquote type=3D"cite" class=3D""><br =
+class=3D"">rc uses ;<br class=3D""></blockquote><br class=3D"">Does it? =
+&nbsp;10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+&nbsp;&nbsp;<br class=3D"">default value of $prompt. &nbsp;At least =
+that's how it's described in the<br class=3D"">manual. &nbsp;None of the =
+v8/9/10 tarballs in the archive contain rc code,<br class=3D"">but some =
+contain manual source, and those describe % prompts.<br class=3D""><br =
+class=3D"">I've seen other references to ; (presumably &nbsp;('; ' ' ')) =
+as the rc <br class=3D"">prompt but I've never seen it in the wild. =
+&nbsp;Does anyone here know what <br class=3D"">the story is?<br =
+class=3D""><br class=3D"">khm<br class=3D""></blockquote><br class=3D"">I =
+believe that Tom Duff's rc does indeed use ('% ' ' '). But I think =
+that<br class=3D"">Byron Rakitsis's version changed the default to ('; ' =
+' ') exactly for<br class=3D"">the reason that it's =
+copyable/pastable.<br class=3D""><br class=3D"">HTH,<br class=3D""><br =
+class=3D"">Arnold<br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><br class=3D""><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Bakul Shah &lt;bakul@bitblocks.com&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 09:57:11 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Kurt H Maier =
+&lt;khm@sciops.net&gt;<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Cc: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Brian Zick =
+&lt;brian@zick.io&gt;, tuhs@minnie.tuhs.org<br class=3D""></span></div><br=
+ class=3D""><br class=3D"">On Tue, 07 Aug 2018 00:31:36 -0700 Kurt H =
+Maier &lt;khm@sciops.net&gt; wrote:<br class=3D""><blockquote =
+type=3D"cite" class=3D"">On Mon, Aug 06, 2018 at 09:53:33PM +0100, Brian =
+Zick wrote:<br class=3D""><blockquote type=3D"cite" class=3D""><br =
+class=3D"">rc uses ;<br class=3D""></blockquote><br class=3D"">Does it? =
+&nbsp;10th edition Unix and Plan 9 rc both have ('% ' ' ') as the =
+&nbsp;&nbsp;<br class=3D"">default value of $prompt. &nbsp;At least =
+that's how it's described in the<br class=3D"">manual. &nbsp;None of the =
+v8/9/10 tarballs in the archive contain rc code,<br class=3D"">but some =
+contain manual source, and those describe % prompts.<br class=3D""><br =
+class=3D"">I've seen other references to ; (presumably &nbsp;('; ' ' ')) =
+as the rc <br class=3D"">prompt but I've never seen it in the wild. =
+&nbsp;Does anyone here know what <br class=3D"">the story is?<br =
+class=3D""></blockquote><br class=3D"">The es shell (by Haar and =
+Rakitzis) used ; - the reason (as<br class=3D"">per the man page)is that =
+a user can cut-n-paste a previous<br class=3D"">line to rexecute it (for =
+the same reason people use term% and<br class=3D"">cpu% functions to =
+execute their args). &nbsp;Es syntax was derived<br class=3D"">from rc, =
+which may be why the confusion.<br class=3D""><br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Michael Kj=C3=B6rling &lt;michael@kjorling.se&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 10:02:56 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">On 7 Aug 2018 =
+06:54 +0000, from michael@kjorling.se (Michael Kj=C3=B6rling):<br =
+class=3D""><blockquote type=3D"cite" class=3D"">the shell will do The =
+Right Thing (tm)<br class=3D""></blockquote><br class=3D"">I suspect I =
+must stand corrected on this. Turns out that at least GNU<br =
+class=3D"">bash 4.4.12(1) seems to not like a `;` at the beginning of =
+the command<br class=3D"">line.<br class=3D""><br class=3D""> =
+&nbsp;&nbsp;&nbsp;$ /bin/bash --version | head -n1<br class=3D""> =
+&nbsp;&nbsp;&nbsp;GNU bash, version 4.4.12(1)-release =
+(x86_64-pc-linux-gnu)<br class=3D""> &nbsp;&nbsp;&nbsp;$ /bin/bash<br =
+class=3D""> &nbsp;&nbsp;&nbsp;$ ; true<br class=3D""> =
+&nbsp;&nbsp;&nbsp;bash: syntax error near unexpected token `;'<br =
+class=3D""> &nbsp;&nbsp;&nbsp;$ echo $?<br class=3D""> =
+&nbsp;&nbsp;&nbsp;2<br class=3D""> &nbsp;&nbsp;&nbsp;$<br class=3D""><br =
+class=3D"">Hopefully other shells are more sane.<br class=3D""><br =
+class=3D"">-- <br class=3D"">Michael Kj=C3=B6rling =E2=80=A2 =
+https://michael.kjorling.se =E2=80=A2 michael@kjorling.se<br class=3D""> =
+&nbsp;=E2=80=9CThe most dangerous thought that you can have as a =
+creative person<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&n=
+bsp;is to think you know what you=E2=80=99re doing.=E2=80=9D (Bret =
+Victor)<br class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Dave Horsfall &lt;dave@horsfall.org&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 10:23:37 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">The Eunuchs Hysterical Society =
+&lt;tuhs@tuhs.org&gt;<br class=3D""></span></div><br class=3D""><br =
+class=3D"">On Tue, 7 Aug 2018, Michael Kj=C3=B6rling wrote:<br =
+class=3D""><br class=3D""><blockquote type=3D"cite" class=3D"">Hopefully =
+other shells are more sane.<br class=3D""></blockquote><br class=3D"">The =
+MacBook here runs GNU bash, version 3.2.57(1)-release =
+(x86_64-apple-darwin16) and is equally busted, as is plain "sh" on both =
+the Mac and FreeBSD (I can't be bothered checking the Penguin); I use =
+ZSH on FreeBSD and it does The Right Thing (tm), as does ZSH on the =
+Mac.<br class=3D""><br class=3D"">-- Dave<br class=3D""><br class=3D""><br=
+ class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">KatolaZ &lt;katolaz@freaknet.org&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 10:37:23 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">On Tue, Aug 07, =
+2018 at 06:23:37PM +1000, Dave Horsfall wrote:<br class=3D""><blockquote =
+type=3D"cite" class=3D"">On Tue, 7 Aug 2018, Michael Kj=C3=B6rling =
+wrote:<br class=3D""><br class=3D""><blockquote type=3D"cite" =
+class=3D"">Hopefully other shells are more sane.<br =
+class=3D""></blockquote><br class=3D"">The MacBook here runs GNU bash, =
+version 3.2.57(1)-release<br class=3D"">(x86_64-apple-darwin16) and is =
+equally busted, as is plain "sh" on both the<br class=3D"">Mac and =
+FreeBSD (I can't be bothered checking the Penguin); I use ZSH on<br =
+class=3D"">FreeBSD and it does The Right Thing (tm), as does ZSH on the =
+Mac.<br class=3D""><br class=3D"">-- Dave<br class=3D""></blockquote><br =
+class=3D"">I have tried all the shells I have on my linux box. It turns =
+out that<br class=3D"">only ksh and zsh like a ";" at the beginning of =
+the line. Otherwise,<br class=3D"">bash, busybox, ash/dash, mksk, posh, =
+and yash can't bear it.<br class=3D""><br class=3D"">I really don't see =
+the point of using ";", especially if you need to<br class=3D"">make it =
+clear if a command needs to be run by root.<br class=3D""><br class=3D"">$=
+ ;-P<br class=3D"">sh: 1: Syntax error: ";" unexpected<br class=3D""><br =
+class=3D""><br class=3D"">-- <br class=3D"">[ ~.,_ &nbsp;Enzo Nicosia =
+aka KatolaZ - Devuan -- Freaknet Medialab &nbsp;] &nbsp;<br class=3D"">[ =
+&nbsp;&nbsp;&nbsp;&nbsp;"+. &nbsp;katolaz [at] freaknet.org --- katolaz =
+[at] yahoo.it &nbsp;]<br class=3D"">[ =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@) &nbsp;&nbsp;http://kalos.mine.nu =
+--- &nbsp;Devuan GNU + Linux User &nbsp;]<br class=3D"">[ =
+&nbsp;&nbsp;&nbsp;&nbsp;@@) &nbsp;http://maths.qmul.ac.uk/~vnicosia -- =
+&nbsp;GPG: 0B5F062F &nbsp;] <br class=3D"">[ (@@@) &nbsp;Twitter: =
+@KatolaZ - skype: katolaz -- github: KatolaZ &nbsp;]<br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">"Steve Johnson" &lt;scj@yaccman.com&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] TUHS Digest, Vol 33, Issue 5</b><br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">6 =
+August 2018 at 23:19:31 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">"Hellwig Geisse" =
+&lt;hellwig.geisse@mni.thm.de&gt;, tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D""><div =
+style=3D"font-family: Helvetica,Arial,sans-serif; font-size: 12px;" =
+class=3D""><div class=3D"">I take a somewhat more relaxed view of what a =
+spec should be:</div><div class=3D"">It should describe a program with =
+enough completeness that a competent</div><div class=3D"">programmer =
+could write it from the spec alone.</div><div class=3D"">Each section of =
+the spec should be capable of being tested.</div><div class=3D"">If all =
+the tests for all the sections pass, then the program is ready</div><div =
+class=3D"">for general use.</div><div class=3D""><br class=3D""></div><div=
+ class=3D"">The formal systems I have seen would roll over and die when =
+presented with</div><div class=3D"">even a simple compiler.&nbsp; =
+Additionally, being able to specify that a particular</div><div =
+class=3D"">function be carried out by a heapsort, for example, would =
+require that the</div><div class=3D"">formalism could describe the =
+heapsort and prove it correct.&nbsp; These don't</div><div class=3D"">grow=
+ on trees...<br class=3D""></div><div class=3D""><br class=3D""></div><div=
+ class=3D"">Steve<br class=3D""></div><br class=3D""><br =
+class=3D""><blockquote class=3D"atmailquote"><br class=3D"">----- =
+Original Message -----<br class=3D""><div id=3D"origionalMessageFromField"=
+ style=3D"width:100%;display:inline;background:rgb(228,228,228);" =
+class=3D""><div style=3D"display:inline;font-weight:bold;" =
+class=3D"">From:</div> "Hellwig Geisse" =
+&lt;hellwig.geisse@mni.thm.de&gt;</div><br class=3D""><div =
+id=3D"origionalMessageToField" style=3D"display:inline;font-weight:bold;" =
+class=3D"">To:</div>&lt;tuhs@minnie.tuhs.org&gt;<br class=3D""><div =
+id=3D"origionalMessageSentField" =
+style=3D"display:inline;font-weight:bold;" class=3D"">Cc:</div><br =
+class=3D""><div style=3D"display:inline;font-weight:bold;" =
+class=3D"">Sent:</div>Mon, 06 Aug 2018 18:30:30 +0200<br class=3D""><div =
+id=3D"origionalMessageSubjectField" =
+style=3D"display:inline;font-weight:bold;" class=3D"">Subject:</div>Re: =
+[TUHS] TUHS Digest, Vol 33, Issue 5<br class=3D""><br class=3D""><br =
+class=3D"">
+On Mo, 2018-08-06 at 08:52 -0700, Bakul Shah wrote:<br class=3D"">
+&gt; <br class=3D"">
+&gt; What counts as a "formal spec"? Is it like Justice Potter =
+Stewart's<br class=3D"">
+&gt; "I know it when I see it" definition or something better?<br =
+class=3D"">
+&gt; <br class=3D""><br class=3D"">
+For me, a "formal spec" should serve two goals:<br class=3D"">
+1) You can reason about the thing that is specified.<br class=3D"">
+2) The spec can be "executed" (i.e., there is an<br class=3D"">
+&nbsp; &nbsp;interpreting mechanism, which lets the spec behave<br =
+class=3D"">
+&nbsp; &nbsp;like the real thing).<br class=3D""><br class=3D"">
+Hellwig<br class=3D""></blockquote></div>
+<br class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: =
+0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" =
+class=3D""><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif; color:rgba(127, 127, 127, 1.0);" =
+class=3D""><b class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Tony Finch &lt;dot@dotat.at&gt;<br class=3D""></span></div><div=
+ style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Subject: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D""><b class=3D"">Re: [TUHS] =
+Origins of shell prompt suffixes % $ &gt; #</b><br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 12:45:37 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Michael Kj=C3=B6rling =
+&lt;michael@kjorling.se&gt;<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Cc: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">Michael Kj=C3=B6rlin=
+g &lt;michael@kjorling.se&gt; wrote:<br class=3D""><blockquote =
+type=3D"cite" class=3D""><br class=3D"">I suspect I must stand corrected =
+on this. Turns out that at least GNU<br class=3D"">bash 4.4.12(1) seems =
+to not like a `;` at the beginning of the command<br class=3D"">line.<br =
+class=3D""></blockquote><br class=3D"">This is a consequence of the =
+POSIX shell grammar, which doesn't allow<br class=3D"">empty =
+commands.<br class=3D""><br =
+class=3D"">http://pubs.opengroup.org/onlinepubs/9699919799.2013edition/uti=
+lities/V3_chap02.html#tag_18_10<br class=3D""><br class=3D"">The prompt =
+I have used since about 1997 (and I can't remember where I got<br =
+class=3D"">it from - somewhere on Usenet, probably) in its most =
+distilled form is<br class=3D""><br class=3D"">:;<br class=3D""><br =
+class=3D"">although in practice I have a load of extra fluff for =
+username, hostname,<br class=3D"">CWD, etc. usw.<br class=3D""><br =
+class=3D"">Tony.<br class=3D"">-- <br class=3D"">f.anthony.n.finch =
+&nbsp;&lt;dot@dotat.at&gt; &nbsp;http://dotat.at/<br class=3D"">Fair =
+Isle, Faeroes: South or southwest 4 or 5, occasionally 6 for a time.<br =
+class=3D"">Slight or moderate, occasionally rough for a time. Showers. =
+Moderate or good.<br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Pete Turnbull &lt;pete@dunnington.plus.com&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 13:24:20 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">On 07/08/2018 =
+09:02, Michael Kj=C3=B6rling wrote:<br class=3D""><blockquote =
+type=3D"cite" class=3D"">On 7 Aug 2018 06:54 +0000, from =
+michael@kjorling.se (Michael Kj=C3=B6rling):<br class=3D""><blockquote =
+type=3D"cite" class=3D"">the shell will do The Right Thing (tm)<br =
+class=3D""></blockquote>I suspect I must stand corrected on this. Turns =
+out that at least GNU<br class=3D"">bash 4.4.12(1) seems to not like a =
+`;` at the beginning of the command<br class=3D"">line.<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;$ /bin/bash --version | head -n1<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;GNU bash, version 4.4.12(1)-release =
+(x86_64-pc-linux-gnu)<br class=3D""> &nbsp;&nbsp;&nbsp;&nbsp;$ =
+/bin/bash<br class=3D""> &nbsp;&nbsp;&nbsp;&nbsp;$ ; true<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;bash: syntax error near unexpected token `;'<br =
+class=3D""> &nbsp;&nbsp;&nbsp;&nbsp;$ echo $?<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;2<br class=3D""> &nbsp;&nbsp;&nbsp;&nbsp;$<br =
+class=3D"">Hopefully other shells are more sane.<br =
+class=3D""></blockquote><br class=3D"">ksh and sh on an IRIX system =
+don't like it either:<br class=3D""><br class=3D"">$ ;<br class=3D"">ksh: =
+syntax error: `;' unexpected<br class=3D"">$<br class=3D""><br =
+class=3D"">csh and tcsh don't mind.<br class=3D""><br class=3D"">Of =
+course it works in rc itself, which is the point, really, and I wonder =
+how often anyone pasted from one shell into another. &nbsp;All the rc =
+use I've seen did indeed use "; " as the prompt, but that was all at the =
+University of York, starting in 1993.<br class=3D""><br class=3D"">-- =
+<br class=3D"">Pete<br class=3D"">Pete Turnbull<br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">From: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Doug McIlroy =
+&lt;doug@cs.dartmouth.edu&gt;<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Subject: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D""><b class=3D"">Re: [TUHS] =
+Origins of shell prompt suffixes % $ &gt; #</b><br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 14:34:16 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D""><blockquote =
+type=3D"cite" class=3D"">The Bourne shell (V7) had setable PS1 (start of =
+command) and PS2 (continuation prompts)<br class=3D""></blockquote><br =
+class=3D"">When PS2 came on the scene, Bob Morris noticed that it most =
+often appeared<br class=3D"">because of a missing close quote. Therefore =
+he set PS2=3D"hit interrupt".<br class=3D""><br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Brian Zick &lt;brian@zick.io&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 17:15:07 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Kurt H Maier =
+&lt;khm@sciops.net&gt;<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Cc: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D""><blockquote =
+type=3D"cite" class=3D""><blockquote type=3D"cite" class=3D"">rc uses =
+;<br class=3D""></blockquote><br class=3D"">Does it? &nbsp;10th edition =
+Unix and Plan 9 rc both have ('% ' ' ') as the &nbsp;&nbsp;<br =
+class=3D"">default value of $prompt. &nbsp;At least that's how it's =
+described in the<br class=3D"">manual. <br class=3D""></blockquote><br =
+class=3D"">In NetBSD 7 the default is ';', but I don't see any reference =
+to a default $prompt in the manual on that system. I wonder if this was =
+a change unique to Berkeley.<br class=3D""><br class=3D"">B<br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">"John P. Linderman" &lt;jpl.jpl@gmail.com&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 17:52:57 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Brian Zick =
+&lt;brian@zick.io&gt;<br class=3D""></span></div><div style=3D"margin-top:=
+ 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" =
+class=3D""><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif; color:rgba(127, 127, 127, 1.0);" =
+class=3D""><b class=3D"">Cc: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Kurt H Maier &lt;khm@sciops.net&gt;, tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D""><div class=3D""><div=
+ dir=3D"auto" class=3D"">On vacation, with just an iPad keyboard, so I =
+apologize for not doing more digging.&nbsp; As I noted, when taking the =
+blame for the Great Echo Schism, my early exposure to a hp2640 terminal =
+that allowed =E2=80=9Crentry=E2=80=9D of a previous command was partly =
+to blame. It also led me to use a PS1 ending in @, the default =
+line-kill. When I reentered a command, the @ wiped out the prompt stuff, =
+and only the command survived.&nbsp;</div></div><div class=3D""><br =
+class=3D""><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"">On =
+Tue, Aug 7, 2018 at 10:15 AM Brian Zick &lt;<a =
+href=3D"mailto:brian@zick.io" class=3D"">brian@zick.io</a>&gt; wrote:<br =
+class=3D""></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 =
+.8ex;border-left:1px #ccc solid;padding-left:1ex">&gt; &gt; rc uses ;<br =
+class=3D"">
+&gt;&nbsp; &nbsp; &nbsp; &nbsp; <br class=3D"">
+&gt; Does it?&nbsp; 10th edition Unix and Plan 9 rc both have ('% ' ' ') =
+as the&nbsp; &nbsp;<br class=3D"">
+&gt; default value of $prompt.&nbsp; At least that's how it's described =
+in the<br class=3D"">
+&gt; manual. <br class=3D"">
+<br class=3D"">
+In NetBSD 7 the default is ';', but I don't see any reference to a =
+default $prompt in the manual on that system. I wonder if this was a =
+change unique to Berkeley.<br class=3D"">
+<br class=3D"">
+B<br class=3D"">
+</blockquote></div></div>
+<br class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: =
+0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" =
+class=3D""><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif; color:rgba(127, 127, 127, 1.0);" =
+class=3D""><b class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Lyndon Nerenberg &lt;lyndon@orthanc.ca&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 19:35:49 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">Tony Finch =
+&lt;dot@dotat.at&gt;<br class=3D""></span></div><div style=3D"margin-top: =
+0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" =
+class=3D""><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif; color:rgba(127, 127, 127, 1.0);" =
+class=3D""><b class=3D"">Cc: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Michael Kj=C3=B6rling &lt;michael@kjorling.se&gt;, =
+tuhs@minnie.tuhs.org<br class=3D""></span></div><br class=3D""><br =
+class=3D""><blockquote type=3D"cite" class=3D"">The prompt I have used =
+since about 1997 (and I can't remember where I got<br class=3D"">it from =
+- somewhere on Usenet, probably) in its most distilled form is<br =
+class=3D""><br class=3D"">:;<br class=3D""></blockquote><br class=3D"">I =
+forget where I stole this from. It lives in $home/lib/profile on my =
+Plan9 machines:<br class=3D""><br class=3D""># =
+/n/sources/contrib/lyndon/prompt.rc<br class=3D"">fn : {}<br class=3D"">fn=
+ setprompt {<br class=3D""> =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prompt =3D (': '^`{cat =
+/dev/user}^@^`{cat /dev/sysname}^':'^`{pwd}^'; ' &nbsp;' =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')<br class=3D"">}<br =
+class=3D"">fn cd { builtin cd $* &amp;&amp; setprompt }<br =
+class=3D"">setprompt<br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">C=C3=A1g &lt;ca6c@bitmessage.ch&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 20:09:51 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">Brian Zick =
+wrote:<br class=3D""><br class=3D""><blockquote type=3D"cite" =
+class=3D"">In NetBSD 7 the default is ';', but I don't see any reference =
+to a<br class=3D"">default $prompt in the manual on that system.<br =
+class=3D""></blockquote><br class=3D"">It's not. '$' is default for sh =
+and ksh, and '%' for csh. I think<br class=3D"">it maybe has never been =
+';'.<br class=3D""><br class=3D"">--<br class=3D"">ca=C3=B3c<br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><br class=3D""><br=
+ class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">arnold@skeeve.com<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">Subject: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D""><b class=3D"">Re: [TUHS] =
+Origins of shell prompt suffixes % $ &gt; #</b><br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 20:51:52 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org, =
+ca6c@bitmessage.ch<br class=3D""></span></div><br class=3D""><br =
+class=3D"">C??g &lt;ca6c@bitmessage.ch&gt; wrote:<br class=3D""><br =
+class=3D""><blockquote type=3D"cite" class=3D"">Brian Zick wrote:<br =
+class=3D""><br class=3D""><blockquote type=3D"cite" class=3D"">In NetBSD =
+7 the default is ';', but I don't see any reference to a<br =
+class=3D"">default $prompt in the manual on that system.<br =
+class=3D""></blockquote><br class=3D"">It's not. '$' is default for sh =
+and ksh, and '%' for csh. I think<br class=3D"">it maybe has never been =
+';'.<br class=3D""><br class=3D"">--<br class=3D"">ca??c<br class=3D""><br=
+ class=3D""></blockquote><br class=3D"">Brian was referring to rc(1) in =
+NetBSD. &nbsp;I suspect it's Byron's rc<br class=3D"">and I think the =
+default there is ';'.<br class=3D""><br class=3D"">Arnold<br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">C=C3=A1g &lt;ca6c@bitmessage.ch&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 21:00:22 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">arnold wrote:<br =
+class=3D""><br class=3D""><blockquote type=3D"cite" class=3D"">Brian was =
+referring to rc(1) in NetBSD. &nbsp;I suspect it's Byron's rc<br =
+class=3D"">and I think the default there is ';'.<br =
+class=3D""></blockquote><br class=3D"">rc is not shipped with NetBSD. =
+There's Byron's rc in pkgsrc, so it could<br class=3D"">be that.<br =
+class=3D""><br class=3D"">--<br class=3D"">ca=C3=B3c<br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D""><div style=3D"margin-top: 0px; margin-right: 0px; =
+margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">From: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" =
+class=3D"">Brian Zick &lt;brian@zick.io&gt;<br =
+class=3D""></span></div><div style=3D"margin-top: 0px; margin-right: =
+0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span =
+style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Subject: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D""><b=
+ class=3D"">Re: [TUHS] Origins of shell prompt suffixes % $ &gt; =
+#</b><br class=3D""></span></div><div style=3D"margin-top: 0px; =
+margin-right: 0px; margin-bottom: 0px; margin-left: 0px;" class=3D""><span=
+ style=3D"font-family: -webkit-system-font, Helvetica Neue, Helvetica, =
+sans-serif; color:rgba(127, 127, 127, 1.0);" class=3D""><b =
+class=3D"">Date: </b></span><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif;" class=3D"">7 =
+August 2018 at 21:06:03 CEST<br class=3D""></span></div><div =
+style=3D"margin-top: 0px; margin-right: 0px; margin-bottom: 0px; =
+margin-left: 0px;" class=3D""><span style=3D"font-family: =
+-webkit-system-font, Helvetica Neue, Helvetica, sans-serif; =
+color:rgba(127, 127, 127, 1.0);" class=3D""><b class=3D"">To: =
+</b></span><span style=3D"font-family: -webkit-system-font, Helvetica =
+Neue, Helvetica, sans-serif;" class=3D"">tuhs@minnie.tuhs.org<br =
+class=3D""></span></div><br class=3D""><br class=3D"">On Tue, Aug 7, =
+2018, at 8:00 PM, C=C3=A1g wrote:<br class=3D""><blockquote type=3D"cite" =
+class=3D"">arnold wrote:<br class=3D""><br class=3D""><blockquote =
+type=3D"cite" class=3D"">Brian was referring to rc(1) in NetBSD. &nbsp;I =
+suspect it's Byron's rc<br class=3D"">and I think the default there is =
+';'.<br class=3D""></blockquote><br class=3D"">rc is not shipped with =
+NetBSD. There's Byron's rc in pkgsrc, so it could<br class=3D"">be =
+that.<br class=3D""></blockquote><br class=3D"">Yes, I was referring to =
+the rc in pkgsrc.<br class=3D""><br class=3D"">B<br class=3D""><br =
+class=3D""><br class=3D""><br class=3D""><br class=3D""><br =
+class=3D"">_______________________________________________<br =
+class=3D"">TUHS mailing list<br class=3D"">TUHS@minnie.tuhs.org<br =
+class=3D"">https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs</div></bl=
+ockquote></div><br class=3D""></div></div></body></html>=
+
+--Apple-Mail=_671DFDFE-B9BD-4A37-87A5-907FB3046664--
