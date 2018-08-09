@@ -1,0 +1,165 @@
+From tuhs-bounces@minnie.tuhs.org Thu Aug  9 12:36:51 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.9 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 9307a5fc
+	for <ml@inbox.vuxu.org>;
+	Thu, 9 Aug 2018 12:36:50 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id ED5F6A1CC4; Thu,  9 Aug 2018 22:36:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0024EA19D7;
+	Thu,  9 Aug 2018 22:36:39 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b=IBy4BLpj;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B76BCA19D7; Thu,  9 Aug 2018 22:36:38 +1000 (AEST)
+Received: from mail-io0-f180.google.com (mail-io0-f180.google.com
+ [209.85.223.180])
+ by minnie.tuhs.org (Postfix) with ESMTPS id EE963A19CD
+ for <tuhs@minnie.tuhs.org>; Thu,  9 Aug 2018 22:36:37 +1000 (AEST)
+Received: by mail-io0-f180.google.com with SMTP id q4-v6so4598188iob.8
+ for <tuhs@minnie.tuhs.org>; Thu, 09 Aug 2018 05:36:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=gxKgOPKru3CR8HIOJG9Es+DxG3mUWmMeFEuYH62m2NE=;
+ b=IBy4BLpjzPMsLudEwgqvYFFORJEzxjnqiiiF/m93EO7Is1j+LawBmys5z6PvbeM2ls
+ WDCaNn23mRLti/h3jasCiZA15Qqz1ht7Nq17HgyyqeX3HYMWzt5qejoiOJKt0StVSSjQ
+ IQAF/vV8GuUYZyHTHoNhuBRRhQSQjvpkNIVyD99DWrbOcKB8NKdXwAH+uaR9qG4TKphF
+ uzEY0nJspbduxiAH7y7oVZgu1IVYbfZctlKGI02/cxfqFDs9R0MrjJaF9bHIhO6hwgRJ
+ XwQZ+Ne7AbcRfFP2/iljZ1BiV/L5/9+K1AK3YOG7Q+D6ViuZ4xupI5SWom7b9z5beRrg
+ kvag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=gxKgOPKru3CR8HIOJG9Es+DxG3mUWmMeFEuYH62m2NE=;
+ b=Nl3wZKYsEyY6zf1O8/P5IDsksgt4i1h6a9Ilmi4U9E3mf3QYwQ9KOpJFa+LI5ShXS4
+ a6rZR/kkmXWhkvT+dGLwtEpjqc+VLsTFURyuAWjYvKpMTEMDHGaavR1XTtELyPyRR1kd
+ s73Gw5Dwrw4NJrg2IOaj8yUh5rk2q5uPUzhncBNtsx1NjZ1l8I9XzTr+NKgrJh18Cj/5
+ 0nmCS+bcYgxBYh37S5jb/VRCIvzgW4bH7vfg0Ts7O4r7sQ0RGbKWAHlNJLOP1FKbqr4G
+ qA0a5vZ67pqHsaITqman8AVLFHm0k1Uf8aFX5gZ3BZPUtJY/QgvkLyoA7JTnOXFG9s0T
+ /26A==
+X-Gm-Message-State: AOUpUlGIjYoTlAsytNm+ZHyEiXFmiORfo96fxz6MNoAfiL0wsR1JxyxW
+ IXlu2hK3p9aNrPdmpk1EdgRq4/7wYn3iFB23bkkT0w==
+X-Google-Smtp-Source: AA+uWPwoGOYxHXSmx/QlMZ3unEfx2b51DpRTd0UJu/qVJk1UzjHmm3ANMbd5yJbzb9u+o7T2KAtpr/PRheJIKsmz8bY=
+X-Received: by 2002:a6b:f70f:: with SMTP id
+ k15-v6mr1565061iog.37.1533818197198; 
+ Thu, 09 Aug 2018 05:36:37 -0700 (PDT)
+MIME-Version: 1.0
+References: <mailman.2.1533693601.12251.tuhs@minnie.tuhs.org>
+ <DBB67EE8-D7D4-4622-BF04-6F037C7B2859@gmail.com>
+ <20180808123229.86FD5E465F@mailuser.nyi.internal>
+ <6EBCF9E5-4600-42D6-9F83-3E2966140540@donhopkins.com>
+ <20180808135106.D7441E4636@mailuser.nyi.internal>
+ <CAC20D2Ox+AbhNvhJoKzoFiupna7Utq=CJHBXadE=tgQ2k76e2g@mail.gmail.com>
+ <c2114f16-78d3-3b11-cd0f-9bedc48ec7f9@telegraphics.com.au>
+ <5B6B2A78.7070303@texoma.net>
+ <CAJohCKK05su6U37B9ANc8gHs7Pnfe+5xhAFNroD2SA88dCcSHA@mail.gmail.com>
+ <CANCZdfphBORbr+HvR5ZvBK9aFvgYx0BT0mRbTSSczRzEzdZ0gw@mail.gmail.com>
+ <201808090514.w795ESAh018689@freefriends.org>
+ <CAJohCKJON2LFM0nx+ts0MwHd9LtmJvNzw9hP-K9t4+GcpNoKiA@mail.gmail.com>
+In-Reply-To: <CAJohCKJON2LFM0nx+ts0MwHd9LtmJvNzw9hP-K9t4+GcpNoKiA@mail.gmail.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Thu, 9 Aug 2018 06:36:25 -0600
+Message-ID: <CANCZdfpmoGXh6rir8xCugCS-y5e6h2JZK7660mpsMJ5gd=A-LQ@mail.gmail.com>
+To: Jim Geist <velocityboy@gmail.com>
+Content-Type: multipart/alternative; boundary="000000000000cb66320572ffe0c1"
+Subject: Re: [TUHS] the distinct smell of light machine oil,
+ was Re: TUHS Digest, Vol 33, Issue 7
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org, Don Hopkins <don@donhopkins.com>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000cb66320572ffe0c1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+It works. For the ribbon type printers, it gets the ink moving enough to
+get a second or third use from the cart. Print quality was dicey, but for
+listings to do debugging on a dot matrix printer, quality wasn't the name
+of the game. Just don't use too much...
+
+Warner
+
+On Wed, Aug 8, 2018, 11:56 PM Jim Geist <velocityboy@gmail.com> wrote:
+
+> You can supposedly revive dried out ribbons by soaking them in WD40. I=E2=
+=80=99ve
+> heard of it but never tried it.
+>
+> On Wed, Aug 8, 2018 at 10:14 PM <arnold@skeeve.com> wrote:
+>
+>> Which was ...?
+>>
+>> Warner Losh <imp@bsdimp.com> wrote:
+>>
+>> > Especially if you use the WD40 trick for the ink ribbon. :)
+>> >
+>> > Warner
+>> >
+>> > On Wed, Aug 8, 2018, 1:14 PM Jim Geist <velocityboy@gmail.com> wrote:
+>> >
+>> > > I have a functional LA120 in my house and can attest to the machine
+>> smell
+>> > > whenever I run it.
+>>
+>
+
+--000000000000cb66320572ffe0c1
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto"><div>It works. For the ribbon type printers, it gets the =
+ink moving enough to get a second or third use from the cart. Print quality=
+ was dicey, but for listings to do debugging on a dot matrix printer, quali=
+ty wasn&#39;t the name of the game. Just don&#39;t use too much...</div><di=
+v dir=3D"auto"><br></div><div dir=3D"auto">Warner<br><br><div class=3D"gmai=
+l_quote" dir=3D"auto"><div dir=3D"ltr">On Wed, Aug 8, 2018, 11:56 PM Jim Ge=
+ist &lt;<a href=3D"mailto:velocityboy@gmail.com">velocityboy@gmail.com</a>&=
+gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0=
+ .8ex;border-left:1px #ccc solid;padding-left:1ex"><div><div dir=3D"auto">Y=
+ou can supposedly revive dried out ribbons by soaking them in WD40. I=E2=80=
+=99ve heard of it but never tried it.</div></div><div><br><div class=3D"gma=
+il_quote"><div dir=3D"ltr">On Wed, Aug 8, 2018 at 10:14 PM &lt;<a href=3D"m=
+ailto:arnold@skeeve.com" target=3D"_blank" rel=3D"noreferrer">arnold@skeeve=
+.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"mar=
+gin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Which was ...?<=
+br>
+<br>
+Warner Losh &lt;<a href=3D"mailto:imp@bsdimp.com" target=3D"_blank" rel=3D"=
+noreferrer">imp@bsdimp.com</a>&gt; wrote:<br>
+<br>
+&gt; Especially if you use the WD40 trick for the ink ribbon. :)<br>
+&gt;<br>
+&gt; Warner<br>
+&gt;<br>
+&gt; On Wed, Aug 8, 2018, 1:14 PM Jim Geist &lt;<a href=3D"mailto:velocityb=
+oy@gmail.com" target=3D"_blank" rel=3D"noreferrer">velocityboy@gmail.com</a=
+>&gt; wrote:<br>
+&gt;<br>
+&gt; &gt; I have a functional LA120 in my house and can attest to the machi=
+ne smell<br>
+&gt; &gt; whenever I run it.<br>
+</blockquote></div></div>
+</blockquote></div></div></div>
+
+--000000000000cb66320572ffe0c1--
