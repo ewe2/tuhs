@@ -1,0 +1,140 @@
+From tuhs-bounces@minnie.tuhs.org Thu Aug 23 20:22:17 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a2b4059d
+	for <ml@inbox.vuxu.org>;
+	Thu, 23 Aug 2018 20:22:16 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 80772A1A2D; Fri, 24 Aug 2018 06:22:15 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C7947A1A1A;
+	Fri, 24 Aug 2018 06:21:51 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6B104A1A1A; Fri, 24 Aug 2018 06:21:48 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 95A41A1A19
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 06:21:47 +1000 (AEST)
+Received: from mob.bitblocks.com (mob.bitblocks.com [192.168.125.11])
+ by mail.bitblocks.com (Postfix) with ESMTP id 26505156E408
+ for <tuhs@minnie.tuhs.org>; Thu, 23 Aug 2018 13:21:40 -0700 (PDT)
+From: Bakul Shah <bakul@bitblocks.com>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Date: Thu, 23 Aug 2018 13:21:39 -0700
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+To: TUHS <tuhs@minnie.tuhs.org>
+In-Reply-To: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+Message-Id: <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Aug 23, 2018, at 7:42 AM, ron@ronnatalie.com wrote:
+>=20
+> The biggest issue we had was BSD didn't use void* at all.   Had they
+> converted pointers to void*, which is in implementation necessarily =
+the same
+> as char*,
+> C would have done the right thing.   The problem is they did what I =
+call
+> "Conversion by union."    They would store a char* into one element of =
+a
+> union and read it out of another typed pointer.
+
+I haven't done much BSD kernel programming in last 15 years
+but this is not my recollection. BSD used caddr_t, typedefed
+to char*, sort of as void *. IIRC void* came in common use
+after BSD unix first came about. Why use a union when a cast
+will do? :-) The union trick is more likely to be used for
+esoteric things (like getting at fl.pt. bytes) or for more
+complex types or probably by people with lots of programming
+experience in pascal and not so much in C (in Pascal you *had*
+to use untagged variant records if you wanted to cheat!). In C,
+all that void* does is allow you to avoid casts in some cases.
+
+> This works fine for a VAX where all pointers are the same format, but =
+fails
+> on word address machines (notably in our case the HEP where the target =
+size
+> is encoded in the low order bits of the pointer).
+> Still, running around and fixing those was only a few hours work.
+>=20
+> The DevSwitch is the beginnings of an object oriented philosophy.   =
+Alas,
+> the original UNIX used it only for mapping major dev numbers to =
+functions.
+> It got some later use for other things like multi filesystemsupport.
+
+{b,c}devsw are closer to an interface (or in C++ terminology=20
+an abstract class that contains nothing but pure virtual
+functions). Go got it right.  I had to build something like
+devsw for some IOT devices in Go and it worked very well. And
+you don't need to manually stuff relevant functions in a
+struct so that {bdev,cdev,line}sw can be properly initialized
+as in C.
+=20
+Not having this feature in C meant dev switches got a bit=20
+impure (in 4.xBSD there was only a buf ptr for bdevsw and a
+tty ptr in cdesw).  In modern BSD the cdev struct contains all
+sorts of cruft.
+=20
+So in this sense C++ got it wrong, at least initially. Code=20
+for each disk or network device would be device specific but
+in so far as possible we want to access devices of a specific
+class the same way. Classical OO would not help here.
+
+[Aside: What I would really like is if Go interfaces can be
+somehow turned into abstract data types by adding an algebraic
+specification. For example, at the source level you should
+be able to say don't allow read/write once  device is closed.
+Adding this sort of assertions/axioms at the interface level
+can make your code less cluttered (no need to check at every
+point if the device is still open) and safer (in case you forget
+to check).]
+
+
+> The scary supportability thing in the kernel, isn't so much typing, =
+but the
+> failuer to "hide" implementation details of one part of the kernel =
+from the
+> other.
+
+Lack of modularity or more fine grained trust boundaries.
+Apropos this point:
+
+=
+https://threatpost.com/researchers-blame-monolithic-linux-code-base-for-cr=
+itical-vulnerabilities/136785/
+
+  In an exhaustive study of critical Linux vulnerabilities, a=20
+  team of academic and government-backed researchers claim to
+  have proven that almost all flaws could be mitigated to less
+  than critical severity - and that 40 percent could be
+  completely eliminated - with an OS design based on a
+  verified microkernel. Though I tend to think the "verified"
+  part doesn't play as strong a role as the modularization
+  forced by microkernels.
+
+[Ties in with the formal methods thread in here and in COFF!]
+
+
+
