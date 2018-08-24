@@ -1,0 +1,103 @@
+From tuhs-bounces@minnie.tuhs.org Fri Aug 24 18:36:56 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d842e438
+	for <ml@inbox.vuxu.org>;
+	Fri, 24 Aug 2018 18:36:56 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 102EDA1CC2; Sat, 25 Aug 2018 04:36:55 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2A843A1A1A;
+	Sat, 25 Aug 2018 04:36:44 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B3F3FA1A1A; Sat, 25 Aug 2018 04:36:42 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 2F3EBA1A19
+ for <tuhs@minnie.tuhs.org>; Sat, 25 Aug 2018 04:36:42 +1000 (AEST)
+Received: from mob.bitblocks.com (mob.bitblocks.com [192.168.125.11])
+ by mail.bitblocks.com (Postfix) with ESMTP id 05012156E400
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 11:36:34 -0700 (PDT)
+From: Bakul Shah <bakul@bitblocks.com>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Date: Fri, 24 Aug 2018 11:36:34 -0700
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+ <4130AFB4-1740-46BC-AA98-F9D01549049C@bitblocks.com>
+ <1d5901d43ba4$7bc413b0$734c3b10$@ronnatalie.com>
+To: TUHS <tuhs@minnie.tuhs.org>
+In-Reply-To: <1d5901d43ba4$7bc413b0$734c3b10$@ronnatalie.com>
+Message-Id: <98A5731F-11D3-4D55-B679-8DDF9E4EFFBC@bitblocks.com>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Aug 24, 2018, at 5:17 AM, ron@ronnatalie.com wrote:
+> 
+> For instance:
+>       int x;
+>       daddr_t* y;
+> 
+>      u.b_un.b_words = &x;
+>      y = u.b_un.b_daddr;
+
+One would typically *not* do this.
+
+> 
+> This is syntactically correct, but the code will blow up bizarrely on
+> machines where the int* and long* pointers are not in the same format. 
+> Now if the datatype was a void* and we did this:
+> 
+>      u.b_vp = & x;
+>      y = u.b_vp;
+> 
+> Provided there weren't any alignment issues, this would work as the
+> conversion to and from void* would result in the right pointer value.
+
+For example, given
+
+	union {
+	    caddr_t b_addr;		/* low order core address */
+	    int	*b_words;		/* words for clearing */
+	    struct filsys *b_filsys;	/* superblocks */
+	    struct dinode *b_dino;	/* ilist */
+	    daddr_t *b_daddr;		/* indirect block */
+	} b_un;
+
+You'd use it something like this:
+
+	struct b_un x, y, z, *w;
+	struct filesys fs;
+	daddr_t d;
+	...
+	x.b_words = &b;
+	y.b_filsys = &fs;
+	z.b_addr = &d;
+	w = &x;
+
+These come about because in different contexts different ptrs
+may be used but one would not do any type conversion. Said another
+way, if you replaced the union with a struct, type punning code
+would fall apart but legit code would continue working (except
+in the case where the *size* of the object is significant).
+
