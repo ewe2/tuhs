@@ -1,0 +1,316 @@
+From tuhs-bounces@minnie.tuhs.org Sat Aug 25 23:02:37 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.9 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4e957e4b
+	for <ml@inbox.vuxu.org>;
+	Sat, 25 Aug 2018 23:02:37 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3AB04A1B05; Sun, 26 Aug 2018 09:02:36 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 53337A19FC;
+	Sun, 26 Aug 2018 09:02:16 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b=Vz/Qqp7e;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C0262A19FC; Sun, 26 Aug 2018 09:02:14 +1000 (AEST)
+Received: from mail-io0-f195.google.com (mail-io0-f195.google.com
+ [209.85.223.195])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B01689E7E7
+ for <tuhs@tuhs.org>; Sun, 26 Aug 2018 09:02:13 +1000 (AEST)
+Received: by mail-io0-f195.google.com with SMTP id l7-v6so9952187iok.6
+ for <tuhs@tuhs.org>; Sat, 25 Aug 2018 16:02:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=zp8Dus1n9YoHddYscwbc+vteMsu2mlCLTOd5n85Otic=;
+ b=Vz/Qqp7ewDNWfCOM8t6DGvL6ZzXumFn+ZaGdcUtfIzgzH3sFk0jXHxvUkyKEGMkxSA
+ +jbFvZNcBUFBzLzHBsga3VJsZE2Ve7X0AYcVSDowC8TPPQd51/9+fEc5DzxE01PjIetp
+ ZbQH/jLX4tTKzLreK3bnQxjRVAPUujTF13rUU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=zp8Dus1n9YoHddYscwbc+vteMsu2mlCLTOd5n85Otic=;
+ b=ALgbMm1a90bj6zCJBxpCdSN2g9t0DRuB/VgFQ/J7fSjkrjowg5x6JEO456vqCl/xRe
+ NydQhpPBYrumS1tg8syq1jQTNok39apbZeLkbTjDg5FuBiLjVgoPjgK7EtQzuzLkzr7/
+ cIBIMo6But2mWfa2voH//DlSmnbrKsJZJXCwaqtKC/rwvNRMaKySl60LZvvDSe8GXXwA
+ jjWebJ6DNwyXegsu0BqtWovICVp7ZCqOTMDW9ifWGQA4bXMhUEoX2ip3jpP/qtshdpCU
+ Z8/9lfsbTHhV4hRz3fPT4GmpKVzMyimeWgYDOafMLENozibBXnaxgX+NkTVNXdT6HFGv
+ 9alQ==
+X-Gm-Message-State: APzg51CKMDU/TlgM84diumMfYor2JmT76x+AyBoj0cfSYEwR6hWev37k
+ kEASWaIJOgazrTgXxFGu2b5glz2dnXHvoM+yga6qLw==
+X-Google-Smtp-Source: ANB0VdZBuFbhn0+Nzv3a7DexdqAi1GaimW9Wu9q/aXgVUYaAHwhJEP7+3hJA9bt2ZVCIrBA9ElCJdrLBbtVoM+T9qos=
+X-Received: by 2002:a6b:9cc9:: with SMTP id
+ f192-v6mr5634919ioe.284.1535238132886; 
+ Sat, 25 Aug 2018 16:02:12 -0700 (PDT)
+MIME-Version: 1.0
+References: <201808240702.w7O72pJT005068@freefriends.org>
+ <EA462C91-DBEE-45A6-9741-E14D6EEBD28C@ccc.com>
+ <201808251830.w7PIURLX024379@freefriends.org>
+ <CAC20D2PSMD=_RBJ0wYGOSJeZJ=MLLB4yLvJrJjVVteF+GoB9jQ@mail.gmail.com>
+ <CAC0cEp_HHP93bTksHmb0fTXtwUxagHpSJNC=BypKLViqPArj=w@mail.gmail.com>
+In-Reply-To: <CAC0cEp_HHP93bTksHmb0fTXtwUxagHpSJNC=BypKLViqPArj=w@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Sat, 25 Aug 2018 19:02:01 -0400
+Message-ID: <CAC20D2OpRguT+HJUStngE2K8TVSVP8jxRHg0LG3vgLsQtK8_DA@mail.gmail.com>
+To: "John P. Linderman" <jpl.jpl@gmail.com>
+Content-Type: multipart/alternative; boundary="0000000000008e86ae05744a7bbc"
+Subject: Re: [TUHS] changes in C compilers
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000008e86ae05744a7bbc
+Content-Type: text/plain; charset="UTF-8"
+
+Fsck was very much a CMU program. I had a small hand in it - the reason why
+the errors Messages are upper case in fact. (a different story).    That
+said it was hardly a new idea - Ted modelled it from a similar program he
+saw at UMich on MTS and one I ran on TSS called the file system checker.
+ im guessing there may have been other programs like it.
+
+Before fsck Ken had icheck ncheck and dcheck.  IIRC Masheys team in PWB @
+Whippany I think, wrote fsdb which shows up around the same time     I also
+think the Columbus folks may have something early on also.
+
+Ted took fsck back To USG and it became part of the Summit releases.  Bill
+Joy had been his roommate at Michigan which I think is how to made to ucb.
+But Joy had it there before I showed up.
+
+Clem
+
+
+On Sat, Aug 25, 2018 at 6:19 PM John P. Linderman <jpl.jpl@gmail.com> wrote:
+
+> *Ted took fsck back to Summit & MH*
+>
+> I got my introduction to UNIX in '73 or '74, when the group running the
+> 11/45 in Piscataway found out I came into work before 6am. UNIX was so
+> unstable back then that it had to be rebooted every day, to contain file
+> system corruption. A 6 am reboot went pretty much unnoticed. I could swear
+> we ran something very like fsck after each reboot. In particular, I recall
+> the **gok** diagnostic when the type of an inode wasn't anything
+> recognizable. Whatever we ran, I'm sure it continued to evolve.
+>
+>
+> On Sat, Aug 25, 2018 at 3:58 PM, Clem Cole <clemc@ccc.com> wrote:
+>
+>>
+>>
+>> On Sat, Aug 25, 2018 at 2:38 PM <arnold@skeeve.com> wrote:
+>>
+>>> The APS work started in the summer of 1979. See
+>>> http://www.eprg.org/papers/202paper.pdf
+>>> and see some of the other stuff at
+>>> http://www.cs.princeton.edu/~bwk/202/index.html.
+>>>
+>>> I think that's after V7 was released.
+>>>
+>> Ok, so that was clearly the first ditroff.
+>>
+>> Typesetter C *must have been the original troff release* which was
+>> separate from V6; but I don't remember what all was in the release.
+>>  Looking at the v6 distribution tape I have, the assembler versions of roff
+>> and nroff was there; but not troff.   V7 clearly shows the original troff
+>> in the sources.
+>>
+>>
+>> The order I remember is this ... V5, V6, Patches, Typesetter C, TS, V7
+>> ...   although TS and Typesetter might be switched but I know we got
+>> Typesetter C before we got V7.    Ted brought TS to us (in EE) and I
+>> thought that had the new compiler.   CS got TS from us in EE.    But
+>> somebody at CMU had wanted troff because we had the XGP in CS that we drive
+>> with Scribe (I want to say that was EE but I don't remember who was
+>> involved).   So I have memory of somebody hacking on the compiler at some
+>> point.  The POR (which if ever came to bear at CMU was after I left) was
+>> some type of hacking on troff to support the XGP.  Given the time Aharon
+>> points out, it might have been direct support it or it might have been
+>> something like vcat - I was not involved.   Klone might remember more of
+>> that.
+>>
+>> Clearly from the time, ditroff did not yet exist.   The more I think
+>> about it, Brian K actually might know some of the story.  Scribe was Brian
+>> Reid's PhD Thesis and Brian K was on Reid's committee at the time and I'm
+>> guessing could somehow have been mixed up.
+>>
+>> FWIW: Compiler hacking at CMU stands out in my mind because of the 11/40e
+>> had CSAV/CRET instructions.  The CS versions of the compilers generated
+>> code using that, because they had 11/40e with CMU WCS options.  The rest of
+>> us in EE, BioMed, Mellon Institute etc were running on 11/34's or 11/34A
+>> which could not handle those binaries (no WCS).   So I personally spent
+>> time tracking the CS versions of the compiler and bringing things to EE,
+>> trying to keep thing clean.  That was one of my jobs at the time.
+>>
+>> That's fairly sure of the order, because we had Typesetter C at CMU in
+>> the Summer '78 when were we negotiating the 'university' commercial V7
+>> license with Al Arms [which I was personally mixed up -- the finally
+>> ruling/agreement was license one system as a commercial system at the $20K
+>> fee and a university, could then use UNIX for back office and commercial
+>> style uses like Industry.  Al did not require the $5K second CPU stuff from
+>> the Universities, if they got a single $20K license; everyone was happy -
+>> details off list or another thread if you want them; although I will say
+>> CMU was first in early '79, followed by Case in late 1979].
+>>
+>> So again, I try to date by things I know are fixed in time and then work
+>> from there.   As Dan points out the cross pollination was high in those
+>> days and it was not just from the labs to the Universities.  For instance,
+>> Ted took fsck back to Summit & MH, as well as a number of other tools
+>> (although I think that one had the longest reach).   Noel has mentioned
+>> similar stories from MIT.  Chesson brought all the networking stuff from
+>> UoI and we saw some of it in datakit (an earlier version of his mpx code
+>> for V7 he did as a grad student).   You get the idea....
+>>
+>> Clem
+>>
+>>
+> --
+Sent from a handheld expect more typos than usual
+
+--0000000000008e86ae05744a7bbc
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div><div dir=3D"auto">Fsck was very much a CMU program. I had a small hand=
+ in it - the reason why the errors Messages are upper case in fact. (a diff=
+erent story). =C2=A0 =C2=A0That said it was hardly a new idea - Ted modelle=
+d it from a similar program he saw at UMich on MTS and one I ran on TSS cal=
+led the file system checker. =C2=A0im guessing there may have been other pr=
+ograms like it. =C2=A0</div><div dir=3D"auto"><br></div><div dir=3D"auto">B=
+efore fsck Ken had icheck ncheck and dcheck.=C2=A0 IIRC Masheys team in PWB=
+ @ Whippany I think, wrote fsdb which shows up around the same time =C2=A0 =
+=C2=A0 I also think the Columbus folks may have something early on also. =
+=C2=A0</div></div><div dir=3D"auto"><br></div><div dir=3D"auto">Ted took fs=
+ck back To USG and it became part of the Summit releases.=C2=A0 Bill Joy ha=
+d been his roommate at Michigan which I think is how to made to ucb.=C2=A0 =
+But Joy had it there before I showed up.=C2=A0</div><div dir=3D"auto"><br><=
+/div><div dir=3D"auto">Clem</div><div dir=3D"auto"><br></div><div dir=3D"au=
+to"><br></div><div><div class=3D"gmail_quote"><div dir=3D"ltr">On Sat, Aug =
+25, 2018 at 6:19 PM John P. Linderman &lt;<a href=3D"mailto:jpl.jpl@gmail.c=
+om">jpl.jpl@gmail.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_qu=
+ote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex=
+"><div dir=3D"ltr"><blockquote style=3D"margin:0 0 0 40px;border:none;paddi=
+ng:0px"><div class=3D"gmail_default"><span style=3D"font-family:arial,helve=
+tica,sans-serif;font-size:12.8px;background-color:rgb(255,255,255);text-dec=
+oration-style:initial;text-decoration-color:initial;float:none;display:inli=
+ne"><i>Ted took fsck back to Summit &amp; MH</i></span></div><div class=3D"=
+gmail_default"><span style=3D"font-family:arial,helvetica,sans-serif;font-s=
+ize:12.8px;background-color:rgb(255,255,255);text-decoration-style:initial;=
+text-decoration-color:initial;float:none;display:inline"><i><br></i></span>=
+</div></blockquote><font face=3D"arial, helvetica, sans-serif"><span style=
+=3D"font-size:12.8px"><div class=3D"gmail_default" style=3D"font-size:small=
+;display:inline">I got my introduction to UNIX in &#39;73 or &#39;74, when =
+the group running the 11/45 in Piscataway found out I came into work before=
+ 6am. UNIX was so unstable back then that it had to be rebooted every day, =
+to contain file system corruption. A 6 am reboot went pretty much unnoticed=
+. I could swear we ran something very like fsck after each reboot. In parti=
+cular, I recall the **gok** diagnostic when the type of an inode wasn&#39;t=
+ anything recognizable. Whatever we ran, I&#39;m sure it continued to evolv=
+e.</div><br></span></font></div><div class=3D"gmail_extra"><br><div class=
+=3D"gmail_quote">On Sat, Aug 25, 2018 at 3:58 PM, Clem Cole <span dir=3D"lt=
+r">&lt;<a href=3D"mailto:clemc@ccc.com" target=3D"_blank">clemc@ccc.com</a>=
+&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0=
+ 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div dir=3D"ltr"><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><b=
+r></div><br><div class=3D"gmail_quote"><div dir=3D"ltr">On Sat, Aug 25, 201=
+8 at 2:38 PM &lt;<a href=3D"mailto:arnold@skeeve.com" target=3D"_blank">arn=
+old@skeeve.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" st=
+yle=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">The A=
+PS work started in the summer of 1979. See <a href=3D"http://www.eprg.org/p=
+apers/202paper.pdf" rel=3D"noreferrer" target=3D"_blank">http://www.eprg.or=
+g/papers/202paper.pdf</a><br>
+and see some of the other stuff at<br>
+<a href=3D"http://www.cs.princeton.edu/~bwk/202/index.html" rel=3D"noreferr=
+er" target=3D"_blank">http://www.cs.princeton.edu/~bwk/202/index.html</a>.<=
+br>
+<br>
+I think that&#39;s after V7 was released.<br></blockquote><div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif;display:=
+inline">Ok, so that was clearly the first ditroff.=C2=A0</div></div><div><d=
+iv class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif;=
+display:inline"><br></div></div><div><div class=3D"gmail_default" style=3D"=
+font-family:arial,helvetica,sans-serif;display:inline">Typesetter C <u><i>m=
+ust have been the original troff release</i></u> which was separate from V6=
+; but I don&#39;t remember what all was in the release.=C2=A0 =C2=A0Looking=
+ at the v6 distribution tape I have, the assembler versions of roff and nro=
+ff was there; but not troff.=C2=A0 =C2=A0V7 clearly shows the original trof=
+f in the sources.</div></div><div><div class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif;display:inline"><br></div></div><div><d=
+iv class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif;=
+display:inline"><br></div></div><div><div class=3D"gmail_default" style=3D"=
+font-family:arial,helvetica,sans-serif">The order I remember is this ... V5=
+, V6, Patches, Typesetter C, TS, V7 ...=C2=A0 =C2=A0although TS and Typeset=
+ter might be switched but I know we got Typesetter C before we got V7.=C2=
+=A0 =C2=A0 Ted brought TS to us (in EE) and I thought that had the new comp=
+iler.=C2=A0 =C2=A0CS got TS from us in EE.=C2=A0 =C2=A0 But somebody at CMU=
+ had wanted troff because we had the XGP in CS that we drive with Scribe (I=
+ want to say that was EE but I don&#39;t remember who was involved).=C2=A0 =
+=C2=A0So I have memory of somebody hacking on the compiler at some point.=
+=C2=A0 The POR (which if ever came to bear at CMU was after I left) was som=
+e type of hacking on troff to support the XGP.=C2=A0 Given the time Aharon =
+points out, it might have been direct support it or it might have been some=
+thing like vcat - I was not involved.=C2=A0 =C2=A0Klone might remember more=
+ of that.</div><div class=3D"gmail_default" style=3D"font-family:arial,helv=
+etica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif">Clearly from the time, ditroff did not yet e=
+xist.=C2=A0 =C2=A0The more I think about it, Brian K actually might know so=
+me of the story.=C2=A0 Scribe was Brian Reid&#39;s PhD Thesis and Brian K w=
+as on Reid&#39;s committee at the time and I&#39;m guessing could somehow h=
+ave been mixed up.</div><div class=3D"gmail_default" style=3D"font-family:a=
+rial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"=
+font-family:arial,helvetica,sans-serif">FWIW: Compiler hacking at CMU stand=
+s out in my mind because of the 11/40e had CSAV/CRET instructions.=C2=A0 Th=
+e CS versions of the compilers generated code using that, because they had =
+11/40e with CMU WCS options.=C2=A0 The rest of us in EE, BioMed, Mellon Ins=
+titute etc were running on 11/34&#39;s or 11/34A which could not handle tho=
+se binaries (no WCS).=C2=A0 =C2=A0So I personally spent time tracking the C=
+S versions of the compiler and bringing things to EE, trying to keep thing =
+clean.=C2=A0 That was one of my jobs at the time.</div><div class=3D"gmail_=
+default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">That=
+&#39;s fairly sure of the order, because we had Typesetter C at CMU in the =
+Summer &#39;78 when were we negotiating the &#39;university&#39; commercial=
+ V7 license with Al Arms [which I was personally mixed up -- the finally ru=
+ling/agreement was license one system as a commercial system at the $20K fe=
+e and a university, could then use UNIX for back office and commercial styl=
+e uses like Industry.=C2=A0 Al did not require the $5K second CPU stuff fro=
+m the Universities, if they got a single $20K license; everyone was happy -=
+ details off list or another thread if you want them; although I will say C=
+MU was first in early &#39;79, followed by Case in late 1979].</div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br>=
+</div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,san=
+s-serif">So again, I try to date by things I know are fixed in time and the=
+n work from there.=C2=A0 =C2=A0As Dan points out the cross pollination was =
+high in those days and it was not just from the labs to the Universities.=
+=C2=A0 For instance, Ted took fsck back to Summit &amp; MH, as well as a nu=
+mber of other tools (although I think that one had the longest reach).=C2=
+=A0 =C2=A0Noel has mentioned similar stories from MIT.=C2=A0 Chesson brough=
+t all the networking stuff from UoI and we saw some of it in datakit (an ea=
+rlier version of his mpx code for V7 he did as a grad student).=C2=A0 =C2=
+=A0You get the idea....</div><span class=3D"m_6409954691215258788HOEnZb"><f=
+ont color=3D"#888888"><div class=3D"gmail_default" style=3D"font-family:ari=
+al,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif">Clem</div><br></font></span></div></d=
+iv></div>
+</blockquote></div><br></div>
+</blockquote></div></div>-- <br><div dir=3D"ltr" class=3D"gmail_signature" =
+data-smartmail=3D"gmail_signature">Sent from a handheld expect more typos t=
+han usual</div>
+
+--0000000000008e86ae05744a7bbc--
