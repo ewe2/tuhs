@@ -1,0 +1,171 @@
+From tuhs-bounces@minnie.tuhs.org Thu Aug 30 11:36:34 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_ADSP_CUSTOM_MED,
+	DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 03512b6f
+	for <ml@inbox.vuxu.org>;
+	Thu, 30 Aug 2018 11:36:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9991EA1A6E; Thu, 30 Aug 2018 21:36:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DB956A1A1F;
+	Thu, 30 Aug 2018 21:35:57 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b=Uuhu4WU5;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5C869A1A1F; Thu, 30 Aug 2018 21:35:54 +1000 (AEST)
+Received: from mail-wm0-f45.google.com (mail-wm0-f45.google.com [74.125.82.45])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8D272A1A1C
+ for <tuhs@tuhs.org>; Thu, 30 Aug 2018 21:35:53 +1000 (AEST)
+Received: by mail-wm0-f45.google.com with SMTP id n11-v6so1652148wmc.2
+ for <tuhs@tuhs.org>; Thu, 30 Aug 2018 04:35:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+ :cc; bh=zrjFULh7ISTgFU7d9AmxRa1C6NcifHMhOJnbSqk8ZUc=;
+ b=Uuhu4WU5PjgOY3mcEDBLCfWPBDe9LtEVeNTq6HasdvVs5FYGE9CddzK7ySVwPq0ZUo
+ ZJMMJIDVu8Iw7+n12K5isPxtC0aJftPeeoNHPbAAXwr5xjMAfyFGDVAGSSa5GYzFzKDr
+ iujdxC19nSURDCat2iOxUVQeGoW+GgVtUuP8TEs5w4JsVugC8KzPAioFZN+TgsBbZQJD
+ bI7kuUyJR2Qz6RNsrR3mC6wOLJQN3Wr022cbxn3Z83OfJO8yNHM15oMkTrDa/YNixd94
+ GbjtZozJplQQzim4wqLY3gyJaUA1arBi84okje9xXkS1EaLvGZZ70Z55E4Q4Sc8pVRcs
+ QfVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+ :message-id:subject:to:cc;
+ bh=zrjFULh7ISTgFU7d9AmxRa1C6NcifHMhOJnbSqk8ZUc=;
+ b=FbLEkQZQdZ9s4m4oeTcf13UorqH3juMKha/bBID8xeAoDu0Jw9aMoaWnOILtZAHHh0
+ PDEJAcCJzvq/0OlL71Upooak8ipB75hGydlwLwNshOOQjSocR7DgTXMXD/j8xZgqQMcQ
+ vBs2BMDJhSfs0K+40bg0iMmTc5kbSINTioSHIHAKmfGMcEAqF6K1FB2ubpjnva15pUOE
+ Fq/Mi3RsrmVs/h7rj28hy85nVG9jALy2e4fEIVoMDcMph21ECLAf3rR5w77SN9rXiM3q
+ L4fqDOMA/IarX1FAvSnBRkemOcvh6WxvVdawryD/E7mbZWhL9HktXaJ4lUl5cNU/7Yhc
+ yaqQ==
+X-Gm-Message-State: APzg51BoGBljNp41GIx5JTnubBezkCobgGcCMG9hNAEr5jzkcmiJo9pg
+ 40ibxkSwfRCxetLdoI3hC8dp4UxliaRUz68lR+0=
+X-Google-Smtp-Source: ANB0VdYYONZVaOTGFae1iFi6zqAfkFCzGtdi2jWaEQq99c7nWEOXyIBwE07R9V3B4WwguG/Y8Qz5GX93biTntj66fQY=
+X-Received: by 2002:a1c:4c0e:: with SMTP id
+ z14-v6mr1640514wmf.89.1535628952037; 
+ Thu, 30 Aug 2018 04:35:52 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 2002:adf:dd88:0:0:0:0:0 with HTTP; Thu, 30 Aug 2018 04:35:51
+ -0700 (PDT)
+In-Reply-To: <051a01d44051$7d7909c0$786b1d40$@ronnatalie.com>
+References: <CAC20D2MoDL7C3WSWn2Gmzo4qgA2Pe4+LTnchDq_VQdvKykubEA@mail.gmail.com>
+ <f28da67c-b9af-b038-556b-f2e3012ddcff@mhorton.net>
+ <CAC20D2PgjftUBz=wq2=ThZ4HU8yP1KuQ1iCWek-T4R0H17iP6Q@mail.gmail.com>
+ <alpine.BSF.2.21.9999.1808281017090.41601@aneurin.horsfall.org>
+ <20180828003057.GA317@mcvoy.com> <201808280601.w7S61oLM030628@freefriends.org>
+ <alpine.BSF.2.21.9999.1808290821350.41601@aneurin.horsfall.org>
+ <c5abd058-2035-d105-2df2-3f94e5d59035@gmail.com>
+ <alpine.BSF.2.21.9999.1808291050580.41601@aneurin.horsfall.org>
+ <20180829032310.GF19128@thunk.org> <20180829043639.GA6691@minnie.tuhs.org>
+ <alpine.BSF.2.21.9999.1808300757530.41601@aneurin.horsfall.org>
+ <051a01d44051$7d7909c0$786b1d40$@ronnatalie.com>
+From: "John P. Linderman" <jpl.jpl@gmail.com>
+Date: Thu, 30 Aug 2018 07:35:51 -0400
+Message-ID: <CAC0cEp_Ukevp2LMLcHFp_RKeLe3U4KPmVuty7XA7VrgKQg3KiQ@mail.gmail.com>
+To: Ron Natalie <ron@ronnatalie.com>
+Content-Type: multipart/alternative; boundary="000000000000316c3b0574a57a55"
+Subject: Re: [TUHS] Cryptic Unix Commands
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000316c3b0574a57a55
+Content-Type: text/plain; charset="UTF-8"
+
+I remember doing a fresh install of unix on a VAX with another sysadmin. We
+had spent a couple hours getting everything ready to go, and he had created
+a bunch of temporary directories under /tmp to hold intermediate work. All
+started with ".", so, in /tmp, he entered "rm -r .*". Unfortunately, that
+matched .. as well. We knew something had gone very wrong when we got a
+"/bin/rm: text busy" message as rm tried to remove itself.
+
+On Thu, Aug 30, 2018 at 7:06 AM, <ron@ronnatalie.com> wrote:
+
+> I use the numbers but I think it stems from the days when kill didn't take
+> the names.    It's easier for me to remember -1 and -9 than to remember
+> what
+> the mnemonics are.
+>
+>
+> > -----Original Message-----
+> > From: TUHS <tuhs-bounces@minnie.tuhs.org> On Behalf Of Dave Horsfall
+> > Sent: Wednesday, August 29, 2018 6:04 PM
+> > To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+> > Subject: Re: [TUHS] Cryptic Unix Commands
+> >
+> > On Wed, 29 Aug 2018, Warren Toomey wrote:
+> >
+> > > This reminded me of other semi-cryptic commands. I remember mistyping
+> > > "kill -1 1" as "kill -9 1" with the inevitable consequences.
+> >
+> > Hands up all those who have *not* done that...
+> >
+> > -- Dave
+>
+>
+
+--000000000000316c3b0574a57a55
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-size:small">I r=
+emember doing a fresh install of unix on a VAX with another sysadmin. We ha=
+d spent a couple hours getting everything ready to go, and he had created a=
+ bunch of temporary directories under /tmp to hold intermediate work. All s=
+tarted with &quot;.&quot;, so, in /tmp, he entered &quot;<font face=3D"mono=
+space, monospace">rm -r .*</font>&quot;. Unfortunately, that matched .. as =
+well. We knew something had gone very wrong when we got a &quot;/bin/rm: te=
+xt busy&quot; message as rm tried to remove itself.</div></div><div class=
+=3D"gmail_extra"><br><div class=3D"gmail_quote">On Thu, Aug 30, 2018 at 7:0=
+6 AM,  <span dir=3D"ltr">&lt;<a href=3D"mailto:ron@ronnatalie.com" target=
+=3D"_blank">ron@ronnatalie.com</a>&gt;</span> wrote:<br><blockquote class=
+=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
+ing-left:1ex">I use the numbers but I think it stems from the days when kil=
+l didn&#39;t take<br>
+the names.=C2=A0 =C2=A0 It&#39;s easier for me to remember -1 and -9 than t=
+o remember what<br>
+the mnemonics are.<br>
+<span class=3D"im HOEnZb"><br>
+<br>
+&gt; -----Original Message-----<br>
+&gt; From: TUHS &lt;<a href=3D"mailto:tuhs-bounces@minnie.tuhs.org">tuhs-bo=
+unces@minnie.tuhs.org</a>&gt; On Behalf Of Dave Horsfall<br>
+&gt; Sent: Wednesday, August 29, 2018 6:04 PM<br>
+&gt; To: The Eunuchs Hysterical Society &lt;<a href=3D"mailto:tuhs@tuhs.org=
+">tuhs@tuhs.org</a>&gt;<br>
+&gt; Subject: Re: [TUHS] Cryptic Unix Commands<br>
+&gt; <br>
+</span><div class=3D"HOEnZb"><div class=3D"h5">&gt; On Wed, 29 Aug 2018, Wa=
+rren Toomey wrote:<br>
+&gt; <br>
+&gt; &gt; This reminded me of other semi-cryptic commands. I remember misty=
+ping<br>
+&gt; &gt; &quot;kill -1 1&quot; as &quot;kill -9 1&quot; with the inevitabl=
+e consequences.<br>
+&gt; <br>
+&gt; Hands up all those who have *not* done that...<br>
+&gt; <br>
+&gt; -- Dave<br>
+<br>
+</div></div></blockquote></div><br></div>
+
+--000000000000316c3b0574a57a55--
