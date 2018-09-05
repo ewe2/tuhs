@@ -1,0 +1,106 @@
+From tuhs-bounces@minnie.tuhs.org Wed Sep  5 03:40:18 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a9bbc85f
+	for <ml@inbox.vuxu.org>;
+	Wed, 5 Sep 2018 03:40:17 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C8763A1B13; Wed,  5 Sep 2018 13:40:16 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 82D16A1A2E;
+	Wed,  5 Sep 2018 13:40:00 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b=mgvBoYu6;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3F8E9A1A25; Wed,  5 Sep 2018 13:39:57 +1000 (AEST)
+Received: from mail-io0-f178.google.com (mail-io0-f178.google.com
+ [209.85.223.178])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 67B24A1A23
+ for <tuhs@minnie.tuhs.org>; Wed,  5 Sep 2018 13:39:52 +1000 (AEST)
+Received: by mail-io0-f178.google.com with SMTP id y12-v6so4808756ioj.13
+ for <tuhs@minnie.tuhs.org>; Tue, 04 Sep 2018 20:39:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:from:date:message-id:subject:to;
+ bh=NhaIGTcOYrM83f8G9PRvtXH0AIPOA87jOKubbLKRMsk=;
+ b=mgvBoYu6pNxg6bbCSq0H0xrxdcOsxVGi5mMlckikhoLbsDnuA4Ub7TGGTacEcgO47n
+ f2pxnWjqccFgry8fAF3RcTDt/NMkugpfaR4XN1+JZiBRo7gNNp0OdcWS5TVBrV46kNb9
+ oa2w5ql09YtP6QMjUxGUa6vyYPXaPKTIpcp5KwZVkXVqzjxEgJSbH5tLLiCg4X3tj5gS
+ hq7ECzdQYwaxtiNI2g7BU1Mk13xCxJsnjg6UxhCAkeNVGr+8tb/tqZdoIHJkv4HO8IEr
+ z+gIzqXfgiRAyenzQu1qHdbOQkNSlq403lECjGIPA2KOnF6ZFiU2tMkJYah2S5xo46yy
+ V3xw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+ bh=NhaIGTcOYrM83f8G9PRvtXH0AIPOA87jOKubbLKRMsk=;
+ b=HBPqgwa0WwpXXQKVdOL+vPbnQrze8DFJ9+oyCMp4AI1g1c1AQWkxKbW4PwTkanL3Tl
+ K9gUSOERicUEhJu59VWSPyaup0ouRoHXlnRPrroaQ0zYhw2+5eAKf41ctH9n46RfxXnX
+ mfryUGLLH7j8+eLDR4apmMXK8EJNSW20hgBA4G3a0ne0BVoGSs2EoB7RM5fMbWeec8ys
+ HXz4pWs6AatgFxO7/lhFXp5eXtyugJ0cCgieJj6HTOQ8RBLau49bkWMFIA3417nRwNi9
+ dTWLg0E04oNqY7jXRdBq7BQ5hoNzi4n3WXRW5KHghpqAYkHrDAuiMnULDqKZXwFibWmV
+ AaMQ==
+X-Gm-Message-State: APzg51Bo2cx/KGpKLxRPtXd4gakP2hayYzjo0271qum6fYrw00l4HUZp
+ cLXyNk70BHtUkYfk0K/pRBY/32wPKiUvfS0BEipSw7oESiI=
+X-Google-Smtp-Source: ANB0VdbWlfacEz/bWHcGVInkHerbzBwZlK0h7/3AylCDuUxkxTXGYGdSwcEUf/wylOUeQX8l6ipAEnz9HVe7Ei+Ru+U=
+X-Received: by 2002:a6b:b44e:: with SMTP id
+ d75-v6mr9314290iof.63.1536118791531; 
+ Tue, 04 Sep 2018 20:39:51 -0700 (PDT)
+MIME-Version: 1.0
+From: Warner Losh <imp@bsdimp.com>
+Date: Tue, 4 Sep 2018 21:39:40 -0600
+Message-ID: <CANCZdfq0R1EtVQ4=MhAB4M+F7pPxCq=fCDXUcP516=xxRV3=2g@mail.gmail.com>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+Content-Type: multipart/alternative; boundary="000000000000e700210575178608"
+Subject: [TUHS] Speaking of legality...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000e700210575178608
+Content-Type: text/plain; charset="UTF-8"
+
+I have a question...
+
+I'm trying to recreate "a" source representation of the Venix for Rainbow
+that I have. It's a v7 port, and I have all the .o's for it.
+
+Most of the .o's compile, with the proper compiler, to the same code that
+are in the .o's, at least judging from the .c file of the same name in the
+TUHS archive.
+
+The question is, what are the legal ramifications of publishing my
+reconstruction?
+
+Warner
+
+--000000000000e700210575178608
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">I have a question...<div><br></div><div>I&#39;m trying to =
+recreate &quot;a&quot; source representation of the Venix for Rainbow that =
+I have. It&#39;s a v7 port, and I have all the .o&#39;s for it.</div><div><=
+br></div><div>Most of the .o&#39;s compile, with the proper compiler, to th=
+e same code that are in the .o&#39;s, at least judging from the .c file of =
+the same name in the TUHS archive.</div><div><br></div><div>The question is=
+, what are the legal ramifications of publishing my reconstruction?</div><d=
+iv><br></div><div>Warner</div></div>
+
+--000000000000e700210575178608--
