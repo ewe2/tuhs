@@ -1,0 +1,133 @@
+From tuhs-bounces@minnie.tuhs.org Wed Sep  5 16:13:00 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 0f772263
+	for <ml@inbox.vuxu.org>;
+	Wed, 5 Sep 2018 16:12:59 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C6667A1AA2; Thu,  6 Sep 2018 02:12:58 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 46008A1A4C;
+	Thu,  6 Sep 2018 02:12:22 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b=A0ay4/1c;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 589CAA1A24; Thu,  6 Sep 2018 02:12:18 +1000 (AEST)
+Received: from mail-wm0-f51.google.com (mail-wm0-f51.google.com [74.125.82.51])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A257BA1A23
+ for <tuhs@tuhs.org>; Thu,  6 Sep 2018 02:12:17 +1000 (AEST)
+Received: by mail-wm0-f51.google.com with SMTP id y2-v6so8583058wma.1
+ for <tuhs@tuhs.org>; Wed, 05 Sep 2018 09:12:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+ :cc; bh=aJWUPvSBx0m/tOcJCX69Zr8J/mJhHv+rDX2Lwl9Mbvo=;
+ b=A0ay4/1cuLRSBlXoZMRNw6DGxuHbDdgdUP3/PttcXCdms1lGrjJOtn2PB0DRaluvFG
+ gaG1JDHrDgBnyENwh9sve057T5AxKEIf0JUTwmKk56ugwcfehXE/kRVvR/ObUB96PsBW
+ fzPIM/EO5Tiv0f0Kvse2upxggynI/aN6IyqWQjgB4X7NP9H5g6vrDpVuqAii0GmxHObc
+ 1DL/IwnbF+DpqYlL4EWwKLfJ673Vpu0i3lXVWBiGTrMyOpBgmXRcMddMzCBcFUND5Xq5
+ 4VdcuK3BH18gX2506QZw/i/4wCXDphBqkBL7LQM0hWaHK9KEfImKLrX5QIB60J/SxenK
+ wgig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+ :message-id:subject:to:cc;
+ bh=aJWUPvSBx0m/tOcJCX69Zr8J/mJhHv+rDX2Lwl9Mbvo=;
+ b=qVt3gWbFJENafbR+w5csqnuZ8gF7v7Jjy2jv7HTgcIGk+i+UlC3qF2qQq7CUQyanWO
+ Ke3otYsF5ZVCL3Sk1pdCqTzjLY4dU9PUgTr1F17cq2pMdlJFjFqwQR5Ic3CZTzGzjUqU
+ y6/Tqo4jr2ksD4xgK+FztzYBpId9Rxg2R8m33mHrYqInfvAx9oTQKJ5Yk28DY0EAvfsp
+ 0vBlbBZN7irKzh8Eb5LVtFnULB4wiRm9tWkzfeyKCWC9kzD9rCz9/BzKpATUQUQ1CN0h
+ QMeG8WwAdCrNwiMjpX7DMWl6WAhKNmAVQ2gVnZslunIZ5VoskFYBI/zFkHM1za0ywsvM
+ cOAA==
+X-Gm-Message-State: APzg51B4oyz23sTEH82KAly1Fqer7DlJw9cEylZNjLKugRAfkGf740Er
+ E2x08UXf9m+QcID+zaHVYxU4zdtGoq7BWt/LDZo=
+X-Google-Smtp-Source: ANB0VdY/JvoGN10FAseXV9Ir/uU+BKVOPVj36EZv1Ek6cIafvOgdN+ZPMETeZ3SpWBz2YDFI2l1QkaLiR0zVB/opEUk=
+X-Received: by 2002:a1c:5dd4:: with SMTP id
+ r203-v6mr717682wmb.29.1536163936148; 
+ Wed, 05 Sep 2018 09:12:16 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 2002:adf:c546:0:0:0:0:0 with HTTP;
+ Wed, 5 Sep 2018 09:12:15 -0700 (PDT)
+In-Reply-To: <20180905154435.103E118C0A0@mercury.lcs.mit.edu>
+References: <20180905154435.103E118C0A0@mercury.lcs.mit.edu>
+From: "John P. Linderman" <jpl.jpl@gmail.com>
+Date: Wed, 5 Sep 2018 12:12:15 -0400
+Message-ID: <CAC0cEp_yYYhwi1SinvsHeT=WhismC7gsM3mBnBTpsX2FmcS6Zg@mail.gmail.com>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Content-Type: multipart/alternative; boundary="000000000000bb220f057522095f"
+Subject: Re: [TUHS] Cryptic Unix Commands
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>, jnc'@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000bb220f057522095f
+Content-Type: text/plain; charset="UTF-8"
+
+On Wed, Sep 5, 2018 at 11:44 AM, Noel Chiappa <jnc@mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Norman Wilson
+>
+>     > It is just plain wrong to code
+>     >  kill(9, pid)
+>
+> _All_ uses of magic numbers in numeric form are wrong!
+>
+>         Noel
+>
+
+I completely agree, although you can do worse. A junior programmer I worked
+with at MIT wrote (in IBM assembler)
+
+twelv dc 10
+
+(I probably have the syntax wrong, but he was declaring the value of
+symbolic name 'twelv' to be 10). I have no idea why he did this. He didn't
+last long.
+
+--000000000000bb220f057522095f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-size:small"><br=
+></div><div class=3D"gmail_extra"><br><div class=3D"gmail_quote">On Wed, Se=
+p 5, 2018 at 11:44 AM, Noel Chiappa <span dir=3D"ltr">&lt;<a href=3D"mailto=
+:jnc@mercury.lcs.mit.edu" target=3D"_blank">jnc@mercury.lcs.mit.edu</a>&gt;=
+</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .=
+8ex;border-left:1px #ccc solid;padding-left:1ex">=C2=A0 =C2=A0 &gt; From: N=
+orman Wilson<br>
+<br>
+=C2=A0 =C2=A0 &gt; It is just plain wrong to code<br>
+=C2=A0 =C2=A0 &gt;=C2=A0 kill(9, pid)<br>
+<br>
+_All_ uses of magic numbers in numeric form are wrong!<br>
+<span class=3D"HOEnZb"><font color=3D"#888888"><br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 Noel<br></font></span></blockquote><div>=C2=A0<=
+/div></div><div class=3D"gmail_default" style=3D"font-size:small">I complet=
+ely agree, although you can do worse. A junior programmer I worked with at =
+MIT wrote (in IBM assembler)</div><div class=3D"gmail_default" style=3D"fon=
+t-size:small"><br></div><div class=3D"gmail_default" style=3D"font-size:sma=
+ll">twelv dc 10</div><div class=3D"gmail_default" style=3D"font-size:small"=
+><br></div><div class=3D"gmail_default" style=3D"font-size:small">(I probab=
+ly have the syntax wrong, but he was declaring the value of symbolic name &=
+#39;twelv&#39; to be 10). I have no idea why he did this. He didn&#39;t las=
+t long.</div><br></div></div>
+
+--000000000000bb220f057522095f--
