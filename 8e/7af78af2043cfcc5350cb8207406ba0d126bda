@@ -1,0 +1,348 @@
+From tuhs-bounces@minnie.tuhs.org Thu Sep 27 22:06:05 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham
+	autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 1491d492
+	for <ml@inbox.vuxu.org>;
+	Thu, 27 Sep 2018 22:06:05 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 517DCA1A83; Fri, 28 Sep 2018 08:06:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 543EAA1A6D;
+	Fri, 28 Sep 2018 08:05:23 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b=It3xeMOF;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 20C2BA1A6D; Fri, 28 Sep 2018 08:05:18 +1000 (AEST)
+Received: from mail-ot1-f42.google.com (mail-ot1-f42.google.com
+ [209.85.210.42])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 35872A1A6C
+ for <tuhs@minnie.tuhs.org>; Fri, 28 Sep 2018 08:05:17 +1000 (AEST)
+Received: by mail-ot1-f42.google.com with SMTP id j9-v6so4155034otl.2
+ for <tuhs@minnie.tuhs.org>; Thu, 27 Sep 2018 15:05:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=Z/4JsOqAccon8/jTBUwA6+Qkt13W1HvnkPxnRfb0oDo=;
+ b=It3xeMOFatyESrkwuHDkELab2JNIHwjle4KVML8KBOCy4r+PQpePG0Li0zfVPlurwf
+ qM6WlGrhER/3VrpKVWdEh7/nQtsIIFljKnz44PcNHO3kc/2xPj2BBMDBJl6Yx0xPDL3U
+ E2DIBDYrbh4Tk3pO0lLYFx32npgH5yUvwQ+TE=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=Z/4JsOqAccon8/jTBUwA6+Qkt13W1HvnkPxnRfb0oDo=;
+ b=pXOW7461yFULJRkm6jT2y8/oknAvOO4g5D96TpOuU32R4sbusF1W2xcVWzfwCpjT7O
+ 9boTESGBMrwFUUARNV37zojNvXGriuc+yeTF21S3erDRjFdkKrhvlsbUEo2iHf20uqos
+ 8KBmEPUf8D9qSMzPyy4oUCsGA2kqxdGm57HcCe0AUeLO7/3UfPBnDmIAs99NAYPFORDB
+ JkpUFvVksHXUSFz6fMuuy5m5vHmv4ib+rneTcy72AOG6Dk7VBZODUAYg94N74MRbzHP2
+ IvY/aMp24QVhi7tL2zqDU+f3Wkq0mlwjF+3oAwus4uJwKTdNUe7XimDCB0VAHXIFXLlK
+ hUsQ==
+X-Gm-Message-State: ABuFfohiAQ2ZbofphrImwlT0fXngLhVGW8KB+ehdBp7J9NPCowlB14NZ
+ PCxHp82zDi6oAtpmirUNRdptaEhaMRslJY2eyk4XYQ==
+X-Google-Smtp-Source: ACcGV622Zg4waTXQSOdkEBF6E3C15S/Zhw+gCfCZA9gRd/Rx4kylRylymXjPYbHy+mfspCYOgslNesJq/a1cHcxHf/I=
+X-Received: by 2002:a9d:3890:: with SMTP id
+ p16-v6mr7977727otc.304.1538085916266; 
+ Thu, 27 Sep 2018 15:05:16 -0700 (PDT)
+MIME-Version: 1.0
+References: <20180927120854.u8rei%ca6c@bitmessage.ch>
+ <CAEoi9W5mnNCUFWWUVs++=adNP7FfB1=iqH6sv5nRF=DxWRHLXA@mail.gmail.com>
+ <20180927204237.h3kQJ%ca6c@bitmessage.ch>
+ <CAEoi9W5Ex3RzCzTMDZOUZCG81YZZTqyWfWhuLxeadQfT1JKUcw@mail.gmail.com>
+In-Reply-To: <CAEoi9W5Ex3RzCzTMDZOUZCG81YZZTqyWfWhuLxeadQfT1JKUcw@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Thu, 27 Sep 2018 18:04:49 -0400
+Message-ID: <CAC20D2O_keNWjS+YDgYdMt1Gsq-Qbk3NFCJHTzZ6=DkzGOizXw@mail.gmail.com>
+To: Dan Cross <crossd@gmail.com>
+Content-Type: multipart/alternative; boundary="000000000000ac663d0576e188d1"
+Subject: Re: [TUHS] The origin of /home
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000ac663d0576e188d1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+I wish I could remember exactly everything happened, but I cannot say I
+do.    Dan Cross, Don and Noel have all said things that line up with what
+I remember.   I=E2=80=99m actually thinking the /home came out of a set of
+discussions that occurred before what would eventually be called UNIX
+International.
+
+
+
+As, Noel says, I do remember using the term =E2=80=98home directory=E2=80=
+=99 as a student,
+so it is likely that was a term being used either by the old PDP-10 or IBM
+shops; but like Noel, I cannot pin the term down either.
+
+
+
+Don noted that the /home does not come to the BSD strain until 1986, which
+also makes sense; because one of the goals of 4.3BSD was to try to make BSD
+a little less divergent from the other UNIX paths, and one of the things
+Keith did was to start to made an effort to try use some of the same
+conventions the industry (Sun and AT&T in particular) were using.
+
+
+
+Dan Cross made the most important note and that is that in the early days
+the size a disk was quite small.  UNIX Sixth and Seventh edition often ran
+on systems that 2 or 3 RK05 drives of 2.5M each [
+https://en.wikipedia.org/wiki/RK05] and as Dan point out, there were limits
+to the what got put in the what file system.   Simply the guiding principle
+at that time was that you stored in the root filesystem; just enough to the
+boot the system, pushed everything else to /usr and then used UNIX
+mount/name space splicing/path mechanisms to make a uniform set of paths.
+
+
+
+BTW: A thing to remember is that symbolic links are not a wide spread when
+all of this was going on in the early 1980s, so they really did not have a
+lot to do with the /home idea.  In the case of symbolic links, Dennis had
+created them as part of V8, but 4.1BSD and System III (PWB 3.0) did not
+have the idea yet.   BSD 4.2 would later get them as part of FFS, but I
+don=E2=80=99t remember if 4.1c did (the kernel source was not in Warren=E2=
+=80=99s browsable
+archive so I could not check).   Dennis had showed them to me on a visit, I
+thought they were cool and useful, and put them in Masscomp=E2=80=99s RTU (=
+which
+was a System III/4.1 mash up) and then created CDL=E2=80=99s shortly therea=
+fter
+which we used for what later Pyramid called Universes (we called it modes
+originally but started calling it universes also because it sounded
+cooler).    Sun picked up symlinks when they went to the 4.2 kernel and BSD
+FFS.
+
+
+
+The other missing item was quotas.   The universities in particular needed
+quotas, which is one of the reasons why Joy added it to 4.2, as it was a
+requested feature by the DARPA community. Before 4.2, people used the
+partition size within the disk as a way to have some sort of quotas.
+
+
+
+So what happened?
+
+
+
+The factiod no one has brought up so far is what would become the
+/usr/group standards committee (later Unix International (UI) and before
+that was the work Heinz Lycklama and Peter Weiner were doing at Interactive
+Systems Corp (ISC).  Heinz wanted an industry wide ABI and was pretty vocal
+about it.  He felt the ISVs would never take UNIX seriously if there were
+not =E2=80=98one true >>binary<< system=E2=80=99 that they compiled too.   =
+The /usr/group
+API work got started from that and was the compromise, a programming
+interface, not an binary one.   But during the discussions that led up to
+the standards committee was a series of meetings originally at USENIX ATC,
+where we began to talk about the naming conventions.  They were trying to
+agree what needs to be in /bin, /usr/bin, /lib, /usr/lib etc=E2=80=A6  and =
+to make
+them more 'readonly-ish' primarily so that programs that went amok, did the
+least amount of damage.     This was also where the idea of /usr/opt and
+/var were born.  /usr/local was a UCB-ism, but people used it for stuff the
+built themselves.    Most installed systems /usr1 /usr2 =E2=80=A6 where the=
+ actual
+user files were stored.  The commercial folks wanted it more like other
+systems were there were some sorts of fences around things.
+
+
+
+But =E2=80=A6it was basically agreed by the commercial side, that if there =
+ever
+were going to be any hope for the ISVs to be able to ship a binary, each
+ISV needed her/his own spot.  The idea for them was
+/usr/opt/hp,  /usr/opt/intel, /usr/opt/msft and then under that the usual
+bin, etc, include, lib, =E2=80=A6  Equally /var was deal with things like l=
+ogs
+which were being to show up (the printer and shell accounting were first),
+but that way ISVs and random programs did not step on each other.    I
+think HP might have actuallybeen  the first of the vendors to start to ship
+using that convention, but USL did pick it up by the time of System
+V. Similarly, at some point the /usr1, /usr2 etc  =E2=80=A6 switched to /ho=
+me
+/home1 /home2 etc=E2=80=A6     I do remember that there HP guys where prett=
+y vocal
+in the arguments when it all went down.
+
+
+
+
+
+There was (should be) an email/netnews article kicking around with the name
+something like =E2=80=98standardized UNIX file tree=E2=80=99 or some such. =
+  I would think
+this was about 1984 or 1985 time frame.   This email/article was part of
+the model that Keith used for 4.3BSD later on; but it is also where my
+memory gets hazy and I lost those notebooks in the flood.
+
+
+
+I cannot swear by it, but I do seem to think I remember that /home was one
+of the directories that came out of that discussion.  The timing is
+certainly right, as is the reasoning.
+
+
+=E1=90=A7
+
+--000000000000ac663d0576e188d1
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default"><p class=3D"=
+MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.0001pt;=
+font-size:medium;color:rgb(0,0,0)">I wish I could remember exactly everythi=
+ng happened, but I cannot say I do.=C2=A0=C2=A0=C2=A0=C2=A0Dan Cross, Don a=
+nd Noel have all said things that line up with what I remember.=C2=A0=C2=A0=
+=C2=A0I=E2=80=99m actually thinking the /home came out of a set of discussi=
+ons that occurred before what would eventually be called UNIX International=
+.<span></span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-=
+serif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=
+=A0</span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-seri=
+f;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)">As, Noel says,=
+ I do remember using the term =E2=80=98home directory=E2=80=99 as a student=
+, so it is likely that was a term being used either by the old PDP-10 or IB=
+M shops; but like Noel, I cannot pin the term down either.=C2=A0=C2=A0=C2=
+=A0<span></span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,san=
+s-serif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=
+=C2=A0</span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-s=
+erif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)">Don noted t=
+hat the /home does not come to the BSD strain until 1986, which also makes =
+sense; because one of the goals of 4.3BSD was to try to make BSD a little l=
+ess divergent from the other UNIX paths, and one of the things Keith did wa=
+s to start to made an effort to try use some of the same conventions the in=
+dustry (Sun and AT&amp;T in particular) were using.<span></span></p><p clas=
+s=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.00=
+01pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=A0</span></p><p class=3D"=
+MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.0001pt;=
+font-size:medium;color:rgb(0,0,0)">Dan Cross made the most important note a=
+nd that is that in the early days the size a disk was quite small.=C2=A0=C2=
+=A0UNIX Sixth and Seventh edition often ran on systems that 2 or 3 RK05 dri=
+ves of 2.5M each [<a href=3D"https://en.wikipedia.org/wiki/RK05">https://en=
+.wikipedia.org/wiki/RK05</a>] and as Dan point out, there were limits to th=
+e what got put in the what file system.=C2=A0=C2=A0=C2=A0Simply the guiding=
+ principle at that time was that you stored in the root filesystem; just en=
+ough to the boot the system, pushed everything else to /usr and then used U=
+NIX mount/name space splicing/path mechanisms to make a uniform set of path=
+s.<span></span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans=
+-serif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=
+=A0</span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-seri=
+f;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)">BTW: A thing t=
+o remember is that symbolic links are not a wide spread when all of this wa=
+s going on in the early 1980s, so they really did not have a lot to do with=
+ the /home idea.=C2=A0=C2=A0In the case of symbolic links, Dennis had creat=
+ed them as part of V8, but 4.1BSD and System III (PWB 3.0) did not have the=
+ idea yet.=C2=A0=C2=A0=C2=A0BSD 4.2 would later get them as part of FFS, bu=
+t I don=E2=80=99t remember if 4.1c did (the kernel source was not in Warren=
+=E2=80=99s browsable archive so I could not check).=C2=A0=C2=A0=C2=A0Dennis=
+ had showed them to me on a visit, I thought they were cool and useful, and=
+ put them in Masscomp=E2=80=99s RTU (which was a System III/4.1 mash up) an=
+d then created CDL=E2=80=99s shortly thereafter which we used for what late=
+r Pyramid called Universes (we called it modes originally but started calli=
+ng it universes also because it sounded cooler).=C2=A0=C2=A0=C2=A0=C2=A0Sun=
+ picked up symlinks when they went to the 4.2 kernel and BSD FFS.<span></sp=
+an></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margi=
+n:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=A0</span></=
+p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in=
+ 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)">The other missing item was=
+ quotas.=C2=A0=C2=A0=C2=A0The universities in particular needed quotas, whi=
+ch is one of the reasons why Joy added it to 4.2, as it was a requested fea=
+ture by the DARPA community. Before 4.2, people used the partition size wit=
+hin the disk as a way to have some sort of quotas.=C2=A0=C2=A0<span></span>=
+</p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0=
+in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=A0</span></p><=
+p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0i=
+n 0.0001pt;font-size:medium;color:rgb(0,0,0)">So what happened?=C2=A0<span>=
+</span></p><p class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;m=
+argin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"><span>=C2=A0</spa=
+n></p><p class=3D"MsoNormal" style=3D"margin:0in 0in 0.0001pt"><font color=
+=3D"#000000" face=3D"Calibri, sans-serif" size=3D"3"><span style=3D"caret-c=
+olor: rgb(0, 0, 0);">The factiod no one has brought up so far is what would=
+ become the /usr/group standards committee (later Unix International (UI) a=
+nd before that was the work Heinz=C2=A0</span></font><font face=3D"Calibri,=
+ sans-serif" size=3D"3"><span style=3D"caret-color: rgb(0, 0, 0);">Lycklama=
+ and Peter Weiner were doing at Interactive Systems Corp (ISC).=C2=A0=C2=A0=
+Heinz wanted an industry wide ABI and was pretty vocal about it.=C2=A0=C2=
+=A0He felt the ISVs would never take UNIX seriously if there were not =E2=
+=80=98one true &gt;&gt;binary&lt;&lt; system=E2=80=99 that they compiled to=
+o.=C2=A0=C2=A0=C2=A0The /usr/group API work got started from that and was t=
+he compromise, a programming interface, not an binary one.=C2=A0=C2=A0=C2=
+=A0But during the discussions that led up to the standards committee was a =
+series of meetings originally at USENIX ATC, where we began to talk about t=
+he naming conventions.=C2=A0=C2=A0They were trying to agree what needs to b=
+e in /bin, /usr/bin, /lib, /usr/lib etc=E2=80=A6 =C2=A0and to make them mor=
+e &#39;readonly-ish&#39; primarily so that programs that went amok, did the=
+ least=C2=A0amount of damage. =C2=A0 =C2=A0 This was also where the idea of=
+ /usr/opt and /var were born.=C2=A0=C2=A0/usr/local was a UCB-ism, but peop=
+le used it for stuff the built themselves.=C2=A0=C2=A0=C2=A0=C2=A0Most inst=
+alled systems /usr1 /usr2 =E2=80=A6 where the actual user files were stored=
+.=C2=A0 The=C2=A0commercial folks wanted it more like other systems were th=
+ere were some sorts of fences around things.</span></font></p><p class=3D"M=
+soNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.0001pt;f=
+ont-size:medium;color:rgb(0,0,0)"><span style=3D"color:rgb(34,34,34)"><span=
+>=C2=A0</span></span></p><p class=3D"MsoNormal" style=3D"margin:0in 0in 0.0=
+001pt"><font face=3D"Calibri, sans-serif" size=3D"3"><span style=3D"caret-c=
+olor: rgb(0, 0, 0);">But =E2=80=A6it was basically agreed by the commercial=
+ side, that if there ever were going to be any hope for the ISVs to be able=
+ to ship a binary, each ISV needed her/his own spot.=C2=A0=C2=A0The idea fo=
+r them was /usr/opt/hp,=C2=A0=C2=A0/usr/opt/intel, /usr/opt/msft and then u=
+nder that the usual bin, etc, include, lib, =E2=80=A6 =C2=A0Equally /var wa=
+s deal with things like logs which were being to show up (the printer and s=
+hell accounting were first), but that way ISVs=C2=A0and random programs did=
+ not step on each other.=C2=A0=C2=A0=C2=A0=C2=A0I think HP might have actua=
+llybeen =C2=A0the first of the vendors to start to ship using that conventi=
+on, but USL did pick it up by the time of System V.=C2=A0Similarly, at some=
+ point the /usr1, /usr2 etc=C2=A0=C2=A0=E2=80=A6 switched to /home /home1 /=
+home2 etc=E2=80=A6 =C2=A0 =C2=A0 I do remember that=C2=A0there HP guys wher=
+e pretty vocal in the arguments when it all went down.</span></font></p><p =
+class=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in =
+0.0001pt;font-size:medium;color:rgb(0,0,0)"><span style=3D"color:rgb(34,34,=
+34)"><span>=C2=A0</span></span></p><p class=3D"MsoNormal" style=3D"font-fam=
+ily:Calibri,sans-serif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0=
+,0,0)"><span style=3D"color:rgb(34,34,34)"><span>=C2=A0</span></span></p><p=
+ class=3D"MsoNormal" style=3D"margin:0in 0in 0.0001pt"><font face=3D"Calibr=
+i, sans-serif" size=3D"3"><span style=3D"caret-color: rgb(0, 0, 0);">There =
+was (should be) an email/netnews article kicking around with the name somet=
+hing like =E2=80=98standardized UNIX file tree=E2=80=99 or some such.=C2=A0=
+=C2=A0=C2=A0I would think this was about 1984 or 1985 time frame.=C2=A0=C2=
+=A0=C2=A0This email/article was part of the model that Keith used for 4.3BS=
+D later on; but it is also where my memory gets hazy and I lost those noteb=
+ooks in the flood.=C2=A0=C2=A0=C2=A0</span><span style=3D"caret-color: rgb(=
+0, 0, 0);"></span></font></p><p class=3D"MsoNormal" style=3D"font-family:Ca=
+libri,sans-serif;margin:0in 0in 0.0001pt;font-size:medium;color:rgb(0,0,0)"=
+><span style=3D"color:rgb(34,34,34)"><span>=C2=A0</span></span></p><p class=
+=3D"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.000=
+1pt;font-size:medium;color:rgb(0,0,0)"><span style=3D"color:rgb(34,34,34)">=
+I cannot swear by it, but I do seem to think I remember that /home was one =
+of the directories that came out of that discussion.=C2=A0=C2=A0The timing =
+is certainly right, as is the reasoning.<span></span></span></p><p class=3D=
+"MsoNormal" style=3D"font-family:Calibri,sans-serif;margin:0in 0in 0.0001pt=
+;font-size:medium;color:rgb(0,0,0)"><br></p></div></div><div class=3D"gmail=
+_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border=
+-left:1px #ccc solid;padding-left:1ex">
+</blockquote></div></div><div hspace=3D"streak-pt-mark" style=3D"max-height=
+:1px"><img alt=3D"" style=3D"width:0px;max-height:0px;overflow:hidden" src=
+=3D"https://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp=
+;type=3Dzerocontent&amp;guid=3Ddd0aa673-63e8-46f8-8bd0-81065750fe91"><font =
+color=3D"#ffffff" size=3D"1">=E1=90=A7</font></div>
+
+--000000000000ac663d0576e188d1--
