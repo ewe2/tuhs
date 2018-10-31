@@ -1,0 +1,88 @@
+From tuhs-bounces@minnie.tuhs.org Wed Oct 31 05:31:23 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.2 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,DKIM_VALID_EF,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id afc4390b
+	for <ml@inbox.vuxu.org>;
+	Wed, 31 Oct 2018 05:31:23 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0C81CA230A; Wed, 31 Oct 2018 15:31:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 04FA5A22E9;
+	Wed, 31 Oct 2018 15:30:53 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=tuhs.org; s=dkim;
+	t=1540963873; bh=4nGAtg6e6mwwVfbvH0FP/7R9b5dk+Lev8nZFwAfs9vc=;
+	h=Date:From:To:Subject:List-Id:List-Unsubscribe:List-Archive:
+	 List-Post:List-Help:List-Subscribe:From;
+	b=ahq+UfZQQw9mOEVxrTcy33GLBCLKUQ9Rt/Ef/8m6nGyWSBTdFbRae90vkShZBzCk3
+	 R1wv6LF2bsv7rBQ2Rcg3nOy7JbxhChnLRW1WULAWbA54aunynBhNxprT0za95HrTrb
+	 cw8UVh8FVbPfi6QvR1oAgdp3XCftJTETXWSWhQAg=
+Received: by minnie.tuhs.org (Postfix, from userid 1000)
+ id CF2BDA2152; Wed, 31 Oct 2018 14:38:10 +1000 (AEST)
+Date: Wed, 31 Oct 2018 14:38:10 +1000
+From: Warren Toomey <wkt@tuhs.org>
+To: tuhs@tuhs.org
+Message-ID: <20181031043810.GA10775@minnie.tuhs.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: [TUHS] Unix APIs: elegant or not?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I was just reading this book review:
+http://www.pathsensitive.com/2018/10/book-review-philosophy-of-software.html
+and came across these paragraphs:
+
+    <book quote>
+    The mechanism for file IO provided by the Unix operating system
+    and its descendants, such as Linux, is a beautiful example of a
+    deep interface. There are only five basic system calls for I/O,
+    with simple signatures:
+
+    int open(const char* path, int flags, mode_t permissions);
+    ssize_t read(int fd, void* buffer, size_t count);
+    ssize_t write(int fd, const void* buffer, size_t count);
+    off_t lseek(int fd, off_t offset, int referencePosition);
+    int close(int fd);
+    </book quote>
+
+  The POSIX file API is a great example, but not of a deep
+  interface. Rather, it’s a great example of how code with a very
+  complicated interface may look deceptively simple when reduced to C-style
+  function signatures. It’s a stateful API with interesting orderings
+  and interactions between calls. The flags and permissions parameters
+  of open hide an enormous amount of complexity, with hidden requirements
+  like “exactly one of these five bits should be specified.” open may
+  return 20 different error codes, each with their own meaning, and many
+  with references to specific implementations.
+
+  The authors of SibylIFS tried to write down an exact description of the
+  open interface. Their annotated version[1] of the POSIX standard is over
+  3000 words. Not counting basic machinery, it took them over 200 lines[2]
+  to write down the properties of open in higher-order logic, and another
+  70 to give the interactions between open and close.
+  [1]: https://github.com/sibylfs/sibylfs_src/blob/8a7f53ba58654249b0ec0725ce3887840d6a1812/fs_spec/src/posix/open.md
+  [2]: https://github.com/sibylfs/sibylfs_src/blob/8a7f53ba58654249b0ec0725ce3887840d6a1812/fs_spec/src/t_fs_spec_fs_command_properties.lem_cppo#L460
+
+I just thought it was a thought-provoking comment on the apparent elegance
+of the Unix file API that actually has some subtle complexity.
+
+Cheers, Warren
