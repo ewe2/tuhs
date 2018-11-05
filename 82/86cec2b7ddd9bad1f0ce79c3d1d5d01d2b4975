@@ -1,0 +1,363 @@
+From tuhs-bounces@minnie.tuhs.org Tue Nov  6 00:29:33 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.9 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SUBJ_ALL_CAPS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 47a0dc4d
+	for <ml@inbox.vuxu.org>;
+	Tue, 6 Nov 2018 00:29:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6AFD3A22EE; Tue,  6 Nov 2018 10:29:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 95B76A22EA;
+	Tue,  6 Nov 2018 10:28:50 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AAFF5A22EA; Tue,  6 Nov 2018 08:35:07 +1000 (AEST)
+Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com
+ [209.85.160.178])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C6940A2171
+ for <tuhs@minnie.tuhs.org>; Tue,  6 Nov 2018 08:35:01 +1000 (AEST)
+Received: by mail-qt1-f178.google.com with SMTP id r14so529535qtp.1
+ for <tuhs@minnie.tuhs.org>; Mon, 05 Nov 2018 14:35:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=gr7gVtGMjDByd+mDuYWcsBbk1TffhXZKlryrM3E1tmM=;
+ b=IHZaENLono4A9U3L0eOj4hE0be6w5kBKtA10ZAOye9y7RjXXBXlTQ5m+ENu4RTNs1z
+ csyK8etZ80oyoadMMDwXqcAsz67UIclzFOolCozoeJzmDS6PFvVgIKHI+KGo6bvFJt/j
+ KGT3Xq5/Zo8PPRQOCRzs+HvCoCNqO61zE4DIsAKxulpTJIBzr2zOLocnvO1NdqwtP7FQ
+ O6lxXNXEQUQcxNfsxqa4iBvTbokL5EHmfDsoslKDCcXeoG/jpZpquOqiqLhaKhJIMAqw
+ GIYAI/8kV5oLVudlJh6/3ovlOoCAIX2rkq0X63qPpLZOgDBM/fSE89cEOBKHzfIoMPs+
+ xbPA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=gr7gVtGMjDByd+mDuYWcsBbk1TffhXZKlryrM3E1tmM=;
+ b=joOPS5EAcMUSbAM9rxkbH/BZijts0UjC3QvVFtwSw8KfkPyfB/z9RNZUc3pvWpzM4k
+ Q13Xe/RnxXngJpdzD/3TfVfn1m5kj2nBjIiLoMF6p/+ys5rRMplBiL+zuE4v6ZheAjpJ
+ rxemr+D885BokSvvPppQDANwNI2+XtS7jMqvFRM0KP8Fg/VzLcvw0ANj2nNEWHytryzu
+ 29cali9ZtwODoKYVAtF4sCVvypagO6c6ynRY407wp+gGpXh6F5BPRfL+rQJomLpR25AX
+ zxPX6n9TYJsaWO/bjcCZEB4vQc3NLc9o+bQc9Uj+wyH1nYIwwkbFY9NbzCkxTImzwKfD
+ CW6Q==
+X-Gm-Message-State: AGRZ1gLSLXb5iHni7jDiix1USUhQI+R8jrcNg6Ne9TmQJpJFCHGjiv4w
+ fme1Nzai5ysj5x/gD04t+zTe8MNe3yIk5g29BI5fesbKu0w=
+X-Google-Smtp-Source: AJdET5c7eamvhrqch9F9IUvhbek1FVweETpr7+Lcb09tWh1jy8shbsUgmKFIfeRyvPKt7OqZnwElcKbgMT2pv03y2Qg=
+X-Received: by 2002:ac8:3065:: with SMTP id g34mr24037378qte.136.1541457300702; 
+ Mon, 05 Nov 2018 14:35:00 -0800 (PST)
+MIME-Version: 1.0
+References: <f99e4c98-d584-d823-a581-0d6c3b9c3420@spamtrap.tnetconsulting.net>
+ <alpine.DEB.2.20.1811051132410.13752@mira.opentrend.net>
+ <c710dafc-9edc-cd29-3aeb-dc0fa6badeff@spamtrap.tnetconsulting.net>
+ <CAPWNY8WqB0fO=a_sNq5NezO7xh3-c4iO3gyoFUZXk5e7=v179w@mail.gmail.com>
+ <0289fa26-d157-8a65-389e-61dd7a01fcc4@spamtrap.tnetconsulting.net>
+In-Reply-To: <0289fa26-d157-8a65-389e-61dd7a01fcc4@spamtrap.tnetconsulting.net>
+From: Dan Cross <crossd@gmail.com>
+Date: Mon, 5 Nov 2018 17:34:24 -0500
+Message-ID: <CAEoi9W4HBH7y5wf+7Ah0Rrjh_yk5KSvsZY--2M-FM7D61S-1OQ@mail.gmail.com>
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+Content-Type: multipart/alternative; boundary="000000000000d849c00579f27e70"
+Subject: Re: [TUHS] YP / NIS / NIS+ / LDAP
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000d849c00579f27e70
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Nov 5, 2018 at 4:00 PM Grant Taylor via TUHS <tuhs@minnie.tuhs.org>
+wrote:
+
+> On 11/05/2018 12:24 AM, Mantas Mikul=C4=97nas wrote:
+> > Let the client handle authentication via Kerberos
+>
+> I don't know enough about Kerberos (yet) to know if it would be possible
+> for a login process to communicate with the KDC and get a TGT as part of
+> logging in, without already being logged in.
+>
+> My ignorance is leaving me with a priming problem that seems like a
+> catch 22.  You can't login without shadow information or TGT.  But
+> traditional (simpler) kinit is run after being logged in.  So ... how do
+> you detangle that?  The only thing that I can come up with is that the
+> login process does the kinit functionality on the users behalf.
+>
+
+You can use a modified `login` that will validate you against a KDC.
+
+The way it works is to set up a host key for the host you're logging into;
+that is then used to authenticate the *host* to the KDC, which then allows
+it to validate a user against the KDC and issue the user a TGT at the same
+time. This works well for e.g. console and X logins.
+
+Modifications have been made to e.g. SSH so that one can authenticate an
+SSH session via GSSAPI, which usually wraps Kerberos. If I recall, GSSAPI
+might be one of the lasting legacies of the DCE, though I may be
+misremembering history.
+
+I can see how NIS(+) sans-shadow could still be useful.  I can also see
+> how LDAP could be a close approximation / replacement for NIS(+) in this
+> case.
+>
+
+Security, in general, usually seeks to address five questions:
+
+1. Authentication - Is some entity who it claims to be?
+2. Authorization - Is some entity allowed to perform some action?
+3. Privacy - Can a third party snoop on a private conversation between two
+entities?
+4. Integrity - Can a third party alter communications between two entities
+in an undetectable way?
+5. Non-repudiation - Can it be definitively shown that some entity was a
+party to some communication?
+
+Kerberos is a authentication protocol.
+
+LDAP, YP (retroactively named NIS after a lawsuit involving, I believe,
+British Telecomm), NIS+, NetInfo, Active Directory, and Hesiod are all
+examples of directory services. To a first-order approximation, one might
+think of a directory service as providing an oracle allowing one to
+discover what entities exist in some domain.
+
+Authentication protocols and directory services solve different problems.
+Though in true Micro$oft-of-old fashion, AD sort of merged both.
+
+Kerberos solves the authentication problem, but does not provide a
+directory service nor does it solve the authorization problem (though some
+"kerberized" services could use a library to consult a user-provided file
+of ACLs mapping principals to privileges). On Unix, "authorization data"
+includes things like your UID and the set of groups you belong to (or more
+precisely, your process's UIDs and GIDs/groups). Kerberos provided support
+for privacy via encryption libraries, and it provided support for integrity
+via hashing/checksumming/signature libraries. "Kerberized" versions of
+network services such as telnet, FTP, rsh/rlogin/rcp etc all provided
+support for authentication via the baseline Kerberos protocol as well as
+privacy and integrity via connection-level encryption and checksumming.
+Kerberos provided a replay cache, but otherwise provided only limited
+support for non-repudiation via mutual authentication through the KDC (that
+is, clients authenticated to servers, but servers also authenticated to
+clients). So while a KDC might tell you whether the principal connecting to
+your SSH service is really "cross@GAJENDRA.NET", it won't tell you your
+UID, what shell you use, the path to your home directory, what groups you
+are a member of, or what finger should say for your real name.
+
+In its pure form, SSH provides support for limited authentication (via
+public key cryptography and the wide distribution of public keys) and
+limited authorization (via the `authorized_keys` file), privacy and
+integrity.
+
+LDAP might provide you some mechanism to look up a user record that
+provides those details; it may also provide some kind of hashed password
+that a system can use to validate a password, but it won't do much better
+than that. I suppose you could put an authorized SSH public key into an
+LDAP directory in the same way you would put a hashed password.
+
+NIS was based on Sun RPC; as was mentioned earlier, anyone on a network
+could bind to an NIS server and query it to get e.g., hashed password file
+entries that they could run crack against. Nothing was encrypted. There was
+a system for a user to update his/her information in the NIS database
+(e.g., this was how you changed your password or set your shell or updated
+your office phone number...), but the "authentication" was just checking
+your password; again nothing was encrypted, so a malicious third party on
+your network could in theory mount a man-in-the-middle attack against you
+and inject his/her own data into the transaction and take over your account=
+.
+
+NIS+ improved on this, but wasn't universally supported across systems and
+we lost some useful NIS functionality: back in the NIS days, you could
+supplement the contents of /etc/passwd with the NIS passwd maps, but keep
+local overrides (e.g., for anyone not in the `@staff` netgroup, set shell
+to `/sbin/nologin` on servers); perhaps there was a way to do this with
+NIS+ but it felt very much like a binary thing: you were either all in on
+NIS+ or not at all. Mixing and matching just wasn't as easy as it had been.
+Also, the symmetric crypto was, I think, DES based and as that fell apart I
+don't recall it getting much better. So unless you were all Sun based (and
+many of us had heterogenous systems to worry about; my shops supported Suns
+running SunOS 4 and Solaris 2, SGIs running Irix, HP-UX machines, Alphas
+running OSF/1 then DEC Unix then Tru64, DECstations running Ultrix,
+RS/6000's running AIX, RTs running AOS, a few NeXTs, PCs running Linux *BSD
+and PCs running Windows and Macs. Oh, and VMS on VAXen and Alphas. Yay.
+Elsewhere on campus we had a mainframe running VM/ESA, a couple of Crays,
+some AS/400s; we also had a few plan9 machines. We even had a PDP-10
+running TOPS-10 at some point. Good ol' YP cut across the widest swath of
+these so that's what we ran the longest, but it was a more innocent time,
+network access was more tightly controlled and it wasn't quite as dangerous
+to run something like ypserv.
+
+I thought for a while that LDAP would be the light and the way, but it was
+really a lot more general than what I cared about just for Unix system
+administration. Setting it up wasn't as easy as NIS, or even NIS+ for that
+matter.
+
+Netinfo came from NeXT and survived into Macos for a little while. It was
+kind of neat but again the all-singing, all-dancing solution to the world.
+No one else really used it.
+
+Hesiod, which seems unique to Athena, was kind of neat; it piggy-backed the
+need for a directory service on DNS, which is already a distributed
+directory service. You embedded relevant data into DNS TXT records, so
+imagine doing a DNS query to look up a user's /etc/passwd entry: after all,
+DNS already scaled and was well-proven Internet-wide. I don't know that
+anyone ever really supported it, though.
+
+So yeah. Kerberos is plenty fine for authentication for small to medium
+sites (up to mid tens of thousands of users, I'd guess), but won't help you
+distribute your authorization data. You need a directory service or some
+other mechanism for that. Directory services will help you with that, but
+usually don't do a great job at authentication, though they may provide the
+means to distributed the data that other systems can use for that. Of the
+directory services out there these days, LDAP seems to have "won".
+
+        - Dan C.
+
+--000000000000d849c00579f27e70
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div cl=
+ass=3D"gmail_quote"><div dir=3D"ltr">On Mon, Nov 5, 2018 at 4:00 PM Grant T=
+aylor via TUHS &lt;<a href=3D"mailto:tuhs@minnie.tuhs.org">tuhs@minnie.tuhs=
+.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"mar=
+gin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1=
+ex">On 11/05/2018 12:24 AM, Mantas Mikul=C4=97nas wrote:<br>
+&gt; Let the client handle authentication via Kerberos<br>
+<br>
+I don&#39;t know enough about Kerberos (yet) to know if it would be possibl=
+e <br>
+for a login process to communicate with the KDC and get a TGT as part of <b=
+r>
+logging in, without already being logged in.<br>
+<br>
+My ignorance is leaving me with a priming problem that seems like a <br>
+catch 22.=C2=A0 You can&#39;t login without shadow information or TGT.=C2=
+=A0 But <br>
+traditional (simpler) kinit is run after being logged in.=C2=A0 So ... how =
+do <br>
+you detangle that?=C2=A0 The only thing that I can come up with is that the=
+ <br>
+login process does the kinit functionality on the users behalf.<br></blockq=
+uote><div><br></div><div>You can use a modified `login` that will validate =
+you against a KDC.</div><div><br></div><div>The way it works is to set up a=
+ host key for the host you&#39;re logging into; that is then used to authen=
+ticate the *host* to the KDC, which then allows it to validate a user again=
+st the KDC and issue the user a TGT at the same time. This works well for e=
+.g. console and X logins.</div><div><br></div><div>Modifications have been =
+made to e.g. SSH so that one can authenticate an SSH session via GSSAPI, wh=
+ich usually wraps Kerberos. If I recall, GSSAPI might be one of the lasting=
+ legacies of the DCE, though I may be misremembering history.</div><div><br=
+></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;=
+border-left:1px solid rgb(204,204,204);padding-left:1ex">
+I can see how NIS(+) sans-shadow could still be useful.=C2=A0 I can also se=
+e <br>
+how LDAP could be a close approximation / replacement for NIS(+) in this <b=
+r>
+case.<br></blockquote><div><br></div><div>Security, in general, usually see=
+ks to address five questions:</div><div><br></div><div>1. Authentication - =
+Is some entity who it claims to be?</div><div>2. Authorization - Is some en=
+tity allowed to perform some action?</div><div>3. Privacy - Can a third par=
+ty snoop on a private conversation between two entities?</div><div>4. Integ=
+rity - Can a third party alter communications between two entities in an un=
+detectable way?</div><div>5. Non-repudiation - Can it be definitively shown=
+ that some entity was a party to some communication?</div><div><br></div><d=
+iv>Kerberos is a authentication protocol.</div><div><br></div><div>LDAP, YP=
+ (retroactively named NIS after a lawsuit involving, I believe, British Tel=
+ecomm), NIS+, NetInfo, Active Directory, and Hesiod are all examples of dir=
+ectory services. To a first-order approximation, one might think of a direc=
+tory service as providing an oracle allowing one to discover what entities =
+exist in some domain.</div><div><br></div><div>Authentication protocols and=
+ directory services solve different problems. Though in true Micro$oft-of-o=
+ld fashion, AD sort of merged both.<br></div><div><br></div><div>Kerberos s=
+olves the authentication problem, but does not provide a directory service =
+nor does it solve the authorization problem (though some &quot;kerberized&q=
+uot; services could use a library to consult a user-provided file of ACLs m=
+apping principals to privileges). On Unix, &quot;authorization data&quot; i=
+ncludes things like your UID and the set of groups you belong to (or more p=
+recisely, your process&#39;s UIDs and GIDs/groups). Kerberos provided suppo=
+rt for privacy via encryption libraries, and it provided support for integr=
+ity via hashing/checksumming/signature libraries. &quot;Kerberized&quot; ve=
+rsions of network services such as telnet, FTP, rsh/rlogin/rcp etc all prov=
+ided support for authentication via the baseline Kerberos protocol as well =
+as privacy and integrity via connection-level encryption and checksumming. =
+Kerberos provided a replay cache, but otherwise provided only limited suppo=
+rt for non-repudiation via mutual authentication through the KDC (that is, =
+clients authenticated to servers, but servers also authenticated to clients=
+). So while a KDC might tell you whether the principal connecting to your S=
+SH service is really &quot;<a href=3D"mailto:cross@GAJENDRA.NET">cross@GAJE=
+NDRA.NET</a>&quot;, it won&#39;t tell you your UID, what shell you use, the=
+ path to your home directory, what groups you are a member of, or what fing=
+er should say for your real name.</div><div><br></div><div>In its pure form=
+, SSH provides support for limited authentication (via public key cryptogra=
+phy and the wide distribution of public keys) and limited authorization (vi=
+a the `authorized_keys` file), privacy and integrity.</div><div><br></div><=
+div>LDAP might provide you some mechanism to look up a user record that pro=
+vides those details; it may also provide some kind of hashed password that =
+a system can use to validate a password, but it won&#39;t do much better th=
+an that. I suppose you could put an authorized SSH public key into an LDAP =
+directory in the same way you would put a hashed password.</div><div><br></=
+div><div>NIS was based on Sun RPC; as was mentioned earlier, anyone on a ne=
+twork could bind to an NIS server and query it to get e.g., hashed password=
+ file entries that they could run crack against. Nothing was encrypted. The=
+re was a system for a user to update his/her information in the NIS databas=
+e (e.g., this was how you changed your password or set your shell or update=
+d your office phone number...), but the &quot;authentication&quot; was just=
+ checking your password; again nothing was encrypted, so a malicious third =
+party on your network could in theory mount a man-in-the-middle attack agai=
+nst you and inject his/her own data into the transaction and take over your=
+ account.</div><div><br></div><div>NIS+ improved on this, but wasn&#39;t un=
+iversally supported across systems and we lost some useful NIS functionalit=
+y: back in the NIS days, you could supplement the contents of /etc/passwd w=
+ith the NIS passwd maps, but keep local overrides (e.g., for anyone not in =
+the `@staff` netgroup, set shell to `/sbin/nologin` on servers); perhaps th=
+ere was a way to do this with NIS+ but it felt very much like a binary thin=
+g: you were either all in on NIS+ or not at all. Mixing and matching just w=
+asn&#39;t as easy as it had been. Also, the symmetric crypto was, I think, =
+DES based and as that fell apart I don&#39;t recall it getting much better.=
+ So unless you were all Sun based (and many of us had heterogenous systems =
+to worry about; my shops supported Suns running SunOS 4 and Solaris 2, SGIs=
+ running Irix, HP-UX machines, Alphas running OSF/1 then DEC Unix then Tru6=
+4, DECstations running Ultrix, RS/6000&#39;s running AIX, RTs running AOS, =
+a few NeXTs, PCs running Linux *BSD and PCs running Windows and Macs. Oh, a=
+nd VMS on VAXen and Alphas. Yay. Elsewhere on campus we had a mainframe run=
+ning VM/ESA, a couple of Crays, some AS/400s; we also had a few plan9 machi=
+nes. We even had a PDP-10 running TOPS-10 at some point. Good ol&#39; YP cu=
+t across the widest swath of these so that&#39;s what we ran the longest, b=
+ut it was a more innocent time, network access was more tightly controlled =
+and it wasn&#39;t quite as dangerous to run something like ypserv.</div><di=
+v><br></div><div>I thought for a while that LDAP would be the light and the=
+ way, but it was really a lot more general than what I cared about just for=
+ Unix system administration. Setting it up wasn&#39;t as easy as NIS, or ev=
+en NIS+ for that matter.</div><div><br></div><div>Netinfo came from NeXT an=
+d survived into Macos for a little while. It was kind of neat but again the=
+ all-singing, all-dancing solution to the world. No one else really used it=
+.</div><div><br></div><div>Hesiod, which seems unique to Athena, was kind o=
+f neat; it piggy-backed the need for a directory service on DNS, which is a=
+lready a distributed directory service. You embedded relevant data into DNS=
+ TXT records, so imagine doing a DNS query to look up a user&#39;s /etc/pas=
+swd entry: after all, DNS already scaled and was well-proven Internet-wide.=
+ I don&#39;t know that anyone ever really supported it, though.</div><div><=
+br></div><div>So yeah. Kerberos is plenty fine for authentication for small=
+ to medium sites (up to mid tens of thousands of users, I&#39;d guess), but=
+ won&#39;t help you distribute your authorization data. You need a director=
+y service or some other mechanism for that. Directory services will help yo=
+u with that, but usually don&#39;t do a great job at authentication, though=
+ they may provide the means to distributed the data that other systems can =
+use for that. Of the directory services out there these days, LDAP seems to=
+ have &quot;won&quot;.</div><div><br></div><div>=C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ - Dan C.</div><div><br></div></div></div></div></div></div>
+
+--000000000000d849c00579f27e70--
