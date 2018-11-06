@@ -1,0 +1,328 @@
+From tuhs-bounces@minnie.tuhs.org Tue Nov  6 21:44:11 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.9 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SUBJ_ALL_CAPS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 0303a901
+	for <ml@inbox.vuxu.org>;
+	Tue, 6 Nov 2018 21:44:11 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 74643A22A0; Wed,  7 Nov 2018 07:44:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EC391A22B7;
+	Wed,  7 Nov 2018 07:43:44 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 9F571A22A1; Wed,  7 Nov 2018 05:58:25 +1000 (AEST)
+Received: from mail-ot1-f47.google.com (mail-ot1-f47.google.com
+ [209.85.210.47])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 155FFA22A0
+ for <tuhs@minnie.tuhs.org>; Wed,  7 Nov 2018 05:58:20 +1000 (AEST)
+Received: by mail-ot1-f47.google.com with SMTP id g27so12630623oth.6
+ for <tuhs@minnie.tuhs.org>; Tue, 06 Nov 2018 11:58:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=oLD9MJaeh5OWLm+aLRWm+mxMYHHp0tq0t2AdMPHJH0Q=;
+ b=cbqtL3Sfd5AahswPRVsnS62rq8AMDUKiV749400S1dB1eN2dgIaUz+oiaxzaUPNNIe
+ NTaVQoG3iOBPmvspdX3gzv9Jd/RF4+BFKrIbI9RuIW0aW9D0RG9uMAYtLcwrCcPATO/V
+ uNi1PEHblBq03XE0eWpxjdAkctG509So8/71PxEIvRy4EsTMGU38PFp9muNaLjbMLJwK
+ hFRm3Brdmr2Qi4Wjl0htNcuc5CLBepgQ3mYBgOaix16sNKM/WZloa13hkX6zIcjVVEAs
+ mzejnaMOqt347E6p2h/gTwyjBX8uWzYHDgiRF56iwW7Rg9C3N+2IOZ4eC8FTJfZjSp9a
+ NPbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=oLD9MJaeh5OWLm+aLRWm+mxMYHHp0tq0t2AdMPHJH0Q=;
+ b=Ao4IReS1j2Nxih0+V1m6NI/aU2buVLtchFWesTnXwKj4bapcQfCXRM1IiKOpryschz
+ KmVflTiIVuijeCuLviqVrOZI5QSajYd0ZjMhUp+KlLCcxXIrUDWuYuVJqbi3u0uFpOC6
+ a/X50jz9OnX/M+j8ihZ+FXXDXLz434i8+Gbxku5/2yG1i4pbmP5nIpQbCHjWax+yUhXT
+ Xa21qC9v5S8dUycoMae5P2cQUD9+vqjrcnxp9w1maMPCkuSqe1oDtfeFLni8NwYs1+fF
+ jBN8qIPMleYwqZJs0S1QojRPdOOrLveTugWImHpHX/ghFZFUnSnmtFUqh+NSncGYskb9
+ Urng==
+X-Gm-Message-State: AGRZ1gIDcn2RJ4yiqrVtPiIRbQwjKeu/l4KvNwmgiT/z0eSr+CP0kHgh
+ We75DoZP2y0G9h5apzgWR1iccVymlWGqvqp1WP0=
+X-Google-Smtp-Source: AJdET5eoCz7we7BM+xSeYhxtXvs03GHRS8jC0LGd0nziz8cHbwaC4Jxyw/+LTUEVlo16olAS6vDL4dnT+34O/N/yeEs=
+X-Received: by 2002:a9d:4335:: with SMTP id s50mr13896249ote.224.1541534298815; 
+ Tue, 06 Nov 2018 11:58:18 -0800 (PST)
+MIME-Version: 1.0
+References: <f99e4c98-d584-d823-a581-0d6c3b9c3420@spamtrap.tnetconsulting.net>
+ <alpine.DEB.2.20.1811051132410.13752@mira.opentrend.net>
+ <c710dafc-9edc-cd29-3aeb-dc0fa6badeff@spamtrap.tnetconsulting.net>
+ <CAPWNY8WqB0fO=a_sNq5NezO7xh3-c4iO3gyoFUZXk5e7=v179w@mail.gmail.com>
+ <0289fa26-d157-8a65-389e-61dd7a01fcc4@spamtrap.tnetconsulting.net>
+ <CAEoi9W4HBH7y5wf+7Ah0Rrjh_yk5KSvsZY--2M-FM7D61S-1OQ@mail.gmail.com>
+ <7d595808-fff7-4c1c-d969-362693ab2672@spamtrap.tnetconsulting.net>
+ <CAPWNY8UG9T32hme5bvtcmrFd3YYdXzNnPJK4J56zhBxBr=-MUA@mail.gmail.com>
+ <4d85ccda-7200-b6e7-8a27-5832e3bdcdba@spamtrap.tnetconsulting.net>
+In-Reply-To: <4d85ccda-7200-b6e7-8a27-5832e3bdcdba@spamtrap.tnetconsulting.net>
+From: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity@gmail.com>
+Date: Tue, 6 Nov 2018 21:58:04 +0200
+Message-ID: <CAPWNY8WycJjaYXEsJvk3M9czQ6d_S6aRsPpF=fs=-=3hcoxE3g@mail.gmail.com>
+To: gtaylor@tnetconsulting.net
+Content-Type: multipart/alternative; boundary="0000000000004a42dc057a046c45"
+Subject: Re: [TUHS] YP / NIS / NIS+ / LDAP
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000004a42dc057a046c45
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Nov 6, 2018 at 9:18 PM Grant Taylor via TUHS <tuhs@minnie.tuhs.org>
+wrote:
+
+> On 11/06/2018 12:07 AM, Mantas Mikul=C4=97nas wrote:
+> > These days the modification generally consists of pam_krb5 added to the
+> > system's PAM configuration.
+>
+> Hum....  I need to do some reading on that.
+>
+> > And similarly =E2=80=93 in other protocols (IMAP, SMTP, IRC, the same L=
+DAP) one
+> > can authenticate a session via SASL, which usually wraps GSSAPI, which
+> > usually wraps Kerberos.
+>
+> *nod*
+>
+> Complicating things is that implementations can choose to bypass SASL
+> and do the GSSAPI interaction directly.  Or take things even further and
+> do the Kerberos interaction directly.
+>
+
+Though from what I've seen on their mailing list, MIT Kerberos developers
+seem to recommend using GSSAPI at minimum, rather than the raw Kerberos
+APIs.
+
+
+>
+> Yet another reason why all these things are complicated.  So many
+> choices that impact other choices in the same problem domain.
+>
+> > You're right, it's primarily an authentication protocol.
+>
+> :-)
+>
+> > But due to the way it works, it *also* negotiates a 'session key'
+> between
+> > the user and the service, which then may be used for transport
+> encryption
+> > (sealing).
+>
+> Does that mean that the protocols would need to retain the session key
+> and use it for their other non-Kerberos specific protocols?  I.e. the
+> rsh daemon would need to use the session key to encrypt / decrypt the
+> rsh data, after and independent of the Kerberos authentication process.
+>
+
+Well, they can use it, but they don't have to. It's up to the developer in
+the end. The earlier kerberized protocols did, because they didn't have any
+other encryption layer. Most recent protocols establish encryption in any
+case (be it TLS or SSHv2 or something else) so they just don't bother
+calling the SASL (or GSSAPI) seal functions.
+
+
+>
+> > It's not commonly used as far as I know =E2=80=93 most new protocols al=
+ready
+> > have their own security layers such as TLS or SSH.
+>
+> ACK
+>
+> I worry that other encryption protocols / methods have far surpassed
+> Kerberos' encryption capability / strength.
+>
+
+Kerberos does include modern enctypes (such as aes128/aes256), but from
+what *little* I understand about this part, it's still not as good as the
+modern protocols. (E.g. complete lack of PFS =E2=80=93 the same client or s=
+erver
+always uses the same master key until it's manually rotated...)
+
+On the bright side, the *authentication* of Kerberos is solid as far as
+I've heard. (Which, again I know very little about this part, but I do
+remember someone saying that it has an actual security proof, as well as
+being decently quantum-resistant.)
+
+
+>
+> > Actually LDAP is the only still-widespread protocol that comes to mind
+> > whose implementations frequently make use of Kerberos-based encryption
+> > (via GSSAPI).
+>
+> O.o=E2=80=BD
+>
+> This sounds like it would be independent of LDAP over SSL (TCP 636).
+>
+> Would this Kerberos specified encryption be run over the standard LDAP
+> port (TCP 389)?
+>
+
+Usually, yes.
+
+(There is no technical reason why it couldn't run inside TLS, it's just
+redundant =E2=80=93 OpenLDAP doesn't mind but e.g. Active Directory explici=
+tly
+refuses to use both encryption layers at once. If you use TLS, you can
+still use GSSAPI auth, but it insists that you turn off the GSSAPI
+signing/sealing.)
+
+
+>
+> > This is especially common in Active Directory environments, where the
+> > DCs might not have a valid TLS certificate.
+>
+> O.o=E2=80=BD
+>
+> I'm going to have to go pick my AD guru's brain after reading that.
+>
+> > (I seem to recall kerberized Telnet didn't survive because it was
+> > limited to DES/3DES for an odd reason. Didn't quite understand why that
+> > was the case, though.)
+>
+> #questionsQuestions
+>
+
+(This reminds me that I've noticed at least one of the MIT Kerberos
+developers here in TUHS, who would surely know more about this than I've
+gathered through barely few years of messing around.)
+
+--=20
+Mantas Mikul=C4=97nas
+
+--0000000000004a42dc057a046c45
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_quote"><div dir=3D"ltr">On Tue, Nov 6,=
+ 2018 at 9:18 PM Grant Taylor via TUHS &lt;<a href=3D"mailto:tuhs@minnie.tu=
+hs.org">tuhs@minnie.tuhs.org</a>&gt; wrote:<br></div><blockquote class=3D"g=
+mail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-l=
+eft:1ex">On 11/06/2018 12:07 AM, Mantas Mikul=C4=97nas wrote:<br>
+&gt; These days the modification generally consists of pam_krb5 added to th=
+e <br>
+&gt; system&#39;s PAM configuration.<br>
+<br>
+Hum....=C2=A0 I need to do some reading on that.<br>
+<br>
+&gt; And similarly =E2=80=93 in other protocols (IMAP, SMTP, IRC, the same =
+LDAP) one <br>
+&gt; can authenticate a session via SASL, which usually wraps GSSAPI, which=
+ <br>
+&gt; usually wraps Kerberos.<br>
+<br>
+*nod*<br>
+<br>
+Complicating things is that implementations can choose to bypass SASL <br>
+and do the GSSAPI interaction directly.=C2=A0 Or take things even further a=
+nd <br>
+do the Kerberos interaction directly.<br></blockquote><div><br></div><div>T=
+hough from what I&#39;ve seen on their mailing list, MIT Kerberos developer=
+s seem to recommend using GSSAPI at minimum, rather than the raw Kerberos A=
+PIs.</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margi=
+n:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+<br>
+Yet another reason why all these things are complicated.=C2=A0 So many <br>
+choices that impact other choices in the same problem domain.<br>
+<br>
+&gt; You&#39;re right, it&#39;s primarily an authentication protocol.<br>
+<br>
+:-)<br>
+<br>
+&gt; But due to the way it works, it *also* negotiates a &#39;session key&#=
+39; between <br>
+&gt; the user and the service, which then may be used for transport encrypt=
+ion <br>
+&gt; (sealing).<br>
+<br>
+Does that mean that the protocols would need to retain the session key <br>
+and use it for their other non-Kerberos specific protocols?=C2=A0 I.e. the =
+<br>
+rsh daemon would need to use the session key to encrypt / decrypt the <br>
+rsh data, after and independent of the Kerberos authentication process.<br>=
+</blockquote><div><br></div><div>Well, they can use it, but they don&#39;t =
+have to. It&#39;s up to the developer in the end. The earlier kerberized pr=
+otocols did, because they didn&#39;t have any other encryption layer. Most =
+recent protocols establish encryption in any case (be it TLS or SSHv2 or so=
+mething else) so they just don&#39;t bother calling the SASL (or GSSAPI) se=
+al functions.</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+<br>
+&gt; It&#39;s not commonly used as far as I know =E2=80=93 most new protoco=
+ls already <br>
+&gt; have their own security layers such as TLS or SSH.<br>
+<br>
+ACK<br>
+<br>
+I worry that other encryption protocols / methods have far surpassed <br>
+Kerberos&#39; encryption capability / strength.<br></blockquote><div><br></=
+div><div>Kerberos does include modern enctypes (such as aes128/aes256), but=
+ from what *little* I understand about this part, it&#39;s still not as goo=
+d as the modern protocols. (E.g. complete lack of PFS =E2=80=93 the same cl=
+ient or server always uses the same master key until it&#39;s manually rota=
+ted...)</div><div><br></div><div>On the bright side, the *authentication* o=
+f Kerberos is solid as far as I&#39;ve heard. (Which, again I know very lit=
+tle about this part, but I do remember someone saying that it has an actual=
+ security proof, as well as being decently quantum-resistant.)</div><div>=
+=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;bo=
+rder-left:1px #ccc solid;padding-left:1ex">
+<br>
+&gt; Actually LDAP is the only still-widespread protocol that comes to mind=
+ <br>
+&gt; whose implementations frequently make use of Kerberos-based encryption=
+ <br>
+&gt; (via GSSAPI).<br>
+<br>
+O.o=E2=80=BD<br>
+<br>
+This sounds like it would be independent of LDAP over SSL (TCP 636).<br>
+<br>
+Would this Kerberos specified encryption be run over the standard LDAP <br>
+port (TCP 389)?<br></blockquote><div><br></div><div>Usually, yes.</div><div=
+><br></div><div>(There is no technical reason why it couldn&#39;t run insid=
+e TLS, it&#39;s just redundant =E2=80=93 OpenLDAP doesn&#39;t mind but e.g.=
+ Active Directory explicitly refuses to use both encryption layers at once.=
+ If you use TLS, you can still use GSSAPI auth, but it insists that you tur=
+n off the GSSAPI signing/sealing.)</div><div>=C2=A0</div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padd=
+ing-left:1ex">
+<br>
+&gt; This is especially common in Active Directory environments, where the =
+<br>
+&gt; DCs might not have a valid TLS certificate.<br>
+<br>
+O.o=E2=80=BD<br>
+<br>
+I&#39;m going to have to go pick my AD guru&#39;s brain after reading that.=
+<br>
+<br>
+&gt; (I seem to recall kerberized Telnet didn&#39;t survive because it was =
+<br>
+&gt; limited to DES/3DES for an odd reason. Didn&#39;t quite understand why=
+ that <br>
+&gt; was the case, though.)<br>
+<br>
+#questionsQuestions<br></blockquote><div><br></div><div>(This reminds me th=
+at I&#39;ve noticed at least one of the MIT Kerberos developers here in TUH=
+S, who would surely know more about this than I&#39;ve gathered through bar=
+ely few years of messing around.)</div><div><br></div></div>-- <br><div dir=
+=3D"ltr" class=3D"gmail_signature" data-smartmail=3D"gmail_signature"><div =
+dir=3D"ltr">Mantas Mikul=C4=97nas</div></div></div>
+
+--0000000000004a42dc057a046c45--
