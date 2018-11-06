@@ -1,0 +1,90 @@
+From tuhs-bounces@minnie.tuhs.org Tue Nov  6 04:37:29 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.9 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE,SUBJ_ALL_CAPS autolearn=no
+	autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 14d3f69d
+	for <ml@inbox.vuxu.org>;
+	Tue, 6 Nov 2018 04:37:28 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 823F0A244F; Tue,  6 Nov 2018 14:37:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5925EA22EA;
+	Tue,  6 Nov 2018 14:36:57 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 11AF0A217C; Tue,  6 Nov 2018 13:04:08 +1000 (AEST)
+Received: from castor.opentrend.net (li1631-87.members.linode.com
+ [172.104.51.87])
+ by minnie.tuhs.org (Postfix) with ESMTP id 863DBA215E
+ for <tuhs@minnie.tuhs.org>; Tue,  6 Nov 2018 13:04:07 +1000 (AEST)
+Received: from mira.opentrend.net (mira.opentrend.net [119.18.33.224])
+ by castor.opentrend.net (Postfix) with ESMTP id DA4B15A043;
+ Tue,  6 Nov 2018 03:04:03 +0000 (UTC)
+Date: Tue, 6 Nov 2018 13:03:47 +1000 (AEST)
+From: Robert Brockway <robert@timetraveller.org>
+X-X-Sender: robert@mira.opentrend.net
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+In-Reply-To: <6a64b957-5912-b102-c73c-d0b71bd24188@spamtrap.tnetconsulting.net>
+Message-ID: <alpine.DEB.2.20.1811061122360.13752@mira.opentrend.net>
+References: <f99e4c98-d584-d823-a581-0d6c3b9c3420@spamtrap.tnetconsulting.net>
+ <CAFCBnZsmLWuCaJo2w4ekR42yaS9XszR1h-H82t49agin-ORgBg@mail.gmail.com>
+ <6a64b957-5912-b102-c73c-d0b71bd24188@spamtrap.tnetconsulting.net>
+User-Agent: Alpine 2.20 (DEB 67 2015-01-07)
+MIME-Version: 1.0
+Content-Type: text/plain; format=flowed; charset=US-ASCII
+Subject: Re: [TUHS] YP / NIS / NIS+ / LDAP
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, 5 Nov 2018, Grant Taylor via TUHS wrote:
+
+> I also loath the idea that Unix (Linux) doesn't have a stand alone central 
+> directory server solution.  Or if LDAP + Kerveros is said solution, so be it. 
+> -  That's sort of what I'm trying to figure out.
+
+LDAP with or without Kerberos certainly counts as a standalone directory 
+server solution for *nix.
+
+> Translation:  What is the current Unix (Linux) method to provide central user 
+> directory / authentication for about a dozen Unix (Linux / Solaris / *BSD / 
+> AIX) systems /without/ a Windows Server in the mix.  I don't own a license 
+> for any version of Windows Server that supports AD.  Nor do I feel compelled 
+> to buy one.
+
+I've seen plenty of businesses with Linux servers and OSX desktops.  These 
+business often manage user auth on Linux with LDAP.  Various solutions 
+were used to manage the OSX boxes but they were quite separate to Linux.
+
+One caveat with LDAP.  When I last did this a few years ago many Linux 
+systems were set up in such a manner that a failure of LDAP makes the 
+systems largely unusable. AFAIK this is still a problem.
+
+A sysadmin logging in had to wait out a series of timeouts while trying to 
+open nsswitch.conf or the PAM config to disable LDAP so the underlying 
+problems could be addressed.
+
+One fix for this that I mentioned earlier is to manage the Linux systems 
+using orchestration tools like Ansible.  Have them generate local passwd, 
+shadow & group files from data stored in LDAP.  This prevent the timeout 
+problems I mentioned earlier and also means that switching to a new 
+authentication backend (eg, OpenLDAP to AD) is a lot easier since it is 
+abstracted away.
+
+Cheers,
+
+Rob
