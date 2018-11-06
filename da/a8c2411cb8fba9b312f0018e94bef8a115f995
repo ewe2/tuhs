@@ -1,0 +1,338 @@
+From tuhs-bounces@minnie.tuhs.org Wed Nov  7 00:15:33 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.9 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SUBJ_ALL_CAPS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 3564f596
+	for <ml@inbox.vuxu.org>;
+	Wed, 7 Nov 2018 00:15:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1B11CA22A2; Wed,  7 Nov 2018 10:15:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A6907A22DA;
+	Wed,  7 Nov 2018 10:15:12 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A11A7A22A0; Wed,  7 Nov 2018 08:24:45 +1000 (AEST)
+Received: from mail-qt1-f182.google.com (mail-qt1-f182.google.com
+ [209.85.160.182])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F1BEF94111
+ for <tuhs@minnie.tuhs.org>; Wed,  7 Nov 2018 08:24:39 +1000 (AEST)
+Received: by mail-qt1-f182.google.com with SMTP id n21so1970839qtl.6
+ for <tuhs@minnie.tuhs.org>; Tue, 06 Nov 2018 14:24:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=VrSyGLTyd1unJR8EqShWwEVgtQSuyIClzYkoz/3GwIM=;
+ b=gfZqg8XnWp1MLB3rwrQmohknBgL8jECDhamALowaX3RcI9Srh2uKsfwA6evI1qO7PJ
+ MHkFr0qoXKtNvJUFNq3J2avHHl+kYoCLj9CNpj+M9IecK9yQI7aQRlCEpk8gxRXyCOY6
+ RoFl1kNrqJgRm9rcuCMJvfb8TZZHVGDIAE04O4el2evDhU893lKXY7rK1pQndxpFrlYN
+ YDe5FMMUSYOTgCN0NLvXzQfisTVG3AkX2+EXYdVlTzNyNSrWMj58gVsLS6SoOXwZxUg8
+ TUJ/hyQ0nJI4ylhf5KXsvtvVdyN3Q4+ApHlnBKAev8MMzm47k0fkJYZ4fPqcMvIeaAtR
+ f+xA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=VrSyGLTyd1unJR8EqShWwEVgtQSuyIClzYkoz/3GwIM=;
+ b=fOaOlMfy6vGe6tgeNVrsOCJ3L3u3Ky26n0UZb49rhbOPLGjtJHlBCff6Y6bpxTz/1y
+ aVznt+f/MdT8M4jGgN0gKEeiEyEvpF+qHnQMs+x/0bEiq64bcZCBIgKvG0wKWBTidm1S
+ o07sEk8ItpLG3Jwm25d3AT/HP/rGWn6KeWHU+i0t9jb9aBEoDFIlN59qXvoLktXFr3ee
+ vLOfMtfy6/JjDvij8kpDXGCy5fgNJW77pClefdz4yMJAUBk6KuPqQeHBD6fmdmmNf7iS
+ 6x6DIZwxaQanfK7d5Q+NlGYBRpappKA33e6h87yV9fIyF0JHy0ccVz4ys1oljCZUzBs3
+ S8dg==
+X-Gm-Message-State: AGRZ1gJWnA6X9bvAs8J3YGAZHQm2IvF0PNeTuhbf+CXVDLozOBG4ZtLV
+ o93fv0L8M6vgWWdIsOAsIyUBNHihIGkSgOzBcqMJFA==
+X-Google-Smtp-Source: AJdET5f59uJyg8D9P9mltelqh5gpyLpE6ZlPZEAO2di7IgH5UXWQtHmqykAPBlFjgPu100vUITejG60seuF5UAWWS+E=
+X-Received: by 2002:ac8:19e2:: with SMTP id s31mr21068699qtk.215.1541543078852; 
+ Tue, 06 Nov 2018 14:24:38 -0800 (PST)
+MIME-Version: 1.0
+References: <f99e4c98-d584-d823-a581-0d6c3b9c3420@spamtrap.tnetconsulting.net>
+ <alpine.DEB.2.20.1811051132410.13752@mira.opentrend.net>
+ <c710dafc-9edc-cd29-3aeb-dc0fa6badeff@spamtrap.tnetconsulting.net>
+ <CAPWNY8WqB0fO=a_sNq5NezO7xh3-c4iO3gyoFUZXk5e7=v179w@mail.gmail.com>
+ <0289fa26-d157-8a65-389e-61dd7a01fcc4@spamtrap.tnetconsulting.net>
+ <CAEoi9W4HBH7y5wf+7Ah0Rrjh_yk5KSvsZY--2M-FM7D61S-1OQ@mail.gmail.com>
+ <7d595808-fff7-4c1c-d969-362693ab2672@spamtrap.tnetconsulting.net>
+In-Reply-To: <7d595808-fff7-4c1c-d969-362693ab2672@spamtrap.tnetconsulting.net>
+From: Dan Cross <crossd@gmail.com>
+Date: Tue, 6 Nov 2018 17:24:02 -0500
+Message-ID: <CAEoi9W7mJD2y29KPj1av_Lpnpd=AYgLwL-G7HjKYjo-B69ejHA@mail.gmail.com>
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+Content-Type: multipart/alternative; boundary="0000000000009f16af057a067785"
+Subject: Re: [TUHS] YP / NIS / NIS+ / LDAP
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000009f16af057a067785
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Nov 6, 2018 at 1:40 AM Grant Taylor via TUHS <tuhs@minnie.tuhs.org>
+wrote:
+
+> On 11/05/2018 03:34 PM, Dan Cross wrote:
+> [snip]
+> > Security, in general, usually seeks to address five questions:
+> >
+> > 1. Authentication - Is some entity who it claims to be?
+> > 2. Authorization - Is some entity allowed to perform some action?
+> > 3. Privacy - Can a third party snoop on a private conversation between
+> > two entities?
+> > 4. Integrity - Can a third party alter communications between two
+> > entities in an undetectable way?
+> > 5. Non-repudiation - Can it be definitively shown that some entity was a
+> > party to some communication?
+>
+> The 3rd A that I'm used to is "Access Control".  Is the requested action
+> allowed given the above information.
+>
+
+Isn't that authorization?
+
+> Kerberos is a authentication protocol.
+> >
+> > LDAP, YP (retroactively named NIS after a lawsuit involving, I believe,
+> > British Telecomm), NIS+, NetInfo, Active Directory, and Hesiod are all
+> > examples of directory services. To a first-order approximation, one
+> > might think of a directory service as providing an oracle allowing one
+> > to discover what entities exist in some domain.
+> >
+> > Authentication protocols and directory services solve different
+> > problems. Though in true Micro$oft-of-old fashion, AD sort of merged
+> both.
+>
+> I would argue that a directory including shadow information (like
+> NIS(+)) does both too.
+>
+
+Not really. It provides the data that lets one perform a relatively weak
+validation of e.g. a password, but it is not *itself* an authentication
+protocol.
+
+> Kerberos solves the authentication problem, but does not provide a
+> > directory service nor does it solve the authorization problem (though
+> > some "kerberized" services could use a library to consult a
+> > user-provided file of ACLs mapping principals to privileges). On Unix,
+> > "authorization data" includes things like your UID and the set of groups
+> > you belong to (or more precisely, your process's UIDs and GIDs/groups).
+> > Kerberos provided support for privacy via encryption libraries, and it
+> > provided support for integrity via hashing/checksumming/signature
+> > libraries. "Kerberized" versions of network services such as telnet,
+> > FTP, rsh/rlogin/rcp etc all provided support for authentication via the
+> > baseline Kerberos protocol as well as privacy and integrity via
+> > connection-level encryption and checksumming.
+>
+> I was not aware that Kerberos could provide privacy (encryption) for
+> kerberized services.  I (naively) thought that Kerberos was
+> authentication that other things could use to make access control
+> decisions.
+>
+
+Older versions of Kerberos often included modified versions of popular
+servers and their clients that had been modified to use the kerberos
+protocol for authentication, and also often to encrypt communications. For
+example, the version of `telnet` that shipped with MIT kerberos back in the
+day had an option that could be used to encrypt the data stream; similarly
+with rlogin, et al. I have a dim memory that the version of FTP might
+support encryption for the control connection but not data connections (but
+I also might be purely imagining that). I'm guessing most of this stuff has
+been dropped from more recent distributions because...really...telnet?
+
+[snip]
+> > In its pure form, SSH provides support for limited authentication (via
+> > public key cryptography and the wide distribution of public keys) and
+> > limited authorization (via the `authorized_keys` file), privacy and
+> > integrity.
+>
+> I think that OpenSSH's certificate support extends that a bit.
+>
+
+What I meant is that SSH supports a limited sense of checking whether a
+given key matches and making a yea or nay decision based on that.
+
+[snip]
+> Even if communications with the NIS server was encrypted, I'm not
+> hearing anything that prevents an authenticated user from enumerating
+> NIS.  Even if it was over encrypted channels.
+>
+
+Correct. `ypcat passwd` often gave you a bunch of hashed passwords in field
+two of a stream 7th Edition /etc/passwd formatted entries.
+
+I have, again, some vague memory that at some point this was changed so
+that root on the localhost could get a shadow-style map, but normal users
+couldn't see the password hashes. But I might totally be making that up,
+and of course, it wasn't robust security since what went over the wire
+wasn't encrypted and breaking root on a host could still get you all the
+hashes on the network. Contrast with Kerberos, where breaking root on a
+host doesn't compromise much beyond that host (modulo leveraging that to
+steal user passwords and the like).
+
+[snip]
+> > Hesiod, which seems unique to Athena, was kind of neat; it piggy-backed
+> > the need for a directory service on DNS, which is already a distributed
+> > directory service. You embedded relevant data into DNS TXT records, so
+> > imagine doing a DNS query to look up a user's /etc/passwd entry: after
+> > all, DNS already scaled and was well-proven Internet-wide. I don't know
+> > that anyone ever really supported it, though.
+>
+> I know that Red Hat Linux did have support for it.  One of my colleagues
+> was a Hesiod maintainer for a while.
+>
+
+Ha! That's a hoot.
+
+[snip]
+
+        - Dan C.
+
+--0000000000009f16af057a067785
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_quote"><div dir=3D"ltr">On Tue, Nov 6,=
+ 2018 at 1:40 AM Grant Taylor via TUHS &lt;<a href=3D"mailto:tuhs@minnie.tu=
+hs.org">tuhs@minnie.tuhs.org</a>&gt; wrote:<br></div><blockquote class=3D"g=
+mail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-l=
+eft:1ex">On 11/05/2018 03:34 PM, Dan Cross wrote:<br>[snip]<br>
+&gt; Security, in general, usually seeks to address five questions:<br>
+&gt; <br>
+&gt; 1. Authentication - Is some entity who it claims to be?<br>
+&gt; 2. Authorization - Is some entity allowed to perform some action?<br>
+&gt; 3. Privacy - Can a third party snoop on a private conversation between=
+ <br>
+&gt; two entities?<br>
+&gt; 4. Integrity - Can a third party alter communications between two <br>
+&gt; entities in an undetectable way?<br>
+&gt; 5. Non-repudiation - Can it be definitively shown that some entity was=
+ a <br>
+&gt; party to some communication?<br>
+<br>
+The 3rd A that I&#39;m used to is &quot;Access Control&quot;.=C2=A0 Is the =
+requested action <br>
+allowed given the above information.<br></blockquote><div><br></div><div>Is=
+n&#39;t that authorization?</div><div><br></div><blockquote class=3D"gmail_=
+quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1=
+ex">
+&gt; Kerberos is a authentication protocol.<br>
+&gt; <br>
+&gt; LDAP, YP (retroactively named NIS after a lawsuit involving, I believe=
+, <br>
+&gt; British Telecomm), NIS+, NetInfo, Active Directory, and Hesiod are all=
+ <br>
+&gt; examples of directory services. To a first-order approximation, one <b=
+r>
+&gt; might think of a directory service as providing an oracle allowing one=
+ <br>
+&gt; to discover what entities exist in some domain.<br>
+&gt; <br>
+&gt; Authentication protocols and directory services solve different <br>
+&gt; problems. Though in true Micro$oft-of-old fashion, AD sort of merged b=
+oth.<br>
+<br>
+I would argue that a directory including shadow information (like <br>
+NIS(+)) does both too.<br></blockquote><div><br></div><div>Not really. It p=
+rovides the data that lets one perform a relatively weak validation of e.g.=
+ a password, but it is not *itself* an authentication protocol.</div><div><=
+br></div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;borde=
+r-left:1px #ccc solid;padding-left:1ex">
+&gt; Kerberos solves the authentication problem, but does not provide a <br=
+>
+&gt; directory service nor does it solve the authorization problem (though =
+<br>
+&gt; some &quot;kerberized&quot; services could use a library to consult a =
+<br>
+&gt; user-provided file of ACLs mapping principals to privileges). On Unix,=
+ <br>
+&gt; &quot;authorization data&quot; includes things like your UID and the s=
+et of groups <br>
+&gt; you belong to (or more precisely, your process&#39;s UIDs and GIDs/gro=
+ups). <br>
+&gt; Kerberos provided support for privacy via encryption libraries, and it=
+ <br>
+&gt; provided support for integrity via hashing/checksumming/signature <br>
+&gt; libraries. &quot;Kerberized&quot; versions of network services such as=
+ telnet, <br>
+&gt; FTP, rsh/rlogin/rcp etc all provided support for authentication via th=
+e <br>
+&gt; baseline Kerberos protocol as well as privacy and integrity via <br>
+&gt; connection-level encryption and checksumming.<br>
+<br>
+I was not aware that Kerberos could provide privacy (encryption) for <br>
+kerberized services.=C2=A0 I (naively) thought that Kerberos was <br>
+authentication that other things could use to make access control decisions=
+.<br></blockquote><div><br></div><div>Older versions of Kerberos often incl=
+uded modified versions of popular servers and their clients that had been m=
+odified to use the kerberos protocol for authentication, and also often to =
+encrypt communications. For example, the version of `telnet` that shipped w=
+ith MIT kerberos back in the day had an option that could be used to encryp=
+t the data stream; similarly with rlogin, et al. I have a dim memory that t=
+he version of FTP might support encryption for the control connection but n=
+ot data connections (but I also might be purely imagining that). I&#39;m gu=
+essing most of this stuff has been dropped from more recent distributions b=
+ecause...really...telnet?</div><div><br></div><blockquote class=3D"gmail_qu=
+ote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex=
+">[snip]<br>
+&gt; In its pure form, SSH provides support for limited authentication (via=
+ <br>
+&gt; public key cryptography and the wide distribution of public keys) and =
+<br>
+&gt; limited authorization (via the `authorized_keys` file), privacy and <b=
+r>
+&gt; integrity.<br>
+<br>
+I think that OpenSSH&#39;s certificate support extends that a bit.<br></blo=
+ckquote><div><br></div><div>What I meant is that SSH supports a limited sen=
+se of checking whether a given key matches and making a yea or nay decision=
+ based on that.</div><div><br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">[snip]<b=
+r>
+Even if communications with the NIS server was encrypted, I&#39;m not <br>
+hearing anything that prevents an authenticated user from enumerating <br>
+NIS.=C2=A0 Even if it was over encrypted channels.<br></blockquote><div><br=
+></div><div>Correct. `ypcat passwd` often gave you a bunch of hashed passwo=
+rds in field two of a stream 7th Edition /etc/passwd formatted entries.</di=
+v><div><br></div><div>I have, again, some vague memory that at some point t=
+his was changed so that root on the localhost could get a shadow-style map,=
+ but normal users couldn&#39;t see the password hashes. But I might totally=
+ be making that up, and of course, it wasn&#39;t robust security since what=
+ went over the wire wasn&#39;t encrypted and breaking root on a host could =
+still get you all the hashes on the network. Contrast with Kerberos, where =
+breaking root on a host doesn&#39;t compromise much beyond that host (modul=
+o leveraging that to steal user passwords and the like).</div><div><br></di=
+v><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:=
+1px #ccc solid;padding-left:1ex">[snip]<br>
+&gt; Hesiod, which seems unique to Athena, was kind of neat; it piggy-backe=
+d <br>
+&gt; the need for a directory service on DNS, which is already a distribute=
+d <br>
+&gt; directory service. You embedded relevant data into DNS TXT records, so=
+ <br>
+&gt; imagine doing a DNS query to look up a user&#39;s /etc/passwd entry: a=
+fter <br>
+&gt; all, DNS already scaled and was well-proven Internet-wide. I don&#39;t=
+ know <br>
+&gt; that anyone ever really supported it, though.<br>
+<br>
+I know that Red Hat Linux did have support for it.=C2=A0 One of my colleagu=
+es <br>
+was a Hesiod maintainer for a while.<br></blockquote><div><br></div><div>Ha=
+! That&#39;s a hoot.</div><div><br></div><div>[snip]</div><div><br></div><d=
+iv>=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Dan C.</div><div><br></div></div></div>
+
+--0000000000009f16af057a067785--
