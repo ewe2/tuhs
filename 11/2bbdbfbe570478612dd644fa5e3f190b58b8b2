@@ -1,0 +1,485 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id eb220fdc
+	for <ml@inbox.vuxu.org>;
+	Tue, 13 Nov 2018 23:22:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 915B7A2477; Wed, 14 Nov 2018 09:22:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 93199A22C7;
+	Wed, 14 Nov 2018 09:22:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1C7E3A22C7; Wed, 14 Nov 2018 09:21:56 +1000 (AEST)
+Received: from mail-ua1-f51.google.com (mail-ua1-f51.google.com
+ [209.85.222.51])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 56921A22C1
+ for <tuhs@tuhs.org>; Wed, 14 Nov 2018 09:21:50 +1000 (AEST)
+Received: by mail-ua1-f51.google.com with SMTP id s26so5026831uao.0
+ for <tuhs@tuhs.org>; Tue, 13 Nov 2018 15:21:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=ygS1cpXYuVmYVwEjOo7XjRKBz+dohOYYBpqermRA/U4=;
+ b=p4Ak04VF/D2H7uxDKOxv1szjfqjTkqjtVhFqFUCTnHRgNSUB1Z54W3xk6TFqKHN+OQ
+ ONvHdm3r+j19Ssh2WALujG25hbPJAsMyuiornTiPTQhLNaXweAThTmVmL0OdOrIV/NVY
+ IrUp1LH476nG9xrbV8dhbfIx2RQ5sLrmDspshFDhEW/unFfP0xEvM5GklZ1xjTX5LgrF
+ KOtDLb8Tu6/VS1KZCHKtrrdehjuAIzBTRmahFQTjATuSO0Uo1nsHmgsm1IV0xqLXyS5g
+ xxjq/nI3QmJF70AXgO5JAgy/GreHw6DWzyka4VWXHj697jIG+8VUh8ll5xi7tG5iTc3H
+ 9LFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=ygS1cpXYuVmYVwEjOo7XjRKBz+dohOYYBpqermRA/U4=;
+ b=Gh2N0E2Knr480wl05q73fU9rGTGBDQW5Ut0sjjj8niSHLxtUxS5/JeXuKmxumdUfEz
+ 5eJSwaz/acaXgccufpNNZMNtfKjote9xx6UxpugOOyK14uvc1mkyWXvkkQPLE1Xd1w3q
+ fqhx+SCjLkoOpnbLF/nea+GxhyIz757XvqLw2KV7E0RLncs4zWVGX8+elCE4gOkpE7jB
+ s+9mFw+xwUMsigfncrPyjS9GHGSOCSWuZ/0uEnf7Q6Fj3nCqEe3u2LFmCI4cYf3qWRLl
+ n25vV2Jg/86HcnzePqOReWSgCOCCHYPkmbsnqPkW5S6RbwBle4p0N5/8hZP+F8ALsmV6
+ aT0A==
+X-Gm-Message-State: AGRZ1gLAfnQ9fVnzd/2k1OpBwCGPEwPDyjLU3yk4gdEEw4nasikxidtx
+ BTziglMfcm3EkpqGJ8hiUZmdpQOw7828PgSisMc=
+X-Google-Smtp-Source: AJdET5ecs3xiTLMKJw7471mPSydjJQzE9IXKKhETkqnf0psOmrfgc8hLSJu8bKITJU3LDIlUgf5uymgcfmESOOHcKto=
+X-Received: by 2002:ab0:1e88:: with SMTP id o8mr3514875uak.69.1542151309003;
+ Tue, 13 Nov 2018 15:21:49 -0800 (PST)
+MIME-Version: 1.0
+References: <20181113215531.GA24373@minnie.tuhs.org>
+ <alpine.BSF.2.21.9999.1811140940440.60610@aneurin.horsfall.org>
+ <20181113224952.GA29973@minnie.tuhs.org>
+ <alpine.BSF.2.21.9999.1811140957280.60610@aneurin.horsfall.org>
+In-Reply-To: <alpine.BSF.2.21.9999.1811140957280.60610@aneurin.horsfall.org>
+From: Rob Pike <robpike@gmail.com>
+Date: Wed, 14 Nov 2018 10:21:37 +1100
+Message-ID: <CAKzdPgwsf-h+V8b1yMq25PcFNu2Ux==q2Lpbvzitb3f7P-UKcA@mail.gmail.com>
+To: dave@horsfall.org
+Content-Type: multipart/alternative; boundary="000000000000f6914c057a9414e7"
+Subject: Re: [TUHS] Article on the history of cat(1)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000f6914c057a9414e7
+Content-Type: text/plain; charset="UTF-8"
+
+I was offended by the -u flag in v7 cat, which was a necessary but
+unfortunate consequence of preserving the original's semantics while
+converting it to use the new standard I/O library. Dennis felt it was
+important as a proof of the value of stdio; to me it was an indication that
+stdio couldn't do everything. I rewrote cat to use just read and write, as
+nature intended. I don't recall if my version is in any of v8 v9 v10 but
+it, or something very like it, is in Plan 9:
+
+% cat cat.c
+
+#include <u.h>
+
+#include <libc.h>
+
+
+void
+
+cat(int f, char *s)
+
+{
+
+char buf[8192];
+
+long n;
+
+
+while((n=read(f, buf, (long)sizeof buf))>0)
+
+if(write(1, buf, n)!=n)
+
+sysfatal("write error copying %s: %r", s);
+
+if(n < 0)
+
+sysfatal("error reading %s: %r", s);
+
+}
+
+
+void
+
+main(int argc, char *argv[])
+
+{
+
+int f, i;
+
+
+argv0 = "cat";
+
+if(argc == 1)
+
+cat(0, "<stdin>");
+
+else for(i=1; i<argc; i++){
+
+f = open(argv[i], OREAD);
+
+if(f < 0)
+
+sysfatal("can't open %s: %r", argv[i]);
+
+else{
+
+cat(f, argv[i]);
+
+close(f);
+
+}
+
+}
+
+exits(0);
+
+}
+
+
+%
+
+-rob
+
+P.S. I learned today that cat.c has a spurious trailing newline.
+
+On Wed, Nov 14, 2018 at 10:15 AM Dave Horsfall <dave@horsfall.org> wrote:
+
+> On Wed, 14 Nov 2018, Warren Toomey wrote:
+>
+> >> Didn't know that cat(1) was still written in assembly on Edition 6...
+> >
+> > https://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/s1/cat.s
+>
+> Thanks; then again, I never had a reason to poke around cat(1) (but I do
+> remember adding a "-h" flag to pr(1) for a sub-header or something).
+>
+> In fact, the only assembler stuff I remember modifying was deep in the
+> kernel, to take advantage of Unibus timing (on the /40 at least), where
+> the "obvious" code was sub-optimal; can't remember the details, but it
+> saved a bus cycle or two.
+>
+> Hell, I wish I still had that "CSU Tape"; it was Edition 6 with as much of
+> Edition 7 (and AUSAM) that I could shoe-horn in, such as XON/XOFF for the
+> TTY driver.  I was known as "Mr Unix 6-1/2" at the time...
+>
+> Completely rewrote the 200-UT driver so that it actually worked (IanJ's
+> driver was a horrible mess) and worked around an egregious bug on the
+> Kronos side which they said was baked-in so deep that it couldn't be
+> fixed.
+>
+> Rewrote the plotter driver and Versatec LV-11 driver to use the buffer
+> pool instead of the character queues, so they went like a bat out of hell.
+>
+> Etc.
+>
+> -- Dave
+>
+
+--000000000000f6914c057a9414e7
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">I was offended by the -u flag in v7 cat, which was a neces=
+sary but unfortunate consequence of preserving the original&#39;s semantics=
+ while converting it to use the new standard I/O library. Dennis felt it wa=
+s important as a proof of the value of stdio; to me it was an indication th=
+at stdio couldn&#39;t do everything. I rewrote cat to use just read and wri=
+te, as nature intended. I don&#39;t recall if my version is in any of v8 v9=
+ v10 but it, or something very like it, is in Plan 9:<div><br></div><div>
+
+
+
+
+
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">% c=
+at cat.c</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">#in=
+clude &lt;u.h&gt;</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">#in=
+clude &lt;libc.h&gt;</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">voi=
+d</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">cat=
+(int f, char *s)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">{</=
+span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>char bu=
+f[8192];</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>long n;=
+</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>while((=
+n=3Dread(f, buf, (long)sizeof buf))&gt;0)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>if(write(1,=
+ buf, n)!=3Dn)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span class=
+=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>sysfatal(&quot;=
+write error copying %s: %r&quot;, s);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>if(n &l=
+t; 0)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>sysfatal(&q=
+uot;error reading %s: %r&quot;, s);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">}</=
+span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">voi=
+d</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">mai=
+n(int argc, char *argv[])</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">{</=
+span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>int f, =
+i;</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>argv0 =
+=3D &quot;cat&quot;;</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>if(argc=
+ =3D=3D 1)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>cat(0, &quo=
+t;&lt;stdin&gt;&quot;);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>else fo=
+r(i=3D1; i&lt;argc; i++){</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>f =3D open(=
+argv[i], OREAD);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>if(f &lt; 0=
+)</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span class=
+=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>sysfatal(&quot;=
+can&#39;t open %s: %r&quot;, argv[i]);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>else{</span=
+></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span class=
+=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>cat(f, argv[i])=
+;</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span class=
+=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>close(f);</span=
+></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span><span c=
+lass=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>}</span></p=
+>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>}</span=
+></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-tab-span" style=3D"white-space:pre">	</span>exits(0=
+);</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">}</=
+span></p><p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:nor=
+mal;font-variant-east-asian:normal;font-stretch:normal;font-size:14px;line-=
+height:normal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0=
+)"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligat=
+ures"><br></span></p><p class=3D"gmail-p1" style=3D"margin:0px;font-variant=
+-numeric:normal;font-variant-east-asian:normal;font-stretch:normal;font-siz=
+e:14px;line-height:normal;font-family:&quot;Lucida Grande Mono550&quot;;col=
+or:rgb(0,0,0)"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-=
+common-ligatures">%=C2=A0<br></span></p><div><br></div><div>-rob</div><div>=
+<br></div></div><div>P.S. I learned today that cat.c has a spurious trailin=
+g newline.</div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr">On We=
+d, Nov 14, 2018 at 10:15 AM Dave Horsfall &lt;<a href=3D"mailto:dave@horsfa=
+ll.org">dave@horsfall.org</a>&gt; wrote:<br></div><blockquote class=3D"gmai=
+l_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left=
+:1ex">On Wed, 14 Nov 2018, Warren Toomey wrote:<br>
+<br>
+&gt;&gt; Didn&#39;t know that cat(1) was still written in assembly on Editi=
+on 6...<br>
+&gt;<br>
+&gt; <a href=3D"https://minnie.tuhs.org/cgi-bin/utree.pl?file=3DV6/usr/sour=
+ce/s1/cat.s" rel=3D"noreferrer" target=3D"_blank">https://minnie.tuhs.org/c=
+gi-bin/utree.pl?file=3DV6/usr/source/s1/cat.s</a><br>
+<br>
+Thanks; then again, I never had a reason to poke around cat(1) (but I do <b=
+r>
+remember adding a &quot;-h&quot; flag to pr(1) for a sub-header or somethin=
+g).<br>
+<br>
+In fact, the only assembler stuff I remember modifying was deep in the <br>
+kernel, to take advantage of Unibus timing (on the /40 at least), where <br=
+>
+the &quot;obvious&quot; code was sub-optimal; can&#39;t remember the detail=
+s, but it <br>
+saved a bus cycle or two.<br>
+<br>
+Hell, I wish I still had that &quot;CSU Tape&quot;; it was Edition 6 with a=
+s much of <br>
+Edition 7 (and AUSAM) that I could shoe-horn in, such as XON/XOFF for the <=
+br>
+TTY driver.=C2=A0 I was known as &quot;Mr Unix 6-1/2&quot; at the time...<b=
+r>
+<br>
+Completely rewrote the 200-UT driver so that it actually worked (IanJ&#39;s=
+ <br>
+driver was a horrible mess) and worked around an egregious bug on the <br>
+Kronos side which they said was baked-in so deep that it couldn&#39;t be <b=
+r>
+fixed.<br>
+<br>
+Rewrote the plotter driver and Versatec LV-11 driver to use the buffer <br>
+pool instead of the character queues, so they went like a bat out of hell.<=
+br>
+<br>
+Etc.<br>
+<br>
+-- Dave<br>
+</blockquote></div>
+
+--000000000000f6914c057a9414e7--
