@@ -1,0 +1,118 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,NUMERIC_HTTP_ADDR,RCVD_IN_DNSWL_NONE,URI_HEX
+	autolearn=no autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d0b0da85
+	for <ml@inbox.vuxu.org>;
+	Wed, 12 Dec 2018 17:55:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1AC04A20FF; Thu, 13 Dec 2018 03:55:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 65348A20EF;
+	Thu, 13 Dec 2018 03:55:28 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 68720A20EF; Thu, 13 Dec 2018 03:55:25 +1000 (AEST)
+Received: from lb2-smtp-cloud7.xs4all.net (lb2-smtp-cloud7.xs4all.net
+ [194.109.24.28])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8217EA1F25
+ for <tuhs@minnie.tuhs.org>; Thu, 13 Dec 2018 03:55:24 +1000 (AEST)
+Received: from [192.168.1.114] ([80.101.112.122])
+ by smtp-cloud7.xs4all.net with ESMTPA
+ id X8j4gXCa1dllcX8j5gAwCo; Wed, 12 Dec 2018 18:55:22 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Date: Wed, 12 Dec 2018 18:55:17 +0100
+Message-Id: <3273DCC7-C127-4126-A5AD-C78104D3EEAB@planet.nl>
+To: "tuhs@minnie.tuhs.org list" <tuhs@minnie.tuhs.org>
+Mime-Version: 1.0 (Apple Message framework v1283)
+X-Mailer: Apple Mail (2.1283)
+X-CMAE-Envelope: MS4wfI1S0tU20hcSQIGy07PvmlNLVYtYNJQZSCwsFidAGwYBR2ejDYcCboNjR4Z0EatNVCzAEyg6KTg9f4JKxn+M8se71sFkUERf4vApFDUGQOrU5Kj67Exh
+ WphzYNbujkgxDiTb/CUobkjPwNol6K15Wv7wI4JfgrsW71avbnERv4pQ
+Subject: Re: [TUHS] 2.9bsd with networking on 18-bit possible?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+>     > the code size is about 25KB for both a minimal V6 kernel and the =
+TCP
+>     > stack, the rest is data.
+>=20
+> That's impressively small; the MIT V6+ with 'demux only in the kernel' =
+was
+> 40KB for the combined code (although I can't easily get separate =
+figures for
+> the networking part and the rest).
+
+I think my sentence was confusing: it is ~25KB each, so about 50KB =
+combined.
+
+The original V6 kernel was about 29KB (says here =
+https://www.tuhs.org//cgi-bin/utree.pl?file=3DV6). I've simplified the =
+TTY driver, only support one type of disk driver, dropped shared text =
+segments, dropped FP emulation. Remains about 25KB. Note that the SLIP =
+is merely via a "super RAW" mode on the TTY driver, so I don't need to =
+include the bulky IMP interface driver. Even at 30KB, the V6 kernel must =
+have offered the best bang/buck ratio in the history of software, imho.
+
+>     > The Gurwitz code also has an Ethernet driver (note ARP was not =
+invented
+>     > yet)
+>=20
+> How did it get Ethernet addresses?
+
+:^) See here: =
+https://www.tuhs.org//cgi-bin/utree.pl?file=3DBBN-Vax-TCP/bbnnet/netconf.c=
+
+
+"Someday this will be generated from the configuration file." I think =
+later it did, but I don't have that code.
+
+>     > a project to make V6 run ... on a TI990 clone
+>=20
+> Oh, about the basic part of this: did you start with a plain V6 =
+distribution?
+> So you've had to do all the machine language stuff from scratch (and =
+modify
+> things in C like estabur())?
+> What are you using for a C compiler ? Is there one out there, or did =
+you have
+> to do your own?
+
+
+I has been a journey. I started with the 2.11BSD compiler and ported =
+that to the TI990 architecture (more precisely the 9995 chip, which is =
+similar to a T11 chip).
+I debugged that to make XINU run, and then moved on to LSX (as recovered =
+by the BK-UNIX project). Then I started with the V6 kernel from the TUHS =
+website and made that work. Dave Pitts made it work on a real TI990 (he =
+has a TI990/10 and a TI990/12 in working order). So, yes, I did =
+bootstrap all the low level stuff from scratch.
+
+After a three year hiatus I resumed work on this, integrating the =
+Gurwitz TCP stack.
+
+The journey is documented here:
+http://1587660.websites.xs4all.nl/cgi-bin/9995/timeline
+
+The network code is in a different tree, I'll move it over to the above =
+tree over the weekend.
+
+Paul
+
+
+
