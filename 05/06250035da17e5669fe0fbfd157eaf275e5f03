@@ -1,0 +1,224 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=BAD_ENC_HEADER,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2bc3831a
+	for <ml@inbox.vuxu.org>;
+	Wed, 26 Dec 2018 04:50:02 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B8952A3671; Wed, 26 Dec 2018 14:50:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EC212A3667;
+	Wed, 26 Dec 2018 14:49:32 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=mit.edu header.i=@mit.edu header.b="u7GFR7G8";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 616A4A3667; Wed, 26 Dec 2018 14:49:29 +1000 (AEST)
+Received: from NAM02-SN1-obe.outbound.protection.outlook.com
+ (mail-eopbgr770137.outbound.protection.outlook.com [40.107.77.137])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D5EC893EA4
+ for <tuhs@minnie.tuhs.org>; Wed, 26 Dec 2018 14:49:27 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=selector1; 
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=/aTuA+50rEpUQls3N9rdQePjPokuq3yEg9KcYpoR8/Q=;
+ b=u7GFR7G8ivPnUvMVBUBaky3HfY/9HZft32cF7mpoDJV34s5ulSnjUqG6RO7LnPQgjQ4fj4CyshX/rKHaD5EQhvqZRxTt4UOyQYM2IGTt1xAmvL/4c2aReMJafKFcke1VSP8ycS4HNstg6A/BusC5ICm6PN15BepI+VKOeyRb6l0=
+Received: from DM5PR0102CA0013.prod.exchangelabs.com (2603:10b6:4:9c::26) by
+ BY2PR0101MB0792.prod.exchangelabs.com (2a01:111:e400:2c88::12) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.1446.26; Wed, 26 Dec 2018 04:49:25 +0000
+Received: from CO1NAM03FT046.eop-NAM03.prod.protection.outlook.com
+ (2a01:111:f400:7e48::208) by DM5PR0102CA0013.outlook.office365.com
+ (2603:10b6:4:9c::26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.20.1446.19 via Frontend
+ Transport; Wed, 26 Dec 2018 04:49:25 +0000
+Authentication-Results: spf=pass (sender IP is 18.9.28.11)
+ smtp.mailfrom=mit.edu; tnetconsulting.net; dkim=none (message not signed)
+ header.d=none;tnetconsulting.net; dmarc=bestguesspass action=none
+ header.from=mit.edu;
+Received-SPF: Pass (protection.outlook.com: domain of mit.edu designates
+ 18.9.28.11 as permitted sender) receiver=protection.outlook.com;
+ client-ip=18.9.28.11; helo=outgoing.mit.edu;
+Received: from outgoing.mit.edu (18.9.28.11) by
+ CO1NAM03FT046.mail.protection.outlook.com (10.152.81.15) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.20.1471.13 via Frontend Transport; Wed, 26 Dec 2018 04:49:25 +0000
+Received: from callcc.thunk.org (96-72-102-169-static.hfc.comcastbusiness.net
+ [96.72.102.169] (may be forged)) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id wBQ4nKiv014972
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 25 Dec 2018 23:49:21 -0500
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id 32C587A4909; Tue, 25 Dec 2018 23:49:20 -0500 (EST)
+Date: Tue, 25 Dec 2018 23:49:20 -0500
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: Larry McVoy <lm@mcvoy.com>
+Message-ID: <20181226044920.GB4158@mit.edu>
+References: <bd626b01-b74a-14d9-c31e-6b5437464387@spamtrap.tnetconsulting.net>
+ <20181226020119.GF18199@mcvoy.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <20181226020119.GF18199@mcvoy.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-EOPAttributedMessage: 0
+X-Forefront-Antispam-Report: CIP:18.9.28.11; IPV:CAL; SCL:-1; CTRY:US; EFV:NLI;
+ SFV:NSPM;
+ SFS:(10019020)(136003)(346002)(39860400002)(376002)(396003)(2980300002)(51444003)(189003)(199004)(88552002)(47776003)(336012)(46406003)(23726003)(26005)(103686004)(246002)(86362001)(8936002)(356004)(6916009)(186003)(14444005)(36756003)(97756001)(8676002)(229853002)(90966002)(52956003)(4326008)(786003)(6266002)(6246003)(2906002)(75432002)(1076003)(305945005)(54906003)(50466002)(58126008)(42186006)(16586007)(316002)(33656002)(5660300001)(26826003)(106002)(2616005)(446003)(476003)(11346002)(76176011)(478600001)(486006)(126002)(106466001)(36906005)(551544002)(18370500001)(42866002);
+ DIR:OUT; SFP:1102; SCL:1; SRVR:BY2PR0101MB0792; H:outgoing.mit.edu; FPR:;
+ SPF:Pass; LANG:en; PTR:outgoing-auth-1.mit.edu; MX:1; A:1; 
+X-Microsoft-Exchange-Diagnostics: 1; CO1NAM03FT046;
+ 1:jTw1Hv9nADjlbCHLXW5IlZFwwxuZI5J6FwHbDiAeuJwCrQXVFOW9kOtst+3uXxx6uD3ZJv604hBqR6fE3xmc3kIRZFBkz3Yj/NNDS3/wyRC9qHlLNrzmJZOq7zTU3S0+
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 6212f2e3-a140-43d9-1c4d-08d66aed82d6
+X-Microsoft-Antispam: BCL:0; PCL:0;
+ RULEID:(2390118)(7020095)(4652040)(8989299)(4534185)(4627221)(201703031133081)(201702281549075)(8990200)(5600074)(711020)(4608076)(2017052603328)(7153060);
+ SRVR:BY2PR0101MB0792; 
+X-Microsoft-Exchange-Diagnostics: 1; BY2PR0101MB0792;
+ 3:oBEAKTZFwqARh2nKrNVyZ/95k21qzH/xn1ac7Yx4HC2RP5k809gHCS0tjRSGeXfW3EPw+zIZyilo2fyWbzmvWo02j9GghDL49uIeqyDs3tdiifsEKUz9Foqf+SxNSXnlsETWONESV6Ly8/Fzi6/g6jQsw0DHaMir/gCba8eJnTlUx7RejOAdHrT5Fmgc2ewqvnjN5rdpNtBYhgKjqnol7LCnLb29EfeDhNCn7WUCbgCB7jdDzOuCidVAdHQnYpVkwWIuYUe7nY8NNOWP0v1nZpwbKHkY+hIxS0FY1XefxAtXFQYSG/pb2tp19I674gKlfAbWFnguEJUeuxP6mkRKtg==;
+ 25:qVJz5rZaZSNUP9mmy1D21s12h5QZwuZBqXtY5PKRpdxPhphz8DPUZycZNO97HllLSMhnzUcHC5Kjt+SN+0CwEGFu+CCdeGj4eGbwfX+1cbwPEiDwjwB4A/oouQOPKkiWhaJ9Uw/q1DQeU/lfZ10bouENbFa8slpmfiEXQHTxWLDlkT82TEwn/j+uNEL0KZbYKZGGR2GCjeI2fTRjInxuk4rNcV7mZQS3oQStl3IluB/j6lqeVNMKNIOanXQYBjWvvvpNmyNlBwUdWc4rKr7hvFLZLH+ktTMfKjBGeG92LRl+1Ix9889gWCMqX616cWD42dFLmAh2IN8XHWzL+updWeVDAEA8CsVKSBYogpfBFzI=
+X-MS-TrafficTypeDiagnostic: BY2PR0101MB0792:
+X-Microsoft-Exchange-Diagnostics: 1; BY2PR0101MB0792;
+ 31:DMweq+0FeJqtPJFXm0Anb6ZvUB7fP79r9Ma2k4MMuCfm89LRsNKVVSapuRmTtzaurwVtyygV84mAd65OxCI9nK/ruOqynjeP0ErU9PfjKX2Pxndn9WfH71XkAo+C31/ZvgB+tm9u7fIzw9wB/HvsgSu5zBPLhgMKU6odVVaSxHMZn/TGUATAXFzp++iX6VfEtF8sccCIuA01g0QyKE7mqF1/dZPtEHoTxEIavoRxnyc=;
+ 20:0Zt1XtDTZiloxURKpNdAUND4GGE9ewn6K93BOosKjuHm3W2Wsx58XRhwgyvYYyZ2ep2AF4FVgs3Q5OUmCPblrRWnuYSjc6uv5lSqNjumx29kelZUgi8Lo/UNLAlT4iR84xVidA+zlITrAy7qVHPSA2WSsKe7t0VfxNR2O6M6v1pPjpc6sfK3mfWYtnSAtpQ6++wRVgpp8iLu99rsueqTrk4viv4TC9UMEvd9G7P0jj4qJHIg8rw7XG5N37pouXUtqyDuz4XfTHNLGs4r5iDO1l4kIRlC7t3So3zJWcsW244xCnivXf542XgbopbABbbvluoPixMIiSZ8C3hXW7NwUKcRIMYmuHGVPxqoh+XB6wIy+vefHYefRmPDipfmUX8dfHAfx3h3Q/nSvaYW/yG/ljZMtb0iYqc2MpZdK/0MOYniE9pfmgCXESWlXMLzfyWF975Kb/6gZr3knura8IGWJvbRBze6bFc2cUPNs6NVLcoIsHTO7bkISyBUZqUJx1gF
+X-Microsoft-Antispam-PRVS: <BY2PR0101MB07928B7DAD980E8DF828E9B3B5B50@BY2PR0101MB0792.prod.exchangelabs.com>
+X-Exchange-Antispam-Report-CFA-Test: BCL:0; PCL:0;
+ RULEID:(8211001083)(3230021)(908002)(999002)(5005026)(6040522)(2401047)(8121501046)(93006095)(93004095)(3231475)(944501520)(52105112)(3002001)(10201501046)(6041310)(20161123564045)(20161123558120)(20161123560045)(20161123562045)(201703131423095)(201702281528075)(201702281529075)(20161123555045)(201703061421075)(201703061406153)(201708071742011)(7699051)(76991095);
+ SRVR:BY2PR0101MB0792; BCL:0; PCL:0; RULEID:; SRVR:BY2PR0101MB0792; 
+X-Microsoft-Exchange-Diagnostics: 1; BY2PR0101MB0792;
+ 4:z2cBxWOj3ayEfZqCf8x8hp4fDaz8Yjqnm6L+Ui8ZzpCqO3dDIBq/SxXnaQIuiQXKiKCVdtydk0R/yYSpdRXwlEOEZUhJASo5PnM7/Ef8wKlHR/k27EReGMN8cVtlRARnFrPEtzmFIlgP+igajtyvs+XEOUvAIH8d5p5JPF6zNUzfwHnYXSV005Drv4IXsWiZ/KtTG9WP485bVMrT5apzDWnZmPT312BTL79Rbpo1gVee37+2gGhLnWuFh42N4RJVjPKYoqgEGXVI8Uni8mpyKQ==
+X-Forefront-PRVS: 0898A6E028
+X-Microsoft-Exchange-Diagnostics: =?us-ascii?Q?1; BY2PR0101MB0792;
+ 23:tf/nyFEOSVy8BRcYzPLfPORdchjpNGjwHH/s0mB?=
+ =?us-ascii?Q?JGmS0lyJq9MKHhEAS1NNaneqzdrzemvwZtcLPsCXURc0c9D8uC31SuUU//+7?=
+ =?us-ascii?Q?y3E0M2J+irMNiUwKy8meu0AdSAZvi1MLsjWl3omF+IsffOwOqdULxSgf3ixU?=
+ =?us-ascii?Q?vmPMmF/KBAogRKH0enKbOEr7dF0wVW8z1aD5BOq7Vb9Rn1CFGdijmxEsX1bf?=
+ =?us-ascii?Q?IBJTZxTA2A4UxRJ2B/gpcyeWcdbbPewvhbAn9Igu9w6ZOLwVnZ0+ZaC1PKU2?=
+ =?us-ascii?Q?JP0J09Dt40lDjqixxuFb8bW2UDLBrrPeJzOzsyDAltecWTMlP+Xt/4Pw1/TY?=
+ =?us-ascii?Q?5d7pQ8Zq+j/ZpWkGhJ3TVVQPmXicEqflZgOeAUweYYDSiLLEvswwidR7PpOC?=
+ =?us-ascii?Q?D3cJwnMdbJeWZBZw79b65MG1+jqrfOofXyJ0iYfaaxMvBcY2AYM6G6YuWvEq?=
+ =?us-ascii?Q?FdXzaIjFwnf/EzF3l1Bb+4eCfKx2/SSdREmMYb3sB1IvWn42m/uiFwJRsaDB?=
+ =?us-ascii?Q?fy9AZkF1TpQXBzverwY6GqMUcq/UJTNBWAPpc1S12qB6IpNZr5hs1OqH0W1c?=
+ =?us-ascii?Q?AzOvuvAgQGU/mCV/gFMMdTlXEnAJqhfIcUWdRJbJZ1NeaMNTEMLXvp9gBz8+?=
+ =?us-ascii?Q?w9fL4/uueU5E2x77hDYGoRBYnWZAwzXJ6n6EK+yNhnXxVvwb7NxPF4KsTqXv?=
+ =?us-ascii?Q?ewqftSDB8jkhWobdb/5Frx48R6Lt3gxUUCCVBFIeEnkHOeITp7kx6VYRhwZx?=
+ =?us-ascii?Q?VqaYD9eMcpm/GonozIi3jBLacWzFjmbjo55hoL1XShlNXixr4PVyiyf0xkNI?=
+ =?us-ascii?Q?twkJtBlJ1wOi0UWX1AijCr9Yo/ewKAmTBzjEJqVWes54AcjAHQ3c+AZA2Mmd?=
+ =?us-ascii?Q?BK/7eeF2QdaEoywZRl7MlOYAotNOpw00t6gXI4+FyXCqeNqvrfhF6du7bhu4?=
+ =?us-ascii?Q?CYq2MqkgHTTRJqf32qzawbN92mhHvQlvZOOkZp7DAtw1wTvQ0va6XYUPXFxU?=
+ =?us-ascii?Q?7fqpJpb5vUhE+JaOFaFZlM4EJkXrVn6eWpn4It6UjgX4PjhKpQHDeEKlnF6M?=
+ =?us-ascii?Q?6SuDRL6lJ3DHQYjETJG5jwB5tUGgnC+F786jzoYbxlyikRycmytR1Vtw8SbO?=
+ =?us-ascii?Q?/Prv9C3admwiA0PKDihmZm2wca6EkntAh2pMi/uG7UJkhqXiAD665259JfdC?=
+ =?us-ascii?Q?n35mAzTfQOnhtrLD19r00xKnUexjtRX5Y5IOs1c25WvmkoHxgt9Y3dwcrI5S?=
+ =?us-ascii?Q?3cWXYf6/zmmpR6Hcg+zbgrb/KpMlGGZ7mapb3u9TIJAbOV64QqhVvRgreu6T?=
+ =?us-ascii?Q?A/t1krYidZFXxkKlkrjDS6mc=3D?=
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam-Message-Info: Idm+W2/5ZDIuH/PJdzBG5Wd/qGZjJTNbLKVPMpJUd4xHTLZ2Hs2IQwQyoFbSOpDU7HxnBNv0TetFbhN5sqa/mS+g9syOOwhQllmQJuApHqoqz5MZv2rJqxM40kLPdbaUMb5X8g3tnB0r3d2FgYpbMxnNNPAC6Ecl73RsNyfIc/oW8JbxiYg+ayWDUkLUB7Q20VIhv3J6QABeUZJBF7znjgetfaMmfr3N2kvHMa2QfnLP8LCR/cAG9UKLx/1gciawhmONXeadVQ082OmUKyhNmKUZMlx0QbGn2iiJ9dz1y2welHEu+8Q2OQgGGDejG67T
+X-Microsoft-Exchange-Diagnostics: 1; BY2PR0101MB0792;
+ 6:0U5Ue4Gn4gr8W4f9cb0LgHogeApEB8LMF8uVNqYiEHr0M4K1Xuez3Pf59or7DuJ2DHYgQEnUtMW4/OVfvwjbPuYFoKpDnRLxT8iTvHXG4IYdLpAplATwWcnb62i5xsDiFgJJABnlUDdp+sGoQ4AmfCUI/e5SCgaUDVvTwSBJOw15bYzMX1nCpAIsSMRkdNEdmEDR8YDoMXJr+8VnX42mIghTC5ddJRf1PU5FxAH/n0aXKNq+SE92xmUR9ZMnY2iOJx7RZt9khpKo9L8E6TO9vrP2349m/G03xAVR5HVUeQlaMYUoZv7mzSfK9NdNehWMqzA87xJPGUCSgYpYNsdO5FAA/WPxnGl+7R2kBIXigotin2bSl+xAYtpozE3VmfAxiu419tUL6PDEF5Ye+9ifHlTq5w9hmN3oY7+tiEIon+vS9rPwGSUdeth3fHe9UvcM18ajQQHFplBQctBkxUIxNw==;
+ 5:+l97fWyswq+DGBvrAFebY1dOPLv2HzdRpv2FfzxmEtGfrgwVNdHheXWRgebQITgkOelIKJ8PHA8tuMKJWhL9PJGW363s19OSNQJNvtQPOXdhyXoAxVnqIjSaJkMnxPDBPnAjkpxERDIOxCceNGvjQwPb+BkDwBO/h+n+r5Jqmg8=;
+ 7:HdvVPtaFGJNL4jx/olLhDcfaXtJNnXUvqN0CYP2VNqT3KbbFKUYaKZOK1N6uteshpc+moxD9zaCjNxcN11wSfItiHF46z2Qyf+Zv9+5jVCe18+86BFnUObieOfrBxnNZygwnrRpDjUHNLwElqhx4bQ==
+SpamDiagnosticOutput: 1:99
+SpamDiagnosticMetadata: NSPM
+X-OriginatorOrg: mit.edu
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Dec 2018 04:49:25.0148 (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6212f2e3-a140-43d9-1c4d-08d66aed82d6
+X-MS-Exchange-CrossTenant-Id: 64afd9ba-0ecf-4acf-bc36-935f6235ba8b
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=64afd9ba-0ecf-4acf-bc36-935f6235ba8b; Ip=[18.9.28.11];
+ Helo=[outgoing.mit.edu]
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY2PR0101MB0792
+Subject: Re: [TUHS] NFS & Kerberos woes...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society <tuhs@minnie.tuhs.org>,
+ Grant Taylor <gtaylor@tnetconsulting.net>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Dec 25, 2018 at 06:01:19PM -0800, Larry McVoy wrote:
+> I'm an NFS guy, learned it a bit at uwisc and then a lot more at Sun. 
+> But Sun didn't do the Kerberos stuff, at least while I was there.
+> 
+> Didn't Kerberos come from MIT?  If so, I bet anything that Ted Ts'o
+> would know the details.  My guess is it was part of project athena
+> and I think that overlaps with Ted.  Yo, Ted, Merry Christmas,
+> what about this Kerberos authentication stuff?  :)
+
+So the way Kerberized NFS was used at Project Athena was that after
+you authenticated as some Kerberos principal, say, such as
+"tytso@ATHENA.MIT.EDU", there was mapping function/database which
+would map that Kerberos authentication to a user id --- say, 15806.
+
+On the Athena client, at login time /bin/login (or a PAM module) would
+do a Hesiod lookup for (tytso, passwd) in the athena.mit.edu Hesiod
+domain.  This translate to a DNS lookup for class=HS, type=TXT, for
+tytso.passwd.ns.athena.mit.edu:
+
+<tytso@cwcc> {/usr/projects/xfstests-bld/build-64}   (master)
+1067% hesinfo -lb tytso passwd
+hes_to_bind(tytso, passwd) expands to
+tytso.passwd.ns.athena.mit.edu
+which resolves to
+tytso:*:15806:101:Theodore Y. Ts'o,E40-343,38091,:/mit/tytso:/bin/athena/tcsh
+
+Because of the Kerberos authentication for tytso@ATHENA.MIT.EDU, the
+Kerberos-authenticated NFS server would map all NFS requests
+(regardless of the uid/gid in the NFS RPC) to the uid in the mapping
+database --- in my case, 15806.  The mapping database and the Hesiod
+DNS zone files are created from administration management system
+called Moira.
+
+This is important, because access checks are going to both be done on
+the client side, as well as the server side.  And the Kerberos NFS
+mapping only affects the uid/gid in the used for server-side access
+control checks (e.g., it replaces the uid/gid in the NFS RPC request).
+It does *not* affect the uid/gid returned by stat(2) / getattr
+request.
+
+All of this is saying, yes, of *course* Kerberos authenticated NFS
+turns off no_root_squash.  The whole point of using Kerberos
+authentication is so the server is willing to blindly trust the
+uid/gid asserted by the client and grant access on that basis.  If you
+are going to allow the the NFS server to go, "Hurr, durr... you are
+claiming a uid of 0 --- OK!  You can do whatever you want." ---- why
+bother with Kerberos authentication at all in the fairst place!?!
+
+Now, I believe you *could* configure in the mapping database that
+authentication from some Kerberos principal such as
+"tytso/root@ATHENA.MIT.EDU" or "host/cwcc.mit.edu@ATHENA.MIT.EDU" (you
+can use service principals from a Kerberos keytab as a client
+principal for the purposes of machine authentication) should be mapped
+to uid 0.
+
+This wasn't somethingh we generally did, though, since the general
+model we used is that root on the local client should mean _nothing_.
+Indeed, on Public Athena workstations, the assumption was that anyone
+could get root (since MIT students had physical access, and there's
+nothing quite as dangerous than a bored MIT student).  Hence, during
+thet time when I was an undergraduate, the public root password as
+"mrroot".  Anyone could su to root thus eliminating the challenge of
+"breaking root".
+
+As a result, we never tried to give uid 0 special server-side
+permissions, since it went against the model that IP address-based
+authentication and blind-faith trust in assertions of uid==0 from NFS
+clients as just being silly.
+
+Cheers,
+	
+						- Ted
