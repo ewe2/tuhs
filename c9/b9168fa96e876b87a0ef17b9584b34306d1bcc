@@ -1,0 +1,112 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.9 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 6243ee6d
+	for <ml@inbox.vuxu.org>;
+	Sat, 29 Dec 2018 01:27:52 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8D304AACF1; Sat, 29 Dec 2018 11:27:51 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EA3AAAACEB;
+	Sat, 29 Dec 2018 11:27:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 384F3AACE8; Sat, 29 Dec 2018 11:27:09 +1000 (AEST)
+X-Greylist: delayed 1080 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 29 Dec 2018 11:27:01 AEST
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AD62CAACEF
+ for <tuhs@minnie.tuhs.org>; Sat, 29 Dec 2018 11:27:01 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 19F6218C074; Fri, 28 Dec 2018 20:09:00 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20181229010900.19F6218C074@mercury.lcs.mit.edu>
+Date: Fri, 28 Dec 2018 20:09:00 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Deleted lib1 and lib2 in v6, recoverable?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Will Senn
+
+    > I whacked /usr/sys/lib1 and lib2 'accidentally' meaning I logged in as
+    > bin changed to /usr/sys and typed rm lib1 and rm lib2 :).
+
+Doesn't sound very accidental... :-)
+
+    > sh run as bin doesn't do it.
+
+Odd. 'run' in /usr/sys on my V6 machine (not that I use that, mind) says:
+  
+  chdir ken
+  cc -c -O *.c
+  ar r ../lib1
+  rm *.o
+  chdir ../dmr
+  cc -c -O *.c
+  ar r ../lib2
+  rm *.o        
+
+which should regenerate them - sort of. I suspect you really meant 'doing sh
+run creates a lib1 and lib2, but then I get errors from the ld phase with
+missing symbols'. Yes?
+
+If so, the thing is that the V6 linker won't pull in an object module from a
+library unless a global in it satisfies an already existing (i.e. in the
+linking process) undefined global. (I don't know if this is true of later
+linkers; never used 'em.) In other words, when loading a multi-module system,
+the module with 'main' has to be first, and then the rest in an order such
+that each one holds a previously-undefined symbol.
+
+So the order of the object modules you'll get in lib? from the above, if you
+precede them with 'rm lib?', is probably not the right order. (The above shell
+script assumes they already exist, with the modules in the right order, so the
+above just replaces them with the newly compiled versions...)
+
+    > So, what magic incantation is required to rebuild them.
+
+Here's the ordering in lib1:
+
+  main.o
+  alloc.o
+  iget.o
+  prf.o
+  rdwri.o
+  slp.o
+  subr.o
+  text.o
+  trap.o
+  sig.o
+  sysent.o
+  clock.o
+  fio.o
+  malloc.o
+  nami.o
+  pipe.o
+  sys1.o
+  sys2.o
+  sys3.o
+  sys4.o   
+
+Other orders would work too (e.g. you could move sys?.o up just after sysent.o
+and it should work).
+
+My lib2 is somewhat odd, so I hesitate to list it, but since most modules in
+dmr are pulled in from entries in c.c, almost any order will work, I think.
+
+    Noel
