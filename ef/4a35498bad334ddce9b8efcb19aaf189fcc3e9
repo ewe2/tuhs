@@ -1,0 +1,197 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 78156aa2
+	for <ml@inbox.vuxu.org>;
+	Sun, 30 Dec 2018 18:56:43 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 513B4AF374; Mon, 31 Dec 2018 04:56:42 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 352AAAF364;
+	Mon, 31 Dec 2018 04:56:22 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="GzKnAFZc";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 48829AF364; Mon, 31 Dec 2018 04:56:20 +1000 (AEST)
+Received: from mail-qk1-f182.google.com (mail-qk1-f182.google.com
+ [209.85.222.182])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8096EAF363
+ for <tuhs@minnie.tuhs.org>; Mon, 31 Dec 2018 04:56:19 +1000 (AEST)
+Received: by mail-qk1-f182.google.com with SMTP id o125so14945464qkf.3
+ for <tuhs@minnie.tuhs.org>; Sun, 30 Dec 2018 10:56:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=6236FuCo21UcwJzdbDIKsd2aHiJTwM9OjzgSi67c9HY=;
+ b=GzKnAFZc4yknKyKTQ/NyZGzy2uTWwuyxd2/rDiNsVBlUAybF5KEYHxyvCoh0f5EgcM
+ +qU1e0fjZoAwHuweYcD3/mZUSrIoS5Aj/O0oEyrfL+pSyk7iw5j84RC01lnvOzVG1SyO
+ TUolWmiJIYcDTq/tg++ABTRaIrwA2nFnOZSOEyaLHle+ns1kUPtGI8om5dko+nhYg1cy
+ 5clqyjKX3RQXD9yCDwVV7NIUFMgwZN18874v/4zeexz5vbFwzZSdl4fBIsLjm9J/Nbcy
+ ZrN/Wgd7tslnoiHLqNqzSaXO/P8s7qaLPHNttjITnS84lSLji4wRAkqnIsu4xI7k1pHR
+ z8bA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=6236FuCo21UcwJzdbDIKsd2aHiJTwM9OjzgSi67c9HY=;
+ b=lWLcqB3k4AW0u4uyZ2BKSHeq264v2d9vGUFQBuhmFi0h/AMEU16nHXHIp8IaZ3F9VP
+ 3ejH7TBv+Ipi8ueCsUjFMspDwvW+QpLd9sHOM5vD5Bs9sVc8HakJU7bMOoZKonasHQCh
+ 538GONwDYj5w6zC3L1kyz1xe517MGbVFBowG5gdmipkuYJNDHMvI1p+AMQBxFz2azrfq
+ Anuku2ysqIFbMIwqQ+HT7qAw6BYrOeBCEoNTM5UuQUw+Q/U+cYa/TlHengARp9bsEGYf
+ 7ZR/dO1O+OXP6T9uzcyZMA64HQ52XfPNs3mHiFV7nywRkYEOeX1vBL+hQeLbKewYDGSx
+ gVrg==
+X-Gm-Message-State: AJcUukey+bMQH0B4vB9MFU25Z4VAI4uLidYDwCnxqy5xsP1iPrU/sN19
+ LgrsK9s2aWIGvseg28ehZ+HBWmj2bPwVJ8Dke5/LsaKt
+X-Google-Smtp-Source: ALg8bN4FALV37AK79TaR4zs8fFN9ymOdXOZrBp36c7TeP757IC0OHlrK/CrSMmy8nITfRT08P0jTIfp95Za0UEqNXtY=
+X-Received: by 2002:a37:c653:: with SMTP id b80mr33405797qkj.245.1546196178390; 
+ Sun, 30 Dec 2018 10:56:18 -0800 (PST)
+MIME-Version: 1.0
+References: <20181229010900.19F6218C074@mercury.lcs.mit.edu>
+ <CABH=_VRr1KPuXVXQysF_9R2DqNpYZeEiiD5RErgZDRqnQ9Mhaw@mail.gmail.com>
+ <128301d4a070$4794ea70$d6bebf50$@ronnatalie.com>
+In-Reply-To: <128301d4a070$4794ea70$d6bebf50$@ronnatalie.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Sun, 30 Dec 2018 11:56:07 -0700
+Message-ID: <CANCZdfoPn0j8wxqF=snizb+XLu07NFPpZOH+prKRTvM1Du=2rQ@mail.gmail.com>
+To: Ronald Natalie <ron@ronnatalie.com>
+Content-Type: multipart/alternative; boundary="000000000000f77188057e41d932"
+Subject: Re: [TUHS] Deleted lib1 and lib2 in v6, recoverable?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000f77188057e41d932
+Content-Type: text/plain; charset="UTF-8"
+
+On Sun, Dec 30, 2018, 1:49 PM <ron@ronnatalie.com wrote:
+
+> Yes, it pretty much has to be this way as it is a single pass process and
+> the ar format is simple.
+> The later libraries have a symbol "dictionary" added to the beginning.
+>  Before that you manually arranged the order of the relocatables in the
+> library and later automated tools to put them in dependency order (ranlib,
+> etc...) came about.
+>
+
+
+Tsort/lorder put them in dependency order. Ranlib gave the index of symbols
+as the first or last archive member... in time, the indexing moved up into
+ar....
+
+Warner
+
+
+> > -----Original Message-----
+> > From: TUHS <tuhs-bounces@minnie.tuhs.org> On Behalf Of Paul Winalski
+> > Sent: Sunday, December 30, 2018 1:34 PM
+> > To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+> > Cc: tuhs@minnie.tuhs.org
+> > Subject: Re: [TUHS] Deleted lib1 and lib2 in v6, recoverable?
+> >
+> > On 12/28/18, Noel Chiappa <jnc@mercury.lcs.mit.edu> wrote:
+> > >
+> > > If so, the thing is that the V6 linker won't pull in an object module
+> > > from a library unless a global in it satisfies an already existing
+> > > (i.e. in the linking process) undefined global. (I don't know if this
+> > > is true of later linkers; never used 'em.)
+> >
+> > I think this has been pretty much universal behavior for all linkers on
+> all OSes
+> > since the 1960s.  It continues to be true today.
+> >
+> > Sometimes one runs into a situation where a module loaded from lib1.a has
+> > an undefined symbol that causes a module from lib2.a to be loaded, and
+> that
+> > module in turn has an undefined symbol that is defined in lib1.a.  In
+> that
+> > case, you have to cause the linker to scan lib1.a
+> > twice:
+> >
+> >     ld main.o lib1.a lib2.a lib1.a
+> >
+> > -Paul W.
+>
+>
+
+--000000000000f77188057e41d932
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto"><div><br><br><div class=3D"gmail_quote"><div dir=3D"ltr">=
+On Sun, Dec 30, 2018, 1:49 PM  &lt;<a href=3D"mailto:ron@ronnatalie.com">ro=
+n@ronnatalie.com</a> wrote:<br></div><blockquote class=3D"gmail_quote" styl=
+e=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Yes, it=
+ pretty much has to be this way as it is a single pass process and the ar f=
+ormat is simple.<br>
+The later libraries have a symbol &quot;dictionary&quot; added to the begin=
+ning.=C2=A0 =C2=A0Before that you manually arranged the order of the reloca=
+tables in the library and later automated tools to put them in dependency o=
+rder (ranlib, etc...) came about.<br></blockquote></div></div><div dir=3D"a=
+uto"><br></div><div dir=3D"auto"><br></div><div dir=3D"auto">Tsort/lorder p=
+ut them in dependency order. Ranlib gave the index of symbols as the first =
+or last archive member... in time, the indexing moved up into ar....</div><=
+div dir=3D"auto"><br></div><div dir=3D"auto">Warner</div><div dir=3D"auto">=
+<br></div><div dir=3D"auto"><div class=3D"gmail_quote"><blockquote class=3D=
+"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding=
+-left:1ex">
+<br>
+&gt; -----Original Message-----<br>
+&gt; From: TUHS &lt;<a href=3D"mailto:tuhs-bounces@minnie.tuhs.org" target=
+=3D"_blank" rel=3D"noreferrer">tuhs-bounces@minnie.tuhs.org</a>&gt; On Beha=
+lf Of Paul Winalski<br>
+&gt; Sent: Sunday, December 30, 2018 1:34 PM<br>
+&gt; To: Noel Chiappa &lt;<a href=3D"mailto:jnc@mercury.lcs.mit.edu" target=
+=3D"_blank" rel=3D"noreferrer">jnc@mercury.lcs.mit.edu</a>&gt;<br>
+&gt; Cc: <a href=3D"mailto:tuhs@minnie.tuhs.org" target=3D"_blank" rel=3D"n=
+oreferrer">tuhs@minnie.tuhs.org</a><br>
+&gt; Subject: Re: [TUHS] Deleted lib1 and lib2 in v6, recoverable?<br>
+&gt; <br>
+&gt; On 12/28/18, Noel Chiappa &lt;<a href=3D"mailto:jnc@mercury.lcs.mit.ed=
+u" target=3D"_blank" rel=3D"noreferrer">jnc@mercury.lcs.mit.edu</a>&gt; wro=
+te:<br>
+&gt; &gt;<br>
+&gt; &gt; If so, the thing is that the V6 linker won&#39;t pull in an objec=
+t module<br>
+&gt; &gt; from a library unless a global in it satisfies an already existin=
+g<br>
+&gt; &gt; (i.e. in the linking process) undefined global. (I don&#39;t know=
+ if this<br>
+&gt; &gt; is true of later linkers; never used &#39;em.)<br>
+&gt; <br>
+&gt; I think this has been pretty much universal behavior for all linkers o=
+n all OSes<br>
+&gt; since the 1960s.=C2=A0 It continues to be true today.<br>
+&gt; <br>
+&gt; Sometimes one runs into a situation where a module loaded from lib1.a =
+has<br>
+&gt; an undefined symbol that causes a module from lib2.a to be loaded, and=
+ that<br>
+&gt; module in turn has an undefined symbol that is defined in lib1.a.=C2=
+=A0 In that<br>
+&gt; case, you have to cause the linker to scan lib1.a<br>
+&gt; twice:<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0ld main.o lib1.a lib2.a lib1.a<br>
+&gt; <br>
+&gt; -Paul W.<br>
+<br>
+</blockquote></div></div></div>
+
+--000000000000f77188057e41d932--
