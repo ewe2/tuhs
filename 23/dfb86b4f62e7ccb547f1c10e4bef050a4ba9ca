@@ -1,0 +1,95 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2c1a4e92
+	for <ml@inbox.vuxu.org>;
+	Sun, 30 Dec 2018 19:07:48 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 225B4AF36C; Mon, 31 Dec 2018 05:07:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C393FAF363;
+	Mon, 31 Dec 2018 05:07:34 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8830FAF363; Mon, 31 Dec 2018 05:07:33 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 38BF394140
+ for <tuhs@tuhs.org>; Mon, 31 Dec 2018 05:07:31 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Sun, 30 Dec 2018 14:07:09 -0500
+Message-ID: <1546196832.22954.for-standards-violators@oclsc.org>
+Subject: Re: [TUHS] Deleted lib1 and lib2 in v6, recoverable?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Warner Losh:
+
+  But wasn't it tsort that did the heavy lifting to get things in order?
+
+  ar c foo.a `tsort *.o`
+
+  Ranlib just made it fast by adding an index..
+
+====
+
+There's a little more than that to ranlib.
+
+Without ranlib, ld made a single pass through each library,
+loading the modules that resolved unresolved symbols.  If
+a module itself had unresolved symbols (as many do) and
+some of those symbols were defined in a module ld had
+already passed, you were out of luck, unless you explicitly
+told ld to run a second pass, e.g. cc x.o y.o -la -la.
+Hence the importance of explicit ordering when building
+the library archive, and the usefulness of tsort.
+
+Ranlib makes a list of all the .o file in this archive and
+the global symbols defined or used by each module, and
+places the list first in the archive.  If ld is (as it
+was) changed to recognize the index, it can then make a
+list of all the object files needed from this archive, even
+if needed only by some file it will load from the same
+archive, then collect all required modules in a single pass.
+
+Ld could all along have just made two passes through the
+library, one to assemble the same list ranlib did in advance,
+a second to load the files.  (Or perhaps a first pass to
+load what it knows it needs and assemble the list, and a
+second only if necessary.)  Presumably it didn't both to
+make ld simpler and because disk I/O was much slower back
+then (especially on a heavily-loaded time-sharing system,
+something far less common today).  I suspect it would work
+fine just to do it that way today.
+
+Nowadays ranlib is no longer a separate program: ar
+recognizes object files and maintains an index if any are
+present.  I never especially liked that; ar is in
+principle a general tool so why should it have a special
+case for one type of file?  But in practice I don't know
+anyone who uses ar for anything except libraries any more
+(everyone uses tar for the general case, since it does a
+better job).  Were I to wave flags over the matter I'd
+rather push to ditch ar entirely save for compatibility
+with the past, move to using tar rather than ar for object
+libraries, and let ld do two passes when necessary rather
+than requiring that libraries be specially prepared.  As
+I say, I think modern systems are fast enough that that
+would work fine.
+
+Norman Wilson
+Toronto ON
