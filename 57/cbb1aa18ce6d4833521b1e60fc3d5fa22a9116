@@ -1,0 +1,194 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 66c04811
+	for <ml@inbox.vuxu.org>;
+	Mon, 31 Dec 2018 07:20:44 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C1D14AF376; Mon, 31 Dec 2018 17:20:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D4DB0AF364;
+	Mon, 31 Dec 2018 17:20:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DC7B5AF364; Mon, 31 Dec 2018 17:20:23 +1000 (AEST)
+X-Greylist: delayed 1735 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 31 Dec 2018 17:20:23 AEST
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3D343AF363
+ for <tuhs@tuhs.org>; Mon, 31 Dec 2018 17:20:23 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 2A34818C073; Mon, 31 Dec 2018 01:51:25 -0500 (EST)
+To: tuhs@tuhs.org
+Message-Id: <20181231065125.2A34818C073@mercury.lcs.mit.edu>
+Date: Mon, 31 Dec 2018 01:51:25 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Upgrading from 11/40 to 11/45 in Unix v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Will Senn
+
+    > We are seriously considering upgrading our PDP 11/40 clone (SIMH), to a
+    > PDP 11/45 (preferably another SIMH)
+
+Heh! When I saw the subject line, I thought you wanted to upgrade a
+_physical_ -11/40 to an -11/45. ('Step 1. Sell the -11/40. Step 2. Buy
+an -11/45.' :-)
+
+    > for our Unix v6 installation.
+
+Why on earth would an organization have such a thing? :-)
+
+    > Our CEO was traveling and met a techie in first class (seriously,
+    > first class?) who told him that we needed one.
+
+Heh. If said techie knows about the two, he's probably pretty senior (i.e.
+eligible for Social Security :-), and thus elegible for first class... :-)
+
+    > It has fairly low utilization - a developer logs in and writes code
+    > every few days
+
+Who the *&%^&*(%& is still writing code under V6?!
+
+And how do you all get the bits in and out? (I run mine under Ersatz-11,
+which has this nice device which allows it to read files off the host file
+system; transfering stuff back and forth is a snap, I do all my editing with
+Epsilon on my Windoze box, 'cause I'm too lazy to bring up the V6 Emacs I
+have.)
+
+    > 1. Are there any v6 specific concerns about upgrading?
+
+Not that I know of.
+
+    > 2. Why should we consider taking the leap to the 11/45? Everything
+    > seems to work fine now.
+
+You're asking _us_?
+
+Some larger applications will only run on an split-I-D machine, is about the
+only reason I can think of.
+
+Oh, also, the floating point instructions on the /45 are the only kind
+understood by V6; the C compiler doesn't emit the ones the /40 provides. Any
+floating point code run on the /40, the instructions are simulated by a
+trap handler (by way of the OS, which has to handle it and reflect it to
+the user process). I.e. very slow.
+
+    > 3. If we jump in and do the upgrade, how can we immediately recognize
+    > what has changed in the environment? I.e what are some things that we
+    > can now do that we couldn't do before?
+
+See above.
+
+    > 4. If we just insert our current diskpacks into the new system, will it
+    > just boot and work? Or what do we need to before/after booting to
+    > prepare/respond to the new system?
+
+Any V6 disk pack can be read/mounted on any V6 machine. Any binaries (the OS,
+or user commands) for the -11/40 will run on the -/45. (Which is why the V6
+dist includes binaries for /40 versions of the OS only.)
+
+To make use of the /45, you need a different copy of the OS binary, built from
+a slightly different set of modules. (Replace m40.s with m45.s; and you will
+need to re-asssemble l.s, prepending it with data.s.) Both variants can live
+on the same pack, under different filenames; select the right one at boot
+time.
+
+    > 5. Is 256K enough memory or what configuration do y'all recommend?
+
+256KB is all you can have. Neither SIMH nor Ersatz-11 support the Able
+ENABLE:
+
+  http://gunkies.org/wiki/Able_ENABLE
+
+which is what you need to have more than 256KB on a UNIBUS -11.
+
+
+    > From: Clem Cole
+
+    > You'll probably want to configure a kernel for the 45 class machine.
+    > Look at the differences in the *.s files in the kernel.
+
+More importantly, look at the 'run' file in /usr/sys, which has commented
+out lines to build the OS image for /45-/70 class machines.
+
+   > But either way you should configure the system to use the largest drive
+   > v6 has.
+
+This is actually of limited utility, since a V6 file system is restricted to
+65K blocks _max_. So a disk with 350K blocks (like an RP06), you'll have to
+split it into like 5 partitions to use it all.
+
+
+    > From: Will Senn
+
+    > Do you know of some commonly used at the time v6 programs that needed
+    > that much space?
+
+Heh. Spun up my v6, and did "file * | grep separate" in /bin and /usr/bin,
+and then recalled that V6 was distributed in a form suitable for a /40. So,
+null set.
+
+Did the same thing on /bin from the MIT V6+ system, and got:
+
+  a68:          separate I&D executable not stripped
+  a86:          separate I&D executable not stripped
+  bteco:        separate I&D executable not stripped
+  c86:          separate I&D executable not stripped
+  e:            separate I&D executable not stripped
+  emacs:        separate I&D executable not stripped
+  lisp:         separate I&D executable not stripped
+  mail:         separate I&D executable not stripped
+  ndd:          separate I&D executable not stripped
+  s:            separate I&D executable not stripped
+  send:         separate I&D executable not stripped
+  teco:         separate I&D executable not stripped
+
+No idea what the difference is between 'teco' and 'bteco', what 's/send' do,
+etc.
+
+    > Is there any material difference between doing it at install time vs
+    > having run on 11/40 for a while and moving the disk over to the 11/45
+    > later?
+
+No; like I said, you can have two different OS binaries on the disk, and
+select which one you boot.
+
+    > On a related note, how difficult is it to copy the system from rk to
+    > hp? I know I can rebuild, but I'm sure there's a quicker/easier method...
+
+Build a system with both, and then copy the files? I'd use 'tar' (I have a V6
+tar, but it uses a modified OS with the smdate() call added back in) to do the
+moving (which would retain the last-write dates); 'tp' or 'stp' would also
+work.
+
+The hack _I_ used on simulated systems was to expand the file that held the
+'disk pack', mount it as a different kind of pack (RL or RP), and then go in
+and hand-patch the disk size in the root block with 'db', then 'icheck -s' to
+re-build the free list. Note: this won't give you more inodes, so you may run
+out, but the usual inode allocation is pretty generous.
+
+	Noel
+
+PS: Speaking of the last write dates, I have versions of mv/mvall, cp/cpall,
+ln, chmod etc which retain them (using smdate()). If there's an actual
+community of people using V6, I should upload all the stuff I have. Although
+it might be good to establish some central location for exchange of V6 code.
+However, I don't and won't (don't even ask) use GitHub or any similar modern
+thing.
