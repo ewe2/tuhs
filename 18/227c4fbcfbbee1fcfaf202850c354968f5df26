@@ -1,0 +1,78 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 47746031
+	for <ml@inbox.vuxu.org>;
+	Thu, 3 Jan 2019 16:05:11 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A5F60A35F7; Fri,  4 Jan 2019 02:05:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BF1B2A35F6;
+	Fri,  4 Jan 2019 02:04:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A1F26A35F6; Fri,  4 Jan 2019 02:04:52 +1000 (AEST)
+Received: from smtp-out-1.mxes.net (smtp-out-1.mxes.net [205.237.194.119])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3E6A69B5FE
+ for <tuhs@tuhs.org>; Fri,  4 Jan 2019 02:04:52 +1000 (AEST)
+Received: from Customer-MUA (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id D37432750D
+ for <tuhs@tuhs.org>; Thu,  3 Jan 2019 11:04:50 -0500 (EST)
+From: <ron@ronnatalie.com>
+To: "'The Eunuchs Hysterical Society'" <tuhs@tuhs.org>
+Date: Thu, 3 Jan 2019 11:04:49 -0500
+Message-ID: <083c01d4a37e$0e2af4d0$2a80de70$@ronnatalie.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: AdSjfJsVgo1RF4R0TkqEGNsnjLLmQw==
+Content-Language: en-us
+X-Sent-To: <dHVoc0B0dWhzLm9yZw==>
+X-Sender: ronnatalie.com
+Subject: [TUHS] Magic numbers
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+The issue of a.out magic numbers came up.   The a.out header was 16 =
+bytes.    The first two bytes was 0407 in the original code.    This was =
+followed by 16 bit quantities for text, data, and bss sizes.   Then the =
+size of the symbol tables.   I'm pretty sure the rest of the fields were =
+blank in V6.   Later a start address (previously always assumed to be =
+zero) was added.
+
+The number 407 was a neat kludge.   It was a (relative) branch =
+instruction on the PDP-11.   0400 was the base op code.  7 referred to =
+jumping ahead 7 words which skipped you over the a.out header (the PC =
+had already been incremented for the branch instruction itself).    This =
+allowed you to make a boot block without having to strip off the header. =
+  Boot blocks were just one 512 byte block loaded from block zero of the =
+disk into low memory.
+
+Later executables used 410 for a write protected text segment and 411 =
+for split-I/D executables.   Later versions added more codes (413 was =
+used in BSD to indicate aligned pages followed etc...   Even later =
+systems coded the hardware type into the magic number to distinguish =
+between different architectures.
+
+Note that the fact that 410 and 411 were also PDP-11 branch instructions =
+wasn't ever really used for anything.
+
+
