@@ -1,0 +1,581 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ebace031
+	for <ml@inbox.vuxu.org>;
+	Fri, 4 Jan 2019 22:44:47 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 29EC1A1F53; Sat,  5 Jan 2019 08:44:46 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DE07EA1C5D;
+	Sat,  5 Jan 2019 08:44:06 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=donhopkins-com.20150623.gappssmtp.com header.i=@donhopkins-com.20150623.gappssmtp.com header.b="yjXn9/bh";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 76CC4A1C5C; Sat,  5 Jan 2019 08:44:03 +1000 (AEST)
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com
+ [209.85.208.44])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AA6AFA1C50
+ for <tuhs@minnie.tuhs.org>; Sat,  5 Jan 2019 08:44:01 +1000 (AEST)
+Received: by mail-ed1-f44.google.com with SMTP id x30so33077468edx.2
+ for <tuhs@minnie.tuhs.org>; Fri, 04 Jan 2019 14:44:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=donhopkins-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:subject:from:in-reply-to:date:cc
+ :content-transfer-encoding:message-id:references:to;
+ bh=hEykmvAMXZEqCk+JshMOYA6LeBqq+1eV8pwk2RfOUF8=;
+ b=yjXn9/bhoVOj3zyztuof1uQ/SkUixRFyZDgthZxazXunxNgILtAlO9/FWuXdjncu9K
+ BZ2wvTUDyq+FtPVyjQH5vrbM1JHHpVLDyVwioiBeZveMaCBegJrEpy8mb7bge0fYkmYJ
+ /Stbw6jwiYByHRCbtPs6zecESs5YlIYsFyCOZp0OuDtLJJU/BeBkHr9pxOPpx+0oKaE1
+ Deb+aKc77ZRSwDWLzi0JsyL98p5CfbHUUfWckwOrYpLIYLWFHZitCJ9oMAVoZLOG3N2T
+ 2G12HHDDl+IjmK/xWBNnFTZwvIYPkmPdNTqkwpb0wgAFG1s9dmzUbwUKmCTB6B5k1gm7
+ zpHg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
+ :content-transfer-encoding:message-id:references:to;
+ bh=hEykmvAMXZEqCk+JshMOYA6LeBqq+1eV8pwk2RfOUF8=;
+ b=ape5864j35ZIkFBCDNhr2qxr2UgX6MOfVuRhaeQuavelX08G8jTNXSuuX/+/zBlrV0
+ VgwqJfmfxbqtgEiUEy9/NTK2hyBTd6os54Ir/C0wHlz4HQtfrsYykjLuTKNe7K06G5qd
+ +NruUz+wXKUxIbNgqNw7nPg3alhM04nnrMEKDH5DBLhF4zMhWCKghZTCGW2ALrY0WFbL
+ CRKHYOI/g/EHdgd/j2rT2wz8IX1g5mhSEAlXhY6kNntAtw8dxUpwEnX7ZDidJEuDNvVa
+ 11oVOPI5c/r0nzS4ukFAQz9huoLs0BAAGrrN1NzGfpzwV+doY2E4O+OdM8lWDhkuDp76
+ PzQA==
+X-Gm-Message-State: AA+aEWZ+8qgxzScIBq9QOP5YWJngr0kIyRzDVUkflXf86utwayMdt0AA
+ P2gWpAP1y6Gt+ikS/Qw/YmGYpSw3In4=
+X-Google-Smtp-Source: AFSGD/UMh7u4SiUA9jQndhhbKi4NBlksv3eaNokkw5WaOTeJVuMuaBLCMFUIUEB7nB3ffvOmhIYy7g==
+X-Received: by 2002:aa7:d7cf:: with SMTP id e15mr45813933eds.69.1546641839906; 
+ Fri, 04 Jan 2019 14:43:59 -0800 (PST)
+Received: from [192.168.0.52] (i36138.upc-i.chello.nl. [62.195.36.138])
+ by smtp.gmail.com with ESMTPSA id z9sm23971350edr.61.2019.01.04.14.43.58
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Fri, 04 Jan 2019 14:43:59 -0800 (PST)
+Content-Type: text/plain;
+	charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 12.0 \(3445.100.39\))
+From: Don Hopkins <don@donhopkins.com>
+In-Reply-To: <CAC20D2MbuQv2XUn5pMromAq+gV1-Mthsa+bPmU_taLWn-x1M7g@mail.gmail.com>
+Date: Fri, 4 Jan 2019 23:43:58 +0100
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <0906195E-E904-4D29-8F59-DEFC63B36079@donhopkins.com>
+References: <mailman.0.1546567202.30849.tuhs@minnie.tuhs.org>
+ <1C76403B-6684-4AA5-BEFF-FDFE19A08229@donhopkins.com>
+ <CAC20D2MbuQv2XUn5pMromAq+gV1-Mthsa+bPmU_taLWn-x1M7g@mail.gmail.com>
+To: Clem Cole <clemc@ccc.com>
+X-Mailer: Apple Mail (2.3445.100.39)
+Subject: Re: [TUHS] NSA MILNET IMP 57 & Explosive Bolts
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 4 Jan 2019, at 21:46, Clem Cole <clemc@ccc.com> wrote:
+
+>=46rom where did that wonderful clip come?   It's clearly a sequence =
+from something else.  I've never seen it before.
+>Thanks,
+>Clem
+
+They were from my email archives of Hackers_Guild and the umd cs =
+department staff mailing list. Does anybody else have any h_g archives =
+sitting around?=20
+
+Here=E2=80=99s some more funny stuff about the NSA! Gotta love how Brian =
+Reid and Rick Adams weigh in. ;)
+
+-Don
+
+
+From: yee@dali.berkeley.edu (Peter E. Yee)
+Subject: For those who missed 997@lll-crg, here it is
+Date: 19 November 1985 at 15:58:08 CET
+To: hackers_guild@ucbvax.berkeley.edu
+
+Relay-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site lll-crg.ARpA
+Posting-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site lll-crg.ARpA
+Path: lll-crg!bandy
+From: bandy@lll-crg.ARpA (Andrew Scott Beals)
+Newsgroups: net.net-people
+Subject: oh YES the NSA is on the net!
+Message-ID: <997@lll-crg.ARpA>
+Date: 19 Nov 85 07:11:36 GMT
+Date-Received: 19 Nov 85 07:11:36 GMT
+References: <324@ucdavis.UUCP> <2253@umcp-cs.UUCP>
+Reply-To: bandy@lll-crg.UUCP (Andrew Scott Beals)
+Distribution: net
+Organization: Computation Research Group, Lawrence Livermore Labs
+Lines: 94
+Summary: (let's say) unintentional dis-information corrected
+
+In article <2253@umcp-cs.UUCP> tlr@umcp-cs.UUCP (Terry L. Ridder) =
+writes:
+	I can almost guarantee that the National Security Agency is
+	not on USENET or ARPANET. I can further almost guarantee that
+	very few employees of NSA are even aware that USENET exist.
+	Signed
+	Terry L. Ridder
+UUCP: seismo!(mimsy.umd.edu|neurad)!bilbo!wiretap!(root|tlr)
+					   ^^^^^^^
+PHONE: 301-490-2248 (home) 301-859-6642 (work)
+
+Right.
+
+There used to be a host called "TYCHO" (nickname "NSA") at host
+zero on imp fifty-seven. (26.0.0.57) (information taken from the old
+NIC (Network Information Center for Internet) host tables)
+
+Now there is a machine called "DOCKMASTER" on that same imp port
+(TYCHO was an old PDP-11 running version 6 unix (which rumors had
+flown for quite some time that someone actually proved was secure)).
+
+Here is what the NIC has to say about DOCKMASTER:
+
+	The National Computer Security Center (DOCKMASTER)=20
+	   820 Elkridge Landing Road
+	   Room A1127, Building FANX-II
+	   Linthicum, MD 21090
+=09
+=09
+	   NetAddress: 26.0.0.57
+	   Nicknames: NCSC-MULTICS
+=09
+	   Host Administrator and Liaison:
+	      Aliff, Stephen W.  (SWA1)  Aliff.DODCSC@MIT-MULTICS
+	      (301) 850-5888
+
+Multics, if I remember correctly, was just given some level of
+certification by the government that it was secure. Interesting, no?
+
+Unfortunately, I'm not nearly as much of a Packrat as some might like
+to think so I don't have a Maryland phone book (I do have my silly
+putty though), so I can't tell you where this exchange is located
+(nor where Terry's work number is located). However, looking up
+Linthicum MD (I was born and raised just north of DC) shows that
+it's just north of BWI (airport). There is a NASA center right near
+there and next to that is an un-marked (of course) NSA center.
+
+All of this points that imp 57 is still NSA's imp.
+
+NIC has this to say about host 1 on imp 57:
+
+	National Security Agency (COINS-GATEWAY)=20
+	   COINS Network Control Center
+	   Fort George G. Meade, MD 20755
+=09
+=09
+	   NetAddress: 26.1.0.57
+	   Nicknames: COINS
+=09
+	   Host Administrator and Liaison:
+	      Smith, Ronald L.  (RLS6)  COINS@USC-ISI
+	      (301) 688-6375
+
+The NIC generally likes to give a machine the name "-GATEWAY" when
+that machine is a gateway into another part of the internet. (the
+machine type of COINS is a Plurbus, which is a multiprocessor
+gateway machine manufactured by BBN (the folks who do the ARPANET
+and MILNET hardware).=20
+
+In any case, it seems that Mr Ridder is un-(or mis-?)informed.=20
+
+Side note: at the last (Portland) USENIX, I happened across a
+gentlemen (very cleancut) whose badge listed him as working for the
+"Department of Defense, Fort Meade Maryland". I said "Oh, you're one
+of those NSA guys!" To which he replied "How did you know?!"...
+"Everyone else in DOD says /which/ part of DOD they work for..."
+
+	andrew scott beals
+	lawrence livermore national laboratory/university of california
+	Pooh-bah for LLL-CRG.ARPA
+	(415) 423-1948 (work) (533-1948 (FTS))
+
+ps. In case anyone is wondering and before you go giving my name to
+people that I don't want to talk to (like the Kind Folks at the NSA
+(but I'm sure they've heard of me or will before I finish up with my
+current round of paperwork with the DOE/OPM/FBI)), I obtained all of
+this information through public channels.
+--=20
+There once was a thing called a V-2,
+To pilot which you did not need to--
+ You just pushed a button,
+ And it would leave nuttin'
+But stiffs and big holes and debris, too.
+
+andy beals - bandy@lll-crg.arpa - {seismo,ihnp4!sun,dual}!lll-crg!bandy
+
+
+From: jordan@ucbarpa.berkeley.edu (Jordan Hayes)
+Subject: Re: ``dockmaster''
+Date: 19 November 1985 at 16:27:34 CET
+To: hackers_guild@ucbvax.berkeley.edu
+
+for those so inclined, they should look at what is on port 2 of that
+imp ... hmmm ... sorta like putting the CIA on port 4 of imp 78 ...
+
+/jordan
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: Re: ``dockmaster''
+Date: 19 November 1985 at 18:27:27 CET
+To: hackers_guild@ucbvax.berkeley.edu, jordan@ucbarpa.berkeley.edu
+
+Maryland lets NSA people use mimsy. The NSA is interested in the
+supercomputer designs that they're working on there... (which is
+why they have an imp connection)
+
+In any case, I just got a long note from Mr Ridder. I'll forward
+it to you when I'm done reading my mail...
+	andy
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: message from Mr. Ridder
+Date: 19 November 1985 at 18:31:44 CET
+To: hackers_guild@lll-crg.ARPA
+
+=46rom tlr@mimsy.umd.edu Tue Nov 19 06:13:44 1985
+Date: Tue, 19 Nov 85 09:12:54 EST
+From: Terry L. Ridder <tlr@mimsy.umd.edu>
+Subject: Your posting
+
+
+	Mr. Andrew Scott Beals
+
+	I am writing to inform you of at least two facts:
+
+	The computer named "wiretap" belongs to my children,
+	age 9, age 7, age 2. Jennifer, the 7 year old, named
+	the computer. Sarah, the 9 year old, named the other
+	computer "bilbo".=20
+
+	Bilbo and wiretap are both private machines. The are
+	owned by my family and I. They are in no way shape or
+	form associated with the NSA.=20
+
+	Concerning your posting, I am concerned that you have
+	no regard for the safety of federal employees. Your
+	posting is marked for distribution "net", if you would
+	look at the two previous posting they are marked for
+	distribution 'usa'. Therefore, you probably have just
+	told most of the world the location of what you believe
+	to be an NSA facility. This probably has made the location
+	a target for any of a number of terrorist groups. What if
+	you are wrong? You have place in danger the lifes of=20
+	innocent people. Just because you may think you know something
+	does not mean that you tell most of the world.=20
+
+	I would hope that in the future that you would take the
+	time to think about all the ramifications before making
+	a posting, similiar in nature to the one in question.
+
+	I would hope that you will send out a cancel message on=20
+	your posting, before it gets to far.
+
+	I sincerely hope that you restrict your speculations about
+	my family's association with any federal agency. I hope
+	also that you are mature enough to post an apology for
+	inferring that my computers were associated with the NSA.
+
+	I do not want to think of what the implications are from
+	that speculation on your part. You may have damaged my
+	family's reputation and my own reputation.=20
+
+	Please be a little more responsible in the future.
+	Engage brain before fingers.
+
+	Signed
+	Terry L. Ridder
+	for the Terry L. Ridder family
+
+
+---------------------
+
+
+From: fair@ucbarpa.berkeley.edu (Erik E. Fair)
+Subject: Re: message from Mr. Ridder
+Date: 19 November 1985 at 18:42:34 CET
+To: bandy@lll-crg.ARPA
+Cc: Hackers_Guild@ucbvax.berkeley.edu
+
+I wonder if this bozoid has ever read `The Puzzle Palace'?
+It identifies several `secret' NSA installations, including
+one out in the wilds of Sonoma, just over the border from
+Marin County, along the road from Tomales to Petaluma. All
+from public sources and Freedom Of Information Act suits.
+
+	Erik E. Fair	ucbvax!fair	fair@ucbarpa.berkeley.edu
+
+P.S.	Be sure to waive hello in your Email to the folks at the
+	Maryland Procurement Office...
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: Re: message from Mr. Ridder
+Date: 19 November 1985 at 19:11:36 CET
+To: fair@ucbarpa.berkeley.edu
+Cc: Hackers_Guild@ucbvax.berkeley.edu
+
+[mimsy.umd.edu]
+Login name: tlr                         In real life: Terry L. Ridder
+Office:     Laurel MD 20707             Office phone: 859-6642
+Home phone: 490-2248                    Arpanet Sponsor
+Directory:  /u/tlr                      Shell: /bin/csh
+Last login Tue Nov 19 09:17 on tty04
+Project: To find a new job, raise three children, and have time for the =
+wife.
+Plan: To move overseas.
+
+----------------------
+Well, this is what it has to say about him. Arpanet sponsor, eh?
+	andy
+
+
+
+From: fair@ucbarpa.berkeley.edu (Erik E. Fair)
+Subject: Re: message from Mr. Ridder
+Date: 19 November 1985 at 19:48:41 CET
+To: bandy@lll-crg.ARPA
+Cc: Hackers_Guild@ucbvax.berkeley.edu
+
+Ask Chris Torek what an `Arpanet Sponsor' is...
+
+	Erik
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: more follies, dt if uninterested
+Date: 20 November 1985 at 02:10:30 CET
+To: hackers_guild@lll-crg.ARPA
+
+Seems that the gentleman doesn't read his fucking news before going
+off at the handle. I sent him an "Excuse me, but if you look at
+article ..." note.
+
+LLL General consul? Snicker snicker. Maybe Postmaster or root or
+usenet will get a nice note from him telling me what a Bad Boy I've
+been... :-)
+	andy
+-----------------------
+Date: Tue, 19 Nov 85 18:46:28 EST
+From: Terry L. Ridder <tlr@mimsy.umd.edu>
+Subject: apology is inorder
+
+
+	Mr. Andrew Scott Beals
+
+	I again ask that you act in a mature manner and post an
+	apology concerning your inferring that my private computers
+	are associated with the NSA.
+
+	If you choose not to, would you be kind enough to inform me
+	what the phone number is for LLL general consul is?
+
+	Signed
+	Terry L. Ridder
+
+
+
+From: jordan@ucbarpa.berkeley.edu (Jordan Hayes)
+Subject: Re: ridder me this ...
+Date: 20 November 1985 at 02:59:22 CET
+To: hackers_guild@ucbvax.berkeley.edu
+
+Methinks either the man is an idiot or he's not really a force to
+be reckoned with. If his main mail machine is mimsy, that means he's
+on the same imp ... since NSA people have accounts at umd, maybe he's
+FROM the NSA ... hmmm ...
+
+/jordan
+
+
+From: Milo S. Medin (NASA ARC Code ED) <medin@orion.ARPA>
+Subject: Re: message from Mr. Ridder
+Date: 20 November 1985 at 03:03:55 CET
+To: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Cc: fair@ucbarpa.berkeley.edu, Hackers_Guild@ucbvax.berkeley.edu
+
+
+LLL general counsel?  uh oh.....  That means lawyers....
+
+
+						Milo
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: ridder me this
+Date: 20 November 1985 at 03:14:56 CET
+To: hackers_guild@lll-crg.ARPA
+
+One of my sources tells me that Mr Ridder is indeed an NSA person. Chris
+Torek told me that an "Arpanet Sponsor" in their terminology means that
+he's one of the people who helped them get on the network.
+	andy
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: Re: Ridder me this (qualification)
+Date: 20 November 1985 at 03:31:22 CET
+To: bandy@ll-crg.ARPA, deboor%buddy@ucbvax.berkeley.edu
+Cc: hackers_guild@ucbvax.berkeley.edu
+
+Oh, I already sent him an apology. Here it is:
+Relay-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site lll-crg.ARpA
+Posting-Version: version B 2.10.3 4.3bsd-beta 6/6/85; site lll-crg.ARpA
+Path: lll-crg!bandy
+From: bandy@lll-crg.ARpA (Andrew Scott Beals)
+Newsgroups: net.net-people
+Subject: Apology to Terry Ridder
+Message-ID: <998@lll-crg.ARpA>
+Date: 19 Nov 85 17:37:12 GMT
+Date-Received: 19 Nov 85 17:37:12 GMT
+References: <324@ucdavis.UUCP> <2253@umcp-cs.UUCP> <997@lll-crg.ARpA>
+Reply-To: bandy@lll-crg.UUCP (Andrew Scott Beals)
+Distribution: net
+Organization: Computation Research Group, Lawrence Livermore Labs
+Lines: 15
+
+I would like to take this opportunity to formally extend my
+apologies to Terry L. Ridder (tlr@mimsy.umd.edu) and his family for
+insinuating that their home machines (bilbo and wiretap) and any
+association with any Federal agency (the NSA in this case).
+
+andrew scott beals
+uc/llnl
+--=20
+There once was a thing called a V-2,
+To pilot which you did not need to--
+ You just pushed a button,
+ And it would leave nuttin'
+But stiffs and big holes and debris, too.
+
+andy beals - bandy@lll-crg.arpa - {seismo,ihnp4!sun,dual}!lll-crg!bandy
+---------------------
+What was interesting was that the file was ~news/net/net-people/666 ...
+Tee hee hee.
+	andy
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: calling LLL {lawyers,diplomats}
+Date: 20 November 1985 at 03:38:35 CET
+To: hackers_guild@lll-crg.ARPA
+
+Of course, they'll tell him that "Anything that our employees say
+is their own opinion unless they are a member of the LLNL Public
+Information group and are speaking in an official capacity."
+
+"Pin-heads. Pin-heads. Roly-poly pin-heads. Pin-heads. Pin-heads.
+Watch them lose. Yow!"
+	andy
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: teehee
+Date: 20 November 1985 at 17:18:25 CET
+To: hackers_guild@ucbvax.berkeley.edu
+
+=46rom reid@glacier Wed Nov 20 06:59:01 1985
+Date: Wed, 20 Nov 85 06:57:35 pst
+From: Brian Reid <reid@glacier>
+Subject: Re: Apology to Terry Ridder
+Newsgroups: net.net-people
+Organization: Stanford University, Computer Systems Lab
+
+
+Terry Ridder is one of the biggest assholes on earth, and I can't fathom
+anybody owing him an apology about anything. Oh well.
+--=20
+	Brian Reid	decwrl!glacier!reid
+	Stanford	reid@SU-Glacier.ARPA
+
+
+
+From: Andrew Scott Beals <bandy@lll-crg.ARPA>
+Subject: philngai on tlr
+Date: 21 November 1985 at 07:21:35 CET
+To: hackers_guild@lll-crg.ARPA
+
+=46rom amdcad!phil Wed Nov 20 20:41:58 1985
+Date: Wed, 20 Nov 85 20:08:04 pst
+From: amdcad!phil (Phil Ngai)
+Subject: Re: message from Mr. Ridder
+
+
+what kind of asshole names a computer wiretap and then complains when
+others make seemingly reasonable assumptions about it?
+
+who should engage their brain, that's what i want to know.
+--=20
+Raise snails for fun and profit! Race them for amusement! Then eat the =
+losers!
+
+Phil Ngai +1 408 749-5720
+UUCP: {ucbvax,decwrl,ihnp4,allegra}!amdcad!phil
+ARPA: amdcad!phil@decwrl.dec.com
+
+
+From: cuuxb!jab@lll-crg.ARPA
+Subject: Re: message from Mr. Ridder
+Date: 24 November 1985 at 02:25:13 CET
+To: lll-crg!sdcsvax.arpa!hutch@lll-crg.ARPA
+Cc: lll-crg!hackers_guild@ucbvax.berkeley.edu
+
+The Ridder guy is a jerk. I would wonder why the ARPANET knows about his
+private machines, anyhow: sounds like a misuse of government funding.
+
+	Jeff Bowles
+	Lisle, IL
+
+
+
+From: Donnalyn Frey <donnalyn@seismo.css.gov>
+Subject: Re: private machines on internet
+Date: 24 November 1985 at 06:08:34 CET
+To: cuuxb!jab@lll-crg.ARPA, deboor%buddy@ucbvax.berkeley.edu
+Cc: hackers_guild@ucbvax.berkeley.edu
+
+Ridders machines are NOT on the arpanet. They have uucp links to
+Uof Maryland. Ridder himself has an account on mimsy.umd.edu.
+
+Ridders two machines were named by his children. ONe had
+just finished reading teh Hobbit (hence bilbo, despite the
+2 other known bilbos [not to be confused with certain dildos being =
+discussed])
+and the other had finished some spy book, hence wiretap.
+
+He is quite pompous and seems to think the world revolves around
+him. We asked him to rename "bilbo" to not conflict. He replied that
+the other machines should change because he had already named his
+machine.
+
+By the way, we're talking about toys here (maybe somthing as expensive
+as an IBM-PC) not the "real" machines you might be led to believe.
+
+He is best ignored.
+
+---rick
+
+
+
+
