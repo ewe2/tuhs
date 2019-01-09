@@ -1,0 +1,90 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 74a71c48
+	for <ml@inbox.vuxu.org>;
+	Wed, 9 Jan 2019 15:10:37 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 503EBA35D5; Thu, 10 Jan 2019 01:10:36 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 72187A35C4;
+	Thu, 10 Jan 2019 01:10:13 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 84616A35C4; Thu, 10 Jan 2019 01:10:10 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 2687BA35B7
+ for <tuhs@tuhs.org>; Thu, 10 Jan 2019 01:10:10 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id E94D2156E41B;
+ Wed,  9 Jan 2019 07:09:55 -0800 (PST)
+From: Bakul Shah <bakul@bitblocks.com>
+To: Warner Losh <imp@bsdimp.com>
+In-reply-to: Your message of "Tue, 08 Jan 2019 22:45:31 -0700."
+ <CANCZdfocjjyFu43JF17iF=woZXvXQzbZpswoL41Pbin7DgJR=Q@mail.gmail.com>
+References: <mailman.5.1546912802.21858.tuhs@minnie.tuhs.org>
+ <966501A7-7736-4EB0-841A-C1516C876272@quintile.net>
+ <CANCZdfrRZfv4Ok6uLN-3Q_HXTcJ19GWcrbcn38qf3hhdoQOrAw@mail.gmail.com>
+ <alpine.BSF.2.21.9999.1901091300140.65590@aneurin.horsfall.org>
+ <20190109052004.9DB6F156E410@mail.bitblocks.com>
+ <CANCZdfocjjyFu43JF17iF=woZXvXQzbZpswoL41Pbin7DgJR=Q@mail.gmail.com>
+Comments: In-reply-to Warner Losh <imp@bsdimp.com>
+ message dated "Tue, 08 Jan 2019 22:45:31 -0700."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <65457.1547046595.1@bitblocks.com>
+Date: Wed, 09 Jan 2019 07:09:55 -0800
+Message-Id: <20190109151002.E94D2156E41B@mail.bitblocks.com>
+Subject: Re: [TUHS] TUHS Digest, Vol 38, Issue 10
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, 08 Jan 2019 22:45:31 -0700 Warner Losh <imp@bsdimp.com> wrote:
+>
+>
+> > > For example, I could envisage a disk where the sectors are deliberately
+> > > not numbered sequentially i.e. they've taken rotational latency into
+> > > account for you?
+> >
+> > We did in fact use an interleave factor of more than 1 (skip
+> > more than 1 block for consecutively numbered sectors) to
+> > improve throughput but that had to do with slow processing.
+> > We did discuss "dead reckoning" (invoking the service routine
+> > right when the N+1 numbered sector was near the r/w heads) but
+> > I don't think we implemented it.
+> >
+>
+>  For floppy drivers that I've seen the source to in early unixes, this was
+> often the case. One minor device would be to access the 'raw' device, while
+> another would be to access the 'cooked' sector numbers where the mapping
+> was anything but linear. you'd have an interleave of, say, 4 or so, and
+> then a 'slip' from track to track. The interleave factor was based on how
+
+We used interleaving on the hard disk because a 5Mbps ST412
+drive could stream data faster than typical user program could
+handle (on a 5.6Mhz bus machine). We used h/w support as the
+machine was already too slow to do any s/w interleaving!
+
+Example: for an interleave of 1, at the time formatting the
+disk, sector ids would be written in this sequence:
+ 1 8 2 9 3 A 4 B 5 C 6 D 7 E
+We picked the interleave number based on some typical use
+cases at the time.
+
+The floppy driver was was a completely separate driver for
+various reasons.
