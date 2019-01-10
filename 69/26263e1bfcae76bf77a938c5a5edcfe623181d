@@ -1,0 +1,105 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 915c87c3
+	for <ml@inbox.vuxu.org>;
+	Thu, 10 Jan 2019 23:20:27 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DD7FD94668; Fri, 11 Jan 2019 09:20:25 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2DA1F9466D;
+	Fri, 11 Jan 2019 09:19:43 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8960494666; Fri, 11 Jan 2019 09:19:41 +1000 (AEST)
+X-Greylist: delayed 428 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Fri, 11 Jan 2019 09:19:40 AEST
+Received: from lb3-smtp-cloud9.xs4all.net (lb3-smtp-cloud9.xs4all.net
+ [194.109.24.30])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7934E93D29
+ for <tuhs@minnie.tuhs.org>; Fri, 11 Jan 2019 09:19:40 +1000 (AEST)
+Received: from [192.168.1.114] ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPA
+ id hjUzggXrfMWvEhjV0gZgF5; Fri, 11 Jan 2019 00:12:31 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 11 Jan 2019 00:12:29 +0100
+Message-Id: <39F862F7-7C4B-4A09-B838-942BE0FD2626@planet.nl>
+To: "tuhs@minnie.tuhs.org list" <tuhs@minnie.tuhs.org>
+Mime-Version: 1.0 (Apple Message framework v1283)
+X-Mailer: Apple Mail (2.1283)
+X-CMAE-Envelope: MS4wfCIfmKDtveY+K6fqgR44Udw37xBl7C6pCdMFsV3LSNOHq7jjPVo8U2pvnCe05baD3RBgXbaDcRKR01+L5C0W1bcmz3MfsJkoD1PQC5PmyYow4rNmNYKf
+ ecGVEgMs8gD6ai4R+/Wd0QZMmOsisQIMZiOBPcf3YRxksS79Vg1pQDzN
+Subject: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+I'm still happily experimenting with my combination of a V6 kernel with =
+the 1981 tcp/ip stack from BBN, for example figuring out how one would =
+write something like 'ping' using that API. That brought me to pondering =
+the origins of the 'alarm()' sys call and how some things were done on =
+the Spider network.
+
+These are my observations:
+
+1. First of all: I understand that early Unix version numbers and dates =
+mostly refer to the manual editions, and that core users had more =
+frequent snapshots of a constantly evolving code base.
+
+2. If I read the TUHS archive correctly, alarm() apparently did not =
+exist in the original V6 edition of mid-1975. On the same basis, it was =
+definitely there by the time of the V7 edition of early '79 (with =
+sleep() removed) - so alarm() would seem to have appeared somewhere in =
+the '75-'78 time frame.
+
+3. The network enhanced NCP Unix versions in the TUHS archive have =
+alarm() appear next to sleep(). Although the surviving tapes date from =
+'79, it would seem to suggest that alarm() may have originated in the =
+earlier part of the '75-'78 time frame.
+
+4. The Spider network file store program 'nfs' (source here: =
+http://chiselapp.com/user/pnr/repository/Spider/dir?mtime=3D0&type=3Dflat&=
+udc=3D1&ci=3Dtip) uses idioms like the below to avoid getting hung on a =
+dead server/network:
+
+	signal(14,timeout); alarm(30);
+	if((read(fn,rply,100)) < 0) trouble();
+	alarm(0);
+
+The 'nfs' program certainly was available in the 5th edition, maybe even =
+in the 4th edition (the surviving 4th edition source code includes a =
+Spider device driver). However, the surviving source for 'nfs' is from =
+1979 as well, so it may include later additions to the original design.
+
+5. Replacing sleep() with alarm() and a user space library routine seems =
+to have happened only some time after alarm() appeared, so it would seem =
+that this was an optimization that alarm() enabled, and not its raison =
+d'=EAtre.
+
+So here are some questions that the old hands may be able to shed some =
+light on:
+
+- When/where did alarm() appear? Was network programming driving its =
+inception?
+
+- Did Spider programs use a precursor to alarm() before that? (similar =
+to V5 including 'snstat' in its libc - a precursor to ioctl).
+
+Paul
+
