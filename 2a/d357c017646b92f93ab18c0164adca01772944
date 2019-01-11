@@ -1,0 +1,86 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 45d1f0eb
+	for <ml@inbox.vuxu.org>;
+	Fri, 11 Jan 2019 22:09:29 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 78B9A9467A; Sat, 12 Jan 2019 08:09:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2907694666;
+	Sat, 12 Jan 2019 08:08:37 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E02CD94666; Sat, 12 Jan 2019 08:08:33 +1000 (AEST)
+Received: from nb3.reedmedia.net (nb3.reedmedia.net [71.19.148.35])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E207D93D29
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 08:08:32 +1000 (AEST)
+Received: from [47.185.49.132] (helo=reedmedia.net)
+ by nb3.reedmedia.net with esmtpa (Exim 4.89)
+ (envelope-from <reed@reedmedia.net>) id 1gi4yf-0003Z1-7y
+ for tuhs@minnie.tuhs.org; Fri, 11 Jan 2019 22:08:33 +0000
+Received: from reed@reedmedia.net by reedmedia.net with local (mailout 0.17)
+ id 26019-1547244506; Fri, 11 Jan 2019 16:08:27 -0600
+Date: Fri, 11 Jan 2019 16:08:25 -0600 (CST)
+From: reed@reedmedia.net
+X-X-Sender: reed@t1.m.reedmedia.net
+To: TUHS main list <tuhs@minnie.tuhs.org>
+In-Reply-To: <CAC20D2Ni4jvA9POZKaQx6O_Dq=Nq5TfdLgbr__oWgrXme=+GHg@mail.gmail.com>
+Message-ID: <alpine.NEB.2.21.1901111528210.21728@t1.m.reedmedia.net>
+References: <39F862F7-7C4B-4A09-B838-942BE0FD2626@planet.nl>
+ <1581c01d4a9c2$ffed5340$ffc7f9c0$@ronnatalie.com>
+ <CAC20D2Ni4jvA9POZKaQx6O_Dq=Nq5TfdLgbr__oWgrXme=+GHg@mail.gmail.com>
+User-Agent: Alpine 2.21 (NEB 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, 11 Jan 2019, Clem Cole wrote:
+
+> Right and select(2) was created by Sam and wnj during the 4.2 development.?
+> I've forgotten which sub-version (it was in 4.1c, but it might have been in
+> b or a before that).? There was a lot of arguing at the time about it's need;?
+> the multiple process solution was considered more 'Unix-like.'
+...
+
+I search through the SCCS code in 4.1c. There is a reference to it by 
+name for 4.1a in syscalls.c (82/11/13) to answer your comment.
+
+"#38 -- 4.1a select",   /*  38 = nosys */
+
+The select system call was added in 81/02/07 with no comment. Commit 
+history shows in 81/10/17: "cleanup (mpx removal, old tty removal, 
+beginnings of select)" and in 81/10/11 "first boot with select()" which 
+includes lots of changes like replace lots of tty code and use 
+selwakeup().
+
+But I don't see any of the select code itself until a new file 
+kern_descrip.c was introduced in 82/07/15. Soon after the #38 select 
+became obsoleted oselect and a new syscall number #93 was assigned.
+(In 4.2 the select code was in sys_generic.c.)
+
+Can someone tell me about SCCS behaviour when renaming/moving or 
+deleting files? In particular, I think the select() code prior to 
+82/07/15 had different source filenames that no longer exist and the 
+SCCS history was lost.  Anyone else have ideas about this?  I have 
+noticed this with other SCCS spelunking where code was removed and then 
+corresponding "s" files were missing -- but maybe that is just the way 
+the systems that our current snapshots (McKusick discs) of this history 
+were made from. Maybe sccs didn't checkout the history of deleted files 
+by default (that is my guess).
