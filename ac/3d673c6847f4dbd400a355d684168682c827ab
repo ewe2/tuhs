@@ -1,0 +1,338 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d7af5d6d
+	for <ml@inbox.vuxu.org>;
+	Thu, 31 Jan 2019 19:46:01 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 452429B762; Fri,  1 Feb 2019 05:46:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 687CB9B75F;
+	Fri,  1 Feb 2019 05:45:20 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=serissa.com header.i=@serissa.com header.b="mS1jErxF";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.b="o4+mtNKn";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 329A69B75C; Fri,  1 Feb 2019 05:45:15 +1000 (AEST)
+Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com
+ [66.111.4.25]) by minnie.tuhs.org (Postfix) with ESMTPS id CB7F39B75C
+ for <tuhs@tuhs.org>; Fri,  1 Feb 2019 05:45:12 +1000 (AEST)
+Received: from compute7.internal (compute7.nyi.internal [10.202.2.47])
+ by mailout.nyi.internal (Postfix) with ESMTP id 2925C21C24;
+ Thu, 31 Jan 2019 14:45:12 -0500 (EST)
+Received: from mailfrontend2 ([10.202.2.163])
+ by compute7.internal (MEProxy); Thu, 31 Jan 2019 14:45:12 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=serissa.com; h=
+ from:message-id:content-type:mime-version:subject:date
+ :in-reply-to:cc:to:references; s=fm1; bh=P36813kXWatXlbGTaWkQLaH
+ lGyBNw4orJZ87Bc3t7vY=; b=mS1jErxF+USpYUrXRJbwkphXsrcEGhodsmuXULR
+ vVCLlIlTcj0Y3PQsZA709hL0RNtqmxDUUfP6mGWT1daPHUjuKcW2cXX6+CRlXp6D
+ 1pQzoCp4tnUwA3UNkP53KTcaFpqPVhg6l18C2Be7VJFC7qijSWyVFB5k/IoJY6zM
+ IAZkDc+kPIFVB+Gf9k27SEc1+xY0bqeOo3XVGz6Sq9BPAnBhWo7XzCD0iLSDK6w9
+ E8JJk2r21ZM1bflX3JtbJmbk1cpeD1ZK32YuI2ClxrFOTxGLjYbzP43uWW+9hequ
+ bzJDO3szD+V8QjJ/YINk9vsX8YWtgWxo5mzXhetj+PjBsow==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+ messagingengine.com; h=cc:content-type:date:from:in-reply-to
+ :message-id:mime-version:references:subject:to:x-me-proxy
+ :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=P36813
+ kXWatXlbGTaWkQLaHlGyBNw4orJZ87Bc3t7vY=; b=o4+mtNKnWH29fh65uGJSuc
+ XA3A4MKyW5rlkRBjxshjRE9BPd+x7ZTJ/lBi6EfDt98/+bTGJborGdwK+lpg2gW7
+ fUjVD3HlizT0JdMQVcaodzyBVW+dHnpYP4pL5f1FSsMmkU3VQswaVVEqfrvK8h1J
+ 32ievy5ftqy+OQXur7HiBnkpRTiru1e195eOX/iZs58/BZUoiD3YFyruLxRFawpi
+ jvGwvUpfm4tZlIqiVIJpsA6zQ33SG2IM0OfIbwHjIO/ASNDRyqmHA1/4mX5G722a
+ QNQsjipvtRxtyQUqWT5H/N/5F9rNfvCRuP1AXTvD2ibjtGy6IEQFTgSvBjDX3ZTg
+ ==
+X-ME-Sender: <xms:SFBTXFtG0PMvgUoTYTXmGK4huRZFdgINEI-h0qyHNxGqRCJfpN7twg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedtledrjeeigddufeduucetufdoteggodetrfdotf
+ fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfquhhtnecuuegrihhlohhuthemucef
+ tddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjughrpefhkfgtggfuff
+ gjvfhfofesrgdtmherhhdtjeenucfhrhhomhepnfgrfihrvghntggvucfuthgvfigrrhht
+ uceoshhtvgifrghrthesshgvrhhishhsrgdrtghomheqnecuffhomhgrihhnpehtfihith
+ htvghrrdgtohhmpdhgihhthhhusghushgvrhgtohhnthgvnhhtrdgtohhmpdhhphdrtgho
+ mhdpshgvmhgrnhhtihgtshgthhholhgrrhdrohhrghenucfkphepuddtkedrgeelrdduhe
+ durddujeegnecurfgrrhgrmhepmhgrihhlfhhrohhmpehsthgvfigrrhhtsehsvghrihhs
+ shgrrdgtohhmnecuvehluhhsthgvrhfuihiivgeptd
+X-ME-Proxy: <xmx:SFBTXLCdkyx2eOw2VoUO6L3gendavDeI55M7XcXSNZ7NWdCMbwml0A>
+ <xmx:SFBTXNN8bAxFO-VONKJ5Q8T6-GbIZkKs1UZfxedrTt2aFiNiSnRioA>
+ <xmx:SFBTXDC5T_866phybZfMiU5gqWkyC6PSmv4p3UTHkvPR6aebCXQBmg>
+ <xmx:SFBTXFT-JZxSBghjggAwrePFfBGT2_WA8OXXSfz6aHrkGJSprQO1KQ>
+Received: from kailua-display.stewart.org
+ (pool-108-49-151-174.bstnma.fios.verizon.net [108.49.151.174])
+ by mail.messagingengine.com (Postfix) with ESMTPA id A562310310;
+ Thu, 31 Jan 2019 14:45:11 -0500 (EST)
+From: Lawrence Stewart <stewart@serissa.com>
+Message-Id: <AE5F90B7-8D06-46DA-9BE1-F69B8AF498A6@serissa.com>
+Content-Type: multipart/alternative;
+ boundary="Apple-Mail=_27BB7136-2EF9-40A6-9B76-2633F04F0EC3"
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+Date: Thu, 31 Jan 2019 14:45:10 -0500
+In-Reply-To: <7C327ED7-E712-475A-8F7D-EDEBCD529255@serissa.com>
+To: Clem Cole <clemc@ccc.com>
+References: <CAFH29tqW+4Z-V9uWp99+Phs-GaaYRyX3mOcsbq1R-Hi+wAZcdQ@mail.gmail.com>
+ <CAFWeb9Jajw48onyW-_RNV9EU9y0N=Nxj-M60MBo2=S28Bd8-uw@mail.gmail.com>
+ <CAC20D2NVurm91cv_3KCQPdMdBHSP1yr7LRxiGWQmTjg9K2umtA@mail.gmail.com>
+ <7C327ED7-E712-475A-8F7D-EDEBCD529255@serissa.com>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] Archeology: AberMUD, BCPL, ec.
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--Apple-Mail=_27BB7136-2EF9-40A6-9B76-2633F04F0EC3
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+A followup from TV Raman, now at Google:
+
+> We also did an intern project -- Tom's intern who became my intern =
+after
+> Tom left (Arjen De Vries) where we did:
+>=20
+> 1. Converted the caption stream into an sgml document indexed by time =
+--
+> so the caption stream came down in dribs and drabs of the form "turn
+> background yellow, foreground white, place this text"... that turned
+> into the  SGML document, with each element tagged with time.
+>=20
+> 2. We then indexed that collection of SGML documents --   the content
+> stream was Tom's ring-buffer of  the CNN live feed (6 hours was what =
+we
+> stored from memory)
+> 3. We then built a simple-minded search engine over the SGML =
+documents,
+> used the CRL reco engine for getting user queries -- you could also =
+just
+> type the query at a search box; did the search over the
+> caption-doc-index, found the time-stamp and played the video.
+>=20
+> Arjen may have published some of this as his final year Masters =
+project
+> out of the University Of Twente -- likely summer 1995.
+> --=20
+> Id: kg:/m/0285kf1
+
+I searched for Arjen De Vries and found
+
+=
+https://pdfs.semanticscholar.org/fb10/b792fb209e0d347cd14430fbb446c1b178f3=
+.pdf
+=E2=80=9CRadio and Television Information Filtering through Speech =
+Recognition=E2=80=9D
+which in turn cites his Master=E2=80=99s thesis from 1995.
+
+
+
+> On 2019, Jan 31, at 2:34 PM, Lawrence Stewart <stewart@serissa.com> =
+wrote:
+>=20
+> I was at CRL from 1989 to 1994.  I sent an inquiry to our informal =
+mailing list.
+>=20
+> We had written an audio server along the lines of the X server =
+(http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-93-8.pdf =
+<http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-93-8.pdf>) and Tom =
+Levergood wrote an application called Store24 to keep a rolling 24 =
+history of WBUR (local NPR station).  We thought about using speech =
+recognition to build a searchable index for it.
+>=20
+> The next idea was to do the same thing for Video, perhaps using the =
+closed captioning feed to develop the index.  Dave Wecker (now at =
+Microsoft Research) reports working on extracting data from NPR news =
+streams and it would find the appropriate audio or video clip.  He=E2=80=99=
+s not sure he published that.
+>=20
+> Jim Gettys cites =
+http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-99-2.pdf =
+<http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-99-2.pdf> (Indexing =
+Multimedia for the Internet) and notes that all the DEC techreports are =
+hidden away at http://www.hpl.hp.com/techreports/ =
+<http://www.hpl.hp.com/techreports/>. Choose =E2=80=9CBrowse by year=E2=80=
+=9D and select Compaq/DEC
+>=20
+> -Larry
+>=20
+>> On 2019, Jan 31, at 9:42 AM, Clem Cole <clemc@ccc.com =
+<mailto:clemc@ccc.com>> wrote:
+>>=20
+>> I'm not sure if the old DEC CRL tech reports are still around.   At =
+one time before the Compaq-tion, some folks at CRL and the folks at =
+Boston Public Library and WGBH were working with video and trying to =
+extract all sorts of text from it.   I do not remember how successful =
+they were, but there might be some hints in their tech reports.  I'll =
+ask around and see if I can turn anything up.  Part of the problem I =
+have is I that don't remember who was doing that work, but some of my =
+friends might.
+>>=20
+>> Clem
+>> =E1=90=A7
+>>=20
+>> On Thu, Jan 31, 2019 at 2:16 AM Alec Muffett <alec.muffett@gmail.com =
+<mailto:alec.muffett@gmail.com>> wrote:
+>> Has anyone ever attempted to OCR a video, perhaps by breaking into =
+frames and then aggregating the results, using multiple frames to =
+correct each other?
+>>=20
+>> On Wed, 30 Jan 2019, 19:51 Richard Salz <rich.salz@gmail.com =
+<mailto:rich.salz@gmail.com> wrote:
+>> Some folks are trying to figure out how to get AberMud source online =
+and working; see =
+https://twitter.com/larsbrinkhoff/status/1056823314272960512 =
+<https://twitter.com/larsbrinkhoff/status/1056823314272960512>
+>>=20
+>> Sample code at =
+https://raw.githubusercontent.com/larsbrinkhoff/abermud/master/abermud1/te=
+xt/timelock.b =
+<https://raw.githubusercontent.com/larsbrinkhoff/abermud/master/abermud1/t=
+ext/timelock.b>
+>>=20
+>>=20
+>>=20
+>=20
+
+
+--Apple-Mail=_27BB7136-2EF9-40A6-9B76-2633F04F0EC3
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" class=3D"">A =
+followup from TV Raman, now at Google:<div class=3D""><br =
+class=3D""></div><div class=3D""><div><blockquote type=3D"cite" =
+class=3D"">We also did an intern project -- Tom's intern who became my =
+intern after<br class=3D"">Tom left (Arjen De Vries) where we did:<br =
+class=3D""><br class=3D"">1. Converted the caption stream into an sgml =
+document indexed by time --<br class=3D"">so the caption stream came =
+down in dribs and drabs of the form "turn<br class=3D"">background =
+yellow, foreground white, place this text"... that turned<br =
+class=3D"">into the &nbsp;SGML document, with each element tagged with =
+time.<br class=3D""><br class=3D"">2. We then indexed that collection of =
+SGML documents -- &nbsp;&nbsp;the content<br class=3D"">stream was Tom's =
+ring-buffer of &nbsp;the CNN live feed (6 hours was what we<br =
+class=3D"">stored from memory)<br class=3D"">3. We then built a =
+simple-minded search engine over the SGML documents,<br class=3D"">used =
+the CRL reco engine for getting user queries -- you could also just<br =
+class=3D"">type the query at a search box; did the search over the<br =
+class=3D"">caption-doc-index, found the time-stamp and played the =
+video.<br class=3D""><br class=3D"">Arjen may have published some of =
+this as his final year Masters project<br class=3D"">out of the =
+University Of Twente -- likely summer 1995.<br class=3D"">--&nbsp;<br =
+class=3D"">Id: kg:/m/0285kf1<br class=3D""></blockquote><div><br =
+class=3D""></div><div>I searched for Arjen De Vries and =
+found</div><div><br class=3D""></div><div><a =
+href=3D"https://pdfs.semanticscholar.org/fb10/b792fb209e0d347cd14430fbb446=
+c1b178f3.pdf" =
+class=3D"">https://pdfs.semanticscholar.org/fb10/b792fb209e0d347cd14430fbb=
+446c1b178f3.pdf</a></div><div>=E2=80=9CRadio and Television Information =
+Filtering through Speech Recognition=E2=80=9D</div><div>which in turn =
+cites his Master=E2=80=99s thesis from 1995.</div><div><br =
+class=3D""></div><br class=3D""><div class=3D""><br =
+class=3D""></div><blockquote type=3D"cite" class=3D""><div class=3D"">On =
+2019, Jan 31, at 2:34 PM, Lawrence Stewart &lt;<a =
+href=3D"mailto:stewart@serissa.com" class=3D"">stewart@serissa.com</a>&gt;=
+ wrote:</div><br class=3D"Apple-interchange-newline"><div class=3D""><meta=
+ http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8" =
+class=3D""><div style=3D"word-wrap: break-word; -webkit-nbsp-mode: =
+space; line-break: after-white-space;" class=3D"">I was at CRL from 1989 =
+to 1994. &nbsp;I sent an inquiry to our informal mailing list.<div =
+class=3D""><br class=3D""></div><div class=3D"">We had written an audio =
+server along the lines of the X server (<a =
+href=3D"http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-93-8.pdf" =
+class=3D"">http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-93-8.pdf</a>) =
+and Tom Levergood wrote an application called Store24 to keep a rolling =
+24 history of WBUR (local NPR station). &nbsp;We thought about using =
+speech recognition to build a searchable index for it.</div><div =
+class=3D""><br class=3D""></div><div class=3D"">The next idea was to do =
+the same thing for Video, perhaps using the closed captioning feed to =
+develop the index. &nbsp;Dave Wecker (now at Microsoft Research) reports =
+working on extracting data from NPR news streams and it would find the =
+appropriate audio or video clip. &nbsp;He=E2=80=99s not sure he =
+published that.</div><div class=3D""><br class=3D""></div><div =
+class=3D"">Jim Gettys cites&nbsp;<a =
+href=3D"http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-99-2.pdf" =
+class=3D"">http://www.hpl.hp.com/techreports/Compaq-DEC/CRL-99-2.pdf</a> =
+(Indexing Multimedia for the Internet) and notes that all the DEC =
+techreports are hidden away at&nbsp;<a =
+href=3D"http://www.hpl.hp.com/techreports/" target=3D"_blank" =
+class=3D"">http://www.hpl.hp.com/techreports/</a>. Choose =E2=80=9CBrowse =
+by year=E2=80=9D and select Compaq/DEC</div><div class=3D""><br =
+class=3D""></div><div class=3D"">-Larry<br class=3D""><div class=3D""><br =
+class=3D""><blockquote type=3D"cite" class=3D""><div class=3D"">On 2019, =
+Jan 31, at 9:42 AM, Clem Cole &lt;<a href=3D"mailto:clemc@ccc.com" =
+class=3D"">clemc@ccc.com</a>&gt; wrote:</div><br =
+class=3D"Apple-interchange-newline"><div class=3D""><div dir=3D"ltr" =
+class=3D""><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">I'm not sure if the old =
+DEC CRL tech reports are still around.&nbsp; &nbsp;At one time before =
+the&nbsp;Compaq-tion, some folks at CRL and the folks at Boston Public =
+Library and WGBH were working with video and trying to extract all sorts =
+of text from it.&nbsp; &nbsp;I do not remember how successful they were, =
+but there might be some hints in their tech reports.&nbsp; I'll ask =
+around and see if I can turn anything up.&nbsp; Part of the problem I =
+have&nbsp;is I that don't remember who was doing that work, but some of =
+my friends might.</div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br class=3D""></div><div=
+ class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">Clem</div></div><div =
+hspace=3D"streak-pt-mark" style=3D"max-height:1px" class=3D""><img =
+alt=3D"" style=3D"width:0px;max-height:0px;overflow:hidden" =
+src=3D"https://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D=
+&amp;type=3Dzerocontent&amp;guid=3Dff55598f-8cc9-44e0-b56e-eeb009d1eb04" =
+class=3D""><font color=3D"#ffffff" size=3D"1" =
+class=3D"">=E1=90=A7</font></div><br class=3D""><div =
+class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Thu, Jan =
+31, 2019 at 2:16 AM Alec Muffett &lt;<a =
+href=3D"mailto:alec.muffett@gmail.com" =
+class=3D"">alec.muffett@gmail.com</a>&gt; wrote:<br =
+class=3D""></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex"><div dir=3D"auto" class=3D""><div =
+class=3D"">Has anyone ever attempted to OCR a video, perhaps by breaking =
+into frames and then aggregating the results, using multiple frames to =
+correct each other?<br class=3D""><br class=3D""><div =
+class=3D"gmail_quote"><div dir=3D"ltr" class=3D"">On Wed, 30 Jan 2019, =
+19:51 Richard Salz &lt;<a href=3D"mailto:rich.salz@gmail.com" =
+target=3D"_blank" class=3D"">rich.salz@gmail.com</a> wrote:<br =
+class=3D""></div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr" class=3D""><div =
+dir=3D"ltr" class=3D""><div dir=3D"ltr" class=3D"">Some folks are trying =
+to figure out how to get AberMud source online and working; see <a =
+href=3D"https://twitter.com/larsbrinkhoff/status/1056823314272960512" =
+rel=3D"noreferrer" target=3D"_blank" =
+class=3D"">https://twitter.com/larsbrinkhoff/status/1056823314272960512</a=
+></div><div dir=3D"ltr" class=3D""><br class=3D""></div><div =
+class=3D"">Sample code at <a =
+href=3D"https://raw.githubusercontent.com/larsbrinkhoff/abermud/master/abe=
+rmud1/text/timelock.b" rel=3D"noreferrer" target=3D"_blank" =
+class=3D"">https://raw.githubusercontent.com/larsbrinkhoff/abermud/master/=
+abermud1/text/timelock.b</a></div><div class=3D""><br =
+class=3D""></div><div class=3D""><br class=3D""></div><div dir=3D"ltr" =
+class=3D""><br class=3D""></div></div></div>
+</blockquote></div></div></div>
+</blockquote></div>
+</div></blockquote></div><br =
+class=3D""></div></div></div></blockquote></div><br =
+class=3D""></div></body></html>=
+
+--Apple-Mail=_27BB7136-2EF9-40A6-9B76-2633F04F0EC3--
