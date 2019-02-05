@@ -1,0 +1,91 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ab7851f9
+	for <ml@inbox.vuxu.org>;
+	Tue, 5 Feb 2019 22:23:20 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4D1D59B8A7; Wed,  6 Feb 2019 08:23:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1122A9B8A4;
+	Wed,  6 Feb 2019 08:22:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B7CF69B8A1; Wed,  6 Feb 2019 08:22:35 +1000 (AEST)
+X-Greylist: delayed 493 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 06 Feb 2019 08:22:35 AEST
+Received: from bugle.employees.org (accordion.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5036A9B8A0
+ for <tuhs@minnie.tuhs.org>; Wed,  6 Feb 2019 08:22:35 +1000 (AEST)
+Received: by bugle.employees.org (Postfix, from userid 1736)
+ id AA9D1FECC117; Tue,  5 Feb 2019 22:14:22 +0000 (UTC)
+Date: Tue, 5 Feb 2019 22:14:22 +0000
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: tuhs@minnie.tuhs.org
+Message-ID: <20190205221422.GA24750@bugle.employees.org>
+References: <20190204202947.69A4818C082@mercury.lcs.mit.edu>
+ <896294eb-44c0-4fed-0436-37f087611c59@spamtrap.tnetconsulting.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <896294eb-44c0-4fed-0436-37f087611c59@spamtrap.tnetconsulting.net>
+User-Agent: Mutt/1.11.1 (2018-12-01)
+Subject: [TUHS] IP weak/strong host model (was Re: OSI stack (Was: Posters))
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Feb 05, 2019 at 11:01:23AM -0700, Grant Taylor via TUHS wrote:
+> 
+> Multi-homed IPv4 hosts (all that I've tested) usually allow traffic to a 
+> local IP to come in on any interface, even if it's not the interface 
+> that the IPv4 address is bound to.
+> 
+> Take the following host:
+> 
+> +---+   +-----------------+   +---+
+> | A +---+ eth0   B   eth1 +---+ C |
+> +---+   +-----------------+   +---+
+> 
+> Even if B has IPv4 forwarding disabled, A will very likely be able to 
+> talk to B via the IPv4 address bound to eth1.  Likewise C can talk to B 
+> using the IPv4 address bound to eth0.
+
+This is generally referred to as the weak host model (or End System),
+as opposed to the strong host model.  See RFC 1122, sect 3.3.4.2.
+
+> My understanding is that IPv6 changes this paredigm to be explicitly the 
+> opposite.  If B has IPv6 forwarding disabled, A can't talk to B via the 
+> IPv6 address bound to eth1.  Nor can C talk to B via the IPv6 address 
+> bound to eth0.
+
+That is not my understanding.  Either protocol can use either model in
+a given system.  In theory it could even differ depending upon configurations.
+
+Most systems I've worked on have used the weak model, but that is largely,
+because they were routers, and looked up destinations in a FIB (or RIB)
+before (or as well as) considering interface addresses.
+
+Some OS's I've used followed the weak scheme, some followed the strong
+scheme.
+
+The following suggests that Linux defaults to weak, and that BSDs
+default to strong; I've never tested that BSD case, but from memory
+OSX (xnu) defaults to weak.
+
+https://unix.stackexchange.com/questions/258810/linux-source-routing-strong-end-system-model-strong-host-model
+
+DF
