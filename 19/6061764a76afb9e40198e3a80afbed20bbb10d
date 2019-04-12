@@ -1,0 +1,265 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id bf02303b
+	for <ml@inbox.vuxu.org>;
+	Fri, 12 Apr 2019 15:34:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B924F95077; Sat, 13 Apr 2019 01:34:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8093E95075;
+	Sat, 13 Apr 2019 01:33:52 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="qGolrP0h";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A255195075; Sat, 13 Apr 2019 01:33:49 +1000 (AEST)
+Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com
+ [209.85.160.170])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 848D095074
+ for <tuhs@tuhs.org>; Sat, 13 Apr 2019 01:33:48 +1000 (AEST)
+Received: by mail-qt1-f170.google.com with SMTP id w5so11637681qtb.11
+ for <tuhs@tuhs.org>; Fri, 12 Apr 2019 08:33:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=weOAyvGCUQZz9eKs63fxdYKEnemYo0J/xH5coRWN+zM=;
+ b=qGolrP0h8tiw4jg2T0viIbR4S1Si2yJP6nNpBIdrSG2Qci+JHSXpXN9iNnD0Pm+qV9
+ fntEKvboewNeRwk4ThnbZo5v/xExIGdcNqMDbN9zZcjAEvoWAb08FlhuekCBT/ZTpQIJ
+ bxlUWzKs5al/XdBCuv/yNPCnoa+EcQ3LAb/yS7yAbQZVjRjC1aGUM4/phd5vtZKJWT6z
+ R4fw1zK9ySwvyrHhf7oUzINHk57zo7wRsQ37osCS7xaTysrVTpwkBXhr5Vl8j+hhtmMB
+ blc9m35svZaD6X0Qhczxtixa7zZlq7KYAbvpv3xk8b1ZP5GCXayP+0SvTpPbWEbtpt+h
+ zuDg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=weOAyvGCUQZz9eKs63fxdYKEnemYo0J/xH5coRWN+zM=;
+ b=klgP8jNNDKPmJWpEjW27iAPE4FOFMGFCujznk2v2KRJVrOp+HcVoT/23oEW2XnSVHe
+ HqN9Ep+z/PDxZgX6fKGcZu8tKTFi46PK2MPmcvg8whNw5Uc22HRXgjr78K63DXJBihcK
+ J5RkLBF+xYLzu3lD26uQCyppL5LANv0I31M4rH3Opdrcq53X7OOI7d/2wuOU9Se/ME31
+ wY9ELK2fC9Nd1tQ/G7l4zk4nubUKa8+eBTYXsFV99kU951/w3RbvCf/Zij2ixz62Xejy
+ Ew85A/rv11uxT6PmdWylT1j8/LaJMAYT2jzpOEZ8FSrtSXhC/rpO2KBcq0UBi0CBhzdY
+ kkOg==
+X-Gm-Message-State: APjAAAXTWjBBsebHusecMLdHiXh5rGa6utR8GqJ4BXefT0SpZwHPbHAL
+ awB8//d3Kfw4+ZinXCyHuSnwpqvkmrPx/iguiA0ysg==
+X-Google-Smtp-Source: APXvYqycjWDcfHN77MLwTqgZyM3d0TWwcKI15RTS0z/h18mVzDVD8Y6jONAIrbDR4su8JKI2j6YxulOdkxJjxgahPMk=
+X-Received: by 2002:a0c:d27a:: with SMTP id o55mr46326409qvh.21.1555083227274; 
+ Fri, 12 Apr 2019 08:33:47 -0700 (PDT)
+MIME-Version: 1.0
+References: <20190412145102.4876F18C0A9@mercury.lcs.mit.edu>
+In-Reply-To: <20190412145102.4876F18C0A9@mercury.lcs.mit.edu>
+From: Warner Losh <imp@bsdimp.com>
+Date: Fri, 12 Apr 2019 09:33:35 -0600
+Message-ID: <CANCZdfqQXenzx3uN-EL1js6NSbn_9Pz6T5DKMrcL38UB4AAWfQ@mail.gmail.com>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Content-Type: multipart/alternative; boundary="0000000000005bca220586570720"
+Subject: Re: [TUHS] "Fork considered harmful"
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000005bca220586570720
+Content-Type: text/plain; charset="UTF-8"
+
+On Fri, Apr 12, 2019 at 8:51 AM Noel Chiappa <jnc@mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Richard Salz
+>
+>     > Any view on this?
+>     >
+> https://www.microsoft.com/en-us/research/publication/a-fork-in-the-road/
+>
+> Having read this, and seen the subsequent discussion, I think both sides
+> have
+> good points.
+>
+> What I perceive to be happening is something I've described previously, but
+> never named, which is that as a system scales up, it can be necessary to
+> take
+> one subsystem which did two things, and split it up so there's a custom
+> subsystem for each.
+>
+> I've seen this a lot in networking; I've been trying to remember some of
+> the
+> examples I've seen, and here's the best one I can come up with at the
+> moment:
+> having the routing track 'unique-ID network interface names' (i.e.
+> interface
+> 'addresses') - think 48-bit IEEE interface IDs' - directly. In a small
+> network, this works fine for routing traffic, and as a side-benefit, gives
+> you
+> mobility. Doesn't scale, though - you have to build an 'interface ID to
+> location name mapping system', and use 'location names' (i.e. 'addresses')
+> in
+> the routing.
+>
+> So classic Unix 'fork' does two things: i) creates a new process, and ii)
+> replicates
+> the environment/etc of an existing process. (In early Unix, the latter was
+> pretty
+> simple, but as the paper points out, it has now become a) complex and b)
+> expensive.)
+>
+
+Signals, fds, address space, copy vs share, COW vs copy now, etc are all
+things. Also I'd split hairs on (i): you need some way to create a new
+thread of execution within a process, which is where a lot of the focus of
+criticisms of fork has focused on the past.
+
+
+> I think the answer has to include decomposing the functionality of old
+> fork()
+> into several separate sub-primitives (albeit not all necessarily directly
+> accessible to the user): a new-process primitive, which can be bundled
+> with a
+> number of different alternatives (e.g. i) exec(), ii) environment
+> replication,
+> iii) address-space replication, etc) - perhaps more than one at once.
+>
+> So that shell would want a form of fork() which bundled in i) and ii), but
+> large applications might want something else. And there might be several
+> variants of ii), e.g. one might replicate only environment variables,
+> another
+> might add I/O channels, etc.
+>
+> In a larger system, there's just no 'one size fits all' answer, I think.
+>
+
+Agreed. We've already seen that happening, some examples are quite old. We
+had vfork() (dating back to 3BSD) which tried to optimize the duplication
+stuff. More recently, rfork() (plan9 and later BSD) and clone() (Linux) [*]
+have been used to specify what parts of process are copied and/or shared to
+allow, among other things, light weight threads to be one of the possible
+answers, to allow the fork to happen asynchronously, etc. Linux has a bunch
+of other variants as well.
+
+fork as a boogie man is a well known trope, honestly. Criticism of it, and
+solutions for it's all-or-nothing approach have been proffered for a long
+time. These solutions range from having the helper child process to spawn
+other things a more complex process wants, to specialized ways to create
+threads (which are process-like things that share an address space and
+benefit from special handling in the kernel), to things like rfork or clone
+that try to pick-and-choose what aspects of process duplication are needed.
+There's a reason that the clone man page is maybe 10x longer than the
+classic fork man page.
+
+Warner
+
+[*] This doesn't even begin to look at things like what Solaris, Irix, or a
+dozen other unix derivatives did to create threads and/or optimize
+different use cases of fork..
+
+--0000000000005bca220586570720
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Fri, Apr 12, 2019 at 8:51 AM Noel =
+Chiappa &lt;<a href=3D"mailto:jnc@mercury.lcs.mit.edu">jnc@mercury.lcs.mit.=
+edu</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"marg=
+in:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1e=
+x">=C2=A0 =C2=A0 &gt; From: Richard Salz<br>
+<br>
+=C2=A0 =C2=A0 &gt; Any view on this?<br>
+=C2=A0 =C2=A0 &gt; <a href=3D"https://www.microsoft.com/en-us/research/publ=
+ication/a-fork-in-the-road/" rel=3D"noreferrer" target=3D"_blank">https://w=
+ww.microsoft.com/en-us/research/publication/a-fork-in-the-road/</a><br>
+<br>
+Having read this, and seen the subsequent discussion, I think both sides ha=
+ve<br>
+good points.<br>
+<br>
+What I perceive to be happening is something I&#39;ve described previously,=
+ but<br>
+never named, which is that as a system scales up, it can be necessary to ta=
+ke<br>
+one subsystem which did two things, and split it up so there&#39;s a custom=
+<br>
+subsystem for each.<br>
+<br>
+I&#39;ve seen this a lot in networking; I&#39;ve been trying to remember so=
+me of the<br>
+examples I&#39;ve seen, and here&#39;s the best one I can come up with at t=
+he moment:<br>
+having the routing track &#39;unique-ID network interface names&#39; (i.e. =
+interface<br>
+&#39;addresses&#39;) - think 48-bit IEEE interface IDs&#39; - directly. In =
+a small<br>
+network, this works fine for routing traffic, and as a side-benefit, gives =
+you<br>
+mobility. Doesn&#39;t scale, though - you have to build an &#39;interface I=
+D to<br>
+location name mapping system&#39;, and use &#39;location names&#39; (i.e. &=
+#39;addresses&#39;) in<br>
+the routing.<br>
+<br>
+So classic Unix &#39;fork&#39; does two things: i) creates a new process, a=
+nd ii) replicates<br>
+the environment/etc of an existing process. (In early Unix, the latter was =
+pretty<br>
+simple, but as the paper points out, it has now become a) complex and b) ex=
+pensive.)<br></blockquote><div><br></div><div>Signals, fds, address space, =
+copy vs share, COW vs copy now, etc are all things. Also I&#39;d split hair=
+s on (i): you need some way to create a new thread of execution within a pr=
+ocess, which is where a lot of the focus of criticisms of fork has focused =
+on the past.</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex">
+I think the answer has to include decomposing the functionality of old fork=
+()<br>
+into several separate sub-primitives (albeit not all necessarily directly<b=
+r>
+accessible to the user): a new-process primitive, which can be bundled with=
+ a<br>
+number of different alternatives (e.g. i) exec(), ii) environment replicati=
+on,<br>
+iii) address-space replication, etc) - perhaps more than one at once.<br>
+<br>
+So that shell would want a form of fork() which bundled in i) and ii), but<=
+br>
+large applications might want something else. And there might be several<br=
+>
+variants of ii), e.g. one might replicate only environment variables, anoth=
+er<br>
+might add I/O channels, etc.<br>
+<br>
+In a larger system, there&#39;s just no &#39;one size fits all&#39; answer,=
+ I think.<br></blockquote><div><br></div><div>Agreed. We&#39;ve already see=
+n that happening, some examples are quite old. We had vfork() (dating back =
+to 3BSD) which tried to optimize the duplication stuff. More recently, rfor=
+k() (plan9 and later BSD) and clone() (Linux) [*] have been used to specify=
+ what parts of process are copied and/or shared to allow, among other thing=
+s, light weight threads to be one of the possible answers, to allow the for=
+k to happen asynchronously, etc. Linux has a bunch of other variants as wel=
+l.</div><div><br></div><div>fork as a boogie man is a well known trope, hon=
+estly. Criticism of it, and solutions for it&#39;s all-or-nothing approach =
+have been proffered for a long time. These solutions range from having the =
+helper child process to spawn other things a more complex process wants, to=
+ specialized ways to create threads (which are process-like things that sha=
+re an address space and benefit from special handling in the kernel), to th=
+ings like rfork or clone that try to pick-and-choose what aspects of proces=
+s duplication are needed. There&#39;s a reason that the clone man page is m=
+aybe 10x longer than the classic fork man page.</div><div><br></div><div>Wa=
+rner</div><div><br></div><div>[*] This doesn&#39;t even begin to look at th=
+ings like what Solaris, Irix, or a dozen other unix derivatives did to crea=
+te threads and/or optimize different use cases of fork..</div></div></div>
+
+--0000000000005bca220586570720--
