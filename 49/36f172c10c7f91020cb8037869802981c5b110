@@ -1,0 +1,117 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 276ed064
+	for <ml@inbox.vuxu.org>;
+	Fri, 19 Apr 2019 02:32:48 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 94E299B487; Fri, 19 Apr 2019 12:32:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id F34C594EC3;
+	Fri, 19 Apr 2019 12:32:11 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D036594EB5; Fri, 19 Apr 2019 12:32:07 +1000 (AEST)
+X-Greylist: delayed 2274 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Fri, 19 Apr 2019 12:32:07 AEST
+Received: from nb3.reedmedia.net (nb3.reedmedia.net [71.19.148.35])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1EAB894BFD
+ for <tuhs@minnie.tuhs.org>; Fri, 19 Apr 2019 12:32:07 +1000 (AEST)
+Received: from [47.185.49.132] (helo=reedmedia.net)
+ by nb3.reedmedia.net with esmtpa (Exim 4.89)
+ (envelope-from <reed@reedmedia.net>) id 1hHIjE-0002tH-Ma
+ for tuhs@minnie.tuhs.org; Fri, 19 Apr 2019 01:54:12 +0000
+Received: from reed@reedmedia.net by reedmedia.net with local (mailout 0.17)
+ id 1804-1555638852; Thu, 18 Apr 2019 20:54:12 -0500
+Date: Thu, 18 Apr 2019 20:54:11 -0500 (CDT)
+From: reed@reedmedia.net
+X-X-Sender: reed@t1.m.reedmedia.net
+To: tuhs@minnie.tuhs.org
+Message-ID: <alpine.NEB.2.21.1904181949240.2488@t1.m.reedmedia.net>
+User-Agent: Alpine 2.21 (NEB 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: [TUHS] looking for HOSTS.TXT parsers and how is /dev/net/HOSTNAME
+ enabled?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This email is two parts. I am researching 1970's symbolic name to 
+network address mapping routines.
+
+1) I am looking for parsers for ancient (pre mid 1982) HOSTS.TXT. Since 
+this is Unix list, for Unix is fine :)
+
+RFC 597 (12 December 1973) says a hostname list will be maintained at 
+the NIC with the location to be announced. (Interestingly NIC as in 
+FEINLER@NIC is probably a nickname as it is not listed in the host 
+status list. I am guessing it is a nickname for SRI-ARC or OFFICE-1.)
+
+RFC 606 (December 1973) says there are different hosts lists, but "now"
+there is "the official list of host names". It proposed that it should 
+be maintained online in machine-readable form. It proposes a format and 
+suggested attributes.
+
+RFC 607 (January 10, 1974) the NIC agrees that NIC maintain a text file 
+of hostnames, addresses, and attributes. (It has also been suggested 
+separately.) The source is maintained in NLS format with multiple 
+attributes. (What is this NLS format?) A program could be written to 
+generate a weekly ASCII file. They will write the program and the 
+generated file will be at OFFICE-1 (IMP #43?) with pathname of 
+<NETINFO>HOSTS.TXT  (It's not Unix. It's TENEX I think. The ">" is the 
+directory delimiter, but what is "<"?)
+
+I have found a few copies of a hostname table, like 
+https://emaillab.jp/pub/hosts/1974/host_names_1974.pdf and 
+https://www.bortzmeyer.org/files/hosts.txt-1982-1.pdf But these don't 
+appear to be the machine parseable files as defined in the RFC 608 
+format. These are just printed formats. (I have also found many of the 
+host status reports.)
+
+Well I cannot find a copy of the HOSTS.TXT file anywhere. I am not 
+looking for the RFC 810 (1 March 1982) or later format (which is easily 
+found).
+http://pdp-10.trailing-edge.com/SRI_NIC_PERM_SRC_3_19910112/01/utility/ps-perm.870103.htm 
+may have copies of it (old format is OHOSTS.TXT). But I cannot figure 
+out if or where there are individual file downloads there. Any ideas?)
+
+That leads me to my question ... does anyone know where parser code for 
+the HOSTS.TXT file is at?
+
+2) I skimmed through some C code (for Unix) for sendmsg, mmdf, srvrftp, 
+mailer.c, telnet.c that use /dev/net/ followed by up to 14-character 
+hostname. I am trying to find the kernel code or routines that enable 
+device driver named with a hostname. Any ideas? (In particular I'd like 
+to know how those names map to a remote host's address.)
+
+I am researching 1970's symbolic name to network address mapping 
+routines, but the only ones I have found are primitive: Purdue's "modest 
+UNIX network" using mx and Berkeley's Berknet (single letter hostnames). 
+But both use simple compiled-in name-to-address tables. (The Purdue 
+implementation looks interesting as it has some design to connect 
+between IMPs too, but I don't see any code for finding IMP numbers via 
+names. By the way, their "csh" tool was their "connected shell" to run a 
+shell on a remote host. The manual had the list of hostnames in it. See 
+the Purdue usenix tape.)
+
+Thanks,
+
+  Jeremy C. Reed
+
+echo 'EhZ[h ^jjf0%%h[[Zc[Z_W$d[j%Xeeai%ZW[ced#]dk#f[d]k_d%' | \
+  tr            '#-~'            '\-.-{'
+
