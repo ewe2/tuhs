@@ -1,0 +1,262 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 801a87fb
+	for <ml@inbox.vuxu.org>;
+	Fri, 31 May 2019 15:05:51 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 93FA59B843; Sat,  1 Jun 2019 01:05:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2F6069B67F;
+	Sat,  1 Jun 2019 01:05:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8DB539B680; Sat,  1 Jun 2019 01:05:07 +1000 (AEST)
+Received: from ipo8.cc.utah.edu (ipo8.cc.utah.edu [155.97.144.47])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BC9B79B67F
+ for <tuhs@minnie.tuhs.org>; Sat,  1 Jun 2019 01:05:04 +1000 (AEST)
+X-IronPort-AV: E=Sophos;i="5.60,535,1549954800"; d="scan'208";a="199823819"
+Received: from mail.math.utah.edu ([155.101.98.135])
+ by ipo8smtp.cc.utah.edu with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384;
+ 31 May 2019 09:05:04 -0600
+Received: from gamma.math.utah.edu (gamma.math.utah.edu [155.101.96.20])
+ by mail.math.utah.edu (8.14.8/8.14.8) with ESMTP id x4VF5113012124;
+ Fri, 31 May 2019 09:05:01 -0600 (MDT)
+Received: from gamma.math.utah.edu (localhost [127.0.0.1])
+ by gamma.math.utah.edu (8.15.1/8.15.1) with ESMTP id x4VF51S2166846;
+ Fri, 31 May 2019 09:05:01 -0600
+Received: (from beebe@localhost)
+ by gamma.math.utah.edu (8.15.1/8.15.1/Submit) id x4VF51Io166844;
+ Fri, 31 May 2019 09:05:01 -0600
+Date: Fri, 31 May 2019 09:05:01 -0600
+From: "Nelson H. F. Beebe" <beebe@math.utah.edu>
+To: Arthur Krewat <krewat@kilonet.net>
+X-US-Mail: "Department of Mathematics, 110 LCB, University of Utah, 155 S
+ 1400 E RM 233, Salt Lake City, UT 84112-0090, USA"
+X-Telephone: +1 801 581 5254
+X-FAX: +1 801 581 4148
+X-URL: http://www.math.utah.edu/~beebe
+In-Reply-To: <8c0e17fb-41e3-753c-9678-04e410825dce@kilonet.net>
+Message-ID: <CMM.0.95.0.1559315101.beebe@gamma.math.utah.edu>
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.3.8
+ (mail.math.utah.edu [155.101.98.135]); Fri, 31 May 2019 09:05:01 -0600 (MDT)
+Subject: Re: [TUHS] Quotas - did anyone ever use them?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+[This is another essay-length post about O/Ses and ZFS...]
+
+Arthur Krewat <krewat@kilonet.net> asks on Thu, 30 May 2019 20:42:33
+-0400 about my TUHS list posting about running a large computing
+facility without user disk quotas, and our experiences with ZFS:
+
+>> I have yet to play with Linux and ZFS but would appreciate to
+>> hear your experiences with it.
+
+First, ZFS on the Solaris family (including DilOS, Dyson, Hipster,
+Illumian, Omnios, Omnitribblix, OpenIndiana, Tribblix, Unleashed, and
+XStreamOS), the FreeBSD family (including ClonOS, FreeNAS, GhostBSD,
+HardenedBSD, MidnightBSD, PCBSD, Trident, and TrueOS), and on
+GNU/Linux (1000+ distributions, due to theological differences) offers
+important data safety features, and ease of management.
+
+There are lots of details about ZFS that you can find in the slides of
+a talk that we have given several times:
+
+	http://www.math.utah.edu/~beebe/talks/2017/zfs/zfs.pdf
+
+The slides at the end of that file contain pointers to ZFS resources,
+including recent books.
+
+Some of the key ZFS features are:
+
+	* all disks form a dynamic shared pool from which space can be
+	  drawn for datasets, on top of which filesystems can be
+	  created;
+
+	* the pool can exploit data redundancy via various RAID Zn
+	  choices to survive loss of individual disks, and optionally,
+	  provide hot spares shared across the pool, and available to
+	  all datasets;
+
+	* hardware RAID controllers are unneeded, and discouraged ---
+	  a JBOD (just a bunch of disks) array is quite satisfactory
+
+	* all metadata, and all file data blocks, have checksums that
+	  are replicated elsewhere in the pool, and checked on EVERY
+	  read and write, allowing automatic silent recovery (via data
+	  redundancy) from transient or permanent errors in disk
+	  blocks --- ZFS is self healing;
+
+	* ZFS filesystems can have unlimited numbers of snapshots;
+
+	* snapshots are extremely fast, typically less than one
+	  second, even in multi-terabyte filesystems;
+
+	* snapshots are readonly, and thus, immune to ransomware
+          attacks;
+
+	* ZFS send and receive operations allow propagation of copies
+	  of filesystems by transferring only data blocks that have
+	  changed since the last send operation;
+
+	* the ZFS copy-on-write policy means that in-use blocks are
+	  never changed, and that block updates are guaranteed to be
+	  atomic;
+
+	* quotas can optionally be enabled on datasets, and grown as
+	  needed (quota shrink is not yet possible, but is in ZFS
+	  development plans).
+
+	* ZFS optionally supports encryption, data compression, block
+	  deduplication, and n-way disk replication;
+
+	* Unlike traditional fsck, which requires disks to be offline
+	  during the checks, ZFS scrub operations can be run (usually
+	  by cron jobs, and at lower priority) to go through datasets
+	  to verify data integrity and filesystem sanity while normal
+	  services continue.
+
+ZFS likes to cache metadata, and active data blocks, in memory.  Most
+of our VMs that have other filesystems, like EXT{2,3,4}, FFS, JFS,
+MFS, ReiserFS, UFS, and XFS, run quite happily with 1GB of DRAM.  The
+ZFS, DragonFly BSD Hammer, and BTRFS ones are happier with 2GB to 4GB
+of DRAM.  Our central fileservers have 256GB to 768GB of DRAM.
+
+The major drawback of copy-on-write and snapshots is that once a
+snapshot has been taken, a filesystem-full condition cannot be
+ameliorated by removing a few large files.  Instead, you have to
+either increase the dataset quota (our normal practice), or you have
+to free older snapshots.
+
+Our view is that the benefits of snapshots for recovery of earlier
+file versions far outweigh that one drawback: I myself did such a
+recovery yesterday when I accidentally clobbered a critical file full
+of digital signature keys.
+
+On Solaris and FreeBSD families, snapshots are visible to users as
+read-only filesystems, like this (for ftp://ftp.math.utah.edu/pub/texlive 
+and http://www.math.utah.edu/pub/texlive):
+
+	% df /u/ftp/pub/texlive
+	Filesystem             1K-blocks      Used Available Use% Mounted on
+	tank:/export/home/2001 518120448 410762240 107358208  80% /home/2001
+
+	% ls /home/2001/.zfs/snapshot
+	AMANDA           auto-2019-05-21  auto-2019-05-25  auto-2019-05-29
+	auto-2019-05-18  auto-2019-05-22  auto-2019-05-26  auto-2019-05-30
+	auto-2019-05-19  auto-2019-05-23  auto-2019-05-27  auto-2019-05-31
+	auto-2019-05-20  auto-2019-05-24  auto-2019-05-28
+
+	% ls /home/2001/.zfs/snapshot/auto-2019-05-21/ftp/pub/texlive
+	Contents  Images  Source  historic  protext  tlcritical  tldump  tlnet  tlpretest
+
+That is, you first use the df command to find the source of the
+current mount point, then use ls to examine the contents of
+.zfs/snapshot under that source, and finally follow your pathname
+downward to locate a file that you want to recover, or compare with a
+current copy, or another snapshot copy.
+
+On Network Appliance systems with the WAFL filesystem design (see
+
+	https://en.wikipedia.org/wiki/Write_Anywhere_File_Layout
+
+), snapshots are instead mapped to hidden directories inside each
+directory, which is more convenient for human users, and is a feature
+that we would really like to see on ZFS.
+
+A nuisance for us is that the current ZFS implementation on CentOS 7
+(a subset of the pay-for-service Red Hat Enterprise Linux 7) does not
+show any files under the .zfs/snapshot/auto-YYYY-MM-DD directories,
+except on the fileserver itself.
+
+When we used Solaris ZFS for 15+ years, our users could themselves
+recover previous file versions following instructions at
+
+	http://www.math.utah.edu/faq/files/files.html#FAQ-8
+
+Since our move to a GNU/Linux fileserver, they no longer can; instead,
+they have to contact systems management to access such files.
+
+We sincerely hope that CentOS 8 will resolve that serious deficiency:
+see
+
+	http://www.math.utah.edu/pub/texlive-utah/README.html#rhel-8
+
+for comments on the production of that O/S release from the recent
+major new Red Hat EL8 release.
+
+We have a large machine-room UPS, and outside diesel generator, so our
+physical servers are immune to power outages and power surges, the
+latter being a common problem in Utah during summer lightning storms.
+Thus, unplanned fileserver outages should never happen.
+
+A second issue for us is that on Solaris and FreeBSD, we have never
+seen a fileserver crash due to ZFS issues, and on Solaris, our servers
+have sometimes been up for one to three years before we took them down
+for software updates.  However, with ZFS on CentOS 7, we have seen 13
+unexplained reboots in the last year.  Each has happened late at
+night, or in the early morning, while backups to our tape robot, and
+ZFS send/receive operations to a remote datacenter, are in progress.
+The crash times suggest to us that heavy ZFS activity is exposing a
+kernel or Linux ZFS bug.  We hope that CentOS 8 will resolve that
+issue.
+
+We have ZFS on about 70 physical and virtual machines, and GNU/Linux
+BTRFS on about 30 systems.  With ZFS, freeing a snapshot moves its
+blocks to the free list within seconds.  With BTRFS, freeing snapshots
+often takes tens of minutes, and sometimes, hours, before space
+recovery is complete.  That can be aggravating when it stops your work
+on that system.
+
+By contrast, snapshots on both BTRFS and ZFS are fast.  However, they
+appear to be far smaller on ZFS than on BTRFS.  We have VMs and
+physical machines with ZFS that have 300 to 1000 daily snapshots with
+little noticeable reduction in free space, whereas those with BTRFS
+seem to lose about a gigabyte a day.  My home TrueOS system has
+sufficient space for about 25 years of ZFS dailies.  Consequently, I
+run nightly reports of free space on all of our systems, and manually
+intervene on the BTRFS ones when space hits a critical level (I try to
+keep 10GB free).
+
+On both ZFS and BTRFS, packages are available to trim old snapshots,
+and we run the ZFS trimmer via cron jobs on our main fileservers.
+
+In the GNU/Linux world, however, only openSUSE comes by default with a
+cron-enabled BTRFS snapshot trimmer, so intervention is unnecessary on
+that O/S flavor.  I have never installed snapshot trimmer packages on
+any of our other VMs, because it just means more management work to
+deal with variants in trimmer packages, configuration files, and cron
+jobs.
+
+Teams of ZFS developers from FreeBSD and GNU/Linux are working on
+merging divergent features back into a common OpenZFS code base that
+all O/Ses that support ZFS can use; that merger is expected to happen
+within the next few months.  ZFS has been ported by third parties to
+Apple macOS and Microsoft Windows, so it has the potential of becoming
+a universal filesystem available on all common desktop environments.
+Then we could use ZFS send/receive instead of .iso, .dmg, and .img
+files to copy entire filesystems between different O/Ses.
+
+-------------------------------------------------------------------------------
+- Nelson H. F. Beebe                    Tel: +1 801 581 5254                  -
+- University of Utah                    FAX: +1 801 581 4148                  -
+- Department of Mathematics, 110 LCB    Internet e-mail: beebe@math.utah.edu  -
+- 155 S 1400 E RM 233                       beebe@acm.org  beebe@computer.org -
+- Salt Lake City, UT 84112-0090, USA    URL: http://www.math.utah.edu/~beebe/ -
+-------------------------------------------------------------------------------
