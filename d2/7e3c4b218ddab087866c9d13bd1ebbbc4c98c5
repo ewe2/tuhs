@@ -1,0 +1,318 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 77500a70
+	for <ml@inbox.vuxu.org>;
+	Tue, 11 Jun 2019 18:05:43 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9B4B69B831; Wed, 12 Jun 2019 04:05:42 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 82C329B7E3;
+	Wed, 12 Jun 2019 04:05:22 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=mhorton-net.20150623.gappssmtp.com header.i=@mhorton-net.20150623.gappssmtp.com header.b="qf6OuRR/";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EF8E49B7E3; Wed, 12 Jun 2019 04:05:20 +1000 (AEST)
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com
+ [209.85.214.174])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 07F369B7DB
+ for <tuhs@minnie.tuhs.org>; Wed, 12 Jun 2019 04:05:20 +1000 (AEST)
+Received: by mail-pl1-f174.google.com with SMTP id p1so5457581plo.2
+ for <tuhs@minnie.tuhs.org>; Tue, 11 Jun 2019 11:05:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mhorton-net.20150623.gappssmtp.com; s=20150623;
+ h=subject:to:references:from:message-id:date:user-agent:mime-version
+ :in-reply-to:content-language;
+ bh=dNIHWXq+o7W7kKwVNiWev/nQ5c7csZjTneHK7Sc7rkc=;
+ b=qf6OuRR/zAoXD4VnRFbFEPzu6XdEFS934K909CjvwPuV9APkcLeSNW6Bm+gXXS0eTN
+ vNbvkrLOQwFFqjbrDiijz2OJLWa7t4iQBB+b/iHBZM3zrByaK7veFvIjPcVfNleGqub7
+ w7YbaJ9hM8va7SMhn09zTUAIZz+xRAjszp9Kd0MPs0O84IwXa4wNcYpFqSWhzP8ODKFz
+ aXj/QI7pqEOgPNOSxuGyYCyC0qWM1IuBlwfvz8x7df2VO/PYoficzKdtEBbHvE2oYi2g
+ B2VOb1p53QPGVxWiE0iH2GjxPdsI/oHZFXFQDPwmM7Lr5h82LM7CkBIjsDPYTh4kEa6A
+ hahA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:subject:to:references:from:message-id:date
+ :user-agent:mime-version:in-reply-to:content-language;
+ bh=dNIHWXq+o7W7kKwVNiWev/nQ5c7csZjTneHK7Sc7rkc=;
+ b=WYAz4pfr4RZKBChBQsS1M8jjynv5S4GwjeH6c6nIX0J6thX6+2M6s/xhDAx4fB6Z+d
+ na009WDw6tsoLNkjKcLP2u7NLGrclESr2+w7PVBzjTCllECKBNi6DruRCVLUhw5gvDSK
+ GdvKhdANVXaeBZA/jgd6R7Eta4MIxc89bCBvosfpzxlzTn7FlSEl0y44E01wuj3Ev+kn
+ T9htxq6j3/MYXPQwIXb92Bo2DE8eROuFXEJ9LCxYq6uV2GmMA3OMTW0UNUwPKYwLB0Ou
+ zTx0nnocAqE8+Rv7L/KXgEuI/V2MT/KCPQo9pdJ1H7hFY8w7rXPT03b/lcdQBgZIxhBS
+ VjSg==
+X-Gm-Message-State: APjAAAX2cFv3wgPdrqRVIuQqpNWnLp6v72GA5bo2lNpoPlxTt4BTu9BN
+ K67K+q+H4o/kGR0iW8zJIaO63T0arYM3gg==
+X-Google-Smtp-Source: APXvYqyzZ0RS0rH7hML5pEUJAGdBL81ycBr9AlM5qNFyTboB2WEuxB3k45LCBC/cUeURyGfML5FHIw==
+X-Received: by 2002:a17:902:124:: with SMTP id
+ 33mr16131527plb.145.1560276319362; 
+ Tue, 11 Jun 2019 11:05:19 -0700 (PDT)
+Received: from [192.168.1.12] (ip72-197-202-72.sd.sd.cox.net. [72.197.202.72])
+ by smtp.gmail.com with ESMTPSA id
+ p1sm6082253pff.74.2019.06.11.11.05.18 for <tuhs@minnie.tuhs.org>
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Tue, 11 Jun 2019 11:05:18 -0700 (PDT)
+To: tuhs@minnie.tuhs.org
+References: <CAP2nic0o_SVSyBSjb_MJCaXKYOu_L7XzOc1sOsMAOaANipa9Ow@mail.gmail.com>
+ <7247.1560233525@cesium.clock.org>
+ <169b01d5204f$f633c1f0$e29b45d0$@ronnatalie.com>
+ <CAC20D2OYRK1MbtQo5AZ1mpyCVXk23zKDNhNOt7Agcf-X+K568g@mail.gmail.com>
+ <7wzhmoqc4z.fsf@junk.nocrew.org>
+ <CAC20D2Px2aDZZP7gJ=M0E+qxm-Hu6GLqOy026UUA-RYbsgW_dw@mail.gmail.com>
+From: Mary Ann Horton Gmail <mah@mhorton.net>
+Message-ID: <6021078c-f1a3-8f09-8c5e-5bb87e1edbbe@mhorton.net>
+Date: Tue, 11 Jun 2019 11:05:17 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.0
+MIME-Version: 1.0
+In-Reply-To: <CAC20D2Px2aDZZP7gJ=M0E+qxm-Hu6GLqOy026UUA-RYbsgW_dw@mail.gmail.com>
+Content-Type: multipart/alternative;
+ boundary="------------9E11E3CA449B8CA302F38839"
+Content-Language: en-US
+Subject: Re: [TUHS] Question about finding curses to build on v7
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This is a multi-part message in MIME format.
+--------------9E11E3CA449B8CA302F38839
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Most of what was produced internally to AT&T had to stay there, because 
+lawyers.
+
+I was at Bell Labs by the time I changed termcap/termlib and the Arnold 
+curses into "The New Curses and Terminfo", which I presented at Usenix 
+in Boston 1982.  Terminfo was "compiled", and Curses had a new algorithm 
+to use insert/delete line/char to avoid having to redraw the whole screen.
+
+I wasn't allowed to distribute it outside AT&T. Pavel Curtis of CMU 
+stepped up and, at my encouragement, volunteered to rewrite it to the 
+same spec. I worked with him on the spec and the algorithm, and his 
+version was available to open source.
+
+If you were at the Boston conference, you may recall my presentation. My 
+Director, Tony Cuilwik, was in the audience, and this was my first 
+public talk since joining Bell Labs, so I was nervous. As I was stepping 
+to the podium to begin my talk, Armando Stettner interrupted to present 
+me with the "Flying Rubber Chicken Award". Someone offstage threw him a 
+rubber chicken. The chicken was quickly vanished and replaced with the 
+real award, "The Term Cap". Armando explained that the hat was an Bell 
+System hard hat, donated by Ken Thompson himself. Scotched to the hat 
+were "hacker eyes" (googly eye glasses) and a Steve Martin style 
+arrow-through-the-head "for the term info to go in and come out". He 
+left me there, holding the award, as I had to reboot my brain to begin 
+my talk.
+
+I still have that award. It graced my workplace for many years. When I 
+worked at Bank One in Columbus, I put it on a styrofoam head on top of 
+my cube. A coworker had contributed a yellow cheerleader pompom which 
+gave her hair. When Chase bought Bank One, there were Chase big shots 
+coming through our building, I was told to take it down because it 
+didn't look "professional". I was offended - "that's an award!" It 
+stayed down for several months, and people complained because, in that 
+cube farm of identical rows of cubes, "people used that for navigation". 
+I made a little plaque explaining the award and placed it next to the 
+restored Term Cap on my cube. The award sat on my cube at SDG&E for 11 
+years without incident, and now that I'm retired I proudly display it on 
+my piano at home.
+
+     Mary Ann
+
+On 6/11/19 10:26 AM, Clem Cole wrote:
+> Interesting and that sounds quite plausible.   CCA sold it at one 
+> point. Masscomp (because Steve was working for us) got a license and a 
+> redistribution license.   IIRC: we could redistribute the binary for 
+> free as long as CCA got Steve's changes back.
+>
+> Steve definitely did the terminfo/lib work for CCA Emacs at Masscomp, 
+> as I had pointed out that AT&T was moving to terminfo but was locking 
+> it up inside of the System V (AT&T 'consider it standard' stuff - much 
+> to a number of their own people telling them not too).   Pavel ?? 
+> Curtis I think ?? - I've forgotten his last name -  had written a new 
+> uncontaminated version at Cornell that was a functional replacement 
+> and that could read the AT&T ASCII database and compile them 
+> properly.   (I don't remember if Pavel's version could take the AT&T 
+> binary versions).  I had obtained Pavel's version and we were shipping 
+> that as our terminfo/lib implementation on the Masscomp boxes and were 
+> switching our code to use it, as we had not yet signed a System V 
+> license and were shipping on a System III based one.   Steve started 
+> to include Pavel's library in the CCA version, which he got from me.
+> ᐧ
+>
+> On Tue, Jun 11, 2019 at 1:12 PM Lars Brinkhoff <lars@nocrew.org 
+> <mailto:lars@nocrew.org>> wrote:
+>
+>     Clem Cole wrote:
+>     > 1.) Zimmerman EMACS (a.k.a. CCA EMACS) ran on the PDP-11 originally
+>     > when Steve wrote it at MIT.
+>
+>     I have this on the origin of Montgomery and Zimmerman Emacs:
+>
+>       "[Montgomery's] emacs implementation was begun in 1979, after having
+>       left MIT.  I made it freely available to people INSIDE of Bell Labs,
+>       and it was widely used. It was never officially "released" from Bell
+>       Labs."
+>
+>       "Unfortunately, several copies did get out during that time, mainly
+>       due to people who left Bell Labs to return to school or gave
+>     copies to
+>       friends.  When Zimmerman modified one of those copies as the
+>     original
+>       basis for CCA emacs, AT&T and CCA had a prolonged debate over it.
+>       Eventually the matter was resolved when Zimmerman replaced the
+>     last of
+>       my code"
+>
+>     https://github.com/larsbrinkhoff/emacs-history/blob/sources/Usenet/net.emacs/btl-emacs-2.txt
+>
+
+--------------9E11E3CA449B8CA302F38839
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <p>Most of what was produced internally to AT&amp;T had to stay
+      there, because lawyers.</p>
+    <p>I was at Bell Labs by the time I changed termcap/termlib and the
+      Arnold curses into "The New Curses and Terminfo", which I
+      presented at Usenix in Boston 1982.  Terminfo was "compiled", and
+      Curses had a new algorithm to use insert/delete line/char to avoid
+      having to redraw the whole screen.<br>
+    </p>
+    <p> I wasn't allowed to distribute it outside AT&amp;T. Pavel Curtis
+      of CMU stepped up and, at my encouragement, volunteered to rewrite
+      it to the same spec. I worked with him on the spec and the
+      algorithm, and his version was available to open source.</p>
+    <p>If you were at the Boston conference, you may recall my
+      presentation. My Director, Tony Cuilwik, was in the audience, and
+      this was my first public talk since joining Bell Labs, so I was
+      nervous. As I was stepping to the podium to begin my talk, Armando
+      Stettner interrupted to present me with the "Flying Rubber Chicken
+      Award". Someone offstage threw him a rubber chicken. The chicken
+      was quickly vanished and replaced with the real award, "The Term
+      Cap". Armando explained that the hat was an Bell System hard hat,
+      donated by Ken Thompson himself. Scotched to the hat were "hacker
+      eyes" (googly eye glasses) and a Steve Martin style
+      arrow-through-the-head "for the term info to go in and come out".
+      He left me there, holding the award, as I had to reboot my brain
+      to begin my talk.</p>
+    <p>I still have that award. It graced my workplace for many years.
+      When I worked at Bank One in Columbus, I put it on a styrofoam
+      head on top of my cube. A coworker had contributed a yellow
+      cheerleader pompom which gave her hair. When Chase bought Bank
+      One, there were Chase big shots coming through our building, I was
+      told to take it down because it didn't look "professional". I was
+      offended - "that's an award!" It stayed down for several months,
+      and people complained because, in that cube farm of identical rows
+      of cubes, "people used that for navigation". I made a little
+      plaque explaining the award and placed it next to the restored
+      Term Cap on my cube. The award sat on my cube at SDG&amp;E for 11
+      years without incident, and now that I'm retired I proudly display
+      it on my piano at home.</p>
+    <p>    Mary Ann<br>
+    </p>
+    <div class="moz-cite-prefix">On 6/11/19 10:26 AM, Clem Cole wrote:<br>
+    </div>
+    <blockquote type="cite"
+cite="mid:CAC20D2Px2aDZZP7gJ=M0E+qxm-Hu6GLqOy026UUA-RYbsgW_dw@mail.gmail.com">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div dir="ltr">
+        <div class="gmail_default"
+          style="font-family:arial,helvetica,sans-serif">Interesting and
+          that sounds quite plausible.   CCA sold it at one point. 
+          Masscomp (because Steve was working for us) got a license and
+          a redistribution license.   IIRC: we could redistribute the
+          binary for free as long as CCA got Steve's changes back.</div>
+        <div class="gmail_default"
+          style="font-family:arial,helvetica,sans-serif"><br>
+        </div>
+        <div class="gmail_default"
+          style="font-family:arial,helvetica,sans-serif">Steve
+          definitely did the terminfo/lib work for CCA Emacs at
+          Masscomp, as I had pointed out that AT&amp;T was moving to
+          terminfo but was locking it up inside of the System V
+          (AT&amp;T 'consider it standard' stuff - much to a number of
+          their own people telling them not too).   Pavel ?? Curtis I
+          think ?? - I've forgotten his last name -  had written a new
+          uncontaminated version at Cornell that was a functional
+          replacement and that could read the AT&amp;T ASCII database
+          and compile them properly.   (I don't remember if Pavel's
+          version could take the AT&amp;T binary versions).  I had
+          obtained Pavel's version and we were shipping that as our
+          terminfo/lib implementation on the Masscomp boxes and were
+          switching our code to use it, as we had not yet signed a
+          System V license and were shipping on a System III based one. 
+            Steve started to include Pavel's library in the CCA version,
+          which he got from me. </div>
+      </div>
+      <div hspace="streak-pt-mark" style="max-height:1px"><img alt=""
+          style="width:0px;max-height:0px;overflow:hidden"
+src="https://mailfoogae.appspot.com/t?sender=aY2xlbWNAY2NjLmNvbQ%3D%3D&amp;type=zerocontent&amp;guid=b203e423-2b8d-4fba-8179-f289c51b1c15"
+          moz-do-not-send="true"><font size="1" color="#ffffff">ᐧ</font></div>
+      <br>
+      <div class="gmail_quote">
+        <div dir="ltr" class="gmail_attr">On Tue, Jun 11, 2019 at 1:12
+          PM Lars Brinkhoff &lt;<a href="mailto:lars@nocrew.org"
+            moz-do-not-send="true">lars@nocrew.org</a>&gt; wrote:<br>
+        </div>
+        <blockquote class="gmail_quote" style="margin:0px 0px 0px
+          0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">Clem
+          Cole wrote:<br>
+          &gt; 1.) Zimmerman EMACS (a.k.a. CCA EMACS) ran on the PDP-11
+          originally<br>
+          &gt; when Steve wrote it at MIT.<br>
+          <br>
+          I have this on the origin of Montgomery and Zimmerman Emacs:<br>
+          <br>
+            "[Montgomery's] emacs implementation was begun in 1979,
+          after having<br>
+            left MIT.  I made it freely available to people INSIDE of
+          Bell Labs,<br>
+            and it was widely used. It was never officially "released"
+          from Bell<br>
+            Labs."<br>
+          <br>
+            "Unfortunately, several copies did get out during that time,
+          mainly<br>
+            due to people who left Bell Labs to return to school or gave
+          copies to<br>
+            friends.  When Zimmerman modified one of those copies as the
+          original<br>
+            basis for CCA emacs, AT&amp;T and CCA had a prolonged debate
+          over it.<br>
+            Eventually the matter was resolved when Zimmerman replaced
+          the last of<br>
+            my code"<br>
+          <br>
+          <a
+href="https://github.com/larsbrinkhoff/emacs-history/blob/sources/Usenet/net.emacs/btl-emacs-2.txt"
+            rel="noreferrer" target="_blank" moz-do-not-send="true">https://github.com/larsbrinkhoff/emacs-history/blob/sources/Usenet/net.emacs/btl-emacs-2.txt</a><br>
+        </blockquote>
+      </div>
+    </blockquote>
+  </body>
+</html>
+
+--------------9E11E3CA449B8CA302F38839--
