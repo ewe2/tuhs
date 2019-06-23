@@ -1,0 +1,87 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2c7e86c2
+	for <ml@inbox.vuxu.org>;
+	Sun, 23 Jun 2019 23:59:39 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 225C29BC91; Mon, 24 Jun 2019 09:59:38 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2B7DB9BC47;
+	Mon, 24 Jun 2019 09:59:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 140BA9BC47; Mon, 24 Jun 2019 09:59:17 +1000 (AEST)
+X-Greylist: delayed 312 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 24 Jun 2019 09:59:16 AEST
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 18E429BC43
+ for <tuhs@minnie.tuhs.org>; Mon, 24 Jun 2019 09:59:16 +1000 (AEST)
+Received: from callcc.thunk.org (168.sub-174-242-144.myvzw.com
+ [174.242.144.168]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id x5NNs0fC020473
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sun, 23 Jun 2019 19:54:02 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id 76AB5420484; Sun, 23 Jun 2019 19:54:00 -0400 (EDT)
+Date: Sun, 23 Jun 2019 19:54:00 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Message-ID: <20190623235400.GA1805@mit.edu>
+References: <20190623220856.AADD018C0CF@mercury.lcs.mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190623220856.AADD018C0CF@mercury.lcs.mit.edu>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+Subject: Re: [TUHS] CMU Mach sources?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Jun 23, 2019 at 06:08:56PM -0400, Noel Chiappa wrote:
+> 
+> Hammer-nail syndrome.
+> 
+> When the only tool you have for creating separate subsystems is processes, you
+> wind up with a lot of processes. Who'd a thunk it.
+> 
+> A system with a segmented memory which allows subroutine calls from one subsystem
+> to another will have a lot less overhead. It does take hardware support to be
+> really efficient, though. The x86 processors had that support, until Intel dropped
+> it from the latest ones because nobody used it.
+
+One of the real problems with how x86 implemented segments was that
+the segments were layered on top of the 32-bit virtual address space
+implemented by the page tables.  So if you wanted to use a pure
+segmented architecture, ala Multics, you run into the same problem as
+32-bit IP addresses.  If you need to allow for segments to grow, you
+very quickly fragment the 32-bit address space.
+
+If I recall correctly, this wasn't an issue with Multics because the
+DPS-8 had page tables for each segment.
+
+Maybe if Intel/AMD had kept segmentation support when x86_64 was
+developed, trying to do something more novel with segments could have
+worked when we went to 64-bits (or maybe, like IPv6, what's really
+needed is 128-bits of address space :-P).  But, Itanic was supposed to
+be the dominant 64-bit architecture that was going to take over the
+whole world, and when that turned out not to be the case, AMD threw
+together x86_64 as the "just good enough" architectural extension.
+
+					- Ted
