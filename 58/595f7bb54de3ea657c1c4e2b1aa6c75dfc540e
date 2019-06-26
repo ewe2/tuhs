@@ -1,0 +1,95 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 23f3abd0
+	for <ml@inbox.vuxu.org>;
+	Wed, 26 Jun 2019 15:42:14 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D5ECA9BF4A; Thu, 27 Jun 2019 01:42:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3CF6E9BD84;
+	Thu, 27 Jun 2019 01:41:55 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A53D39BD84; Thu, 27 Jun 2019 01:41:52 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CCC639BC77
+ for <tuhs@tuhs.org>; Thu, 27 Jun 2019 01:41:51 +1000 (AEST)
+Received: from callcc.thunk.org (guestnat-104-133-0-109.corp.google.com
+ [104.133.0.109] (may be forged)) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id x5QFfjhX001409
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Wed, 26 Jun 2019 11:41:46 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id DBE3442002B; Wed, 26 Jun 2019 11:41:44 -0400 (EDT)
+Date: Wed, 26 Jun 2019 11:41:44 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: ron minnich <rminnich@gmail.com>
+Message-ID: <20190626154144.GD3116@mit.edu>
+References: <1561491205.19116.for-standards-violators@oclsc.org>
+ <CAP6exYJtjMMaXsLL17WTftCFcuRSwtLtNfTF69TNCdu7KO+VzQ@mail.gmail.com>
+ <CAKzdPgyUuiXRPo6N59EnjFDE4WgqgtTYbiNWpvGAKNZ6Qd9p9Q@mail.gmail.com>
+ <20190626004603.GG925@mcvoy.com>
+ <CAP6exYKFkDYYYNbkhUxC1x4kSf0w-TJvy0L7udcoP4btSmBGxQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAP6exYKFkDYYYNbkhUxC1x4kSf0w-TJvy0L7udcoP4btSmBGxQ@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+Subject: Re: [TUHS] 4.1c bsd ptrace man entry ("ptrace is unique and arcane")
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Jun 25, 2019 at 06:03:47PM -0700, ron minnich wrote:
+> 
+> I do recall (possibly wrongly) at some point in the 2000s there was an
+> effort to stop putting stuff in /proc, but rather in /sys, but that
+> seems to have not worked out. /proc is just too convenient a place,
+> and by convention, lots of stuff lands there.
+
+When looking at linux's /proc, there are three broad categories of
+stuff:
+
+	* Traditional process-specific files, in /proc/<pid>/...
+	* System configuration parameters, aka "sysctls", which are
+		in /proc/sys/...
+	* Other miscellaneous ad-hoc files
+
+It's the last category where there has been a big push to only add new
+files in /sys (aka sysfs), and in general the vast majority of new
+files have been going into sysfs, and not into /proc.  However, for
+backwards compatibility reasons, all of the old ad-hoc /proc files
+have stuck around.
+
+The files in /sys and /proc/sys tend to be very discplined, in that
+it's one value per file.  That's both a good and bad thing.  We don't
+have a general, efficient, way of supporting files that return a
+variable list of fields, especially if there is no obvious key.
+(e.g., like /proc/mounts).  And it's certainly the case that looking
+at, say, /proc/scsi/scsi is much more conveient that iterating over
+/sys/bus/scsi/devices and grabbing a huge number of tiny files to get
+the same information.
+
+This last is the usual reason where there is temptation by some
+developers to add a new file in /proc, as opposed to adding several
+dozen files (per device/process/network connection) in /sys and then
+needing to promulgate a perl/python/go program to actually get a user
+friendly status report out.
+
+						- Ted
