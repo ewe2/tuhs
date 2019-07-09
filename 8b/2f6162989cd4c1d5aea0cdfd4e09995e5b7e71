@@ -1,0 +1,147 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a8532dd3
+	for <ml@inbox.vuxu.org>;
+	Tue, 9 Jul 2019 16:28:38 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 263399BDB4; Wed, 10 Jul 2019 02:28:37 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 66EB29BD0D;
+	Wed, 10 Jul 2019 02:28:09 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=mhorton-net.20150623.gappssmtp.com header.i=@mhorton-net.20150623.gappssmtp.com header.b="ThAjRYfe";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 859FC9BD0D; Wed, 10 Jul 2019 02:28:07 +1000 (AEST)
+Received: from mail-pl1-f195.google.com (mail-pl1-f195.google.com
+ [209.85.214.195])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E09F49BD07
+ for <tuhs@minnie.tuhs.org>; Wed, 10 Jul 2019 02:28:06 +1000 (AEST)
+Received: by mail-pl1-f195.google.com with SMTP id az7so2896685plb.5
+ for <tuhs@minnie.tuhs.org>; Tue, 09 Jul 2019 09:28:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mhorton-net.20150623.gappssmtp.com; s=20150623;
+ h=subject:from:to:references:message-id:date:user-agent:mime-version
+ :in-reply-to:content-transfer-encoding:content-language;
+ bh=dNhhYTpk/UVzfvi7V2B0YGbDB8Hzd+jGAvoEVIr3ZPY=;
+ b=ThAjRYfeH2Y3vlIa/tbj2vs/zuYryDTGS4RRPtSQG0sqJP7r0QP/CqNIzEwej90nCL
+ peShcXhpFnjZqHEWolEDnvh3ncSrD6/iKqNiuG8NGwVA9pdHkshxQlCUhlQZw5mu0p8y
+ xaz2sHxC3t+1q54NZEAjQWqTRKaxK6OEZuGlrrx3Ytj1V1SZOf9qBn0h4BYnPuO6pe2i
+ fJ0veAvN2LryzekYpBwWsUBbNqaenDDAsA5L3KA1Uz3YcBzkTKCZRDAWomx7lTUs9YSj
+ 005cdh4dxiZjZLOnnWHtINjXvq3RZ4ePJQxef9C1Jz/4jr9+dp3Z0MK/TLm7h0GOvk/V
+ Bq6Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:subject:from:to:references:message-id:date
+ :user-agent:mime-version:in-reply-to:content-transfer-encoding
+ :content-language;
+ bh=dNhhYTpk/UVzfvi7V2B0YGbDB8Hzd+jGAvoEVIr3ZPY=;
+ b=WpEfy8xfdD3pVE37hTjZNiRrlwyf1xCmXtNqveMRoCjWx7DuSxewLAMh0LDHPfqv6I
+ arUf0vRSuNpl4Yl7cItQhTuW3G5+RquBU6KZDyUDVQ2vj8Hkq9FjuZVv4YXaQRZQUBO3
+ ud4hZiZiokhgO5nPhZB4glBsj0CI4m6fkcR66qhw3P7ff1Qe77J3OPoEGOL/paYvXGB2
+ nWDZJKr55r8yTmEh53/ooo4GaSfe6r1j6k0ldijeIhYX10il/H7YT6OJlCVJPaWPFDgi
+ aMmFF2RoxpdsWv14lwckC/itwSdmWPWw5kk9hap4+nYfDr+UlNZOrTR+UzVku0nQoRqQ
+ mHFg==
+X-Gm-Message-State: APjAAAUGm8NfKAYg+uQ4Jxga04bkD0yebNmm0O9FJuiwjqscWmpl8xIY
+ B/y2UzhHEEKqcSY7IHwmPL7+hOmQjLE=
+X-Google-Smtp-Source: APXvYqwtUjGL2dBMs1KgA19qdZv1oksN3osLDNVwRyBZ/yVvH0zqK7OmP1Tc4vo68nBSR3gRpW7VhA==
+X-Received: by 2002:a17:902:6b86:: with SMTP id
+ p6mr33942720plk.14.1562689686154; 
+ Tue, 09 Jul 2019 09:28:06 -0700 (PDT)
+Received: from [192.168.1.12] (ip72-197-202-72.sd.sd.cox.net. [72.197.202.72])
+ by smtp.gmail.com with ESMTPSA id
+ m11sm9182633pgk.65.2019.07.09.09.28.05 for <tuhs@minnie.tuhs.org>
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Tue, 09 Jul 2019 09:28:05 -0700 (PDT)
+From: Mary Ann Horton Gmail <mah@mhorton.net>
+To: tuhs@minnie.tuhs.org
+References: <c43a0f17-276e-d023-4cf2-d42f072b05f6@mhorton.net>
+Message-ID: <03f3d34a-bc7f-4b26-559e-101ccd614ef3@mhorton.net>
+Date: Tue, 9 Jul 2019 09:28:04 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.2
+MIME-Version: 1.0
+In-Reply-To: <c43a0f17-276e-d023-4cf2-d42f072b05f6@mhorton.net>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+Subject: Re: [TUHS] Floppy to modern files for Usenet maps
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I've succeeded in copying the files from floppy. Thanks to everyone for 
+the great suggestions!
+
+I used a USB-to-serial adapter, combined with PuTTY and the usual serial 
+tools (DB-9 to DB-25 adapter, gender changer, and null modem). I even 
+dug out my AT&T PC 6300 MS DOS manual for details on writing BAT files 
+(although the main script had a bad habit of exiting after the first 
+file got copied). I wound up calling a 3 line script separately for each 
+file to be copied over, and using PuTTY's scrolling history to save the 
+files.
+
+I've collected these and other old Usenet maps here:
+
+http://www.stargatemuseum.org/maps/
+
+I hope to display these (and hand out a few copies!) in Seattle this week.
+
+Does anyone have anything put together that can easily do the "leroy" 
+thing described here:
+
+http://www.stargatemuseum.org/maps/032383.GRF.txt
+
+and produce the graphical map it contains?
+
+     Mary Ann
+
+On 6/23/19 4:10 PM, Mary Ann Horton Gmail wrote:
+> Hunting around through my ancient stuff today, I ran across a 5.25" 
+> floppy drive labeled as having old Usenet maps. These may have 
+> historical interest.
+>
+> First off, I don't recognize the handwriting on the disk. It's not 
+> mine. Does anyone recognize it? (pic attached)
+>
+> I dug out my AT&T 6300 (XT clone) from the garage and booted it up. 
+> The floppy reads just fine. It has files with .MAP extension, which 
+> are ASCII Usenet maps from 1980 to 1984, and some .BBM files which are 
+> ASCII Usenet backbone maps up to 1987.
+>
+> There is also a file whose extension is .GRF from 1983 which claims to 
+> be a graphical Usenet map.  Does anyone have any idea what GRF is or 
+> what this map might be? I recall Brian Reid having a plotter-based 
+> Usenet geographic map in 84 or 85.
+>
+> I'd like to copy these files off for posterity. They read on DOS just 
+> fine. Is there a current best practice for copying off files? I would 
+> have guessed I'd need a to use the serial port, but my old PC has DOS 
+> 2.11 (not much serial copying software on it) and I don't have 
+> anything live with a serial port anymore. And it might not help with 
+> the GRF file.
+>
+> I took some photos of the screen with the earliest maps (the ones that 
+> fit on one screen.) So it's an option to type things in, at least for 
+> the early ASCII ones.
+>
+> Thanks,
+>
+>     Mary Ann
+>
+>
