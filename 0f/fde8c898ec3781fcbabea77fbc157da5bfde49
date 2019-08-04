@@ -1,0 +1,64 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a2edd7e8
+	for <ml@inbox.vuxu.org>;
+	Sun, 4 Aug 2019 21:28:14 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 53F449BB62; Mon,  5 Aug 2019 07:28:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3B5EE9BB39;
+	Mon,  5 Aug 2019 07:28:04 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id F10A69BB39; Mon,  5 Aug 2019 07:28:02 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id AC5039BB38
+ for <tuhs@tuhs.org>; Mon,  5 Aug 2019 07:28:00 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Sun, 04 Aug 2019 17:27:33 -0400
+Message-ID: <1564954057.6926.for-standards-violators@oclsc.org>
+Subject: Re: [TUHS] Set-uid shell scripts
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Oops.  Didn't think it through: the problem is argv[1],
+passed as the name of the script being executed, not
+argv[0].  Disregard my previous execl(...).
+
+A related problem is the inherent race condition:
+If you do
+	ln -s /bin/setuidscript .
+	./setuidscript
+./setuidscript is opened twice: once when the kernel
+reads it and finds #! as magic number and execs the
+interpreter, a second time when the interpreter opens
+./setuidscript.  If you meanwhile run something that
+swoops in in the background and replaces ./setuidscript
+with malicious instructions for the interpreter, you
+win.
+
+I remember managing to do this myself at one point in
+the latter part of the 1980s.  That was when I fell
+out of love with setuid interpreter scripts.
+
+It looks like we didn't disable the danger in the
+Research kernel, though.  I don't remember why not.
+
+Norman Wilson
+Toronto ON
