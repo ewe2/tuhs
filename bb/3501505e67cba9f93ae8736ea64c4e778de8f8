@@ -1,0 +1,132 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d4aae546
+	for <ml@inbox.vuxu.org>;
+	Fri, 9 Aug 2019 15:10:52 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 85CAE9BB82; Sat, 10 Aug 2019 01:10:51 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 975BF9BA7E;
+	Sat, 10 Aug 2019 01:10:18 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="fVxB2sqD";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 120939BA7E; Sat, 10 Aug 2019 01:10:15 +1000 (AEST)
+Received: from mail-qk1-f170.google.com (mail-qk1-f170.google.com
+ [209.85.222.170])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5D0059BA0F
+ for <tuhs@tuhs.org>; Sat, 10 Aug 2019 01:10:14 +1000 (AEST)
+Received: by mail-qk1-f170.google.com with SMTP id r6so71936773qkc.0
+ for <tuhs@tuhs.org>; Fri, 09 Aug 2019 08:10:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:from:date:message-id:subject:to;
+ bh=DsDYq3K42dOYJmlnEh/0oQOx4Mce9or8kX6fxX7gu3k=;
+ b=fVxB2sqDeH0JnIOyxafpks1f7Akxpuv3EZeYe7Kn9nvVLHL3XEb5664KrYCrQX3aIY
+ /cyR8eBQYSZ6q9ibynVESgN7lU31vAj3jGGhMEG+lry3JI2hPhynGfPG2L5abyvigzjf
+ gqByajRGcTYje2AWSAr/f0BsNHzqRzvEkaAnOPmuJKzHhplejskaZl5j+JMq/GpYl1jQ
+ KNyuGX3xZVZvKeKXiEvty/AXrIPOkKemfGv8zu/89yCJddOxHNYmzBpTWwfjHRPWL0BK
+ kDHV+9ouxA2Wp8uMmCfWBZObFZrgMbsJBI3Vbb8SX8/xUisKtIvP3av5ukut/I7R9YIV
+ cHGw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+ bh=DsDYq3K42dOYJmlnEh/0oQOx4Mce9or8kX6fxX7gu3k=;
+ b=tkK4v27Z6d96zQobJfb5EflOIZKSxWDjdgsgcbBFpYSVGNZ2meoG24klYDfrGbMtcH
+ vgw1YmlYETUJ+XUyh63/lrZmHUYhtxVOlbdOnnZDyRw70+CJOgHsc8CmnhlyagyqWxiM
+ j7/uTKy65YIlO5tS40KtJKkFONLm2vEeAEDzDDY5yZvDDNpULp3S27w371Ky6dzvmwET
+ JUHvrCTQJXIQGC2gK+LTqsQNQyGOVMFxwKv0E/ufXzLgvLvdpuAYlDqL73RBJBnX6m4J
+ sgcIHCFQVvj00OXDJGW5ujNQ39iG5AdND4sF9nTl1tklA7X1ZtijxSyXhpOi2QvZGCio
+ ikVw==
+X-Gm-Message-State: APjAAAXmkY+3K/s2OlvczN1f61gqkGzSiDLBZm65zGQnVLxxOJ4ZPy4e
+ W+BhAbd5PfhRu7zAIJlRPAi/d1JB34/C4qcQxB2xSOU2rZU=
+X-Google-Smtp-Source: APXvYqx7RAH13yOf9/GQNyv8MYGh8fZyDj26B/sx2OsxVho+5eeCFI11rRkNBy4SaigbVMRS9qvcbaT/mo6KxqKFlns=
+X-Received: by 2002:a37:4804:: with SMTP id v4mr15306088qka.60.1565363413040; 
+ Fri, 09 Aug 2019 08:10:13 -0700 (PDT)
+MIME-Version: 1.0
+From: Warner Losh <imp@bsdimp.com>
+Date: Fri, 9 Aug 2019 09:10:01 -0600
+Message-ID: <CANCZdfoL_Mxd5zr-RY9tA2kc09fN+hpyP13ztiAt_J0GLZ9H7g@mail.gmail.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Content-Type: multipart/alternative; boundary="0000000000002dd170058fb09258"
+Subject: [TUHS] MERT aka UNIX/RT
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000002dd170058fb09258
+Content-Type: text/plain; charset="UTF-8"
+
+Greetings,
+
+I was wondering if there were any early versions of MERT available?
+
+Reading different sources, it appears that MERT was a real time kernel that
+used EMT traps to implement unix system calls (from around V4 or V5 given
+the timelines) on top of a real time executive (though some sources seem to
+imply it was a derivative of V4, most disagree).
+
+I see this in our archives
+https://wiki.tuhs.org/doku.php?id=misc:snippets:mert1 which is quite handy
+for discover its (and other early) unix lineages for a talk I'm doing in
+about a month. Now that we have sources, I go back and double check the
+recollections of things like this to see if version numbers were right,
+etc. But I can't do that with MERT at all. I can find the Bell Systems
+Technical Journal for Unix that has a brief article on it, but no sources
+to double check.
+
+So I thought I'd ask here if we have any MERT artifacts I can look at that
+have escaped my casual browsing of the archive. So far I've just found an
+email from Kevin Bowling on the topic from last month with no replies. And
+a similar thread from 2002, plus pleading from time to time (I can't tell
+if Warren or Noel wants it more :).
+
+I guess the same could be said for CB-UNIX and UNIX/TS, though I see a
+USDL/CB_Unix directory in the archive I could look at :).
+
+Warner
+
+--0000000000002dd170058fb09258
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Greetings,<div><br></div><div>I was wondering if there wer=
+e any early versions of MERT available?</div><div><br></div><div>Reading di=
+fferent sources, it appears that MERT was a real time kernel that used EMT =
+traps to implement unix system calls (from around V4 or V5 given the timeli=
+nes) on top of a real time executive (though some sources seem to imply it =
+was a derivative of V4, most disagree).</div><div><br></div><div>I see this=
+ in our archives=C2=A0<a href=3D"https://wiki.tuhs.org/doku.php?id=3Dmisc:s=
+nippets:mert1" target=3D"_blank">https://wiki.tuhs.org/doku.php?id=3Dmisc:s=
+nippets:mert1</a>=C2=A0which is quite handy for discover its (and other ear=
+ly) unix lineages for a talk I&#39;m doing in about a month. Now that we ha=
+ve sources, I go back and double check the recollections of things like thi=
+s to see if version numbers were right, etc. But I can&#39;t do that with M=
+ERT at all. I can find the Bell Systems Technical Journal for Unix that has=
+ a brief article on it, but no sources to double check.</div><div><br></div=
+><div>So I thought I&#39;d ask here if we have any MERT artifacts I can loo=
+k at that have escaped my casual browsing of the archive. So far I&#39;ve j=
+ust found an email from Kevin Bowling on the topic from last month with no =
+replies. And a similar thread from 2002, plus pleading from time to time (I=
+ can&#39;t tell if Warren or Noel wants it more :).</div><div><br></div><di=
+v>I guess the same could be said for CB-UNIX and UNIX/TS, though I see a US=
+DL/CB_Unix directory in the archive I could look at :).</div><div><br></div=
+><div>Warner</div></div>
+
+--0000000000002dd170058fb09258--
