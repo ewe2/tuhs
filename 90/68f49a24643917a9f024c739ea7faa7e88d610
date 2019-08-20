@@ -1,0 +1,91 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.2 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,DKIM_VALID_EF,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f8180b33
+	for <ml@inbox.vuxu.org>;
+	Tue, 20 Aug 2019 22:00:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 792409B502; Wed, 21 Aug 2019 08:00:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 004549B484;
+	Wed, 21 Aug 2019 08:00:36 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=tuhs.org; s=dkim;
+	t=1566338447; bh=tQbytHAcdz0XRAJZ2CInTcwDeVgI6xLc0mmTyP0C5y0=;
+	h=Date:From:To:References:In-Reply-To:Subject:List-Id:
+	 List-Unsubscribe:List-Archive:List-Post:List-Help:List-Subscribe:
+	 Cc:From;
+	b=EZFd4/FTC/ERZaV5m9Nwr/6gqw3F1x1DrgE2Fg5yjbPgnEar3M/Fr0KfYHzwnXU0q
+	 1lsPJX3sjl57MXadp4O8j3iRkPB+l2Eg8yCSYgwXFYeAsImlI+roYyyNaHuNIlKUqz
+	 WOFAAbuT3TgIak/G3+FO4EWBe+vr6nxf9DYGPwIk=
+Received: by minnie.tuhs.org (Postfix, from userid 1000)
+ id EAD0E94C18; Wed, 21 Aug 2019 08:00:33 +1000 (AEST)
+Date: Wed, 21 Aug 2019 08:00:33 +1000
+From: Warren Toomey <wkt@tuhs.org>
+To: Adam Thornton <athornton@gmail.com>
+Message-ID: <20190820220033.GA18256@minnie.tuhs.org>
+References: <CAP2nic1SEFg=e4htyw_23KAL_pUC98JL4XDoWLKwU365BMWXxg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAP2nic1SEFg=e4htyw_23KAL_pUC98JL4XDoWLKwU365BMWXxg@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+Subject: Re: [TUHS] Shell builtin exec
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Aug 20, 2019 at 02:10:55PM -0700, Adam Thornton wrote:
+>    This is probably the place to ask:
+>    I understand why the shell builtin "exec" is the same as the syscall
+>    exec() in the sense of "replace this process with that one."  But why
+>    is it also the way to redirect filehandles in the current shell?  (That
+>    is, why isn't the redirection named something else?)
+
+exec() doesn't do anything with file handles; it simply replaces the
+executable code in the current process. Here's the pseudo-code for a
+shell where redirection is done.
+
+  int pid;                      /* Holds the process-id of the child */
+
+  switch (pid = fork())         /* Call fork, and test what it returns */
+  {
+    case -1: printf("The fork failed\n"); return (-1);
+
+    case 0:              /* The child is given a value of 0 from fork() */
+                           /* Do special things like closing files etc. */
+
+    if (redirection required) {
+      close my standard output;
+      open the named output file as my standard output;
+    }
+
+                                /* Replace ourselves with the real child */
+                                /* Call execvp */
+      execlp(command, arg1, arg2, ..., NULL);
+      exit(1);                  /* Exec failed, indicate error */
+
+    default:          /* The parent receives the new process-id from fork() */
+      wait();                   /* Wait for child to exit */
+}
+
+So the child shell itself does the redirection after the fork(), but before
+it replaces itself with the new executable code.
+
+Cheers, Warren
+
+
