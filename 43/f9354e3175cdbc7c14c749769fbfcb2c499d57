@@ -1,0 +1,129 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a799ccc7
+	for <ml@inbox.vuxu.org>;
+	Tue, 27 Aug 2019 22:40:28 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 84BAD9BC34; Wed, 28 Aug 2019 08:40:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4C4B69BBFD;
+	Wed, 28 Aug 2019 08:40:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 583689BBFD; Wed, 28 Aug 2019 08:40:04 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7ABDA9BBF7
+ for <tuhs@minnie.tuhs.org>; Wed, 28 Aug 2019 08:40:03 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 0932735E0A8; Tue, 27 Aug 2019 15:40:02 -0700 (PDT)
+Date: Tue, 27 Aug 2019 15:40:02 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: George Michaelson <ggm@algebras.org>
+Message-ID: <20190827224002.GB15511@mcvoy.com>
+References: <CANCZdfqEs2RQ3YO_6PxfMtipD5PXm2wdztdkHRFLZfsO2DhaEA@mail.gmail.com>
+ <75a32043-4830-ba04-ee0f-023c5f5ade3f@gmail.com>
+ <b9f6633e-36f6-d802-c315-1f1528486270@kilonet.net>
+ <20190827003013.GS13570@mcvoy.com>
+ <312b39a1-2944-100f-55e0-fc65b504d43d@kilonet.net>
+ <CAEoi9W6upO4LdvV0AVLy8f1je6oSZeuz4bbP4yuux-Xe6UUEBA@mail.gmail.com>
+ <20190827024511.GU13570@mcvoy.com>
+ <faaebe25-e5e5-0f6e-6eda-fc2fc6a0dc95@kilonet.net>
+ <20190827145556.GD13570@mcvoy.com>
+ <CAKr6gn2V_T_EnYaz3OYassHSpLecoKTkqZe+By8A9kQQ=7jnMA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKr6gn2V_T_EnYaz3OYassHSpLecoKTkqZe+By8A9kQQ=7jnMA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] If not Linux, then what?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Wait, are you arguing for STREAMS over sockets?  Dear god, please no.
+Have you ever used STREAMS (not Ritchies streams, those were OK)?
+I have.  I ported Lachman's STREAMS based TCP/IP stack twice, once
+to a long since defunct super computer called the ETA-10 and then 
+to SCO Unix.  I've got way more STREAMS experience than most people
+and I can tell you that sockets are WAY WAY better.  I get the "it
+should have just been file I/O" except that I don't.  I tried to 
+write a library that let you open up /net/tcp/$host:$port and do
+I/O like it was a file descriptor.  That works for a lot of stuff
+but I ran into problems quickly.  A networking connection is not
+a file handle.  You can make some stuff work but I couldn't figure
+out how to do all of it.   You end up having to do ioctls to handle
+the stuff that doesn't fit well into the file system name space.
+I think plan 9 did this sort of thing, maybe Rob can prove me wrong
+or remember where it didn't match.
+
+I do know that STREAMS came back to Solaris, some VP inked a shitty
+deal with Lachman and bought the rights to the stack.  It was slow
+as molasses in the winter and customers absolutely hated it.  Sun 
+got Mentat to redo it for perf but customers still hated it, they
+understood sockets, everyone else had sockets, they wanted sockets
+and they got them.  Sun put them back and nobody ever asked about
+STREAMS again.
+
+On Wed, Aug 28, 2019 at 08:30:01AM +1000, George Michaelson wrote:
+> BSD, but with the original STREAMS semantics, not sockets.
+> 
+> DARPA did us no favours accepting sockets in place of simple file I/O
+> semantics for networks.
+> 
+> Newcastle connection put the namespace into
+> /.../remote-part/path/to/thing which I felt was also good.
+> 
+> So for me, 7 -> BSD -> got worse for some values of worse
+> 
+> On Wed, Aug 28, 2019 at 12:56 AM Larry McVoy <lm@mcvoy.com> wrote:
+> >
+> > On Mon, Aug 26, 2019 at 11:14:45PM -0400, Arthur Krewat wrote:
+> > > On 8/26/2019 10:45 PM, Larry McVoy wrote:
+> > > >  Which was that the page cache is
+> > > >*the*  cache.  There is nothing else.
+> > > Yeah, I re-read what you wrote a few times after I replied, and realized
+> > > what you meant ... eventually ;)
+> >
+> > I might be making too big of a deal about it.  mmap semantics mattered
+> > a lot when SMPs first showed up and main memory was small.  It meant
+> > that you could have multiple CPUs seeing and working on the same chunk
+> > of data at the same time.
+> >
+> > It's very similar to way that IOMMUs are exposed to user space these
+> > days, enabling virtual machines direct access to the I/O devices.
+> >
+> > ZFS breaks that model, the data is all in the ARC and if you mmap
+> > it they have to bcopy the data out of the ARC, into the page cache
+> > and now they have a consistency problem, you could modify stuff
+> > via mmap or write and they have to manage that.
+> >
+> > That consistency problem is the main reason that Sun almost completely
+> > killed the buffer cache (it still was used for inodes and directories
+> > but that was it).  That consistency problem is a pain in the rear,
+> > all sorts of race conditions and it tended to bit rot.
+> >
+> > Jeff and Bill are smart people so I suspect they got it right but I'm
+> > still stunned that they took such an architecturally bad approach.
+> > And even more stunned that the oversight people approved it.  There
+> > is zero chance that the Sun I worked at would have allowed that.
+> >
+> > --lm
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
