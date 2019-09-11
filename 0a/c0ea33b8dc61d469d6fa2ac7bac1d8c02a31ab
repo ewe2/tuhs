@@ -1,0 +1,853 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a6169058
+	for <ml@inbox.vuxu.org>;
+	Wed, 11 Sep 2019 03:54:34 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 39D6694799; Wed, 11 Sep 2019 13:54:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 765D69478D;
+	Wed, 11 Sep 2019 13:53:35 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="bxptriHu";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1ABA49478D; Wed, 11 Sep 2019 13:53:33 +1000 (AEST)
+Received: from mail-qt1-f174.google.com (mail-qt1-f174.google.com
+ [209.85.160.174])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8048393D35
+ for <tuhs@tuhs.org>; Wed, 11 Sep 2019 13:53:31 +1000 (AEST)
+Received: by mail-qt1-f174.google.com with SMTP id g13so23151984qtj.4
+ for <tuhs@tuhs.org>; Tue, 10 Sep 2019 20:53:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=jruLi7UlSjCx7KaCcjEWDzHTFXUIWWWfkZuZcSpvFTQ=;
+ b=bxptriHuKOicMu1n1pxTVRlMlqrccezBrRY8EUyUNwaPmQfDhMM4/tLtldBBantrkr
+ 8lkuYGAG75V47PbR2jX7o6Hgm8SneTLLRoyrJdadu+GJy3Dp5M4UznMo0Kf6ou/3ekLk
+ BU0brxqDwH7Ongc+6xpK4j7cDKF7lvoJ+yLwOLoCYL3iXRZ9G5Mw1kzjzL/esGxT6Li8
+ j/Q7NspEKPB9C/08eQGnqNSGOnObOZmGiGsWq5niFGPi1hoJDuOVfwX3bLKTmM/V7LHO
+ 84sFnW1PKuM5YX0TO/GWpAEo8KmpJgNtv4J+KqylZ5zgpZd7sDqyojKNlMc8XqLNIzuo
+ ne2Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=jruLi7UlSjCx7KaCcjEWDzHTFXUIWWWfkZuZcSpvFTQ=;
+ b=exubgoA3LOVWqjOYqGEbLfwu/hlmlkjHXiwi0wmtvJI/61k56njC4KCCkw/qKmnqBt
+ Tftuhr5ukrMpQWkW7tgjrgUq0Bcv78TvjwymZEo764oTNUkInVniabAF8NuLot9gZPUN
+ 0cdeKp8yTqufHhD/ghmxU2vtcPZqsy6iXqqx+8cJn3IeZjkodPuvcDkeUZBIL1Mj+W+S
+ ktlFyBWbbu+UlMIOdVeKfkxkyT6nezKAybUVomcpS5uAEUSePZqj5JgYA4P35o2D3vV+
+ vibSozTz5jPN9XXerZ5OiMJqARX5v65Gm+iRHWe0uWQydAgxWMaIVDO9rr4SLhhNNyXW
+ 0hjw==
+X-Gm-Message-State: APjAAAXoM0KwPeB4kRUDH5FH+JYeYQHc2QWBkTYZ0uaCgri4v2k/wTzn
+ e0HEpaDHQnyycHkAunL66wwERmcfWgOsz72GlzaAXA==
+X-Google-Smtp-Source: APXvYqzWMOmvKOnMzgmXbGtLtZdJwhnThcY/yNxXTuT59kWGlU8fJ7Qxw17WYhJMOpwjKzt7PTRnX+JJfWvWnba0cjI=
+X-Received: by 2002:ac8:71cb:: with SMTP id i11mr31376580qtp.32.1568174010403; 
+ Tue, 10 Sep 2019 20:53:30 -0700 (PDT)
+MIME-Version: 1.0
+References: <CANCZdfpEu6OxvmhDGSa3Cw4TSpfcbBOFbJjU7nZU-C_JFGFdRA@mail.gmail.com>
+ <CAC20D2Pz+gwyeuVYcHFbJaimHtrt+sKSvCFp=hMZNoAWr4G09Q@mail.gmail.com>
+In-Reply-To: <CAC20D2Pz+gwyeuVYcHFbJaimHtrt+sKSvCFp=hMZNoAWr4G09Q@mail.gmail.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Tue, 10 Sep 2019 21:53:19 -0600
+Message-ID: <CANCZdfpsXnbaQJo54qw689-unmVb35114PrOuNXHrcyp2Cng5g@mail.gmail.com>
+To: Clem Cole <clemc@ccc.com>
+Content-Type: multipart/alternative; boundary="000000000000d6227605923ef620"
+Subject: Re: [TUHS] PWB vs Unix/TS
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000d6227605923ef620
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Sep 10, 2019 at 9:17 AM Clem Cole <clemc@ccc.com> wrote:
+
+> Below ... from memory - Someone like APS was a little closer to some of
+> this than I was, so I might have a few things wrong.  I don't think so, but
+> it's been quite a few beers
+>
+> On Mon, Sep 9, 2019 at 2:26 AM Warner Losh <imp@bsdimp.com> wrote:
+>
+>> OK. I'm totally confused, and I see contradictory information around. So
+>> I thought I'd ask here.
+>>
+>> PWB was started to support unix time sharing at bell labs in 1973 (around
+>> V4 time).
+>>
+> No...  that is not quite right.  PWB was Mashey's project to build an RJE
+> system to front end SW development for the IBM systems, which AT&T had a
+> number [IIRC Call Accounting and lot of the 'business' part of the Bell
+> System was mainframe based].  I think Dick Haight was also involved.  I've
+> forgotten the site there were at.  It might have been Holmdel or Whippany.
+> But it was not MH or Summit.
+>
+
+"The Programmer's Workbench was started in 1973,[2]
+<https://en.wikipedia.org/wiki/PWB/UNIX#cite_note-Mashey-2> by Evan Ivie
+and Rudd Canaday to support a computer center for a 1000-employee Bell Labs
+division" is what wikipedia says, though that reference is in a acm queue
+article by Mashey...
+
+PWB 1.0 was released just after V6 "based on" it.
+>>
+> Well not so much "right after", but it was based on V6.  There are
+> differences.  IIRC this was the first attempt at redoing how groups
+> worked.  The biggest additions were an IBM RJE support, SCCS and a
+> different set of backup utilities; including some disk to disk (volcpy) and
+> the original binary formatted program for 9-tracks (cpio) to replace
+> Ken's assembler based tp.
+>
+
+Yes. PWB had their own collection of add-ons. I believe, but can't find the
+reference, that there were frequent imports of Research Unix into PWB as I
+saw references to UNIX/TS and CB-UNIX never getting too far away from
+Research Unix, so that's kinda speculative...  I imagine that SCCS was a
+boon for keeping it all straight, but I've never actually used SCCS.
+
+
+> SCCS was important and the RJE support was important because that was the
+> system being used and it made a huge impression on AT&T staff.   A terminal
+> to a UNIX box was way cheaper and to the IBM and people were so much more
+> productive.
+>
+> Also remember, that tp(1) was written in assembler had been originally
+> targeted to DECtape in a very early version of Research UNIX.  The DECtape
+> nature is why the directory was on the front of the tape.  Ken moved it
+> 9-track but used the same tape format.   I don't remember who wrote stp
+> (super-tp - in C), [?? Harvard ?? it's on the Harvard tape and is how I got
+> it].   But better peripheral support was really important in Mashey's
+> setting.  In that world, the production computer system was being put in
+> the raised floor computer rooms next to a mainframe and they had
+> 'operators' so John and team started to think more about what was needed to
+> admin the system.   IMHO: this was the first heavy use of shell scripts,
+> while I saw them in MH, it was Mashey's guys that cause me personally to
+> have an ah-ha moment about them.
+>
+> Interestingly enough, and I have talked to Bourne and Mashey about it,
+> John's use of the V6 was definitely one of the groups that were asking for
+> a new shell, which Bourne set out to solve; but that is not yet available.
+>
+> At some point (and here is where we need Steve Johnson, aps, and I wish
+> the late Ted Kowalski) to fill in details I can not.  USG/Summit was
+> chartered to "support UNIX for the Bell System."   As I understand it, the
+> genesis for their system was a kernel from MH that was moving towards V7s
+> but not there yet, the 'Typesetter C' and a bunch of other utilities that
+> Summit had collected/developed, but which I do not know.  I think fsdb was
+> around by that time. The new Bourne Shell and adb were being developed
+> although how complete I'm not sure.
+>
+> But accept for the new shell and updated compiler, I remember the system
+> 'felt' like V6 (Thompson shell) and thinking how much 'better' different v7
+> (Bourne Shell was) when we finally got it. This earlier system is the one
+> Ted brought to CMU in the fall 1977 (I think that is the right date) to
+> update the V6 system were then running.  Anyway, Ted always referred to
+> this as a UNIX/TS kernel.
+>
+> Another thing we did not have SCCS or the RJE stuff.  What I'm not sure
+> of is if there was a formally release of what ted had.  So it may have
+> been that TS had them and sent the release to Mashey, although I don't
+> think there were such releases originally in TS.  FWIW: I believe that in
+> our (CMU) case,Ted would just grab things as they appeared that he
+> thought we needed at CMU and he pushed things back (like CMU's fsck as he
+> found things we had that he thought we would like).  Interestingly
+> enough, RJE and SCCS was needed for the IBM support and while Ted (and his
+> undergrad roommate, Bill Joy) had worked on the MTS system on the IBM's at
+> UMich, I always felt like Ted looked down on the mainframes (which was were
+> I had also emerged but from CMU's TSS team).
+>
+> Also, Ted was a die-hard original cpio user and I liked the user
+> interface to stp, which I remember was a difference/source of argument.
+>  Tar did not yet exist. TS had some of the PWB tools like volcpy; but we
+> were using DOS-11's similar but different backup scheme (I've forgotten
+> the name of the format; but the tapes were boot-able, which volcpy tapes
+> were not).
+>
+> FWIW:  cu(1) did not yet exist.  I wrote a program (that I tended to
+> prefer in some ways for many years) called connect(1cmu) that did the same
+> thing.  We used it to download images to the Microprocessors like the
+> KIM-1.   It was originally written with the v6 portable C library, which is
+> also what the original fsck used (it's what we had on v6).   Ted introduced
+> me to what would become stdio and one of my first tasks was using it with
+> connect(1cmu).  The other thing I remember about that program is it was the
+> first time I wrote something that used two separate processes on a UNIX
+> system that cooperated with each other and found it so much easier than on
+> the PDP-10.
+>
+> Also, Dennis' stand-alone system for V7 was not yet available BTW.   If I
+> think of anything else about that system I can remember, I'll send an update
+>
+> PWB 2.0 was released just after V7, also "based on it".
+>>
+> I think the confusion is that TS and V7 were done sort of at the same time
+> and while the folks working on them talked to each other, it has never been
+> clear to me who was behind TS. For instance, I would learn that Bourne was
+> the 'project leader' for Seventh, in that he was the person that collected
+> everything for it.  I never heard of someone having the same role for TS,
+> which is why I sometimes think it was a name inside of Summit, but never
+> actually saw the light of day as a formal release.   I really am not sure
+> and would love to learn more details (I wish Ted were still alive to fill
+> us in).
+>
+
+Several timelines have, without references, Unix/TS or some variant of that
+going back to the V4 time frame. It's at best murky. There's some
+references in https://wiki.tuhs.org/doku.php?id=misc:snippets:mert1 including
+the post by Dan DeJegar which I had trouble parsing the ins and outs of.
+
+
+> As for V7 itself, Ken wrote tar(1) in response to cpio (preferring an
+> ASCII based header, but 'threading' it like cpio did, but keeping the user
+> interface that tp/stp had).  As I understand it, Dennis built up did the
+> standalone toolkit stuff.  Ken changed groups and messed with the file system
+> in the kernel.  Lots of new peripheral support, which is why he also
+> added lseek() as disks overflowed a 16-bit integer for the seek position.
+> Plus there were a number of other small changes between v6 and v7.  Some of
+> this stuff from PWB and Summit went back to MH (fsck as an example), but
+> not everything (like cpio/volcpy/SCCS).  I kind of think of the kernel and
+> Typesetter C going from MH to Summit and the PWB teams.
+>
+> @Steve Johnson, I need your help here.... at some point PCC was created in
+> MH (along with lint).  Didn't that start on V6 but was not complete until
+> V7? And when did you move to Summit to lead the compiler effort there?  My
+> impressions that was yet to happen, but I'm fuzzy on dates.
+>
+> Remember, there are a number of teams at BTL hacking on UNIX by then.
+> Dale's team in Columbus, the crew in Indiana Hill,  folks at Western
+> Electric (the Teletype folks ported the Ritchie C to the Z80 at some point
+> for instance), *etc.*
+>
+
+Yea, the Columbus crew added a lot to the different versions, and merged
+from them, according to the above link and a few other sources.
+
+
+> Again, I don't remember the politics but like any big company, you can
+> imagine it was not all that clean and crisp.   PWB 2.0 & 3.0 definitely
+> picked up features from other UNIX systems.  As I remember, Dale's shared
+> memory hacks would beget System V Shared Mem, Semaphores and IPC (they are
+> different, but they started in Columbus).
+>
+
+This jives with other information that says the basis of system V share
+memory, semaphores and ipc were derived from CB-Unix...
+
+
+> The other thing I'm not clear on is when the PWB team was folded into USG (Unix
+> Support Group) in Summit.  *I believe* that was after PWB 2.0 was
+> released.  But at some point, Mashey's team and the USG got interwoven.
+> I really don't know/remember many of those details as I watched them from
+> the outside and only knew the results.  The key point is the PWB 2.0 would
+> eventually be released as the internal, but official UNIX for the Bell
+> System.   It was supposed to bring together the needed from the different
+> labs; but it was not >>officially<< released *outside of the Bell System*
+> (it was an internal product, remember at this point, AT&T is not allowed to
+> have computer products, etc...)
+>
+
+Yes. There's some confusion as PWB and UNIX/TS become a USG thing that
+turns into System III and then the influx of CB-UNIX that's added before
+System V. How all that relates to USG, I'm quite unclear on still...
+
+
+> So PWB 2.0 is basically internal, and a melding of V7, TS, PWB 1.0 and
+> starting to take things from different labs with in BTL -- different from
+> all of them but mostly a superset.
+>
+>
+>
+>
+>> Later Unix TS 3.0 would become System III.
+>>
+> No --I do not think this is a true statement... not sure where you got
+> that, more in a minute
+>
+
+From the above recollection of Dan DeJAger...
+
+
+> We know there was no System I or System II.
+>>
+> Correct.
+>
+> But was there a Unix TS 1.0 and 2.0?
+>>
+> This is where it gets sticky.  I don't think so.   TS was the original
+> work by USG.   What I do not know is if it ever was 'packaged' as PWB had
+> been. *I do not believe it was*.   I think a little like the way Research
+> 'bled' out a little a time, pieces of TS made their way to MIT, CMU, *etc*.
+> but never as a formal release.
+>
+
+I've seen lots of references to UNIX/TS, but no versions, so this makes
+some sense... And it appears they go back further than V6...
+
+
+> And were they the same thing as PWB 1.0 and 2.0, or somehow just closely
+>> related?
+>>
+> See above... I'll explain how PWB 3.0 became System III in a minute.
+>
+>
+>> And I've seen both Unix/TS and Unix TS. Is there a preferred spelling?
+>>
+> Don't know.  I remember Ted always called it UNIX/TS all caps.
+>
+> The thing you left out is how PWB 3.0 became System III.
+>
+> Two important issues.  First with V7, AT&T (Al Arms) wrote the first
+> binary system redistribution license.  The commercial folks were happy to
+> have a redistribution license, but the terms were not what they really
+> needed.  Much of the issue was that AT&T was not the computer hardware or
+> software business and really did not understand the issues that the vendors
+> had.  Professor Dennis Allison of Stanford, was consulting for almost all
+> of us in the computer industry at the time (for those that don't know
+> Dennis, around the same time he founded what is now called the Asilomar
+> Microprocessor Workshop (check out:
+> https://www.computerhistory.org/atchm/the-asilomar-microcomputer-workshop-and-the-billion-dollar-toilet-seat/
+> ).
+>
+> Dennis arranged for a big meeting at Ricki's Hyatt in Palo Alto and
+> invited Al Arms and team, plus a representatives from his clients. I was
+> the techie with a lawyer from Tektronix in the room (as I have said in
+> other emails this it is only time I have been in a meeting with Bill
+> Gates).  The folks I remember who were there: was Bill Munson and team from
+> DEC; Fred Clegg and Team from HP; Bob MetCalfe from 3Com; Gates and the
+> MSFT crew; folks from SCO and DG.   There were some others, about 10 firms
+> in total; although I think if remember correctly, IBM was not among them
+> [This is the meeting where Gates famously exclaimed: "*You guys don't get
+> it.  The only thing that matters in the software industry is volume*."].
+>
+> BTW: The bits we were discussing was the upcoming release from USG, to be
+> called PWB 3.0 and they were for the PDP-11 only (which was fine, that was
+> what we all had been licensing already.  We could still use things from
+> other places, because that is what those other places were all licensed to
+> have -- all was good in UNIX-land).
+>
+> Thus began a series of negotiations for a new license agreement that would
+> allow the HW vendors to better ship UNIX as a binary product:  FWIW: Gates
+> wanted to pay $25/copy.   The DEC, HP and DG folks laughed.  $1K/copy was
+> fine by them, since their HW was typically $50-150K/system.
+>
+> Either shortly after or maybe during the negotiations time, Judge Green
+> ruled and AT&T got broken up.   One of the things that occured is that AT&T
+> was now allowed to sell SW and more importantly their new 3B20 as a product
+> (against IBM and DEC).  From a SW standpoint, AT&T Marketing did not like
+> the 'Programmers' moniker, feeling that it would limit who they could sell
+> too.  So they rebranded the new software product 'System III.'
+>
+> Note the printing of the manuals had already begun, which is why the cover
+> of the manuals say System III, but the title pages say PWB 3.0.
+>
+> As other have said a few years later, another PWB release came out for the
+> Bell System, *a.k.a.* PWB 4.0; but this was not licensed outside.
+>
+> At some point later, negotiations had restarted on yet another license
+> with the System III licensees and AT&T.   By the time that completed, yet
+> another release had been finished by USG.  The biggest change was the
+> addition support for HW besides the PDP-11. In particular, the official USG
+> support for the VAX and the 3B20.  What I forget, but I think in that
+> license you had to declare a system type and most licensees picked the VAX.
+>
+> By the time of release and finalization of the license, AT&T Marketing
+> which had already started the '*Consider it Standard*' campaign, called
+> the new release "System V."
+>
+> AT&T Marketing would stay with System V moniker from then on and we know
+> have SVR2, SVR3, SVR4, SVR5 in later years.
+>
+
+Yea, the detailed part of my history ends with the progeny of V7 (and I
+only have room for some, I've found maybe 3 dozen different systems that
+started out with V7 and then merge in System III or System V code for later
+versions or some variation on this theme).
+
+
+>
+>> Thanks for all your help with this topic and sorting things out. It's
+>> been quite helpful for my talk in a few weeks.
+>>
+>> Warner
+>>
+>> P.S. Would it be inappropriate to solicit feedback on an early version of
+>> my talk from this group?
+>>
+> I would suggest sending a pointer to this group to the slides and ask for
+> people to send you comments privately.
+>
+
+Works for me. Let me update based on this and Steve's email.
+
+
+>
+>
+>> I'm sure they would be rather keener on catching errors in my
+>> understanding of Unix history than just about any other forum...
+>>
+> Indeed - happy to help.
+>
+
+I am so very grateful for the help.
+
+
+> Clem
+>
+
+--000000000000d6227605923ef620
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Tue, Sep 10, 2019 at 9:17 AM Clem =
+Cole &lt;<a href=3D"mailto:clemc@ccc.com">clemc@ccc.com</a>&gt; wrote:<br><=
+/div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bo=
+rder-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><di=
+v dir=3D"ltr"><div style=3D"font-family:arial,helvetica,sans-serif"><font c=
+olor=3D"#0000ff">Below ... from memory - Someone like APS=C2=A0was a little=
+ closer to some of this than I was, so I might=C2=A0have a few things wrong=
+.=C2=A0 I don&#39;t think so, but it&#39;s been quite a few beers</font></d=
+iv></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_att=
+r"><font color=3D"#ff0000">On Mon, Sep 9, 2019 at 2:26 AM Warner Losh &lt;<=
+a href=3D"mailto:imp@bsdimp.com" target=3D"_blank">imp@bsdimp.com</a>&gt; w=
+rote:<br></font></div><blockquote class=3D"gmail_quote" style=3D"margin:0px=
+ 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><di=
+v dir=3D"ltr"><font color=3D"#ff0000">OK. I&#39;m totally confused, and I s=
+ee contradictory information around. So I thought I&#39;d ask here.</font><=
+div><font color=3D"#ff0000"><br></font></div><div><font color=3D"#ff0000">P=
+WB was started to support unix time sharing at bell labs in 1973 (around V4=
+ time).</font></div></div></blockquote><div><div style=3D"font-family:arial=
+,helvetica,sans-serif"><font color=3D"#0000ff">No...=C2=A0 that is not quit=
+e right.=C2=A0 PWB was Mashey&#39;s project to build an RJE system to front=
+ end SW development for the IBM systems, which AT&amp;T had a number [IIRC =
+Call Accounting and lot of the &#39;business&#39; part of the Bell System w=
+as mainframe based].=C2=A0 I think Dick Haight was also involved.=C2=A0 I&#=
+39;ve forgotten the site there were at.=C2=A0 It might have been Holmdel or=
+ Whippany. But it was not MH or Summit.</font></div></div></div></div></blo=
+ckquote><div><br></div><div><span style=3D"font-family:sans-serif;font-size=
+:14px">&quot;The Programmer&#39;s Workbench was started in 1973,</span><sup=
+ id=3D"gmail-cite_ref-Mashey_2-0" class=3D"gmail-reference" style=3D"line-h=
+eight:1;unicode-bidi:isolate;white-space:nowrap;font-size:11.2px;font-famil=
+y:sans-serif"><a href=3D"https://en.wikipedia.org/wiki/PWB/UNIX#cite_note-M=
+ashey-2" style=3D"text-decoration-line:none;color:rgb(11,0,128);background:=
+none">[2]</a></sup><span style=3D"font-family:sans-serif;font-size:14px">=
+=C2=A0by Evan Ivie and Rudd Canaday to support a computer center for a 1000=
+-employee Bell Labs division&quot; is what wikipedia says, though that refe=
+rence is in a acm queue article by Mashey...</span><br></div><div><br></div=
+><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border=
+-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div cl=
+ass=3D"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0=
+px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div =
+dir=3D"ltr"><div><font color=3D"#ff0000">PWB 1.0 was released just after V6=
+ &quot;based on&quot; it.</font></div></div></blockquote><div><span class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font c=
+olor=3D"#0000ff">Well not so much &quot;right after&quot;, but it was based=
+ on V6.=C2=A0 There are differences.=C2=A0 IIRC this was the first attempt =
+at redoing how groups worked.=C2=A0 The biggest=C2=A0</font></span><font co=
+lor=3D"#0000ff">additions<span class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif"> were</span></font><span style=3D"color:rgb(0,=
+0,255);font-family:arial,helvetica,sans-serif"><span class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif"></span> <span class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif">an IBM RJE s=
+upport, </span>SCCS and a different set of backup utilities<span class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif">; </span>inc=
+luding some disk to disk <span class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif">(volcpy)=C2=A0</span>and the original binary f=
+ormatted<span class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif"> program for 9-tracks (</span>cpio<span class=3D"gmail_default"=
+ style=3D"font-family:arial,helvetica,sans-serif">)</span> to replace Ken&#=
+39;s <span class=3D"gmail_default" style=3D"font-family:arial,helvetica,san=
+s-serif">assembler based </span>tp.</span></div></div></div></blockquote><d=
+iv><br></div><div>Yes. PWB had their own collection of add-ons. I believe, =
+but can&#39;t find the reference, that there were frequent imports of Resea=
+rch Unix into PWB as I saw references to UNIX/TS and CB-UNIX never getting =
+too far away from Research Unix, so that&#39;s kinda speculative...=C2=A0 I=
+ imagine that SCCS was a boon for keeping it all straight, but I&#39;ve nev=
+er actually used SCCS.</div><div>=C2=A0</div><blockquote class=3D"gmail_quo=
+te" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204=
+);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div><span =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><f=
+ont color=3D"#0000ff">SCCS was important and the RJE support was important =
+because that was the system being used and it made a huge impression on AT&=
+amp;T staff.=C2=A0 =C2=A0A terminal to a UNIX box was way cheaper and to th=
+e IBM and people were so much more productive.</font></span></div><div><spa=
+n class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+<font color=3D"#0000ff"><br></font></span></div><div><span class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#00=
+00ff">Also remember, that tp(1) was written in assembler had been originall=
+y targeted to DECtape in a very early version of Research UNIX.=C2=A0 The D=
+ECtape nature is why the directory was on the front of the tape.=C2=A0 Ken =
+moved it 9-track but used the same tape format.=C2=A0 =C2=A0I don&#39;t rem=
+ember who</font></span><span class=3D"gmail_default" style=3D"color:rgb(0,0=
+,255);font-family:arial,helvetica,sans-serif"> wrote stp (super-tp - in C),=
+ [?? Harvard ?? it&#39;s on the Harvard tape and is how I got it].</span><s=
+pan style=3D"color:rgb(0,0,255)">=C2=A0<span class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif">=C2=A0 But better peripheral su=
+pport was really important in Mashey&#39;s setting.=C2=A0 In that world, th=
+e production computer system was being put in the raised floor computer roo=
+ms next to a mainframe and they had &#39;operators&#39; so John and team st=
+arted to think more about what was needed to admin the system.=C2=A0 =C2=A0=
+IMHO: this was the first heavy use of shell scripts, while I saw them in MH=
+, it was Mashey&#39;s guys that cause me personally to have an ah-ha moment=
+ about them.</span></span></div><div><span style=3D"color:rgb(0,0,255)"><sp=
+an class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"=
+><br></span></span></div><div><span style=3D"color:rgb(0,0,255)"><span clas=
+s=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Intere=
+stingly enough, and I have talked to Bourne and Mashey about it, John&#39;s=
+ use of the V6 was definitely one of the groups that were asking for a new =
+shell, which Bourne set out to solve; but that is not yet available.</span>=
+</span></div><div><span style=3D"color:rgb(0,0,255)"><span class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><br></span></span>=
+</div><div><span style=3D"color:rgb(0,0,255)"><span class=3D"gmail_default"=
+ style=3D"font-family:arial,helvetica,sans-serif">At some point (and here i=
+s where we need Steve Johnson, aps, and I wish the late Ted Kowalski) to fi=
+ll in details I can not.=C2=A0 USG/Summit was chartered to &quot;support UN=
+IX for the Bell System.&quot;=C2=A0 =C2=A0As I understand it, the genesis f=
+or their system was a kernel from MH that was moving towards V7s but not th=
+ere yet, the &#39;Typesetter C&#39; and a bunch of other utilities that Sum=
+mit had collected/developed, but which I do not know.=C2=A0 I think fsdb wa=
+s around by that time. The new Bourne Shell and adb were being developed al=
+though how complete I&#39;m not sure.</span></span></div><div><span style=
+=3D"color:rgb(0,0,255)"><span class=3D"gmail_default" style=3D"font-family:=
+arial,helvetica,sans-serif"><br></span></span></div><div><span style=3D"col=
+or:rgb(0,0,255)"><span class=3D"gmail_default" style=3D"font-family:arial,h=
+elvetica,sans-serif">But accept for the new shell and updated compiler, I r=
+emember the system &#39;felt&#39; like V6 (Thompson shell) and thinking how=
+ much &#39;better&#39; different v7 (Bourne Shell was) when we finally got =
+it. This earlier system is the one Ted brought to CMU in the fall 1977 (I t=
+hink that is the right date) to update the V6 system were then running.=C2=
+=A0 Anyway, Ted always referred to this as a UNIX/TS kernel.</span></span><=
+/div><div><span style=3D"color:rgb(0,0,255)"><span class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br></span></span></div><d=
+iv><span style=3D"color:rgb(0,0,255)"><span class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif">Another thing we did not have S=
+CCS or the RJE stuff.=C2=A0=C2=A0</span></span><span style=3D"font-family:a=
+rial,helvetica,sans-serif"></span><font color=3D"#0000ff" style=3D"font-fam=
+ily:arial,helvetica,sans-serif">What I&#39;m not sure of is if there was a =
+formally release<span class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"> of what ted had</span>.=C2=A0<span class=3D"gmail_defa=
+ult" style=3D"font-family:arial,helvetica,sans-serif"> So it may have been =
+that TS had them and sent the release to Mashey, although I don&#39;t think=
+ there were such releases originally in TS.=C2=A0 FWIW:</span>=C2=A0I <span=
+ class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">b=
+elieve that in our (CMU) case,</span><span class=3D"gmail_default" style=3D=
+"font-family:arial,helvetica,sans-serif">Ted</span>=C2=A0would just grab th=
+ings as they appeared that <span class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif">he thought </span>we needed <span class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif">at CMU </spa=
+n>and he pushed things back (like <span class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif">CMU&#39;s </span>fsck as he found thi=
+ngs we had that he thought we would like).=C2=A0<span class=3D"gmail_defaul=
+t" style=3D"font-family:arial,helvetica,sans-serif"> Interestingly enough, =
+RJE and SCCS was needed for the IBM support and while Ted (and his undergra=
+d roommate, Bill Joy) had worked on the MTS system on the IBM&#39;s at UMic=
+h, I always felt like Ted looked down on the mainframes (which was were I h=
+ad also emerged but from CMU&#39;s TSS team).</span></font></div><div><font=
+ color=3D"#0000ff" style=3D"font-family:arial,helvetica,sans-serif"><span c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br=
+></span></font></div><div><font color=3D"#0000ff" style=3D"font-family:aria=
+l,helvetica,sans-serif"><span class=3D"gmail_default" style=3D"font-family:=
+arial,helvetica,sans-serif">Also,</span> Ted was a die-hard <span class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif">original </=
+span>cpio user and I liked the user interface to stp, which I remember was =
+a difference<span class=3D"gmail_default" style=3D"font-family:arial,helvet=
+ica,sans-serif">/source of argument</span>.=C2=A0 =C2=A0Tar did not yet exi=
+st. TS had some of the PWB tools like volcpy; but we were using DOS<span cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">-</s=
+pan>11&#39;s similar but different <span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif">backup </span>scheme (I&#39;ve forgo=
+tten the name of the format; but the tapes were boot-able, which=C2=A0volcp=
+y=C2=A0tapes were not).</font></div><div><div style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff"><br></font></div><div style=3D"=
+font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">FWIW:=C2=A0=
+ cu(1) did not yet exist.=C2=A0 I wrote a program (that I tended to prefer =
+in some ways for many years) called connect(1cmu) that did the same thing.=
+=C2=A0 We used it to download images to the Microprocessors like the KIM-1.=
+=C2=A0 =C2=A0It was originally written with the v6 portable C library, whic=
+h is also what the original fsck used (it&#39;s what we had on v6).=C2=A0 =
+=C2=A0Ted introduced me to what would become stdio and one of my first task=
+s was using it with connect(1cmu).=C2=A0 The other thing I remember about t=
+hat program is it was the first time I wrote something that used two separa=
+te processes on a UNIX system that cooperated with each=C2=A0other and foun=
+d it so much easier than on the PDP-10.</font></div><div style=3D"font-fami=
+ly:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></div><di=
+v style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">=
+Also, Dennis&#39; stand-alone system for V7 was not yet available BTW.=C2=
+=A0 =C2=A0If I think of anything else about that system I can remember, I&#=
+39;ll send an update</font></div><br></div><blockquote class=3D"gmail_quote=
+" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);=
+padding-left:1ex"><div dir=3D"ltr"><div><font color=3D"#ff0000">PWB 2.0 was=
+ released just after V7, also &quot;based on it&quot;.</font></div></div></=
+blockquote><div><span class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff">I think the confusion is that T=
+S and V7 were done sort of at the same time and while the folks working on =
+them talked to each other,=C2=A0it has never been clear to me who was behin=
+d TS. For instance, I would learn that Bourne was the &#39;project leader&#=
+39; for Seventh, in that he was the person that collected everything for it=
+.=C2=A0 I never heard of someone having the same role for TS, which is why =
+I sometimes think it was a name inside of Summit, but never actually saw th=
+e light of day as a formal release.=C2=A0 =C2=A0I really am not sure and wo=
+uld love to learn more details (I wish Ted were still alive to fill us in).=
+</font></span></div></div></div></blockquote><div><br></div><div>Several ti=
+melines have, without references, Unix/TS or some variant of that going bac=
+k to the V4 time frame. It&#39;s at best murky. There&#39;s some references=
+ in=C2=A0<a href=3D"https://wiki.tuhs.org/doku.php?id=3Dmisc:snippets:mert1=
+">https://wiki.tuhs.org/doku.php?id=3Dmisc:snippets:mert1</a>=C2=A0includin=
+g the post by Dan DeJegar which I had trouble parsing the ins and outs of.<=
+/div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px=
+ 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><di=
+v dir=3D"ltr"><div class=3D"gmail_quote"><div><span style=3D"color:rgb(0,0,=
+255);font-family:arial,helvetica,sans-serif">As for V7 itself, Ken wrote ta=
+r<span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-se=
+rif">(1)</span> in response to cpio (preferring an ASCII based header, but =
+&#39;threading&#39; it like cpio did, but keeping the user interface that t=
+p/stp had).=C2=A0 As I understand it, Dennis built up did the standalone to=
+olkit stuff.=C2=A0 Ken changed groups and messed with the file </span><font=
+ color=3D"#0000ff"><span style=3D"font-family:arial,helvetica,sans-serif">s=
+ystem </span>in<span class=3D"gmail_default" style=3D"font-family:arial,hel=
+vetica,sans-serif"> </span>the<span style=3D"font-family:arial,helvetica,sa=
+ns-serif"> kernel.=C2=A0 Lo</span></font><span style=3D"color:rgb(0,0,255);=
+font-family:arial,helvetica,sans-serif">ts of new peripheral support, which=
+ is why he also added lseek()<span class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif"> as disks overflowed a 16-bit integer for =
+the seek position</span>.=C2=A0 Plus there were a number of other small cha=
+nges between v6 and v7.=C2=A0 Some of this stuff from PWB and Summit went b=
+ack to MH (fsck as an example), but not everything (like cpio/volcpy/SCCS).=
+=C2=A0 I kind of think of the kernel and Typesetter C going from MH to Summ=
+it and the PWB teams.</span><br></div><div><span class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br>=
+</font></span></div><div><span class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif"><font color=3D"#0000ff">@Steve Johnson, I need=
+ your help here.... at some point PCC was created in MH (along with lint).=
+=C2=A0 Didn&#39;t that start on V6 but was not complete until V7? And when =
+did you move to Summit to lead the compiler effort there?=C2=A0 My impressi=
+ons that was yet to happen, but I&#39;m fuzzy on dates.</font></span></div>=
+<div><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,san=
+s-serif"><font color=3D"#0000ff"><br></font></span></div><div><span class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font c=
+olor=3D"#0000ff">Remember, there are a number of teams at BTL hacking on UN=
+IX by then.=C2=A0 Dale&#39;s team in Columbus, the crew in Indiana=C2=A0Hil=
+l,=C2=A0 folks at Western Electric (the Teletype folks ported the Ritchie C=
+ to the Z80 at some point for instance),=C2=A0<i>etc.</i></font></span></di=
+v></div></div></blockquote><div><br></div><div>Yea, the Columbus crew added=
+ a lot to the different versions, and merged from them, according to the ab=
+ove link and a few other sources.</div><div>=C2=A0</div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote=
+"><div><div style=3D"font-family:arial,helvetica,sans-serif"><font color=3D=
+"#0000ff">Again, I don&#39;t remember the politics but like any big company=
+, you can imagine it was not all that clean and crisp.=C2=A0 =C2=A0PWB 2.0 =
+&amp; 3.0 definitely picked up features from other UNIX systems.=C2=A0 As I=
+ remember, Dale&#39;s shared memory hacks would beget System V Shared Mem, =
+Semaphores and IPC (they are different, but they started in Columbus).</fon=
+t></div></div></div></div></blockquote><div><br></div><div>This jives with =
+other information that says the basis of system V share memory, semaphores =
+and ipc were derived from CB-Unix...</div><div>=C2=A0</div><blockquote clas=
+s=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid r=
+gb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quot=
+e"><div><div style=3D"font-family:arial,helvetica,sans-serif"><div><span cl=
+ass=3D"gmail_default"><font color=3D"#0000ff">The other thing I&#39;m not c=
+lear on is when the PWB team was folded into USG (</font></span><font color=
+=3D"#0000ff">Unix Support Group)</font>=C2=A0<span style=3D"color:rgb(0,0,2=
+55)">in Summit.=C2=A0 </span><i style=3D"color:rgb(0,0,255)">I believe</i><=
+span style=3D"color:rgb(0,0,255)"> that was after PWB 2.0 was released.=C2=
+=A0=C2=A0</span><span style=3D"color:rgb(0,0,255)">But at some point, Mashe=
+y&#39;s team and the USG got interwoven.=C2=A0 I really don&#39;t know/reme=
+mber many of those details as I watched them from the outside and only knew=
+ the results.=C2=A0 The key point is the PWB 2.0 would eventually be releas=
+ed as the internal, but=C2=A0</span><font color=3D"#0000ff">official</font>=
+<span style=3D"color:rgb(0,0,255)"> UNIX for the Bell System.=C2=A0 =C2=A0I=
+t was supposed to bring together the needed from the different labs; but it=
+ was not &gt;&gt;</span><font color=3D"#0000ff">officially</font><span styl=
+e=3D"color:rgb(0,0,255)">&lt;&lt; released <i>outside of the Bell System</i=
+> (it was an internal product, remember at this point, AT&amp;T is not allo=
+wed</span><span style=3D"color:rgb(0,0,255)">=C2=A0to have computer product=
+s, etc...)=C2=A0</span></div></div></div></div></div></blockquote><div><br>=
+</div><div>Yes. There&#39;s some confusion as PWB and UNIX/TS become a USG =
+thing that turns into System III and then the influx of CB-UNIX that&#39;s =
+added before System V. How all that relates to USG, I&#39;m quite unclear o=
+n still...</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D=
+"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-le=
+ft:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div><div style=3D"font=
+-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">So PWB 2.0 is b=
+asically internal, and a melding of V7, TS, PWB 1.0 and starting to take th=
+ings from different labs with in=C2=A0BTL -- different from all of them but=
+ mostly a superset.</font></div><br></div><div><br></div><div>=C2=A0</div><=
+blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-l=
+eft:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div><fon=
+t color=3D"#ff0000"> Later Unix TS 3.0 would become System III.</font></div=
+></div></blockquote><div><div style=3D"font-family:arial,helvetica,sans-ser=
+if"><font color=3D"#0000ff">No --I do not think this is a true statement...=
+ not sure where you got that, m</font><span style=3D"color:rgb(0,0,255)">or=
+e in a minute</span></div></div></div></div></blockquote><div><br></div><di=
+v>From the above recollection of Dan DeJAger...</div><div>=C2=A0</div><bloc=
+kquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:=
+1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D=
+"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px=
+ 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D=
+"ltr"><div><font color=3D"#ff0000">We know there was no System I or System =
+II. </font></div></div></blockquote><div><div style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff">Correct.=C2=A0 </font></div><br=
+></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;=
+border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><=
+div><font color=3D"#ff0000">But was there a Unix TS 1.0 and 2.0? </font></d=
+iv></div></blockquote><div><div style=3D"font-family:arial,helvetica,sans-s=
+erif"><font color=3D"#0000ff">This is where it gets sticky.=C2=A0 I don&#39=
+;t think so.=C2=A0 =C2=A0TS was the original work by USG.=C2=A0 =C2=A0What =
+I do not know is if it ever was &#39;packaged&#39; as PWB had been. <i>I do=
+ not believe it was</i>.=C2=A0 =C2=A0I think a little like the way Research=
+ &#39;bled&#39; out a little a time, pieces of TS made their way to MIT, CM=
+U,=C2=A0<i>etc</i>. but never as a formal release.</font></div></div></div>=
+</div></blockquote><div><br></div><div>I&#39;ve seen lots of references to =
+UNIX/TS, but no versions, so this makes some sense... And it appears they g=
+o back further than V6...</div><div>=C2=A0</div><blockquote class=3D"gmail_=
+quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,=
+204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><blockqu=
+ote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px=
+ solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div><font color=
+=3D"#ff0000">And were they the same thing as PWB 1.0 and 2.0, or somehow ju=
+st closely related? </font></div></div></blockquote><div><div style=3D"font=
+-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">See above... I&=
+#39;ll explain how PWB 3.0 became System III in a minute.</font></div><div =
+style=3D"font-family:arial,helvetica,sans-serif"><span style=3D"font-family=
+:Arial,Helvetica,sans-serif">=C2=A0</span></div></div><blockquote class=3D"=
+gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(20=
+4,204,204);padding-left:1ex"><div dir=3D"ltr"><div><font color=3D"#ff0000">=
+And I&#39;ve seen both Unix/TS and Unix TS. Is there a preferred spelling?<=
+/font></div></div></blockquote><div><div style=3D"font-family:arial,helveti=
+ca,sans-serif"><font color=3D"#0000ff">Don&#39;t know.=C2=A0 I remember Ted=
+ always called it UNIX/TS all caps.</font></div><br></div><div style=3D"fon=
+t-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">The thing you =
+left out is how PWB 3.0 became System III.</font></div><div style=3D"font-f=
+amily:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></div>=
+<div style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000f=
+f">Two important issues.=C2=A0 First with V7, AT&amp;T (Al Arms) wrote the =
+first binary system redistribution license.=C2=A0 The commercial folks were=
+ happy to have a redistribution license, but the terms were not what they r=
+eally needed.=C2=A0 Much of the issue was that AT&amp;T was not the compute=
+r hardware or software business and really did not understand the issues th=
+at the vendors had.=C2=A0 Professor Dennis Allison of Stanford, was consult=
+ing=C2=A0for almost all of us in the computer industry at the time (for tho=
+se that don&#39;t know Dennis, around the same time he founded what is now =
+called the Asilomar Microprocessor Workshop (check out:=C2=A0</font><a href=
+=3D"https://www.computerhistory.org/atchm/the-asilomar-microcomputer-worksh=
+op-and-the-billion-dollar-toilet-seat/" style=3D"font-family:Arial,Helvetic=
+a,sans-serif" target=3D"_blank">https://www.computerhistory.org/atchm/the-a=
+silomar-microcomputer-workshop-and-the-billion-dollar-toilet-seat/</a>)<spa=
+n style=3D"color:rgb(0,0,255)">.</span></div><div style=3D"font-family:aria=
+l,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></div><div style=
+=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">Dennis =
+arranged for a big meeting at Ricki&#39;s Hyatt in Palo Alto and invited Al=
+ Arms and team, plus a representatives from his clients. I was the techie w=
+ith a lawyer from Tektronix in the room (as I have said in other emails thi=
+s it is only time I have been in a meeting with Bill Gates).=C2=A0 The folk=
+s I remember who were there: was Bill Munson and team from DEC; Fred Clegg =
+and Team from HP; Bob MetCalfe from 3Com; Gates and the MSFT crew; folks fr=
+om SCO and DG.=C2=A0 =C2=A0There were some others, about 10 firms in total;=
+ although I think if remember correctly, IBM was not among them [This is th=
+e meeting where Gates famously exclaimed: &quot;<i>You guys don&#39;t get i=
+t.=C2=A0 The only thing that matters in the software industry is volume</i>=
+.&quot;].</font></div><div style=3D"font-family:arial,helvetica,sans-serif"=
+><font color=3D"#0000ff"><br></font></div><div style=3D"font-family:arial,h=
+elvetica,sans-serif"><font color=3D"#0000ff">BTW: The bits we were discussi=
+ng was the upcoming release from USG, to be called PWB 3.0 and they were fo=
+r the PDP-11 only (which was fine, that was what we all had been licensing =
+already.=C2=A0 We could still use things from other places, because that is=
+ what those other places were all licensed to have -- all was good in UNIX-=
+land).</font></div><div style=3D"font-family:arial,helvetica,sans-serif"><f=
+ont color=3D"#0000ff"><br></font></div><div style=3D"font-family:arial,helv=
+etica,sans-serif"><font color=3D"#0000ff">Thus began a series of negotiatio=
+ns for a new license agreement that would allow the HW vendors to better sh=
+ip UNIX as a binary product:=C2=A0 FWIW: Gates wanted to pay $25/copy.=C2=
+=A0 =C2=A0The DEC, HP and DG folks laughed.=C2=A0 $1K/copy was fine by them=
+, since their HW was typically $50-150K/system.</font></div><div style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font><=
+/div><div style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#=
+0000ff">Either shortly after or maybe during the negotiations time, Judge G=
+reen ruled and AT&amp;T got broken up.=C2=A0 =C2=A0One of the things that o=
+ccured is that AT&amp;T was now allowed to sell SW and more importantly the=
+ir new 3B20 as a product (against IBM and DEC).=C2=A0 From a SW standpoint,=
+ AT&amp;T Marketing did not like the &#39;Programmers&#39; moniker, feeling=
+ that it would limit who they could sell too.=C2=A0 So they rebranded the n=
+ew software product &#39;System III.&#39;</font></div><div style=3D"font-fa=
+mily:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></div><=
+div style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff=
+">Note the printing of the manuals had already begun, which is why the cove=
+r of the manuals say System III, but the title pages say PWB 3.0.</font></d=
+iv><div style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#00=
+00ff"><br></font></div><div style=3D"font-family:arial,helvetica,sans-serif=
+"><font color=3D"#0000ff">As other have said a few years later, another PWB=
+ release came out for the Bell System, <i>a.k.a.</i> PWB 4.0; but this was =
+not licensed outside.</font></div><div style=3D"font-family:arial,helvetica=
+,sans-serif"><font color=3D"#0000ff"><br></font></div><div style=3D"font-fa=
+mily:arial,helvetica,sans-serif"><font color=3D"#0000ff">At some point late=
+r, negotiations=C2=A0had restarted on yet another license with the System I=
+II licensees and AT&amp;T.=C2=A0 =C2=A0By the time that completed, yet anot=
+her release had been finished by USG.=C2=A0 The biggest change was the addi=
+tion support for HW besides the PDP-11. In particular, the official USG sup=
+port for the VAX and the 3B20.=C2=A0 What I forget, but I think in that lic=
+ense you had to declare a system type and most licensees picked the VAX.</f=
+ont></div><div style=3D"font-family:arial,helvetica,sans-serif"><font color=
+=3D"#0000ff"><br></font></div><div style=3D"font-family:arial,helvetica,san=
+s-serif"><font color=3D"#0000ff">By the time of release and finalization of=
+ the license, AT&amp;T Marketing which had already started the &#39;<i>Cons=
+ider it Standard</i>&#39; campaign, called the new release &quot;System V.&=
+quot;</font></div><div style=3D"font-family:arial,helvetica,sans-serif"><fo=
+nt color=3D"#0000ff"><br></font></div><div style=3D"font-family:arial,helve=
+tica,sans-serif"><font color=3D"#0000ff">AT&amp;T Marketing would stay with=
+ System V moniker from then on and we know have SVR2, SVR3, SVR4, SVR5 in l=
+ater years.</font></div></div></div></blockquote><div><br></div><div>Yea, t=
+he detailed part of my history ends with the progeny of V7 (and I only have=
+ room for some, I&#39;ve found maybe 3 dozen different systems that started=
+ out with V7 and then merge in System III or System V code for later versio=
+ns or some variation on this theme).=C2=A0</div><div>=C2=A0</div><blockquot=
+e class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px s=
+olid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmai=
+l_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8e=
+x;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"=
+><div><font color=3D"#ff0000"><br></font></div><div><font color=3D"#ff0000"=
+>Thanks for all your help with this topic and sorting things out. It&#39;s =
+been quite helpful for my talk in a few weeks.</font></div><div><font color=
+=3D"#ff0000"><br></font></div><div><font color=3D"#ff0000">Warner</font></d=
+iv><div><font color=3D"#ff0000"><br></font></div><div><font color=3D"#ff000=
+0">P.S. Would it be inappropriate to solicit feedback on an early version o=
+f my talk from this group?</font></div></div></blockquote><div><div style=
+=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">I would=
+ suggest sending a pointer to this group to the slides and ask for people t=
+o send you comments privately.</font></div></div></div></div></blockquote><=
+div><br></div><div>Works for me. Let me update based on this and Steve&#39;=
+s email.=C2=A0</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" styl=
+e=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);paddin=
+g-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div>=C2=A0</div><b=
+lockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-le=
+ft:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div><font=
+ color=3D"#ff0000"> I&#39;m sure they would be rather keener on catching er=
+rors in my understanding of Unix history than just about any other forum...=
+</font></div></div></blockquote><div><span class=3D"gmail_default" style=3D=
+"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">Indeed - h=
+appy to help.</font></span></div></div></div></blockquote><div><br></div><d=
+iv>I am so very grateful for the help.</div><div>=C2=A0</div><blockquote cl=
+ass=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid=
+ rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_qu=
+ote"><div><font color=3D"#0000ff"><span class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif">Clem</span>=C2=A0</font></div></div><=
+/div>
+</blockquote></div></div>
+
+--000000000000d6227605923ef620--
