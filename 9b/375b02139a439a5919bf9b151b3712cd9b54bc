@@ -1,0 +1,107 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 04304773
+	for <ml@inbox.vuxu.org>;
+	Fri, 13 Sep 2019 04:11:43 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B84079B9B4; Fri, 13 Sep 2019 14:11:41 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9BF6E94820;
+	Fri, 13 Sep 2019 14:11:20 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A0AA494820; Fri, 13 Sep 2019 14:11:18 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F3503947B9
+ for <tuhs@tuhs.org>; Fri, 13 Sep 2019 14:11:17 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 9E12635E11A; Thu, 12 Sep 2019 21:11:17 -0700 (PDT)
+Date: Thu, 12 Sep 2019 21:11:17 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Tony Finch <dot@dotat.at>
+Message-ID: <20190913041117.GR2046@mcvoy.com>
+References: <CANCZdfpEu6OxvmhDGSa3Cw4TSpfcbBOFbJjU7nZU-C_JFGFdRA@mail.gmail.com>
+ <CAC20D2Pz+gwyeuVYcHFbJaimHtrt+sKSvCFp=hMZNoAWr4G09Q@mail.gmail.com>
+ <CANCZdfpsXnbaQJo54qw689-unmVb35114PrOuNXHrcyp2Cng5g@mail.gmail.com>
+ <CAC20D2MuABFQw_R2HyUFsg8Dpum+LNn6ixneO2C7Te8ECtZ3PA@mail.gmail.com>
+ <20190911181101.GF3143@mcvoy.com>
+ <alpine.BSF.2.21.9999.1909120846160.18105@aneurin.horsfall.org>
+ <20190912034346.GJ2046@mcvoy.com>
+ <CAKr6gn39D_XrOHXr22EUsEWhCUcFJw2n6C8iQ_ntXGkbO33irw@mail.gmail.com>
+ <20190912043145.GA12480@mcvoy.com>
+ <alpine.DEB.2.20.1909121417040.5352@grey.csi.cam.ac.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.20.1909121417040.5352@grey.csi.cam.ac.uk>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] [SPAM] Re:  SCCS
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Sep 12, 2019 at 02:44:45PM +0100, Tony Finch wrote:
+> Larry McVoy <lm@mcvoy.com> wrote:
+> 
+> > If you have actual data that shows RCS to be faster I would like to
+> > see that.  RCS read the whole file.  It could have been faster, it could
+> > have put the offset into the file where the most recent version begain.
+> > But it didn't.  It read the entire file.
+> 
+> In RCS the most recent version of the file is near the start of the ,v
+> file after a list of revisions, so it doesn't have to read the deltas for
+> the common case of checking out the current version of a file. I think
+> there must be a similar optimization to copy the deltas without processing
+> them when committing a new revision. But yes, as soon as you get away from
+> working on the latest revision of the main branch, RCS becomes
+> quadratically slow.
+
+Yeah, you are right. The most recent version should be fast.  SCCS reads
+the whole file and RCS does not in the common case.
+
+But here is an SCCS win.  SCCS has a 16 bit ignore the carry bit checksum
+over the whole file.  RCS has none of that.
+
+You can argue that a 16 bit checksum is not good enough in this day of
+md5sums, sha1 hashes, crcs, etc.
+
+There are two places where it is great.
+
+A) Memory errors.  Memory chips errors are none, parity, or ECC.
+Parity has gone the way of the doodoo bird so we have none or ECC.  I can
+pretty much promise you that the machine you are reading this on has no
+error detection or correction.  Only high end servers have ECC.
+
+That SCCS checksum is awesome because we can print out what the checksum
+should be and what we got.  If it differs in a power of two then it is
+a single bit error and that is your memory sucks.  I can't tell you how
+many times customers said something was wrong and I made them run a 
+memory check and it was their memory.  100's is too small, 1000's 
+at least.
+
+B) NFS errors.  So all NFS implementations, Suns included, had a bad
+habit of returning a block of nulls.  I dunno why but that is a thing.
+The SCCS checksum would detect that.  RCS and CVS did not have a checksum
+so when NFS returned garbage, they were happy to return that to you.
+
+It's really surprising how well the SCCS checksum has worked.  When we
+went to a binary format we did CRC on each block and XOR so we could
+put stuff back together.  I still have a lot of respect for that little
+checksum.  It served us well.
+
+--lm
