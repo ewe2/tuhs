@@ -1,0 +1,451 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 87cfea1e
+	for <ml@inbox.vuxu.org>;
+	Fri, 13 Sep 2019 20:03:32 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 03CD89BA00; Sat, 14 Sep 2019 06:03:31 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2FCF19B9A9;
+	Sat, 14 Sep 2019 06:03:02 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="Yuiw7BBI";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 413589B9A9; Sat, 14 Sep 2019 06:02:59 +1000 (AEST)
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com
+ [209.85.128.44])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3ECC69B937
+ for <tuhs@tuhs.org>; Sat, 14 Sep 2019 06:02:58 +1000 (AEST)
+Received: by mail-wm1-f44.google.com with SMTP id n10so4014203wmj.0
+ for <tuhs@tuhs.org>; Fri, 13 Sep 2019 13:02:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=u5zc6jZlOqTsulVT9t0HVeAGYENVKo66ZT4mATEBbvw=;
+ b=Yuiw7BBIbkqrsTTo0kT5UtHMQzFsgc4e3vvN4SIu8fXKmNJLvzRJGXzCmLfIjpo5n6
+ Sfg+ecVbgEwVkOJHw/sN8UZ0u8lrvDQpa3i/Df7a3qNK3zcIESzntEdml0bPQtlMs3js
+ zW6K5Ae822lOH7vDJksdLYebpx5SKRblANowk=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=u5zc6jZlOqTsulVT9t0HVeAGYENVKo66ZT4mATEBbvw=;
+ b=g7VlGx2Z6LnxHEyUxXuHAQzVjxZkEN6u3YeLQoKy+86anqEc+9pdathYzETDvzwT8k
+ qPTVsQvt7zzCcWCfC96fXLeiPZYxVyljuhMLeCxEtSzhjFyDWAB4qDbcyjdlH9ioLFIN
+ /JMKNxVgusTap70sg4c+6J9o6Z76kdzkRLkC2C0OMDhqkzhBUNBXvnf2uBlDMDtV0lps
+ tHbbD93cymJ2jPtIxDrhcO5VlZWB5B4wrIAO1+xV6ldBHZIehpYkNsmPxrnlo/4bQxOr
+ y2BEefO+zXGkvS0tVFj5QNFAOUKx76qyKOfkpUpbDh1YyZgeg3HClPgYcELNvJKhd/EO
+ lCAQ==
+X-Gm-Message-State: APjAAAXVxI5RgO65kDpRszMTcPGHiv1SQxb9Ctrf21j6SfPKwEpFWaqh
+ xSI2ucgus3mG2DukM/F/X5d2vCfzCToGXXlJHuIX7QokCT8=
+X-Google-Smtp-Source: APXvYqwsgWBvx2lbkwQxmg2vYka9Xw209ofCuPvW7wL41q1m65SEWgCm29tutJFH88mgRu7DXvHTblIM6hlHipbDR+E=
+X-Received: by 2002:a1c:cbcc:: with SMTP id b195mr5156212wmg.80.1568404976606; 
+ Fri, 13 Sep 2019 13:02:56 -0700 (PDT)
+MIME-Version: 1.0
+References: <CANCZdfrK4iFQCWOFP4MoUggpfJVmoJ0dnSg6H0cCi4dop7sVXw@mail.gmail.com>
+ <CAC20D2NmXGzN7imTKy-RRWRZ2ewWMEmUV9oDuP3-e3a4R+ynpA@mail.gmail.com>
+In-Reply-To: <CAC20D2NmXGzN7imTKy-RRWRZ2ewWMEmUV9oDuP3-e3a4R+ynpA@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Fri, 13 Sep 2019 16:02:30 -0400
+Message-ID: <CAC20D2PXYWpv-8BQNKvUjgT=2W81GgzaOLyZiQ5=sM9+LXCWnw@mail.gmail.com>
+To: Warner Losh <imp@bsdimp.com>
+Content-Type: multipart/alternative; boundary="0000000000007ebb2a059274bde0"
+Subject: Re: [TUHS] My EuroBSDcon talk (preview for commentary)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000007ebb2a059274bde0
+Content-Type: text/plain; charset="UTF-8"
+
+BTW:  I just thought of something else....  one of the b*tched about the
+commercial redistribution license from V7 in 1979, that was not fixed until
+the SVR3 licensing the mid-late 1980s  was AT&T's source policy.   As I
+said, a commercial source license was $20K for the first CPU and 5K for
+each additional one.   Later (System V) it went to $50K for the first and
+$10K for each additional.   But what really ticked off the vendors like
+DEC, Masscomp, Sun et al, was that each system that sources on was supposed
+to one of the 'second CPU licenses' - the binary license was not good
+enough.
+
+What most of us did, was make sure any system that was a 'source control'
+or 'master' system at any 'site' had a full source license, but we were all
+in violation of the source agreement on our personal workstations.  The
+argument was the sources on people's machines was ephemeral and not
+'stored' there.   But it was definitely contentious.
+
+
+
+On Fri, Sep 13, 2019 at 3:47 PM Clem Cole <clemc@ccc.com> wrote:
+
+> slide 4 --  All of HP-UX, Ultrix and Digital UNIX/Tru64 are BSD kernels.
+> HP-UP and Tru64 support System V calls.
+>
+> BTW:  DG-UX and Stratus built their own kernels, but used System V command
+> systems and System Call definitions - which are not listed.
+>
+> Slide 6 - if you want it I have another picture of the GE system from some
+> of their literature has a view of all of the components.   Send me email if
+> you want it.
+>
+> Slide 8 - Sets out to write version of Fortran came up with B.  Uses B to
+> write Assembler
+>
+> Slide 9 - Wrong DEC logo.  Should be the Blue one.  The maroon version
+> does not show up until the 1990s with Bob Palmer (and has bad memories for
+> some of us).
+>
+> Slide 17 - Ken write PDP-11 assembler on PDP-7 in B. , Dennis starts to
+> rewrite B compiler to output PDP-11 code.
+>
+> Slide 18 - B begins to become different enough that Dennis starts to call
+> it nb [new B], eventually deviates enough to become new language
+>
+> Slide 19 - 4th Edition release outside of the BTL.  Lou Katz becomes 'user
+> zero'
+>
+> Slide 20 -- We need to get you the site and group name from Mash.  It was
+> not in Summit, it was not USG - but was in NJ.  I thought it was Homdel but
+> I that is purely speculation.
+>                   Also the role of Columbus team needs to be defined.
+>  Ask Mary Ann.
+>
+> Slide 21 -- I'm not going to argue - but I would ask you to add a
+> disclaimer.   This is what you could reconstruct, but there is some
+> question of some of the arrows.   Heinz might be able to help, but as
+> Stienhart and I have said, its believed to be in LA; but no one has tracked
+> him down as he has been pursuing non-computer interests.
+>
+> Slide 22 --4th Edition went to Katz that this is wrong, who sometimes
+> reads this mailing list.  If not, send me a note, I'll reintroduce you.  He
+> might be able to give you a data.  Check with Warren, my >>memory<< is that
+> some of userland is still in C although a lot assembler is still there.
+>
+> Slide 23 -- ??widespread??   -- I'm not sure I would use that. Not even
+> 100 sites yet.     Also there were not "commercial version" this was the
+> first "commercial license" -- big difference [contact me if you want
+> explanation].  IIRC fee was 15K per CPU.  Commercial redistribution doesn't
+> occur until after 7th is released and was a separate license.   I would
+> add, Mike Lesk's portable C library is starting to be used, but most C
+> program do their own I/O with read/write
+>
+>           First real install man page and Dennis build tape installation
+> system.   Earlier version released as RK05 disk copies.
+>            Also numerous new peripherals. IIRC Support for the 11/40
+> starts here, 4th & 5th needed a 45 class, and earlier used the 20 with the
+> CSS MMU.
+>
+> Slide 24 -- CMU uses it to teaches OS class.  makes student in class sign
+> a sub-license.
+>
+> Slide 25 - missing the first USENIX tapes. which include Harvard and the
+> like.  Warren and I can probably help a little here.
+>
+> Slide 26 - new licenses.  Commercial license fees change to 20K for 1st
+> CPU/5K for each CPU afterward.  CMU buys first commercial license to use
+> UNIX to make money [after Cole and Klein go on strike].  Case Western
+> follows suit 6month later.   AT&T agrees for the Universities that they
+> only had to declare one CPU as commercial and could intermix otherwise and
+> notifies all the universities that if they were using it for commercial
+> purposes, then needed a license.
+>
+> AT&T creates first redistribution license.  Needed at least one $20K
+> commercial CPU and then $150k for the rights to redistribute.   Originally
+> $1K per binary CPU.
+>
+> Slide 27 -- missing Purdue Dual Vax and CMU Mach
+>
+> Slide 28 - APS had NH which was the model the DEC plate you show.   Maddog
+> has it now on his Jeep when aps moved to CA (he also has the NH Linux plate
+> but I don't remember the car -- you can ask him).   I have had the
+> Massachusetts UNIX plate since 1983 (it's on my model S of course).   ghg
+> has indiana from around the same time (I think on a pickup).  wnj had the
+> CA vmunix on his Ferrari, but I don't know if he still has it or what its
+> on.
+>
+> Slide 29 - Look in HenrySpencer-TUHS.org -- you'll find tail but not head.
+>
+> Slide 31 - Job Control can from Europe via MIT.  Jim Kulp wrote it.   Noel
+> and I can give you the story if you want it.  It was on the PDP-11 there.
+>  Joy modified csh and added it to 4.1
+>
+> Slide 32 -- JC was not from UCB.   Joy got it from MIT   -- Dennis create
+> ENV and it was first distributed in V7.
+>
+> Slide 33 -- No Bourne supported ENV in the new shell -- see me earlier
+> email for how all this went down or ask Steve yourself.
+>
+> Slide 34 -- PCC was included, but the Ritchie Compiler (a.k.a. Typesetter
+> C) was the default compiler.  You are missing a step BTW -- typesetter C
+> was released between V6 and V7.   As is the first draft of the White Book.
+> The new compiler had stdio but targets V6.
+> Also mpx was part of DataKit support.
+>
+> Slide 35 --   Not sure that is true.   I thought Microsoft's Xenix ships
+> before Venix.    Particularly since you made the comment about System III
+> The original 8086 Xenix was a pure V7 port, with a few additions Gordon
+> brought with him from Purdue (i.e. ghg hacks).
+>
+> Slide 52/53/54/55 -- wrong logo (see above)
+>
+>
+>
+>
+>
+>
+>
+>
+>
+>
+> On Thu, Sep 12, 2019 at 11:21 PM Warner Losh <imp@bsdimp.com> wrote:
+>
+>> OK. I've shared my slides for the talk.
+>>
+>> Some of the family trees are simplified (V7 doesn't have room for all its
+>> ports, for example)
+>> Some of it is a little cheeseball since I'm also trying to be witty and
+>> entertaining (we'll see how that goes).
+>> Please don't share them around until after my talk on the September 20th
+>>
+>> I'd like feedback on the bits I got wrong. Or left out. Or if you're in
+>> this and don't want to be, etc.
+>>
+>> All the slides after the Questions slide won't be presented and will
+>> likely be deleted.
+>>
+>>
+>> https://docs.google.com/presentation/d/177KxOif5oHARyIdZHDq-OO67_GVtMkzIAlDX-cHxgb4/edit?usp=sharing
+>>
+>> Please be kind (but if it sucks, please do tell). I've turned on
+>> commenting on the slides. Probably best if you comment there.
+>>
+>> I have a video of me giving this talk, but it's too rough to share...
+>>
+>> Thanks for any help you can give me.
+>>
+>> Warner
+>>
+>
+
+--0000000000007ebb2a059274bde0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif">BTW:=C2=A0 I just thought of something else....=C2=A0 o=
+ne of the b*tched about the commercial=C2=A0redistribution license from V7 =
+in 1979, that was not fixed until the SVR3 licensing the mid-late 1980s=C2=
+=A0 was AT&amp;T&#39;s source policy.=C2=A0 =C2=A0As I said, a commercial=
+=C2=A0source license was $20K for the first=C2=A0CPU and 5K for each additi=
+onal one.=C2=A0 =C2=A0Later (System V) it went to $50K for the first and $1=
+0K for each additional.=C2=A0 =C2=A0But what really ticked off the=C2=A0ven=
+dors like DEC, Masscomp, Sun et al, was that each system that sources on wa=
+s supposed to one of the &#39;second CPU licenses&#39; - the binary=C2=A0li=
+cense was not good enough.=C2=A0=C2=A0</div><div class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmai=
+l_default" style=3D"font-family:arial,helvetica,sans-serif">What most of us=
+ did, was make sure any system that was a &#39;source control&#39; or &#39;=
+master&#39; system at any &#39;site&#39; had a full source license, but we =
+were all in violation of the source agreement on our personal workstations.=
+=C2=A0 The argument was the sources on people&#39;s machines was ephemeral =
+and not &#39;stored&#39; there.=C2=A0 =C2=A0But it was definitely=C2=A0cont=
+entious.</div><div class=3D"gmail_default" style=3D"font-family:arial,helve=
+tica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-famil=
+y:arial,helvetica,sans-serif"><br></div></div><br><div class=3D"gmail_quote=
+"><div dir=3D"ltr" class=3D"gmail_attr">On Fri, Sep 13, 2019 at 3:47 PM Cle=
+m Cole &lt;<a href=3D"mailto:clemc@ccc.com">clemc@ccc.com</a>&gt; wrote:<br=
+></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;=
+border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><=
+div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif=
+">slide 4 --=C2=A0 All of HP-UX, Ultrix and Digital UNIX/Tru64 are BSD kern=
+els.=C2=A0 HP-UP and Tru64 support System V calls.</div><div class=3D"gmail=
+_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">BTW=
+:=C2=A0 DG-UX and Stratus built their own kernels, but used System V comman=
+d systems and System Call definitions - which are not listed.</div><div cla=
+ss=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br><=
+/div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans=
+-serif">Slide 6 - if you=C2=A0want it I have another picture of the GE syst=
+em from some of their literature has a view of all of the components.=C2=A0=
+ =C2=A0Send me email if you want it.</div><div class=3D"gmail_default" styl=
+e=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_=
+default" style=3D"font-family:arial,helvetica,sans-serif">Slide 8 - Sets ou=
+t to write version of Fortran came up with B.=C2=A0 Uses B to write Assembl=
+er</div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,s=
+ans-serif"><br></div><div class=3D"gmail_default" style=3D"font-family:aria=
+l,helvetica,sans-serif">Slide 9 - Wrong DEC logo.=C2=A0 Should be the Blue =
+one.=C2=A0 The maroon version does not show up until the 1990s with Bob Pal=
+mer (and has bad memories for some of us).</div><div class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 17 - =
+Ken write PDP-11 assembler on PDP-7 in B. , Dennis starts to rewrite B comp=
+iler to output PDP-11 code.</div><div class=3D"gmail_default" style=3D"font=
+-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">Slide 18 - B begins to bec=
+ome different enough that Dennis starts to call it nb [new B], eventually d=
+eviates enough to become new language</div><div class=3D"gmail_default" sty=
+le=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail=
+_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 19 - 4th E=
+dition release outside of the BTL.=C2=A0 Lou Katz becomes=C2=A0&#39;user ze=
+ro&#39;</div><div class=3D"gmail_default" style=3D"font-family:arial,helvet=
+ica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif">Slide 20 -- We need to get you the site and gr=
+oup name from Mash.=C2=A0 It was not in Summit, it was not USG - but was in=
+ NJ.=C2=A0 I thought it was Homdel but I that is purely speculation.</div><=
+div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif=
+">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 Also the r=
+ole of Columbus team needs to be defined.=C2=A0 =C2=A0Ask Mary Ann.</div><d=
+iv class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"=
+><br></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetic=
+a,sans-serif">Slide 21 -- I&#39;m not going to argue - but I would ask you =
+to add a disclaimer.=C2=A0 =C2=A0This is what you could reconstruct, but th=
+ere is some question of some of the arrows.=C2=A0 =C2=A0Heinz might be able=
+ to help, but as Stienhart and I have said, its believed to be in LA; but n=
+o one has tracked him down as he has been pursuing non-computer interests.<=
+/div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans=
+-serif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,h=
+elvetica,sans-serif">Slide 22 --4th Edition went to Katz that this is wrong=
+, who sometimes reads this mailing list.=C2=A0 If not, send me a note, I&#3=
+9;ll reintroduce you.=C2=A0 He might be able to give you a data.=C2=A0 Chec=
+k with Warren, my &gt;&gt;memory&lt;&lt; is that some of userland is still =
+in C although a lot assembler is still there.</div><div class=3D"gmail_defa=
+ult" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 2=
+3 -- ??widespread??=C2=A0 =C2=A0-- I&#39;m not sure I would use that. Not e=
+ven 100 sites yet.=C2=A0 =C2=A0 =C2=A0Also there were not &quot;commercial=
+=C2=A0version&quot; this was the first &quot;commercial=C2=A0license&quot; =
+-- big difference [contact me if you want explanation].=C2=A0 IIRC fee was =
+15K per CPU.=C2=A0 Commercial redistribution doesn&#39;t occur until after =
+7th is released and was a separate license.=C2=A0 =C2=A0I would add, Mike L=
+esk&#39;s portable C library is starting to be used, but most C program do =
+their own I/O with read/write</div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif">=C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 First real install man page and Dennis build tape installation s=
+ystem.=C2=A0 =C2=A0Earlier version released as RK05 disk copies.</div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0Also numerous=C2=A0new peripherals=
+. IIRC Support for the 11/40 starts here, 4th &amp; 5th needed a 45 class, =
+and earlier used the 20 with the CSS MMU.</div><div class=3D"gmail_default"=
+ style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 24 -- =
+CMU uses it to teaches=C2=A0OS class.=C2=A0 makes student in class sign a s=
+ub-license.</div><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif">Slide 25 - missing the first=C2=A0USENIX t=
+apes. which include Harvard and the like.=C2=A0 Warren and I can probably h=
+elp a little here.</div><div class=3D"gmail_default" style=3D"font-family:a=
+rial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"=
+font-family:arial,helvetica,sans-serif">Slide 26 - new licenses.=C2=A0 Comm=
+ercial=C2=A0license fees change to 20K for 1st CPU/5K for each CPU afterwar=
+d.=C2=A0 CMU buys first commercial=C2=A0license to use UNIX to make money [=
+after Cole and Klein go on strike].=C2=A0 Case Western follows suit 6month =
+later.=C2=A0 =C2=A0AT&amp;T agrees for the Universities=C2=A0that they only=
+ had to declare one CPU as commercial and could intermix otherwise and noti=
+fies all the universities that if they were using it for commercial purpose=
+s, then needed a license.</div><div class=3D"gmail_default" style=3D"font-f=
+amily:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif">AT&amp;T creates first redis=
+tribution license.=C2=A0 Needed at least one $20K commercial=C2=A0CPU and t=
+hen $150k for the rights to redistribute.=C2=A0 =C2=A0Originally $1K per bi=
+nary CPU.</div><div class=3D"gmail_default" style=3D"font-family:arial,helv=
+etica,sans-serif"><div class=3D"gmail_default"><br></div><div class=3D"gmai=
+l_default">Slide 27 -- missing Purdue Dual Vax and CMU Mach</div></div><div=
+ class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><=
+br></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif">Slide 28 - APS had NH which was the model the DEC plate you sho=
+w.=C2=A0 =C2=A0Maddog has it now on his Jeep when aps=C2=A0moved to CA (he =
+also has the NH Linux plate but I don&#39;t remember the car -- you can ask=
+ him).=C2=A0 =C2=A0I have had the Massachusetts=C2=A0UNIX plate since 1983 =
+(it&#39;s on my model S of course).=C2=A0 =C2=A0ghg has indiana from around=
+ the same time (I think on a pickup).=C2=A0 wnj had the CA vmunix on his Fe=
+rrari, but I don&#39;t know if he still has it or what its on.=C2=A0</div><=
+div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif=
+"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,helveti=
+ca,sans-serif">Slide 29 - Look in=C2=A0HenrySpencer-TUHS.org -- you&#39;ll =
+find tail but not head.</div><div class=3D"gmail_default" style=3D"font-fam=
+ily:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" styl=
+e=3D"font-family:arial,helvetica,sans-serif">Slide 31 - Job Control can fro=
+m Europe via MIT.=C2=A0 Jim Kulp wrote it.=C2=A0 =C2=A0Noel and I can give =
+you the story if you want it.=C2=A0 It was on the PDP-11 there.=C2=A0 =C2=
+=A0Joy modified csh and added it to 4.1</div><div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gma=
+il_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 32 -- JC=
+ was not from UCB.=C2=A0 =C2=A0Joy got it from MIT=C2=A0 =C2=A0-- Dennis cr=
+eate ENV and it was first distributed in V7.</div><div class=3D"gmail_defau=
+lt" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 3=
+3 -- No Bourne supported ENV in the new shell -- see me earlier email for h=
+ow all this went down or ask Steve yourself.</div><div class=3D"gmail_defau=
+lt" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 3=
+4 -- PCC was included, but the Ritchie Compiler (a.k.a. Typesetter C) was t=
+he default compiler.=C2=A0 You are missing a step BTW -- typesetter C was r=
+eleased between V6 and V7.=C2=A0 =C2=A0As is the first draft=C2=A0of the Wh=
+ite Book.=C2=A0 The new compiler had stdio but targets V6.=C2=A0=C2=A0</div=
+><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-ser=
+if">Also mpx was part of DataKit support.</div><div class=3D"gmail_default"=
+ style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif">Slide 35 --=
+=C2=A0 =C2=A0Not sure=C2=A0that is true.=C2=A0 =C2=A0I thought Microsoft&#3=
+9;s Xenix ships before Venix.=C2=A0 =C2=A0 Particularly since you made the =
+comment about=C2=A0System III</div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif">The original 8086 Xenix was a pure V7=
+ port, with a few additions Gordon brought with him from Purdue (i.e. ghg h=
+acks).</div><div class=3D"gmail_default" style=3D"font-family:arial,helveti=
+ca,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-family:=
+arial,helvetica,sans-serif">Slide 52/53/54/55 -- wrong logo (see above)</di=
+v><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-se=
+rif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,helv=
+etica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div cla=
+ss=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br><=
+/div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans=
+-serif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,h=
+elvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-f=
+amily:arial,helvetica,sans-serif"><br></div></div><br><div class=3D"gmail_q=
+uote"><div dir=3D"ltr" class=3D"gmail_attr">On Thu, Sep 12, 2019 at 11:21 P=
+M Warner Losh &lt;<a href=3D"mailto:imp@bsdimp.com" target=3D"_blank">imp@b=
+sdimp.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><div dir=3D"ltr">OK. I&#39;ve shared my slides for the talk.<div=
+><br></div><div>Some of the family trees are simplified (V7 doesn&#39;t hav=
+e room for all its ports, for example)</div><div>Some of it is a little che=
+eseball since I&#39;m also trying to be witty and entertaining (we&#39;ll s=
+ee how that goes).<br><div>Please don&#39;t share them around until after m=
+y talk on the September 20th</div></div><div><br></div><div>I&#39;d like fe=
+edback on the bits I got wrong. Or left out. Or if you&#39;re in this and d=
+on&#39;t want to be, etc.</div><div><br></div><div>All the slides after the=
+ Questions slide won&#39;t be presented and will likely be deleted.</div><d=
+iv><br></div><div><a href=3D"https://docs.google.com/presentation/d/177KxOi=
+f5oHARyIdZHDq-OO67_GVtMkzIAlDX-cHxgb4/edit?usp=3Dsharing" target=3D"_blank"=
+>https://docs.google.com/presentation/d/177KxOif5oHARyIdZHDq-OO67_GVtMkzIAl=
+DX-cHxgb4/edit?usp=3Dsharing</a><br></div><div><br></div><div>Please be kin=
+d (but if it sucks, please do tell). I&#39;ve turned on commenting on the s=
+lides. Probably best if you comment there.</div><div><br></div><div>I have =
+a video of me giving this talk, but it&#39;s too rough to share...</div><di=
+v><br></div><div>Thanks for any help you can give me.</div><div><br></div><=
+div>Warner</div></div>
+</blockquote></div>
+</blockquote></div>
+
+--0000000000007ebb2a059274bde0--
