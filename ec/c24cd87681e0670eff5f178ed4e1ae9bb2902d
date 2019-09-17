@@ -1,0 +1,81 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 18722fa0
+	for <ml@inbox.vuxu.org>;
+	Tue, 17 Sep 2019 00:20:47 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AE5259BFEF; Tue, 17 Sep 2019 10:20:46 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 34FA49479A;
+	Tue, 17 Sep 2019 10:20:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 45A269479A; Tue, 17 Sep 2019 10:20:37 +1000 (AEST)
+Received: from mail.cs.Dartmouth.EDU (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B1BE394794
+ for <tuhs@tuhs.org>; Tue, 17 Sep 2019 10:20:36 +1000 (AEST)
+Received: from tahoe.cs.Dartmouth.EDU (tahoe.cs.dartmouth.edu [129.170.212.20])
+ by mail.cs.Dartmouth.EDU (8.15.2/8.15.2) with ESMTPS id x8H0KXTR021766
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+ Mon, 16 Sep 2019 20:20:33 -0400
+Received: from tahoe.cs.Dartmouth.EDU (localhost.localdomain [127.0.0.1])
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.14.3) with ESMTP id x8H0KXCw037691;
+ Mon, 16 Sep 2019 20:20:33 -0400
+Received: (from doug@localhost)
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.15.2/Submit) id x8H0KWC6037690;
+ Mon, 16 Sep 2019 20:20:32 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <201909170020.x8H0KWC6037690@tahoe.cs.Dartmouth.EDU>
+Date: Mon, 16 Sep 2019 20:20:32 -0400
+To: tuhs@tuhs.org, ggm@algebras.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: [TUHS] block operations in editors, was  My EuroBSDcon talk
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> The "block copy in an editor" thing is something which has intrigued
+> me for years. poor old ed/ex/vi just couldn't do it, and for the life
+> of me, I could not understand why this was "deprecated" by the people
+> writing that family of editors.
+
+One might trace it to the founding tenet that a file is a stream of bytes,
+reinforced by the absence of multidemensional arrays in C. But it goes
+deeper than that.
+
+Ed imposes a structure, making a (finite) file into an array, aka list,
+of lines. It's easy to define block moves and copies in a list. But
+what are the semantics of a block move, wherein one treats the list
+as a ragged-right 2D array? What gets pushed aside? In what direction?
+How does a block move into column that not all destination rows
+reach? How do you cope when the bottom gets ragged? How about the
+top? Can one move blocks of tab-separated fields?
+
+I think everyone has rued the lack of block operations at one time
+or another. But implementing them in any degree of generality is a
+stumbling block. What should the semantics be?
+
+> Similarly the 'repeat this sequence of commands' thing which emacs had.
+
+Ed's g command does that, except the sequence can't contain another g.
+Sam, barely harder than ed to learn, cures that deficiency and generalizes
+in other ways, too--but has no block operations.
+
+Doug
