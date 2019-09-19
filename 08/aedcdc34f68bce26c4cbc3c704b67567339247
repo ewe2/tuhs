@@ -1,0 +1,477 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.1 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8af3e881
+	for <ml@inbox.vuxu.org>;
+	Thu, 19 Sep 2019 22:42:59 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8B6D09BC1D; Fri, 20 Sep 2019 08:42:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id F303D9B906;
+	Fri, 20 Sep 2019 08:42:25 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="YgbV28wl";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BCE829B906; Fri, 20 Sep 2019 08:42:22 +1000 (AEST)
+Received: from mail-ua1-f49.google.com (mail-ua1-f49.google.com
+ [209.85.222.49])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C6844947D6
+ for <tuhs@tuhs.org>; Fri, 20 Sep 2019 08:42:21 +1000 (AEST)
+Received: by mail-ua1-f49.google.com with SMTP id r25so1633028uam.3
+ for <tuhs@tuhs.org>; Thu, 19 Sep 2019 15:42:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=I3Rk1YH9+7XrZ6hqa6V27xTpjbp0axunxn+5Be6RrAM=;
+ b=YgbV28wleJyZJOyXKkhAitVvO5XBl9l/UqhUE25CBjF2AmLo2zoWkXWH9lgxB6cOsN
+ 3RLbNVfFkGkElG6O91EB7ymmEPqljEb870OzeceIAwkOS46GKgR2dKoVbkGD6E+C4pZU
+ 4qO9f3xL0lv0XJn/RzgDi20DwVKJ3JP5b0vc+V/siKuXVwSSGlTdQOwHljZ832Jq0ZzT
+ SW+rSxdxR0pvtkxJA/gcYab2nX7+zZVFJV+BqHaOfckwXch5l1iRXw0ndg2CaJ2YLbP8
+ 11+wsQtLEaCkC0cBpaCMk/gmtD1+NC3eryZKEH+gqbiiP5AlWO4UByRClX4WlSvwUbT3
+ 7Azw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=I3Rk1YH9+7XrZ6hqa6V27xTpjbp0axunxn+5Be6RrAM=;
+ b=bMS2+dFe6pFw9f5nL6DMQBPsr6ayHH02C99kwpQSx6MgwY+3uvwifHXX3JMOvUXZ0e
+ vwxsCCLlF3VwlKtYeOpkrShtkWw0hJvUzdJ91yn8S66p6amozjg+n98R/Fy8CNldbDjR
+ ktdL6J9H9T1pRRQ9dX9I6XL214KAmwQ3v/JJGtsRnOX5zdAEmIVUeNYVdsucIx4tIA+b
+ MmTRQ+bDnZissEQfv7DQCi2YerFXcHdssP9Wl8eBMppL1JyJt8w6rxSAYXhpiIVRGD6A
+ d6FDuT11AvBH212qTjGQmPxqjK5UBUmXSLrN6SlcLftrs6lZg8xXqCVLpMO67qPFcV/b
+ Z+xg==
+X-Gm-Message-State: APjAAAVcexZ7oK8RfI3DZugwKIcHZx3wXgMMwMgjYpAu1au0hs38L61+
+ TejGzpf4FeoKk9QzRkQVVeIE+Cpca7WD/nG7IyyLmvTR
+X-Google-Smtp-Source: APXvYqy1NMrQNziooJNnz4b6hKGMnz66bOEZ5bZqSs38fBItfbPfaLrSVdTkttdYCfvIMLPrvVWGPT3eUj6u4MCw2JI=
+X-Received: by 2002:ab0:658a:: with SMTP id v10mr1438775uam.73.1568932940631; 
+ Thu, 19 Sep 2019 15:42:20 -0700 (PDT)
+MIME-Version: 1.0
+References: <1568918582.18253.for-standards-violators@oclsc.org>
+In-Reply-To: <1568918582.18253.for-standards-violators@oclsc.org>
+From: Rob Pike <robpike@gmail.com>
+Date: Fri, 20 Sep 2019 08:42:08 +1000
+Message-ID: <CAKzdPgySW=OowWHg=jEjdUj2q=kLKtpOAkYfF+bxx2VP4tA-ag@mail.gmail.com>
+To: Norman Wilson <norman@oclsc.org>
+Content-Type: multipart/alternative; boundary="0000000000009a53da0592efaab4"
+Subject: Re: [TUHS] earliest Unix roff
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000009a53da0592efaab4
+Content-Type: text/plain; charset="UTF-8"
+
+Here is the complete Plan 9 man page for p:
+
+% 9 man p
+
+
+     P(1)                                                         P(1)
+
+
+     NAME
+
+          p - paginate
+
+
+     SYNOPSIS
+
+          p [ -number ] [ file ... ]
+
+
+     DESCRIPTION
+
+          P copies its standard input, or the named files if given, to
+
+          its standard output, stopping at the end of every 22nd line,
+
+          and between files, to wait for a newline from the user.  The
+
+          option sets the number of lines on a page.
+
+
+          While waiting for a newline, p interprets the commands:
+
+
+          !    Pass the rest of the line to the shell as a command.
+
+
+          q    Quit.
+
+
+     SOURCE
+
+          /usr/local/plan9/src/cmd/p.c
+
+
+     Page 1                       Plan 9             (printed 9/20/19)
+
+
+
+On Fri, Sep 20, 2019 at 4:43 AM Norman Wilson <norman@oclsc.org> wrote:
+
+> Clem Cole:
+>
+>   Exactly!!!!   That's what Eric did when he wrote more(ucb) -  he *added
+> to
+>   Unix*.   The funny part was that USG thought more(ucb) was a good idea
+> and
+>   then wrote their own, pg(att); which was just as arrogant as the info
+>   behavior from the Gnu folks!!!
+>
+> ======
+>
+> And others wrote their own too, of course.  The one I know
+> best is p(1), written by Rob Pike in the late 1970s at the
+> University of Toronto.  I encountered at Caltech on the
+> system Rob had set up before leaving for Bell Labs (and
+> which I cared for and hacked on for the next four years
+> before following him).  By the time I reached BTL it was
+> a normal part of the Research system; I believe it's in
+> all of the Eighth, Ninth, and Tenth Edition manuals.
+>
+> p is interesting because it's so much lighter-weight, and
+> because it has rather a different interior design:
+>
+> Rather than doing termcappy things, p just prints 22 lines
+> (or the number specified in an option), then doesn't print
+> the newline after the 22nd line.  Hit return and it will
+> print the next 22 lines, and so on.  The resulting text just
+> flows up the glass-tty screen without any fuss, cbreak, or
+> anything.  (I believe the first version predated V7 and
+> therefore cbreak.)
+>
+> Why 22 lines instead of 24, the common height of glass ttys
+> back then?  Partly because that means you keep a line or two
+> of context when advancing pages, making reading simpler.
+> But also because in those days, a standard page destined for
+> a printer (e.g. from pr or nroff, and therefore from man) was
+> 66 lines long.  22 evenly divides 66, so man something | p
+> never gives you a screen spanning pages.
+>
+> p was able to back up: type - (and return) instead of just
+> return, and it reprints the previous 22-line page; -- (return)
+> the 22 lines before that; and so on.  This was implemented
+> in an interesting and clever way: a wrapper around the standard
+> I/O library which kept a circular buffer of some fixed number
+> of characters (8KiB in early versions, I think), and a new
+> call that, in effect, backed up the file pointer by one character
+> and returned the character just backed over.  That made it easy
+> to back over the previous N lines: just make that call until
+> you've seen N newlines, then discard the newline you've just
+> backed over, and you're at the beginning the first line you want
+> to reprint.
+>
+> As I vaguely recall, more was able to back up, but only when
+> reading from a real file, not a pipeline.  p could do (limited
+> but sufficient) backup from a pipeline too.
+>
+> As a creature of its pre-window-system era, you could also type
+> !command when p paused as well.
+>
+> I remember being quite interested in that wrapper as a
+> possible library for use in other things, though I never
+> found a use for it.
+>
+> I also remember a wonderful Elements-of-Programming-Style
+> adventure with Rob's code.  I discovered it had a bug under some
+> specific case when read returned less than a full bufferful.
+> I read the code carefully and couldn't see what was wrong.
+> So I wrote my own replacement for the problematic subroutine
+> from scratch, tested it carefully in corner cases, then with
+> listings of Rob's code and mine side-by-side walked through
+> each with the problem case and found the bug.
+>
+> I still carry my own version of p (rewritten from scratch mainly
+> to make it more portable--Rob's code was old enough to be too
+> clever in some details) wherever I go; ironically, even back to
+> U of T where I have been on and off for the past 30 years.
+> more and less and pg and the like are certainly useful programs;
+> for various reasons they're not to my taste, but I don't scorn
+> them.  But I can't help being particular fond of p because it
+> taught me a few things about programming too.
+>
+> Norman Wilson
+> Toronto ON
+>
+
+--0000000000009a53da0592efaab4
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Here is the complete Plan 9 man page for p:<div><br></div>=
+<div>
+
+
+
+
+
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures">% 9=
+ man p</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>P(1) <s=
+pan class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 </span>P(1)</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>NAME</s=
+pan></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>p - paginate</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>SYNOPSI=
+S</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>p [ -number ] [ file ... ]</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>DESCRIP=
+TION</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>P copies its standard input, or the named files if given, to</span>=
+</p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>its standard output, stopping at the end of every 22nd line,</span>=
+</p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>and between files, to wait for a newline from the user.<span class=
+=3D"gmail-Apple-converted-space">=C2=A0 </span>The</span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>option sets the number of lines on a page.</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>While waiting for a newline, p interprets the commands:</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>!<span class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 </span>P=
+ass the rest of the line to the shell as a command.</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>q<span class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 </span>Q=
+uit.</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>SOURCE<=
+/span></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0=
+ </span>/usr/local/plan9/src/cmd/p.c</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p>
+<p class=3D"gmail-p1" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0)"><span =
+class=3D"gmail-s1" style=3D"font-variant-ligatures:no-common-ligatures"><sp=
+an class=3D"gmail-Apple-converted-space">=C2=A0=C2=A0 =C2=A0 </span>Page 1 =
+<span class=3D"gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 </span>Plan 9 <span class=3D"=
+gmail-Apple-converted-space">=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 </sp=
+an>(printed 9/20/19)</span></p>
+<p class=3D"gmail-p2" style=3D"margin:0px;font-variant-numeric:normal;font-=
+variant-east-asian:normal;font-stretch:normal;font-size:14px;line-height:no=
+rmal;font-family:&quot;Lucida Grande Mono550&quot;;color:rgb(0,0,0);min-hei=
+ght:16px"><span class=3D"gmail-s1" style=3D"font-variant-ligatures:no-commo=
+n-ligatures"></span><br></p></div></div><br><div class=3D"gmail_quote"><div=
+ dir=3D"ltr" class=3D"gmail_attr">On Fri, Sep 20, 2019 at 4:43 AM Norman Wi=
+lson &lt;<a href=3D"mailto:norman@oclsc.org">norman@oclsc.org</a>&gt; wrote=
+:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.=
+8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">Clem Cole:<br>
+<br>
+=C2=A0 Exactly!!!!=C2=A0 =C2=A0That&#39;s what Eric did when he wrote more(=
+ucb) -=C2=A0 he *added to<br>
+=C2=A0 Unix*.=C2=A0 =C2=A0The funny part was that USG thought more(ucb) was=
+ a good idea and<br>
+=C2=A0 then wrote their own, pg(att); which was just as arrogant as the inf=
+o<br>
+=C2=A0 behavior from the Gnu folks!!!<br>
+<br>
+=3D=3D=3D=3D=3D=3D<br>
+<br>
+And others wrote their own too, of course.=C2=A0 The one I know<br>
+best is p(1), written by Rob Pike in the late 1970s at the<br>
+University of Toronto.=C2=A0 I encountered at Caltech on the<br>
+system Rob had set up before leaving for Bell Labs (and<br>
+which I cared for and hacked on for the next four years<br>
+before following him).=C2=A0 By the time I reached BTL it was<br>
+a normal part of the Research system; I believe it&#39;s in<br>
+all of the Eighth, Ninth, and Tenth Edition manuals.<br>
+<br>
+p is interesting because it&#39;s so much lighter-weight, and<br>
+because it has rather a different interior design:<br>
+<br>
+Rather than doing termcappy things, p just prints 22 lines<br>
+(or the number specified in an option), then doesn&#39;t print<br>
+the newline after the 22nd line.=C2=A0 Hit return and it will<br>
+print the next 22 lines, and so on.=C2=A0 The resulting text just<br>
+flows up the glass-tty screen without any fuss, cbreak, or<br>
+anything.=C2=A0 (I believe the first version predated V7 and<br>
+therefore cbreak.)<br>
+<br>
+Why 22 lines instead of 24, the common height of glass ttys<br>
+back then?=C2=A0 Partly because that means you keep a line or two<br>
+of context when advancing pages, making reading simpler.<br>
+But also because in those days, a standard page destined for<br>
+a printer (e.g. from pr or nroff, and therefore from man) was<br>
+66 lines long.=C2=A0 22 evenly divides 66, so man something | p<br>
+never gives you a screen spanning pages.<br>
+<br>
+p was able to back up: type - (and return) instead of just<br>
+return, and it reprints the previous 22-line page; -- (return)<br>
+the 22 lines before that; and so on.=C2=A0 This was implemented<br>
+in an interesting and clever way: a wrapper around the standard<br>
+I/O library which kept a circular buffer of some fixed number<br>
+of characters (8KiB in early versions, I think), and a new<br>
+call that, in effect, backed up the file pointer by one character<br>
+and returned the character just backed over.=C2=A0 That made it easy<br>
+to back over the previous N lines: just make that call until<br>
+you&#39;ve seen N newlines, then discard the newline you&#39;ve just<br>
+backed over, and you&#39;re at the beginning the first line you want<br>
+to reprint.<br>
+<br>
+As I vaguely recall, more was able to back up, but only when<br>
+reading from a real file, not a pipeline.=C2=A0 p could do (limited<br>
+but sufficient) backup from a pipeline too.<br>
+<br>
+As a creature of its pre-window-system era, you could also type<br>
+!command when p paused as well.<br>
+<br>
+I remember being quite interested in that wrapper as a<br>
+possible library for use in other things, though I never<br>
+found a use for it.<br>
+<br>
+I also remember a wonderful Elements-of-Programming-Style<br>
+adventure with Rob&#39;s code.=C2=A0 I discovered it had a bug under some<b=
+r>
+specific case when read returned less than a full bufferful.<br>
+I read the code carefully and couldn&#39;t see what was wrong.<br>
+So I wrote my own replacement for the problematic subroutine<br>
+from scratch, tested it carefully in corner cases, then with<br>
+listings of Rob&#39;s code and mine side-by-side walked through<br>
+each with the problem case and found the bug.<br>
+<br>
+I still carry my own version of p (rewritten from scratch mainly<br>
+to make it more portable--Rob&#39;s code was old enough to be too<br>
+clever in some details) wherever I go; ironically, even back to<br>
+U of T where I have been on and off for the past 30 years.<br>
+more and less and pg and the like are certainly useful programs;<br>
+for various reasons they&#39;re not to my taste, but I don&#39;t scorn<br>
+them.=C2=A0 But I can&#39;t help being particular fond of p because it<br>
+taught me a few things about programming too.<br>
+<br>
+Norman Wilson<br>
+Toronto ON<br>
+</blockquote></div>
+
+--0000000000009a53da0592efaab4--
