@@ -1,0 +1,114 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e68902c3
+	for <ml@inbox.vuxu.org>;
+	Sun, 29 Sep 2019 10:50:42 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D751B9B51D; Sun, 29 Sep 2019 20:50:41 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6AAC39B529;
+	Sun, 29 Sep 2019 20:50:21 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6FA919B51D; Sun, 29 Sep 2019 20:50:18 +1000 (AEST)
+Received: from relay05.pair.com (relay05.pair.com [216.92.24.67])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 00031947C8
+ for <tuhs@tuhs.org>; Sun, 29 Sep 2019 20:50:17 +1000 (AEST)
+Received: from orac.inputplus.co.uk (unknown [81.174.206.21])
+ by relay05.pair.com (Postfix) with ESMTP id 384FD1A2BEB
+ for <tuhs@tuhs.org>; Sun, 29 Sep 2019 06:50:17 -0400 (EDT)
+Received: from orac.inputplus.co.uk (orac.inputplus.co.uk [IPv6:::1])
+ by orac.inputplus.co.uk (Postfix) with ESMTP id 92665200AB
+ for <tuhs@tuhs.org>; Sun, 29 Sep 2019 11:50:16 +0100 (BST)
+To: tuhs@tuhs.org
+From: Ralph Corderoy <ralph@inputplus.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+In-reply-to: <20190929100336.GA2390@minnie.tuhs.org>
+References: <20190929092158.GA27566@minnie.tuhs.org>
+ <20190929094726.6488620154@orac.inputplus.co.uk>
+ <20190929100336.GA2390@minnie.tuhs.org>
+Date: Sun, 29 Sep 2019 11:50:16 +0100
+Message-Id: <20190929105016.92665200AB@orac.inputplus.co.uk>
+Subject: Re: [TUHS] OT: compiler back-end bug
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi Warren,
+
+> Good point Ralph:
+> https://minnie.tuhs.org/wktcloud/index.php/s/HQjsggHb4i6wdWM?path=%2FSfiles
+
+I've always tried to avoid x86 and friends for ARM, so I may be wrong,
+but the run up to the first of the two memcpy() calls looks the same to
+me.  Here's the assembler, values given an RBP of 100, and the stack
+contents.  Good version first, bad second.
+
+                                rbp = 100
+    L29:
+        movq  -8(%rbp),%rax     rax = *92
+        pushq %rax                                            *92
+        movq  16(%rbp),%rax     rax = *116
+        pushq %rax                                            *92 *116
+        movq  $64,%rax          rax = 64
+        pushq %rax                                            *92 *116 64
+        movq  32(%rbp),%rax     rax = *132
+        popq  %rcx              rcx = 64                      *92 *116
+        addq  %rcx,%rax         rcx = 64+*132
+        movq  (%rax),%rax       rax = *(64+*132)
+        pushq %rax                                            *92 *116 *(64+*132)
+        movq  $40,%rax          rax = 40
+        pushq %rax                                            *92 *116 *(64+*132) 40
+        movq  32(%rbp),%rax     rax = *132
+        popq  %rcx              rcx = 40                      *92 *116 *(64+*132)
+        addq  %rcx,%rax         rax = 40+*132
+        movq  (%rax),%rax       rax = *(40+*132)
+        popq  %rcx              rcx = *(64+*132)              *92 *116
+        addq  %rcx,%rax         rax = *(64+*132)+*(40+*132)
+        pushq %rax                                            *92 *116 *(64+*132)+*(40+*132)
+        call  Cmemcpy
+
+                                rbp = 100
+    L29:
+        movq  -8(%rbp),%r8      r8 = *92
+        pushq %r8                                             *92
+        movq  16(%rbp),%r8      r8 = *116
+        pushq %r8                                             *92 *116
+        movq  $64,%r8           r8 = 64
+        movq  32(%rbp),%r9      r9 = *132
+        addq  %r9,%r8           r8 = *132+64
+        movq  (%r8),%r8         r8 = *(*132+64)
+        movq  $40,%r9           r9 = 40
+        movq  32(%rbp),%r10     r10 = *132
+        addq  %r10,%r9          r9 = *132+40
+        movq  (%r9),%r9         r9 = *(*132+40)
+        addq  %r9,%r8           r8 = *(*132+64)+*(*132+40)
+        pushq %r8                                             *92 *116 *(*132+64)+*(*132+40)
+        call  Cmemcpy
+
+A glance at the second memcpy() call look equivalent too.
+
+So perhaps it's not calculating the parameters to memcpy() that's wrong,
+but the inputs into those calculations being faulty?  I'd use gdb(1) to
+break at particular instructions, examine memory, etc., to work
+backwards through the bad version until spotting where good data becomes
+bad.
+
+-- 
+Cheers, Ralph.
