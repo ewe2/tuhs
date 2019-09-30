@@ -1,0 +1,215 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f44db211
+	for <ml@inbox.vuxu.org>;
+	Mon, 30 Sep 2019 19:30:39 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1EC629B9C5; Tue,  1 Oct 2019 05:30:38 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E493B94803;
+	Tue,  1 Oct 2019 05:30:10 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=plonka-us.20150623.gappssmtp.com header.i=@plonka-us.20150623.gappssmtp.com header.b="tb1R0Slq";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B572994803; Tue,  1 Oct 2019 05:30:08 +1000 (AEST)
+Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com
+ [209.85.167.170])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9CADD947D6
+ for <tuhs@tuhs.org>; Tue,  1 Oct 2019 05:30:07 +1000 (AEST)
+Received: by mail-oi1-f170.google.com with SMTP id w17so12185979oiw.8
+ for <tuhs@tuhs.org>; Mon, 30 Sep 2019 12:30:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=plonka-us.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :content-transfer-encoding;
+ bh=UfH6CbAaOEHlhOrqp9sXl4RZVjqlAT/X38r4fnEWfGg=;
+ b=tb1R0SlqBsICiSwn6fgZUIxEFOdF0UDVuhN5VWhMwGfKqjiwxHpyBbePMk9Y7ewaWA
+ 8YXXexR3I2QPTUFNktzh10kIWhGcjKmwt8darC+YZ6dshzIYWQKpvy46h/Z3wzG81PjP
+ q48+38IMmYchqUSox9XaDG7tvZFmeLYGwIGeudG7A1l0WZUvMZ1ME5bnLNL7ByyR2F02
+ 0T7eUNCA+HsbSk5R+TJCkJZ7sELSjHF/20Brh8FFJ5uX/gH6EWkPKD/jtuW4o1bMbZd4
+ 5vAiHd8p5MewWq08LrdugmPTWjphRnl87/fNNZdbGpzQXyH0LZfjXQzqupYYr4H5JYz4
+ QYxQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:content-transfer-encoding;
+ bh=UfH6CbAaOEHlhOrqp9sXl4RZVjqlAT/X38r4fnEWfGg=;
+ b=dgioEIVt39390+i4C738v2fPbUW0ygJuANrMsBdoDv3rL/UUxfVlmjhDX/+Ayot3fW
+ o2FG6oIPvP2PuvAZ5CwoIspatiQ11HQg6VGX95Cy6d7wGj2xBAdSnntE3U8qoghi4s09
+ 0FuiVl0a76bbmFAgGYjXLZaLK2nMA8qiM/OwTfLTYtNrH/R0l39JtnHtCxJjJ9Sy4F6j
+ HY+4z3GAvJd8VTV1pBQojIoB1ke+aIOWts+iz/v6dy7/zYZu8jQkHI/lMoeWYf7hg8DN
+ uO/9wigsmroDrHYDvwcS7/nYYsiJUJOafmQm93K4nwVNJL15/eXEMOBZARQsH6S6NBL1
+ Ts3g==
+X-Gm-Message-State: APjAAAUzIx0PfAc+WzlPChvjYIPQpb+e4FxAyKmanvdqASRonaO6ca/a
+ OVHKnRankZ7Y0NlC7G2CwtrB7i4RV5fxUhCBbTq1+e8wLyI=
+X-Google-Smtp-Source: APXvYqzetKt4kbXI5/4AF+RB/FDmOO7cDlqwpMTACq7a5k09I0UHzz1oQ68rULMrlUGOX/tZkprG9qm/x2xHjp3fg9s=
+X-Received: by 2002:a54:4483:: with SMTP id v3mr633143oiv.41.1569871806619;
+ Mon, 30 Sep 2019 12:30:06 -0700 (PDT)
+MIME-Version: 1.0
+References: <75D36093-D9D0-48EF-ACAC-DF739E0236B6@mac.com>
+ <20081210180826.GE1746@mercury.ccil.org>
+ <20190909001945.GA2815@akamai.com>
+In-Reply-To: <20190909001945.GA2815@akamai.com>
+From: Dave Plonka <dave@plonka.us>
+Date: Mon, 30 Sep 2019 14:29:55 -0500
+Message-ID: <CANPwAQapt6dWw-yYdMne7wtxt8Q1=nAoBrc9Ca3xgwnBwrZBrg@mail.gmail.com>
+To: tuhs@tuhs.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Subject: [TUHS] capturing history of bs(1) command / programming language
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi TUHS folks,
+
+Earlier this month I did a fair bit of research on a little known Unix
+programming language - bs - and updated the wikipedia pages
+accordingly.
+
+   https://en.wikipedia.org/wiki/Bs_(programming_language)
+
+Thanks for solving some bs mysteries goes to its author, Dick Haight,
+as well as those that got us in touch: Doug McIlroy, Brian Kernighan,
+and John Mashey.
+
+Apart from what is in the aforementioned wikipedia page, in exchanging
+email with me, Dick shared:
+
+q(
+I wrote bs at the time Unix (V 3?) and all of the commands were being
+converted from assembler to C. So Thompson=E2=80=99s bas became my bs =E2=
+=80=94 sort
+of. I included snobol=E2=80=99s succeed/fail feature (? Operator/fail retur=
+n).
+[...]
+
+No one asked me to write bs. [...] I tried to get Dennis Ritche to add
+something like =E2=80=9C? / fail=E2=80=9D to C but he didn=E2=80=99t. This =
+is probably part of
+why I wrote bs. I wasn=E2=80=99t part of the Unix inner circle (BTL Computi=
+ng
+Research, e.g., Thompson, Ritchie, McIlroy, etc). Neither were Mashey
+& Dolotta. We were =E2=80=9Csupport=E2=80=9D.
+)
+
+The Release 3.0 manual (1980) mentions bs prominently on page 9:
+
+   Writing a program. To enter the text of a source program into a
+UNIX file, use ed(1). The four principal languages available under
+UNIX are C (see cc(1)), Fortran (see f77(1)), bs (a
+compiler/interpreter in the spirit of Basic, see bs(1)), and assembly
+language (see as(1)).
+
+Personally, some reasons I find bs noteworthy is (a) it is not much
+like BASIC (from today's perspective) and (b)  as mentioned in the
+wikipedia page, "The bs language is a hybrid interpreter and compiler
+and [an early] divergence in Unix programming" (from Research Unix
+mentioning only the other three languages):
+
+q(
+The bs language was meant for convenient development and debugging of
+small, modular programs. It has a collection of syntax and features
+from prior, popular languages but it is internally compiled, unlike a
+Shell script. As such, in purpose, design, and function, bs is a
+largely unknown, modest predecessor of hybrid interpreted/compiled
+languages such as Perl and Python.
+)
+
+It survives today in some System III-derived or System V-derived
+commercial operating systems, including HP-UX and AIX.
+
+If you have additional information that might be useful for the
+wikipedia page, please do share it.
+
+Peace,
+Dave
+
+P.S. Here is a 2008 TUHS list discussion, "Re: /usr/bin/bs on HPUX?":
+
+On Wed, Dec 10, 2008 at 01:08:26PM -0500, John Cowan wrote:
+> Lord Doomicus scripsit:
+>
+> > I was poking around an HP UX system at work today, and noticed a
+> > command I've never noticed before ... /usr/bin/bs.
+> >
+> > I'm sure it's been there for a long time, even though I've been an
+> > HPUX admin for more than a decade, sometimes I'm just blind ... but
+> > anyway ....
+> >
+> > I tried to search on google ... it looks like only HPUX, AIX, and
+> > Maybe AU/X has it.  Seems to be some kind of pseudo BASIC like
+> > interpreter.
+>
+> That's just what it is.  Here are the things I now know about it.
+>
+> 0.  The string "bs" gets an awful lot of false Google hits, no matter
+> how hard you try.
+>
+> 1.  "bs" was written at AT&T, probably at the Labs, at some time between
+> the release of 32V and System III.  It was part of both System III and
+> at least some System V releases.
+>
+> 2.  It was probably meant as a replacement for "bas", which was a more
+> conventional GW-Basic-style interpreter written in PDP-11 assembly
+> language.  (32V still had the PDP-11 source, which of course didn't work.=
+)
+>
+> 3.  At one time System III source code was available on the net,
+> including bs.c and bs.1, but apparently it no longer is.  I downloaded
+> it then but don't have it any more.
+>
+> 4.  I was able to compile it under several Unixes, but it wouldn't run:
+> I think there must have been some kind of dependency on memory layout,
+> but never found out exactly what.
+>
+> 5. I remember from the man page that it had regular expressions, and
+> two commands "compile" and "execute" that switched modes to storing
+> expressions and executing them on the spot, respectively.  That eliminate=
+d
+> the need for line numbers.
+>
+> 6. It was apparently never part of Solaris.
+>
+> 7. It was never part of any BSD release, on which "bs" was the battleship=
+s
+> game.
+>
+> 8. I can't find the man page on line anywhere either.
+>
+> 9. The man page said it had some Snobol features.  I think that meant
+> the ability to return failure -- I vaguely remember an "freturn" command.
+>
+> 10.  99 Bottles of Beer has a sample bs program at
+> http://www2.99-bottles-of-beer.net/language-bs-103.html .
+>
+> 11. If someone sends me a man page, I'll consider reimplementing it as
+> Open Source.
+>
+> --
+> We are lost, lost.  No name, no business, no Precious, nothing.  Only emp=
+ty.
+> Only hungry: yes, we are hungry.  A few little fishes, nassty bony little
+> fishes, for a poor creature, and they say death.  So wise they are; so ju=
+st,
+> so very just.  --Gollum        cowan at ccil.org  http://ccil.org/~cowan
+
+--=20
+
+dave@plonka.us  http://www.cs.wisc.edu/~plonka/
