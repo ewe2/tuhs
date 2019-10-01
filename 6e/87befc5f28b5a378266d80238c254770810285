@@ -1,0 +1,322 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id dbb154be
+	for <ml@inbox.vuxu.org>;
+	Tue, 1 Oct 2019 01:06:01 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3A8089B9C7; Tue,  1 Oct 2019 11:06:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8ED8494803;
+	Tue,  1 Oct 2019 11:05:26 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="XXZD7xiq";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BB2AC94803; Tue,  1 Oct 2019 11:05:24 +1000 (AEST)
+Received: from mail-qt1-f174.google.com (mail-qt1-f174.google.com
+ [209.85.160.174])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C5EAF947D6
+ for <tuhs@tuhs.org>; Tue,  1 Oct 2019 11:05:23 +1000 (AEST)
+Received: by mail-qt1-f174.google.com with SMTP id n7so19509941qtb.6
+ for <tuhs@tuhs.org>; Mon, 30 Sep 2019 18:05:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=eWgL1QQpMxclgTTG+reGxCcWbceGnVEfZ9p1Qzhljyk=;
+ b=XXZD7xiqUqzn2RYgXAmGelt6HFtvbIzFaj3Y7MTz/oeBsk/y7Glul0GFIWzpskOKXU
+ M2U1gfki1Hc3yOs6FG57TyT7XqfCqcYFuBrk6qAUrdk7H6qrgCl48hCywCfllTSwH4Bs
+ e9XBYSeoNGn/JH1SQyycYToyXpRjY9JvP4JVTNSnufsFv/Y0mm1Lyd+XoyA2SUaKWVU0
+ wMRfauqXv/YXxD5DdKRjylnKbnEFIUKHhBpj7QKq4M3gxIIlkTw9FjbAevwOczLhi2+V
+ 0+UBDuINZkjzds/5AL9lr5iDjtdz+z3nuJIzM9e3wgc6ShWSAvhdQC4GgV5DHJicHnaD
+ j3Ew==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=eWgL1QQpMxclgTTG+reGxCcWbceGnVEfZ9p1Qzhljyk=;
+ b=NVzWpg3u9Z/jf8V0O7lGUYlX9rmpyNSfLhOxEb8Z3k36MdIv2V0hKyTvthTlmbrEHD
+ JibfNJ/iedzXDq6tzAbVTCNiqUiaaJ1pJYStAwd6v0A2lj9u/IsmbfhPworU6KG1+05b
+ 6V5FsAiqR2+ONtlk6vFojriVIaGCM3IWviEjYIWtq+sH7+P2/PSQJeJcT4saLDG1lBfw
+ WR0ZPvIbfUQhPOWK06kKIj4GLrE3tvYUaeyCnAf0A4xzkROn6T2JSVI1PBhOyurZUugQ
+ c9DWhSEevYysgN4vK9C3gf8ax10z53QVRMBLL86OZ0oHY3XTif2OpjlBX1wmVhY9dN4v
+ rOzw==
+X-Gm-Message-State: APjAAAWrX/c9f8nL96beNJVMLeCsKvpEsOskeAAQq72GIOFQkwajFXXV
+ 02BRCXSgunsP2s1d/Oq6lQU8vJCikFoZrAcy0cmmiXb0Ma8=
+X-Google-Smtp-Source: APXvYqywjtk8Wn+/uwBYhh5yEqrQoUdV+f/NgFbeGieCLqa87DVf/LgpPWBg+n6JRARNfBLSK+J5GrwOmdCtZ08LazE=
+X-Received: by 2002:ac8:3564:: with SMTP id z33mr28057276qtb.291.1569891922636; 
+ Mon, 30 Sep 2019 18:05:22 -0700 (PDT)
+MIME-Version: 1.0
+References: <alpine.NEB.2.21.1909301624190.1609@t1.m.reedmedia.net>
+In-Reply-To: <alpine.NEB.2.21.1909301624190.1609@t1.m.reedmedia.net>
+From: Warner Losh <imp@bsdimp.com>
+Date: Mon, 30 Sep 2019 19:05:11 -0600
+Message-ID: <CANCZdfrkXRVmaURTeD04rL98xNgdtSYjOBRyeaTsRtGxO3mrkQ@mail.gmail.com>
+To: "Jeremy C. Reed" <reed@reedmedia.net>
+Content-Type: multipart/alternative; boundary="0000000000006288cd0593cef27e"
+Subject: Re: [TUHS] understand earliest hardware?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000006288cd0593cef27e
+Content-Type: text/plain; charset="UTF-8"
+
+On Mon, Sep 30, 2019 at 4:00 PM <reed@reedmedia.net> wrote:
+
+> I read in the PDP-7 reference manual that Precision CRT Display Type 30
+> and Precision Incremental Display Type 340 are the typical displays used
+> with the PDP-7, but aren't standard equipment. I read about the
+> Graphics-II scope. Was it the only display? I read it was used as a
+> second terminal and that it would pause per display full with a button
+> to continue.
+>
+
+According to the reconstructed kernel sources, it had both. I'm unsure
+about the button detail.
+
+
+> I assume this second terminal's keyboard was TTY model 33 or similar
+> since it was the standard equipment. Does anyone know?
+>
+
+I've no looked at this detail, but I think it had its own keyboard
+independent of a tty 33. We have the sources so we can look. They will be
+the final answer on this anyway.
+
+
+> Do you know if the PDP-7 or early edition Unixes have pen support for
+> that Graphics-II or similar displays?
+>
+
+Yes.
+
+
+> Clem has written that the PDP-7 had a disk from a PDP-9. Where is this
+> cited?
+>
+
+You can look at the simh simulator to find where this is described. We know
+there's one pdp-7 with the PDP-9 disk drive from the 18-bit service log
+that was printed in 1972 available from bitsavers.org. It is excerpted
+here: https://www.soemtron.org/downloads/decinfo/18bitservicelist1972.pdf for
+details. Serial number 34 was Ken's PDP-7. I have a blog entry on that
+here: https://bsdimp.blogspot.com/2019/07/the-pdp-7-where-unix-began.html that
+describes things in some detail.
+
+
+> The ~1971 draft "The UNIX Time-Sharing System" says first version runs
+> on PDP-9 also.
+> https://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/
+> But I cannot find any other reference of running on PDP-9 at all. Was
+> this academic?
+>
+
+Private email from Ken earlier this year said that there were 2 PDP-9s and
+3 PDP-15s at Bell Labs that ran pdp7 Unix at one time or another. There are
+other instances sprinkled through the early newsletters I've been reading
+lately, but they aren't greppable and I don't have the time to look at them
+all again (including a couple of cases where it was said that Ken brought
+things up on a PDP-9, which we know to be in error).
+
+
+> That draft calls the PDP-7 version the "first edition" but later the
+> PDP-11/20 is called the "first edition". When did the naming of first
+> edition get defined to not include the PDP-7 version? Or is it because
+> the early "0th" version was never released/shared outside?
+>
+
+It's the first version, but the 1st edition manual definitely describes the
+PDP-11/20 port.
+
+
+> Thompson interview
+>
+> https://www.tuhs.org/Archive/Documentation/OralHistory/transcripts/thompson.htm
+> mentions an "interim machine" and a "PDP-11 that had PDP-10 memory
+> management, KS-1."  What is this interim machine? Is this a PDP-11
+> without a disk (for a few months?) What is this PDP-11
+> and KS-1?  Maybe this is the PDP-11/20 with KS-11?
+>
+> Do we know what hardware was supported for the early editions? We don't
+> have all the kernel code and from a quick look from what is available I
+> didn't see specific hardware references.
+>
+
+We know that it was a 11/20, initially without an MMU, and later with a
+custom hacked MMU, which I think is the KS-11. Clem would know :)
+
+
+> The later ~1974 "The UNIX Time-Sharing System" paper does mention some
+> hardware at that time on the PDP-11/45 like a 201 dataset interface and
+> a Tektronix 611 storage-tube display on a satellite PDP-11/20.
+>
+
+PDP 11/45 support was added as part of the efforts for the 4th edition.
+bitsavers has a couple of interesting sets of notes from lectures at the
+time: http://bitsavers.org/pdf/bellLabs/unix/ has the interesting bits
+(including the sources used to reconstruct the 1st edition kernel we have
+in TUHS in the kernel routine documentation).
+
+
+> When did a CRT with keyboard terminal like DEC vt01 (with Tektronix 611
+> CRT display), LS ADM-3, Hazeltine 2000, VT01A display with keyboard
+> (what keyboard?) get supported?  Any code to help find this?  (The
+> https://www.bell-labs.com/usr/dmr/www/picture.html does mention the
+> VT01A plys keyboard).
+>
+
+I'm unsure. I didn't research those details.
+
+Warner
+
+
+> Thanks,
+>
+> Jeremy C. Reed
+>
+> echo Ohl zl obbx uggc://errqzrqvn.arg/obbxf/csfrafr/ | \
+>  tr "Onoqrsuvxzabcefghl" "Babdefhikmnoprstuy"
+>
+
+--0000000000006288cd0593cef27e
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Mon, Sep 30, 2019 at 4:00 PM &lt;<=
+a href=3D"mailto:reed@reedmedia.net">reed@reedmedia.net</a>&gt; wrote:<br><=
+/div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bo=
+rder-left:1px solid rgb(204,204,204);padding-left:1ex">I read in the PDP-7 =
+reference manual that Precision CRT Display Type 30 <br>
+and Precision Incremental Display Type 340 are the typical displays used <b=
+r>
+with the PDP-7, but aren&#39;t standard equipment. I read about the <br>
+Graphics-II scope. Was it the only display? I read it was used as a <br>
+second terminal and that it would pause per display full with a button <br>
+to continue.<br></blockquote><div><br></div><div>According to the reconstru=
+cted kernel sources, it had both. I&#39;m unsure about the button detail.</=
+div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+I assume this second terminal&#39;s keyboard was TTY model 33 or similar <b=
+r>
+since it was the standard equipment. Does anyone know?<br></blockquote><div=
+><br></div><div>I&#39;ve no looked at this detail, but I think it had its o=
+wn keyboard independent of a tty 33. We have the sources so we can look. Th=
+ey will be the final answer on this anyway.</div><div>=C2=A0</div><blockquo=
+te class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px =
+solid rgb(204,204,204);padding-left:1ex">
+Do you know if the PDP-7 or early edition Unixes have pen support for <br>
+that Graphics-II or similar displays?<br></blockquote><div><br></div><div>Y=
+es.</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin=
+:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"=
+>
+Clem has written that the PDP-7 had a disk from a PDP-9. Where is this <br>
+cited?<br></blockquote><div><br></div><div>You can look at the simh simulat=
+or to find where this is described. We know there&#39;s one pdp-7 with the =
+PDP-9 disk drive from the 18-bit service log that was printed in 1972 avail=
+able from <a href=3D"http://bitsavers.org">bitsavers.org</a>. It is excerpt=
+ed here:=C2=A0<a href=3D"https://www.soemtron.org/downloads/decinfo/18bitse=
+rvicelist1972.pdf">https://www.soemtron.org/downloads/decinfo/18bitservicel=
+ist1972.pdf</a>=C2=A0for details. Serial number 34 was Ken&#39;s PDP-7. I h=
+ave a blog entry on that here:=C2=A0<a href=3D"https://bsdimp.blogspot.com/=
+2019/07/the-pdp-7-where-unix-began.html">https://bsdimp.blogspot.com/2019/0=
+7/the-pdp-7-where-unix-began.html</a>=C2=A0that describes things in some de=
+tail.</div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"marg=
+in:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1e=
+x">
+The ~1971 draft &quot;The UNIX Time-Sharing System&quot; says first version=
+ runs <br>
+on PDP-9 also.<br>
+<a href=3D"https://www.tuhs.org/Archive/Distributions/Research/McIlroy_v0/"=
+ rel=3D"noreferrer" target=3D"_blank">https://www.tuhs.org/Archive/Distribu=
+tions/Research/McIlroy_v0/</a><br>
+But I cannot find any other reference of running on PDP-9 at all. Was <br>
+this academic?<br></blockquote><div><br></div><div>Private email from Ken e=
+arlier this year said that there were 2 PDP-9s and 3 PDP-15s at Bell Labs t=
+hat ran pdp7 Unix at one time or another. There are other instances sprinkl=
+ed through the early newsletters I&#39;ve been reading lately, but they are=
+n&#39;t greppable and I don&#39;t have the time to look at them all again (=
+including a couple of cases where it was said that Ken brought things up on=
+ a PDP-9, which we know to be in error).</div><div>=C2=A0</div><blockquote =
+class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px sol=
+id rgb(204,204,204);padding-left:1ex">
+That draft calls the PDP-7 version the &quot;first edition&quot; but later =
+the <br>
+PDP-11/20 is called the &quot;first edition&quot;. When did the naming of f=
+irst <br>
+edition get defined to not include the PDP-7 version? Or is it because <br>
+the early &quot;0th&quot; version was never released/shared outside?<br></b=
+lockquote><div><br></div><div>It&#39;s the first version, but the 1st editi=
+on manual definitely describes the PDP-11/20 port.</div><div>=C2=A0</div><b=
+lockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-le=
+ft:1px solid rgb(204,204,204);padding-left:1ex">
+Thompson interview <br>
+<a href=3D"https://www.tuhs.org/Archive/Documentation/OralHistory/transcrip=
+ts/thompson.htm" rel=3D"noreferrer" target=3D"_blank">https://www.tuhs.org/=
+Archive/Documentation/OralHistory/transcripts/thompson.htm</a> <br>
+mentions an &quot;interim machine&quot; and a &quot;PDP-11 that had PDP-10 =
+memory <br>
+management, KS-1.&quot;=C2=A0 What is this interim machine? Is this a PDP-1=
+1 <br>
+without a disk (for a few months?) What is this PDP-11 <br>
+and KS-1?=C2=A0 Maybe this is the PDP-11/20 with KS-11?<br>
+<br>
+Do we know what hardware was supported for the early editions? We don&#39;t=
+ <br>
+have all the kernel code and from a quick look from what is available I <br=
+>
+didn&#39;t see specific hardware references.<br></blockquote><div><br></div=
+><div>We know that it was a 11/20, initially without an MMU, and later with=
+ a custom hacked MMU, which I think is the KS-11. Clem would know :)</div><=
+div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0=
+px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+The later ~1974 &quot;The UNIX Time-Sharing System&quot; paper does mention=
+ some <br>
+hardware at that time on the PDP-11/45 like a 201 dataset interface and <br=
+>
+a Tektronix 611 storage-tube display on a satellite PDP-11/20.<br></blockqu=
+ote><div><br></div><div>PDP 11/45 support was added as part of the efforts =
+for the 4th edition. bitsavers has a couple of interesting sets of notes fr=
+om lectures at the time:=C2=A0<a href=3D"http://bitsavers.org/pdf/bellLabs/=
+unix/">http://bitsavers.org/pdf/bellLabs/unix/</a>=C2=A0has the interesting=
+ bits (including the sources used to reconstruct the 1st edition kernel we =
+have in TUHS in the kernel routine documentation).</div><div>=C2=A0<br></di=
+v><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;borde=
+r-left:1px solid rgb(204,204,204);padding-left:1ex">
+When did a CRT with keyboard terminal like DEC vt01 (with Tektronix 611 <br=
+>
+CRT display), LS ADM-3, Hazeltine 2000, VT01A display with keyboard <br>
+(what keyboard?) get supported?=C2=A0 Any code to help find this?=C2=A0 (Th=
+e <br>
+<a href=3D"https://www.bell-labs.com/usr/dmr/www/picture.html" rel=3D"noref=
+errer" target=3D"_blank">https://www.bell-labs.com/usr/dmr/www/picture.html=
+</a> does mention the <br>
+VT01A plys keyboard).<br></blockquote><div><br></div><div>I&#39;m unsure. I=
+ didn&#39;t research those details.</div><div><br></div><div>Warner</div><d=
+iv>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0p=
+x 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+Thanks,<br>
+<br>
+Jeremy C. Reed<br>
+<br>
+echo Ohl zl obbx uggc://errqzrqvn.arg/obbxf/csfrafr/ | \<br>
+=C2=A0tr &quot;Onoqrsuvxzabcefghl&quot; &quot;Babdefhikmnoprstuy&quot;<br>
+</blockquote></div></div>
+
+--0000000000006288cd0593cef27e--
