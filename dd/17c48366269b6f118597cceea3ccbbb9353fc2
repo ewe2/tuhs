@@ -1,0 +1,112 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id b58d8e2e
+	for <ml@inbox.vuxu.org>;
+	Sat, 5 Oct 2019 17:38:51 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2A32B9BCD9; Sun,  6 Oct 2019 03:38:50 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 419659B8F0;
+	Sun,  6 Oct 2019 03:38:15 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4A2169B8F0; Sun,  6 Oct 2019 03:38:12 +1000 (AEST)
+X-Greylist: delayed 502 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 06 Oct 2019 03:38:11 AEST
+Received: from ste-pvt-msa1.bahnhof.se (ste-pvt-msa1.bahnhof.se
+ [213.80.101.70])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6D48A948D7
+ for <tuhs@tuhs.org>; Sun,  6 Oct 2019 03:38:11 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by ste-pvt-msa1.bahnhof.se (Postfix) with ESMTP id 728403F6A9
+ for <tuhs@tuhs.org>; Sat,  5 Oct 2019 19:29:47 +0200 (CEST)
+X-Virus-Scanned: Debian amavisd-new at bahnhof.se
+Received: from ste-pvt-msa1.bahnhof.se ([127.0.0.1])
+ by localhost (ste-pvt-msa1.bahnhof.se [127.0.0.1]) (amavisd-new, port 10024)
+ with ESMTP id nIGk-MVFXBaT for <tuhs@tuhs.org>;
+ Sat,  5 Oct 2019 19:29:46 +0200 (CEST)
+Received: from localhost (unknown [85.24.253.51])
+ (Authenticated sender: mc469656)
+ by ste-pvt-msa1.bahnhof.se (Postfix) with ESMTPA id 5BA173F382
+ for <tuhs@tuhs.org>; Sat,  5 Oct 2019 19:29:45 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+ by localhost (Postfix) with ESMTPS id 4B3542E02C1
+ for <tuhs@tuhs.org>; Sat,  5 Oct 2019 19:29:45 +0200 (CEST)
+Date: Sat, 5 Oct 2019 17:29:44 +0000
+From: Michael =?utf-8?B?S2rDtnJsaW5n?= <michael@kjorling.se>
+To: tuhs@tuhs.org
+Message-ID: <20191005172944.GI20298@localhost>
+References: <6dceffe228804a76de1e12f18d1fc0dc@inventati.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <6dceffe228804a76de1e12f18d1fc0dc@inventati.org>
+Subject: Re: [TUHS] Recovered /etc/passwd files
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 3 Oct 2019 18:51 +0000, from finnoleary@inventati.org (Finn O'Leary):
+> password was something interesting like './,..,/' (it was entirely
+> punctuation characters, was around three different characters in total, and
+> was pretty damn short).
+
+I'm a bit late to the party here (it's been a crazy week for me and
+I'm only just now starting to catch up), but don't forget that hashed
+Unix passwords back then were limited to eight bytes (actually I
+believe the hard limit was 64 bits' worth of password, so if your
+system used less than 8 bits per character, you could theoretically
+cram more _characters_ into the password, but not more _entropy_,
+which topped out at 2^64 no matter what you did, and in practice a
+fair bit less because you wanted to be able to type it in).
+
+Of course, this wasn't a problem in practice when even just hashing a
+single candidate password took noticable fractions of a second. At 100
+ms per hash, while you could exhaustively search the lower
+alphanumerics four characters space within about two days (my
+calculator says 1.944 * 86400 seconds for that) if you could hog the
+computer for everyone, by the time you got to six characters the same
+search would take almost 7 years, and eight characters the better part
+of 9000 years (assuming you kept running it on the same hardware for
+the duration).
+
+Adding uppercase A-Z alongside lowercase a-z and 0-9 increases the
+exhaustive search time even for the four characters password space to
+about 17 days at 100 ms per hash. So with no additional information
+for an attacker, even a [a-zA-Z0-9]{4} password was tolerably secure,
+and a [a-zA-Z0-9]{5} one was more than good enough if you changed it
+once a year (would take about three years to crack at 100 ms/hash).
+
+William Cheswick mentioned 8e9 hashes per second. While that sounds
+low for good ol' Unix crypt() to me, at that rate, an exhaustive
+search of [a-z0-9]{8} would take about 353 days, again according to my
+calculator. [a-z0-9]{4} would finish in about 18 seconds. My _guess_,
+without having looked up current numbers, is that these figures are at
+least some two orders of magnitude too high given modern hardware.
+Just look at EFF's good ol' Deep Crack.
+
+I wasn't really around much at the time, but if _The Cuckoo's Egg_ is
+to be believed, the bigger problem was that people in general weren't
+any better at choosing good passwords (or keeping them secret) back
+then than they are today. That honestly wouldn't particularly surprise
+me. Technology advances, but people remain largely the same?
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael@kjorling.se
+  “The most dangerous thought that you can have as a creative person
+              is to think you know what you’re doing.” (Bret Victor)
