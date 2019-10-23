@@ -1,0 +1,109 @@
+From: arno@usn.nl (Arno Griffioen)
+Date: Mon, 13 Dec 1999 10:18:14 +0100 (CET)
+Subject: Installing UNIX on an 11/94
+Message-ID: <199912130918.KAA01758@lost.usn.nl>
+
+OK.. Biggie here is that this machine doesn't have a tape drive, just
+2 RA92 drives. It used to have a TU81, but it seems to have been junked
+along the way.
+
+No ethernet card either.. (anybody know where to get a DEUNA cheap??)
+
+What are my options to get 2.11BSD running on this beast? 
+
+I have a uVAX 3600 running NetBSD, so I could possibly dump a raw
+filesystem image onto one of the RA92's and perhaps boot the 11/94
+off of it. Is this feasible? I haven't looked into it yet..
+
+I was thinking of using one of those TU58 emulators on the PC, but I 
+didn't find any mention of booting an 11/94 of these tape drives
+or installing UNIX from it..
+
+I don't have any other UNIBUS cards, so I can't plug my TK70 into
+the 11/94..
+
+Any thoughts on the subject are welcome..
+
+							Bye, Arno.
+
+-- 
+PSINetworks Europe           Fax: +31-23-5699841 | One disk to rule them all,
+Siriusdreef 34               Tel: +31-23-5699840 | One disk to bind them,
+2132WT Hoofddorp+--------------------------------+ One disk to hold the files
+The Netherlands |   *  Musical Interlude  *      | And in the darkness grind 'em
+----------------+--------------------------------+------------------------------
+
+ We say Retribution, We say Vengeance is bliss, We say Revolution,
+ With a Cast-Iron fist!                  (Megadeth, 'The Disintegrators')
+
+--------------------------------------------------------------------------------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA46129
+	for pups-liszt; Tue, 14 Dec 1999 06:36:50 +1100 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id GAA46125
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 14 Dec 1999 06:36:40 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id LAA18041
+	for pups at minnie.cs.adfa.edu.au; Mon, 13 Dec 1999 11:35:35 -0800 (PST)
+Date: Mon, 13 Dec 1999 11:35:35 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199912131935.LAA18041 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Installing UNIX on an 11/94
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Arno Griffioen <arno at usn.nl>
+> 
+> OK.. Biggie here is that this machine doesn't have a tape drive, just
+> 2 RA92 drives. It used to have a TU81, but it seems to have been junked
+
+
+	Congratulations on getting a /94 with RA92 drives!   Condolences
+	on the tape drive being junked.
+
+> No ethernet card either.. (anybody know where to get a DEUNA cheap??)
+
+	In the US there are many places which sell used DEC equipment but
+	I do not know of any in the Netherlands.  If at all possible get
+	a DELUA insetad  - less power hungry and fewer bugs.
+
+> What are my options to get 2.11BSD running on this beast? 
+> 
+> I have a uVAX 3600 running NetBSD, so I could possibly dump a raw
+> filesystem image onto one of the RA92's and perhaps boot the 11/94
+> off of it. Is this feasible? I haven't looked into it yet..
+
+	Yes, it should be possible.  You will need to run one of the emulators
+	(either Bob Supnik's or Willi Begemot's "P11").  The tricky part
+	will be in the geometry/size of the disk image.  The emulators
+	do not know about MSCP drives so you will have to go thru the bootstrap
+	process using an SMD ('xp' driver) drive and pretend you have a 
+	RP06 or 7.  Then at the last minute install the MSCP bootblock.  
+	DD that image to an  RA92 and hoo that up to the /94.
+	
+
+	The problem you will most likely encounter is that the size will not
+	be exactly right for the last partition.  Experimenting with the
+	standalone 'disklabel' program and adjusting the sizes/geometry may
+	be needed.  If the size is changed then 'fsck -s' to force a 
+	rebuild of the freelist will be needed.
+
+	Experimentation - I think it'd take a few tries to get it right ;)
+
+> I was thinking of using one of those TU58 emulators on the PC, but I 
+> didn't find any mention of booting an 11/94 of these tape drives
+> or installing UNIX from it..
+
+	No support for the TU58 in the kernel or boot program.   At 256kb
+	it's barely large enough to hold the standalone programs much less
+	a dump of the root filesystem or anything like that.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+

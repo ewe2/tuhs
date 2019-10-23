@@ -1,0 +1,60 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 22 Sep 2017 11:14:31 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: Your message of "Fri, 22 Sep 2017 10:57:39 -0400."
+ <91176da9-8f88-d3a9-7078-d1438cf551f5@case.edu>
+Message-ID: <201709221814.v8MIEVLp070033@elf.torek.net>
+
+>Kulp did the signal work in the kernel and added the code to the c shell
+>to use it (or had Eric Cooper, who was working for him as a student at
+>the time do fg/bg). He did his work on 3BSD and set the mods to Berkeley,
+>where Joy took them and integrated them into 4.1 BSD.
+
+Kulp's name (and IIASA) appeared in several source files, I think;
+I know I came across them.
+
+Job control is a little overly complicated but there's only one
+really big mistake in it, in my opinion, and that is that the
+process group IDs are not allocated in the kernel.  This is what
+led to all the "session group leader" cruft in POSIX.
+
+Job control ought to be independent of tty devices: each shell
+pipeline is a "job", and the shell should group them by having the
+kernel create an initial empty(ish -- the shell is a member of
+both its original pgroup and this one it just created, until it
+detaches from it) job, then pushing each process it forks into
+that pgroup.
+
+I'll use "fd" as a name here since I think that's one way to
+return them (they're refcounted like file descriptors) but not
+the only way, and it probably makes more sense to return a
+pgroup ID directly and have a pgclose()...
+
+    // in a shell:
+    fd = new_pgroup(); // kernel allocates pgroup
+
+    for (all commands in a pipeline) {
+        pid = fork();
+        if (pid == 0) {
+            // child
+            pid = getpid();
+            setpgrp(pid, fd);
+            ... all the other stuff we do ...
+            exec(childprocess)
+        }
+        if (pid < 0) ... clean up ...
+        // still in the shell - set up the rest of the pipe using
+        // the same pgroup
+    }
+    close(fd); // we're done with the pgroup, it goes away
+    // when the last pid we created above also exits
+
+Note that this would mean that anything that creates login sessions
+would have to have this same kind of code (create a pgroup, fork,
+push child into pgroup, exec shell).  But that's already true for
+job control in general: init or getty needs to be job-control-aware,
+and this makes their code simpler.
+
+Chris
+
+

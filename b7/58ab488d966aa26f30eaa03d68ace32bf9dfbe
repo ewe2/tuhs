@@ -1,0 +1,41 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Fri, 2 May 2008 07:05:49 -1000 (HST)
+Subject: [Unix-jun72] cold boot tape
+In-Reply-To: <Pine.BSI.4.64.0805011810520.20114@malasada.lava.net>
+References: <Pine.BSI.4.64.0805011810520.20114@malasada.lava.net>
+Message-ID: <Pine.BSI.4.64.0805020658220.20114@malasada.lava.net>
+
+> I wrote a utility for building a cold boot tape and included it in the
+> tools directory.  Its not yet tested so its possible I got the format
+> wrong... its based on my reading of init at the end of u0.s.
+
+It occurs to me that the tape is probably meant to be bootable.
+The init program seeks to the 65th block to start booting, so blocks
+0 through 64 can be used to hold a bootable kernel image or two.
+I'm guessing we could make a tape as:
+
+     blocks 0-31  - the "cold" kernel
+     blocks 32-64 - the real kernel
+     blocks 65-   - the contents of /bin and /etc
+
+boot the cold kernel from tape, have it write out a primordeal root
+file system on rf0.  Boot the real kernel from tape, have it
+run the /etc/init that the cold kernel put onto rf0 which reads
+files from blocks 65 onwards on the tape.  Finally reboot the real
+kernel from tape again and be in a real system.
+
+By the way, I made some tape images from the s2 binaries (just /etc
+and /bin, /usr is probably meant to go onto rk0):
+
+    http://www.thenewsh.com/%7Enewsham/unix_jun72/tape
+        - the raw tape bits with the first 65 blocks empty
+    http://www.thenewsh.com/%7Enewsham/unix_jun72/tape.tc
+        - a simh format tape of the above bits
+
+the tape image isnt tested yet.  It should hopefully have the right
+uids and file modes for first ed.
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+
+

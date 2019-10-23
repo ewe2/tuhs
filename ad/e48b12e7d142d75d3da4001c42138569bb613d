@@ -1,0 +1,66 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Tue, 7 Nov 2017 07:55:49 -0600
+Subject: [TUHS] Literal character escapes in v7
+In-Reply-To: <20171107090723.F2CC3A585D1@yagi.h-net.msu.edu>
+References: <b72ba3f2-5f38-6194-4925-b3b9e0caf4b9@gmail.com>
+ <20171107090723.F2CC3A585D1@yagi.h-net.msu.edu>
+Message-ID: <3657a548-46be-0a7a-c092-af5979f36334@gmail.com>
+
+On 11/7/17 3:07 AM, Dennis Boone wrote:
+>   > I'm not looking for code review, but the code is intended to replace
+>   > the tabs and backspaces with \t and \b respectively, but I haven't
+>   > been able to test it because I can't seem to make a backspace
+>   > character appear in input. In later unices, ^V followed by the
+>   > backspace would work, but that's not part of v7. Backspace itself is
+>   > my erase character, so anytime I just type it, it backspaces :).
+>
+> This bit from the middle of sys/dev/tty.c seems to indicate that you
+> escape it with \:
+>
+> 	} else {
+> 		mc = maptab[c];
+> 		if (c==tp->t_erase || c==tp->t_kill)
+> 			mc = c;
+> 		if (mc && (mc==c || (tp->t_flags&LCASE))) {
+> 			if (bp[-2] != '\\')
+> 			c = mc;
+> 			bp--;
+> 		}
+> 	}
+>
+> On my test v7 system if I type backslash control-h:
+>
+> 	# stty
+> 	speed 0 baud
+> 	erase = '^H'; kill = '^U'
+> 	even -nl echo -tabs
+> 	# echo \^H | od -c
+> 	0000000  \b  \n
+> 	0000002
+> 	#
+>
+> De
+
+Thanks for the note. I thought about it and tried it out even though I 
+don't see the ^H (my cursor backs up a space).
+
+After typing echo "\^H" | od -c, here's what it looks like:
+
+$ echo "" | od -c
+0000000  \b  \n
+0000002
+
+So, sure enough there's a backspace in there and my code "sees" it too:
+
+$ echo "" | 1-8
+<<BACKSPACE>>
+$
+
+
+-- 
+GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171107/34432d5e/attachment.html>
+

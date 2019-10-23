@@ -1,0 +1,50 @@
+From: nao@tom-yam.or.jp (nao)
+Date: Mon, 24 Nov 2003 15:51:59 +0900 (JST)
+Subject: [pups] UC08 and Ultrix-3.1 again
+In-Reply-To: nao's message of "Sun, 23 Nov 2003 09:56:45 +0900 (JST)"
+	<200311230056.hAN0ujUJ053894@miffy.tom-yam.or.jp>
+References: <200311230056.hAN0ujUJ053894@miffy.tom-yam.or.jp>
+Message-ID: <200311240651.hAO6px33058689@miffy.tom-yam.or.jp>
+
+Hi, all.
+
+Here continues my story on a PDP-11/53 with UC08 and Ultrix-11 version
+3.1. In Phase 2 "Load/unload optional software" process failed saying:
+
+Open of distribution device FAILED: Try again <y or n> ?
+
+I have to give up once, but after the installer quitted I can complete
+installation by typing:
+
+/.setup/setup_osl 53 tu 0 0 0
+
+"53" means PDP-11/53. "Tu" is for "TU81". The optional software
+installer distinguish TU81 and TK50 because they do not share device
+files. Despite the OS installer creats these device files, it failes
+to tell setup_osl this difference. Other part of the installation
+process runs with "TK50".
+
+TU81 and TK50 are both TMSCP tape device, but UC08 seems to tell
+Ultrix kernel that my DDS2 drive (Seagate STD28000N) as TU81. Since I
+can use no other tape drives, I have no idea whether the emurated
+drive depends on a real drive or not.
+
+Again I made a quick patch. As always, it is untested.
+
+--- sys/distr/setup.c-	Sun Jan 24 06:26:13 1988
++++ sys/distr/setup.c	Mon Nov 24 15:11:20 2003
+@@ -2622,6 +2622,10 @@
+ 		} else
+ 			break;
+ 	    }
++	    if ((tkflag == 1) && (tk_ctid[mtflag] == TU81)) {
++		loadev[0] = 't';
++		loadev[1] = 'u';
++	    }
+ 	    sprintf(syscmd, "setup_osl %d %.2s %d %c %d", cputyp[tpi].p_type,
+ 		loadev, rxflag ? rq_dt[rxunit] : 0, loadev[3], rd2);
+ 	    if((fo = fopen(osload, "w")) != NULL) {
+
+Naoki Hamada
+nao at tom-yam.or.jp
+

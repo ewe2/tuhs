@@ -1,0 +1,71 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Thu, 19 Oct 2017 21:27:07 -0400
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: <CAEoi9W4zdJ3+RXjK5-5rAJ6rwx_0kx6N-bn1U61=txJGyLT_mw@mail.gmail.com>
+References: <009a01d348e9$e3dce200$ab96a600$@ronnatalie.com>
+ <CAEoi9W7YZ7YXUip0JTMGip3Nd0czgdjqRCMRcK2GYmDJsckuDg@mail.gmail.com>
+ <CAEoi9W4zdJ3+RXjK5-5rAJ6rwx_0kx6N-bn1U61=txJGyLT_mw@mail.gmail.com>
+Message-ID: <CAEoi9W5Z6WDPtD9TuFz8W7KsSrsrLcrXmhhq4h6P2dG4vOAF7Q@mail.gmail.com>
+
+[I tried to send this earlier, but was thwarted by list shenanigans.
+Apologies if it's a dup.]
+
+On Thu, Oct 19, 2017 at 10:52 AM, Ron Natalie <ron at ronnatalie.com> wrote:
+> My favorite reduction to absurdity was /bin/true.   Someone decided we
+> needed shell commands for true and false.   Easy enough to add a script that
+> said "exit 0" or exit 1" as its only line.
+> Then someone realized that the "exit 0" in /bin true was superfluous, the
+> default return was 0.  /bin/true turned into an empty, yet executable, file.
+>
+> Then the lawyers got involved.    We got a version of a packaged UNIX (I
+> think it was Interactive Systems).    Every shell script got twelve lines of
+> copyright/license boilerplate.     Including /bin true.
+> The file had nothing but useless comment in it.
+
+Gerard Holzmann has something on this that I think is great:
+
+http://spinroot.com/gerard/pdf/Code_Inflation.pdf
+
+        - Dan C.
+
+PS: A couple of thoughts.
+
+The shell script hack on 7th Edition doesn't work if one tries to
+'execl("/bin/true", "true", NULL);'.  This is because the behavior of
+re-interpreting an execution failure as a request to run a script is
+done by the shell, not exec in the kernel. This implies that one could
+not directly exec a shell script, but rather must exec the shell and
+give the path to the script as the first argument. I vaguely recall we
+had a discussion about the origin of the '#!' syntax and how this was
+addressed about a year or so ago.
+
+I tried to write a teeny-tiny '/bin/true' on my Mac. Dynamically
+linked, the obvious "int main() { return 0; }" is still a little over
+4KB. Most of that is zeros; padding for section alignment and the
+like. I managed to create a 'statically' linked `true` binary by
+writing the program in assembler:
+
+% cat true.s
+# /bin/true in x86_64 assembler for Mac OS X
+.text
+.globl start
+start:
+mov $0x2000001, %rax # BSD system call #1
+mov $0, %rdi # Exit status: 0 = 'true'
+syscall
+
+# OS X requires a non-empty data segment.
+.data
+zero: .word 0 As I recall,
+%
+
+macOS requires you to have a data section aligned to 4K, even if you
+don't use it. The resulting binary is a little over 8K; again, mostly
+zeros.
+
+There are parlor tricks people play to get binary sizes down to
+incredibly small values, but I found the results interesting. Building
+the obvious C program on a PDP-11 running 7th Edition yields a 136
+byte executable, stripped. Still infinitely greater than /bin/true in
+the limit, but still svelte by modern standards.
+

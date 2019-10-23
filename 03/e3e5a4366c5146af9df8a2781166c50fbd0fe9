@@ -1,0 +1,52 @@
+From: imp@bsdimp.com (M. Warner Losh)
+Date: Sat, 02 Oct 2010 15:39:11 -0600 (MDT)
+Subject: [TUHS] PDP-8
+In-Reply-To: <20101002210346.GE27937@bitmover.com>
+References: <20100930135029.GB30928@bitmover.com>
+	<20101002034601.GE66070@dereel.lemis.com>
+	<20101002210346.GE27937@bitmover.com>
+Message-ID: <20101002.153911.710852003685317415.imp@bsdimp.com>
+
+In message: <20101002210346.GE27937 at bitmover.com>
+            Larry McVoy <lm at bitmover.com> writes:
+: > > If you could look at the stack frames and give me a stack trace
+: > > that's more or less the same thing.
+: > 
+: > (gdb) bt
+: > 
+: > The real question is not to get a stack trace, but to analyse it.
+: 
+: Hmm, we seem to have a different view.  I like people who can write
+: the gdb bt code, not run it.  This isn't an imaginary thing, one of 
+: my guys showed up one day with his own hand rolled backtrace that we
+: ended up putting in our product for support.
+: 
+: The advantage of his, over the following hack we had before, was that
+: it worked when no gdb was installed (windows):
+: 
+: void
+: gdb_backtrace(void)
+: {
+:         FILE    *f;
+:         char    *cmd;
+: 
+:         unless (getenv("_BK_BACKTRACE")) return;
+:         unless ((f = efopen("BK_TTYPRINTF")) ||
+:             (f = fopen(DEV_TTY, "w"))) {
+:                 f = stderr;
+:         }
+:         cmd = aprintf("gdb -batch -ex backtrace '%s/bk' %u 1>&%d 2>&%d",
+:             bin, getpid(), fileno(f), fileno(f));
+: 
+:         system(cmd);
+:         free(cmd);
+:         if (f != stderr) fclose(f);
+: }
+
+Stack back traces are easy on x86, but get a lot harder on !x86 at
+high optimization layers without help from libunwind.  That's the down
+side of not relying on gdb... :)
+
+Warner
+
+

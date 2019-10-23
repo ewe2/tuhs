@@ -1,0 +1,184 @@
+From tuhs-bounces@minnie.tuhs.org Fri Jun 29 02:02:53 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 1790e3b2
+	for <ml@inbox.vuxu.org>;
+	Fri, 29 Jun 2018 02:02:53 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 320E1A185D; Fri, 29 Jun 2018 12:02:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id F3EF9A182F;
+	Fri, 29 Jun 2018 12:02:37 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1F7AFA182F; Fri, 29 Jun 2018 12:02:36 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 8A319A1815
+ for <tuhs@minnie.tuhs.org>; Fri, 29 Jun 2018 12:02:33 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id 1AAB4156E517;
+ Thu, 28 Jun 2018 19:02:11 -0700 (PDT)
+From: Bakul Shah <bakul@bitblocks.com>
+To: "Theodore Y. Ts'o" <tytso@mit.edu>
+In-reply-to: Your message of "Thu, 28 Jun 2018 10:15:38 -0400."
+ <20180628141538.GB663@thunk.org>
+References: <af780f9fb5c14e37f12ce5c2a4e40376669c730f@webmail.yaccman.com>
+ <81277CC3-3C4A-49B8-8720-CFAD22BB28F8@bitblocks.com>
+ <20180628141538.GB663@thunk.org>
+Comments: In-reply-to "Theodore Y. Ts'o" <tytso@mit.edu>
+ message dated "Thu, 28 Jun 2018 10:15:38 -0400."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <60112.1530237731.1@bitblocks.com>
+Date: Thu, 28 Jun 2018 19:02:11 -0700
+Message-Id: <20180629020219.1AAB4156E517@mail.bitblocks.com>
+Subject: Re: [TUHS] PDP-11 legacy, C, and modern architectures
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, 28 Jun 2018 10:15:38 -0400 "Theodore Y. Ts'o" <tytso@mit.edu> wrote:
+> Bakul, I think you and Steve have a very particular set of programming
+> use cases in mind, and are then over-generalizing this to assume that
+> these are the only problems that matter.  It's the same mistake
+> Chisnall made when he assrted the parallel programming a myth that
+> humans writing parallel programs was "hard", and "all you needed" was
+> the right language.
+
+Let me try to explain my thinking on this topic.
+
+1. Cobol/C/C++/Fortran/Go/Java/Perl/Python/Ruby/... will be
+   around for a long time.  Lots of computing platforms &
+   existing codes using them so them languages will continue
+   to be used. This is not particularly interesting or worth
+   debating.
+
+2. A lot of processor architecture evolution in the last few
+   decades has been to make such programs run as fast as
+   possible but this emulation of flat shared/virtual address
+   spaces and squeezing out parallelism at run time from
+   sequential code is falling further and further behind.
+
+   The original Z80 had 8.5E3 transistors while an 8 core
+   Ryzen has 4.8E9 transistors (about 560K Z80s worth of
+   transistor).  And yet, it is only 600K times faster in
+   Dhrystone MIPS even though it has > thousand times faster
+   clock rate, its data bus is 8 times wider and there is no
+   data/address multiplexing.
+
+   I make this crude comparison to point out how much less
+   efficient these resources are used due to the needs of
+   above languages.
+
+3. As Perry said, we are using parallel and distributed
+   computing more and more. Even the RaspberryPi Zero has a
+   several times more powerful GPU than its puny ARM "cpu"!
+   Most all cloud services use multiple cores & nodes.  We may
+   not set up our services but we certainly use quite a few of
+   them via the Internet. Even on my laptop at present there
+   are 555 processes and 2998 threads. Most of these are
+   indeed "embarrassingly" parallel -- most of them don't talk
+   to each other!
+
+   Even local servers in any organization run a large number
+   of processes.
+
+   Things like OpenCL is being used more and more to benefit
+   from whatever parallelism we can squeeze out of a GPU for
+   specialized applications.
+
+4. The reason most people prefer to use one very high perf.
+   CPU rather than a bunch of "wimpy" processors is *because*
+   most of our tooling uses only sequential languages with
+   very little concurrency. And just as in the case of
+   processors, most of our OSes also allow use of very little
+   parallelism. And most performance metrics focus on single
+   CPU performance. This is what is optimized so given these
+   assumptions using faster and faster CPUs makes the most
+   sense but we are running out that trick.
+
+5. You may well be right that most people don't need faster
+   machines. Or that machines optimized for parallel languages
+   and codes may never succeed commercially.
+
+   But as a techie I am more interested in what can be built
+   (as opposed to what will sell). It is not a question of
+   whether problems amenable to parallel solutions are the
+   *only problems that matter*.  
+
+   I think about these issues because
+   a) I find them interesting (one among many).
+   b) Currently we are using resources rather inefficiently
+      and I'm interested in what can be done about it.
+   c) This is the only direction in future that may yield
+      faster and faster solutions for large set of problems.
+
+   And in *this context* our current languages do fall short.
+
+6. The conventional wisdom is parallel languages are a failure
+   and parallel programming is *hard*.  Hoare's CSP and
+   Dijkstra's "elephants made out of mosquitos" papers are
+   over 40 years old. But I don't think we have a lot of
+   experience with parallel languages to know one way or
+   another. We are doing adhoc distributed systems but we
+   don't have a theory as to how they behave under stress.
+   But see also [1]
+
+7. As to distributed vs parallel systems, my point was that
+   even if they different, there are a number of subproblems
+   common to them both. These should be investigated further
+   (beyond using adhoc solutions like Kubernetes). It may even
+   be possible to separate a reliability layer to simplify a
+   more abstract layer that is more common to the both. Not
+   unlike the way disks handle reliability so that at a higher
+   level we can treat them like a sequence of blocks (or how
+   IP & TCP handle reliability).
+
+Here is a somewhat tenuous justification for why this topic does
+make sense on this list: Unix provides *composable* tools. It
+isn'just that one unix program did one thing well but that it
+was easy to make them worked together to achieve a goal + a
+few abstractions were useful from most programs. You hid
+device peculiarities in device drivers and filesystem
+peculiarities in filesystem code and so on. I think these same
+design principles can help with distributed/parallel systems.
+
+Even if we get an easy to use parallel language, we may still
+have to worry about placement and load balancing and latencies
+and so forth. And for that we may need a glue language.
+
+[1] What I have discovered is that it takes some experience
+and experimenting to think in a particular way that is natural
+to the language at hand.  As an example, when programming in k
+I often start out with a sequential, loopy program .  But if I
+can think about in terms of "array" operations, I can iterate
+fast and come up with a better solution. Not have to think
+about locations and pointers make this iterativer process very
+fast.
+
+Similarly it takes a while to switch to writing forth (or
+postscript) code idiomatically. Writind idiomatic code in any
+language is not just a matter learning the language but being
+comfortable with it, knowing what works well and in what
+situation.
+
+I suspect the same is true with parallel programming as well.
+
+Also note that Unix hackers routinely write simple parallel
+programms (shell pipelines) but these may seem quite foreign
+to people who grew up using just GUI.

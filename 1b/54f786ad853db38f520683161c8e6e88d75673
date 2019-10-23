@@ -1,0 +1,76 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 15 Aug 2016 10:04:50 -0400 (EDT)
+Subject: [TUHS] fstat(2) on pipes?
+Message-ID: <20160815140450.C6CC618C0B3@mercury.lcs.mit.edu>
+
+    > From: Warren Toomey
+
+    > xv6 is a Unix-like OS written for teaching purposes. 
+
+I'm fairly well-aware of Xv6; I too am planning to use it in a project.
+
+But back to the original topic, it sounds like there's a huge amount of
+variance in the semantics of doing fstat() on a pipe. V6 doesn't special-case
+it in any way, but it sounds as if other systems do.
+
+What V6 does (to complete the list) is grow the temporary file being used to
+buffer the pipe contents up to a certain maximum size, whereupon it halts the
+writer, and waits for the reader to catch up - at which point it truncates
+the file, and adjusts the read and write pointers back to 0. So fstat() on
+V6, which doesn't special-case pipes in any way for fstat(), apparently
+returns 'waiting_to_be_read' plus 'already_read'.
+
+
+    >>> xv6 has fstat() but returns an error if the file descriptor isn't
+    >>> associated with an i-node.
+
+    >> ?? All pipe file descriptors should have an inode?
+
+To answer my own question, after a quick look at the Xv6 sources (on my
+desktop ;-); it turns out that Xv6 handles pipes completely differently;
+instead of borrowing an inode, they have special 'pipe' structures.  Hence the
+error return in fstat() on Xv6. (That difference also limits the amount of
+buffered data in a pipe to 512 bytes. So don't expect high throughput from a
+pipe on Xv6! :-)
+
+So I guess you get to pick which semantics you want fstat() on a pipe to have
+there: V6's, V7's (see below), or something else! :-)
+
+
+    > 7th Ed seems to return the amount of free space in the pipe, if I read
+    > the code correctly:
+
+I'm not sure of that (see below), but I think it would make more sense to
+return the amount of un-read data (which is what I think it does do), as the
+closest semantics to fstat() on a file.
+
+It might also make sense to return the amount of free space (to a writer), and
+the amount of data available to read (to a reader), since those are the
+numbers users will care about. (Although then fstat() on the write side of a
+pipe will have semantics which are inconsistent with fstat() on files. And if
+the user code knows the maximum amount of buffering in a pipe, it could work
+out the available write space from that, and the amount currently un-read.)
+
+    > fstat()
+    > {
+    >    ...
+    >    /* Call stat1() with the current offset in the pipe */
+    >   stat1(fp->f_inode, uap->sb, fp->f_flag&FPIPE? fp->f_un.f_offset: 0);
+    > }
+    > stat1()
+    > {
+    >   ...
+    >    ds.st_size = ip->i_size - pipeadj;
+
+I'm too lazy to go read the code (even though I already have it :-), but V7
+seems to usually be very similar to V6. So, what I suspect this code does is
+pass the expression:
+
+  ((fp->f_flag & FPIPE) ? fp->f_un.f_offset : 0)
+
+as 'pipeadj' (to account for the amount that's already been read), and then
+returns (ip->i_size - pipeadj), i.e. the amount remaining un-read, as the
+size.
+
+	Noel
+

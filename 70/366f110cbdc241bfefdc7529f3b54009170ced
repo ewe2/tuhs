@@ -1,0 +1,135 @@
+From: bqt@softjar.se (Johnny Billquist)
+Date: Wed, 04 Oct 2006 13:11:30 +0200
+Subject: [pups] Issues of AUUGN
+In-Reply-To: <Pine.BSI.4.61.0610041942420.15033@dave.horsfall.org>
+References: <Pine.BSI.4.61.0610041659120.14784@dave.horsfall.org>	<45236F2B.2050208@softjar.se>
+	<Pine.BSI.4.61.0610041942420.15033@dave.horsfall.org>
+Message-ID: <452396E2.8030102@softjar.se>
+
+Dave Horsfall wrote:
+> On Wed, 4 Oct 2006, Johnny Billquist wrote:
+> 
+>>>There was a clever assembly program that did it; it relied upon the 
+>>>instruction counter wrapping around (I can't remember in which 
+>>>direction, or whether it first relocated itself).  Anyone, it managed 
+>>>to fill memory with SPLs, so the next instruction after overwriting 
+>>>its last instruction was SPL, and for the foreseeable future after 
+>>>that...
+>>
+>>It would have to wrap forwards. Basically, if you just have a
+>>
+>>	MOV	(PC)+,(R0)+
+>>	SPL	#7
+> 
+> Yes, that's it!  Except it was SPL 0; not that it made any difference, but 
+> it was just as devastating in user mode.
+
+Interesting thing, though. I didn't know that SPL blocked interrupts for 
+the next instruction. Always something more to learn...
+
+> Damn; I'm still trying to visualise how it works...  It took me ages, the 
+> first time I saw it; I *think* it propagates the MOV throughout memory, 
+> leaving a trail of SPLs behind it?
+
+Nope. That snippet I wrote now just copies the SPL in the instruction 
+after the MOV to wherever R0 is pointing. The key is that both these 
+instructions takes just one word.
+
+Actually, here is an improved version:
+
+	MOV	(PC)+,R0
+	.WORD	FOO
+FOO:	MOV	(PC)+,-(R0)
+	SPL	#0
+	BR	FOO
+
+(Sorry about the DEC syntax, I've never learned as)
+
+This code will work fine no matter what is in memory, and no matter 
+where we have the program.
+
+This code will start by overwriting the .WORD FOO with the SPL, then 
+overwrite the MOV, and then continue backwards, wrap around, write from 
+the end of memory back towards the branch.
+When we overwrite the branch instruction we will no longer be in our 
+tight loop. However all other memory than what we have here is now 
+containing the SPL instruction, so running through that is no problem, 
+and we will wrap to the start of the memory and at a later time once 
+again come to the MOV (PC)+,-(R0), which this time will overwrite the 
+SPL instruction with the SPL instruction. Basically just a decrement of 
+R0. Next time around, it will overwrite the MOV (PC)+,-(R0), which will 
+leave just the SPL instructions left.
+
+My first version will write forwards, without an explicit loop, so it 
+requires that the rest of the memory didn't modify R0 and didn't branch 
+backwards in a never-ending loop not including the MOV.
+
+Perhaps an even more devious piece of code is:
+
+	MOV	-(PC),-(PC)
+
+even though it won't hang the machine. :-)
+
+>>However, another way of achieving this, if you have some kind of control 
+>>of the MMU is to just fill one page with SPLs, and then remap all of 
+>>your memory to be that page. The last page you remap is just the page 
+>>that holds all the code doing the setup.
+> 
+> But you'd need kernel mode for that; this is a DoS attack (one of the 
+> first?) launched by a user.
+
+You wouldn't need kernel mode if you were programming in RSX, since 
+there are system calls to remap your memory in that OS. You cannot remap 
+it arbitrarily, but you can remap it enough to set this up.
+
+>>>If I find the article I'll post it here; I don't think there are too 
+>>>many 11/70s still in public operation.
+>>
+>>Well, ours is occasionally. It's off at the moment, since we're not 
+>>allowed to consume that much money anymore, but Magica.Update.UU.SE is 
+>>just a key turn away from being online.
+> 
+> Cool :-)
+
+Heck, we actually have two. But one is enough to have standing ready. 
+We're a computer club, so we exist at the mercy of our university.
+Our second machine used to run 2.11BSD, but is now in storage. *sigh* 
+Wish we had a little more money designated for our fun. :-)
+
+>>Oh, that would be having the HALT switch down and pressing the START 
+>>switch, by the way. That combination will trigger a Unibus reset, and 
+>>will bring the CPU out of almost all catatonic states that I've seen, 
+>>including serious bus problems.
+> 
+> Interesting.  I knew the HALT switch didn't halt the box right away; bus 
+> transfers still completed so we were taught to W/PROT the RK-05s *after* 
+> hitting HALT, but I didn't know it worked in combination.
+
+Yeah, the HALT switch will stop the machine at the next instruction 
+fetch. That is, unless you have the S.INST/S.CYCLE switch thrown to the 
+S.CYCLE position, which will cause the machine to stop at the next clock 
+cycle.
+
+The thing to realize is that the START switch always performs a bus 
+reset, and then it usually also starts the clocks running in the 
+machine. However, if the HALT switch is active, the clocks won't start 
+running (obviously), so all that remains is the bus reset.
+
+Hmm, thinking about this, I wonder how much the CPU is reset by the 
+start switch as well. Maybe I should check if the CPU registers are 
+cleared and so on... The MMU is definitely cleared.
+
+Another thing is debugging on the front panel. You have START and CONT, 
+which both will start the CPU clocks. The difference is wether a reset 
+of the machine is done or not. If you want to debug a program from the 
+front panel, you keep the HALT switch down, and pull the CONT switch to 
+step a single instruction or single cycle (depending on the switch).
+
+If you raise the HALT switch, CONT will cause the processor to proceed 
+from wherever it is at the moment, while a START also will start the 
+processor, but will reset a number of things so things will not actually 
+be able to proceed as nothing happened.
+
+	Johnny
+
+

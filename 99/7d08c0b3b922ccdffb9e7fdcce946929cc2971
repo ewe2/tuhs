@@ -1,0 +1,1248 @@
+From: lars@nocrew.org (lars brinkhoff)
+Date: 09 May 2000 09:25:55 +0200
+Subject: Help: PDP-11 instruction classification
+In-Reply-To: sjm's message of "Mon, 8 May 2000 15:02:40 -0700"
+References: <20000508150240.A7092@loomcom.com>
+Message-ID: <85og6g18xo.fsf@junk.nocrew.org>
+
+I'm adding PDP-11 support to GNU binutils, and I need help on
+classifying the instruction set.
+
+I'm somewhat confused, because:
+
+  PDP-11 FAQ says:
+  11/45 introduced MUL, DIV, ASH, ASHC, SPL.
+  Later, 11/40 introduced SOB, XOR, MARK, SXT, RTT.  MUL, DIV, etc in
+  EIS option.
+
+  GCC pdp11.md and pdp11.c says:
+  11/40 and 11/45 has SOB, SXT, XOR.
+  11/45 has ASHC, MUL, DIV.
+  All models has ASH.
+
+  John Holden writes:
+  11/40 and 11/45 has EIS and FPU instructions.
+  11/40 had several options to add EIS, FIS and a MMU.
+
+Does this mean that an unexpanded 11/40 has no EIS instructions,
+but with the EIS option, it has more instructions than an 11/45?
+
+GCC seems to think that all PDP-11 models has ASH, but this seems
+wrong.  It's only in EIS, right?
+
+So far, this is the classification I've come up with:
+
+  BASIC: the basic instruction set.
+  CIS: commercial instruction set (opcodes 0x7d00..0x7eff).
+  EIS45: 11/45 extended instruction set: MUL, DIV, ASH, ASHC, SPL.
+  EIS40: 11/40 extended instruction set: EIS45 + SOB, XOR, MARK, SXT, RTT.
+  FIS: FADD, FSUB, FMUL, and FDIV (opcodes 0x7a00..0x7bff).
+  FPU: LDF, STF, LDCFF', STCFF', CMPF, LDEXP, STEXP, LDCIF, STCFI, MULF,
+       MODF, ADDF, SUBF, and DIVF (opcodes 0xf000..0xffff).
+
+Would this be correct?
+
+FIS and CIS isn't imlemented in Supnik's simulator, and I haven't
+found any documentation.  Does anyone know more about those?  Why
+is there both an FADD and an ADDF instruction?
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA75480
+	for pups-liszt; Wed, 10 May 2000 09:47:20 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA75476
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 09:47:13 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id JAA89501;
+	Wed, 10 May 2000 09:47:01 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200005092347.JAA89501 at henry.cs.adfa.edu.au>
+Subject: Re: Good news on the Ancient UNIX License front
+In-Reply-To: <20000508150240.A7092 at loomcom.com> from sjm at "May 8, 2000  3: 2:40 pm"
+To: sethm at loomcom.com (sjm)
+Date: Wed, 10 May 2000 09:47:01 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by sjm:
+> Hello all,
+> 
+> I've just received this mail from SCO.  I think it's appropriate to
+> post here.
+> 
+> Apparently we can expect the Ancient UNIX License available on the
+> SCO website by Friday (U.S. Pacific Time, I would suspect).  Very
+> good news indeed!
+
+I'm just back from a training course. I've seen a preview of the web site.
+You get to click-thru the license agreement, then you have a set of hyperlinks
+to the UNIX versions that SCO owns (5e, 6e, 7e, 32V, SysIII, Mini UNIX).
+
+I'm still trying to work out an access method to the PUPS Archive with them,
+but I think we're getting there.
+
+So, you will get access to some UNIX source code soon, but access to the
+PUPS Archive might be a week or so longer.
+
+Cheers all!
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA75681
+	for pups-liszt; Wed, 10 May 2000 10:27:50 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA75677
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 10:27:44 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id KAA89955;
+	Wed, 10 May 2000 10:27:22 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200005100027.KAA89955 at henry.cs.adfa.edu.au>
+Subject: Re: PDP land
+In-Reply-To: <20000505191242.A13087 at ussenterprise.ufp.org> from Leo Bicknell at "May 5, 2000  7:12:42 pm"
+To: bicknell at ufp.org (Leo Bicknell)
+Date: Wed, 10 May 2000 10:27:22 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Leo Bicknell:
+> 	I don't know if you remember me or not.  I believe we talked
+> before when I was a student at Virginia Tech about Unix on a PDP-11/40
+> that I had.  Alas, I had to let those machines go as I didn't have
+> the time or space to keep them.
+> 
+> 	I went looking for PDP stuff on the web, and ran across your
+> name again.  I thought I'd give you a whirl.  I'm now in a position to
+> give real data center space to one or more of these beasts, and I would
+> love to put a PDP-11 up on the net running old-school unix.
+> 
+> 	Any pointers as to where to find someone giving away or
+> selling one of these beasts?
+> 
+> 	Thanks.
+> Leo Bicknell - bicknell at ufp.org
+
+Leo, I'm punting this on to the PUPS mailing list to see if you get any
+nibbles. Go to http://minnie.cs.adfa.edu.au/PUPS/maillist.html to see
+how to join. You could also try the Usenet newsgroups alt.sys.pdp11 and
+vmsnet.pdp-11.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA75735
+	for pups-liszt; Wed, 10 May 2000 10:37:58 +1000 (EST)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA75731
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 10:37:52 +1000 (EST)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id KAA11235
+	for pups at minnie.cs.adfa.edu.au; Wed, 10 May 2000 10:37:51 +1000 (EST)
+Date: Wed, 10 May 2000 10:37:51 +1000 (EST)
+From: johnh@psych.usyd.edu.au
+Message-Id: <200005100037.KAA11235 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+The 11/45 has the base instruction set, plus EIS (MUL, DIV, ASH, ASHC, SPL,
+SOB, XOR, MARK, SXT, RTT). This was standard with the CPU, and the optional
+floating point unit (another 4 cards in the backplane) added the floating
+point instruction set.
+
+The 11/40 has billions (Carl Sagans) of options. The minimal processor had
+the base set, plus SOB, MARK, RTT, XOR and SXT. Processor options added extra
+microcode and extra shift registers and counters to the data path.
+
+	Option	Description
+	KE11-E	EIS instruction set (ASH, ASHC, DIV, MUL)
+	KE11-F	FIS instruction set (FDIV, FMUL, FADD, FSUB)
+	KJ11-A	Stack limit register
+	KT11-D	Memory management
+	KW11-L	Line time clock
+
+The processor options had dedicated slots, but lots of jumpers have to be
+changed to enable them. Note that there are just four floating point
+instructions (not directly compatible with any FPP instruction), and they
+are not very PDP-11 like in their behaviour. The instructions have a three bit
+address field to specify a register. The register points to a 'floating point
+stack frame' that contains the arguments for the instruction in memory. The
+floating point number format is the same as FPP.
+
+When the original LSI-11 came out, it was modeled on 11/40, again with the
+base instructions, plus SOB, MARK, RTT, XOR and SXT. EIS and FIS were options
+in 'Microm Chips' (extra microcode). There was no memory management options
+and it lacked an addressable PSW (processor status word) and switch register
+(01777570).
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA75920
+	for pups-liszt; Wed, 10 May 2000 11:36:00 +1000 (EST)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA75916
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 11:35:54 +1000 (EST)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id LAA02228
+	for pups at minnie.cs.adfa.edu.au; Wed, 10 May 2000 11:35:53 +1000 (EST)
+Date: Wed, 10 May 2000 11:35:53 +1000 (EST)
+From: johnh@psych.usyd.edu.au
+Message-Id: <200005100135.LAA02228 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+> lars brinkhoff wrote :-
+> 
+> I'm adding PDP-11 support to GNU binutils, and I need help on
+> classifying the instruction set.
+
+I forgot to mention a critical point. Any PDP-11 runing Unix (except very
+early versions and Miniunix), and certainly from Edition 6 onwards, MUST have
+EIS. Even the Unix bootstraps used EIS. So binaries built for Unix, will run
+on a 11/34/35/40/44/45/50/53/55/60/70/73/83/84/93/94 !!
+
+Floating point is a bit more problematic. The kernel (see crevat latter) didn't
+require it, but had to save FP status and registers on context switches.
+Quite a few processors had the FPP as an option, and so there was FPP emulation
+build into the kernel (conditionally). There were versions of the C compiler
+that had code tables for the FIS, to suit the 11/35/40.
+
+I have a distant memory, that I have seen FPP instructions used for some
+integer arithmetic for speed. I cannot recall if it was in the kernel or
+C libraries. It was conditional, and may have been in the latter BSD versions,
+but I don't have the source code online.
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA75986
+	for pups-liszt; Wed, 10 May 2000 11:50:48 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA75982
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 11:50:42 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id LAA90764;
+	Wed, 10 May 2000 11:50:31 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200005100150.LAA90764 at henry.cs.adfa.edu.au>
+Subject: Re: Help: PDP-11 instruction classification
+In-Reply-To: <85og6g18xo.fsf at junk.nocrew.org> from lars brinkhoff at "May 9, 2000  9:25:55 am"
+To: lars at nocrew.org (lars brinkhoff)
+Date: Wed, 10 May 2000 11:50:31 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by lars brinkhoff:
+> So far, this is the classification I've come up with:
+> 
+>   BASIC: the basic instruction set.
+>   CIS: commercial instruction set (opcodes 0x7d00..0x7eff).
+>   EIS45: 11/45 extended instruction set: MUL, DIV, ASH, ASHC, SPL.
+>   EIS40: 11/40 extended instruction set: EIS45 + SOB, XOR, MARK, SXT, RTT.
+>   FIS: FADD, FSUB, FMUL, and FDIV (opcodes 0x7a00..0x7bff).
+>   FPU: LDF, STF, LDCFF', STCFF', CMPF, LDEXP, STEXP, LDCIF, STCFI, MULF,
+>        MODF, ADDF, SUBF, and DIVF (opcodes 0xf000..0xffff).
+> 
+> Would this be correct?
+> 
+> FIS and CIS isn't imlemented in Supnik's simulator, and I haven't
+> found any documentation.  Does anyone know more about those?  Why
+> is there both an FADD and an ADDF instruction?
+
+I've got some details on FADD, FSUB, FMUL, and FDIV. I could fax you the
+relevant details from the processor handbook, and/or give you source code
+from my Apout simulator.
+
+FADD is instruction 07500x, ADDF is 1720xx. They are different.
+
+I don't know enough about the CIS extensions. Can you name some of the
+opcode names, so that I can look in the handbooks I have here: 04, 05, 10, 15,
+20, 34, 35, 40, 45, 55, 60, 70.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA76328
+	for pups-liszt; Wed, 10 May 2000 13:00:15 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA76324
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 13:00:06 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id TAA18914
+	for pups at minnie.cs.adfa.edu.au; Tue, 9 May 2000 19:58:25 -0700 (PDT)
+Date: Tue, 9 May 2000 19:58:25 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200005100258.TAA18914 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Warren Toomey <wkt at cs.adfa.edu.au>
+> I don't know enough about the CIS extensions. Can you name some of the
+> opcode names, so that I can look in the handbooks I have here: 04, 05, 10, 15,
+> 20, 34, 35, 40, 45, 55, 60, 70.
+
+	The CIS was a quite expensive option that was only available (as I
+	recall) on the 11/44 and the later KDJ-11 based systems (11/83 and up 
+	where it occupied another socket on the cpu board).  
+
+	The CIS instructions are:
+
+		L2D
+		L3D
+		ADDP
+		ADDN
+		ADDNI
+		ADDPI
+		ASHN
+		ASHP
+		ASHNI
+		ASHPI
+		CMPC
+		CMPCI
+		CMPN
+		CMPP
+		CMPNI
+		CMPPI
+		CVTLN
+		CVTLP
+		CVTLNI
+		CVTLPI
+		CVTNL
+		CVTPL
+		CVTLNI
+		CVTPLI
+		CVTNP
+		CVTPN
+		CVTNPI
+		CVTPNI
+		DIVP
+		DIVPI
+		LOCC
+		LOCCI
+		MATC
+		MATCI
+		MOVC
+		MOVCI
+		MOVRC
+		MOVRCI
+		MOVTC
+		MOVTCI
+		MULP
+		MULPI
+		SCANC
+		SCANCI
+		SKPC
+		SKPCI
+		SPANC
+		SPANCI
+		SUBN
+		SUBP
+		SUBNI
+		SUBPI
+
+	Try the processor handbook that covers the 11/44+11/70  - I think
+	that's where the CIS is described.
+
+	At one time it looked like where I worked was going to get a CIS
+	board for the 11/44 to help with the COBOL runtime we'd written/ported.
+	It never came to be ;(   But I did add the opcodes to the assembler
+	and did some initial coding in preparation for getting the CIS
+	instructions.   You do a _lot_ of saving and restoring registers because
+	the CIS instructions expect many of their operands to be in R2 thru R5
+	(R0 and R1 were used for returning results).  That's a pretty high
+	percentage (~100) of the available registers ;)
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA76464
+	for pups-liszt; Wed, 10 May 2000 13:30:12 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA76452
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 13:30:00 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id UAA19095
+	for pups at minnie.cs.adfa.edu.au; Tue, 9 May 2000 20:22:57 -0700 (PDT)
+Date: Tue, 9 May 2000 20:22:57 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200005100322.UAA19095 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi --
+
+> From: johnh at psych.usyd.edu.au
+> I forgot to mention a critical point. Any PDP-11 runing Unix (except very
+> early versions and Miniunix), and certainly from Edition 6 onwards, MUST have
+> EIS. Even the Unix bootstraps used EIS. So binaries built for Unix, will run
+> on a 11/34/35/40/44/45/50/53/55/60/70/73/83/84/93/94 !!
+
+	Absolutely correct.  By the time Unix was making its way out of the
+	lab and becoming commercially available (V7 and later for certain)
+	the 11/70 was the target machine and while you could order an 11/70
+	without floating point very few (that I saw) were bought that way.
+
+	Even some of the DEC bootstraps used EIS - at least the later RSX-11D
+	ones did.   At one site we couldn't boot the 11/45 into RSX-11D, it
+	would crash part way thru the boot process.  The DEC folks would
+	bring in their diagnostic disks and they would boot just fine.  Finally
+	I insisted they run full cpu diagnostics and voila - the 'div' (or was
+	it the 'ash' - been a looong time) instruction was failing.  The 
+	diagnostic packs were RT11 based (I believe) and were meant to run
+	on all processors rather than the 45 and up.
+
+>Floating point is a bit more problematic. The kernel (see crevat latter) didn't
+>require it, but had to save FP status and registers on context switches.
+
+	The compiler also checks if any FP is done and generates references
+	to special symbols as needed.   The linker can then link in dummy
+	modules for parts of the 'printf' and int->floating conversion routines
+	and save some space that way.   A kluge but on a small machine every
+	half kb counts.
+
+>Quite a few processors had the FPP as an option, and so there was FPP emulation
+
+	The kernel (at least V7 and later) has special code in it to catch
+	and ignore the illegal instruction 'setd' if no hardware FP is present.
+	This is because the crt0 routine (which receives control from the
+	kernel when a program is run) forces double precision mode in all
+	programs.
+	
+	Some floating point simulators (V7's for example) ran in user mode 
+	and caught the SIGILL signal).   I guess running slow instead of
+	crashing is a plus but wow did that bog down the system immensely.
+	Of course one of the programs that was used a lot was a Fortran
+	one and f77 generates a *lot* of floating point code.  It wasn't just
+	the emulation of the FP instructions (that would not have been too
+	bad) but the overhead of the hundreds of signals and context switches
+	was a system killer.
+
+> build into the kernel (conditionally). There were versions of the C compiler
+> that had code tables for the FIS, to suit the 11/35/40.
+
+	2.10BSD and later have an in-kernel FP emulator - alas it doesn't
+	work.  About the most I did was get it thru the assembler.  All the
+	systems I have come with builtin FP.  At one time Tim Shoppa was
+	going to take a stab at pulling the FP board out of his 11/44 and
+	see about getting the emulator working - copious free time permitting
+	of course ;)
+
+> I have a distant memory, that I have seen FPP instructions used for some
+> integer arithmetic for speed. I cannot recall if it was in the kernel or
+
+	In the C library.   The kernel itself can't (or at least shouldn't)
+	do floating point stuff because that might happen at interrupt level
+	and trash the current user process (if any) context.
+
+	The C library code (at least in 2.11) uses FP to do the 32 bit
+	divide and multiply.  It's a lot faster (and much less code) to
+	convert long to double, do the operations and then store&convert
+	double back to int or long.   There might be one or two other cases
+	but that was the primary use.
+
+	And thereby hangs a bit of a tale.  The KDJ-11{A,B} handle faults
+	during a stack push by a FP instruction differently than the 11/44 or
+	11/70.   If you have access to the 2.11BSD bug archive (I know it's
+	on 'ns.to.gd-es.com' and 'moe.2bsd.com' - not sure of who else is
+	mirroring it) look for update #150 (Subject is "stack expansion bug
+	on KDJ-11 cpus".
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA76504
+	for pups-liszt; Wed, 10 May 2000 13:45:07 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA76494
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 13:44:59 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id UAA19137
+	for pups at minnie.cs.adfa.edu.au; Tue, 9 May 2000 20:32:53 -0700 (PDT)
+Date: Tue, 9 May 2000 20:32:53 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200005100332.UAA19137 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: lars brinkhoff <lars at nocrew.org>
+> Does this mean that an unexpanded 11/40 has no EIS instructions,
+
+	Quite correct. 
+
+> but with the EIS option, it has more instructions than an 11/45?
+
+	Adding the EIS brings an 11/40 to the same level as an 11/45 without
+	floating point.
+
+> GCC seems to think that all PDP-11 models has ASH, but this seems
+> wrong.  It's only in EIS, right?
+
+	Yes - that's part of the EIS.  Standard on the 11/45, 11/70 (and the
+	later KDJ-11 systems such as the 11/53, 73, 83,etc)
+
+>   CIS: commercial instruction set (opcodes 0x7d00..0x7eff).
+
+	Not a popular option at all.  At the time DEC was trying to make the
+	11 more of a COBOL machine but the CIS option was too little, too late
+	and expensive (plus it wouldn't fit as I recall on a 11/70 - just the
+	11/44 and newer).
+
+	...
+>        MODF, ADDF, SUBF, and DIVF (opcodes 0xf000..0xffff).
+> 
+> Would this be correct?
+
+	Looks right to me.
+
+> FIS and CIS isn't imlemented in Supnik's simulator, and I haven't
+> found any documentation.  Does anyone know more about those?  Why
+> is there both an FADD and an ADDF instruction?
+	
+	Two different machines.  The FADD was part of the FIS option for the 
+	11/40 only (I don't recall ever hearing of someone adding the FIS
+	to a 11/45 or 70).  The 11/45, 70 and later all had the FPU 
+	as an option or standard (the KDJ-11{A,B} had the instructions standard
+	but you could buy (~$600 at the time) an accelerator chip to speed
+	them up).   I don't think there were any models after the 11/70
+	that used the FIS.
+
+	There was also the CSM (Call Supervisor Mode) instruction which was
+	on the 11/44 only (or did it make it into the later KDJ-11 line as
+	well - I forget).
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id QAA77102
+	for pups-liszt; Wed, 10 May 2000 16:56:39 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.uu.se [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id QAA77098
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 16:56:29 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id IAA22713;
+	Wed, 10 May 2000 08:56:05 +0200
+Date: Wed, 10 May 2000 08:56:04 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: Warren Toomey <wkt at cs.adfa.edu.au>
+cc: lars brinkhoff <lars at nocrew.org>,
+        Unix Heritage Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: Help: PDP-11 instruction classification
+In-Reply-To: <200005100150.LAA90764 at henry.cs.adfa.edu.au>
+Message-ID: <Pine.VUL.3.93.1000510085424.22474D-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wed, 10 May 2000, Warren Toomey wrote:
+
+> I don't know enough about the CIS extensions. Can you name some of the
+> opcode names, so that I can look in the handbooks I have here: 04, 05, 10, 15,
+> 20, 34, 35, 40, 45, 55, 60, 70.
+
+You don't have a handbook for any machine that could have CIS then Warren.
+It was only available for the 11/44 and F-11 based machines. (11/23 11/24)
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA77158
+	for pups-liszt; Wed, 10 May 2000 17:02:53 +1000 (EST)
+Received: from junk.nocrew.org (mail@[212.73.17.42])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA77154
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 17:02:45 +1000 (EST)
+Received: from lars by junk.nocrew.org with local (Exim 3.03 #1 (Debian))
+	id 12pQW0-0000VH-00; Wed, 10 May 2000 09:02:40 +0200
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+References: <200005100332.UAA19137 at moe.2bsd.com>
+From: lars brinkhoff <lars@nocrew.org>
+Date: 10 May 2000 09:02:40 +0200
+In-Reply-To: "Steven M. Schultz"'s message of "Tue, 9 May 2000 20:32:53 -0700 (PDT)"
+Message-ID: <85g0rqzy3z.fsf at junk.nocrew.org>
+Lines: 6
+User-Agent: Gnus/5.0803 (Gnus v5.8.3) Emacs/20.5
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+"Steven M. Schultz" <sms at moe.2bsd.com> writes:
+>       There was also the CSM (Call Supervisor Mode) instruction which was
+>       on the 11/44 only (or did it make it into the later KDJ-11 line as
+>       well - I forget).
+
+What bit pattern does that instruction have?
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA77208
+	for pups-liszt; Wed, 10 May 2000 17:11:51 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.uu.se [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA77204
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 17:11:42 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id JAA22854;
+	Wed, 10 May 2000 09:11:25 +0200
+Date: Wed, 10 May 2000 09:11:24 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+In-Reply-To: <200005100332.UAA19137 at moe.2bsd.com>
+Message-ID: <Pine.VUL.3.93.1000510090352.22474E-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 9 May 2000, Steven M. Schultz wrote:
+
+Hi, all.
+
+> > From: lars brinkhoff <lars at nocrew.org>
+...
+> >   CIS: commercial instruction set (opcodes 0x7d00..0x7eff).
+> 
+> 	Not a popular option at all.  At the time DEC was trying to make the
+> 	11 more of a COBOL machine but the CIS option was too little, too late
+> 	and expensive (plus it wouldn't fit as I recall on a 11/70 - just the
+> 	11/44 and newer).
+
+Actually, not even those. It's the 11/44 and the KDF-11 based systems
+only, which means 11/23 and 11/24.
+
+...
+> > FIS and CIS isn't imlemented in Supnik's simulator, and I haven't
+> > found any documentation.  Does anyone know more about those?  Why
+> > is there both an FADD and an ADDF instruction?
+> 	
+> 	Two different machines.  The FADD was part of the FIS option for the 
+> 	11/40 only (I don't recall ever hearing of someone adding the FIS
+> 	to a 11/45 or 70).  The 11/45, 70 and later all had the FPU 
+> 	as an option or standard (the KDJ-11{A,B} had the instructions standard
+> 	but you could buy (~$600 at the time) an accelerator chip to speed
+> 	them up).   I don't think there were any models after the 11/70
+> 	that used the FIS.
+
+FIS is only for 11/35, 11/40 and the LSI-11. And it's a real brain-damaged
+thing too. Lucky us FPU came along.
+
+> 	There was also the CSM (Call Supervisor Mode) instruction which was
+> 	on the 11/44 only (or did it make it into the later KDJ-11 line as
+> 	well - I forget).
+
+Yes, CSM is in the J-11. There is also TSTSET in J11, but I wonder if
+anyone uses it.
+
+Speaking of CSM, by the way. Slighty off-topic perhaps, but in
+RSX-11M-PLUS they used to have a rather complex way of getting to
+supervisor mode in user programs, since the 11/70 didn't have CSM. Then
+came the J-11, and DEC changed things around on systems having CSM to use
+this instruction instead. It turned out that this improved code quite a
+lot, so they implemented the CSM instruction by emulation on the 11/70 as
+well.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA77339
+	for pups-liszt; Wed, 10 May 2000 17:41:47 +1000 (EST)
+Received: from junk.nocrew.org (mail@[212.73.17.42])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA77335
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 17:41:39 +1000 (EST)
+Received: from lars by junk.nocrew.org with local (Exim 3.03 #1 (Debian))
+	id 12pR7b-0002L7-00; Wed, 10 May 2000 09:41:31 +0200
+To: Johnny Billquist <bqt at Update.UU.SE>
+Cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+References: <Pine.VUL.3.93.1000510090352.22474E-100000 at Zeke.Update.UU.SE>
+From: lars brinkhoff <lars@nocrew.org>
+Date: 10 May 2000 09:41:31 +0200
+In-Reply-To: Johnny Billquist's message of "Wed, 10 May 2000 09:11:24 +0200 (MET DST)"
+Message-ID: <85bt2ezwb8.fsf at junk.nocrew.org>
+Lines: 11
+User-Agent: Gnus/5.0803 (Gnus v5.8.3) Emacs/20.5
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Johnny Billquist <bqt at Update.UU.SE> writes:
+> > 	There was also the CSM (Call Supervisor Mode) instruction which was
+> > 	on the 11/44 only (or did it make it into the later KDJ-11 line as
+> > 	well - I forget).
+> 
+> Yes, CSM is in the J-11. There is also TSTSET in J11, but I wonder if
+> anyone uses it.
+
+Ok, so CSM is found in 11/44 and J11 machines?
+
+And TSTSET is found only in J11?
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA77372
+	for pups-liszt; Wed, 10 May 2000 17:47:13 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.uu.se [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA77368
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 17:47:02 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id JAA23131;
+	Wed, 10 May 2000 09:46:51 +0200
+Date: Wed, 10 May 2000 09:46:50 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: lars brinkhoff <lars at nocrew.org>
+cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+In-Reply-To: <85bt2ezwb8.fsf at junk.nocrew.org>
+Message-ID: <Pine.VUL.3.93.1000510094549.22474H-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 10 May 2000, lars brinkhoff wrote:
+
+> Johnny Billquist <bqt at Update.UU.SE> writes:
+> > > 	There was also the CSM (Call Supervisor Mode) instruction which was
+> > > 	on the 11/44 only (or did it make it into the later KDJ-11 line as
+> > > 	well - I forget).
+> > 
+> > Yes, CSM is in the J-11. There is also TSTSET in J11, but I wonder if
+> > anyone uses it.
+> 
+> Ok, so CSM is found in 11/44 and J11 machines?
+
+Yes.
+
+> And TSTSET is found only in J11?
+
+Yes.
+I think that the J11 had one or two other new instructions as well, but
+I'll have to look it up at home, unless someone beats me to it.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA77434
+	for pups-liszt; Wed, 10 May 2000 18:02:00 +1000 (EST)
+Received: from junk.nocrew.org (mail@[212.73.17.42])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA77430
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 18:01:52 +1000 (EST)
+Received: from lars by junk.nocrew.org with local (Exim 3.03 #1 (Debian))
+	id 12pRRA-0003LQ-00; Wed, 10 May 2000 10:01:44 +0200
+To: Johnny Billquist <bqt at Update.UU.SE>
+Cc: "Steven M. Schultz" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+References: <Pine.VUL.3.93.1000510094549.22474H-100000 at Zeke.Update.UU.SE>
+From: lars brinkhoff <lars@nocrew.org>
+Date: 10 May 2000 10:01:44 +0200
+In-Reply-To: Johnny Billquist's message of "Wed, 10 May 2000 09:46:50 +0200 (MET DST)"
+Message-ID: <857ld2zvdj.fsf at junk.nocrew.org>
+Lines: 7
+User-Agent: Gnus/5.0803 (Gnus v5.8.3) Emacs/20.5
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Johnny Billquist <bqt at Update.UU.SE> writes:
+> > And TSTSET is found only in J11?
+> Yes.
+> I think that the J11 had one or two other new instructions as well, but
+> I'll have to look it up at home, unless someone beats me to it.
+
+WRTLCK perhaps?
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id UAA77937
+	for pups-liszt; Wed, 10 May 2000 20:55:53 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.uu.se [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id UAA77933
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 20:55:43 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id MAA24782;
+	Wed, 10 May 2000 12:55:33 +0200
+Date: Wed, 10 May 2000 12:55:32 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: lars brinkhoff <lars at nocrew.org>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+In-Reply-To: <857ld2zvdj.fsf at junk.nocrew.org>
+Message-ID: <Pine.VUL.3.93.1000510125423.22474I-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 10 May 2000, lars brinkhoff wrote:
+
+> Johnny Billquist <bqt at Update.UU.SE> writes:
+> > > And TSTSET is found only in J11?
+> > Yes.
+> > I think that the J11 had one or two other new instructions as well, but
+> > I'll have to look it up at home, unless someone beats me to it.
+> 
+> WRTLCK perhaps?
+
+Yup. That sounds familiar. The J11 have several design features aimed at
+multi-processor systems. None were produced, however.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id XAA78420
+	for pups-liszt; Wed, 10 May 2000 23:02:28 +1000 (EST)
+Received: from junk.nocrew.org (mail@[212.73.17.42])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id XAA78416
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 23:02:18 +1000 (EST)
+Received: from lars by junk.nocrew.org with local (Exim 3.03 #1 (Debian))
+	for pups at minnie.cs.adfa.edu.au
+	id 12pW7o-0000ZD-00; Wed, 10 May 2000 15:02:04 +0200
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+From: lars brinkhoff <lars@nocrew.org>
+Date: 10 May 2000 15:02:04 +0200
+In-Reply-To: "Steven M. Schultz"'s message of "Tue, 9 May 2000 20:22:57 -0700 (PDT)"
+Message-ID: <85snvqy2wj.fsf at junk.nocrew.org>
+Lines: 72
+User-Agent: Gnus/5.0803 (Gnus v5.8.3) Emacs/20.5
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ok, I've tried to collect all information and make a handy table.
+I've also looked quit a bit at the processor feature table at
+http://www.pdp11.org/mirrors/www.psych.usyd.edu.au/pdp-11/table.html
+
+Could you please check that this table is correct?  In particular,
+some features may be optional instead of standard (yes) or missing
+(no), or vice versa.
+
+Some models are listed as (see XXX), where XXX is a CPU model used in
+that machine.  Are there more opportunities for doing that?  It would
+be nice to have two tables: "Machine model 11/NN used CPU models X11 or
+Y11."  "CPU model X11 had features A, B , and C."  Or something like
+that.
+
+Model	EIS	EIS40	CSM	TSTSET,	FPP	CIS	FIS
+				WRTLCK
+
+03	(see LSI11) (LSI-11 or LSI-11/2)
+04	no	no	no	no	no	no	no
+05	no	no	no	no	no	no	no
+10	no	no	no	no	no	no	no
+15	no	no	no	no	no	no	no
+20	no	no	no	no	no	no	no
+21	(see T11)
+23	(see F11)
+24	(see F11)
+34	yes	yes	no	no	yes	no	no
+35	opt	yes	no	no	no?	no	opt
+40	opt	yes	no	no	no	no?	opt
+44	yes	yes	yes	no	opt	opt     no?
+45      (see KB11)
+50      (see KB11)
+53	(see J11) (KDJ-11D?)
+55      (see KB11+) (KB-11D)
+60	yes	yes	no	no	yes[2]	no	no
+70	(see KB11+) (KB-11B or KB-11C)
+73	(see J11) (KDJ-11A or KDJ-11B)
+83	(see J11) (KDJ-11B?C?)
+84	(see J11) (KDJ-11B?C?)
+93	(see J11) (KDJ-11D?)
+94	(see J11) (KDJ-11D?)
+
+KB11	yes	yes	no	no	opt	no	no
+KB11+   yes	yes	no	no	yes[1]	no	no
+J11	yes	yes	yes	yes	yes	opt	no
+LSI11	opt	yes	no	no	no	no	opt
+T11	no	no	no	no	no	no	no
+F11	yes	yes	no	no	opt	opt	no
+
+[1] = really optional, but most shipped with fpp
+[2] = microcoded fpp standard, accelerated hardware fpp optional
+
+EIS = RTT, SPL, MARK, SXT, MUL, DIV, ASH, ASHC, XOR, SOB
+EIS40 = RTT, MARK, SXT, XOR, SOB
+FPP = CFCC, SETF, SETI, SETD, SETL, LDFPS, STFPS, STST, CLRF,
+      TSTF, ABSF, NEGF, MULF, MODF, ADDF, LDF, SUBF, CMPF, STF,
+      DIVF, STEXP, STCFI, STCFF', LDEXP, LDCIF, LDCFF'
+CIS = L2D, L3D, ADDP, ADDN, ADDNI, ADDPI, ASHN, ASHP, ASHNI,
+      ASHPI, CMPC, CMPCI, CMPN, CMPP, CMPNI, CMPPI, CVTLN,
+      CVTLP, CVT, CVTLNI, CVTLPI, CVTNL, CVTPL, CVLNI, CVTPLI,
+      CVTNP, CVTPN, CVTNPI, CVTPNI, DIVP, DIVPI, LOCC, LOCCI,
+      MATC, MATCI, MOVC, MOVCI, MOVRC, MOVRCI, MOVTC, MOVTCI,
+      MULP, MULPI, SCANC, SCANCI, SKPC, SKPCI, SPANC, SPANCI,
+      SUBN, SUBP, SUBNI, SUBPI
+FIS = FADD, FDIV, FMUL, FSUB
+
+KB11 = KB-11
+KB11+ = KB-11B, KB-11C, or KB-11D
+J11 = KDJ-11A or KDJ-11B
+LSI11 = LSI-11 or LSI-11/2
+T11 = ?
+F11 = ?
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id AAA78761
+	for pups-liszt; Thu, 11 May 2000 00:16:18 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.uu.se [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id AAA78757
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 11 May 2000 00:16:08 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id QAA26854;
+	Wed, 10 May 2000 16:15:56 +0200
+Date: Wed, 10 May 2000 16:15:55 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: lars brinkhoff <lars at nocrew.org>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+In-Reply-To: <85snvqy2wj.fsf at junk.nocrew.org>
+Message-ID: <Pine.VUL.3.93.1000510154632.22474K-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 10 May 2000, lars brinkhoff wrote:
+
+[table deleted...]
+
+First I think it's wrong of you to call the limited EIS stuff implemented
+by default on the 11/40 "EIS40". It's just that parts of the EIS was
+always available, with or without the optional EIS.
+
+Second, the FPU implemented in the 11/60 was a bit special, and not
+compatible with the normal FPU, which was an option. I'm not aware of
+anything that used the 11/60 internal FPU stuff.
+Specifically, it used the normal processor registers for operations, and I
+don't remember exactly if the data format was compatible, but it didn't
+have double precision at all. I can probably dig up specific details if
+you are interested. I think I have a processor handbook for the 11/60
+somewhere.
+
+About processor names:
+
+KA11 was the 11/15 and 11/20.
+KB11-A was the 11/45, 11/50.
+KB11-B was the 11/70.
+KB11-C was the 11/70.
+KB11-D was the 11/55.
+KB11-Cm and KB-11E was the never produced 11/74.
+KD11-A was the 11/35 and 11/40.
+KD11-B was the 11/05 and 11/10.
+KD11-D was the 11/04.
+KD11-E was the 11/34.
+KD11-EA was the 11/34a.
+KD11-[FHQ] was the 11/03.
+KD11-HA was the LSI-11/2.
+KD11-K was the 11/60.
+KD11-Z was the 11/44.
+
+KDF11 is F-11 based.
+KDJ11 is J-11 based.
+
+All as far as I can glean from various sources.
+KE11 is not a processor, but instead different processor options, such as
+EIS, FIS, EAE and such.
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id BAA79057
+	for pups-liszt; Thu, 11 May 2000 01:39:06 +1000 (EST)
+Received: from fw0.transarc.com (xfw.transarc.ibm.com [192.54.226.51])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id BAA79053
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 11 May 2000 01:38:58 +1000 (EST)
+Received: from mailhost2.transarc.ibm.com (mailhost2.transarc.ibm.com [9.38.192.125]) by fw0.transarc.com (AIX4.2/UCB 8.7/8.7) with ESMTP id LAA09672 for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 11:18:06 -0400 (EDT)
+Received: from smithfield.transarc.ibm.com (smithfield.transarc.ibm.com [9.38.192.92]) by mailhost2.transarc.ibm.com (8.8.0/8.8.0) with SMTP id LAA28911 for <pups at minnie.cs.adfa.edu.au>; Wed, 10 May 2000 11:37:56 -0400 (EDT)
+Date: Wed, 10 May 2000 11:37:51 -0400 (EDT)
+From: Pat Barron <pat@transarc.ibm.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+In-Reply-To: <200005100135.LAA02228 at psychwarp.psych.usyd.edu.au>
+Message-ID: <Pine.GSO.3.96.1000510111921.6129B-100000 at smithfield.transarc.ibm.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wed, 10 May 2000 johnh at psych.usyd.edu.au wrote:
+> 
+> Floating point is a bit more problematic. The kernel (see crevat latter) didn't
+> require it, but had to save FP status and registers on context switches.
+> Quite a few processors had the FPP as an option, and so there was FPP emulation
+> build into the kernel (conditionally). There were versions of the C compiler
+> that had code tables for the FIS, to suit the 11/35/40.
+> 
+
+This discussion brings back memories ... I once found a bug in the kernel
+floating-point stuff on V7m on an 11/40 (without FIS).  Turned out that,
+if you took a zero-length file, chmod'ed it to be executable, and then
+tried to run it, the kernel would take a path through the code that it
+didn't normally take, in which it tried to save the *real* FP registers -
+which were not there, and attempting to touch the missing registers would
+panic the machine.
+
+I found this while I was a lab assistant for a computer architecture
+course, taking care of this 11/40 that the department had just aquired
+(another department was about to discard it, so we picked it up ...), and
+which was being used by students learning assembly language programming.
+As you might imagine, these folks generated zero-length a.out files *all
+the time* (since that's what 'as' would sometimes output if your source
+code had errors in it), and sometimes they'd try to execute them.
+Therefore, the machine was crashing a couple of times a day until I found
+and fixed the bug ...
+
+--Pat.
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA79425
+	for pups-liszt; Thu, 11 May 2000 02:30:10 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA79421
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 11 May 2000 02:30:02 +1000 (EST)
+Received: (from root at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id JAA28584
+	for pups at minnie.cs.adfa.edu.au; Wed, 10 May 2000 09:20:58 -0700 (PDT)
+Date: Wed, 10 May 2000 09:20:58 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200005101620.JAA28584 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+From: lars brinkhoff <lars@nocrew.org>
+>>       There was also the CSM (Call Supervisor Mode) instruction which was
+
+> What bit pattern does that instruction have?
+
+	070DD
+
+	It's a single operand instruction.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA79549
+	for pups-liszt; Thu, 11 May 2000 03:06:26 +1000 (EST)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id DAA79545
+	for <PUPS at MINNIE.CS.ADFA.EDU.AU>; Thu, 11 May 2000 03:06:18 +1000 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.EDU.AU;
+          Wed, 10 May 2000 13:06:12 -0400
+Date: Wed, 10 May 2000 13:06:12 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <000510130612.202009f2 at trailing-edge.com>
+Subject: Re: Help: PDP-11 instruction classification (again!)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>Some models are listed as (see XXX), where XXX is a CPU model used in
+>that machine.  Are there more opportunities for doing that?  It would
+>be nice to have two tables: "Machine model 11/NN used CPU models X11 or
+>Y11."  "CPU model X11 had features A, B , and C."  Or something like
+>that.
+
+It's complicated by the fact that often the same CPU module was used in
+differently DEC-labeled systems.  For example, a late-rev KDJ11B with
+PMI memory in a Q-bus is an 11/83; the exact same CPU board with non-PMI
+memory in a Q-bus is an 11/73.  And the exact same CPU board in a very
+different backplane is an 11/84.
+
+And an 11/73 can also have a KDJ11A in it, a very different module.
+See Micronote #39.
+
+At one point I began writing up a "KDJ11-x" FAQ, but never got it
+finished.  There are many variations between different revs of the
+J11 CPU chip and the boards, especially with respect to whether
+FPJ11's work properly or not.  Many (but not all) of the KDJ11 differences
+are well described in Micronote #39, _KDJ11-A and KDJ11-B Differences_.
+
+(Side hint: everyone should have a copy of the Micronotes.  If you don't
+have a printed set, you can read them online at
+
+  http://metalab.unc.edu/pub/academic/computer-science/history/pdp-11/
+
+by clicking on "Micronotes").
+
+>53     (see J11) (KDJ-11D?)
+
+Yes, the 11/53 is a KDJ11-D.
+
+>93     (see J11) (KDJ-11D?)
+>94     (see J11) (KDJ-11D?)
+
+93's and 94's are KDJ11-E's.
+
+>J11 = KDJ-11A or KDJ-11B
+
+And lots of other systems.  Some DEC peripherals (most noticably the
+early HSC storage controllers for VAXclusters) have J11's, several Xerox
+laserprinters used J11's, DEC PRO380's used J11's.  Many third-party
+CPU boards use J11's, it's not unusual to see them scrounging the used
+market for HSC's to strip the J11 from, as the HSC's generally had late-rev
+J11's.  (And Harris hasn't made the J11 chips for many years now.)
+
+>T11 = ?
+
+Never sold as a "PDP-11" system, though the chip does implement the
+basic PDP-11 instruction set (and some of the add-ons.)  It was sold
+by DEC in the KXT11-CA single board computer, which had a T11, 32K RAM,
+up to 32K of EPROM, 3 serial lines, some parallel I/O, and a Q-bus
+interface.  For more information see
+
+  Micronote #16, _KXT11-CA Development Tools_
+
+  Micronote #18, _KXT11-CA DMA Programming_
+
+  Micronote #32, _KXT11-CA Parallel I/O_
+
+  Micronote #34, _Programming KXT-11C Multi SLU_
+
+You can find T11 chips in several Q-bus and Unibus peripherals, most notably
+the RQDX1, 2, and 3 (the chip labeled "27-17311-01").
+
+>F11 = ?
+
+aka "Fonz-11", the CPU chipset used in 11/23's, 11/24's, the lower-end
+DEC PRO's, etc.
+
+The CPU chipset used in the LSI-11/02 and /03 is a Western Digital chipset,
+and the same set was used (with different microcode) by other CPU makers.
+In particular, the Alpha Micro two-board S-100 set.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id EAA79749
+	for pups-liszt; Thu, 11 May 2000 04:04:13 +1000 (EST)
+Received: from europe.std.com (europe.std.com [199.172.62.20])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id EAA79738
+	for <PUPS at minnie.cs.adfa.edu.au>; Thu, 11 May 2000 04:04:00 +1000 (EST)
+From: allisonp@world.std.com
+Received: from world.std.com (allisonp at world-f.std.com [199.172.62.5])
+	by europe.std.com (8.9.3/8.9.3) with ESMTP id OAA08691;
+	Wed, 10 May 2000 14:03:40 -0400 (EDT)
+Received: from localhost (allisonp at localhost)
+	by world.std.com (8.9.3/8.9.3) with SMTP id OAA10265;
+	Wed, 10 May 2000 14:03:35 -0400 (EDT)
+Date: Wed, 10 May 2000 14:03:35 -0400 (EDT)
+To: Tim Shoppa <SHOPPA at trailing-edge.com>
+cc: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: Help: PDP-11 instruction classification (again!)
+In-Reply-To: <000510130612.202009f2 at trailing-edge.com>
+Message-ID: <Pine.SGI.3.95.1000510135452.6336D-100000 at world.std.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> 
+> >53     (see J11) (KDJ-11D?)
+> 
+> Yes, the 11/53 is a KDJ11-D.
+
+Not KDF-11B????
+
+> And lots of other systems.  Some DEC peripherals (most noticably the
+> early HSC storage controllers for VAXclusters) have J11's, several Xerox
+
+HSC was F11, J11 or T11???  I thought T11 or f11 in the early models.
+
+> laserprinters used J11's, DEC PRO380's used J11's.  Many third-party
+> CPU boards use J11's, it's not unusual to see them scrounging the used
+> market for HSC's to strip the J11 from, as the HSC's generally had late-rev
+> J11's.  (And Harris hasn't made the J11 chips for many years now.)
+
+> >T11 = ?
+> 
+> Never sold as a "PDP-11" system, though the chip does implement the
+> basic PDP-11 instruction set (and some of the add-ons.)  It was sold
+> by DEC in the KXT11-CA single board computer, which had a T11, 32K RAM,
+> up to 32K of EPROM, 3 serial lines, some parallel I/O, and a Q-bus
+> interface.  For more information see
+> 
+
+You forget the falcon card KXT-11A, That with two MXT11 memory IO combo
+have you 32kw ram, 4 serial, boot and some parallel that would run rt-11.
+

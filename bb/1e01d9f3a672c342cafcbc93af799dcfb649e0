@@ -1,0 +1,124 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 2 Jan 2017 13:42:31 +1100
+Subject: [TUHS] Unix stories
+In-Reply-To: <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+References: <CAH1jEzaLux09LFYSXgSgf2Bo+kNp-E=ZG++p9wbD6H-oG60nbw@mail.gmail.com>
+ <5257291ca0a0e1d80c646cab730129d589c5d707@webmail.yaccman.com>
+Message-ID: <CAH1jEzbnqCPYDfOqmAE+N=4jFG4YoitUf=+w29FUOP7wGw6KXg@mail.gmail.com>
+
+This is something I think about a lot. And I can't really say how
+adding an option to gcc (for example) should be tested. In fact I'm a
+bit lazy when it comes to adding test cases even though I recognize
+their validity. Programming by test case is a good idea, but one
+problem is the setup cost, for a new project I tend to just write a
+two-line Makefile and start coding, and I really want to keep doing
+this. Once I start adding a testcase infrastructure then the Makefile
+is a lot bigger (make tests and so forth) and relies on external tools
+etc. Simplicity really can be better, I mean once you start using
+tools like cmake/smake, ant, or (THE HORRORS) maven, it's a time
+waste.
+
+But what I really want to say here, is a lot of the bloat arises
+because different ecosystems have different ways of doing things. For
+instance the object model. Well C++ has an object model. And C has an
+object model (based on void * pointers, lots of libraries export this
+kind of object model including FILE * in stdio). And gnome has an
+object model. And OpenOffice/StarOffice defines its own object model
+which is similar to Microsoft's COM. And so on and so forth. So, much
+as I like the democracy of an open ecosystem where everyone can define
+a competing way of doing the same thing and de facto standards
+develop... my own plan is a little bit different.
+
+What I want to do is go back to a REALLY SIMPLE unbloated system,
+which is why I am very interested in 2.11BSD (you probably saw my
+earlier posts about the 2.11BSD system and potential port to Z180 and
+so on). And then I want to define the ONE TRUE WAY(TM) of doing each
+thing. But before I do this I want to go right back to basics and look
+at the object model used in the operating system itself. For instance
+the stuff like the oft (open file table), inode table, the filesystem
+table (I mean Sun VFS which isn't in 2.11BSD AFAIK but eventually
+should be), the device table and so on. And also the user-visible
+objects like files, sockets etc which map to kernel objects.
+
+So once I have sorted all this out and created an object model that
+the kernel can use efficiently, with compiler support (like C++
+without the bloat, like java with internal pointers and ability to get
+at the bits and bytes of your objects, like C without all the void *
+stuff and with automatic handling of stuff like vtables), and
+converted the kernel and all drivers to use it, then I think I will
+have an object model that is useful in practice. So my idea then is to
+export it to userlevel, so that userland programs can be rewritten
+into this new C-like object oriented language and calls like: count =
+read(fd, buf, size) would change to: count = fd.read(buf, size) since
+kernel objects are objects. There would also be a compatibility layer
+that allows you to keep a table of integer fds and their kernel
+objects in userspace for porting.
+
+After this I would start to look at popular libraries like the C
+library or the X-Window system, and convert them to use the new object
+model, while also providing the compatibility layer as I did for the
+kernel interface. Ultimately the result would be a bit like Java, but
+using all the familiar Unix objects and familiar Unix calling
+conventions (such as argument passing by reference or malloc/memcpy
+stuff that Java can't do). Also without any header files or
+boilerplate of any description, which is one of my pet peeves with
+Java, C, C++ etc.
+
+I really think that the solution to bloat is to go through and rewrite
+everything to do things in a more standardized way with more reuse.
+Also I think that the massive amount of bloat arises to some extent
+because the environment lends itself to writing non maintainable code
+(for example you have to write loads of boilerplate and synchronize
+function definitions in various places, which discourages you from
+changing a function definition even if that's the right thing to do in
+a situation). So there's always the temptation to add another
+compatibility layer rather than dealing with the bloat. Rewriting
+things in a much more minimal and maintainable style is the answer.
+
+Another reason for bloat is that authors have to support millions of
+slightly different systems. My idea is to totally standardize it, like
+POSIX but much more drastically so. Think about Java, it defines a
+strict virtual machine so there's nothing to change when you port your
+code to another platform. I haven't totally decided how to handle
+word-size issues in this context, but I am sure there is a way.
+
+Did i mention I also have plans for world domination? :)
+
+cheers, Nick
+
+
+On Mon, Jan 2, 2017 at 1:03 PM, Steve Johnson <scj at yaccman.com> wrote:
+>
+> These stories certainly rang true to me.  I think it's interesting to pose
+> the question, to be a bit more contemporary, "What do we need to do to make
+> open source code higher quality?"  I think the original arguments (that open
+> source would be high quality because everybody would read the code and fix
+> the bugs) has a bit of validity.  But, IMHO, it is swamped by the typical
+> in-coherence of the software.
+>
+> It seems to me to be glaringly obvious that if you add a single on/off
+> option to a program, and don't want the quality of the code to decrease, you
+> should a priori double the amount of testing you do before it releasing it.
+> If you have a carefully designed program with multiple phases with firewalls
+> between them, you might be able to get away with only 10 or 20% more
+> testing.
+>
+> So look at gcc with nearly 600 lines in the man page describing just the
+> names of the options...   It seems obvious that the actual amount of testing
+> of these combinations is a set of measure 0 in the space of all possible
+> invocations.  And the observed fact is that if you try to do something at
+> all unusual, no matter how reasonable it may seem, it is likely to fail.
+> Additionally, it is kind sad to see the same functionality (e.g., increasing
+> the default stack size) is done so differently on different OS's.  Even
+> within Linux, setting the locale (at least at one time) was quite different
+> from Linux to Linux.
+>
+> And I think you can argue that gcc is a success story...
+>
+> But how much longer can this go on?  What can we do to fight the exponential
+> bloat of this and other open-souce projects.  All ideas cheerfully
+> entertained...
+>
+> Steve
+>
+

@@ -1,0 +1,58 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sun,  3 Jan 2016 20:59:06 -0500 (EST)
+Subject: [TUHS] Early Unix function calls: expensive?
+Message-ID: <20160104015906.4BF9843F88@lignose.oclsc.org>
+
+As late as 1990, every UNIX I knew of still used the
+expensive calls/ret instructions for subroutine calls.
+I vaguely remember a consensus (and I certainly shared
+the feeling) that in hindsight it would have been better
+to use jsb/rsb, but changing everything would have been
+so much work that nobody wanted to do it.
+
+1990 was already past peak VAX in the UNIX world, so
+I can't imagine anyone bothering to make such a change
+to an existing system after then.  Especially a system
+that already had many existing installations who would
+have to deal with the resulting compatibility problem.
+
+During the latter part of the 1990s, I was actively
+supporting a private UNIX system just for myself on
+a few MicroVAXes at home.  One of the things I did
+was to write a VAX code generator for the then-current
+version of lcc (the one around which the book was
+written), so as to have an ISO-compatible compiler
+and convert all of /usr/src (not so big even in those
+days) to ISO.  It was an interesting exercise and I
+learned a lot, but even then, I wasn't brave enough to
+adopt an incompatible subroutine-calling convention.
+
+Another big time waste in the original VAX UNIX was
+the system-call interface: arguments were left on the
+stack (where they had been put before calling the
+syscall stub routine in libc); the kernel then had
+to do a full-fledged copyin to get them.  It occurred
+to me more than once to change the convention and have
+the syscall stubs copy the arguments into registers
+before executing the chmk (syscall) instruction.
+That instruction didn't touch the registers; the
+kernel saved them early in the chmk trap routine,
+in its own address space, so no copying or access
+checking would have been required to fetch their
+call-time contents.
+
+That would still have been a messy change to make,
+because I'd have to be sure every program had been
+relinked with the new-style libc before changing the
+kernel.  (This was a system without shared libraries.)
+But on a personal system it would have been doable.
+I never did.
+
+It's possible that current UNIX-descended/cloned systems
+that have VAX ports, like Linux or Open/Free/NetBSD,
+have had a chance to start over and do better on
+subroutine calls and system calls.  Does anyone know?
+
+Norman Wilson
+Toronto ON
+

@@ -1,0 +1,43 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Fri, 11 Sep 2015 09:44:56 -0700
+Subject: [TUHS] Did realloc ever zero the new memory?
+In-Reply-To: <1441986088.9291.for-standards-violators@oclsc.org>
+References: <1441986088.9291.for-standards-violators@oclsc.org>
+Message-ID: <72b8190786e0faf1ecb7bd11c94cff87.squirrel@webmail.yaccman.com>
+
+Maybe I can clear up some of the confusion.  I too believe that malloc and
+realloc never zeroed the newly added memory.  However, at some point
+someone realized that when Unix added a page to the memory available to a
+process, it didn't clear that page.  Somebody wrote a small program that
+would, from time to time, malloc a chunk of memory and look for
+interesting things in it (e.g., ASCII strings).  It was rather effective,
+and soon Unix was changed so that any new pages were cleared before they
+were added to the process.
+
+Many mallocs tried to allocate a page if you asked for that size memory
+(it depended on whether the control info was in the same arena as the
+memory blocks or not).  So if your program used such a malloc and you
+allocated full pages at a time, you might have silently seen malloc turn
+into calloc, albeit in a completely non-portable way.  I suspect realloc
+worked similarly.
+
+Steve
+
+
+> I've never heard before of a belief that the new memory belonging
+> to realloc is always cleared, except in conjunction with the utterly-
+> mistaken belief that that's true of malloc as well.  I don't think it
+> was ever promised to be true, though it was probably true by accident
+> just often enough (just as often as with malloc) to fool the careless.
+>
+> Norman Wilson
+> Toronto ON
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+
+
+
+

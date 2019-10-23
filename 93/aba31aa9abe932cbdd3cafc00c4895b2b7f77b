@@ -1,0 +1,83 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2ca7f5ad
+	for <ml@inbox.vuxu.org>;
+	Fri, 11 Jan 2019 22:19:16 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4E8CC9467C; Sat, 12 Jan 2019 08:19:15 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9165694666;
+	Sat, 12 Jan 2019 08:18:57 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 81F8E94666; Sat, 12 Jan 2019 08:18:55 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2843D93D29
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 08:18:55 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 080E735E145; Fri, 11 Jan 2019 14:18:53 -0800 (PST)
+Date: Fri, 11 Jan 2019 14:18:53 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: reed@reedmedia.net
+Message-ID: <20190111221853.GB7733@mcvoy.com>
+References: <39F862F7-7C4B-4A09-B838-942BE0FD2626@planet.nl>
+ <1581c01d4a9c2$ffed5340$ffc7f9c0$@ronnatalie.com>
+ <CAC20D2Ni4jvA9POZKaQx6O_Dq=Nq5TfdLgbr__oWgrXme=+GHg@mail.gmail.com>
+ <alpine.NEB.2.21.1901111528210.21728@t1.m.reedmedia.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <alpine.NEB.2.21.1901111528210.21728@t1.m.reedmedia.net>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, Jan 11, 2019 at 04:08:25PM -0600, reed@reedmedia.net wrote:
+> Can someone tell me about SCCS behaviour when renaming/moving or 
+> deleting files? In particular, I think the select() code prior to 
+> 82/07/15 had different source filenames that no longer exist and the 
+> SCCS history was lost.  Anyone else have ideas about this?  I have 
+> noticed this with other SCCS spelunking where code was removed and then 
+> corresponding "s" files were missing -- but maybe that is just the way 
+> the systems that our current snapshots (McKusick discs) of this history 
+> were made from. Maybe sccs didn't checkout the history of deleted files 
+> by default (that is my guess).
+
+Ah, SCCS is my jam (I rewrote it from scratch as part of BitKeeper).
+
+SCCS didn't know about renames, it was strictly checkin/checkout.
+BitKeeper added the concept of "inode" to SCCS though it was not
+an integer like an inode in Unix, it was what we called a "key"
+and it looked like 
+
+	user@host|pathname|time_t|SCCS_chksum|64bits_of_dev_random
+
+There was a key for each delta and the name of the file was an 
+attribute of the delta just as the contents were.  So internally
+we worked in keys but externally you used file names and it was
+trivial to see where the file had lived.
+
+Anyhoo, I digress, that's all BitKeeper, not SCCS.  If you have
+the SCCS history somewhere where I can get it I might be able to
+find the file you want.  Just point me at (I know I have that 
+set somewhere but no idea where they are).
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 

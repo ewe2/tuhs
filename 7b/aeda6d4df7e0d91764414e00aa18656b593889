@@ -1,0 +1,81 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu,  1 Feb 2018 08:03:11 -0500 (EST)
+Subject: [TUHS] Odd behaviour on V6 startup, etc
+Message-ID: <20180201130311.4BAB118C0B2@mercury.lcs.mit.edu>
+
+As I mentioned recently, Dave Bridgham and I are doing an RK11 emulator (and
+soon an RP11, which just will take editing the Verilog a tiny bit) using an
+SD card for storage, for heritage computer collectors who want to run their
+PDP-11's but don't want to risk a head crash (since replacement heads are now
+un-obtainium) - and also for people who have an -11, but no mass storage.
+
+So the last stage was bringing up V6 on a hardware PDP-11/23, using the
+emulated RK11, and we were having an issue (which turned out to be partial
+block reads/writes not working properly; this has since been fixed, and we
+have successfullly booted V6 on the -11/23 with only an SD card).
+
+
+In the process of debugging that issue, I added logging to the RK driver, and
+noticed that in the process of attempting to boot single-user, the system was
+trying to do some swapping - two writes, and two reads - before it even tried
+doing the fork() to create the shell process, followed by opening /dev/tty8
+and doing the exec() of /bin/sh.
+
+This confused me, since both newproc() and expand() have code which uses a
+memory-memory copy if there is enough free memory - and on first booting,
+there definitely was. Why was it swapping?
+
+
+So I added some more logging, and the cause turned out that at one point, I
+had re-compiled /etc/init - and without thinking about it too hard, had made
+it a pure-text program.
+
+And that's what did it: in exec() (called when process 1 tries to exec()
+/etc/init), it calls xalloc(), which i) if the text was not already
+available, gets together the pure text, and puts a copy on the swap device,
+and ii) if the text is not already in core, swaps the rest of the process
+out, because, as the code explains:
+
+ * if the calling process
+ * is misplaced in core the text image might not fit.
+ * Quite possibly the code after "out:" could check to
+ * see if the text does fit and simply swap it in. 
+
+If you're looking at the code, the process doesn't have a data segment at
+that point, just the U area; the data will be set up later in the exec()
+code, after the call to xalloc() returns, after the process is swapped back
+in.
+
+In fact, the process will _never_ have anything other than a U area when in
+this code; the only call to xalloc() in the system is immediately preceeded
+by an "expand(USIZE)" which throws away everything except the U area.
+
+
+So I'm contemplating doing what the comment suggests - adding code to check
+to see if there's enough memory available to hold the pure text, and if so,
+avoiding the swap-out/in of the process' U-only data segment.
+
+If done 'right', it should also be possible to allow avoiding the reading-in
+of the text from the swap device, when first exec'ing a pure text...
+
+Probably not as interesting a project as doing the splice() system call was,
+but no doubt it will teach me about a corner of the system I don't know very
+well (back in the day, doing networking stuff, I was mostly looking at I/O
+code).
+
+Although there is potentially a certain amount of amusement in an additional
+enhancement, which is trying to make sure there's enough room for both the
+text and the data; immediately upon the return from xalloc(), the process is
+expanded to have room for the data. Which might involve _another_ swap-out/in
+sequence...  So perhaps the U area should simply be moved out of the way via a
+direct memory-memory copy, rather than swapping it out/in, just before doing
+it again!
+
+You are not expected to understand this... :-)
+
+I guess I should first take a look at the PWB1 pure text code, which is
+heavily modified from the stock V6, to see what it does - this all may have
+already been done there.
+
+	Noel
+

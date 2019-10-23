@@ -1,0 +1,164 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Tue, 1 Mar 2016 19:07:54 +1000
+Subject: [TUHS] PDP-7 cat is working
+Message-ID: <20160301090754.GA27599@minnie.tuhs.org>
+
+All, I've got the original PDP-7 cat working in my PDP-7 user-mode
+simulator called "a7out". The cat.s source code and the a7out program are
+in the Github repository in src/cmds and tools, respectively.
+The repository is at https://github.com/DoctorWkt/pdp7-unix
+The mailing list is at http://minnie.tuhs.org/pipermail/pdp7-unix/
+
+I'm attaching the a.out assembly output as the as7 assembler in the
+repository currently is not quite ready for cat.s.
+
+To run the original cat, create a text file, e.g. echo hello > file1
+
+$ ./a7out a.out file1
+hello                   <- the output of the PDP-7 machine code
+
+Cheers, Warren
+
+P.S Thanks again to Norman for getting us the scans.
+-------------- next part --------------
+000000: 237777	   lac 017777 i
+000001: 540407	   sad d4			" Skip if we have more than four argument words
+000002: 600052	     jmp nofiles		" Only four argument words, so no arguments
+000003: 217777	   lac 017777			" Move five words past the argument word count
+000004: 340406	   tad d1			" so that AC points at the first argument
+000005: 340407	   tad d4			" and save the pointer in name
+000006: 040010	   dac name
+000007: 000003	   sys open; name:0; 0		" Open file, get fd back
+000010: 000000	
+000011: 000000	
+000012: 741100	   spa
+000013: 600035	     jmp badfile		" Negative fd, exit with an error message
+000014: 040301	   dac fi			" Save file descriptor in fi
+000015: 100104	   jms getc			" Get a character in AC
+000016: 540407	   sad o4
+000017: 600022	     jmp 1f			" Break the loop when we get a ctrl-D
+000020: 100140	   jms putc			" Write the character on stdout
+000021: 600015	   jmp 1b			" and loop back
+000022: 200301	   lac fi			" Close the file descriptor in fi
+000023: 000011	   sys close
+000024: 777774	   -4
+000025: 377777	   tad 017777 i			" Subtract 4 from the count of argument words
+000026: 077777	   dac 017777 i
+000027: 540407	   sad d4			" Is the value 4, i.e. no args left?
+000030: 600064	     jmp done			" Yes, so exit
+000031: 200010	   lac name			" Still an argument, so move up
+000032: 340407	   tad d4			" to the next filename argument
+000033: 040010	   dac name
+000034: 600007	   jmp loop			" and loop back to cat this file
+000035: 200010	   lac name			" Get the pointer to the filename
+000036: 040041	   dac 1f			" Store it in 1f below
+000037: 200410	   lac d8			" Load fd 8 which is stderr
+000040: 000005	   sys write; 1:0; 4		" Write the four words of the filename
+000041: 000000	
+000042: 000004	
+000043: 200410	   lac d8
+000044: 000005	   sys write; 1f; 2		" and then write " ?\n"
+000045: 000050	
+000046: 000002	
+000047: 600024	   jmp loop1			" Now try doing the next argument
+000050: 000040	1: 040;077012			" String literal: " ?\n"
+000051: 077012	
+000052: 200410	   lac d8
+000053: 000005	   sys write; 1f; 5		" Write "No files\n" to stderr
+000054: 000057	
+000055: 000005	
+000056: 000016	   sys exit			" and exit
+000057: 156157	1: <no>; 040;  <fi>;<le>;<s 012
+000060: 000040	
+000061: 146151	
+000062: 154145	
+000063: 163012	
+000064: 200404	   lac noc			" Is the number of characters left zero?
+000065: 741200	   sna
+000066: 000016	     sys exit			" Yes, exit
+000067: 500406	   and d1
+000070: 751200	   sna cla
+000071: 600074	     jmp 1f
+000072: 100140	   jms putc			" Print out the character
+000073: 600064	   jmp done			" and loop back
+000074: 200404	   lac noc			
+000075: 744020	   rcr
+000076: 040102	   dac 1f
+000077: 200405	   lac fo			" Load fd 1, stdout
+000100: 000005	   sys write; iopt+1; 1:..
+000101: 000304	
+000102: 000000	
+000103: 000016	   sys exit
+000104: 000000	getc: 0
+000105: 200176	   lac ipt			" Load the pointer to the next word in the buffer
+000106: 540177	   sad eipt
+000107: 600123	     jmp 1f			" We've reached the end of the buffer, so read more
+000110: 040174	   dac 2f			" Save the pointer
+000111: 300411	   add o400000			" Flip the msb and save into ipt
+000112: 040176	   dac ipt
+000113: 740010	   ral				" Move the msb into the link register
+000114: 220174	   lac 2f i			" Load the word from the buffer
+000115: 741400	   szl				" Skip if this is the second character in the word
+000116: 660511	     lrss 9			" It's the first char, shift down the top character
+000117: 500412	   and o177			" Keep the lowest 7 bits
+000120: 741200	   sna
+000121: 600105	     jmp getc+1			" Skip a NUL characters and read another one
+000122: 620104	   jmp getc i			" Return the character from the subroutine
+000123: 200301	   lac fi			" Buffer is empty, read another 64 characters
+000124: 000004	   sys read; iipt+1; 64
+000125: 000201	
+000126: 000100	
+000127: 741200	   sna
+000130: 600136	     jmp 1f			" No characters were read in
+000131: 340200	   tad iipt			" Add the word count to the base of the buffer
+000132: 040177	   dac eipt			" and store in the end buffer pointer
+000133: 200200	   lac iipt			" Reset the ipt to the base of the buffer
+000134: 040176	   dac ipt
+000135: 600105	   jmp getc+1			" and loop back to get one character
+000136: 200407	   lac o4			" No character, return with ctrl-D
+000137: 620104	   jmp getc i			" return from subroutine
+000140: 000000	putc: 0
+000141: 500412	   and o177			" Keep the lowest 7 bits and save into 2f+1
+000142: 040175	   dac 2f+1
+000143: 200302	   lac opt			" Save the pointer to the empty buffer
+000144: 040174	   dac 2f			" position to 2f
+000145: 300411	   add o400000			" Flip the msb and save back into opt
+000146: 040302	   dac opt			" This also has the effect of incrementing
+000147: 741100	   spa				" If the bit was set, we already have one
+000150: 600154	     jmp 1f			" character at 2f+1. If no previous character,
+000151: 220174	   lac 2f i			" merge the old and new character together
+000152: 240175	   xor 2f+1
+000153: 600156	   jmp 3f			" and go to the "save it in buffer" code
+000154: 200175	   lac 2f+1			" Move the character up into the top half
+000155: 660711	   alss 9
+000156: 060174	   dac 2f i			" Save the word into the buffer
+000157: 440404	   isz noc			" Add 1 to the char count, never skipping
+000160: 200404	   lac noc			" Have we reached 128 characters, 64 words?
+000161: 540413	   sad d128
+000162: 741000	     skp
+000163: 620140	   jmp putc i			" No, so return (more room still in the buffer)
+000164: 200405	   lac fo			" Load fd1 (i.e stdout)
+000165: 000005	   sys write; iopt+1; 64	" and write out the 64 words in the buffer
+000166: 000304	
+000167: 000100	
+000170: 200303	   lac iopt
+000171: 040302	   dac opt			" Set opt pointing back to base of buffer
+000172: 140404	   dzm noc			" Set the number of chars in the buffer to 0
+000173: 620140	   jmp putc i			" and return
+000174: 000000	2: 0;0				" Current input and output word pointers
+000175: 000000	
+000176: 000000	ipt: 0				" Current input buffer base
+000177: 000000	eipt: 0				" Pointer to end of data read in input buffer
+000200: 000201	iipt: .+1; .=.+64		" 64 word input buffer and pointer to it
+000301: 000000	fi: 0				" Input file descriptor
+000302: 000304	opt: .+2			" Current output buffer base
+000303: 000304	iopt: .+1; .=.+64		" 64 word output buffer and pointer to it
+000404: 000000	noc: 0				" Number of output characters
+000405: 000001	fo: 1				" Output file descriptor, fd 1 is stdout
+000406: 000001	d1: 1				" Octal and decimal constants
+000407: 000004	o4:d4: 4
+000410: 000010	d8: 8
+000411: 400000	o400000: 0400000		" Msb toggle bit
+000412: 000177	o177: 0177			" ASCII mask
+000413: 000200	d128: 128			" 128 words in the output buffer
+

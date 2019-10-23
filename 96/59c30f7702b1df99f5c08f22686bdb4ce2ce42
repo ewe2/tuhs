@@ -1,0 +1,70 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sat, 07 Nov 2015 23:13:38 +0100
+Subject: [TUHS] System III - TCP/IP
+In-Reply-To: <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+References: <20151107200358.Horde.M1lYZZyTC4t0Qb8KrygKzhy@avocado.salatschuessel.net>
+ <20151107192043.GA11895@mcvoy.com>
+ <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+Message-ID: <20151107231338.Horde.d8EIgIMMf9VYCExfovc2K_M@avocado.salatschuessel.net>
+
+
+Clem Cole <clemc at ccc.com> wrote:
+
+> 0.) adding pty's is pretty easy.  Just grab the BSD code and start
+> hacking.  Grab the original version of Steven's book - he will talk to you
+> through it in detail.   It's a two drivers, the control (ptyX) and the
+> slave (ttypX) .   Having them in your system is handy anyway for a number
+> of things besides networking (like the expect(1) program).
+
+Yeah.. having pty would be good anyway but the C compiler is so limited
+that it would be just some sort of rewrite instead of "porting"...
+
+It is basically a pcc as of 1981 with whatever Zilog hacked into it
+additionally. I once tried to get a current pcc onto the system but...
+yeah... I guess I lack skill ;)
+- the new PCC would need to create Z8001 ASM code.... something I lack skill.
+- an optimizer... haha...  no way I could  even optimize Z8001 ASM code by
+   hand ;)
+- if a new linker is needed - how to create Zilogs s.out format...
+- I guess I would need to recompile the whole kernel with this new compiler
+   to have every object work "together" - but I still lack some sources (most
+of them I "retranslated" from disassembled object files to C code - but 2 or
+3 are just are too hard to retranslate)
+I also had a look at the C-Compiler which comes with Plexis SYSIII (which
+is available as source somewhere in the WWW) but this is a compiler capable
+of non-segmented executables (one 64K segment adressable) only but I need a
+Compiler creating segmented executables (128 64k segments accessable = 8MB
+address space)
+
+So I'm stuck with this '81ish C compiler - ok - but who said that it would
+be an easy task ;)
+
+
+> 4.) It strikes me that it would be easiest of all to just take something
+> like a $20-$30 "Wiznet" 5100 board from Sparkfun and interface it to the
+> system either via serial or better if you have a parallel port.   Then run
+> the IP/TCP stack externally.   This is what we do for Arduino's and other
+> small micro controllers - the board is well documents and easy to talk
+> too.  They have both RJ45 style and wireless too.   I have a hand full of
+> them here and am pretty happy with them for what they provide.
+
+I was thinking about the same. I have connectors on the board where I have
+access to the System complete bus. They where used for things like a RTC,
+system memory, Tape controller and so on. So I could build up a board using
+Wiznet and thats it. So no need of a PIO or SIO which would things kinda slow
+anyway... Wiznet would be of course faster as the Z8001 would do in any way.
+
+But what comes to my mind with that solution... I would need a kernel part
+which interacts with the wiznet chip (driver). I can not directly access
+the wiznet from userland which would be non privileged code which is not
+allowed to execute privileged instructions (raises a trap).
+On the userland side...
+I probably have to "rewrite" all the stuff which comes with BSD and uses
+libnet. Pr is there something like a compatibility layer which provides
+a library looking like a libnet API but internally "redirects" everything
+to the wiznet (via the to-be-written-kernel-driver) so I wouldn't need to
+reinvent all the userland tools as well?
+
+Oliver
+
+

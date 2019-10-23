@@ -1,0 +1,37 @@
+From: patbarron@acm.org (Pat Barron)
+Date: Fri, 18 Mar 2016 13:01:03 -0400
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <20160318004832.GA18245@minnie.tuhs.org>
+References: <20160318004832.GA18245@minnie.tuhs.org>
+Message-ID: <56EC344F.6040507@acm.org>
+
+On 3/17/2016 8:48 PM, Warren Toomey wrote:
+> As a side note, the PDP-7 kernel knows about the top-level directory ("dd")
+> but it is agnostic to the concept of "." and "..". What that means is
+> that you can build a filesystem with "." and ".." links and the kernel
+> will deal with them as per all other links. But you can also build a
+> filesystem without "." or ".." and the kernel doesn't care.
+>
+> There's not enough evidence (source code, papers, anecdotes) to confirm
+> or deny the presence of "." in the PDP-7 code that Norman scanned for us.
+> ".." does seem to exist as it is mentioned in one source file, ds.s.
+> It's an intruiging mystery.
+
+So, I'm trying to figure out - at what point did "." and ".." really 
+become part of the filesystem?  Even as late as V7, "." and ".." were 
+not automatically added to directories when created - the "mkdir" 
+program used mknod() to create the directory, and then created the links 
+for "." and ".." by itself.  I see code in the kernel that has special 
+handling of "." in unlink(), and also some in "namei()" - but I don't 
+see anywhere where ".." is obviously handled at all.  Though I figure it 
+has to be, somehow, because when mkdir makes the directory and creates 
+the links for "." and "..", it doesn't have to figure out the inode 
+number or anything - that part just seems to happen behind the scenes.  
+I just can't figure out where or how....
+
+The first place I saw where mkdir() became a system call, and the system 
+call handled "." and ".." by itself, was in 4.1BSD....
+
+--Pat.
+
+

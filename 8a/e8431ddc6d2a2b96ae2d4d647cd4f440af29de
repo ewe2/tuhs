@@ -1,0 +1,24 @@
+From: ron@ronnatalie.com (Ronald Natalie)
+Date: Wed, 23 Jan 2013 13:19:46 -0500
+Subject: [TUHS] History of strncpy
+In-Reply-To: <12408BE9-5FC8-4ECA-93C1-38D27EF1DA23@ieee.org>
+References: <CAGg_6+MMAB9pqrMkiD7kd8gGyRYdSDeV9AZ7zaAOC9etO=GP1Q@mail.gmail.com>
+ <CAC20D2N_XbQ1Hb=bh-rAChVrRw+C3LOErWS0M845VreFvPaPTQ@mail.gmail.com>
+ <5CE5BCC9-06CF-423D-AEBA-636952773EDA@ronnatalie.com>
+ <12408BE9-5FC8-4ECA-93C1-38D27EF1DA23@ieee.org>
+Message-ID: <0A836D4A-A8D0-4A5D-98F3-AA962CC38EF0@ronnatalie.com>
+
+Decrementing the reference count in the inode also cleared an allocated bit in the flags (unless it was held open after deleted).    It also added it to an ersatz-free list of 100 entries, but unlike the disk freespace, that didn't have a provision to link to more entries.   After the inode freetable was exhausted, the inodes were scanned to find more free ones to replenish the list.
+
+The original v6 filesystem code wasn't very transaction safe.   When the machine crashed, you can almost count on a file in the process of deletion having either a mismatched number of appearances in directories versus the reference count in the inode.    The program "dcheck" was run to reconcile these.    Of course, dcheck only reported the errors.   Fixing them was more fun (especially since fsdb was yet to be written).    Any files that were open but deleted would be left allocated with 0-0 link count and references.     A program "clri" would zero out the entire inode for these files to fix that.   Of course, that's a bit brute force (and hard to reverse if you screwed up and did the wrong one).    We rewrote it to only reset the allocated bit.
+
+The kernel didn't have any string functions either.   Namei (the function that handles mapping file names to inodes) just used char*'s to traverse, compare, and copy the strings.   The code that handled the arguments for exec did the same.   m45.s where many assembler utility functions lived had some block copying (although they are not heavily used by the C code which just as soon would copy things with loops)  but nothing that knew anything about strings.
+
+On Jan 23, 2013, at 10:24 AM, Armando Stettner wrote: 
+
+> I also second/support Ron's and uh Clem's view.  In addition to zeroing out the inumber field, "removing" a file decremented the reference count in the i-node causing it to be freed (not cleared) when the reference count went to zero.  There was no strncpy() in the kernel.  Was there a strcpy() (other than a macro) in the kernel??  Long live movtuc.
+> 
+>> 
+
+
+

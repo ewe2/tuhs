@@ -1,0 +1,100 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Mon, 25 Sep 2017 13:57:06 -0400
+Subject: [TUHS] Sockets and the true UNIX
+Message-ID: <1506362230.23809.for-standards-violators@oclsc.org>
+
+Clem Cole:
+
+  It was never designed for it.  dmr designed Streams to replace the
+  tty handler.   I never understood  why the Summit guys insisted on
+  forcing networking into it.
+
+======
+
+You've mistaken.  The point of the stream I/O setup with
+stackable line disciplines, rather than the old single
+line-discipline switch, was specifically to support networking
+as well as tty processing.
+
+Serial-device drivers in V7 used a single line-discipline
+driver, used variously for canonical-tty handling and for
+network protocols.  The standard system as used outside
+the labs had only one line discipline configured, with
+standard tty handling (see usr/sys/conf/c.c).  There were
+driver source files for what I think were internal-use-only
+networks (dev/pk[12].c, perhaps), but I don't think they
+were used outside AT&T.
+
+The problem Dennis wanted to solve was that tty handling
+and network protocol handling interfered with one another;
+you couldn't ask the kernel to do both, because there was
+only one line discipline at a time.  Hence the stackable
+modules.  It was possible to duplicate tty handling (probably
+by placing calls to the regular tty line discipline's innards)
+within the network-protocol code, but that was messy.  It also
+ran into trouble when people wanted to use the C shell, which
+expected its own special `new tty' line discipline, so the
+network code would have to know which tty driver to call.
+It made more sense to stack the modules instead, so the tty
+code was there only if it was needed, and different tty
+drivers could exist without the network code knowing or caring.
+
+When I arrived at the Labs in 1984, the streams code was in
+use daily by most of us in 1127.  The terminals on our desks
+were plugged into serial ports on Datakit (like what we call
+a terminal server now).  I would turn on my terminal in the
+morning, tell the prompt which system I wanted to connect to,
+and so far as I could tell I had a direct serial connection.
+But in the remote host, my shell talked to an instance of the
+tty line module, which exchanged data with a Datakit protocol
+module, which exchanged data with the low-level Datakit driver.
+If I switched to the C shell (I didn't but some did), csh would
+pop off the tty module and push on the newtty module, and the
+network code was none the wiser.
+
+Later there was a TCP/IP that used the stream mechanism.  The
+first version was shoehorned in by Robert T Morris, who worked
+as a summer intern for us; it was later cleaned up considerably
+by Paul Glick.  It's more complicated because of all the
+multiplexers involved (Ethernet packets split up by protocol
+number; IP packets divided by their own protocol number;
+TCP packets into sessions), but it worked.  I still use it at
+home.  Its major flaw is that details of the original stream
+implementation make it messy to handle windows of more than
+4096 bytes; there are also some quirks involving data left in
+the pipe when a connection closes, something Dennis's code
+doesn't handle well.
+
+The much-messier STREAMS that came out of the official System
+V people had fixes for some of that, but at the cost of quite
+a bit more complexity; it could probably be done rather better.
+At one point I wanted to have a go at it, but I've never had
+the time, and now I doubt I ever will.
+
+One demonstration of virtue, though: although Datakit was the
+workhorse network in Research when I was there (and despite
+the common bias against virtual circuits it worked pretty well;
+the major drawback was that although the underlying Datakit
+fabric could run at multiple megabits per second, we never had
+a host interface that could reliably run at even a single megabit),
+we did once arrange to run TCP/IP over a Datakit connection.
+It was very simple in concept: make a Datakit connection (so the
+Datakit protocol module is present); push an IP instance onto
+that stream; and off you go.
+
+I did something similar in my home V10 world when quickly writing
+my own implementation of PPP from the specs many years ago.
+The core of that code is still in use in my home-written PPPoE code.
+PPP and PPPoE are all outside the kernel; the user-mode program
+reads and writes the serial device (PPP) or an Ethernet instance
+that returns just the desired protocol types (PPPoE), does the
+PPP processing, and reads and writes IP packets to a (full-duplex
+stream) pipe on the other end of which is pushed the IP module.
+
+All this is very different from the socket(2) way of thinking,
+and it has its vices, but it also has its virtues.
+
+Norman Wilson
+Toronto ON
+
+

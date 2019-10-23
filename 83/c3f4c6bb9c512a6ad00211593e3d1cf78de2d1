@@ -1,0 +1,61 @@
+From: rudi.j.blom@gmail.com (Rudi Blom)
+Date: Tue, 7 Mar 2017 11:16:56 +0700
+Subject: [TUHS] communication files: interprocess IO before pipes
+Message-ID: <CAMYpm87_dNaDL4kqjzxroffigpoS9L4+yZcaMsCrfKiHr0YgJQ@mail.gmail.com>
+
+On SCO UNIX 3.2V4 pipes where simulated as follows
+
+	int fd[2]
+	struct strfdinsert	ins;
+
+	/*
+	 * First open the stream clone device "/dev/spx" twice,
+	 * obtaining the two file descriptors.
+	 */
+	if ( (fd[0] = open(SPX_DEVICE, O_RDWR)) < 0)
+	{
+		gen_trace(gtr_flag, "-gen_pipe(): -open(fd[0]): %s\n", strerror(errno));
+		break;
+	}
+	if ( (fd[1] = open(SPX_DEVICE, O_RDWR)) < 0)
+	{
+		gen_trace(gtr_flag, ">gen_pipe(): -open(fd[1]): %s\n", strerror(errno));
+		close(fd[0]);
+		break;
+	}
+
+	/*
+	 * Now link these two streams together with an
+	 * I_FDINSERT ioctl.
+	 */
+	ins.ctlbuf.buf     = (char *) &pointer; /* no ctl info, just the ptr */
+	ins.ctlbuf.maxlen  = sizeof(queue_t *);
+	ins.ctlbuf.len     = sizeof(queue_t *);
+	ins.databuf.buf    = (char *) 0;        /* no data to send */
+	ins.databuf.len    = -1; /* magic: must be -1, not 0, for stream pipe */
+	ins.databuf.maxlen = 0;
+	ins.fildes = fd[1];     /* the fd to connect with fd[0] */
+	ins.flags  = 0;         /* nonpriority message */
+	ins.offset = 0;         /* offset of pointer in control buffer */
+
+	if (ioctl(fd[0], I_FDINSERT, (char * ) &ins) < 0)
+	{
+		gen_trace(gtr_flag, ">gen_pipe(): -ioctl(I_FDINSERT): %s\n", strerror(errno));
+		close(fd[0]);
+		close(fd[1]);
+		break;
+	}
+
+	/*
+	 * reset close_on_exec flag
+	 */
+	gen_trace(gtr_flag, ">gen_pipe(): +fcntl()\n");
+	if ((rc = fcntl(fd[0], F_SETFD, 0)) == -1)
+		gen_trace(gtr_flag, ">gen_pipe(): -fcntl(fd0, close_on_exec): %s\n",
+			strerror(errno));
+	if ((rc = fcntl(fd[1], F_SETFD, 0)) == -1)
+		gen_trace(gtr_flag, ">gen_pipe(): -fcntl(fd1, close_on_exec): %s\n",
+			strerror(errno));
+	rc = 0;
+	break;
+

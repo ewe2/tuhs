@@ -1,0 +1,36 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Sat, 25 Nov 2017 13:59:10 -0800
+Subject: [TUHS] Harvard and Von Neumann Architectures and Unix
+In-Reply-To: <20171125142424.3518A18C0D9@mercury.lcs.mit.edu>
+References: <20171125142424.3518A18C0D9@mercury.lcs.mit.edu>
+Message-ID: <BA65888D-47A6-43DF-9AE0-1F7E13FBE83B@bitblocks.com>
+
+
+
+> On Nov 25, 2017, at 6:24 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+> 
+>> From: Doug McIlroy
+> 
+>> Optimal code for bitblt (raster block transfers) in the Blit
+> 
+> Interesting case. I'm not familiar with BitBLT codes, do they actually modify
+> the existing program, or rather do they build small custom ones? Only the
+> former is what I was thinking of.
+
+This was the only way we could handle four 9600 baud serial connections
+on a 5.5Mhz 68000 processor. Back then the UART we used only buffered
+one character (also the case with the old 16450) - so one interrupt per char.
+And we "discovered" devices at runtime. So Yost wrote some code to hook
+up customized interrupt handlers that stuffed a larger char buffer specific
+to each UART. Essentially "partially evaluated" interrupt handler code to
+minimize memory accesses. A separate s/w interrupt was used to service
+the larger buffers.
+
+This was done at boot time but another instance of self-modifying code
+(that is not a virus) at runtime was by the old gcc compiler - don't know
+what it does now - but pointer to a GNU C's lexically nested function was
+actually a piece of code that was constructed at runtime with hardwired
+static link in it (recall that a nested function can reference variables from
+its lexical environment but normal C function pointers are represented as
+a single pointer).
+

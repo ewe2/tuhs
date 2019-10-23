@@ -1,0 +1,113 @@
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Date: Wed, 22 May 02 13:12:55 PDT
+Subject: [TUHS] simh vax and 4.3-quasijarus
+Message-ID: <0205222012.AA03045@ivan.Harhan.ORG>
+
+Rico Pajarola <rp at servium.ch> wrote:
+
+> I installed 4.3-quasijarus on simh [...]
+> I have been unable to boot it directly from it's 'own'
+> filesystem.
+>
+> here's what I see, complete transcript at the end
+> > >>>boot dua0
+> > (BOOT/R5:0 DUA0)
+> > 
+> > 
+> > 
+> >   2..
+> > -DUA0
+> > HALT instruction, PC: 00000C1A (MOVL (R11),SP)
+
+My ability to help you here will be limited because you are using simh rather
+than a real VAX. The real KA655 console ROM does not issue halt messages like
+the above, its halt message have a different form (the one prescribed by DEC
+STD 032-0, VAX Architecture Standard). The last message above does not exist on
+any real VAX made by DEC.
+
+> that's obviously not what I want. I tried all combinations of
+> installboot and disklabel -B I can think of, both in netbsd and
+> quasijarus, and all lead to the same result.
+>
+> Can anybody tell me the exact incantations necessary to install
+> the bootblocks for quasijarus0a [...]
+
+This seems like a simh problem, or, more probably since you can boot That Other
+OS successfully, a problem with your installation of 4.3BSD-Quasijarus0a masked
+by a simh problem. You've got a halt inside VMB that happened after VMB had
+successfully opened the boot device but before it accepted a valid bootblock.
+What happens on a real KA655 is as follows: the console copies VMB from the
+EPROM to RAM and transfers control to it, which is accompanied by the display
+of 2.. on the console and on the CPU module LEDs. At that point the VAX is
+unhalted, i.e., the RUN indicator on the front panel lights up. VMB thus runs
+as user code and tries to perform the bootstrap. As VMB successfully opens the
+boot device using its built-in drivers, it displays the device name in VMS
+format on the console. Then if it finds and accepts a valid bootblock it
+displays 1.. on the console and on the CPU module LEDs. Finally it transfers
+control to the bootblock accompanied by 0.. display. If something goes wrong
+and VMB gives up, it prints its own error message on the console and then
+executes a HALT instruction to return to the console prompt. The HALT
+instruction halts the VAX (the RUN indicator on the front panel goes out) and
+invokes the console, which prints the halt message followed by the >>> prompt
+as prescribed by DEC STD 032-0.
+
+It looks like you are seeing VMB fail for some reason and halt, giving you the
+(not compliant with DEC STD 032-0) halt message from simh. However, you are not
+seeing VMB's error message which on a real KA655 will always appear before the
+halt message from the console. This is a simh problem, it obviously does not
+fully and properly emulate the real KA655 here. I cannot help you past this
+point as I only support real VAX hardware. There is probably something wrong
+with your bootblock as your emulated VAX's VMB is not accepting it while
+accepting the one on DUA1 from That Other OS, but your poor emulator prevents
+you from seeing what the problem is.
+
+> So far I have not been able to boot any other VAX operating system
+> from the TUHS archive, the netbsd bootloader cannot load ultrix32m,
+> 32v and 3bsd.
+
+I don't know / don't care much about That Other OS and its bootloader, but the
+format of the VAX unix/vmunix kernel image and its boot interface has remained
+absolutely unchanged from 32V through 4.3BSD-Quasijarus0a inclusive (but see
+below about VAX model support). DEC has extended the boot interface in Ultrix,
+but it's completely backward compatible: as the Ultrix bootloader starts the
+kernel with a calls instruction, it passes one argument (calls $1) whereas
+traditional Bell/Berkeley UNIX had zero (calls $0). A traditional kernel will
+simply ignore this argument, while the Ultrix kernels checks for its presence
+(thanks to the wonderful VAX architecture and its procedure call standard that
+allows a procedure to determine its argument count) and lives without it if
+it's absent. (That argument is a pointer to a structure with useful info,
+however, and I plan to adopt this extension in 4.3BSD-Quasijarus1.)
+
+> I have not yet had time to try any of the other 4.x
+> bsds, but I assume they'd have the same problem as quasijarus0a.
+
+4.3BSD-Quasijarus0 was the first release to support KA650/655, so don't bother
+trying earlier ones. (Although you could try 4.3-Reno if that's what you like.)
+
+> I don't
+> have ultrix/vax media to do it right
+
+You can get the complete TK50 distribution (tape images) of Ultrix V4.00 for
+VAX on my FTP site ivan.Harhan.ORG in /pub/UNIX/thirdparty/Ultrix-32. I have
+full sources for it there too.
+
+> Ultrix 4.3 gives me:
+> > 466788+254256+177476+[36984+34990] total=0xecfa2
+
+OK, so the kernel has been loaded successfully.
+
+> > machine check 82: vap 82000004 istate1 7c000c00 istate2 c070fe pc 80001c61 psl 41f0008
+> > r0=8000000c, r1=8000167c, r2=0, r3=211bd0dd, r4=0, r5=dd274
+> > panic: mchk
+
+Since Ultrix V4.3 perfectly supports the KA655 CPU, this again must be a case
+of simh misemulating it.
+
+My advice to you is to get a real VAX.
+
+MS
+
+P.S. You may want to subscribe to the Quasijarus mailing list, send a request
+to quasijarus-request at ifctfvax.Harhan.ORG.
+
+

@@ -1,0 +1,66 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Fri, 21 Mar 2003 10:26:17 -0800 (PST)
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <200303211826.h2LIQH906763@moe.2bsd.com>
+
+Hi -
+
+> From: "Ian King" <iking at killthewabbit.org>
+> Now I know I'm missing something.  I tried following your advice, using the
+> disklabel utility running under the old kernel.  From what you say below, I
+
+	Which part of the advice?   ;)
+
+	The part of the advice that might be most useful was to put a 
+	copy of the standalone disklabel program in / and boot it - NOT
+	run the usermode version while the system is running.
+
+	cd /sys/pdpstand
+	make
+	cp disklabel /
+
+	then reboot the system and at the ':' prompt enter ra(0,0)disklabel
+
+	there are things that can be done with the standalone version that
+	are either impractical under a kernel (because the 'a'/root partition
+	is open/busy) or because the standalone version has no safety checks.
+
+> assume you are referring to the 'fstype' parameter on the partition, not the
+> 'type' parameter for the drive, correct?  The drive type is MSCP, and the
+> partition fstype is 2.11BSD.
+
+	'fstype' is what I had in mind.  
+
+  a:    16720        0   2.11BSD     1024  1024         # (Cyl.    0 - 39)
+
+> I tried changing the partition type with disklabel -e -r but, when I exited
+> vi, I got an error message saying that the type I'd provided was not valid.
+> Viewing the label (with disklabel -r) showed the fstype set to 'unknown'.
+
+	Now I am confused.   2.11BSD is correct - but then it's "unknown" and
+	that would cause the 'iinit' panic that started this thread of
+	discussion.
+
+	Down the path of logic that results in a 'iinit' panic and the 
+	'no fs' there's a check for the filesystem type and "unknown" was the
+	likely cause (or at least that was the hope).
+
+	If the standalone disklabel program says it's "2.11BSD" then there's
+	something else going on - the next likely thought is that 'rootdev'
+	or related entity isn't set to the device that is the actual root
+	filesystem.
+
+> Just for grins, I tried modifying the drive type, too - no success there,
+> either.  The disklabel utility isn't having any of that; again it claims
+> 'unknown'.
+
+	That's not used for anything important.
+
+> Oh well, while I'm waiting for your reply I can rebuild my kernel with a
+> higher MAXUSERS parameter.  :-)
+
+	~12 is a good number - not much need for more than that as a rule.
+
+	Steve
+
+

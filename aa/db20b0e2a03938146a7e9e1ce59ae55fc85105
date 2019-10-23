@@ -1,0 +1,87 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 9 Nov 2015 11:21:18 +1100
+Subject: [TUHS] System III - TCP/IP
+In-Reply-To: <20151108143817.Horde.tlWgdF0OWmzmg-kXXO-AxUO@avocado.salatschuessel.net>
+References: <20151107200358.Horde.M1lYZZyTC4t0Qb8KrygKzhy@avocado.salatschuessel.net>
+ <20151107192043.GA11895@mcvoy.com>
+ <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+ <20151107231338.Horde.d8EIgIMMf9VYCExfovc2K_M@avocado.salatschuessel.net>
+ <20151108051028.GA32246@cowbell.employees.org>
+ <CAH1jEzbzpuwzncuEFQMHHD-pHHk_4SHre2PY5BPZNpY_HAgXCw@mail.gmail.com>
+ <20151108143817.Horde.tlWgdF0OWmzmg-kXXO-AxUO@avocado.salatschuessel.net>
+Message-ID: <CAH1jEzarQAW4ucfP81RRhP0pgkFiHiiMAH9F=a6DsEEiU0Uy=Q@mail.gmail.com>
+
+Although the Z8000 has segments, they will require special code to
+access, and so you will have to regard it as a 16 bit CPU from the
+viewpoint of running ordinary unix kernel/applications.
+
+You can most likely implement a split I/D architecture by having code
+execute out of a different segment than data, although I haven't
+checked the datasheet so I don't know for sure if this is possible.
+You can also do a few other things -- you could for example make mbufs
+and bufs reside in different segments and wrap all kernel accesses to
+them in macros, which would free up significant space in the main
+kernel data segment. Or you could do what I did for the Z180
+implementation, (the first try -- UZI / NOS derivative, not the
+proposed 2.11BSD port), which I somewhat borrowed from the IAR's Z180
+C compiler -- the calling convention allows for a segment switch on
+function call and return, so you can have large multi-segment
+executables.
+
+In my implementation I had a 768 kbyte RAM disk which was formatted
+unix style (not BSD style unfortunately), but I had an alignment
+routine which put executable files into contiguous blocks on 4kbyte
+boundaries (normally the filesystem had 1kbyte blocks), and I created
+a mapping table, and I revised the IAR compiler's calling stubs to
+allow executing multi segment executables direct from RAM disk. This
+would work in your system with minor porting, but unfortunately it's
+not implemented in 2.11BSD, it's in my earlier code. You're welcome to
+it, though.
+
+The kernel and some of the utilities in 2.11BSD are large enough to
+require split I/D, I didn't have that, but proposed to get around it
+by using multi-segmented executables (my memory map allowed for 4
+kbytes of stubs and utility code/data, 56 kbytes of data and 4 kbytes
+of the currently visible code segment). So you will have to either
+implement split I/D or multi-segmented executables, it doesn't matter
+which. Check how your sys3 system handles this, because you will
+probably want to take as much of the assembly code from the sys3
+system as possible.
+
+So given you're implementing a 16 bit system, you should definitely go
+for 2.11BSD, it's simply the most advanced and the only reasonable
+unix system out there that executes in 64 kbytes. You can look at
+4.3BSD, personally I looked at a later BSD and I discovered that the
+network stack is significantly cut down in 2.11BSD, and for good
+reasons. For example it does not implement syn cookies (protection
+against TCP SYN DOS attacks), presumably because this required some
+largeish kernel tables. You don't need the complexity, you want
+2.11BSD I think.
+
+Nick
+
+On Mon, Nov 9, 2015 at 12:38 AM, Oliver Lehmann <lehmann at ans-netz.de> wrote:
+>
+> Nick Downing <downing.nick at gmail.com> wrote:
+>
+>> I think you might get better mileage by just trying to port 2.11BSD over
+>> to
+>> your Z8001 device, since it is a self contained system, no interface
+>> hacking will be needed, just porting.
+>
+>
+> By the way - why do you think 2.11 BSD would be better to port instead of
+> the
+> original 4.3 BSD? The system has no 64KB addressing limitation. It can
+> adress
+> up to 128 64KB segments (=8MB). I mean, on a first look, it looks like
+> 2.11BSD
+> contains a lot more Assembler Code I would need to move to Z8001 ASM
+> mnemonics
+> as 4.3 does?!
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+

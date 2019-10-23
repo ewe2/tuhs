@@ -1,0 +1,47 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 19 Mar 2018 10:03:59 -0400 (EDT)
+Subject: [TUHS] PDP-11 DIV instruction lossage
+Message-ID: <20180319140359.2204C18C088@mercury.lcs.mit.edu>
+
+    > I'll have to redo my kludgy fix to gmtime() ... I guess I'll have to fix
+    > it for real, instead of my kludgy fix (which extended it to work for
+    > 16-bit results). :-)
+    > ...
+    > And on the -11/23:
+    > Note that the returned 'quotient' is simply the high part of the dividend.
+
+Heh. I had decided that the easiest clean and long-lived fix was to just to do
+it right, using the long division routine used in the V7 C compiler runtime:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/src/libc/crt/ldiv.s
+
+and I vaguely recalled reading a DMR story that talked about that, so just for
+amusement I decided to re-read it, and looked it up:
+
+  https://www.bell-labs.com/usr/dmr/www/odd.html
+
+(the section "Comments I do feel guilty about"), and it's lucky I did, because
+I found this:
+
+  Addendum 18 Oct 1998
+
+  Amos Shapir of nSOF (and of long memory!) just blackened (or widened) the
+  spot a bit more in a mail message, to wit:
+ 
+  'I gather the "almost" here is because this trick almost worked... It has a
+  nasty bug which I had to find the hard way!
+
+  The "clever part" relies on the fact that if the "bvc 1f" is not taken, it
+  means that the result could not fit in 16 bits; in that case the long value
+  in r0,r1 is left unchanged. The bug is that this behavior is not documented;
+  in later models (I found this on an 11/34) when the result does fit in 16
+  bits but not in 15 bits ... which makes this routine provide very strange
+  results!'
+
+So this code won't work on an 11/23 either (which bashes the low register of
+the pair; above). I'd have been groveling in buggy math, again...
+
+Caveat Haquur (if you're trying to run stock V7 on a /23 or /34)!
+
+       Noel
+

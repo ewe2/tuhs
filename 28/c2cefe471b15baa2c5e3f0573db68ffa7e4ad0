@@ -1,0 +1,92 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 3a2ad76e
+	for <ml@inbox.vuxu.org>;
+	Tue, 30 Apr 2019 12:01:42 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E875C94902; Tue, 30 Apr 2019 22:01:40 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 362B1948F1;
+	Tue, 30 Apr 2019 22:01:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 54472948F1; Tue, 30 Apr 2019 22:01:19 +1000 (AEST)
+X-Greylist: delayed 515 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 30 Apr 2019 22:01:18 AEST
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7DC52948F0
+ for <tuhs@minnie.tuhs.org>; Tue, 30 Apr 2019 22:01:18 +1000 (AEST)
+Received: from callcc.thunk.org (adsl-173-228-226-134.prtc.net
+ [173.228.226.134]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id x3UBqVep023878
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 30 Apr 2019 07:52:33 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id 1F86A420023; Tue, 30 Apr 2019 07:52:31 -0400 (EDT)
+Date: Tue, 30 Apr 2019 07:52:31 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Bakul Shah <bakul@bitblocks.com>
+Message-ID: <20190430115231.GK3789@mit.edu>
+References: <20190428165452.9BB414422F@lignose.oclsc.org>
+ <97e93751-6e2f-a120-2159-0fb0246ad683@gmail.com>
+ <D239CD94-F1BA-47B0-9E16-4F67C09C5CEA@bitblocks.com>
+ <20190429180512.q2jrlsyhvb7cx4ev@h-174-65.A328.priv.bahnhof.se>
+ <20190429223226.303F9156E40C@mail.bitblocks.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190429223226.303F9156E40C@mail.bitblocks.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+Subject: Re: [TUHS] A question about ls(1)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Apr 29, 2019 at 03:32:19PM -0700, Bakul Shah wrote:
+> > My workstation Debian system has a staggering 3467 files in that
+> > directory, spread around 444 directories (75 directories directly
+> > under ~/.config). Plus another 142 dot-directories and 66 dotfiles in
+> > ~/. Now, ~/.config typically uses multiple files per application, and
+> > at a glance there's some stuff there that could definitely go, but I
+> > still shudder to think of having all of those directly under ~/, so
+> > it's clearly doing _some_ good in that regard.
+> 
+> I suspect most of these files contain some state and cached
+> application data or content as opposed to configuration.
+
+Applications which follow the XDG specification (which is what
+specified ~/.config are supposed to use ~/.cache for cache files (the
+per-user analog of /var/cache) and ~/.local/share for data files (the
+per-user analog of /usr/share).  These locations can be overridden by
+the environment variables XDG_CACHE_HOME, XDG_DATA_HOME, and
+XDG_CONFIG_HOME to override ~/.config.
+
+While I would never under-estimate the ability for application writers
+to Get Things Wrong[1], at least in theory there should *not* be state
+or cache files stored in ~/.config.
+
+[1] For example, GUI text editors updating precious files in place
+using O_TRUNC, as opposed to writing to foo.new, reading the extended
+attributes and Posix ACL's from file foo and writing them to foo.new,
+calling fsync, and then renaming foo.new to foo --- because The Right
+Way is too much trouble for an application author.  Sigh....
+
+Cheers,
+
+						- Ted

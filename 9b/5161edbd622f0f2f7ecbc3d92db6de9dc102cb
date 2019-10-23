@@ -1,0 +1,73 @@
+From: dds@aueb.gr (Diomidis Spinellis)
+Date: Fri, 23 Dec 2016 19:15:04 +0200
+Subject: [TUHS] Validating the s2-bits tape epoch
+Message-ID: <5f63c34a-aa66-f462-8a39-cce86348aa27@aueb.gr>
+
+The document 
+http://www.tuhs.org/Archive/PDP-11/Distributions/research/1972_stuff/Readme 
+discusses the uncertainty regarding the epoch used for the file timestamps.
+
+"The biggest problem here is to pin down the epoch for the files. In the
+early version of UNIX, timestamps were in 1/60th second units. A 32-bit
+counter using these units overflows in 2.5 years, so the epoch had to
+be changed periodically, and I believe 1970, 1971, 1972 and 1973 were
+all epochs at one stage or another."
+
+"Given that the C compiler passes, and the library, are dated in June
+of the epoch year, and that Dennis has said ``1972-73 were the truly
+formative years in the development of the C language'', it's therefore
+unlikely that the epoch for the s2 tape is 1971: it is more likely to
+be 1972. The tape also contains several 1st Edition a.out binaries,
+which also makes it unlikely to be 1973."
+
+"Therefore, Warren's decoding of the s2-bits file, in s2-bits.tar.gz,
+uses 1972 as the epoch. However, Dennis decoding in s2.tar.gz uses 1973."
+
+"Finally, the date(1) a.out on the tape uses 1971 as its archive. How 
+annoying! After a bit of discussion, Dennis and Warren have agreed that 
+1972 is the most probable epoch for s2-bits."
+
+I thought I could validate the epoch by looking at the distribution of 
+weekdays for the three alternative years (1971 to 1973).  Here are the 
+results.
+
+wget 
+http://www.tuhs.org/Archive/PDP-11/Distributions/research/1972_stuff/Readme
+for guess in 1971 1972 1973 ; do
+   echo $guess
+   EPOCH=$(date +'%s' -d "$guess/01/01 00:00 UTC")
+   awk '/\/core/,/\/etc\/init/ {
+    if ($9) print strftime("%a", '$EPOCH' + $9 / 60)}' Readme |
+    sort |
+    uniq -c |
+    sort -n
+done
+
+1971
+       1 Sat
+       6 Mon
+       8 Thu
+       8 Tue
+      17 Fri
+      21 Wed
+      34 Sun
+1972
+       1 Sun
+       6 Tue
+       8 Fri
+       8 Wed
+      17 Sat
+      21 Thu
+      34 Mon
+1973
+       1 Tue
+       6 Thu
+       8 Fri
+       8 Sun
+      17 Mon
+      21 Sat
+      34 Wed
+
+As you can see, unless weekends at the Bell Labs were highly atypical, 
+1972 has the most probable distribution of work among the days of the week.
+

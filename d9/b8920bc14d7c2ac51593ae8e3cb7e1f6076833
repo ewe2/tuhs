@@ -1,0 +1,25 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 14 Nov 2015 18:07:16 -0500
+Subject: [TUHS] link() syscall implementation
+References: <20151114133415.Horde.waGYhqdGBssNHzZf3_TcC5x@avocado.salatschuessel.net>
+ <20151114135635.Horde.6nqJB5AyLmQsx2fCZX4iZtZ@avocado.salatschuessel.net>
+ <20151114161757.Horde.RL0PZVub39UDZ9-Qr0wtXdW@avocado.salatschuessel.net>
+ <m2bnawqnze.fsf@fastmail.com>
+ <20151114224205.Horde.pNedl1JFkdNwTKQKHr6OiXv@avocado.salatschuessel.net>
+Message-ID: <m2y4e0p4d7.fsf@fastmail.com>
+
+Oliver Lehmann <lehmann at ans-netz.de> writes:
+> OK - it is not temporarily copied to rr4, but directly modfied in
+> rr2 and then assigned to u.u_dirp. It should be "the same" - But
+>  - ln(1) does not work with this code. Instead of creating a
+> hardlink, it creates a new empty file (different inode).
+
+Are you sure this is where the problem is?
+
+For the pointer assignment, what about just using u.u_dirp.l =
+uap->linkname, and validating there are no invalid bits (return EFAULT
+or raise SIGSEGV if so - also should the user code really be allowed to
+pass in arbitrary segment IDs?) in a separate step?
+
+
+

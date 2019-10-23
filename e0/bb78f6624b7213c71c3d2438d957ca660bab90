@@ -1,0 +1,59 @@
+From: dot@dotat.at (Tony Finch)
+Date: Wed, 7 Jun 2017 15:58:50 +0100
+Subject: [TUHS] Array index history
+In-Reply-To: <20170607135004.GB7802@yeono.kjorling.se>
+References: <CAH_OBiewwwS6kbdWKUO-j3v=Do+Y9AzBn4ZkyVic7LOJN5WX7w@mail.gmail.com>
+ <CAH_OBid5q-YeB6UYeOfjW68s3nb3TX_icC5dFMapfo=7_q5DUQ@mail.gmail.com>
+ <CAH_OBideJeNGiiys=VOEYcU1cffSg+6zDOD39HOU74vumQF0kA@mail.gmail.com>
+ <CAH_OBie_+dQXOC2OaZii5K=j1Ljmv-OvAVXvyypoLJ10jaysWA@mail.gmail.com>
+ <CAH_OBidXd1Lpgp8ttM3sWLfXDT0ms5EGAzEjPH9QkY+bXyev2w@mail.gmail.com>
+ <CAH_OBifge2RrwcDvSV46gwLAc0wHVtH++gdMBhXi-x8C0a_2jw@mail.gmail.com>
+ <CAH_OBic3MTy-20C_T2ciT2x+EjNZvXR2PJ0OzB0qRp1gd2OL-g@mail.gmail.com>
+ <CAH_OBifFdBTOD6xXAhWE61GbvmF_TQ5HBHhUU-SFx=AXn1=J+Q@mail.gmail.com>
+ <201706071320.v57DKhmJ026303@freefriends.org>
+ <20170607135004.GB7802@yeono.kjorling.se>
+Message-ID: <alpine.DEB.2.11.1706071524340.21595@grey.csi.cam.ac.uk>
+
+Michael Kjörling <michael at kjorling.se> wrote:
+>
+> And https://www.bell-labs.com/usr/dmr/www/bcpl.pdf page 11 (PDF page
+> 14) says:
+>
+> > 4.7 Vector Applications
+> > /.../
+> > Semantics: A vector is represented by a pointer to a consecutive
+> > group of words which are the elements of the vector. The pointer
+> > points to the zeroth element.
+
+That syntax is quite different from the later BCPL that I'm familiar with.
+http://www.cl.cam.ac.uk/~mr10/bcplman.pdf
+
+It has a ! indirection operator which can be both unary and binary, as in
+
+	old BCPL	new BCPL	C
+
+	lv x		@x		&x
+	rv ptr		!ptr		*ptr
+	ptr*[i]		ptr!i		ptr[i]
+
+Richards' 1969 paper uses a down-arrow for binary !
+
+You can use "manifest" constants for laying out a structure, e.g.
+
+	MANIFEST { car; cdr; }
+
+declares car and cdr to have values 0 and 1. This lets you do struct-style
+indirection using the same operator as for array indexing, like in this
+function definition:
+
+	LET cadr(p) = p!cdr!car;
+
+When I saw how ->integ is used in the 6th Edition kernel it felt very BCPL
+to me.
+
+Tony.
+-- 
+f.anthony.n.finch  <dot at dotat.at>  http://dotat.at/  -  I xn--zr8h punycode
+Shannon: Cyclonic becoming southwest, 5 or 6. Moderate or rough. Rain.
+Moderate or poor.
+

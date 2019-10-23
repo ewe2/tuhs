@@ -1,0 +1,74 @@
+From: jigsaw@gmail.com (jigsaw)
+Date: Tue, 3 Oct 2006 12:05:27 +0300
+Subject: [TUHS] Reading UNIX V6: Does eash process has its own user
+	structure, or all the processes share one copy of it?
+Message-ID: <2051ec920610030205j67a6446cv53e6d7a180a43273@mail.gmail.com>
+
+hi All,
+
+Again, I run into problems when reading slp.c and savu/retu.
+
+Actually, I have 3 questions.
+
+First, I doubt whether all processes share one "u" or each process has
+its own "u".
+
+line 0402: One allocated per process.
+
+It seems that each process has its own user structure.
+
+But the "u" is defined as a universal variable (line 0459), and the
+line 0407 clearly states that the "u" resides at virtual kernel loc
+140000.
+
+So isn't it saying that there's only one "u" in the core memory?
+
+
+This concept is very important, because it's bound tightly with
+savu/retu mechanism.
+
+---------------------------------------------------------------------------
+
+Now comes the second question:
+
+The savu procedure is supposed to save r5 and sp to u.u_rsav,
+and the retu is supposed to reset the r5 and sp with the saved values.
+
+If each process has its own u, then savu/retu simply work fine.
+
+But if all processes share one u, the newest call to savu will
+overwrite the previously saved values of r5 and sp, so that retu is
+not able to get back the r5/sp again!
+
+The story is like this:
+1889: r5/sp of process #1 are saved to u.u_rsav
+2189: r5/sp of process #0 are saved! Thus overwriting the values of process #1.
+So when we are coming to 2228, how can retu work in a way as it is expected to?
+
+-----------------------------------------------------------------------------
+
+The final question is about how savu/retu work.
+
+savu:
+line 0729 and line 0730: r5 and sp are saved to (r0) and (r0)+, which
+are the address of u.u_rsav.
+
+retu:
+0746 and 0747: sp and r5 are read from (r0) and (r0)+, which is
+"rp->p_addr" (see line 2228). It looks weird to me. (Okay...I have to
+confess I look stupid here...) When making call to retu, why bother
+"retu(rp->p_addr)"? Why not calling with "retu(u.u_rsav)"? Does it
+mean that rp->p_addr == u.u_rsav?
+
+OMG, I am totally confused...
+
+--------------------------------------------------------------------------------
+
+I guess It's kind of boring to read my question...but hopefully
+someone can give me some hint...Thanks in advance!
+
+Regards,
+
+Qinglai
+
+

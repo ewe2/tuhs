@@ -1,0 +1,68 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Fri, 27 Oct 2017 19:00:44 -0700
+Subject: [TUHS] Charles Forsyth on putting Unix on a diet.
+In-Reply-To: Your message of "Fri, 27 Oct 2017 23:51:12 +0200."
+ <CALMnNGiKFq4UpdOxqoit1+24vakP=qH6bn+PsQxtApSQOVKOXg@mail.gmail.com>
+References: <20171027103648.4030118C08A@mercury.lcs.mit.edu>
+ <CAC20D2MEkvO_yOYjiR0_reL7VB=GmtHS0RTGCBEf56_ZWPc7Ew@mail.gmail.com>
+ <alpine.BSF.2.02.1710270922200.5457@frieza.hoshinet.org>
+ <CALMnNGiKFq4UpdOxqoit1+24vakP=qH6bn+PsQxtApSQOVKOXg@mail.gmail.com>
+Message-ID: <20171028020100.26A50156E7D7@mail.bitblocks.com>
+
+On Fri, 27 Oct 2017 23:51:12 +0200 Andy Kosela <akosela at andykosela.com> wrote:
+> We don't even have to look at M$.  We can look at our own backyard and find
+> the same pattern.  UNIX in the 70s was small and simple, the same way Linux
+> kernel was small and simple in the early 90s.  Now it is a bloated,
+> fat monster.
+> 
+> It seems that it is very hard to avoid bloat in the software world in the
+> long run.  Most people don't care, but the original UNIX and C, Plan 9 and
+> Go projects could be one of the few I can think of that really cared about
+> minimalism.  It is interesting to note that they were built by the
+> very same group of people.
+> 
+> Minimalism is the main word here.  If you read personal website of Charles
+> Forsyth then you will notice he mentions it explicitly as his "overarching
+> theme".  That is the secret key to beauty and elegance in the software
+> world.
+
+Minimalism as a goal has been long lost in the Unix world.
+(Well, everywhere but at least Unix started out lean). Even
+the generic FreeBSD kernel is 20MB or so (txtsize).  When you
+add in all the loadable kernel modules, it is about 52MB[1].
+Linux is of course more bloated. Plan9 is quite lean but other
+than a few diehard fans no one uses it. Worse, its leanness
+lessons have not been learned by any other OS.
+
+I wish there was a way to evolve plan9 into a modern Unix.
+Making an existing modern Unix diet into a lean OS is close to
+impossible.
+
+A unix kernel boils down to a few subsystems: device drivers +
+device switch, scheduling, VM, networking and network switch,
+filesystems + filesystem switch, interrupt handling, process
+management. Some graphics support. A bunch of this can be
+pushed out of the kernel without much loss of efficiency.  And
+may be the original design decisions of Unix need to be
+revisited for 21st century hardware.
+
+A comment on Charles Forsyth's paper. I saw most of his work
+as essentially re-engineering (or perhaps just engineering).
+This is actually pretty important and something we don't seem
+to pay a lot of attention to. It is improving the fit and
+finish of parts so that they fit well together. It is making
+it easy to take things apart or put them together well.  It is
+making diagnosis and repair easy.  Make reproducibiliy easy
+etc. But we don't have a clear idea of what metrics to focus
+on that will help this engineering.  Performance? Number of
+lines of code?  Latency?  Energy used?  Maintainability?
+Extensibility?  Curiously, what is most tangible to me not
+what can be measured but a sense of aesthetics.
+
+Bakul
+
+[1] FreeBSD has some strange things: if_bxe.ko (for the Qlogic
+10GBe card) is 2+ MB (larger than zfs.ko)! May be due to
+proprietary binary blobs? The next after zfs is a driver for
+another Qlogic card.
+

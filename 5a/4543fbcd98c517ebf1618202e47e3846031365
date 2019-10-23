@@ -1,0 +1,59 @@
+From: doug@remarque.org (Doug Merritt)
+Date: Wed, 21 May 2008 00:44:39 -0700 (PDT)
+Subject: [Unix-jun72] status on disassembler
+In-Reply-To: <Pine.BSI.4.64.0805200944091.16752@malasada.lava.net>
+Message-ID: <20080521074439.9D3575A52C@remarque.org>
+
+Tim Newsham wrote:
+> This is a standard register allocation problem (ie. assigning registers to 
+
+Thanks for the thought, but I don't think it is, quite, in part because
+of the presence of backward branches:
+
+2:
+	br	1f
+	br	2b
+1:
+
+Here the 2 could be a 1, despite overlapping ranges:
+
+1:
+	br	1f
+	br	1b
+1:
+
+In standard register allocation, live/dead ranges are forward only:
+
+	mov	$0,r0
+	mov	$1,r1
+	mov	r0,(sp)+
+	mov	r1,(sp)+
+
+r0 and r1 cannot be subsumed into a single register (completely
+ignoring the possibility of other optimizations as off topic here).
+
+Perhaps that's merely a superficial difference, but it's enough
+to confuse my thinking so far, if so.
+
+To further complicate things, it would be especially nice to allocate
+labels not just in a legal way (that preserves the semantics of the
+program), but actually in a way as similar as possible to the way that 
+humans were doing so, for the sake of improved reconstruction. (A
+complication with *that* is that, in some cases, the labels are
+obviously subtopimal, presumably due to the historical sequence of edits.)
+
+Some adaptation of e.g. graph coloring might conceivably do fine at the
+former but not the latter, so if I succeeded at the first I would
+still want to keep improving it in the direction of the second.
+
+P.S. And obviously it would yield to a big enough hammer (dynamic
+programming, exhaustive backtracking, genetic algorithms, simulated
+annealing, etc), but I dislike the idea. I'm currently pondering
+establishing a partial order and using a nice simple topological sort,
+and/or attempting a simulation of how a human might go about it --
+which might end up being the simplest way to accomplish both goals.
+	Doug
+--
+Professional Wild-eyed Visionary        Member, Crusaders for a Better Tomorrow
+
+

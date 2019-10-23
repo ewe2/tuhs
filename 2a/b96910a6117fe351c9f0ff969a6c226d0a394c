@@ -1,0 +1,46 @@
+From: dds@aueb.gr (Diomidis Spinellis)
+Date: Wed, 13 Mar 2013 01:27:18 +0200
+Subject: [TUHS] mancvt
+In-Reply-To: <4adafdbb2eb04d60d5d948d60ec7a7dc@quintile.net>
+References: <4adafdbb2eb04d60d5d948d60ec7a7dc@quintile.net>
+Message-ID: <513FB9D6.6030800@aueb.gr>
+
+On 13/03/2013 01:00, Steve Simon wrote:
+> I was trying to generate PDFs of some PWB
+> manual pages but they use V6 macros.
+>
+> I have found tmac.an6 which generates somthing
+> readable but stamps each page with:
+>
+> 	THIS MANUAL ENTRY NEEDS TO BE CONVERTED - SEE mancvt(1) and man(7)
+>
+> Anyone know of mancvt, I cannot find it.
+
+SysIII/usr/src/cmd/text/shells.d/mancvt.sh
+
+#	MANCVT(@(#)mancvt.sh	1.3)
+while [ $1 ]
+do
+ed - $1 <<\!
+g/^\.th/s//.TH/
+g/^\.sh/s//.SH/
+g/^\.bd/s//.B/
+g/^\.it/s//.I/
+g/^\.dt/s//.DT/
+g/\\\*r/s//\\*R/
+g/^\.lp/s/.*$/==>DOES NOT CONVERT EASILY - SEE .RS\/.RE\/.TP in MAN.7/
+g/^\.s[123]/s/.*$/==>DOES NOT CONVERT EASILY - SEE .PD\/.P in MAN.7/
+w temp.n
+q
+!
+mv temp.n $1.n
+shift
+done
+
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=SysIII/usr/src/cmd/text/shells.d/mancvt.sh
+
+
+
+
+

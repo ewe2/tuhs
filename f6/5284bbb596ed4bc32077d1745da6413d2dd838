@@ -1,0 +1,51 @@
+From: dfawcus+lists-tuhs@employees.org (Derek Fawcus)
+Date: Tue, 3 Jan 2017 17:59:26 +0000
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <AEA71495-53ED-4A19-A1F1-4C8FB20627DB@kdbarto.org>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <586bb9dc.iVkFRSLWnXd79ger%schily@schily.net>
+ <AEA71495-53ED-4A19-A1F1-4C8FB20627DB@kdbarto.org>
+Message-ID: <20170103175926.GA4824@cowbell.employees.org>
+
+On Tue, Jan 03, 2017 at 09:39:36am -0800, David wrote:
+> I’m running Yosemite, Sierra won’t run on my hardware.
+> 
+> Does the standard expect an int to be a specific size? I can’t imagine this to be the case.
+> On Mac ints are 32 bits, as are longs. Unlike Linux where long defaults to 64 bits.
+
+Depends:
+
+$ uname -a
+Darwin Old-MBA.local 14.5.0 Darwin Kernel Version 14.5.0: Sun Sep 25 22:07:15 PDT 2016; root:xnu-2782.50.9~1/RELEASE_X86_64 x86_64
+$ cat size.c
+#include <stdio.h>
+
+int main()
+{
+	printf("sz(int) = %lu, sz(long) = %lu\n",
+		(unsigned long)sizeof(int),
+		(unsigned long)sizeof(long));
+	return 0;
+}
+
+$ cc -o size size.c
+$ ./size
+sz(int) = 4, sz(long) = 8
+$ file size
+size: Mach-O 64-bit executable x86_64
+$ cc -m32 -o size size.c
+$ ./size
+sz(int) = 4, sz(long) = 4
+$ file size
+size: Mach-O executable i386
+
+As I recall the same applies on linux for amd64, with the size of
+logn changing depending upon if one compiles as x86 or amd64.
+
+ILP32 vs LP64
+
+DF
+

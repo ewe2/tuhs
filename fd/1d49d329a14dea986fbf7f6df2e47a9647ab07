@@ -1,0 +1,71 @@
+From: pete@dunnington.plus.com (Pete Turnbull)
+Date: Thu, 8 Jun 2006 23:44:15 +0100 (BST)
+Subject: [TUHS] PDP-11/23 questions ...
+In-Reply-To: asbesto <asbesto@freaknet.org>
+	"[TUHS] PDP-11/23 questions ..." (Jun  8, 17:15)
+References: <20060608171557.GA16159@freaknet.org>
+Message-ID: <10606082344.ZM8534@mindy.dunnington.plus.com>
+
+On Jun 8 2006, 17:15, asbesto wrote:
+>
+> 1) we lack the power supply of the 11/23 cpu. From the
+>    schematics, we see that only +5V, +12V and -12V are required,
+>    so we will try to use a normal PC power supply for the QBUS
+>    backplane; does somebody know about problems in doing this?
+
+Is it missing or just not working?  It's hard to imagine a BA11-N box
+like the one in your picture without the PSU, since the screws that
+hold the front panel onto the backplane go through the PSU cover.  If
+it's simply not working, it's not usually hard to repair.
+
+You will need to ensure that the BDCOK H (Bus DC OK, active high)
+signal is held high, also the BPOK H (Bus Power OK, active high, from
+the AC input) signal or the CPU won't run -- the normal PSU does this.
+ "High" means tied to no less than 3.5V DC.  The PSU also provides a
+mains-frequency square-wave at about 3.5V-4V which drives the BEVENT L
+line for a real-time clock interrupt, which Unix needs.  One of the
+switches on the front panel can be configured to control this (there
+are times when you might want to switch it off).  Note that devices
+that turn off BEVENT, including the switch on the front panel, or the
+DIP switch on the CPU card, do it by shorting that line to ground!  The
+same switch that can be configured to stop the BEVENT signal, is also
+often used to control the rack's power controller via a 3-wire cable
+with a 3-pin AMP Mate-N-Lok connector on each end.
+
+The front panel with the three switches also has a flip-flop controlled
+by one of the switches, connected to the BHALT L line, and another
+connected by a flip-flop to BINIT L.  The first halts the CPU when
+enabled (active low), the other provides a pulse to start it.
+
+The RUN light on the panel is driven by the SRUN L signal on the first
+slot in the backplane.
+
+Most of the signals I've mentioned are carried between the backplane
+and the panel by a narrow ribbon cable.  The backplane pinout is shown
+in a PostScript file called QBusConnsBig.ps on my web page at
+http://www.dunnington.u-net.com/public/PDP-11/
+QBusConns.ps is the same file, but actual size, if you want to hold it
+up against the backplane.
+
+> 2) what kind of UNIX can be run on an 11/23 using a RL02 disk
+>    drive? (just one, unfortunately :!)
+
+Nothing later than about 7th Edition, because BSD needs separate I&D
+space, which an 11/23 doesn't have (2.9 BSD might work, I can't
+remember).  BSD (any version) is much too big for a single RL02 anyway.
+ 7th Edition works; my original PDP-11 Unix system is my second 11/23,
+still in its original condition, which looks rather like yours, except
+it has two RL02s and a slightly earlier front panel.  Be aware that the
+RL11/RLV11/RLV12 driver was not a standard feature of 7th Edition,
+though.
+
+You ought to do an inventory of the cards.  7th Edition wants at least
+256K of memory.  You might also want to see what version of the CPU you
+have.
+
+-- 
+Pete						Peter Turnbull
+						Network Manager
+						University of York
+
+

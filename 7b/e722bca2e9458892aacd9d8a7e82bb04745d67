@@ -1,0 +1,61 @@
+From: sven_dehmlow@web.de (Sven Dehmlow)
+Date: Sun, 27 Jan 2002 17:10:39 +0100
+Subject: [TUHS] Porting Unix v6 to i386
+Message-ID: <02012717103901.00631@linux>
+
+Hi,
+The last few weeks I've thought a lot about porting Unix v6 to the 
+PC. Here are my "results":
+
+1. If you really want to do it, don't do it from scratch. Porting 
+Unix 1:1 maybe the usual way but integrating your code step by step 
+into another Unix or Unix-a-like operating system will surely become 
+much easier as you can test the result in every stage of development. 
+Another benefit is of course that with a little bit of luck you don't 
+have to rewrite all the machine dependent stuff as it might already 
+exist in the other os. If you want to do things this way ELKS (the 
+Linux kernel subset for the 8088) might be a good candidate as it is 
+very simple and by this very easy to understand. Also there is a big 
+Linux/ELKS community which might help you with some problems.
+
+2.Another question is if it is really necessary to port when so many 
+good emulators for the PDP11 exist. Of course a ported Unix is faster 
+than one running on a simulator but is fastness really so important 
+in times where multi-processor machines exist that make your 1.5Ghz 
+machine look like a fool? Also wouldn't a user who needs a 
+professional fast Unix (or a-like) take the newest Linux or one of 
+the BSDs instead of Unix v6? 
+The main reason for porting is from my point of view to get access to 
+the i86's hardware. But for reaching this aim a port isn't necessary. 
+You can either develop the emulated machine further so that it has 
+additional devices (and interupts, etc. for them) or you can try to 
+give the os on the emulated machine direct access to the real 
+machine. This may sound a little bit strange and unusual but will 
+save much code in the emulator as you don't have to code for each 
+device twice (one time in the emulator and one time in the os). Of 
+course the os you're running your emulator on must give you the 
+chance to get direct access to the real hardware, but I found a DOS 
+port from Bob Supniks J-11 emulator so that is not a real problem.
+Currently I'm working on the latter idea (on the emulator which gives 
+you direct access to the hardware), but in fact I haven't written a 
+line of code yet as I'm still searching for the best way to integrate 
+the interesting parts of PC's memory into PDP11's memory. The idea is 
+to put the interesting parts of PC's memory behind PDP11's memory and 
+to change some lines in Unix that for example malloc doesn't get the 
+idea to give this pieces of memory away to user programs. Putting the 
+PC's memory before the memory space of the PDP11 would as far as I 
+can see make more changes especially in the code relevant for booting 
+necessary. Other things like for example PC's interupts will surely 
+make much less trouble.
+
+Suggestions, ideas, opinions, etc. are very welcome. If someone feels 
+the urge to help me with this project it would be very kind if he 
+would let me know ;-)
+
+BTW: if someone has patches to the v6 or ported programs it would be 
+very kind if he would send them to me. If I get enough stuff I'll 
+make something like a new Unix v6 distribution.
+
+Sven
+
+

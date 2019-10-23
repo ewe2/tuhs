@@ -1,0 +1,47 @@
+From: random832@fastmail.us (Random832)
+Date: Thu, 31 Jan 2013 18:52:22 -0500
+Subject: [TUHS] History of strncpy
+In-Reply-To: <EC8F3C9A-F979-4B6E-911A-12947F061FD2@bsdimp.com>
+References: <1301231756.AA27240@ivan.Harhan.ORG>
+ <B8FAD0BB-8796-4A0F-B441-0688405736E9@ronnatalie.com>
+ <20130123214651.GF22559@mercury.ccil.org>
+ <20130124060205.GQ24498@bitmover.com>
+ <1AFADE66-7F72-4776-8738-EC27748DAF33@ronnatalie.com>
+ <EC8F3C9A-F979-4B6E-911A-12947F061FD2@bsdimp.com>
+Message-ID: <510B03B6.6010708@fastmail.us>
+
+On 1/24/2013 9:52 AM, Warner Losh wrote:
+> On Jan 24, 2013, at 7:42 AM, Ronald Natalie wrote:
+>> Amen. For practical matters, there is no way given the rest of the 
+>> library that an implementation can do anything other than multiply 
+>> the two middle args together. 
+
+
+Is there any part of the rest of the library that will be broken if it 
+does something like call (e.g. on UNIX) fflush (or _flsbuf), fileno, and 
+write in a loop?
+
+vfprintf doesn't call fwrite, so it won't break sprintf.
+
+In theory all I can even think of is if some piece of userspace code 
+made assumptions about the state of a setvbuf buffer.
+
+> Historically the only implementation I know that didn't just multiply the two args together was on VAX/VMS's VAXC. The underlying filesystem had a notion of a file of records, so you'd get very different result from n * size, 1 and n, size.
+
+You might get a different result in terms of the resulting underlying 
+file, and maybe in terms of performance, but given the requirements the 
+standard puts on fread (which I don't imagine it would do if a 
+then-prominent implementation violated them), I have to wonder what 
+would happen, if this is the case, if you attempted to call fread when 
+the file pointer is positioned on a different sized record, or in the 
+middle of a record.
+
+Because for all the concessions to non-unix-like file systems the 
+standard _does_ make (binary files may be padded with extra zero bytes 
+[because they may not be able to be an arbitrary size], text files may 
+have a maximum line length and may not be able to contain some control 
+characters, heck, _everything_ the standard says about text files is 
+non-unix-like), it's IIRC rather strict about "fread has equivalent 
+results to getc in a loop".
+
+

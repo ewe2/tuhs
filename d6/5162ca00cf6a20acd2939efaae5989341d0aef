@@ -1,0 +1,105 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Mon, 11 Sep 2017 13:26:48 -0400
+Subject: [TUHS] File-as-record (was: Happy birthday, Dennis Ritchie!)
+In-Reply-To: <20170909013034.GA42338@eureka.lemis.com>
+References: <alpine.BSF.2.21.1709090646420.48526@aneurin.horsfall.org>
+ <20170908210450.C0FA618C08E@mercury.lcs.mit.edu>
+ <20170908210927.GB24413@DD0DDC435AC34EA8A55ABC3A9753F2FB>
+ <1504919790.59b340ee1620c@www.paradise.net.nz>
+ <20170909013034.GA42338@eureka.lemis.com>
+Message-ID: <CABH=_VQAZdt1WeHD6LEhDENn2b+gTeHbEGLVma_CQ6_w0WzNZQ@mail.gmail.com>
+
+On 9/8/17, Greg 'groggy' Lehey <grog at lemis.com> wrote:
+> On Saturday,  9 September 2017 at 13:16:30 +1200, Wesley Parish wrote:
+>> 'fraid so. The Unix directory structure and the correlating
+>> free-form file competed with the file-as- record-structure and
+>> directory-as-record-structure in the seventies and eighties. The
+>> competition had finished by the nineties, and hardly anybody
+>> remembers it now.
+>
+> Sorry, I don't understand this.  Can you give an example of
+> file-as-record and directory-as-record?  Some of it suggests MVS, but
+> not quite.
+
+At least in the IBM world, disk drives originally didn't have their
+tracks formatted into fixed-length sectors as they are today.  Early
+on in the business world, everything was record-oriented.  Except for
+the very largest ones, computers didn't have the either the speed or
+the memory to do database processing as we now know it.  For most
+business shops, there was sequential file processing, random access
+(where you had to know the cylinder and head position of the record
+you wanted), and indexed sequential access (by the value of a key
+field in the record).
+
+Disks in those days (pre-mid 70s) were not formatted in fixed-length
+sectors as they are today.  Instead, records could be arbitrary length
+(limited by the capacity of a single disk track, of course) and had
+three fields:  a count field containing the number of bytes in the
+record, a key field for indexed access, and a data field.  This format
+was called CKD (count/key/data).  On IBM disks, records were addressed
+by a number of the form CCCHHRR, where CCC is the cylinder, HH the
+head, and RR the record on the track (for the data cell drive, there
+was also a two digit bin number).  The disk controller could also do a
+"seek by key" operation.  This would scan the track for a record whose
+key field matched the given key.  It was used to implement indexed
+sequential access.
+
+For System/360/370, the OSes for the smaller, slower systems, such as
+Basic Operating System (BOS) and Disk Operating System (DOS and
+DOS/VS) did not have an on-disk file system at all.  You had to
+manually allocate the files on the disk and you used directives in job
+control language (JCL) to tell the OS where your file was and to
+assign it a logical unit number for the program to use (FORTRAN's I/O
+reflects this).  The OSes for larger systems such as OS/MVS (and
+perhaps its predecessor, OS/MVT?) had a catalog file that could
+automate the process of assigning files to locations on disk.  This
+was the closest these OSes came to a modern directory-oriented file
+system.
+
+In the business world this is not as grim as it might seem.  Most
+businesses had a small number of files that didn't change very often.
+For example, a college has accounts payable/receivable, student
+academic records, alumni/charitable giving, and payroll and personnel.
+These get allocated once and, provided the initial disk allocation is
+sufficient, don't have to move.
+
+On the programming side, there wasn't either the memory capacity or
+processing power to implement a modern disk file system.  One of the
+first computers I worked with was a System/360 model 25 running
+DOS/360.  The machine had 48K of core memory, 12K of which was for the
+OS, leaving 36K for programs.  No virtual memory.  The OS had an 8K
+resident kernel and two 2K overlay areas:  the physical transient area
+(for controlling hardware; the forerunners of what we now call device
+drivers) and the logical transient area (for the parts of program I/O
+that had to operate in privileged mode, and for most OS system service
+functions).  For I/O, each program contained library routines called
+"access methods", which took logical file I/O operations (open, close,
+read, write, seek, etc.), built the appropriate I/O channel programs,
+and executed the EXCP (execute channel program) OS primitive.  The
+access methods operated on logical I/O unit numbers, which as
+previously noted were associated with places on-disk via JCL
+statements before the program started execution.  The access methods
+were SAM (Sequential Access Method; records read/written in on-disk
+order), DAM (Direct Access Method; allowed seeking to an arbitrary
+record using CCCHHRR address), and ISAM (Indexed Sequential Access
+Method; allowed seeking to a record by key, and then reading/writing
+sequentially from there).
+
+The access methods and their capabilities mirrored the CKD disk format
+of the time.  As disk hardware became denser and faster, and computers
+got more memory, it became more efficient to format the disk as a set
+of fixed-length sectors, which could be packed more densely and
+accessed faster than CKD records.  Record blocking and unblocking was
+moved to the OS or application.  Indexed access could be accomplished
+a lot faster using B-trees in the file.
+
+UNIX took the final step in this evolution by providing exclusively
+byte-stream I/O in the OS, and leaving record processing up to the
+application.  Those of us from the record-oriented world found this a
+pain in the butt at first (application programmers were forced to roll
+their own record processing, something that the access methods did for
+you in the OS/360 world).  But by 1990 it was generally recognized
+that stream I/O is the more appropriate OS primitive.
+
+-Paul W.
+

@@ -1,0 +1,60 @@
+From: don@DonHopkins.com (Don Hopkins)
+Date: Thu, 9 Nov 2017 16:02:04 +0100
+Subject: [TUHS] 80 columns ...
+In-Reply-To: <7wpo8rud7y.fsf@junk.nocrew.org>
+References: <CAP6exYK_XOF16T-=h1ebmn3UsoXX5cHBkkiUvsGxJKxuHHa=fw@mail.gmail.com>
+ <7wpo8rud7y.fsf@junk.nocrew.org>
+Message-ID: <60C45CFF-0B5C-4DAB-8936-BA27ECFFA487@gmail.com>
+
+The theory was that fixed size FORTH blocks with 64 (or 40) columns forced you to factor your code into aesthetically pleasing little functions, but that was bullshit. 
+
+Forth code needs stack comments on every line to be readable, and 40 columns makes that damn hard to do. (Here’s some dense under-commented RPN 6502 and Forth code I wrote for my 40-column Apple ][ Forth — this does RAM card bank switching and copying for saving and restoring lines of text for the SUPDUP line saving protocol %TDSAV %TDRES commands.)
+HEX CREATE SETUP-LINE ASSEMBLER
+  BOT LDA, N STA, BOT 1+ LDA, N 1+ STA,
+  BOT 2+ LDY, SCR-LBASES ,Y LDA,
+  N 2+ STA, SCR-HBASES ,Y LDA,
+  N 3 + STA, SCR-WIDTH 1- # LDY, RTS,
+CREATE RAMOFF ASSEMBLER
+  0C0D2 LDA, CLI, POPTWO JMP,
+CODE LINE! ( LINE ADDR --- )
+  SETUP-LINE JSR, BEGIN,
+    N 2+ )Y LDA, N )Y STA,
+    DEY, 0< UNTIL, RAMOFF JMP, C;
+CODE LINE@ ( LINE ADDR --- )
+  SETUP-LINE JSR, BEGIN,
+    N )Y LDA, N 2+ )Y STA,
+    DEY, 0< UNTIL, RAMOFF JMP, C;
+
+http://www.donhopkins.com/home/archive/forth/supdup.f <http://www.donhopkins.com/home/archive/forth/supdup.f>
+
+Check out Toffoli and Margolus’s eccentric right-justified indentation style! (This is a cellular automata rule definition for their CAM6 hardware.)
+
+http://www.donhopkins.com/home/code/tomt-cam-forth-scr.txt <http://www.donhopkins.com/home/code/tomt-cam-forth-scr.txt>
+
+http://www.donhopkins.com/home/code/tomt-users-forth-scr.txt <http://www.donhopkins.com/home/code/tomt-users-forth-scr.txt>
+
+( GASHV: horizontal/vertical gas with collisions)       24 LOAD
+    ( rotate right/left depending on time phase; do collisions)
+: RULE0      KC0 IF
+            C0 ELSE
+         T0 0= IF
+          Y0 ELSE
+          X0 THEN
+               THEN ;
+                                                        ( echo)
+
+-Don
+
+
+> On 9 Nov 2017, at 08:24, Lars Brinkhoff <lars at nocrew.org> wrote:
+> 
+> ron minnich wrote:
+>> So, 80 column folks
+> 
+> And then there's old-school Forth style, where lines are limited to 64
+> characters.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171109/d380c384/attachment.html>
+

@@ -1,0 +1,353 @@
+From: frank@wortner.com (Frank Wortner)
+Date: Tue, 3 Oct 2000 16:02:17 -0400 (EDT)
+Subject: [pups] Networking With 2.11 BSD and Begemot Emulator
+Message-ID: <Pine.NEB.4.21.0010031544040.23696-100000@panix2.panix.com>
+
+I've been trying to set up an emulated PDP-11 running 2.11 BSD.  Just for
+the fun,  I'm trying to get the 11 to talk on a LAN.  Unfortunately,  it's
+not working.
+
+My configuration is Begemot P11 Version 2.7 running under
+FreeBSD 4.1.1.  I've booted 2.11,  configured a custom networking kernel,
+installed the unix and netnix images,  changed the IP addresses in
+/etc/hosts to match my LAN,  run mkhosts to rebuild  /etc/hosts.dir and
+/etc/hosts.pag and rebooted.
+
+On the P11 front,  I've built a fake qma.rom file populated with zeros --
+just like the P11 README file said,  made sure that I had a tun driver
+configured in my FreeBSD system,  and started P11.   Then I did an
+
+	ifconfig tun0 host-IP-address emulator-IP-address up
+
+Running ifconfig on the host confirmed that things *seemed* to be OK:
+
+# ifconfig tun0
+tun0: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1518
+        inet6 fe80::260:8ff:febd:5882%tun0 --> :: prefixlen 64 scopeid 0xb
+        inet host-IP-address --> emulator-IP-address netmask 0xffff0000
+        Opened by PID 32199
+
+The IP addresses are identical in the first three octets,  and differ only
+in the last octet.
+
+Unfortunately,  once I boot 2.11 BSD,  I can't contact the "outside
+world" from the emulator,  nor contact the emulator from the
+outside.  No telnet,  no ftp,  pings just hang.
+
+Everything looks OK from inside:
+
+# ifconfig qe0
+qe0: flags=63<UP,BROADCAST,NOTRAILERS,RUNNING>
+        inet emulator-IP-address netmask ffff0000 broadcast Bcast-IP
+
+What am I missing?
+
+Thanks in advance,
+
+Frank
+ 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA36466
+	for pups-liszt; Wed, 4 Oct 2000 10:49:43 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA36462
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 10:49:41 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id KAA58459
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 10:51:28 +1100 (EST)
+	(envelope-from wkt)
+Received: from wantadilla.lemis.com (root at wantadilla.lemis.com [192.109.197.80])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA36453
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 10:48:45 +1100 (EST)
+	(envelope-from grog at wantadilla.lemis.com)
+Received: (from grog at localhost)
+	by wantadilla.lemis.com (8.11.0/8.9.3) id e93NlMb05692;
+	Wed, 4 Oct 2000 09:17:22 +0930 (CST)
+	(envelope-from grog)
+Date: Wed, 4 Oct 2000 09:17:22 +0930
+From: Greg Lehey <grog@lemis.com>
+To: Frank Wortner <frank at wortner.com>
+Cc: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>,
+        Hartmut Brandt <brandt at fokus.gmd.de>,
+        Joerg Micheel <joerg at begemot.org>
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Message-ID: <20001004091722.C1760 at wantadilla.lemis.com>
+References: <Pine.NEB.4.21.0010031544040.23696-100000 at panix2.panix.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 1.0i
+In-Reply-To: <Pine.NEB.4.21.0010031544040.23696-100000 at panix2.panix.com>; from frank at wortner.com on Tue, Oct 03, 2000 at 04:02:17PM -0400
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tuesday,  3 October 2000 at 16:02:17 -0400, Frank Wortner wrote:
+> I've been trying to set up an emulated PDP-11 running 2.11 BSD.  Just for
+> the fun,  I'm trying to get the 11 to talk on a LAN.  Unfortunately,  it's
+> not working.
+
+There's a bug.  It used to work, and *something* changed.  I've been
+meaning to look at it, but it's currently waiting on the tuit queue.
+
+> My configuration is Begemot P11 Version 2.7 running under
+> FreeBSD 4.1.1.  I've booted 2.11,  configured a custom networking kernel,
+> installed the unix and netnix images,  changed the IP addresses in
+> /etc/hosts to match my LAN,  run mkhosts to rebuild  /etc/hosts.dir and
+> /etc/hosts.pag and rebooted.
+>
+> On the P11 front,  I've built a fake qma.rom file populated with zeros --
+> just like the P11 README file said,  made sure that I had a tun driver
+> configured in my FreeBSD system,  and started P11.  
+
+I know the README says this will work, but I haven't been able to get
+it to work that way.  Somewhere I have a real image; I'll see if I can
+find it.
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA36700
+	for pups-liszt; Wed, 4 Oct 2000 11:12:10 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA36696
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 11:12:09 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id LAA58613
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 11:13:56 +1100 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA36682
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 11:11:38 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id RAA09035;
+	Tue, 3 Oct 2000 17:11:10 -0700 (PDT)
+Date: Tue, 3 Oct 2000 17:11:10 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200010040011.RAA09035 at moe.2bsd.com>
+To: frank at wortner.com, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi --
+
+> From: Frank Wortner <frank at wortner.com>
+> 
+> I've been trying to set up an emulated PDP-11 running 2.11 BSD.  Just for
+> the fun,  I'm trying to get the 11 to talk on a LAN.  Unfortunately,  it's...
+> 
+> My configuration is Begemot P11 Version 2.7 running under
+> FreeBSD 4.1.1.  I've booted 2.11,  configured a custom networking kernel,
+> installed the unix and netnix images,  changed the IP addresses in...
+> 
+> 	ifconfig tun0 host-IP-address emulator-IP-address up
+> 
+> # ifconfig tun0
+> tun0: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1518
+>         inet6 fe80::260:8ff:febd:5882%tun0 --> :: prefixlen 64 scopeid 0xb
+>         inet host-IP-address --> emulator-IP-address netmask 0xffff0000
+>         Opened by PID 32199
+> 
+> The IP addresses are identical in the first three octets,  and differ only
+> in the last octet.
+> 
+> Unfortunately,  once I boot 2.11 BSD,  I can't contact the "outside
+> world" from the emulator,  nor contact the emulator from the
+> outside.  No telnet,  no ftp,  pings just hang.
+> What am I missing?
+
+	You're missing ARP.
+
+	'tun' only works with IP - ARP packets are not IP and do not pass
+	thru the 'if_tun' driver.
+
+	I have (using BSD/OS 4.1's if_tun which is probably the same as
+	FreeBSD's) an emulated 11 going quite nicely.
+
+	What you need to do ON THE 11's SIDE, is populate his arp table with
+	the information about any host on the local LAN that the 11 will
+	want to talk to
+
+	In /etc/netstart on the 11 side just after the 'ifconfig' lines:
+
+	ifconfig qe0 inet netmask $netmask $hostname broadcast $broadcast up -trailers >/dev/console 2>&1
+	# ifconfig sl0 inet 192.254.254.2 192.254.254.1 -arp -trailers >/dev/console 2>&1
+	# slattach /dev/ttyS6 9600
+	# Next line needed when running under the Begemot emulator
+	arp -s 206.139.202.1 "0:0:c:3d:e9:f7" pub
+	arp -s 206.139.202.51 "0:a0:24:78:9c:21" pub
+ 	arp -s 206.139.202.200 "0:90:27:88:64:74" pub
+ 	arp -s 206.139.202.201 "08:0:2b:f:5b:a6" pub
+	arp -s 206.139.202.209 "0:40:5:a4:72:27" pub
+	ifconfig lo0 inet localhost up -trailers	>/dev/console 2>&1
+
+	Typically you only need the ARP info for the hosting system and
+	the default gateway.   
+
+	Oh, there's a bug in P11 that after 25 days of calendar up time the
+	clock on the 11 basically stops ticking.   I've a fix I came up with
+	(and submitted to the author) but it'll be a couple weeks until I
+	know for sure if it's the right fix (32bit overflow in a calculation).
+
+	Steven Schultz
+	sms at to.gd-es.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA37363
+	for pups-liszt; Wed, 4 Oct 2000 12:35:16 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA37359
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 12:35:14 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id MAA58957
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 12:37:01 +1100 (EST)
+	(envelope-from wkt)
+Received: from wantadilla.lemis.com (root at wantadilla.lemis.com [192.109.197.80])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA37319
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 12:29:41 +1100 (EST)
+	(envelope-from grog at wantadilla.lemis.com)
+Received: (from grog at localhost)
+	by wantadilla.lemis.com (8.11.0/8.9.3) id e941TBk07853;
+	Wed, 4 Oct 2000 10:59:11 +0930 (CST)
+	(envelope-from grog)
+Date: Wed, 4 Oct 2000 10:59:11 +0930
+From: Greg Lehey <grog@lemis.com>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: frank at wortner.com, pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Message-ID: <20001004105911.H7292 at wantadilla.lemis.com>
+References: <200010040011.RAA09035 at moe.2bsd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 1.0i
+In-Reply-To: <200010040011.RAA09035 at moe.2bsd.com>; from sms at moe.2bsd.com on Tue, Oct 03, 2000 at 05:11:10PM -0700
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tuesday,  3 October 2000 at 17:11:10 -0700, Steven M. Schultz wrote:
+> Hi --
+>
+>> From: Frank Wortner <frank at wortner.com>
+>>
+>> I've been trying to set up an emulated PDP-11 running 2.11 BSD.  Just for
+>> the fun,  I'm trying to get the 11 to talk on a LAN.  Unfortunately,  it's...
+>>
+>> My configuration is Begemot P11 Version 2.7 running under
+>> FreeBSD 4.1.1.  I've booted 2.11,  configured a custom networking kernel,
+>> installed the unix and netnix images,  changed the IP addresses in...
+>>
+>> 	ifconfig tun0 host-IP-address emulator-IP-address up
+>>
+>> # ifconfig tun0
+>> tun0: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1518
+>>         inet6 fe80::260:8ff:febd:5882%tun0 --> :: prefixlen 64 scopeid 0xb
+>>         inet host-IP-address --> emulator-IP-address netmask 0xffff0000
+>>         Opened by PID 32199
+>>
+>> The IP addresses are identical in the first three octets,  and differ only
+>> in the last octet.
+>>
+>> Unfortunately,  once I boot 2.11 BSD,  I can't contact the "outside
+>> world" from the emulator,  nor contact the emulator from the
+>> outside.  No telnet,  no ftp,  pings just hang.
+>> What am I missing?
+>
+> 	You're missing ARP.
+>
+> 	'tun' only works with IP - ARP packets are not IP and do not pass
+> 	thru the 'if_tun' driver.
+>
+> 	I have (using BSD/OS 4.1's if_tun which is probably the same as
+> 	FreeBSD's) an emulated 11 going quite nicely.
+>
+> 	What you need to do ON THE 11's SIDE, is populate his arp table with
+> 	the information about any host on the local LAN that the 11 will
+> 	want to talk to
+
+I didn't need to do this when I had the emulated net running.  I did
+set the netmask to 255.255.255.255, though, and put the default route
+through that interface.
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA37613
+	for pups-liszt; Wed, 4 Oct 2000 13:10:32 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA37609
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 13:10:30 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id NAA59086
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 13:12:18 +1100 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA37598
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 13:09:08 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id SAA09659;
+	Tue, 3 Oct 2000 18:59:45 -0700 (PDT)
+Date: Tue, 3 Oct 2000 18:59:45 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200010040159.SAA09659 at moe.2bsd.com>
+To: grog at lemis.com, sms at moe.2bsd.com
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Cc: frank at wortner.com, pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Greg Lehey <grog at lemis.com>
+> 
+> I didn't need to do this when I had the emulated net running.  I did
+> set the netmask to 255.255.255.255, though, and put the default route
+> through that interface.
+
+	I thought you mentioned using the 'tap' driver rather than 'tun'
+	at one time.   If my memory hasn't failed me that would explain
+	why it worked since 'tap' passes ARP traffic.
+
+	The missing piece I forgot earlier was on the hosting machine's
+	side to publish an ARP entry for the simulated 11.
+
+	Just after ifconfig'ing tun0 up use the hosting system's mac address:
+
+ifconfig tun0 206.139.202.200 206.139.202.203 up
+arp -s shemp 0:90:27:88:64:74 pub
+
+	I'm not sure how ARP can be made to work thru the 'tun' device.
+	Without ARP on an ethernet I am not aware of any 'routing' that 
+	can fill in the mac addresses in the ethernet packets.   
+
+	Try pub'ing the arp entries and see if that works.   Might try 'tap'
+	instead of 'tun' if you're looking for something else to try.
+
+	Steven Schultz
+
+

@@ -1,0 +1,53 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 27 Nov 2002 20:50:05 -0800 (PST)
+Subject: [pups] 2.11BSD networking on simh
+Message-ID: <200211280450.gAS4o5824942@moe.2bsd.com>
+
+Hi -
+
+> From: Andru Luvisi <luvisi at andru.sonoma.edu>
+> I have gotten 2.11 installed on simh, I have it recognizing the simulated
+> ethernet card, and everything appears correct except the packets just
+> aren't getting in and out.  The simh documentation says that the DELQA
+> card is better than the DEQNA, but I was unable to get the DELQA (qt)
+> driver to recognize the card.  When I compiled the kernel to use the DEQNA
+
+	There are TWO variants of the DELQA as I recall.   One was referred
+	to as the "turbo" verion (I think it was called the DELQA-YM) and
+	the if_qt driver was developed and tested specifically for, and only
+	for, that variant.   The normal DELQA and DEQNA should use the if_qe
+	driver.
+
+> I have configured 2.11BSD with:
+>   A valid IP address on the network the host is on.
+>   The same netmask, broadcast, and gateway as the host.
+
+> I am running the emulator as root.
+> 
+> The docs say you won't be able to talk between the host and the emulated
+
+	Hmmm, that seems strange.   Using P11 I talk between the host (the
+	machine running the emulator program) and the "PDP11" all the time.
+
+	Ah, it has to do with ARP handling I suspect.  I know that with P11
+	it's IP only and thus ARP packets do not traverse the emulated ethernet
+	card.   If that is the case with simh as well then on the PDP11 side
+	you might have to do what I did and install arp entries for everything
+	on the local lan with which the PDP11 is going to communicate.   That
+	way the 11 already knows the 'mac' address and does not need ARP (which
+	doesn't work thru the emulated ethernet) at all.
+
+> machine, so my test for each configuration has been pinging the gateway,
+> which I know responds to pings since I can ping it from the host.
+
+	Ah, but on the host did you publish an ARP entry so that the host
+	will arp for the PDP11?   I think that is required.    
+
+	I would tinker around with installing published/proxy arp entries and
+	seeing what happens.
+
+	Cheers,
+	Steven Schultz
+	sms at 2bsd.com
+
+

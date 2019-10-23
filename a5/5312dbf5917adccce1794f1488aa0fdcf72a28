@@ -1,0 +1,209 @@
+From: fair-tuhs@netbsd.org (Erik E. Fair)
+Date: Sat, 18 Mar 2017 00:17:51 -0700
+Subject: [TUHS] pathalias and sendmail experience?
+In-Reply-To: <20170318034025.GA792@minnie.tuhs.org>
+Message-ID: <27926.1489821471@cesium.clock.org>
+
+In fact, my "mkglue" awk script explains that the dbm(3) hacks came from UUNET:
+
+#!/bin/awk -f
+# MKGLUE: UUCP map post processor
+# Idea from Mel Pleasant via Eliot Lear
+# Erik E. Fair <fair at apple.com>, August, 1988
+#
+# revised from domains.txt on December 31, 1990
+#
+# What we have here is a UUCP map postprocessor. To use:
+#	pathalias uucpmaps > /tmp/paths.raw
+#	mkglue /tmp/paths.raw > /tmp/glue
+#	pathalias uucpmaps /tmp/glue > /tmp/paths.refined
+#	do whatever you do with the maps here
+#
+# what this does is find Internet EQUIVALENCES for UUCP sites, e.g.
+#
+#	ucbvax=	ucbvax.berkeley.edu
+#	apple= apple.com
+#
+# and then it reverses them, and puts all the domain names it finds into
+# a completely connected network called "INTERNET", with COST defined
+# below. That cost was determined experimentally on a Cray X/MP-48
+# (pathalias will run on such a beast. It takes only 24 seconds to
+# process all the maps and the glue file. It's amazing what you can do
+# with a supercomputer). Your milage may vary.
+#
+# The effect of this is to cause nearly all your paths to take their
+# first hop through the Internet. DO NOT USE THIS POSTPROCESSOR, unless
+# you're actually on the Internet, or you have multiple UUCP neighbors
+# who are on the Internet of equivalent call cost to you.
+#
+# This script will NOT do anything with domain gateway declarations, e.g.
+#
+#	foo	.bar.com
+#
+# because these do not provide a mapping between the Internet name and
+# the UUCP name of the UUCP host involved. This script makes no
+# distinction between "real" Internet hosts and "fake" (MX'd) ones (how
+# can I? The information isn't there). Even with an MX host, someone on
+# the Internet is accepting mail for them (that's what MX is all about).
+#
+# Encourage your Internet friends and neighbors to put all the right
+# information into the UUCP maps.
+#
+# Also, your mailer must be able to transform thusly:
+#
+#	do.main!foo!bar!bazz -> foo!bar!bazz at do.main
+#
+# since that's what the database will generate. I do it with sendmail,
+# and I installed the uunet hacks to 5.59 sendmail to look stuff up in a
+# DBM database. I expect that the IDA sendmail stuff can be similarly
+# coerced to do this.
+#
+# If nothing else, you might find the report at the end of the glue file
+# interesting.
+#
+BEGIN{
+	COST = "DEMAND+LOW";
+#
+	domain["arpa"] = 1;	domain["nato"] = 1;
+	domain["com"] = 1;	domain["gov"] = 1;
+	domain["mil"] = 1;	domain["org"] = 1;
+	domain["edu"] = 1;	domain["net"] = 1;
+	domain["int"] = 1;
+
+	domain["ar"] = 1;
+	domain["at"] = 1;
+	domain["au"] = 1;
+	domain["be"] = 1;
+	domain["br"] = 1;
+	domain["ca"] = 1;
+	domain["ch"] = 1;
+	domain["cl"] = 1;
+	domain["cn"] = 1;
+	domain["cr"] = 1;
+	domain["cs"] = 1;
+	domain["de"] = 1;
+	domain["dk"] = 1;
+	domain["eg"] = 1;
+	domain["es"] = 1;
+	domain["fi"] = 1;
+	domain["fr"] = 1;
+	domain["gr"] = 1;
+	domain["hk"] = 1;
+	domain["hu"] = 1;
+	domain["ie"] = 1;
+	domain["il"] = 1;
+	domain["in"] = 1;
+	domain["is"] = 1;
+	domain["it"] = 1;
+	domain["jp"] = 1;
+	domain["kr"] = 1;
+	domain["lk"] = 1;
+	domain["mx"] = 1;
+	domain["my"] = 1;
+	domain["ni"] = 1;
+	domain["nl"] = 1;
+	domain["no"] = 1;
+	domain["nz"] = 1;
+	domain["ph"] = 1;
+	domain["pl"] = 1;
+	domain["pr"] = 1;
+	domain["pt"] = 1;
+	domain["se"] = 1;
+	domain["sg"] = 1;
+	domain["su"] = 1;
+	domain["th"] = 1;
+	domain["tr"] = 1;
+	domain["tw"] = 1;
+	domain["uk"] = 1;
+	domain["us"] = 1;
+	domain["uy"] = 1;
+	domain["yu"] = 1;
+	domain["za"] = 1;
+
+	nbad = 0;
+	imon_inet = 0;
+}
+
+# ignore domain gateways (no clean mapping - we must know the internet name)
+/^\./ {next}
+
+$2 == "%s" {
+# hopefully only one of these
+	if ( $1 !~ /\./ ) {
+		localuucpname = $1;
+		next;
+	}
+}
+
+# here's the meat of the matter - find real domains and reverse the
+# equivalences so that pathalias will give us paths with internet
+# names in them.
+$1 ~ /\./ {
+	hostname= $1;
+	curbad = 0;
+# check top of domain name for validity
+	i = split(hostname, parts, ".");
+	top = parts[i];
+	if (domain[top] != 1) {
+		printf("# bad domain - %s\n", hostname);
+		badtop[top]++;
+		nbad++;
+		curbad = 1;
+	} else domtop[top]++;
+	n = split($2, path, "!");
+	if (n > 1) {
+		uucpname= path[n - 1];
+		if (hostname == uucpname)
+			next;
+# skip two sided dot aliases
+		i = split(uucpname, parts, ".");
+		if (i < 2) {
+			if (! curbad) {
+				print hostname "=" uucpname;
+				internet[hostname]++;
+			}
+		} else if (domain[parts[i]] == 1) {
+			print uucpname "=" hostname;
+			internet[uucpname]++;
+		}
+	} else if ($2 == "%s") {
+		if (imon_inet && localuucpname != "" && !curbad) {
+			print localinetname "=" localuucpname;
+			internet[localinetname]++;
+		}
+		if (!curbad) {
+			localinetname= $1;
+			internet[localinetname]++;
+			imon_inet++
+		}
+	}
+}
+
+# now create a completely connected network of the domain names,
+# with a low cost, so that we mostly use the Internet in preference
+# to any other path
+END{
+	if (imon_inet) {
+		print localinetname "=" localuucpname;
+	}
+	print "INTERNET={"
+	for(hostname in internet) {
+		printf("\t%s,\n", hostname);
+	}
+	printf("\t}(%s)\n", COST);
+#
+# report on what we found while perusing the map data
+#
+	printf("# top level domains\n");
+	for(top in domtop) {
+		printf("#\t%s\t%d\n", top, domtop[top]);
+	}
+#
+	if (nbad > 0) {
+		printf("\n# unrecognized summary:\n");
+		for(dom in badtop) {
+			printf("#\t%s\t%d\n", dom, badtop[dom]);
+		}
+	}
+}
+

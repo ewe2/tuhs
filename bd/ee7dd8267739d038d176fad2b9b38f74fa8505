@@ -1,0 +1,54 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Tue, 23 May 2017 00:07:34 +0200
+Subject: [TUHS] Unix with TCP/IP for small PDP-11s
+In-Reply-To: <CAC20D2OXOwYnbwpv8O=E14j-PQRONJrKL6VEyvCc+Reeguy72Q@mail.gmail.com>
+References: <35238F37-6324-4D40-A6C0-7957F2E22964@planet.nl>
+ <CAC20D2Mi+iVqoMcHxoaOKwu00-A-V9OPWrAOVoCdH6c6MbKdyQ@mail.gmail.com>
+ <80EBBEAA-5774-4594-B69E-00FB1EE0F101@quintile.net>
+ <CAC20D2OXOwYnbwpv8O=E14j-PQRONJrKL6VEyvCc+Reeguy72Q@mail.gmail.com>
+Message-ID: <830AF76B-3E3C-4C76-9ED6-959AC38AF6EE@planet.nl>
+
+Clem,
+
+You've got me confused.
+
+> The API pretty much worked this way...  there was one simple kernel hook.   A small mod was done to the old nami routine (what modern UNIX calls 'lookup'), as a path was being parsed, the rest of the path was left in place made available to other routines.
+
+The UoI Arpanet code did not use the partial path parsing that you describe.
+The namei() routine is unchanged (see http://www.tuhs.org/cgi-bin/utree.pl?file=SRI-NOSC/ken/nami.c).
+
+The code recognizes a network open, because the open() is of a special character file with major number 255;
+the minor number would be the remote address (1974 arpanet used 8 bit network addresses - 6 bits IMP, 2 bits host).
+If the 'mode' parameter to open() is 0, 1 or 2, then a NCP/telnet connection would be made to that host. If the mode parameter was anything else, it was a pointer to a data block with the full specification of the connection to be made. See:
+http://www.tuhs.org/cgi-bin/utree.pl?file=SRI-NOSC/ken/sys2.c - open1()
+http://www.tuhs.org/cgi-bin/utree.pl?file=SRI-NOSC/ncpk/nopcls.c - netopen()
+
+The data block contained all the parameters that are set via calls to connect/bind/listen in the BSD sockets API. 
+
+> There were a couple of different schemes with V7's multiplexor call was created by Chesson for DataKit (which was similar to was used in the UofI code Arpanet code).
+
+You've lost me here.
+
+Paul
+
+On 22 May 2017, at 18:29 , Clem Cole wrote:
+
+> The Rand API is documented in a couple of papers that have been discussed here previously.   I'll have to do a little googling to find them.   The ChaosNET docs are the best MIT docs.
+> 
+> 
+> The API pretty much worked this way...  there was one simple kernel hook.   A small mod was done to the old nami routine (what modern UNIX calls 'lookup'), as a path was being parsed, the rest of the path was left in place made available to other routines.
+> 
+> Thus you could open:  /dev/tcp/xxx  and the string xxx was available in call that was implementing tcp and was then able to be passed xxx as a parameter.  Hence, the traditional open/close/read/write was all that was needed.
+> 
+> Joy codified a new API that was supposed to be more network centric and map to different network protocols - the thinking being that open/close/read/write were insufficient semantics for network operations.
+> 
+> Also, the only other issue at the time was that BSD's select(2) did not exist, and the UNIX I/O were 100% synchronous.  So some other mechanism (also discussed here) needed to be created to avoid blocking in the application.  There were a couple of different schemes with V7's multiplexor call was created by Chesson for DataKit (which was similar to was used in the UofI code Arpanet code).   Rand, UNET & Chaos had something else that gave the save async function, who's name I've forgotten at the moment, but I believe Noel posted the code for same in the last year from one of the MIT kernels - we had used it at CMU that we had gotten from Rand.
+> 
+> On Mon, May 22, 2017 at 10:51 AM, Steve Simon <steve at quintile.net> wrote:
+> hi Clem,
+> 
+> do you have pointers to any documentation on the rand/MIT network API?
+> 
+> -Steve
+
+

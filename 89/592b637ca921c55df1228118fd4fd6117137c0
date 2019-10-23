@@ -1,0 +1,58 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 14 Oct 2017 11:40:14 -0500
+Subject: help building kernel after fresh install of V7
+Message-ID: <fd1304e9-6e13-1637-476f-e4619120dcff@gmail.com>
+
+After installing a fresh simh V7 instance with 2 RP06's and a TU10, I 
+tried building the kernel and running it. I got a panic. I didn't mess 
+with the defaults, so I'm at a loss as to how the stock kernel is 
+different from the one I built. I tried building as root, then sys, same 
+effect. Here's what I did:
+
+nboot.ini contents:
+
+    set cpu 11/70
+    set cpu 2M
+    set cpu idle
+    set rp0 rp06
+    att rp0 rp06-0.disk
+    set rp1 rp06
+    att rp1 rp06-1.disk
+    boot rp0
+
+pdp11 nboot.ini
+boot
+hp(0,0)unix (actually renamed hptmunix)
+mem = 2020544
+CTRL-D
+login: root
+cd /usr/sys/conf
+make allsystems
+... build stuff, no errors or warnings
+
+mv hptmunix /
+sync
+sync
+CTRL-E
+
+quit the sim
+
+pdp11 nboot.ini
+boot
+hp(0,0)hptmunix
+mem = 2021696
+err on dev 0/0
+bn=1 er=100000,4507
+err on dev 0/0
+bn=1 er=100000,4521
+err on dev 0/0
+... etc.
+
+Am I doing something wrong or missing an important configuration step. I 
+am just trying to rebuild the stock kernel before I try any 
+reconfigurations.
+
+-- 
+GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+
+

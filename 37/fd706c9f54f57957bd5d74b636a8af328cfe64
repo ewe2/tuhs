@@ -1,0 +1,67 @@
+From: andreww591@gmail.com (Andrew Warkentin)
+Date: Sat, 25 Mar 2017 21:01:22 -0600
+Subject: [TUHS] Were all of you.. Hippies?
+In-Reply-To: <20170326013520.86B8E18C097@mercury.lcs.mit.edu>
+References: <20170326013520.86B8E18C097@mercury.lcs.mit.edu>
+Message-ID: <CAD-qYGqzkkf9e3FPZitG8pcQgv1fA+p+9EStErqJ3b0=gBorgw@mail.gmail.com>
+
+On 3/25/17, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+>     > From: Ron Minnich
+>
+>     > There was no shortage of people at the time who were struggling to
+> find
+>     > a way to make the Unix model work for networking ...  It didn't quite
+>     > work out
+>
+> For good reason.
+>
+> It's only useful to have a file-name _name_ for a thing if...  the thing
+> acts
+> like a file - i.e. you can plug that file-name into other places you might
+> use
+> a file-name (e.g. '> {foo}' or 'ed <foo>', etc, etc).
+>
+> There is very little in the world of networking that acts like a file. Yes,
+> you can go all hammer-nail, and use read() and write() to get data back and
+> forth, and think that makes it a file - but it's not.
+>
+> For instance, files, as far as I know, generally don't have timeout
+> semantics. Can the average application that deals with a file, deal
+> reasonably
+> with the fact that sometimes one gets half-way through the 'file' - and
+> things
+> stop working?  And that's a _simple_ one.  How does a file abstraction
+> match
+> to a multi-cast lossy (i.e. packets may be lost) datagram group?
+>
+> For another major point (and the list goes on, I just can't be bothered to
+> go
+> through it all), there's usually all sorts of other higher-level protocol
+> in
+> there, so only specialized applications can make use of it anyway. Look at
+> HTTP: there's specialized syntax one has to spit out to say what file you
+> want, and the HTML files you get back from that can generally only be
+> usefully
+> used in a browser.
+>
+
+Just because an OS provides unstructured files as its primary or only
+IPC primitive doesn't mean that you can't run a structured protocol
+over them (after all, the IP protocol suite provides only unstructured
+transports - byte streams or unconnected datagrams - to the
+application layer). That's what I'm planning to do in UX/RT. Services
+that don't fit into an unstructured file model will run a structured
+protocol over the file transport (UX/RT will provide a
+message-boundary-preserving special file type specifically because
+it's easier to implement RPC-like and other structured protocols over
+such a transport). And just because such services will be harder to
+use with tools like ed, cat, and the like doesn't mean there aren't
+other advantages to having them in the filesystem. In UX/RT, the main
+advantages of the file-oriented architecture for services using
+structured protocols will be the unified security model and the ease
+of overriding such services with filter servers (e.g. UX/RT's fakeroot
+will be a pure server rather than an unreliable LD_PRELOAD hack, and
+in a similar vein, jails in UX/RT will be able to virtualize as much
+or as little as desired rather than being pretty much all-or-nothing
+like in a lot of other OSes).
+

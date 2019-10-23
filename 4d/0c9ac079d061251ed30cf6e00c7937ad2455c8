@@ -1,0 +1,120 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f85fa10a
+	for <ml@inbox.vuxu.org>;
+	Thu, 19 Sep 2019 18:43:31 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E17A29BA28; Fri, 20 Sep 2019 04:43:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7CBA49B906;
+	Fri, 20 Sep 2019 04:43:16 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5DAF79B906; Fri, 20 Sep 2019 04:43:14 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 45E90947B9
+ for <tuhs@tuhs.org>; Fri, 20 Sep 2019 04:43:12 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Thu, 19 Sep 2019 14:42:58 -0400
+Message-ID: <1568918582.18253.for-standards-violators@oclsc.org>
+Subject: Re: [TUHS] earliest Unix roff
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Clem Cole:
+
+  Exactly!!!!   That's what Eric did when he wrote more(ucb) -  he *added to
+  Unix*.   The funny part was that USG thought more(ucb) was a good idea and
+  then wrote their own, pg(att); which was just as arrogant as the info
+  behavior from the Gnu folks!!!
+
+======
+
+And others wrote their own too, of course.  The one I know
+best is p(1), written by Rob Pike in the late 1970s at the
+University of Toronto.  I encountered at Caltech on the
+system Rob had set up before leaving for Bell Labs (and
+which I cared for and hacked on for the next four years
+before following him).  By the time I reached BTL it was
+a normal part of the Research system; I believe it's in
+all of the Eighth, Ninth, and Tenth Edition manuals.
+
+p is interesting because it's so much lighter-weight, and
+because it has rather a different interior design:
+
+Rather than doing termcappy things, p just prints 22 lines
+(or the number specified in an option), then doesn't print
+the newline after the 22nd line.  Hit return and it will
+print the next 22 lines, and so on.  The resulting text just
+flows up the glass-tty screen without any fuss, cbreak, or
+anything.  (I believe the first version predated V7 and
+therefore cbreak.)
+
+Why 22 lines instead of 24, the common height of glass ttys
+back then?  Partly because that means you keep a line or two
+of context when advancing pages, making reading simpler.
+But also because in those days, a standard page destined for
+a printer (e.g. from pr or nroff, and therefore from man) was
+66 lines long.  22 evenly divides 66, so man something | p
+never gives you a screen spanning pages.
+
+p was able to back up: type - (and return) instead of just
+return, and it reprints the previous 22-line page; -- (return)
+the 22 lines before that; and so on.  This was implemented
+in an interesting and clever way: a wrapper around the standard
+I/O library which kept a circular buffer of some fixed number
+of characters (8KiB in early versions, I think), and a new
+call that, in effect, backed up the file pointer by one character
+and returned the character just backed over.  That made it easy
+to back over the previous N lines: just make that call until
+you've seen N newlines, then discard the newline you've just
+backed over, and you're at the beginning the first line you want
+to reprint.
+
+As I vaguely recall, more was able to back up, but only when
+reading from a real file, not a pipeline.  p could do (limited
+but sufficient) backup from a pipeline too.
+
+As a creature of its pre-window-system era, you could also type
+!command when p paused as well.
+
+I remember being quite interested in that wrapper as a
+possible library for use in other things, though I never
+found a use for it.
+
+I also remember a wonderful Elements-of-Programming-Style
+adventure with Rob's code.  I discovered it had a bug under some
+specific case when read returned less than a full bufferful.
+I read the code carefully and couldn't see what was wrong.
+So I wrote my own replacement for the problematic subroutine
+from scratch, tested it carefully in corner cases, then with
+listings of Rob's code and mine side-by-side walked through
+each with the problem case and found the bug.
+
+I still carry my own version of p (rewritten from scratch mainly
+to make it more portable--Rob's code was old enough to be too
+clever in some details) wherever I go; ironically, even back to
+U of T where I have been on and off for the past 30 years.
+more and less and pg and the like are certainly useful programs;
+for various reasons they're not to my taste, but I don't scorn
+them.  But I can't help being particular fond of p because it
+taught me a few things about programming too.
+
+Norman Wilson
+Toronto ON

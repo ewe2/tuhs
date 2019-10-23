@@ -1,0 +1,1593 @@
+From: bill@cs.scranton.edu (Bill Gunshannon)
+Date: Mon, 26 Feb 2001 13:47:57 -0500 (EST)
+Subject: [pups] Swap device in V6?
+In-Reply-To: <3A9A97B5.4EBD13A4@tampabay.rr.com>
+Message-ID: <Pine.LNX.4.10.10102261344410.14505-100000@triangle.cs.uofs.edu>
+
+On Mon, 26 Feb 2001, Ken Wellsch wrote:
+
+> 
+> Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+> still gripes about "no swap device."
+> 
+> So I'm missing something I guess.
+> 
+
+Based on my recent experience with Ultrix-11 (which warns you not
+to try and change the partiitioning on certain drive types as the
+kernel has some references hard-coded) what you may be missing are
+the devices for the individual partitions.  Is there an equivalent
+to MAKEDEV??  Ultrix uses a program named "msf" (for "make special
+file") and so you never see what the partitioning layout is unless
+you peek at the sources.
+
+Good luck.
+
+bill
+
+-- 
+Bill Gunshannon          |  de-moc-ra-cy (di mok' ra see) n.  Three wolves
+bill at cs.scranton.edu     |  and a sheep voting on what's for dinner.
+University of Scranton   |
+Scranton, Pennsylvania   |         #include <std.disclaimer.h>   
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA53869
+	for pups-liszt; Tue, 27 Feb 2001 05:59:06 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id FAA53865
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 05:59:03 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Mon, 26 Feb 2001 10:26:14 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <FWD7Q3LT>; Mon, 26 Feb 2001 10:27:13 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>, Roger Ivie <IVIE at cc.usu.edu>
+Cc: PUPS at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Swap device in V6?
+Date: Mon, 26 Feb 2001 10:27:12 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I, too, have /dev/rk0 mknod'ed as 0,0.  Relaetd to this, ps does something
+odd (at least to my experience) with the open() system call - it calls 'open
+("/dev")', without a second argument for mode; that seems like a no-no in C,
+but for C of this era I'm not sure.  That call seems to succeed; it's a few
+statements later where it fails with the "no swap device" console message.  
+
+But where cc seems to be failing (in /lib/c0), it is doing a fork(),
+execve() and wait(), and if the system needs to swap to do that, not being
+able to find swap space would sure bugger things up.  
+
+I'll examine my /dev/rk0 structure next....  -- Ian 
+
+-----Original Message-----
+From: Ken Wellsch [mailto:kwellsch@tampabay.rr.com]
+Sent: Monday, February 26, 2001 9:52 AM
+To: Roger Ivie
+Cc: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+
+
+Roger Ivie wrote:
+> 
+> Ian King said:
+> > I've combed the docs and the code, and I can't find ANYthing about how =
+> > swap space is assigned or designated.  Does anyone have any hints?  =
+> > Thanks -- Ian=20
+> 
+> Yeah, I figured this out a while ago. Unfortunately, I'm in the middle
+> of changing employers so everything's in boxes at the moment.
+> 
+> Basically, the swap space is hard-coded into the device drivers. If you
+> take a look at, for example, the RK05 driver you'll see that one of the
+> drives is smaller than the others. That extra space is the swap space.
+> I forget how the rest of the system is informed of the swap space, but
+> it's done in the disk driver sources IIRC.
+
+I took a quick look at this this morning and as Roger says, the kernel
+is built with a wired in swap.  In the case of the kernel 'rkunix,' in
+looking at usr/sys/run or something like that, I see they are wiring
+the swap to be device major=0 and minor=0 which is the root RK05 drive.
+
+Looking at the code it seems the first 4000 blocks are file system and
+a following 782 (or something like that) are for swap.
+
+The "ps" command source appears to be poking around /dev looking for a
+block device that matches the kernel value for swapdev (or something like
+that) and confirming it is a block device.
+
+Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+still gripes about "no swap device."
+
+So I'm missing something I guess.
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA53963
+	for pups-liszt; Tue, 27 Feb 2001 06:08:50 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from grumpy.usu.edu (grumpy.usu.edu [129.123.1.86])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id GAA53959
+	for <PUPS at MINNIE.CS.ADFA.EDU.AU>; Tue, 27 Feb 2001 06:08:47 +1100 (EST)
+	(envelope-from IVIE at cc.usu.edu)
+Received: from cc.usu.edu by cc.usu.edu (PMDF V5.2-32 #30472)
+ id <01K0KD39CHXC91Z5ER at cc.usu.edu> for PUPS at MINNIE.CS.ADFA.EDU.AU; Mon,
+ 26 Feb 2001 12:04:53 MDT
+Date: Mon, 26 Feb 2001 12:04:53 -0600 (MDT)
+From: Roger Ivie <IVIE@cc.usu.edu>
+Subject: Re: [pups] Swap device in V6?
+To: PUPS at minnie.cs.adfa.edu.au
+Message-id: <01K0KD39CMMQ91Z5ER at cc.usu.edu>
+X-VMS-To: PUPS at MINNIE.CS.ADFA.EDU.AU
+MIME-version: 1.0
+Content-type: TEXT/PLAIN; CHARSET=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Ian King wrote:
+> But where cc seems to be failing (in /lib/c0), it is doing a fork(),
+> execve() and wait(), and if the system needs to swap to do that, not being
+> able to find swap space would sure bugger things up.  
+
+It is indeed the case that V6 needs swap to fork. Forking in V6 is done
+essentially by swapping the task out to disk and (oops!) forgetting to
+delete the in-core copy. At least, that's how it looked to me.
+
+Roger Ivie
+ivie at cc.usu.edu
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA54007
+	for pups-liszt; Tue, 27 Feb 2001 06:13:29 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id GAA54001
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 06:13:26 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Mon, 26 Feb 2001 11:07:28 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <FWD7QWQ7>; Mon, 26 Feb 2001 11:06:17 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEBFD at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Steven M. Schultz'" <sms at moe.2bsd.com>, pups at minnie.cs.adfa.edu.au
+Subject: Serial settings (was RE: [pups] 2.11BSD boot hangs.)
+Date: Mon, 26 Feb 2001 11:06:07 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+FWIW, I noticed that Unix V6 is happier with 7E1 for its console, too; I'm
+using a terminal emulator, and was getting garbage from V6 (but had had no
+problems with RSX-11).  -- Ian 
+
+-----Original Message-----
+From: Steven M. Schultz [mailto:sms@moe.2bsd.com]
+Sent: Monday, February 26, 2001 10:22 AM
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+
+[snip] 
+
+> BTW: What serial parameters does 2.11BSD use? The first time I booted
+> UNIX I got garbage after "user mem  = 307200". I seted the vt220 to 7e1
+> and this worked, but is it correct?
+
+	Yes, 7e1 is correct - a legacy setting from eons ago.
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id GAA54287
+	for pups-liszt; Tue, 27 Feb 2001 06:51:57 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id GAA54283
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 06:51:54 +1100 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+ (Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f2651f8e8f4da at mwnt5.microwalt.nl> for <pups at minnie.cs.adfa.edu.au>;
+ Mon, 26 Feb 2001 20:46:07 +0000
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <FQJ8RAWQ>; Mon, 26 Feb 2001 20:41:13 +0100
+Message-ID: <6F63E31101C6D41196490008C7B2BFC32CA8 at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "PUPS Mailing List (E-mail)" <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] Ultrix-11 V3.1 hang on DEQNA ?
+Date: Mon, 26 Feb 2001 20:41:07 +0100
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+
+I'm almost there.  If only I can tell my 11/23+ _not_ to hang as soon
+as I enable networking by configuring the Ethernet (qe0; DEQNA) card 
+with ifconfig.
+
+Does anyone have docs regarding the DEQNA and/or DELQA so I can check the
+board's physical settings?
+
+Thx,	
+	Fted
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA54456
+	for pups-liszt; Tue, 27 Feb 2001 07:22:31 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from tele-post-20.mail.demon.net (tele-post-20.mail.demon.net [194.217.242.20])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id HAA54452
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 07:22:17 +1100 (EST)
+	(envelope-from robin at ruffnready.co.uk)
+Received: from falstaf.demon.co.uk ([158.152.152.109])
+	by tele-post-20.mail.demon.net with esmtp (Exim 2.12 #2)
+	id 14XU6C-0000Xp-0K; Mon, 26 Feb 2001 20:18:25 +0000
+Message-ID: <ZchHXUAOnrm6Ewzo at ruffnready.co.uk>
+Date: Mon, 26 Feb 2001 20:17:18 +0000
+To: Ian King <iking at microsoft.com>
+Cc: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>, Roger Ivie <IVIE at cc.usu.edu>,
+        PUPS at minnie.cs.adfa.edu.au
+From: Robin Birch <robin@ruffnready.co.uk>
+Subject: Re: [pups] Swap device in V6?
+References: <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.corp.microsoft.com>
+In-Reply-To: <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.corp.microsoft.com>
+MIME-Version: 1.0
+X-Mailer: Turnpike Integrated Version 5.00 U <YSkKJATYm0AxAbv6xwlBrCeVCW>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In later unixes, 2.11 for instance, /dev/swap is a link to the swap
+device.  Is ps attempting to open /dev/swap and finding that it either
+isn't there or it is mknoded to an incorrect device?
+
+Robin
+
+In message <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.
+corp.microsoft.com>, Ian King <iking at microsoft.com> writes
+>I, too, have /dev/rk0 mknod'ed as 0,0.  Relaetd to this, ps does something
+>odd (at least to my experience) with the open() system call - it calls 'open
+>("/dev")', without a second argument for mode; that seems like a no-no in C,
+>but for C of this era I'm not sure.  That call seems to succeed; it's a few
+>statements later where it fails with the "no swap device" console message.  
+>
+>But where cc seems to be failing (in /lib/c0), it is doing a fork(),
+>execve() and wait(), and if the system needs to swap to do that, not being
+>able to find swap space would sure bugger things up.  
+>
+>I'll examine my /dev/rk0 structure next....  -- Ian 
+>
+>-----Original Message-----
+>From: Ken Wellsch [mailto:kwellsch at tampabay.rr.com]
+>Sent: Monday, February 26, 2001 9:52 AM
+>To: Roger Ivie
+>Cc: PUPS at minnie.cs.adfa.edu.au
+>Subject: Re: [pups] Swap device in V6?
+>
+>
+>Roger Ivie wrote:
+>> 
+>> Ian King said:
+>> > I've combed the docs and the code, and I can't find ANYthing about how =
+>> > swap space is assigned or designated.  Does anyone have any hints?  =
+>> > Thanks -- Ian=20
+>> 
+>> Yeah, I figured this out a while ago. Unfortunately, I'm in the middle
+>> of changing employers so everything's in boxes at the moment.
+>> 
+>> Basically, the swap space is hard-coded into the device drivers. If you
+>> take a look at, for example, the RK05 driver you'll see that one of the
+>> drives is smaller than the others. That extra space is the swap space.
+>> I forget how the rest of the system is informed of the swap space, but
+>> it's done in the disk driver sources IIRC.
+>
+>I took a quick look at this this morning and as Roger says, the kernel
+>is built with a wired in swap.  In the case of the kernel 'rkunix,' in
+>looking at usr/sys/run or something like that, I see they are wiring
+>the swap to be device major=0 and minor=0 which is the root RK05 drive.
+>
+>Looking at the code it seems the first 4000 blocks are file system and
+>a following 782 (or something like that) are for swap.
+>
+>The "ps" command source appears to be poking around /dev looking for a
+>block device that matches the kernel value for swapdev (or something like
+>that) and confirming it is a block device.
+>
+>Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+>still gripes about "no swap device."
+>
+>So I'm missing something I guess.
+>
+>-- Ken
+
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA54490
+	for pups-liszt; Tue, 27 Feb 2001 07:26:37 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id HAA54486
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 07:26:33 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.2/8.11.2) with ESMTP id f1QKMZL28334;
+	Mon, 26 Feb 2001 15:22:41 -0500 (EST)
+Message-ID: <3A9ABB0B.F1E754B at tampabay.rr.com>
+Date: Mon, 26 Feb 2001 15:22:35 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.0.38 i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Robin Birch <robin at ruffnready.co.uk>
+CC: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+References: <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.corp.microsoft.com> <ZchHXUAOnrm6Ewzo at ruffnready.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I know I for one had forgotten just what "the state of the art" was with
+UNIX back in 1975.  If you can, please do look at the source for V6/ps.
+Really.  /dev/swap?  In your dreams!  B^)  Cheers,  -- Ken
+
+Robin Birch wrote:
+> 
+> In later unixes, 2.11 for instance, /dev/swap is a link to the swap
+> device.  Is ps attempting to open /dev/swap and finding that it either
+> isn't there or it is mknoded to an incorrect device?
+> 
+> Robin
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA54574
+	for pups-liszt; Tue, 27 Feb 2001 07:40:27 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail3.microsoft.com (mail3.microsoft.com [131.107.3.123])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id HAA54570
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 07:40:23 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.100 by mail3.microsoft.com (InterScan E-Mail VirusWall NT); Mon, 26 Feb 2001 12:28:34 -0800 (Pacific Standard Time)
+Received: by inet-imc-03.redmond.corp.microsoft.com with Internet Mail Service (5.5.2653.19)
+	id <FW8LQLS5>; Mon, 26 Feb 2001 12:30:01 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C0235D1CB at red-msg-06.redmond.corp.microsoft.com>
+From: Ian King <iking@microsoft.com>
+To: "'Robin Birch'" <robin at ruffnready.co.uk>
+Cc: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>, Roger Ivie <IVIE at cc.usu.edu>,
+        PUPS at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Swap device in V6?
+Date: Mon, 26 Feb 2001 12:29:48 -0800
+X-Mailer: Internet Mail Service (5.5.2653.19)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I was wondering about that, as I've seen that sort of thing in other *nixes,
+too.  I tried creating a link to /dev/swap from /dev/rk0, and it didn't help
+ps (same error message).  
+
+I'm going to figure out some way to print out ps.c later and trace through
+it; I was going through it with ed on the PDP-11 (which was fun, in a
+twisted, nostalgic sort of way).  If I can figure out exactly how it's
+looking for what it's looking for, perhaps I can figure out why it isn't
+finding it.  :-)  
+
+I've found the stuff on coming up in single-user mode, too - with 173030 in
+the switch register (I have the programmer's panel on my 11/34a).  FYI.  --
+Ian 
+
+-----Original Message-----
+From: Robin Birch [mailto:robin@ruffnready.co.uk]
+Sent: Monday, February 26, 2001 12:17 PM
+To: Ian King
+Cc: 'Ken Wellsch'; Roger Ivie; PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+
+
+In later unixes, 2.11 for instance, /dev/swap is a link to the swap
+device.  Is ps attempting to open /dev/swap and finding that it either
+isn't there or it is mknoded to an incorrect device?
+
+Robin
+
+In message <8D25F244B8274141B5D313CA4823F39C0235D1C9 at red-msg-06.redmond.
+corp.microsoft.com>, Ian King <iking at microsoft.com> writes
+>I, too, have /dev/rk0 mknod'ed as 0,0.  Relaetd to this, ps does something
+>odd (at least to my experience) with the open() system call - it calls
+'open
+>("/dev")', without a second argument for mode; that seems like a no-no in
+C,
+>but for C of this era I'm not sure.  That call seems to succeed; it's a few
+>statements later where it fails with the "no swap device" console message.
+
+>
+>But where cc seems to be failing (in /lib/c0), it is doing a fork(),
+>execve() and wait(), and if the system needs to swap to do that, not being
+>able to find swap space would sure bugger things up.  
+>
+>I'll examine my /dev/rk0 structure next....  -- Ian 
+>
+>-----Original Message-----
+>From: Ken Wellsch [mailto:kwellsch at tampabay.rr.com]
+>Sent: Monday, February 26, 2001 9:52 AM
+>To: Roger Ivie
+>Cc: PUPS at minnie.cs.adfa.edu.au
+>Subject: Re: [pups] Swap device in V6?
+>
+>
+>Roger Ivie wrote:
+>> 
+>> Ian King said:
+>> > I've combed the docs and the code, and I can't find ANYthing about how
+=
+>> > swap space is assigned or designated.  Does anyone have any hints?  =
+>> > Thanks -- Ian=20
+>> 
+>> Yeah, I figured this out a while ago. Unfortunately, I'm in the middle
+>> of changing employers so everything's in boxes at the moment.
+>> 
+>> Basically, the swap space is hard-coded into the device drivers. If you
+>> take a look at, for example, the RK05 driver you'll see that one of the
+>> drives is smaller than the others. That extra space is the swap space.
+>> I forget how the rest of the system is informed of the swap space, but
+>> it's done in the disk driver sources IIRC.
+>
+>I took a quick look at this this morning and as Roger says, the kernel
+>is built with a wired in swap.  In the case of the kernel 'rkunix,' in
+>looking at usr/sys/run or something like that, I see they are wiring
+>the swap to be device major=0 and minor=0 which is the root RK05 drive.
+>
+>Looking at the code it seems the first 4000 blocks are file system and
+>a following 782 (or something like that) are for swap.
+>
+>The "ps" command source appears to be poking around /dev looking for a
+>block device that matches the kernel value for swapdev (or something like
+>that) and confirming it is a block device.
+>
+>Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+>still gripes about "no swap device."
+>
+>So I'm missing something I guess.
+>
+>-- Ken
+
+____________________________________________________________________
+Robin Birch     robin at ruffnready.co.uk
+
+M1ASU/2E0ARJ/M5ABD     Old computers and radios always welcome
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA54716
+	for pups-liszt; Tue, 27 Feb 2001 08:12:35 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA54712
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 08:12:31 +1100 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+ (Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f2651f932a75e at mwnt5.microwalt.nl>;
+ Mon, 26 Feb 2001 22:06:37 +0000
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <FQJ8RAXB>; Mon, 26 Feb 2001 22:01:43 +0100
+Message-ID: <6F63E31101C6D41196490008C7B2BFC32CAB at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "'Robin Birch'" <robin at ruffnready.co.uk>, Ian King <iking at microsoft.com>
+Cc: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>, Roger Ivie <IVIE at cc.usu.edu>,
+        PUPS at minnie.cs.adfa.edu.au
+Subject: RE: [pups] Swap device in V6?
+Date: Mon, 26 Feb 2001 22:01:36 +0100
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> In later unixes, 2.11 for instance, /dev/swap is a link to the swap
+> device.  Is ps attempting to open /dev/swap and finding that it either
+> isn't there or it is mknoded to an incorrect device?
+That is often the case.. dunno about V6 though.. is a long time ago :)
+
+--f
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA54749
+	for pups-liszt; Tue, 27 Feb 2001 08:20:24 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from sun.rhrk.uni-kl.de (sun.rhrk.uni-kl.de [131.246.137.50])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id IAA54745
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 08:20:21 +1100 (EST)
+	(envelope-from jkunz at unixag-kl.fh-kl.de)
+From: jkunz@unixag-kl.fh-kl.de
+Received: from aixs1.rhrk.uni-kl.de
+           ( exim at aixs1.rhrk.uni-kl.de [131.246.137.3] ) by sun.rhrk.uni-kl.de
+          id aa10531 ; 26 Feb 2001 22:16 MET
+Received: from forelle32.wohnheim.uni-kl.de ([131.246.141.32] helo=unixag-kl.fh-kl.de)
+	by aixs1.rhrk.uni-kl.de with esmtp (Exim 3.03 #2)
+	id 14XV0L-0006eA-00; Mon, 26 Feb 2001 22:16:25 +0100
+Received: from unixag-kl.fh-kl.de (localhost [127.0.0.1])
+	by unixag-kl.fh-kl.de (8.8.8/8.8.8) with ESMTP id WAA16750;
+	Mon, 26 Feb 2001 22:15:53 +0100 (CET)
+Message-Id: <200102262115.WAA16750 at unixag-kl.fh-kl.de>
+Date: Mon, 26 Feb 2001 22:15:52 +0100 (CET)
+Subject: Re: [pups] 2.11BSD boot hangs.
+To: sms at moe.2bsd.com
+cc: pups at minnie.cs.adfa.edu.au
+In-Reply-To: <200102261822.f1QIMNt09941 at moe.2bsd.com>
+MIME-Version: 1.0
+Content-Type: TEXT/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8BIT
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 26 Feb, Steven M. Schultz wrote:
+
+>> 2.11 BSD UNIX #115: Sat Apr 22 19:07:25 PDT 2000
+>>     sms1 at curly.2bsd.com:/usr/src/sys/GENERIC
+> 	That looks good - and familiar ;)
+;-)
+
+> 	The next thing that should have come out is the '# ' single user
+> 	prompt.
+... like setup.ps says.
+
+>> else happens. The "Run" LED at the front panel is off. I tried with an
+> 
+> 	That sounds like the system 'halt'ed for some (unknown) reason.
+> 	Sigh - that kernel should work fine, especially with a RQDX3/RD54.
+Yes. All the devices where used in a MVII bevore and are knowen to
+work. Thats a bit confusing. 
+
+>> System configuration:
+>> 11/73 (M8192), one with FP accel. or one without. (Jumpers W1..W6 in,
+>> W7..W9 out, so that the CPU enters ODT at power up.)
+> 
+> 	There is a jumper (I forget which one) that enables/disables the
+> 	'halt' instruction. 
+BINGO! Pulling W5 solved the problem. But then I seted it again to
+double check. (I changed location today and took only the cards and
+disk with me.) In the "new" BA23 the system runs even with the W5
+jumper installed. Then I noticed the different setting of the front
+panel DIP swich. The upper switch is off and the lower on. The switches
+of the other cabinet are both on. If I boot the machine with W5
+installed and the upper switch on it hangs. It continues to run
+immediately if it is switched off. What is the purpose of this
+switches? 
+
+OK. The machine is currently un-tar-ing /usr... :-)))
+
+Ahh, and an other question: Can the RT11 bootstrap listed in 
+http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/bootstraps/mscp_rt11.txt
+be used to boot 2.11BSD? I have no bootstrap ROM card. (Emanuel, hint,
+hint. ;-)  ) So I use a minicom script to load the bootstrap via ODT.
+But the current bootstrap script is for TMSCP. So I have to load the
+bootblocks from tape...
+-- 
+
+
+
+tsch��,
+         Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz/
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA54909
+	for pups-liszt; Tue, 27 Feb 2001 08:48:15 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA54905
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 08:48:12 +1100 (EST)
+	(envelope-from johnh at psychwarp.psych.usyd.edu.au)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id IAA24139
+	for PUPS at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 08:44:23 +1100 (EST)
+Date: Tue, 27 Feb 2001 08:44:23 +1100 (EST)
+From: John Holden <johnh@psych.usyd.edu.au>
+Message-Id: <200102262144.IAA24139 at psychwarp.psych.usyd.edu.au>
+To: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+The root device, swap device, swap size and offset are hard coded into the
+kernel configuration file c.c. This is build by 'myconf', although a lot
+of people would directly edit l.s and c.c (in /usr/sys/conf). There are no
+magic /dev/swap entries. Edition 7 does the same thing.
+
+For a RK05 disk, the filesystem would typically occupy 4000 blocks, with the
+last 872 being allocated for swap. If you built a new root disk, you had to
+be careful that the disk size you gave to 'mkfs', didn't overlap the
+hard configured swap disk. No disk partitions.
+
+You can find out the current values by using one of the debuggers (db or cdb)
+to find the values of swap (_swapdev), swap size (_nswap), swap offset (_swplo)
+and root device (_rootdev). You can also use 'nm' to get the symbol table,
+and 'od' the kernel file /unix. The RK05 was usually the first entry in
+the device switch tables, so the major/minor numbers are usually 0.
+
+The 'ps' command looks up the symbol table of the unix kernel, and gets
+the device entry for swap (_swapdev), and the process table (_proc)
+It would open /dev as file, and read the directory entries to find a matching
+device entry, so it then had the name of a device to open (you cannot open
+a device based only in the major and minor device entries from a user process).
+It also uses /dev to decode tty entries into names.
+
+For 'ps' to work correctly, /unix had to be linked to the real kernel, say
+rkunix.
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA55090
+	for pups-liszt; Tue, 27 Feb 2001 09:32:10 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA55086
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:32:08 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1QMZJR09631;
+	Tue, 27 Feb 2001 09:35:19 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102262235.f1QMZJR09631 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] Announce: The Unix Tree
+In-Reply-To: <200102261747.SAA16216 at unixag-kl.fh-kl.de> from "jkunz at unixag-kl.fh-kl.de"
+ at "Feb 26, 2001 06:47:11 pm"
+To: jkunz at unixag-kl.fh-kl.de
+Date: Tue, 27 Feb 2001 09:32:38 +1100 (EST)
+CC: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by jkunz at unixag-kl.fh-kl.de:
+> On 26 Feb, Warren Toomey wrote:
+> 
+> > Because of the license restrictions, you need your normal UNIX Archive
+> > username and password to browse.
+> Hmm. Can you set up Apache to provide SSL / HTTPS? I don't like to send
+> passwords unencrypted around the world.
+> tsch__,
+>          Jochen
+
+They are not real passwords, in a sense. There is only a userpool of
+1,000 usernames/passwords.
+
+When you register for access into the Unix Archive, you get one out of
+the pool. The only purpose here is to prove to SCO that you indeed
+agreed to their on-line license before you were given access to the
+archive.
+
+I'd be quite happy to completely dispense with the passwords altogether
+and run an anonymous service. If/when Caldera work out what they are doing
+with this stuff, I'll push them to allow for anonymous access.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA55130
+	for pups-liszt; Tue, 27 Feb 2001 09:39:18 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA55126
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:39:14 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f1QMQOv11403
+	for pups at minnie.cs.adfa.edu.au; Mon, 26 Feb 2001 14:26:24 -0800 (PST)
+Date: Mon, 26 Feb 2001 14:26:24 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200102262226.f1QMQOv11403 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From jkunz at unixag-kl.fh-kl.de Mon Feb 26 13:16:40 2001
+> > 	There is a jumper (I forget which one) that enables/disables the
+> > 	'halt' instruction. 
+> BINGO! Pulling W5 solved the problem. But then I seted it again to
+> double check. (I changed location today and took only the cards and
+> disk with me.) In the "new" BA23 the system runs even with the W5
+
+	Years ago I was completely suprised that 'halt' in kernel mode did 
+	not work and the system simply continued executing the next instruction.
+
+> jumper installed. Then I noticed the different setting of the front
+> panel DIP swich. The upper switch is off and the lower on. The switches
+> of the other cabinet are both on. If I boot the machine with W5
+> installed and the upper switch on it hangs. It continues to run
+> immediately if it is switched off. What is the purpose of this
+> switches? 
+
+	I suspect that one of the switches enables the line frequency clock.
+	With out a clock running things will work (at least minimally) as
+	long as there are some interrupts happening.   
+
+	I vaguely remember that some systems (11/23?) had an externally 
+	enabled clock and if that switch was not set correctly the OS could
+	be installed but the system would "hang" later on due to no context
+	switch scheduling.
+
+> OK. The machine is currently un-tar-ing /usr... :-)))
+
+	Fantastic!
+
+> Ahh, and an other question: Can the RT11 bootstrap listed in 
+> http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/bootstraps/mscp_rt11.txt
+> be used to boot 2.11BSD? I have no bootstrap ROM card. (Emanuel, hint,
+
+	I think it will work.   2.11 is expecting the registers to contain
+	the following:
+
+		R0 = unit number
+		R1 = CSR of booting controller
+
+	as long as those are set it should not matter what bootcode is used.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA55189
+	for pups-liszt; Tue, 27 Feb 2001 09:46:55 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from fgh.geac.com.au ([203.32.189.100])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA55185
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:46:53 +1100 (EST)
+	(envelope-from dave at horsfall.org)
+Received: from localhost (dave at localhost)
+	by fgh.geac.com.au (8.11.2/8.11.2) with ESMTP id f1QMdUY03244;
+	Tue, 27 Feb 2001 09:39:30 +1100 (EST)
+Date: Tue, 27 Feb 2001 09:39:30 +1100 (EST)
+From: Dave Horsfall <dave@horsfall.org>
+X-X-Sender:  <dave at fgh.au.geac.com>
+To: Ken Wellsch <kwellsch at tampabay.rr.com>
+cc: Roger Ivie <IVIE at cc.usu.edu>, <PUPS at minnie.cs.adfa.edu.au>
+Subject: Re: [pups] Swap device in V6?
+In-Reply-To: <3A9A97B5.4EBD13A4 at tampabay.rr.com>
+Message-ID: <Pine.GSO.4.32.0102270938530.2716-100000 at fgh.au.geac.com>
+X-No-Archive: Yes
+X-Disclaimer: "Me, speak for us?"
+X-Witty-Saying: "Mobius Strip - See other side for instructions"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 26 Feb 2001, Ken Wellsch wrote:
+
+> Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+> still gripes about "no swap device."
+
+As I dimly recall, you need to link "/dev/drum" to whichever is the swap
+device.
+
+-- 
+Dave Horsfall CL VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493  Fx: * 9978-7490
+Geac Computers P/L (ERP Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA55240
+	for pups-liszt; Tue, 27 Feb 2001 09:52:59 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from fgh.geac.com.au ([203.32.189.100])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA55235
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:52:57 +1100 (EST)
+	(envelope-from dave at horsfall.org)
+Received: from localhost (dave at localhost)
+	by fgh.geac.com.au (8.11.2/8.11.2) with ESMTP id f1QMjuC03306
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:45:56 +1100 (EST)
+Date: Tue, 27 Feb 2001 09:45:56 +1100 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-X-Sender:  <dave at fgh.au.geac.com>
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: [pups] Swap device in V6?
+In-Reply-To: <01K0KD39CMMQ91Z5ER at cc.usu.edu>
+Message-ID: <Pine.GSO.4.32.0102270942470.2716-100000 at fgh.au.geac.com>
+X-No-Archive: Yes
+X-Disclaimer: "Me, speak for us?"
+X-Witty-Saying: "Mobius Strip - See other side for instructions"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 26 Feb 2001, Roger Ivie wrote:
+
+> It is indeed the case that V6 needs swap to fork. Forking in V6 is done
+> essentially by swapping the task out to disk and (oops!) forgetting to
+> delete the in-core copy. At least, that's how it looked to me.
+
+Yes, that's how it was done, leading to the dreaded "panic: swap".  I
+think the swapped image became the parent, and the in-core one the child,
+hence the child was pretty well guaranteed to run before the parent (it
+typically did an exec() afterwards).
+
+-- 
+Dave Horsfall CL VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493  Fx: * 9978-7490
+Geac Computers P/L (ERP Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA55279
+	for pups-liszt; Tue, 27 Feb 2001 09:55:22 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA55275
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:55:18 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.2/8.11.2) with ESMTP id f1QMpBL28517;
+	Mon, 26 Feb 2001 17:51:12 -0500 (EST)
+Message-ID: <3A9ADDDF.F8468078 at tampabay.rr.com>
+Date: Mon, 26 Feb 2001 17:51:11 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.0.38 i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Dave Horsfall <dave at horsfall.org>
+CC: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Swap device in V6?
+References: <Pine.GSO.4.32.0102270938530.2716-100000 at fgh.au.geac.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Dave Horsfall wrote:
+> 
+> On Mon, 26 Feb 2001, Ken Wellsch wrote:
+> 
+> > Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+> > still gripes about "no swap device."
+> 
+> As I dimly recall, you need to link "/dev/drum" to whichever is the swap
+> device.
+
+After some wise person earlier explained the whole process in detail,
+once I'd seen the final step ,I realized my error - I was booting rkunix
+and as it turned out, had not matched /unix with that kernel... I just
+tried it now and 'ps' is a happy camper.  B^)
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA55384
+	for pups-liszt; Tue, 27 Feb 2001 10:15:29 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from fgh.geac.com.au ([203.32.189.100])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA55380
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 10:15:27 +1100 (EST)
+	(envelope-from dave at horsfall.org)
+Received: from localhost (dave at localhost)
+	by fgh.geac.com.au (8.11.2/8.11.2) with ESMTP id f1QMe9n03256
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 09:40:10 +1100 (EST)
+Date: Tue, 27 Feb 2001 09:40:09 +1100 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-X-Sender:  <dave at fgh.au.geac.com>
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: [pups] Swap device in V6?
+Message-ID: <Pine.GSO.4.32.0102270939440.2716-100000 at fgh.au.geac.com>
+X-No-Archive: Yes
+X-Disclaimer: "Me, speak for us?"
+X-Witty-Saying: "Mobius Strip - See other side for instructions"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 26 Feb 2001, Ken Wellsch wrote:
+
+> Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+> still gripes about "no swap device."
+
+As I dimly recall, you need to link "/dev/drum" to whichever is the swap
+device.
+
+-- 
+Dave Horsfall CL VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493  Fx: * 9978-7490
+Geac Computers P/L (ERP Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA55398
+	for pups-liszt; Tue, 27 Feb 2001 10:15:57 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA55394
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 10:15:55 +1100 (EST)
+	(envelope-from johnh at psychwarp.psych.usyd.edu.au)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id KAA26058
+	for pups at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 10:12:07 +1100 (EST)
+Date: Tue, 27 Feb 2001 10:12:07 +1100 (EST)
+From: John Holden <johnh@psych.usyd.edu.au>
+Message-Id: <200102262312.KAA26058 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: [pups] Forks under V6
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+> It is indeed the case that V6 needs swap to fork. Forking in V6 is done
+> essentially by swapping the task out to disk and (oops!) forgetting to
+> delete the in-core copy. At least, that's how it looked to me.
+
+No. Fork calls the internal version 'newproc'. It tries to allocate memory from
+the core map for the new process, and only when it fails that it creates the new
+process as a swap image. Effectively, it copies out the parent as a swap
+image, but attaches it to the child process (the parent isn't really swapped).
+
+In 'miniunix', the V6 strip down for pdp-11's without memory management
+(pdp11/20, 05, 10 and 40's without the proper options), only a single process
+would fit in core, so every context switch or fork required swapping.
+
+I cannot speak for pre V6
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA55548
+	for pups-liszt; Tue, 27 Feb 2001 10:50:56 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from Tempo.Update.UU.SE (IDENT:0 at Tempo.Update.UU.SE [130.238.19.17])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA55544
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 10:50:51 +1100 (EST)
+	(envelope-from bqt at update.uu.se)
+Received: from localhost (bqt at localhost)
+	by Tempo.Update.UU.SE (8.11.2/8.11.2/Update-Iltempogigante) with ESMTP id f1QNkkx08605;
+	Tue, 27 Feb 2001 00:46:46 +0100
+Date: Tue, 27 Feb 2001 00:46:45 +0100 (CET)
+From: Johnny Billquist <bqt@update.uu.se>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+In-Reply-To: <200102262226.f1QMQOv11403 at moe.2bsd.com>
+Message-ID: <Pine.LNX.4.21.0102270042590.7228-100000 at Tempo.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 26 Feb 2001, Steven M. Schultz wrote:
+
+> > jumper installed. Then I noticed the different setting of the front
+> > panel DIP swich. The upper switch is off and the lower on. The switches
+> > of the other cabinet are both on. If I boot the machine with W5
+> > installed and the upper switch on it hangs. It continues to run
+> > immediately if it is switched off. What is the purpose of this
+> > switches? 
+> 
+> 	I suspect that one of the switches enables the line frequency clock.
+> 	With out a clock running things will work (at least minimally) as
+> 	long as there are some interrupts happening.   
+
+Could be. I also remember seeing somewhere that the two dip switches on
+the front panel of BA23 boxes should be set differently for PDP-11s and
+VAXen. Appearantly they expect the boot button to behave in different ways
+on the bus as well... (and HALT I think)
+
+Don't have that docuemnt anywhere close though...
+
+> 	I vaguely remember that some systems (11/23?) had an externally 
+> 	enabled clock and if that switch was not set correctly the OS could
+> 	be installed but the system would "hang" later on due to no context
+> 	switch scheduling.
+
+That definitely happens for RSX atleast. You *must* have a clock interrupt
+running, or you are cooked.
+
+> > Ahh, and an other question: Can the RT11 bootstrap listed in 
+> > http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/bootstraps/mscp_rt11.txt
+> > be used to boot 2.11BSD? I have no bootstrap ROM card. (Emanuel, hint,
+> 
+> 	I think it will work.   2.11 is expecting the registers to contain
+> 	the following:
+> 
+> 		R0 = unit number
+> 		R1 = CSR of booting controller
+> 
+> 	as long as those are set it should not matter what bootcode is used.
+
+Then it's more forgiving than the RSX boot code. I have tried that
+bootstrap and it won't boot RSX atleast, that much I know...
+
+Speaking of which; does anyone have boot roms for TMSCP for the M9312?
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA55592
+	for pups-liszt; Tue, 27 Feb 2001 10:53:39 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from nose.cs.utoronto.ca (nose.cs.utoronto.ca [128.100.27.218])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA55588
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 10:53:33 +1100 (EST)
+	(envelope-from norman at nose.cs.utoronto.ca)
+Message-Id: <200102262353.KAA55588 at minnie.cs.adfa.edu.au>
+Subject: [pups] Forks under V6
+From: norman@nose.cs.utoronto.ca (Norman Wilson)
+To: pups at minnie.cs.adfa.edu.au
+Date: Mon, 26 Feb 2001 18:49:13 -0500
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I believe the practice John Holden describes from Mini-UNIX (only one
+process in memory at a time, hence a context switch is the same as a
+swap) was also part of the very earliest UNIXes, on the PDP-7 and the
+11/20, neither of which had hardware memory management.  Dennis Ritchie's
+`Evolution of the UNIX Time-Sharing System' paper (in the October 1984
+Bell Labs Technical Journal, the second issue to be devoted entirely to
+UNIX), tells how it worked in some detail.  It wouldn't surprise me if
+the swap-to-fork mechanism lived on for a while even after the system
+learned about memory management, but I don't actually know that.  (Warren:
+wbat does the old system you have do?)
+
+Anyone who wants to verify what John describes for V6 can look in (among
+other places) the Lions book; newproc is at line 1826, at the beginning
+of slp.c.
+
+Norman Wilson
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA55770
+	for pups-liszt; Tue, 27 Feb 2001 11:15:35 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA55766
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 11:15:33 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f1R0IOT10330;
+	Tue, 27 Feb 2001 11:18:24 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <200102270018.f1R0IOT10330 at henry.cs.adfa.edu.au>
+Subject: Re: [pups] Forks under V6
+In-Reply-To: <200102262353.KAA55588 at minnie.cs.adfa.edu.au> from Norman Wilson
+ at "Feb 26, 2001 06:49:13 pm"
+To: Norman Wilson <norman at nose.cs.utoronto.ca>
+Date: Tue, 27 Feb 2001 11:15:44 +1100 (EST)
+CC: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL68 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Norman Wilson:
+> I believe the practice John Holden describes from Mini-UNIX (only one
+> process in memory at a time, hence a context switch is the same as a
+> swap) was also part of the very earliest UNIXes, on the PDP-7 and the
+> 11/20, neither of which had hardware memory management.  Dennis Ritchie's
+> `Evolution of the UNIX Time-Sharing System' paper (in the October 1984
+> Bell Labs Technical Journal, the second issue to be devoted entirely to
+> UNIX), tells how it worked in some detail.  It wouldn't surprise me if
+> the swap-to-fork mechanism lived on for a while even after the system
+> learned about memory management, but I don't actually know that.  (Warren:
+> wbat does the old system you have do?)
+> Norman Wilson
+
+For the versions on the 11/20 [that's V1, V2 and V3], as there was no
+memory protection, there was only 1 process in core at any time. Thus,
+the parent was definitely swapped out.
+
+
+The Nsys kernel (just before V4) also swaps the parent out:
+
+newproc()
+{
+        /*
+         * make proc entry for new proc
+         */
+	/*
+         * swap out old process
+         * to make image of new proc
+         */
+}
+(http://minnie.cs.adfa.edu.au/UnixTree/Nsys/sys/nsys/ken/slp.c.html)
+
+We don't have kernel source for V4 :-(. It looks like V5 also swaps
+the parent out:
+http://minnie.cs.adfa.edu.au/UnixTree/V5/usr/sys/ken/slp.c.html
+
+
+By V6, the parent could stay in core if there was enough room:
+
+newproc()
+{
+	/*
+         * If there is not enough core for the
+         * new process, swap out the current process to generate the
+         * copy.
+         */
+        if(a2 == NULL) {
+                savu(u.u_ssav);
+                xswap(rpp, 0, 0);
+        } else {
+        /*
+         * There is core, so just copy.
+         */
+                rpp->p_addr = a2;
+                while(n--) copyseg(a1++, a2++);
+        }
+        u.u_procp = rip;
+        return(0);
+}
+(http://minnie.cs.adfa.edu.au/UnixTree/V6/usr/sys/ken/slp.c.html)
+
+I've omitted some lines of code here and there.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA56632
+	for pups-liszt; Tue, 27 Feb 2001 14:06:49 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA56628
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 14:06:45 +1100 (EST)
+	(envelope-from johnh at psychwarp.psych.usyd.edu.au)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id OAA31721
+	for pups at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 14:02:55 +1100 (EST)
+Date: Tue, 27 Feb 2001 14:02:55 +1100 (EST)
+From: John Holden <johnh@psych.usyd.edu.au>
+Message-Id: <200102270302.OAA31721 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+On BA-23 boxes, there is a small, two lever DIP switch. Switch 1 in the
+ON position (down) enables BEVENT on the Qbus. Without it enabled, there
+will no line time clock interrupts generated, even if the LTC register at
+777546 in enabled.
+
+The second switch enables the 'restart' button when ON. Pressing 'restart'
+starts a powerup sequence, running diagnostics and starting ODT or the
+bootstrap (equivalent to cycling the power). 
+
+On the earlier BA-11 series boxes for the LSI-11 (and /23), there was an
+equivalent switch on the front panel labeled  "Aux". It could be used either to
+enable the BEVENT or the remote switch for the cabinet power controller. The
+11/23plus, 11/53/73 have programable LTC registers, so the switch is normally
+left on. On the LSI-11,/2 and early 11/23, you would initially boot the machine
+with it off, then enable it.
+
+As for machines hanging without the LTC running, the problem is that the
+scheduler (sched) never gets to run, since it sleeps waiting for the 'lbolt'
+flag that is only ever set in the clock interrupt service routine. The timeout
+queue also doesn't run, so only the internal 'init' process will ever get to run
+
+PS
+
+You can run into problems with the BHALT line, which can be asserted by a line
+break on the console line (if enabled), or on some DHV serial card emulations.
+Turning off a terminal may be enough to halt the process if it generates a
+serial break as the power goes down.
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA57000
+	for pups-liszt; Tue, 27 Feb 2001 14:58:23 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail2.rdc1.il.home.com (mail2.rdc1.il.home.com [24.2.1.77])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA56996
+	for <pups-digest at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 14:58:19 +1100 (EST)
+	(envelope-from cube1 at home.com)
+Received: from ddjay.home.com ([65.3.254.22]) by mail2.rdc1.il.home.com
+          (InterMail vM.4.01.03.00 201-229-121) with ESMTP
+          id <20010227035419.WQFR26655.mail2.rdc1.il.home.com at ddjay.home.com>;
+          Mon, 26 Feb 2001 19:54:19 -0800
+Message-Id: <4.3.2.7.2.20010226213702.04607d00 at cirithi>
+X-Sender: cube1 at cirithi
+X-Mailer: QUALCOMM Windows Eudora Version 4.3.2
+Date: Mon, 26 Feb 2001 21:50:59 -0600
+To: pups-digest at minnie.cs.adfa.edu.au
+From: Jay Jaeger <cube1@home.com>
+Subject: Re: [pups] Swap device in V6?
+Cc: kwellsch at tampabay.rr.com, johnh at psych.usyd.edu.au
+In-Reply-To: <200102262232.JAA55097 at minnie.cs.adfa.edu.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; format=flowed
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In case someone didn't put 2+2 together...  The V6 distribution has various 
+unix kernels.  I don't recall for sure which kernel is linked to /unix, but 
+for sure it is only one of them.
+
+So, if /rpunix is linked to /unix, and you boot rkunix, and then do a ps, 
+it will search /unix for the symbol for swapdev, look for the RP device in 
+/dev, and not find one.  no swap dev.
+
+The cure is, of course, quite simple:
+
+# chdir /
+# ln rkunix unix
+
+And ps will now work fine.
+
+[ Ian might have gotten this directly had he not hidden his real e-mail 
+address...  ;-) ]
+
+Jay Jaeger
+
+
+At 09:32 AM 2/27/01 +1100, you wrote:
+
+>Date: Sun, 25 Feb 2001 23:49:22 -0800
+>From: "Ian King" <iking at killthewabbit.org>
+>Subject: [pups] Swap device in V6?
+>
+>This is a multi-part message in MIME format.
+>
+>- ------=_NextPart_000_0007_01C09F85.94050E80
+>Content-Type: text/plain;
+>         charset="iso-8859-1"
+>Content-Transfer-Encoding: quoted-printable
+>
+>I'm working with the install image provided by Ken Wellsch, and when I =
+>execute the 'ps' command I get an error that says "no swap device".  I'm =
+>
+>------------------------------
+>
+>Date: Mon, 26 Feb 2001 10:27:12 -0800
+>From: Ian King <iking at microsoft.com>
+>Subject: RE: [pups] Swap device in V6?
+>
+>I, too, have /dev/rk0 mknod'ed as 0,0.  Relaetd to this, ps does something
+>odd (at least to my experience) with the open() system call - it calls 'open
+>("/dev")', without a second argument for mode; that seems like a no-no in C,
+>
+>- -----Original Message-----
+>From: Ken Wellsch [mailto:kwellsch at tampabay.rr.com]
+>Sent: Monday, February 26, 2001 9:52 AM
+>To: Roger Ivie
+>Cc: PUPS at minnie.cs.adfa.edu.au
+>Subject: Re: [pups] Swap device in V6?
+>
+>The "ps" command source appears to be poking around /dev looking for a
+>block device that matches the kernel value for swapdev (or something like
+>that) and confirming it is a block device.
+>
+>Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but "ps"
+>still gripes about "no swap device."
+>
+>So I'm missing something I guess.
+>
+>Date: Tue, 27 Feb 2001 08:44:23 +1100 (EST)
+>From: John Holden <johnh at psych.usyd.edu.au>
+>Subject: Re: [pups] Swap device in V6?
+>
+<< snip >>
+
+
+>The 'ps' command looks up the symbol table of the unix kernel, and gets
+>the device entry for swap (_swapdev), and the process table (_proc)
+>It would open /dev as file, and read the directory entries to find a matching
+>device entry, so it then had the name of a device to open (you cannot open
+>a device based only in the major and minor device entries from a user 
+>process).
+>It also uses /dev to decode tty entries into names.
+>
+>For 'ps' to work correctly, /unix had to be linked to the real kernel, say
+>rkunix.
+
+---	
+Jay R. Jaeger					The Computer Collection
+cube1 at home.com			visit http://members.home.net/thecomputercollection
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id WAA58909
+	for pups-liszt; Tue, 27 Feb 2001 22:07:53 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mud.stack.nl (mud.stack.nl [131.155.141.98])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id WAA58905
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 27 Feb 2001 22:07:49 +1100 (EST)
+	(envelope-from martijnb at stack.nl)
+Received: by mud.stack.nl (Postfix, from userid 587)
+	id 47EB97F14; Tue, 27 Feb 2001 12:03:54 +0100 (CET)
+Date: Tue, 27 Feb 2001 12:03:54 +0100
+From: Martijn van Buul <pino@dohd.org>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Message-ID: <20010227120354.A9872 at mud.stack.nl>
+Reply-To: Martijn van Buul <pino at dohd.org>
+References: <200102270302.OAA31721 at psychwarp.psych.usyd.edu.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.3.3i
+In-Reply-To: <200102270302.OAA31721 at psychwarp.psych.usyd.edu.au>; from johnh at psych.usyd.edu.au on Tue, Feb 27, 2001 at 02:02:55PM +1100
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+John Holden wrote:
+> You can run into problems with the BHALT line, which can be asserted by a line
+> break on the console line (if enabled), or on some DHV serial card emulations.
+> Turning off a terminal may be enough to halt the process if it generates a
+> serial break as the power goes down.
+
+On my /53+ running 2.11, it's enough to kick in ODT.. Very anoying, really.
+Is there any way to disable this functionality, save rewiring the backplane?
+
+-- 
+    Martijn van Buul -  Pino at dohd.org - http://www.stack.nl/~martijnb/
+	 Geek code: G--  - Visit OuterSpace: mud.stack.nl 3333
+   Kees J. Bot: The sum of CPU power and user brain power is a constant.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id EAA61301
+	for pups-liszt; Wed, 28 Feb 2001 04:43:03 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mail4.microsoft.com (mail4.microsoft.com [131.107.3.122])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id EAA61297
+	for <pups-digest at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 04:42:46 +1100 (EST)
+	(envelope-from iking at microsoft.com)
+Received: from 157.54.9.101 by mail4.microsoft.com (InterScan E-Mail VirusWall NT); Tue, 27 Feb 2001 08:56:20 -0800 (Pacific Standard Time)
+Received: from red-msg-06.redmond.corp.microsoft.com ([157.54.12.71]) by inet-imc-01.redmond.corp.microsoft.com with Microsoft SMTPSVC(5.0.2195.1600);
+	 Tue, 27 Feb 2001 08:55:28 -0800
+X-MimeOLE: Produced By Microsoft Exchange V6.0.4418.65
+content-class: urn:content-classes:message
+Subject: RE: [pups] Swap device in V6?
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Date: Tue, 27 Feb 2001 08:56:06 -0800
+Message-ID: <8D25F244B8274141B5D313CA4823F39C018EEC0A at red-msg-06.redmond.corp.microsoft.com>
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: [pups] Swap device in V6?
+Thread-Index: AcCgdE7qokpl8pfARPebGWEtnq6FUgAaQ5uQ
+From: "Ian King" <iking@microsoft.com>
+To: "Jay Jaeger" <cube1 at home.com>, <pups-digest at minnie.cs.adfa.edu.au>
+Cc: <kwellsch at tampabay.rr.com>, <johnh at psych.usyd.edu.au>
+X-OriginalArrivalTime: 27 Feb 2001 16:55:28.0605 (UTC) FILETIME=[1670D0D0:01C0A0DE]
+Content-Transfer-Encoding: 8bit
+X-MIME-Autoconverted: from quoted-printable to 8bit by minnie.cs.adfa.edu.au id EAA61298
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+The good news is, this fixed my ps problem - ps now works.  The bad news
+is that cc still fails with the following error:
+
+fFatal error in /lib/c0
+
+The lowercase f appears, followed shortly by the rest of the line.  I've
+tried the -c option to suppress linking, and still get this error.  I
+don't get this error on the Supnik emulator.  
+
+Obviously, one way to do things would be to rebuild the kernel on the
+emulator, and transfer it to the PDP-11.  But that seems like cheating.
+:-)  Besides, the Supnik emulator is just too freeform; my 11/34a
+doesn't have a half-dozen instructions the emulator implements.  I've
+tried the DBit E11 emulator (since it gives more control over processor
+features), but I can't get it to boot these images. -- Ian 
+
+-----Original Message-----
+From: Jay Jaeger [mailto:cube1@home.com]
+Sent: Monday, February 26, 2001 7:51 PM
+To: pups-digest at minnie.cs.adfa.edu.au
+Cc: kwellsch at tampabay.rr.com; johnh at psych.usyd.edu.au
+Subject: Re: [pups] Swap device in V6?
+
+
+In case someone didn't put 2+2 together...  The V6 distribution has
+various 
+unix kernels.  I don't recall for sure which kernel is linked to /unix,
+but 
+for sure it is only one of them.
+
+So, if /rpunix is linked to /unix, and you boot rkunix, and then do a
+ps, 
+it will search /unix for the symbol for swapdev, look for the RP device
+in 
+/dev, and not find one.  no swap dev.
+
+The cure is, of course, quite simple:
+
+# chdir /
+# ln rkunix unix
+
+And ps will now work fine.
+
+[ Ian might have gotten this directly had he not hidden his real e-mail 
+address...  ;-) ]
+
+Jay Jaeger
+
+
+At 09:32 AM 2/27/01 +1100, you wrote:
+
+>Date: Sun, 25 Feb 2001 23:49:22 -0800
+>From: "Ian King" <iking at killthewabbit.org>
+>Subject: [pups] Swap device in V6?
+>
+>This is a multi-part message in MIME format.
+>
+>- ------=_NextPart_000_0007_01C09F85.94050E80
+>Content-Type: text/plain;
+>         charset="iso-8859-1"
+>Content-Transfer-Encoding: quoted-printable
+>
+>I'm working with the install image provided by Ken Wellsch, and when I
+=
+>execute the 'ps' command I get an error that says "no swap device".
+I'm =
+>
+>------------------------------
+>
+>Date: Mon, 26 Feb 2001 10:27:12 -0800
+>From: Ian King <iking at microsoft.com>
+>Subject: RE: [pups] Swap device in V6?
+>
+>I, too, have /dev/rk0 mknod'ed as 0,0.  Relaetd to this, ps does
+something
+>odd (at least to my experience) with the open() system call - it calls
+'open
+>("/dev")', without a second argument for mode; that seems like a no-no
+in C,
+>
+>- -----Original Message-----
+>From: Ken Wellsch [mailto:kwellsch at tampabay.rr.com]
+>Sent: Monday, February 26, 2001 9:52 AM
+>To: Roger Ivie
+>Cc: PUPS at minnie.cs.adfa.edu.au
+>Subject: Re: [pups] Swap device in V6?
+>
+>The "ps" command source appears to be poking around /dev looking for a
+>block device that matches the kernel value for swapdev (or something
+like
+>that) and confirming it is a block device.
+>
+>Yet I see I have /dev/rk0 mknod'ed 0/0 and it is a block device but
+"ps"
+>still gripes about "no swap device."
+>
+>So I'm missing something I guess.
+>
+>Date: Tue, 27 Feb 2001 08:44:23 +1100 (EST)
+>From: John Holden <johnh at psych.usyd.edu.au>
+>Subject: Re: [pups] Swap device in V6?
+>
+<< snip >>
+
+
+>The 'ps' command looks up the symbol table of the unix kernel, and gets
+>the device entry for swap (_swapdev), and the process table (_proc)
+>It would open /dev as file, and read the directory entries to find a
+matching
+>device entry, so it then had the name of a device to open (you cannot
+open
+>a device based only in the major and minor device entries from a user 
+>process).
+>It also uses /dev to decode tty entries into names.
+>
+>For 'ps' to work correctly, /unix had to be linked to the real kernel,
+say
+>rkunix.
+
+---	
+Jay R. Jaeger					The Computer Collection
+cube1 at home.com			visit
+http://members.home.net/thecomputercollection
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id FAA61575
+	for pups-liszt; Wed, 28 Feb 2001 05:32:00 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chiton.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA61571
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Feb 2001 05:31:57 +1100 (EST)
+	(envelope-from cdl at mpl.ucsd.edu)
+Received: (from cdl at localhost)
+	by chiton.ucsd.edu (8.9.3/8.9.3) id KAA16090
+	for pups at minnie.cs.adfa.edu.au; Tue, 27 Feb 2001 10:27:56 -0800 (PST)
+Date: Tue, 27 Feb 2001 10:27:56 -0800 (PST)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <200102271827.KAA16090 at chiton.ucsd.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD boot hangs.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From owner-pups at minnie.cs.adfa.edu.au Mon Feb 26 13:32 PST 2001
+> From: jkunz at unixag-kl.fh-kl.de
+> Date: Mon, 26 Feb 2001 22:15:52 +0100 (CET)
+> Subject: Re: [pups] 2.11BSD boot hangs.
+> To: sms at moe.2bsd.com
+> cc: pups at minnie.cs.adfa.edu.au
+> 
+> >> System configuration:
+> >> 11/73 (M8192), one with FP accel. or one without. (Jumpers W1..W6 in,
+> >> W7..W9 out, so that the CPU enters ODT at power up.)
+> > 
+> > 	There is a jumper (I forget which one) that enables/disables the
+> > 	'halt' instruction. 
+> BINGO! Pulling W5 solved the problem. But then I seted it again to
+> double check. (I changed location today and took only the cards and
+> disk with me.) In the "new" BA23 the system runs even with the W5
+> jumper installed. Then I noticed the different setting of the front
+> panel DIP swich. The upper switch is off and the lower on. The switches
+> of the other cabinet are both on. If I boot the machine with W5
+> installed and the upper switch on it hangs. It continues to run
+> immediately if it is switched off. What is the purpose of this
+> switches? 
+
+Quote from _Microcomputer Products Handbook_ EB26078 41/85 (DEC)
+
+"Control Panel
+  . . .
+The 2-position linetime clock (LTC) switch (switch 1) is used to enable
+or disable the LTC function.  Setting switch 1 ON enables the LTC to
+function under software control.  Setting switch 1 to the OFF position
+disables the LTC function.  The other 2-position switch (switch 2) is
+not used."
+
+Note (by me) this refers to microPDP usage of the BA23.  The LTC is not
+used by the microVAX which could occupy the same box.
+
+    carl
+
+
+

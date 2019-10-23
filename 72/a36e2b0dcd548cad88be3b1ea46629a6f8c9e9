@@ -1,0 +1,294 @@
+From: wkt@henry.cs.adfa.oz.au (Warren Toomey)
+Date: Thu, 3 Dec 1998 10:18:43 +1100 (EST)
+Subject: New Apout PDP-11 simulator
+Message-ID: <199812022318.KAA27852@henry.cs.adfa.oz.au>
+
+All,
+	I've just spent the week tidying up my Apout program. This runs
+PDP-11 user-mode programs (specifically 7th Edition binaries), and
+translates V7 syscalls to native syscalls.
+
+I've tidied the program up and optimised it a bit too. Over the summer
+break (it's summer down here) I want to add floating-point and start
+work on emulating 2.11BSD user-mode binaries.
+
+The program runs on FreeBSD 2.2.x and 3.0 systems: porting to other 32-bit
+little-endian Unix systems should be relatively easy. Porting to big-endian
+systems might be harder :-) I'll have a look at that too.
+
+Anyway, an alpha of the new 2.2 version is at:
+	ftp://minnie.cs.adfa.edu.au/pub/PDP-11/Sims/Apout
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id PAA24007
+	for pups-liszt; Thu, 3 Dec 1998 15:51:17 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id PAA23997
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 3 Dec 1998 15:50:45 +1100 (EST)
+Received: from dosdev (pm8-114.dial.qual.net [205.212.2.114])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id JAA06898
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 3 Dec 1998 09:48:58 +0500
+Message-Id: <199812030448.JAA06898 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 3 Dec 1998   04:48:30 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: System Industries MSCP disk controller problem
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+   Tim Shoppa <SHOPPA at trailing-edge.com> wrote:
+> This sounds a lot like the Webster WQESD, which was repackaged
+> and sold by many different folks (Sigma, DSD, Qualogy, American
+> Digital, etc.)
+   
+   Quite possible, since this funny Xerox system has a lot of Sigma
+components. The outer box in which the BA23 is mounted is made by Sigma,
+the funny way the ESDI drives are mechanically mounted is clearly a Sigma
+invention, the card connecting the BA23 backplane to the expansion
+backplane in the outer Sigma box is made by Sigma, and so is another
+totally unmarked card of unknown purpose (its presence or absence appears
+to have absolutely no effect on anything). The system is not 100% Sigma,
+though. There also another 2-drive ESDI controller (that's the one that was
+at 172150 from the beginning) and a 9-track tape controller, both made by
+Emulex (QD21 and QT13, respectively) and both appear toast (I want to get
+rid of both).
+   
+> If it is a repackaged WQESD, SW9 on the 10-switch pack was originally
+> on, with SW10 and SW5-8 off, to put the CSR at 160334.
+> To set it to be 172150, you put SW10 on, and SW5-9 off.
+   
+   Before I got your E-mail, SW5 and SW8 were ON and the rest were OFF
+(don't remember if it was the original position). I also tried SW10 ON and
+the rest OFF. In both cases the effect is exactly the same. At power-up the
+CPU screams, but then gives the ">>>" prompt. Trying to read different
+locations with the E/P/W command (the Q-bus I/O page is mapped at
+0x20000000 in the VAX address space), I see that the card responds somehow
+to 160334 and to 160400, but not to 172150. (I know that it's this card and
+not something else, since when I pull it out the CPU is happy and no one
+responds to these addresses.)
+   
+> Then again, it might not be a repackaged WQESD, but instead a Dilog
+> or Emulex.
+   
+   I'm 99% sure that it's neither Dilog nor Emulex. I have seen quite a few
+Dilog and Emulex cards, and I think I should be able to detect them easily.
+   
+> Is there a 10-pin header on the card edge?  Can you describe the
+> positions and types of "big chips" on the board?
+   
+   This is a quad-height board. All components are thru-hole and all chips
+are in DIP packages. There are no 4-sided chips or surface-mounted
+components. Hold it with the component side up, the fingers to the right
+and the handles to the left. On the left (handle) side there is a row of
+shrouded header connectors. From top to bottom, they are: 10-pin (connected
+to something, but purpose unknown), 34-pin (ESDI control and status), 20-
+pin (drive 0 data), 20-pin (drive 1 data), 20-pin (drive 2 data). Directly
+behind the bottom 20-pin header there is another 20-pin header for drive 3
+data. The biggest chip is a 48-pin DIP labeled DP8466AN (National
+Semiconductor as far as I can tell), and it's right behind the drive 3 data
+connector. There are two AM2901CPCs behind the 34-pin connector. There is
+one 28-pin EPROM right about in the center, shifted downward a little. The
+ROM size is obscured by the sticker saying "ESDI V2.41 9901-8918 REV.A".
+There is a stack of narrow 24-pin DIP chips going from the top of the board
+to right above the EPROM. All have stickers, suggesting that they are
+programmable. The stickers have different 6-character codes on them, all
+starting with "1583". Directly to the right from the last one there is one
+more such chip labeled "SYS IND 1583W3".
+   
+   Actually, I was wrong about there being 2 switch packs. There are 3 of
+them, one of 10 and two of 4. The 10-switch one is right above the chip
+labeled "SYS IND 1583W3". In the top right corner (right next to row A
+fingers) there is a 4-switch pack. All switches are ON. Directly behind it
+there is a 16-pin DIP chip labeled "1583I1" (the only chip with a sticker
+not mentioned before). At the top of the board directly to the left from
+the 10-chip stack there is a 10 MHz oscillator, the only clock on the
+board. Directly to the left from it there is the last 4-switch pack. All
+switches are ON. Finally, there are 3 LEDs between the top handle and the
+10-pin header. The top one is red and the other two are green.
+   
+> Some
+> other switches also set the interrupt priority, and this being
+> off can also confuse some tests and OS's.
+   
+   What's the correct priority for disk MSCP? Should it be different
+between primary and secondary?
+   
+> As to your power-on self-test woes, you're going to have to tell
+> us what's in the system and what slot it lives in, as well as what
+> sort of backplane it's all in.
+   
+   The outer box is Sigma. It provides funny mounting for 4 ESDI drives, an
+expansion Q-bus backplane, and a big bay for a BA23. The BA23 contains the
+CPU, the memory, and all peripherals except the controller in question.
+First comes the KA650 CPU. Then two MS650 memory modules. Then DELQA,
+DZQ11, TQK50, and the Sigma Q-bus extender card. The latter takes the Q-bus
+into the expansion backplane, where the controller in question is the only
+device. It's in the expansion backplane instead of the BA23 because that's
+where the actual drives are. I have tried pulling the Sigma Q-bus extender
+card out and putting the ESDI controller right in the BA23 backplane, but
+this didn't change anything, so there is nothing wrong with the Q-bus
+expansion.
+   
+   You know what, I just looked a little closer and noticed that in this
+configuration (both 4-switch packs all ON, SW1-9 on the 10-switch pack OFF,
+and SW10 ON) the controller responds not only to 160334 and 160400, but to
+just about any address in the Q-bus I/O page (except 172150)! No wonder the
+CPU screams about it! What the hell is going on? How can it possibly do
+this? Is someone trying to port Plug-n-Pray to Q-bus? Is it something like
+KFQSA with a separate address for each drive and everything soft-
+configured?
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA25817
+	for pups-liszt; Fri, 4 Dec 1998 01:27:17 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id BAA25812
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 4 Dec 1998 01:27:04 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Thu, 3 Dec 1998 9:25:04 -0500
+Date: Thu, 3 Dec 1998 9:25:04 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+CC: SHOPPA at trailing-edge.com
+Message-Id: <981203092504.2de002c1 at trailing-edge.com>
+Subject: Re: System Industries MSCP disk controller problem
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>> This sounds a lot like the Webster WQESD, which was repackaged
+>> and sold by many different folks (Sigma, DSD, Qualogy, American
+>> Digital, etc.)
+>   Quite possible, since this funny Xerox system has a lot of Sigma
+>components.
+
+I regularly work with "PDP-11 systems" now that don't have a single
+DEC component in them.  CPU by Mentec ( http://www.mentec.com/ ), 
+disk controller by Andromeda ( http://www.andromedasystems.com/ ),
+async and parallel I/O by the Logical Company ( http://www.logical-co.com ),
+etc.  What else are commercial developers left to do now that
+DEC (after over a decade of trying to) has finally abandoned their
+PDP-11 product line?  At least the other companies named are still
+doing active support and (at least in Mentec's case) development!
+
+> The outer box in which the BA23 is mounted is made by Sigma,
+>...
+>though. There also another 2-drive ESDI controller (that's the one that was
+>at 172150 from the beginning) and a 9-track tape controller, both made by
+>Emulex (QD21 and QT13, respectively) and both appear toast (I want to get
+>rid of both).
+
+You might be a bit hasty in casting these off, as you aren't having
+the best of luck with the rest of the peripherals, either!
+   
+>> If it is a repackaged WQESD, SW9 on the 10-switch pack was originally
+>> on, with SW10 and SW5-8 off, to put the CSR at 160334.
+>> To set it to be 172150, you put SW10 on, and SW5-9 off.
+>   Before I got your E-mail, SW5 and SW8 were ON and the rest were OFF
+>(don't remember if it was the original position). I also tried SW10 ON and
+>the rest OFF. In both cases the effect is exactly the same. At power-up the
+>CPU screams, but then gives the ">>>" prompt. Trying to read different
+>locations with the E/P/W command (the Q-bus I/O page is mapped at
+>0x20000000 in the VAX address space), I see that the card responds somehow
+>to 160334 and to 160400, but not to 172150. (I know that it's this card and
+>not something else, since when I pull it out the CPU is happy and no one
+>responds to these addresses.)
+>> Is there a 10-pin header on the card edge?  Can you describe the
+>> positions and types of "big chips" on the board?
+>   This is a quad-height board. All components are thru-hole and all chips
+>are in DIP packages. There are no 4-sided chips or surface-mounted
+>components. Hold it with the component side up, the fingers to the right
+>and the handles to the left. On the left (handle) side there is a row of
+>shrouded header connectors. From top to bottom, they are: 10-pin (connected
+>to something, but purpose unknown), 34-pin (ESDI control and status), 20-
+>pin (drive 0 data), 20-pin (drive 1 data), 20-pin (drive 2 data). Directly
+>behind the bottom 20-pin header there is another 20-pin header for drive 3
+>data. The biggest chip is a 48-pin DIP labeled DP8466AN (National
+>Semiconductor as far as I can tell), and it's right behind the drive 3 data
+>connector. There are two AM2901CPCs behind the 34-pin connector. There is
+>one 28-pin EPROM right about in the center, shifted downward a little. The
+>ROM size is obscured by the sticker saying "ESDI V2.41 9901-8918 REV.A".
+
+That clinches it - it's a Webster WQESD, running Wombat V2.41.
+
+9901-8918 is evidently the SI part number for the complete system.
+It's a bit confusing to go from the SI part number because they all
+begin with "9900" or "9901"!
+   
+>   What's the correct priority for disk MSCP? Should it be different
+>between primary and secondary?
+
+A summary of the WQESD switch settings, and the various ways in which
+you can invoke Wombat, lives at:
+
+ ftp://sunsite.unc.edu/pub/academic/computer-science/history/pdp-11/hardware
+
+as the file "WQESD.txt".
+   
+>> As to your power-on self-test woes, you're going to have to tell
+>> us what's in the system and what slot it lives in, as well as what
+>> sort of backplane it's all in.
+   
+>   The outer box is Sigma. It provides funny mounting for 4 ESDI drives, an
+>expansion Q-bus backplane, and a big bay for a BA23. The BA23 contains the
+>CPU, the memory, and all peripherals except the controller in question.
+>First comes the KA650 CPU. Then two MS650 memory modules. Then DELQA,
+>DZQ11, TQK50, and the Sigma Q-bus extender card. The latter takes the Q-bus
+>into the expansion backplane, where the controller in question is the only
+>device. It's in the expansion backplane instead of the BA23 because that's
+>where the actual drives are. I have tried pulling the Sigma Q-bus extender
+>card out and putting the ESDI controller right in the BA23 backplane, but
+>this didn't change anything, so there is nothing wrong with the Q-bus
+>expansion.
+
+I'm willing to bet that you have severe Q-bus continuity problems,
+especially now that you've told us that you have an expansion Q-bus
+cabinet and that you've been randomly moving Q-bus cards around.
+You have to tell us exactly which slot each card is in, and preferably
+the original configuration as well (the Sigma backplanes have different
+wirings than the common DEC ones.)
+
+Is the "BA23" indeed a real DEC BA23, and not the Sigma "clone"?
+The sigma 5.25" 9-slot backplanes have very different backplane
+wirings (and, indeed, putting a DEC dual-wide Microvax CPU into
+it will very likely cause damage.)
+
+As a start, work just with the BA23.  Put the CPU in slot 1, with
+the two memory boards in slots 2 and 3.  Put the WQESD in slot 4.
+Have nothing else plugged in at all - especially not the boards
+that jumper the two backplanes together.
+
+Set the DIPswitches on the WQESD as follows:
+10-switch pack: Switches 1-2 off, 3 on, 4-9 off, 10 on.
+4-switch pack near the edge connector: 1-3 on, 4 off.
+4-switch pack near the handles: 1-4 on.
+
+Then try to start up wombat with the following sequence of console commands:
+
+Microvax II:
+Halt the processor
+U
+I
+D/P/W 20001F40  20
+D/L 20088008 80000002
+D/W 20001468 AC
+S 400
+
+If this doesn't start Wombat, tell us *exactly* what the error message
+produced is.
+
+--    
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+

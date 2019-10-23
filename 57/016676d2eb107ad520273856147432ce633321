@@ -1,0 +1,47 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Wed, 21 May 2008 11:34:01 -1000 (HST)
+Subject: [Unix-jun72] status on disassembler
+In-Reply-To: <20080521074439.9D3575A52C@remarque.org>
+References: <20080521074439.9D3575A52C@remarque.org>
+Message-ID: <Pine.BSI.4.64.0805211129440.16752@malasada.lava.net>
+
+> Thanks for the thought, but I don't think it is, quite, in part because
+> of the presence of backward branches:
+>
+> 2:
+> 	br	1f
+> 	br	2b
+> 1:
+>
+> Here the 2 could be a 1, despite overlapping ranges:
+>
+> 1:
+> 	br	1f
+> 	br	1b
+> 1:
+
+I think you can consider "1f" and "1b" to be two separate names for
+the sake of the register coloring algorithm (both of which happen
+to exist at the point where the "1:" label is defined).  In many
+cases only the forward one will be live, in other cases only the
+backward one will be live, but sometimes both will be live simultaneously.
+This does add a slight difference to the graph because "1f" and "1b"
+must be given the same number "1" when both are alive at the same
+definition site.
+
+> To further complicate things, it would be especially nice to allocate
+> labels not just in a legal way (that preserves the semantics of the
+> program), but actually in a way as similar as possible to the way that
+> humans were doing so, for the sake of improved reconstruction. (A
+> complication with *that* is that, in some cases, the labels are
+> obviously subtopimal, presumably due to the historical sequence of edits.)
+
+I think doing a minimum coloring will be pretty close to what a human
+would do.  If you want to, you can try to swap around labels so that
+the outter most labels have low numbers and the inner labels (nested
+inside loops) have the higher numbers...
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+
+

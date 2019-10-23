@@ -1,0 +1,63 @@
+From: tytso@mit.edu (Theodore Ts'o)
+Date: Thu, 7 Dec 2017 16:06:53 -0500
+Subject: [TUHS] looking for a quote
+In-Reply-To: <20171207174500.B08E61FB3E@orac.inputplus.co.uk>
+References: <CAP6exYLn6dV7ZLUAojkEhqtZFBYph=yLxcT1nKiuHPvO6pr5YA@mail.gmail.com>
+ <20171207003439.GB24409@mcvoy.com>
+ <20171207115024.217CA1FB3E@orac.inputplus.co.uk>
+ <20171207162448.hw4ehuwy4egeflsw@thunk.org>
+ <20171207174500.B08E61FB3E@orac.inputplus.co.uk>
+Message-ID: <20171207210653.ev7dyasd5tnyvhqf@thunk.org>
+
+On Thu, Dec 07, 2017 at 05:45:00PM +0000, Ralph Corderoy wrote:
+> Hi Ted,
+> 
+> > The reason why it's useful is that it's much more likely to find
+> > relevant lines of code by using "grep st_size *.[ch]".  If you grep
+> > for "size", there will be way too many false matches.
+> 
+> True, but hasn't static analysis come on since then?  I don't use them,
+> but tools like http://ffevotte.github.io/clang-tags/ build on clang's
+> work to allow queries like finding all mentions of st_size AFAIK.
+> They'll even cope with two different struct definitions with a st_size
+> kicking about and use the one you give as a seed reference.
+
+First of all, these tools didn't exist in the days of BSD 4.x.
+
+Second of all, those tools aren't integrated into ctags and etags, so
+for the needs of working programmers, the need to run some modified
+clang and then parse clang output when trying to figure out where all
+the places that use some structure field would be unnecessarily
+complex and destructive of a working programmer's productivity.
+
+So arguably the tools *still* don't exist in a useful form for
+developers to use.
+
+> I'm surprised with things like DWARF in ELF that compilers weren't used
+> to generate a super `ctags' longer ago.  We had cscope, that was Bell
+> Labs IIRC.  And then there's been GNU GLOBAL, GNU's idutils, ...
+
+DWARF is incredibly bloated for large projects, because unless the
+header files which are #included in each .c file is exactly the same
+(the exact same header files, included in the exact same order, with
+no other local structure or type definitions in the C source file),
+there will N different copies of the structure information in the .o
+files, and this duplication will also exist in combined executable's
+DWARF information.
+
+I complained about this a decade ago, when this defect essentially
+made Systemtap completely unusable by real kernel developers.
+Compiling with DWARF exploded the compile time, and size of the build
+tree, and the size of the insatlled kernel, by a factor of at least
+ten.  We now have a way of generated reduced debuginfo files, but it
+works by eliding all of the structure definitions, and only keeping
+the file/line number information.  So that won't work for your "super
+ctags" proposal.
+
+If you want to try to fix this, feel free --- but we don't actually
+have a solution that works in the real world today.  It's something
+that only really works in the Powerpoint Slideware world inhabited by
+IBM executives....
+
+						- Ted
+

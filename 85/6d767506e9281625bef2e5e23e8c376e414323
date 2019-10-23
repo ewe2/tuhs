@@ -1,0 +1,46 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 21 Sep 2017 09:17:44 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: <201709211613.v8LGDcuN015299@darkstar.fourwinds.com>
+References: <20170921160112.ctpv4a52t5rjcqzg@matica.foolinux.mooo.com>
+ <201709211613.v8LGDcuN015299@darkstar.fourwinds.com>
+Message-ID: <20170921161744.GD25650@mcvoy.com>
+
+On Thu, Sep 21, 2017 at 09:13:38AM -0700, Jon Steinhart wrote:
+> Maybe this is naive of me, but I have never liked parts of the sockets
+> interface.  I understand that at some level it was a political/legal
+> keeping the networking code independent of the rest of the kernel.
+> >From a technical and historical standpoint, I view it as the tip of
+> the iceberg bloating the number of system calls.
+> 
+> In particular, I have often thought that it would have been a better
+> and more consistent with the philosophy to have it implemented as
+> open("/dev/tcp") and so on.  Granted that networking added some new
+> functionality that justified some of the system calls, just not socket().
+
+If you look in the lmbench code I sort of had similar thoughts but did
+them as functions.  I've never been fond of the socket API though I
+am sympathetic, it's easy to do the easy parts as /dev/tcp but as I
+recall there are all sorts of weird cases that don't fit.  I've tried
+to come up with a /dev/tcp style that covers all the cases and I failed.
+
+lib_tcp.h
+#include        <sys/types.h>
+#include        <sys/socket.h>
+#include        <netinet/in.h>
+#include        <netdb.h>
+#include        <arpa/inet.h>
+
+int     tcp_server(int prog, int rdwr);
+int     tcp_done(int prog);
+int     tcp_accept(int sock, int rdwr);
+int     tcp_connect(char *host, int prog, int rdwr);
+void    sock_optimize(int sock, int rdwr);
+int     sockport(int s);
+#ifndef NO_PORTMAPPER
+u_short pmap_getport(struct sockaddr_in *addr, u_long prognum, u_long versnum,
+u_int protocol);
+bool_t  pmap_set(u_long prognum, u_long versnum, u_long protocol, u_short port);
+bool_t  pmap_unset(u_long prognum, u_long versnum);
+#endif
+

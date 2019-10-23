@@ -1,0 +1,187 @@
+From: wkt@cs.adfa.edu.au (Warren Toomey)
+Date: Fri, 21 Jan 2000 13:16:40 +1100 (EST)
+Subject: Emulators
+In-Reply-To: <034201bf63ad$8ad414b0$5d01a8c0@p2350> from emanuel stiebler at "Jan 20, 2000  6:19:18 pm"
+Message-ID: <200001210216.NAA53527@henry.cs.adfa.edu.au>
+
+In article by emanuel stiebler:
+> Hi,
+> Anybody here, who made some benchmarks of the different simulators (supnik,
+> apout, ...)
+> 
+> What I'm looking for is something like:
+> supnik version xxx on pentium 2 350 MHz using linux, is xxx times faster
+> than a 11/73.
+> 
+> cheers & thanks,
+> emanuel
+
+Here's my no-numbers-just-gut-feelings of the various PDP-11 emulators.
+John Wilson's Ersatz is probably the fastest; it's written in assembly
+code, and so gains a fair bit that way.
+
+Second would be the Begemot emulator. They've unrolled the instruction
+decode loop heavily, and that helps a lot.
+
+Bob Supnik's emulator would be the slowest of the three. However, it's
+still not that slow, may 1/3 the speed of Ersatz.
+
+Apout can't be compared to the above 3 emulators, because it doesn't emulate
+peripherals nor supervisor mode. User-mode instructions run at about the
+same speed as Supnik's emulator, but system calls are done by native code.
+
+The sole benchmark I have is: FreeBSD identifies my desktop box as
+Pentium II/Xeon/Celeron (348.93-MHz 686-class CPU). Using Apout, I can
+compile the 2.11BSD GENERIC kernel in 4 minutes 15 seconds.
+
+I'll try building Supnik and Begemot and getting comparative results.
+
+Last comment: all the simulators have strengths & shortcomings, and that
+applies not just to ease of use but also to CPU, I/O performance etc. You
+really have to try them all & find the one that suits you.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA35744
+	for pups-liszt; Fri, 21 Jan 2000 13:44:42 +1100 (EST)
+Received: from begemot.org (negara.cs.waikato.ac.nz [130.217.248.112])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA35740
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 21 Jan 2000 13:44:20 +1100 (EST)
+Received: (from joerg at localhost)
+	by begemot.org (8.9.3/8.9.2) id PAA71802;
+	Fri, 21 Jan 2000 15:45:24 +1300 (NZDT)
+	(envelope-from joerg)
+Date: Fri, 21 Jan 2000 15:45:24 +1300
+From: "Joerg B. Micheel" <joerg@begemot.org>
+To: Warren Toomey <wkt at cs.adfa.edu.au>
+Cc: Unix Heritage Society <pups at minnie.cs.adfa.edu.au>, joerg at begemot.org,
+        "Hartmut B. Brandt" <brandt at fokus.gmd.de>
+Subject: Re: Emulators
+Message-ID: <20000121154524.A71774 at begemot.org>
+References: <034201bf63ad$8ad414b0$5d01a8c0 at p2350> <200001210216.NAA53527 at henry.cs.adfa.edu.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+In-Reply-To: <200001210216.NAA53527 at henry.cs.adfa.edu.au>; from Warren Toomey on Fri, Jan 21, 2000 at 01:16:40PM +1100
+Organization: Begemot Computer Associates
+Operating-System: ... powered by FreeBSD
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Fri, Jan 21, 2000 at 01:16:40PM +1100, Warren Toomey wrote:
+> In article by emanuel stiebler:
+> > Hi,
+> > Anybody here, who made some benchmarks of the different simulators (supnik,
+> > apout, ...)
+> > 
+> > What I'm looking for is something like:
+> > supnik version xxx on pentium 2 350 MHz using linux, is xxx times faster
+> > than a 11/73.
+
+Us too! :-)
+
+The problem is that it doesn't scale that simple. Each and every
+instruction has the parsing overhead. Next comes execution overhead.
+You'll find that the parsing is pretty constant, no matter whether
+it is a NOP or some sophisticated MUL command. The execution speed
+varies heavily, very often it is alot faster than the original
+hardware. IO has seen a tremendous speedup, we can benefit here
+from todays hardware alot. Just remeber how long it took to get
+a prompt or echo when hitting the keyboard. As a result, the
+original feeling of the real machine is lost, very unfortunate.
+
+As a rough summary, simple commands do not improve (much), whereas
+everything complex speeds up with the emulator. Harti has done quite
+a bit of testing on different instructions and compared them to an
+LSI11/73 (KDJ11A). The emulator was run on a i486 at the time. Have
+a look at the p11 distribution, it should be in Tests somewhere.
+
+Regards,
+	Joerg
+-- 
+Joerg B. Micheel			Email: <joerg at begemot.org>
+Begemot Computer Associates		Phone: +64 7 8562148
+40 Masters Avenue, Hillcrest		Fax:   +64 7 8562148
+Hamilton, New Zealand			Pager: +64 868 38222
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA39169
+	for pups-liszt; Sat, 22 Jan 2000 03:08:07 +1100 (EST)
+Received: from uni02du.unity.ncsu.edu (uni02du.unity.ncsu.edu [152.1.2.66])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA39165
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 22 Jan 2000 03:07:42 +1100 (EST)
+From: rdkeys@unity.ncsu.edu
+Received: (from rdkeys at localhost)
+          by uni02du.unity.ncsu.edu (8.8.4/EC02Jan97)
+	  id LAA12512; Fri, 21 Jan 2000 11:07:37 -0500 (EST)
+Message-Id: <200001211607.LAA12512 at uni02du.unity.ncsu.edu>
+Subject: Anyone know what a Masscomp 5400 (54S-01) is?
+To: pups at minnie.cs.adfa.edu.au
+Date: Fri, 21 Jan 2000 11:07:37 -0500 (EST)
+Cc: rdkeys at unity.ncsu.edu
+X-Mailer: ELM [version 2.5 TKL/POP PL2]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On a surplus junket, today, I ran across a 2 dollar chassis that was
+listed as a Masscomp 5400 (54S-01) computer.  It looked rather like
+a DECish based thing with dual height cards, like some sort of laboratory
+digital aquisition machine.  On the long-shot that it is some sort of
+PDP-11ish thing, anyone have any recollection or pointers to any info
+on that kind of a Masscomp machine? 
+
+Thanks
+
+Bob
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA42516
+	for pups-liszt; Sat, 22 Jan 2000 03:45:56 +1100 (EST)
+Received: from lostwithiel.cley.com (lostwithiel.cley.com [212.240.242.98])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA42512
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 22 Jan 2000 03:45:33 +1100 (EST)
+Received: (from tfb at localhost)
+	by lostwithiel.cley.com (8.9.1b+Sun/8.9.1) id QAA04637;
+	Fri, 21 Jan 2000 16:44:35 GMT
+X-Mailer: 21.1 (patch 8) "Bryce Canyon" XEmacs Lucid (via feedmail 8 I);
+	VM 6.72 under 21.1 (patch 8) "Bryce Canyon" XEmacs Lucid
+From: Tim Bradshaw <tfb@cley.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Message-ID: <14472.36082.530024.331321 at cley.com>
+Date: Fri, 21 Jan 2000 16:44:34 +0000 (GMT)
+To: rdkeys at unity.ncsu.edu
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Anyone know what a Masscomp 5400 (54S-01) is?
+In-Reply-To: <200001211607.LAA12512 at uni02du.unity.ncsu.edu>
+References: <200001211607.LAA12512 at uni02du.unity.ncsu.edu>
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+* rdkeys  wrote:
+> On a surplus junket, today, I ran across a 2 dollar chassis that was
+> listed as a Masscomp 5400 (54S-01) computer.  It looked rather like
+> a DECish based thing with dual height cards, like some sort of laboratory
+> digital aquisition machine.  On the long-shot that it is some sort of
+> PDP-11ish thing, anyone have any recollection or pointers to any info
+> on that kind of a Masscomp machine? 
+
+Masscomps were 68k based machines, they had a whole bunch of stuff for
+real-time and data-acquistion type stuff.  They ran something called
+RTU -- real-time Unix -- which was a weirdo sysv / BSD hybrid, not fun
+to use.  If the 5400 is the machine I remember it's a 68020 machine
+but it may have a lot of cards for other stuff in.  If it *is* the
+machine we had it was deeply unreliable.  Masscomp got bought by
+someone else later on but I forget who, so they sometimes get badged
+as some other make.
+
+I would run away, fast.
+
+--tim
+
+
+

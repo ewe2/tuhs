@@ -1,0 +1,211 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Tue, 14 Feb 2017 22:27:40 +1100
+Subject: [TUHS] Another odd comment in V6
+In-Reply-To: <378063CD-9B94-4AE3-B4BB-F41D2F6BFBF6@planet.nl>
+References: <378063CD-9B94-4AE3-B4BB-F41D2F6BFBF6@planet.nl>
+Message-ID: <CAH1jEzZsHqxEJpiMizkg6-cLDaaEhzjb9vzicrK0AJaRQT8muQ@mail.gmail.com>
+
+Well I don't know about this actual conversation in history so I can't
+help with that. But I can describe how interrupted system calls work.
+
+Firstly it depends on what you mean by an interrupt. The guy from MIT
+might have meant, "what happens if the process is blocked in a system
+call and a task switch occurs". This isn't a problem in the design of
+unix, because a process continues to have a normal program counter
+(PC) and stack pointer (SP) whilst executing a system call. A task
+switch can only occur when executing inside the kernel, and what it
+does is to save the kernel PC and SP of the process going to sleep,
+and then restore the kernel PC and SP of the process waking up. So the
+system call that was being executed when the waking-up process went to
+sleep, is NOT restarted as a fresh system call. By contrast the MIT
+guy probably was working with a much smaller/more economical system
+that didn't maintain a kernel stack per process.
+
+I now have to digress a bit to discuss interrupts. There are two kinds
+of interrupts, one is a direct hardware interrupt that gets delivered
+to the kernel, such as a timer interrupt or an I/O event, e.g. for an
+RS232 TTY interface this could be receiver ready (character just came
+in) or transmitter ready (character just went out, can now transmit
+another one). The other is a simulated interrupt that gets delivered
+to a user process. This latter is what we call a "signal", some
+examples are SIGINT (Ctrl-C was pressed) or SIGALRM (process requested
+a timer interrupt and the requested period has elapsed). Note that
+signals are not real interrupts, they are a "fiction" created by the
+kernel that appears to the receiving process like an interrupt. This
+was chosen by Thompson and Ritchie because it's convenient and "makes
+sense" -- for exactly the same reasons that hardware designers created
+hardware interrupts, clever software designers created signals.
+
+One slight complication with hardware interrupts is they can happen in
+either kernel mode (current process is doing a system call) or user
+mode (current process is doing some computation in between system
+calls). The kernel mode case is the simplest -- it behaves as if the
+kernel had executed a subroutine call to the interrupt service routine
+(ISR). The ISR has to be careful to save and restore any registers it
+uses. It also cannot redirect execution flow anywhere else, it has to
+service the interrupting hardware device quickly and then return. On
+the other hand, if the hardware interrupt occurs in user mode, it
+behaves as if the user-mode program had executed a null system call --
+which simply does nothing, does not alter any registers or memory, and
+returns. But once inside the kernel, it then behaves as if the
+kernel-mode program had executed a subroutine call to the ISR. Once
+this finishes, the kernel executes basically its normal system call
+return sequence (but without any status return), requiring checks (1)
+should process be pre-empted and (2) should signals be delivered.
+
+If process is going to be pre-empted (either at the conclusion of a
+system call, or else before the "fake" system call associated with a
+hardware interrupt returns) then the kernel does a normal in-kernel
+task switch, basically it goes to sleep and another process wakes up
+in kernel mode. Then when the pre-empted process eventually gets
+scheduled again, it resumes in kernel mode and continues with its
+system call return sequence. If signals are going to be delivered,
+this is where things get a bit interesting. Conceptually all we do is
+to take the user-mode PC we were going to return to, and put it on the
+user-mode stack (decrementing the user-mode SP by one word) and then
+load the user-mode PC with the address of the user-mode signal hander,
+and then continue the system call return sequence. So, to the
+user-mode program, it looks like the system call completed, and then
+the user program magically did a subroutine call to the signal
+handler. If the system call was a "fake" system call due to a hardware
+interrupt, then this appears asynchronous to the user program.
+
+One way of thinking about a signal, is that it's a "callback" from the
+operating system to tell you that something's happened. This is
+particularly useful in the context of long-running system calls, like
+for instance suppose I've used the alarm() system call to ask for a
+SIGALRM to be delivered to my process in 30 seconds, and then I've
+used the read() system call to get some input from the TTY. If the
+read() system call is still blocked after 30 seconds, the SIGALRM
+signal has to be delivered to me, and conceptually we would like the
+kernel to call my signal handler to tell me about the SIGALRM, and
+then return to the blocked read() system call, which conceptually
+should not return until there is some input available. But alas this
+conceptual model is too dangerous to implement, because of the risk to
+the kernel from badly behaved signal handlers. The kernel can't risk
+calling user code directly, in case that user code never returns.
+
+So, in early versions of unix what happened was that if SIGALRM or
+some other signal had to be delivered during a blocking operation, the
+blocking operation would terminate returning the error EINTR, and then
+in the normal system call return sequence the signal would be
+delivered, and after the signal handler executed, the user code that
+made the system call had to process the EINTR. Basically, every call
+to read() or similar, had to check for an EINTR return, and then
+restart the system call. Very annoying, and a source of bugs since
+there would be plenty of little-used read() sites in the program that
+didn't have the required checks. So, in my understanding at least, a
+new error code was reserved, I think by the BSD designers, called
+ERESTART, and the C library's system call routines like read() and
+write() were modified to always do the looping that restarts the
+system call, if the system call returns an error and the error is
+ERESTART. EINTR is thus (in my understanding) redundant, except for a
+few rare system calls where restarting isn't desirable or EINTR can be
+requested.
+
+With this innovation we can have callbacks from the operating system
+at any time, even though the operating system is executing a blocking
+operation, and if the signal handler returns normally (to the C
+library code just after the system call, i.e. to the ERESTART check),
+then from the user-mode foreground program's point of view it is
+completely transparent, the read() only returns when it has data. But
+if the signal handler instead chooses to, say, abort the user-mode
+foreground program by doing a longjmp() to an error recovery routine,
+and then restarting the user-mode foreground program from a known
+point such as its main loop or main menu, then this is also fine, the
+blocking system call appears to have been aborted so that the
+foreground program could do its error recovery. And the kernel just
+doesn't care, since once it's done its system call return sequence and
+diverted the user-mode execution appropriately, it washes its hands of
+it all.
+
+And now having explained all that, I can address your point about the
+interface complexity. To keep things simple, unix doesn't have the
+ability to actually undo or restart a system call. For instance, if I
+was reading the TTY and the kernel delivered some keystrokes into my
+buffer, it can't restore the previous contents of the buffer and move
+those keystrokes back into the TTY driver. Some other operating
+systems probably can do this. And, for instance, x86 processors can do
+something like this: If a pagefault occurs partway through the
+execution of an instruction, the x86 processor will actually restore
+all register values to their values prior to the instruction starting,
+so that the pagefault handler can resume the user program cleanly
+after a pagefault. This is kind of a good feature (the 68010 added
+this feature fixing a significant issue in the 68000 which prevented
+its widespread adoption in unix workstations), but it's also a potent
+source of bugs, for instance early 286 silicon didn't correctly
+restart some instructions after a segment-not-present or similar
+fault. It's clear to see why Thompson and Ritchie didn't adopt such a
+design. Instead what happens is, the blocking system calls are
+specified so that they can only return EINTR or ERESTART if no data
+has been transferred. If data has been transferred, they return a
+"short read" or "short write".
+
+To make my discussion complete I also have to mention something about
+signal trampolines. To understand these properly it's best to think
+about hardware interrupts (signals are just an emulation of a hardware
+interrupt). Hardware interrupts always disable further interrupts of
+the same kind while they execute. For instance suppose a TTY is
+receiving characters very fast, it would be unacceptable to have the
+ISR get interrupted by a fresh character arriving halfway through
+stashing the last character. So the hardware always provides a way to
+enter the ISR with interrupts of the same or lower priority as the one
+under service, disabled. The ISR then has to inform the hardware when
+these can be re-enabled. Moreover, this last step has to be done
+*atomically* with the interrupt return -- it can't be done BEFORE the
+interrupt return, because fast-arriving interrupts could each push a
+new return address on the stack until the stack overflows.
+
+Thus the hardware provides intructions like IRET (x86) which
+atomically re-enable interrupts and return. What unix provides is a
+system call that *behaves* like IRET, it is called sigreturn(). What
+this does conceptually, is to re-enable the signal that just got
+delivered, and then make the user-mode process do a
+return-from-subroutine. This neatly reverses the steps taken when
+delivering the signal, i.e. it pops the user-mode PC from the
+user-mode stack, increasing the user-mode SP by one word. To make this
+whole process more user-friendly, the C library provides something
+called the signal trampoline. When the kernel wants to deliver a
+signal, it first masks off further delivery of signals of the same
+kind. Then, instead of making the user-mode program issue a subroutine
+call to the signal handler, it makes the user-mode program call the
+signal trampoline. In turn the signal trampoline calls the user's
+signal handler, and when the user's signal handler returns (which is
+not compulsory, it is allowed to do a longjmp() to error recovery code
+instead), the signal trampoline does the sigreturn().
+
+cheers, Nick
+
+
+On Tue, Feb 14, 2017 at 7:46 PM, Paul Ruizendaal <pnr at planet.nl> wrote:
+>
+> There's an odd comment in V6, in tty.c, just above ttread():
+>
+> /*
+>  * Called from device's read routine after it has
+>  * calculated the tty-structure given as argument.
+>  * The pc is backed up for the duration of this call.
+>  * In case of a caught interrupt, an RTI will re-execute.
+>  */
+>
+> That comment is strange, because it does not describe what the code does. The comment isn't there in V5 or V7.
+>
+> I wonder if there is a link to the famous Gabriel paper about "worse is better" (http://dreamsongs.com/RiseOfWorseIsBetter.html). In arguing its points, the paper includes this story:
+>
+> ---
+> Two famous people, one from MIT and another from Berkeley (but working on Unix) once met to discuss operating system issues. The person from MIT was knowledgeable about ITS (the MIT AI Lab operating system) and had been reading the Unix sources. He was interested in how Unix solved the PC loser-ing problem. The PC loser-ing problem occurs when a user program invokes a system routine to perform a lengthy operation that might have significant state, such as IO buffers. If an interrupt occurs during the operation, the state of the user program must be saved. Because the invocation of the system routine is usually a single instruction, the PC of the user program does not adequately capture the state of the process. The system routine must either back out or press forward. The right thing is to back out and restore the user program PC to the instruction that invoked the system routine so that resumption of the user program after the interrupt, for example, re-enters the system routine. It is called PC loser-ing because the PC is being coerced into loser mode, where loser is the affectionate name for user at MIT.
+>
+> The MIT guy did not see any code that handled this case and asked the New Jersey guy how the problem was handled. The New Jersey guy said that the Unix folks were aware of the problem, but the solution was for the system routine to always finish, but sometimes an error code would be returned that signaled that the system routine had failed to complete its action. A correct user program, then, had to check the error code to determine whether to simply try the system routine again. The MIT guy did not like this solution because it was not the right thing.
+>
+> The New Jersey guy said that the Unix solution was right because the design philosophy of Unix was simplicity and that the right thing was too complex. Besides, programmers could easily insert this extra test and loop. The MIT guy pointed out that the implementation was simple but the interface to the functionality was complex. The New Jersey guy said that the right tradeoff has been selected in Unix -- namely, implementation simplicity was more important than interface simplicity.
+> ---
+>
+> Actually, research Unix does save the complete state of a process and could back up the PC. The reason that it doesn't work is in the syscall API design, using registers to pass values etc. If all values were passed on the stack it would work. As to whether it is the right thing to be stuck in a read() call waiting for terminal input after a signal was received...
+>
+> I always thought that this story was entirely fictional, but now I wonder. The Unix guru referred to could be Ken Thompson (note how he is first referred to as "from Berkeley but working on Unix" and then as "the New Jersey guy").
+>
+> Who can tell me more about this? Any of the old hands?
+>
+> Paul
+>
+

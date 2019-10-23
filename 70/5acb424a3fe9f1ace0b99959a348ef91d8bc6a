@@ -1,0 +1,73 @@
+From: krewat@kilonet.net (Arthur Krewat)
+Date: Wed, 20 Sep 2017 13:31:19 -0400
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <20170920165830.e6lp4acvfpq63n25@matica.foolinux.mooo.com>
+References: <c38ba7b5-e867-93a3-14a2-c61c90bb49b5@kilonet.net>
+ <201709201542.v8KFgN9T012655@darkstar.fourwinds.com>
+ <20170920165830.e6lp4acvfpq63n25@matica.foolinux.mooo.com>
+Message-ID: <568e3829-07d9-22c2-b3bd-b2a6a244bcc9@kilonet.net>
+
+Oh, and one more thing that may produce an offshoot, or at least more 
+discussion about what's the "right thing to do".
+
+I'm coming off as a Solaris snob, I'm sure, but that's ok ;)
+
+Using Solaris and ZFS, it automatically checksums everything, and can 
+correct it on-the-fly. Add to that raidz2, and most data corruption can 
+be dealt with.
+
+Which brings up my experience with bit-rot.
+
+Two stories:
+
+1) Home server, using SAS to some Dell MD1000's with SATA drives in them 
+(through SAS->SATA interposers), and find that one of controllers in one 
+of the MD1000s was corrupting data. On average at it's height, I was 
+getting one or two checksum errors in ZFS a day. I didn't notice it 
+right away until ZFS actually errored out a disk because of it, and the 
+raidz2 zpool went DEGRADED. By the time I dealt with it, I had a few 
+hundred errors showing in the zpool status.
+
+It was pretty obvious which MD1000 controller was causing the issue 
+because almost every drive on that particular controller was reporting 
+errors all at the same time. But it was at a level that the data on the 
+disk was actually being corrupted "in flight" in such a way that the SAS 
+controller in the server didn't see any protocol errors, it was really 
+data corruption at the sector level.
+
+2) Work server, M1000e chassis with an Oracle Solaris cluster on a pair 
+of M610 blades, Emulex fiber controllers, Brocade 5100 switchs, and a 
+Dell Compellent. Twice in two years, ZFS noticed a checksum error in a 
+record of a file. One was a redo log that had already been read before 
+it errored, and the other was a flashback log that wasn't necessary for 
+continued operation of the database.
+
+This one, I'm not so sure isn't a bug in firmware (or even Solaris) 
+somewhere along the path. One error happened on one node, the other 
+error happened on the other node. Two different types of databases - one 
+Student Information System, the other online learning. QA cluster never 
+see any issues.
+
+Problem with this is, I'm using ZFS on top of a SAN - so there's no 
+mirroring or raidz# going on, it's all on the SAN to deal with errors. 
+Once ZFS sees corruption, the file goes into "I/O error".
+
+--
+
+Both these stories point out that bit-rot is really a thing. I refuse to 
+store any of my own personal/work/whatever data on a machine that 
+doesn't do ECC for RAM, or filesystems that do not checksum. I have a 
+lot of old data and source code stored on my array. I would hate to open 
+an old source file and see a corrupted sector right in the middle of it. 
+I've seen it happen to other people. I've seen it happen to me 20 years 
+ago. Never again.
+
+I back everything up to an LTO4 library, and regular take 
+infinite-retention backups and store them off-site, and recently started 
+up an Amazon EC2 instance in Ireland and rsync stuff to that using 
+"magnetic" storage (spinning disk) - which is relatively cheap.
+
+Anyone know of a reliable filesystem that checksums everything? Oh wait, 
+ZFS is available for Linux - wonder if I can install it on an Amazon 
+micro t2 instance? I'll have to check.
+

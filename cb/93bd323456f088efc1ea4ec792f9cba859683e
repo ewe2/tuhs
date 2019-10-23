@@ -1,0 +1,81 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Thu, 5 Jun 2008 19:59:47 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080605170730.35320095@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605170730.35320095@veda.cnb.uam.es>
+Message-ID: <20080605195947.27193afe.lehmann@ans-netz.de>
+
+Jose R. Valverde wrote:
+
+> > so i created the following C code out of it:
+> > 
+> > u.u_count = (-u.u_segmts[NUSEGS-1].sg_limit+0x100)<<8;
+> > ...
+> > 
+> > done by having 256² - 256*x. This was great. With that information I wrote
+> > in C:
+> > 
+> > u.u_count = (256-u.u_segmts[NUSEGS-1].sg_limit)<<8;
+> 
+> 
+> What happens if you use instead
+> 
+> 	u.u_count = (~(-u.u_segmts[NUSEGS-1].sg_limit))<<8;
+> 
+> That should mean the same, would avoid using a hard coded value and the
+> compiler may optimize it to the same assembly.
+
+This gets compiled+optimized to:
+
+        ldb     rl2,_u+1060
+        neg     r2
+        com     r2
+        ldb     rh2,rl2
+        clrb    rl2
+        ld      _u+48,r2
+
+I think 256 is ok for me as it a) works, and b) I'm using a defined
+variable (CPAS - clicks per address space) instead of the hardcoded 256
+and instead of <<8 I'm using "ctob()" which is defined as 
+
+/* clicks to bytes */
+# define ctob(x)        ((x)<<8)
+
+so I guess this is OK.
+
+
+
+The other (unsolved) problem is quite more complicated for me. I tried
+several different things:
+
+u.u_dirp.l = (long)((saddr_t *)uap->linkname)->l & 0x7f00ffffL;
+u.u_dirp.l = ((long)uap->linkname&0x7F00FFFFL);
+u.u_dirp.l = (long)((int)uap->linkname&0x7F00);
+
+(the types are all defined in param.h I linked to at the webpage) I've
+tried to figure out what happens there.
+
+Any value which is in the long-word-register will be ANDed with
+
+    7F       00      FF       FF
+01111111 00000000 11111111 11111111
+
+This means, that the higher register will be taken from the long-word-
+register unmodified. For the lower register the first bit will be
+removed, and the highbyte will be removed as well. The colleague of
+mine meant this could have to do something with memory adressing - maybe
+to get an address from a memory segment. I didn't understood it that
+much. But we didn't found a way how it could be written "differently" and
+the optimizer creates the ANDing - again with a temporary register.
+I also tried to put the 0x7f00ffff in front of the variable just to be
+sure this is not what's triggering the copy. But without success. Maybe
+I'm to focused on the ANDing with 7f00 of the first 16bit register-word
+from the 32bit-longword - who knows?
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+

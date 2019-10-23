@@ -1,0 +1,326 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.1 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,
+	HTML_MESSAGE,HTML_OBFUSCATE_05_10,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f7c37e2c
+	for <ml@inbox.vuxu.org>;
+	Sat, 12 Jan 2019 17:22:28 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5490F94677; Sun, 13 Jan 2019 03:22:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1895794666;
+	Sun, 13 Jan 2019 03:21:20 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="kRj0Zj8T";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1A70C94666; Sun, 13 Jan 2019 03:21:17 +1000 (AEST)
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com
+ [209.85.221.49])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 92CAE93D29
+ for <tuhs@minnie.tuhs.org>; Sun, 13 Jan 2019 03:21:15 +1000 (AEST)
+Received: by mail-wr1-f49.google.com with SMTP id t6so18391170wrr.12
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 09:21:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+ bh=rTsR44wxrAlDUEliTYYTGDdrQxlTyK09iaPpQ6qyvpc=;
+ b=kRj0Zj8TYHf2mM3SVOCzrP39aGt1ys5DfGHSg6FxcvFYYQZq1+jK2ifWFTkj9/fy51
+ QbSd5XmHSjimlVVPkdpL8jgSeTIXIw+/zqnKL9HfT4Q+xO9kY1xLiJa2tXaq7PXcEKfr
+ WaO9iX/+dEOxTnyRoM9U/9BnRbAVraR/OjTuE=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to;
+ bh=rTsR44wxrAlDUEliTYYTGDdrQxlTyK09iaPpQ6qyvpc=;
+ b=tZjpuGLhUZutVHUbMK6Rg9psiHGhAkgUrZlP+AO7H98Nyve0dpMSI4dZ77F7+ROwKk
+ PLosBqB9o6G4KcNbtitZJN3N0NTsP4gGvXPAckIQTwLk7Jzu4owjG/1aoX3Lv7wVtmRn
+ 1jmgaRoo1unr/XQdmiGl7shSCY5F+DQR8/eDkdSKsG4bkSCFKE4qBStb1HmCMFJx2qLD
+ FrGFBV9UnWe0MYRGNfpciYTgVSsRQFJlt3/IbUCqbitkh0Nq5roWwu0CXMVwTX5DtzGx
+ wPBxyYzhPBKa2ny8aTJMA9HOsYeG/sceSpNCReBX1QySmueBIH2uo3LgvNBanB2eH94V
+ uKiA==
+X-Gm-Message-State: AJcUukfaG6QJlhlWoxSKblnLObNVUXzEkWlm8uM8+QSQhE/24ZdORX7z
+ zzapCcd/Sf5UdQXI8JtjjCgEBm8Q8iKIiSisDaKE3eY1QeDzww==
+X-Google-Smtp-Source: ALg8bN62sTJzB6BPUAR5EUtlunAyxyo1j/KmFIDyzbLvnLMnQ0PQ2jFp4tKni/SAtJYO9x63aidj+4au29jPq7p+BkM=
+X-Received: by 2002:a5d:634b:: with SMTP id b11mr18018824wrw.14.1547313673198; 
+ Sat, 12 Jan 2019 09:21:13 -0800 (PST)
+MIME-Version: 1.0
+References: <39F862F7-7C4B-4A09-B838-942BE0FD2626@planet.nl>
+ <1581c01d4a9c2$ffed5340$ffc7f9c0$@ronnatalie.com>
+ <CAC20D2Ni4jvA9POZKaQx6O_Dq=Nq5TfdLgbr__oWgrXme=+GHg@mail.gmail.com>
+ <alpine.NEB.2.21.1901111528210.21728@t1.m.reedmedia.net>
+ <20190111221853.GB7733@mcvoy.com>
+ <alpine.NEB.2.21.1901120559110.21728@t1.m.reedmedia.net>
+In-Reply-To: <alpine.NEB.2.21.1901120559110.21728@t1.m.reedmedia.net>
+From: Clem Cole <clemc@ccc.com>
+Date: Sat, 12 Jan 2019 12:20:46 -0500
+Message-ID: <CAC20D2NA=Z8NBFNyCC5TPv_kZSkCnBLBHHQuD-6t3QOeWpVKAw@mail.gmail.com>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+Content-Type: multipart/alternative; boundary="000000000000d8f13f057f46099b"
+Subject: Re: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000d8f13f057f46099b
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Paul, I can date it a little I suspect, although not as precisely as you
+might like.  I arrived at UCB in late August/Early September '81 to be a
+grad student.  Sam had arrived earlier that spring to work for wnj in the
+CSRG team. I had known Sam before I went to UCB.   [We actually had played
+rugby against each other in eastern PA many years before he went off to
+Case and me to CMU].  Anyway, when I arrived Sam was one of the people I
+already knew and we socialized a lot together in that fall in particular.
+
+We also know the first 'Alpha' kit of 4.1a was not a thing until the next
+summer.  Plus, during the winter was the arguments with ARPA steering
+committee about the features that needed to be added. The key item is that
+vestigial select(2) does not show up until at least 6-9 months after I
+arrived and it seems like it was part of 4.1a.   As I said, I have memories
+of discussing all of the networking interfaces, CMU Accent, et al with Sam
+in particular during that time. So, I would bet Joy did the basic work
+winter/spring of 82; but I can not be more precise than that.
+
+FWIW: Since I had been working networking at both CMU and Tek before I came
+to UCB, one of the first things I did when I arrived in fall '81 was to
+install the Gurwitz BBN IP/TCP stack on 4.1 so we could run Ethernet
+between the 3 CAD machines in Cory Hall to replace the use of BerkNet over
+9600 baud serial links (IIRC Eric Cooper, was involved with that hack
+also).   When I had arrived, few machines at UCB were on LANS and the need
+for ARPAnet style networking >>besides<< email was still limited.  The way
+people connected to systems was their terminal was to connect over serial
+links and we had a giant 'plugboard' that allowed you patch your terminal
+into one of the systems [I wonder if there are pictures of these somewhere
+in the UCB archives - it was quite something].
+
+We had three 780s in the CAD group in Cory and really did not like the
+plugboard scheme. From my previous experience, I wanted something like
+telnet or supdup, like we had been messing with at CMU and Tek.  Hence my
+push to put the BBN code on the CAD systems and use an ethernet.    Eric,
+please fill me in.   You must have been running the BBN code then also,
+since Ing70 and then IngVax were the ArpaNet connection (via a VHDH to the
+LBL IMP - UCB did not yet have its own IMP).   But I know the CAD systems
+4.1 networking stuff was done by me.
+
+Its a little fuzzy now, but memory is that Bob Kriddle had run a Xerox 3
+Meg cable in Cory, from my machine room over to the Ingres machine room
+also; but I've forgotten the details.  BerkNet (i.e. serial links) allowed
+email to flow on campus, but I'm thinking we were trying to make that both
+more efficient and allow telnet/ftp [which might not have happened until
+after the C/30 IMP was installed in Evan later).   [Since all ARPAnet email
+followed through IngVax, Eric's history of dealing with the header file
+format of the month in the old delivermail program would force
+his writing sendmail - said history has been repeated here and elsewhere
+previously].
+
+But this thread got me thinking a little bit.   I've forgotten actual LAN
+topology we had a UCB now. I know from the CAD hosts, we could talk to the
+other hosts in our lab in Cory for sure, I want to say we could talk to a
+few other hosts in Evans and Cory; as I know Sam would give me code usually
+via some type of network connection, although sneaker-net with 9-track
+tapes used a great deal too.   I want to say the connection was over
+Kriddle's 3M Xerox cable (Eric do you remember what you had in IngVax in
+those days).  I know we also a had real 10Meg cable in floor our lab in
+Cory, plus at least one Xerox board on one of the systems, another had a
+DEC interface in it, and Interlan boards in at least two others another.
+ We must have even had a 3Com board in the third system; as I remember
+hacking both the Interlan and 3Com drivers (I had written a 3Com driver at
+Tek previous for VMS.  The Interlan board was new, as was the DEC board;
+but I've forgotten what we got when).     The original CAD 780 ('Coke')
+must have had multiple interfaces in it, but I really don't remember.
+
+FWIW: I spent a good bit of time with Sam in those days. CSRG was using
+750s for most of their development, and the couple of 780's in Evan's had a
+lot of non-DEC equipment in them.   But we had the one large undoctored and
+max configuration VAX 785 ('Pepsi'), that was fully tricked out with a real
+DEC I/O equipment in it=E2=80=A0  So when CRSG (*i.e.* Sam) wanted to test =
+things
+on a 'pure DEC' system with things like TU78's, real RP07's, RMxx drives;
+he would give me something and I would debug it late at night on it.  Once
+it was stable, it might become the system we ran.
+
+While I can not date select(2) more precisely.  I can date routed(2) as
+being that spring, but after 4.1a's alpha code.   Sam has seen the Xerox
+routed system at PARC.   The BBN code was a not friendly to sub-nets and we
+had already started to proliferate them between Evans and Cory Hall.   He
+decided to create something like the Xerox code for us (as well as the r*
+commands). routed was created in a couple of weeks after Sam got the idea
+from Xerox and first place it ran was on the 10 Meg LAN in the CAD group.
+
+Hope this helps,
+Clem
+
+
+=E2=80=A0 That specific system ('Pepsi') had been used as a demo machine fo=
+r DEC at
+Summer Comdex.  It was the famous "forklift'' system and we actually had in
+a back room the panel with the forklift holes. It had been donated by Al
+Hanover of DEC's CAD team to the UCB CAD group; after Prof. Rich Newton had
+convinced >>HP<< to fund the purchasing of an earlier 780 for us [this is
+all a different story]. Also, that system had the big 64-bit array
+processor I was working on for my thesis too; because it was the only
+system we had with enough I/O bandwidth to support it.
+=E1=90=A7
+
+--000000000000d8f13f057f46099b
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Paul=
+, I can date it a little I suspect, although not as precisely as you might =
+like.=C2=A0 I arrived at UCB in late August/Early September &#39;81 to be a=
+ grad student.=C2=A0 Sam had arrived earlier that spring to work for wnj=C2=
+=A0in the CSRG team. I had known Sam before I went to UCB.=C2=A0 =C2=A0[We =
+actually had played rugby against each other in eastern PA many years befor=
+e he went off to Case and me to CMU].=C2=A0 Anyway, when I=C2=A0<span class=
+=3D"gmail-gr_ gmail-gr_9858 gmail-gr-alert gmail-gr_gramm gmail-gr_inline_c=
+ards gmail-gr_run_anim gmail-Grammar gmail-multiReplace" id=3D"gmail-9858" =
+style=3D"display:inline;border-bottom:2px solid transparent;background-repe=
+at:no-repeat">arrived</span>=C2=A0Sam was one of the people I already knew =
+and we socialized a lot together in that fall in particular.</div><div clas=
+s=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></=
+div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif">We also know the first &#39;Alpha&#39; kit of 4.1a was not a thing u=
+ntil the next summer.=C2=A0 Plus, during the winter was the arguments with =
+ARPA steering committee about the features that needed to be added. The key=
+ item is that vestigial select(2) does not show up until at least 6-9 month=
+s after I arrived and it seems like it was part of 4.1a.=C2=A0 =C2=A0As I s=
+aid, I have memories of discussing all of the networking interfaces, CMU Ac=
+cent, et al with Sam in particular during that time. So, I would bet Joy di=
+d the basic work winter/spring of 82; but I can not be more precise than th=
+at.</div><br class=3D"gmail-Apple-interchange-newline"><div class=3D"gmail_=
+default" style=3D"font-family:arial,helvetica,sans-serif">FWIW: Since I had=
+ been working networking at both CMU and Tek before I came to UCB, one of t=
+he first things I did when I arrived in fall &#39;81 was to install the Gur=
+witz BBN IP/TCP stack on 4.1 so we could run Ethernet between the 3 CAD mac=
+hines in Cory Hall to replace the use of BerkNet over 9600 baud serial link=
+s (IIRC Eric Cooper, was involved with that hack also).=C2=A0 =C2=A0When I =
+had arrived, few machines at UCB were on LANS and the need for ARPAnet styl=
+e networking &gt;&gt;besides&lt;&lt; email was still limited.=C2=A0 The way=
+ people connected to systems was their terminal was to connect over serial =
+links and we had a giant &#39;plugboard&#39; that allowed you patch your te=
+rminal into one of the systems [I wonder if there are pictures of these som=
+ewhere in the UCB archives - it was quite something].</div><div class=3D"gm=
+ail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><di=
+v class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+We had three 780s in the CAD group in Cory and really did not like the plug=
+board scheme. From my previous experience, I wanted something like telnet o=
+r supdup, like we had been messing with at CMU and Tek.=C2=A0 Hence my push=
+ to put the BBN code on the CAD systems and use an ethernet.=C2=A0 =C2=A0 E=
+ric, please fill me in.=C2=A0 =C2=A0You must have been running the BBN code=
+ then also, since Ing70 and then IngVax were the=C2=A0<span class=3D"gmail-=
+gr_ gmail-gr_11116 gmail-gr-alert gmail-gr_spell gmail-gr_inline_cards gmai=
+l-gr_disable_anim_appear gmail-ContextualSpelling gmail-ins-del gmail-multi=
+Replace" id=3D"gmail-11116" style=3D"display:inline;border-bottom:2px solid=
+ transparent;background-repeat:no-repeat">ArpaNet</span>=C2=A0connection (v=
+ia a=C2=A0<span class=3D"gmail-gr_ gmail-gr_13817 gmail-gr-alert gmail-gr_s=
+pell gmail-gr_inline_cards gmail-gr_run_anim gmail-ContextualSpelling gmail=
+-ins-del gmail-multiReplace" id=3D"gmail-13817" style=3D"display:inline;bor=
+der-bottom:2px solid transparent;background-repeat:no-repeat">VHDH</span>=
+=C2=A0to the LBL IMP - UCB did not yet have its own IMP).=C2=A0 =C2=A0But I=
+ know the CAD systems 4.1 networking stuff was done by me.</div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></d=
+iv><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif">Its a little fuzzy now, but memory is that Bob Kriddle had run a Xero=
+x 3 Meg cable in Cory, from my machine room over to the Ingres machine room=
+ also; but I&#39;ve forgotten the details.=C2=A0 BerkNet (i.e. serial links=
+) allowed email to flow on campus, but I&#39;m thinking we were trying to m=
+ake that both more efficient and allow telnet/ftp [which might not have hap=
+pened until after the C/30 IMP was installed in Evan later).=C2=A0 =C2=A0[S=
+ince all ARPAnet email followed through IngVax, Eric&#39;s history of deali=
+ng with the header file format of the month in the old delivermail program =
+would force his=C2=A0writing=C2=A0sendmail=C2=A0- said history has been rep=
+eated here and elsewhere previously].</div><div class=3D"gmail_default" sty=
+le=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail=
+_default" style=3D"font-family:arial,helvetica,sans-serif">But this thread =
+got me thinking a little bit.=C2=A0 =C2=A0I&#39;ve forgotten actual LAN top=
+ology we had a UCB now. I know from the CAD hosts, we could talk to the oth=
+er hosts in our lab in Cory for sure, I want to say we could talk to a few =
+other hosts in Evans and Cory; as I know Sam would give me code usually via=
+ some type of network connection, although sneaker-net with 9-track tapes u=
+sed a great deal too.=C2=A0 =C2=A0I want to say the connection was over Kri=
+ddle&#39;s=C2=A03M Xerox cable (Eric do you remember what you had in IngVax=
+=C2=A0in those days).=C2=A0 I know we also a had real 10Meg cable in floor =
+our lab in Cory, plus at least one Xerox board on one of the systems, anoth=
+er had a DEC interface in it, and Interlan boards in at least two others an=
+other.=C2=A0 =C2=A0We must have even had a 3Com board in the third system; =
+as I remember hacking both the Interlan and 3Com drivers (I had written a 3=
+Com driver at Tek previous for VMS.=C2=A0 The Interlan board was new, as wa=
+s the DEC board; but I&#39;ve forgotten what we got when).=C2=A0 =C2=A0 =C2=
+=A0The original CAD 780 (&#39;Coke&#39;)=C2=A0 must have had multiple inter=
+faces=C2=A0in it, but I really don&#39;t remember.<br></div><div class=3D"g=
+mail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><d=
+iv class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"=
+>FWIW: I spent a good bit of time with Sam in those days. CSRG was using 75=
+0s for most of their development, and the couple of 780&#39;s in Evan&#39;s=
+ had a lot of non-DEC equipment in them.=C2=A0 =C2=A0But we had the one lar=
+ge undoctored and max configuration VAX 785 (&#39;Pepsi&#39;), that was ful=
+ly tricked out with a real DEC I/O equipment in it=E2=80=A0 =C2=A0So when C=
+RSG (<i>i.e.</i> Sam) wanted to test things on a &#39;pure DEC&#39; system =
+with things like TU78&#39;s, real=C2=A0RP07&#39;s, RMxx drives;=C2=A0 he wo=
+uld give me something and I would debug it late at night on it.=C2=A0 Once =
+it was stable, it might become the system we ran.</div><div class=3D"gmail_=
+default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Whil=
+e I can not date select(2) more precisely.=C2=A0 I can date routed(2) as be=
+ing that spring, but after 4.1a&#39;s alpha code.=C2=A0 =C2=A0Sam has seen =
+the Xerox routed system at PARC.=C2=A0 =C2=A0The BBN code was a not friendl=
+y to sub-nets and we had already started to proliferate them between Evans =
+and Cory Hall.=C2=A0 =C2=A0He decided to create something like the Xerox co=
+de for us (as well as the r* commands). routed was created in a couple of w=
+eeks after Sam got the idea from Xerox and first place it ran was on the 10=
+ Meg LAN in the CAD group.</div><div class=3D"gmail_default" style=3D"font-=
+family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif">Hope this helps,</div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Cl=
+em</div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,s=
+ans-serif"><br></div><div class=3D"gmail_default" style=3D"font-family:aria=
+l,helvetica,sans-serif"><br></div><div class=3D"gmail_default"><font face=
+=3D"arial, helvetica, sans-serif">=E2=80=A0 That specific system (&#39;Peps=
+i&#39;) had</font><span style=3D"font-family:arial,helvetica,sans-serif">=
+=C2=A0been used as a demo machine for DEC at Summer Comdex.=C2=A0 It was th=
+e famous &quot;</span><span class=3D"gmail-gr_ gmail-gr_1252 gmail-gr-alert=
+ gmail-gr_spell gmail-gr_inline_cards gmail-gr_disable_anim_appear gmail-Co=
+ntextualSpelling gmail-ins-del" id=3D"gmail-1252" style=3D"display:inline;b=
+order-bottom:2px solid transparent;background-repeat:no-repeat;font-family:=
+arial,helvetica,sans-serif">forklift&#39;&#39;</span><span style=3D"font-fa=
+mily:arial,helvetica,sans-serif">=C2=A0system and we actually had in a back=
+ room the panel with the=C2=A0</span><span class=3D"gmail-gr_ gmail-gr_4746=
+ gmail-gr-alert gmail-gr_spell gmail-gr_inline_cards gmail-gr_disable_anim_=
+appear gmail-ContextualSpelling gmail-ins-del" id=3D"gmail-4746" style=3D"d=
+isplay:inline;border-bottom:2px solid transparent;background-repeat:no-repe=
+at;font-family:arial,helvetica,sans-serif">forklift</span><span style=3D"fo=
+nt-family:arial,helvetica,sans-serif">=C2=A0holes. It had been donated by A=
+l Hanover of DEC&#39;s CAD team to the UCB CAD group; after Prof. Rich Newt=
+on had convinced &gt;&gt;HP&lt;&lt; to fund the purchasing of an earlier 78=
+0 for us [this is all a different story]. Also, that system=C2=A0</span><sp=
+an style=3D"font-family:arial,helvetica,sans-serif">had the big 64-bit arra=
+y processor I was working on for my thesis=C2=A0</span><span class=3D"gmail=
+-gr_ gmail-gr_15759 gmail-gr-alert gmail-gr_gramm gmail-gr_inline_cards gma=
+il-gr_run_anim gmail-Punctuation gmail-multiReplace" id=3D"gmail-15759" sty=
+le=3D"display:inline;border-bottom:2px solid transparent;background-repeat:=
+no-repeat;font-family:arial,helvetica,sans-serif">too; because it was the o=
+nly system we had with enough I/O bandwidth to support it.</span></div></di=
+v></div></div></div><div hspace=3D"streak-pt-mark" style=3D"max-height:1px"=
+><img alt=3D"" style=3D"width:0px;max-height:0px;overflow:hidden" src=3D"ht=
+tps://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp;type=
+=3Dzerocontent&amp;guid=3D01cc6f4f-4c20-48fd-ad1a-aced00fdf9ae"><font color=
+=3D"#ffffff" size=3D"1">=E1=90=A7</font></div>
+
+--000000000000d8f13f057f46099b--

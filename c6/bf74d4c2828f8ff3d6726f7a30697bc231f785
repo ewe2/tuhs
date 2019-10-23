@@ -1,0 +1,96 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 10 May 2014 23:13:29 -0400 (EDT)
+Subject: [TUHS] Work I've done with a PDP-11 simulator
+Message-ID: <20140511031329.6220418C0AD@mercury.lcs.mit.edu>
+
+    > From: Gregg Levine <gregg.drwho8 at gmail.com>
+
+    > By Shoppa disk do you mean, Shoppe disk
+
+The root pack (linked to from my page):
+
+  http://www.tuhs.org/Archive/PDP-11/Distributions/other/Tim_Shoppa_v6/unix_v6.rl02.gz
+
+It contains lots of V6 goodies - but not, alas, source for most of them. (E.g.
+I had to disassemble the RL bootstrap(s) from it.)
+
+
+    > I've been trying to figure out how to attach them to the E11 one to
+    > bring the whole thing up.
+
+The others are junk (see below). To boot up the root pack (I don't think I
+did this at any point; I've always mounted it as a subsidiary drive) you'd
+need to say:
+
+  mount dl0: unix_v6.rl02 /RL02
+
+and then:
+
+  boot dl0:
+
+The disk has a working RL bootstrap in block 0, it should boot OK. Then you
+get to take your pick of which unix to boot! There are 7 to chose from:
+
+  77 -rwxrwxr-x  1 root    38598 Aug 22  1984 oldunix
+  77 -rwxrwxr-x  1 root    38504 Jul 19  1984 oldunix.25.7
+  77 -rwxrwxr-x  1 root    38568 Feb 20  1985 unix
+  74 -rwxrwxr-x  1 4       36956 Mar  9  1983 unix.jones
+  69 -rwxrwxr-x  1 root    34408 Aug 16  1983 unix.mlab
+  76 -rwxrwxr-x  1 4       38316 Sep  3  1982 unix.rxrl
+  68 -rwxrwxr-x  1 root    33958 Jun  6  1983 unix.tmp        
+
+and I have no idea how they all differ - or what each one expects to use for
+a root device and swap device.
+
+Looking at 'unix', it gives both rootdev and swapdev as '01000' (which is
+probably the RL, I'm too lazy to grovel around in bdevsw and make sure). The
+super block reports 19000 as the size of the file system, and sure enough,
+swplo is reported as 045070 (19000), and nswap as 02710 (1480). So it's
+probably set up to run and swap on RL/0.
+
+
+    > and any of the set of disks that are in the distributions portion of
+    > the site with his name on them?
+
+All of the other disks in the V6 folder with his name on it:
+
+  http://www.tuhs.org/Archive/PDP-11/Distributions/other/Tim_Shoppa_v6
+
+are junk; here's a brief rundown on each one:
+
+ copy_num1_user.rl02:
+ user0_backup.rl02:
+ user_backup2.rl02:
+
+All very similar to the 'unlabeled' disk (below) - lots of random user files
+for biology stuff, little if anything of any use/interest.
+
+There is a file which isn't listed in the README:
+
+ unlabeled.rl02:
+
+It looks like another /user disk, full of random biology stuff; nothing
+interesting except a copy of a nice-looking Kermit written in C (by someone
+at Columbia, IIRC).
+
+ junk:
+
+An RL01 pack (the others are all RL02's); it has a boot block with PDP-11
+code in it; I mounted it on a simulator and booted it, and it says it's an
+RSX-11M V3.2 disk.
+
+ user01.rl02:
+
+This is also an RSX pack (I think), but when I tried to boot it, it said
+"THIS VOLUME DOES NOT CONTAIN A HARDWARE BOOTABLE SYSTEM", and since I don't
+know how to mount disks under RSX-11 I left it at that.
+
+ scratch_disk_1123.rl02: 
+
+This does indeed seem to be something that was used for disk diagnostics: the
+boot block contains gubble, including (in the first RL11 block) lots of words
+with all ones, and a lot of 52525's.
+
+	Noel
+
+

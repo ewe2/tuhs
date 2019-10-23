@@ -1,0 +1,86 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 9 Jan 2014 13:48:04 -0500
+Subject: [TUHS] History of chown semantics
+In-Reply-To: <013901cf0d69$01e11890$05a349b0$@ronnatalie.com>
+References: <F174F3EE-BFED-4561-9A1A-B4D33D179513@tfeb.org>
+ <F617B430-57C4-4465-BD0D-E505525E7242@ronnatalie.com>
+ <CAC20D2MJRk8eyBayMJQ8yNWCPzSb+TPRMMcTKN=g4Gfn3zOyxg@mail.gmail.com>
+ <20140109181824.GA10087@dnied%tiscali.it>
+ <013901cf0d69$01e11890$05a349b0$@ronnatalie.com>
+Message-ID: <CAC20D2Obm-vsc5kz59DssCmw7pyw-X5WMBcLD3oYd50GTLX=CQ@mail.gmail.com>
+
+Right ...  tools like tar(1) called the system call directly,
+Which is why the restriction/check in the research family was done in the
+OS.
+The PWB kernel did not make the check - although V6 did:
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/sys/ken/sys4.c
+
+chown()
+{
+	register *ip;
+
+	if (!suser() || (ip = owner()) == NULL)
+		return;
+	ip->i_uid = u.u_arg[1].lobyte;
+	ip->i_gid = u.u_arg[1].hibyte;
+	ip->i_flag =| IUPD;
+	iput(ip);
+}
+
+
+
+Where as: PWB 1.0:
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=PWB1/sys/sys/os/sys4.c
+
+chown()
+{
+	register *ip;
+
+	if ((ip = owner()) == NULL)
+		return;
+	ip->i_uid = u.u_arg[1].lobyte;
+	ip->i_gid = u.u_arg[1].hibyte;
+	if(u.u_uid != 0)
+		ip->i_mode =& ~(ISUID|ISGID);
+	ip->i_flag =| IUPD;
+	iput(ip);
+}
+
+
+Clem
+
+
+On Thu, Jan 9, 2014 at 1:31 PM, Ron Natalie <ron at ronnatalie.com> wrote:
+
+> There's no real point in restricting the chown program if the system call
+> remains executable by non-root.
+>
+> -----Original Message-----
+> From: tuhs-bounces at minnie.tuhs.org [mailto:tuhs-bounces at minnie.tuhs.org]
+> On
+> Behalf Of Dario Niedermann
+> Sent: Thursday, January 9, 2014 1:18 PM
+> To: tuhs at minnie.tuhs.org
+> Subject: Re: [TUHS] History of chown semantics
+>
+> Il 09/01/2014 alle 15:56, Clem Cole ha scritto:
+>
+> > I agree with you, I always thought it was crazy [...]
+>
+> Maybe I'm missing something, but it seems easy enough to make the `chown'
+> program only executable by root.
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140109/1a469662/attachment.html>
+

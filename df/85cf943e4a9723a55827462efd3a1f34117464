@@ -1,0 +1,66 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Thu, 12 Jan 2017 21:39:41 +1000
+Subject: [TUHS] VFS: confusion (and an end)
+Message-ID: <20170112113941.GA23718@minnie.tuhs.org>
+
+Ok, the story so far. Berny wrote:
+
+    Here's the breakdown of SVR4 kernel lineage as I recall it. ...
+    From SunOS:
+    vnodes
+    VFS
+
+Dan Cross wrote:
+    > VFSSW                         <=== NO, this is from SunOS-4
+
+   Surely Berny meant the file system switch here, which could have come
+   from early system V, but originated in research Unix (8th edition?).
+
+Joerg Schilling wrote:
+
+    It is rather a part of the VFS interface that has first been completed
+    with SunOS-3.0 in late 1985.
+
+And this is where the confusion starts. Does "It" refer to FSS or VFS?
+
+I've just looked through some sources. The file system switch was in SysVR3:
+
+    uts/3b2/sys/mount.h:
+    /* Flag bits passed to the mount system call */
+    #define MS_RDONLY       0x1     /* read only bit */
+    #define MS_FSS          0x2     /* FSS (4-argument) mount */
+
+VFS was in SunOS 4.1.4:
+    sys/sys/vfs.h:
+    struct vfssw {
+        char            *vsw_name;      /* type name string */
+        struct vfsops   *vsw_ops;       /* filesystem operations vector */
+    };
+
+And VFS is in SysVR4:
+    uts/i386/sys/vfs.h:
+    typedef struct vfssw {
+        char            *vsw_name;      /* type name string */
+        int             (*vsw_init)();  /* init routine */
+        struct vfsops   *vsw_vfsops;    /* filesystem operations vector */
+        long            vsw_flag;       /* flags */
+    } vfssw_t;
+
+Interestingly, the "filesystem operations vector" comment also occurs
+in FreeBSD 5.3, NetBSD-5.0.2 and OpenBSD-4.6. Look for vector here:
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=FreeBSD-5.3/sys/sys/mount.h
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=NetBSD-5.0.2/sys/compat/sys/mount.h
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=OpenBSD-4.6/sys/sys/mount.h
+
+
+Larry wrote:
+    System Vr3 had something called the file system switch which is what
+    Berny is talking about. SunOS had virtual file system layer (VFS) and
+    that would be one of things ported to SVr4.
+
+which is consistent with everybody else.
+
+So now that we have consistency, let's move on.
+
+Cheers, Warren
+

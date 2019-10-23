@@ -1,0 +1,29 @@
+From: helbig@Informatik.BA-Stuttgart.DE (Wolfgang Helbig)
+Date: Sat, 7 Dec 2002 23:33:23 +0100 (MET)
+Subject: [TUHS] raise of interrupt level necessary
+Message-ID: <200212080035.gB80Z7t00512@bsd.korb>
+
+Hi,
+
+While studying the V6 kernel, I search for some rules as when to raise
+the interrupt priority level (IPL). I came up with something like this:
+A kernel process needs to raise the IPL if a change of data must be atomic and might 
+be accessed (not necessarily changed) by an IRS.
+
+In light of this rule, some raising of interrupts seem unnecessary:
+- In m40.s changes of the user space segmentation registers are bracketed by raising 
+and lowering the IPL, although these registers are never accessed by an ISR.
+  
+- Likewise, in m40.s, just before the trap routine checks the runrun flag and 
+restores r0, r1 and the user stackpointer, it raises the IPL. I can't see what 
+possibly should go wrong, if being interrupted while restoring the values.
+  
+I'd appreciate any help from someone with more experience in kernel programming.
+
+Greetings,
+
+Wolfgang Helbig
+
+
+
+

@@ -1,0 +1,39 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 11 Sep 2014 21:54:15 -0400 (EDT)
+Subject: [TUHS] Etymology of bc(1)
+Message-ID: <20140912015415.DB69E18C09E@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall <dave at horsfall.org>
+
+    > On the *nix systems to which I have access, bc(1) is a standalone
+    > program on FreeBSD and OSX, but pipes to dc(1) on OpenBSD. I cannot
+    > check my Penguin box (Ubuntu)
+
+Dude! Trying to answer questions about the origins of BC by looking at
+systems this late is like trying to learn Latin by studying Italian! :-)
+
+I looked at the Version 6 source, and it's a bunch of YACC code, but it pulls
+the same technique of using a pipe to an instance of DC, viz:
+
+	pipe(p);
+	if (fork()==0) {
+		close(1);
+		dup(p[1]);
+		close(p[0]);
+		close(p[1]);
+		yyinit(argc, argv);
+		yyparse();
+		exit();
+	}
+	close(0);
+	dup(p[0]);
+	close(p[0]);
+	close(p[1]);
+	execl("/bin/dc", "dc", "-", 0);
+
+There's likely even older versions than the V6 one, but that's the earliest
+source I have online on my PC for easy access.
+
+	Noel
+
+

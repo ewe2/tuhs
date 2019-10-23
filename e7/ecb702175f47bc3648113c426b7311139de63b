@@ -1,0 +1,50 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Thu, 9 Feb 2017 09:58:03 +0000
+Subject: [TUHS] Code bloat (was: How Unix brings people together,
+ or it's a small...)
+In-Reply-To: <C7E0FD3B-59FD-4E51-BCB9-01A14DB7FB99@planet.nl>
+References: <CAC20D2O8dXan9hX5Sv6LyBD6dEFPwpV5wYZJ_XsFCHtVw6Gb3Q@mail.gmail.com>
+ <930c52a0c279cdd7d44953aa403a504a8622bb83@webmail.yaccman.com>
+ <20170208025538.GE65698@eureka.lemis.com>
+ <CAH1jEzbpOUC2OFjZ9oHodg0DdzQUk2R+3XPdn0RgE9dX7yD5nA@mail.gmail.com>
+ <F2A7F638-CC2F-4D0E-B191-0F301DDDA46F@superglobalmegacorp.com>
+ <CAH1jEza0j2wLwOY7QpW=T0CMoseNmhmBV8Qp-5gU-W+buE1z2Q@mail.gmail.com>
+ <B747F0D5-A896-4088-A506-B7F63063DD21@planet.nl>
+ <CAH1jEzZqRPYenwzBbUwFVanA-NVvWMGzYiADVoAXCDOqnUrMrg@mail.gmail.com>
+ <CAH1jEzZ9d4ZEWMdx_R5_TZ4CFYFzrG-V83rS21S1z-LPC0fMCw@mail.gmail.com>
+ <C7E0FD3B-59FD-4E51-BCB9-01A14DB7FB99@planet.nl>
+Message-ID: <20170209095803.GF5418@yeono.kjorling.se>
+
+On 9 Feb 2017 10:19 +0100, from pnr at planet.nl (Paul Ruizendaal):
+> A TCP connection spends most of its time in the 'established' state. I
+> wonder if just putting the code for this state in the kernel and handling
+> only the state changes and other states in a daemon is perhaps the best
+> split on constrained hardware. I'm not aware of any historical
+> implementation having that design, so perhaps it is flawed thinking.
+
+Wouldn't the state change code need to be executable, even if it
+technically isn't in the kernel? I can see no _obvious_ reason why you
+_couldn't_ have a daemon handling state changes and non-established
+TCP connections, but I'm having a hard time seeing what it would save
+you in terms of code size. If anything, it seems like the code would
+need to be a little larger in total, because now you have two
+components interacting where previously there was just one component
+doing all of the work.
+
+One benefit I can see though would be to reduce the incidence of bugs
+in the established-state code; less code running privileged means less
+things to screw up so badly that the system panics (or scribbles over
+the wrong data). A crashed TCP daemon would be an annoyance, but would
+at least allow you to restart it or to reboot the system at leisure
+rather than having the whole system come to a screeching halt.
+
+You'd need some amount of synchronization either way, to prevent two
+connections changing state at the same time from stepping on each
+other's toes, but that would hardly be unheard of in the kernel of a
+multitasking OS...
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+                 “People who think they know everything really annoy
+                 those of us who know we don’t.” (Bjarne Stroustrup)
+

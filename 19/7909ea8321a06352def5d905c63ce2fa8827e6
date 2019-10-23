@@ -1,0 +1,98 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 9d176797
+	for <ml@inbox.vuxu.org>;
+	Sat, 27 Apr 2019 20:13:38 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6270E9B529; Sun, 28 Apr 2019 06:13:37 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3088693D2A;
+	Sun, 28 Apr 2019 06:13:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5093C93D2A; Sun, 28 Apr 2019 06:13:08 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id A0CAD93D27
+ for <tuhs@tuhs.org>; Sun, 28 Apr 2019 06:13:05 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id 899434422F; Sat, 27 Apr 2019 16:11:21 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20190427201121.899434422F@lignose.oclsc.org>
+Date: Sat, 27 Apr 2019 16:11:21 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] A question about ls(1)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sat, Apr 27, 2019 at 09:38:27AM -0600, Warner Losh wrote:
+  But I find this interesting, since the 8th edition was based on BSD 4.1c I
+  thought....
+
+`Based on' is an overstatement, except in the kernel.
+
+The system described in the 8th Edition manual (as noted in the
+past, there was only sort of a real V8 release) had a kernel
+that started as 4.1x BSD.  I'm not sure of the value of x.
+It had the Joy/Babaolgu paging code and the complicated changes
+to signals, and a lot of the gratuitous asms, but not a trace
+of the BSD networking API.  Neither was the BSD FFS present.
+
+Local additions included Dennis's original stream implementation,
+which completely replaced the old tty code and rewrote the drivers
+for serial-port devices.  The tty driver (responsible for cooked
+mode, interrupt and quit signals, and the like) was a stream
+module.  The BSD-style `new tty line discipline' was a separate
+module, for the few people who couldn't live without csh.
+
+Tom Killian's original version of /proc and Peter Weinberger's original
+network file system (neta) client were there.  These were accessed
+through a file system switch, also Peter's work.
+
+Instead of FFS, Peter made a simple speedup to the V7 file system:
+adding 64 to the minor device number meant the file system used 4KiB
+blocks.  The unused space at the end of the now-4KiB superblock was a
+bitmap of free blocks, allowing somewhat-smarter block allocation.
+
+There was a hacky implementation of TCP/IP which we didn't really use:
+4.Y BSD (I don't know the value of Y) protocol code, wrapped up to
+work as stream modules* and shoehorned in, with a custom API quite
+different from the BSD one.  The work was done by a summer student,
+Robert T. Morris, who later became rather famous for a smaller but
+rather more troublesome bit of network code.  Our production network
+was Datakit, which was also implemented as stream devices and modules
+(it was the network whose use inspired the stream design, in fact).
+
+[* Quite a while ago, someone asked how multiplexing was handled
+in the stream world.  I meant to write a reply but never did.  In
+a sentence, by a paired device driver and stream module.  If someone
+wants more details I'll be glad to write more about that.]
+
+That's just the kernel, though.  The user-mode world was largely
+descended from V7 rather than from BSD.  Most people used sh, which
+had been augmented a bit by Rob Pike (perhaps et al) to add functions
+and a simple external history mechanism (Tom Duff's idea, I think).
+wc had no uucp-dependent flags, and cat had no flags at all.  ls did
+sniff at whether standard output was a tty and put things in columns.
+
+Things mutated further as time went on, further diverging from and
+discarding aspects of the BSD origin.  (I can take credit or blame
+for a lot of that, though not all.)  But that happened later, and
+is reflected in the 9th and especially 10th editions of the manual.
+
+Norman Wilson
+Toronto ON

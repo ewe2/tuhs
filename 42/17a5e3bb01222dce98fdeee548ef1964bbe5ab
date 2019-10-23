@@ -1,0 +1,187 @@
+From tuhs-bounces@minnie.tuhs.org Mon Jun 25 03:04:19 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE,WEIRD_QUOTING autolearn=ham
+	autolearn_force=no version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ea5d4fe3
+	for <ml@inbox.vuxu.org>;
+	Mon, 25 Jun 2018 03:04:19 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5189A9EE01; Mon, 25 Jun 2018 13:04:18 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3FE469E5BF;
+	Mon, 25 Jun 2018 13:04:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3B80D9E5BF; Mon, 25 Jun 2018 13:04:03 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8366C9E5BE
+ for <tuhs@minnie.tuhs.org>; Mon, 25 Jun 2018 13:04:01 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id E917535E0B6; Sun, 24 Jun 2018 20:04:00 -0700 (PDT)
+Date: Sun, 24 Jun 2018 20:04:00 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: George Michaelson <ggm@algebras.org>
+Message-ID: <20180625030400.GA17529@mcvoy.com>
+References: <b6ef82de-739a-ed8e-0e91-3abfa2fb5f07@spamtrap.tnetconsulting.net>
+ <20180622192505.mfig_%steffen@sdaoden.eu>
+ <89e5ae21-ccc0-5c84-837b-120a1a7d9e26@spamtrap.tnetconsulting.net>
+ <20180623144959.M9byU%steffen@sdaoden.eu>
+ <ce6f617c-cf8e-63c6-8186-27e09c78020c@spamtrap.tnetconsulting.net>
+ <20180623223851.LcBjy%steffen@sdaoden.eu>
+ <09ee8833-c8c0-8911-751c-906b737209b7@spamtrap.tnetconsulting.net>
+ <AE998A8F-3541-41E6-87F3-266340768C26@bitblocks.com>
+ <42849F79-D132-4059-8A94-FFF8B141C49E@orthanc.ca>
+ <CAKr6gn0DDZg9vUZSkxYvCLWTPOxNRK72_7bNv5U5LrEEeOa7LQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKr6gn0DDZg9vUZSkxYvCLWTPOxNRK72_7bNv5U5LrEEeOa7LQ@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] mail (Re: off-topic list
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Jun 25, 2018 at 12:44:15PM +1000, George Michaelson wrote:
+> your email Lyndon, was uncannily like what I wanted to say. I think.
+> 
+> a) (n)MH is great
+> b) I can't live in one mail UI right now for a number of reasons.
+> Thats unfortunate
+> 3) integration of MH into pop/imap was abortive and requires effort.
+> If thats improved, I'd love to know
+
+I use rackspace for mcvoy.com but plain old mutt for reading it here
+and sending.  I use fetchmail to get the mail locally.  Works for me
+because mcvoy.com used to be a mail server and is still set up from
+those times to send mail.  Kind of hacky but rackspace does the spam
+filtering and I got sick of babysitting that.
+
+> 4) we stopped advancing the art (tm) for handling data via pipes and
+> grep-like workflows
+
+So the source management system I started, BitKeeper, has sort of an
+answer for the processing question.  It's a stretch but if you look 
+at it enough a mail message is a little like a commit, they both have
+fields.
+
+Below is an example of the little "language" we built for processing
+deltas in a revision history graph.  Some notes on how it works:
+
+	:SOMETHING: means take struct delta->SOMETHING and replace the
+	:SOMETHING: with that value.
+
+	Control statements begin with $, so $if (expr).
+	From awk we get $begin and $end (this whole language is very awk
+	like with what awk would consider a line we hand the language
+	a struct delta.)
+
+	We invented a $each(:MULTI_LINE_FILE:) {
+		:MULTI_LINE_FILE:
+	}
+	that is an interator, the variable in the body evaluates to 
+	the next line of the multi line thing.  Weird but it works.
+
+	$json(:FIELD:) json encodes the field.
+
+	"text" is just printed.
+
+	We gave you 10 registers/variables in $0 .. $9, they default to
+	false.
+
+This little script is running through each commit and printing out the
+information in json.  Examples after the script.
+
+It's important to understand that the $begin/end are run before/after
+the deltas and then the main part of the script is run once per delta,
+just like awk.
+
+# dspec-v2
+# The dspec used by 'bk changes -json'
+
+$begin {
+	"[\n"
+}
+
+$if (:CHANGESET: && !:COMPONENT_V:) {
+	$if($0 -eq 1) {
+		"\},\n"
+	}
+	"\{\n"
+	"  \"key\": \":MD5KEY:\",\n"
+	"  \"user\": \":USER:\",\n"
+	"  \"host\": \":HOST:\",\n"
+	"  \"date\": \":Dy:-:Dm:-:Dd:T:T::TZ:\",\n"
+	"  \"serial\": :DS:,\n"
+	"  \"comments\": \"" $each(:C:){$json{(:C:)}\\n} "\",\n"
+        $if (:TAGS:) {
+             "  \"tags\": [ "
+             $each(:TAGS:){:JOIN:"\""(:TAGS:)"\""}
+             " ],\n"
+        }
+        "  \"parents\": [ "
+            $if(:PARENT:){"\"" :MD5KEY|PARENT: "\""}
+            $if(:PARENT: && :MPARENT:){," "}
+            $if(:MPARENT:){"\"" :MD5KEY|MPARENT: "\""}
+            " ]\n"
+	${0=1}		 		# we need to close off the changeset
+}
+
+$end {
+	$if($0 -eq 1) {
+		"\}\n"
+	}
+	"]\n"
+}
+
+So here is human readable output:
+
+$ bk changes -1
+ChangeSet@1.2926, 2018-03-12 08:00:33-04:00, rob@bugs.(none)
+  L: Fix bug where "defaultx:" would be scanned as a T_DEFAULT
+  followed by a T_COLON. The "x" and anything else after
+  "default" and before the colon would be ignored.
+  
+  So if you ever had an option name that began with "default",
+  it wouldn't be scanned correctly.
+  
+  This bug was reported by user GNX on the BitKeeper user's forum
+  (Little language area).
+
+And here is the same thing run through that scrip above.
+
+$ bk changes -1 --json
+[
+{
+  "key": "5aa66be1MaS_1t5lQkNCflPexCwd2w",
+  "user": "rob",
+  "host": "bugs.(none)",
+  "date": "2018-03-12T08:00:33-04:00",
+  "serial": 11178,
+  "comments": "L: Fix bug where \"defaultx:\" would be scanned as a T_DEFAULT\nf
+ollowed by a T_COLON. The \"x\" and anything else after\n\"default\" and before 
+the colon would be ignored.\n\nSo if you ever had an option name that began with
+ \"default\",\nit wouldn't be scanned correctly.\n\nThis bug was reported by use
+r GNX on the BitKeeper user's forum\n(Little language area).\n",
+  "parents": [ "5a2d8748bf8TYIOquTa3CZInTjC7KQ" ]
+}
+]
+
+
+If you have read this far, maybe some ideas from this stuff could be used
+to get a sort of processing system for structured data.  You'd need a plugin
+for each structure but the harness itself could be reused.

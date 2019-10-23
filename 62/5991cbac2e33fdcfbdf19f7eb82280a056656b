@@ -1,0 +1,106 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2929cb73
+	for <ml@inbox.vuxu.org>;
+	Fri, 31 May 2019 19:14:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A59989B877; Sat,  1 Jun 2019 05:14:23 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CE8A89B680;
+	Sat,  1 Jun 2019 05:14:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 23ECE9B680; Sat,  1 Jun 2019 05:14:04 +1000 (AEST)
+X-Greylist: delayed 400 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 01 Jun 2019 05:14:03 AEST
+Received: from mail.nomadlogic.org (mail.nomadlogic.org [174.136.98.114])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 89FCC9B67F
+ for <tuhs@tuhs.org>; Sat,  1 Jun 2019 05:14:03 +1000 (AEST)
+Received: from [192.168.1.206] (cpe-23-243-162-239.socal.res.rr.com
+ [23.243.162.239])
+ by mail.nomadlogic.org (OpenSMTPD) with ESMTPSA id 63b7b5fa
+ TLS version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NO;
+ Fri, 31 May 2019 19:07:23 +0000 (UTC)
+To: david@kdbarto.org, The Eunuchs Hysterical Society <tuhs@tuhs.org>
+References: <975B93B6-AD7C-41B5-A14D-2DE4FEFAD3A6@kdbarto.org>
+From: Pete Wright <pete@nomadlogic.org>
+Message-ID: <78485efd-2cd3-a290-8142-48672bb847c5@nomadlogic.org>
+Date: Fri, 31 May 2019 12:07:22 -0700
+User-Agent: Mozilla/5.0 (X11; FreeBSD amd64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.0
+MIME-Version: 1.0
+In-Reply-To: <975B93B6-AD7C-41B5-A14D-2DE4FEFAD3A6@kdbarto.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+Subject: Re: [TUHS] Quotas - did anyone ever use them?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+
+On 5/30/19 6:49 AM, David wrote:
+> I think it was BSD 4.1 that added quotas to the disk system, and I was just wondering if anyone ever used them, in academia or industry. As a user and an admin I never used this and, while I thought it was interesting, just figured that the users would sort it out amongst themselves. Which they mostly did.
+>
+> So, anyone ever use this feature?
+
+Lots of interesting insights/stories on this thread so figured i'd throw 
+my hat in the ring and share a business anecdote...
+
+For quite a while i worked in the special effects/animation industry 
+where fortunately (for me) unix has a long and interesting history. One 
+secret abut the VFX world is that it's tremendously expensive with 
+relatively little financial upside.  in my experience it is the studios 
+who get most of the residual income from a blockbuster feature.  also a 
+crew for a AAA feature requires lots of human power, computers and 
+storage.  my shop frequently had 3-5 features in full production mode at 
+the same time so we were redlining all of our systems 24/7.
+
+So aside from the cost of maintaining a large renderfarm, unix/linux 3d 
+workstations, editing bays etc we also had an enormous NetApp footprint 
+to support all these systems.  Now artists love creating lots and lots 
+of high resolution images, and if they had their way there were be 
+unlimited storage so they'd never have to archive a shot to tape in the 
+event they need to reference it later.  But obviously that's not 
+reasonable from a financial perspective.
+
+Our solution was to make heavy use of storage quotas in our environment, 
+and then leverage quotas to provide per-department billing.  An 
+individual user was given something like 1GB by default (here they had 
+their mailbox, source-code, scripts etc), then the show they were booked 
+on was then given an allocation of say 1TB of storage.  The show would 
+then carve out this allocation in a per-shot basis.  This allowed us as 
+an organization to actually keep pretty detailed records on our costs 
+and unfortunately isn't something I've seen replicated well at lots of 
+startups flush with cash these days.
+
+I was briefly on the team responsible for managing these quotas for a 
+show and it was seriously an around the clock operation to keep our 
+disks from filling up.  One of the tricks was to figure out how much 
+space a rendered sequence of images would consume, factor in the 
+time-to-render a frame and attempt to line up your backup jobs to free 
+up enough space so the render nodes could write out the images to NFS.
+
+-pete
+
+-- 
+
+Pete Wright
+pete@nomadlogic.org
+@nomadlogicLA
+

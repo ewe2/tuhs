@@ -1,0 +1,60 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Mon, 20 Nov 2017 14:02:32 -0500
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <EC9F5ECB-D02A-435B-8AB6-93F484908F99@ccc.com>
+References: <20171119134109.59F3018C0F5@mercury.lcs.mit.edu>
+ <EC9F5ECB-D02A-435B-8AB6-93F484908F99@ccc.com>
+Message-ID: <CABH=_VTF7JYQF_Jv-_1CqNZjMe=+8O3_fzpNm5qjyunpb3T_4g@mail.gmail.com>
+
+On 11/19/17, Clem cole <clemc at ccc.com> wrote:
+> Noel is correct. DECtape (aka linctape) was a block oriented technology.
+> Traditional 1/2” mag tape which had 5, 7 or 9 tracks is a stream oriented
+> technology.
+
+DECtape/LINCtape was unusual as tape technology goes.  It was
+block-oriented, meaning that data were formatted as a sequence of
+fixed-length blocks (256 or 512 bytes, IIRC).  It was also
+block-replaceable--you could seek (fast-forward or rewind) to a
+particular block and rewrite it without destroying the data following
+the block.  DECtape also had a timing track and could be read at
+variable speed.  I heard one story from a PDP-10 operator who had
+critical data on a DECtape, but the motor on the drive broke down.  He
+was able to use a pencil to wind the tape, and because of the timing
+track the drive was able to read the tape successfully.
+
+> DECtape was used liked disk in the late 60s.  It was comparably cheap and
+> very reliable.  The joke was you could unroll it and run over it with a car
+> and then roll it back up and it would still work.
+
+Because of the block-oriented and block replacement feature, you could
+treat a DECtape as if it were a high-capacity disk with a horribly
+long seek time.
+
+> Magtape was traditional back up scheme.  Cost per bit was low and good for
+> archiving.  But you could only add to the end of a tape.  You can do funny
+> things like change recording techniques between files (not recommended as it
+> can confuse many tape controllers but is technically allowed and was done).
+
+I never used 5-track 1/2" magtape, and had only a brief acquaintance
+with 7-track tape.  9-track tape at 800 bits/inch used non-return to
+zero inverted (NRZI) encoding, 1600 bpi using phase encoding (PE), and
+6250 bpi using group coded recording (GCR).  Data were written as
+variable-length blocks, with a special tape mark indicating
+end-of-file.  The first block of a file was typically a file label.
+PE- and GCR-encoded tapes had a special "PE burst" or "GCR burst"
+record as the first block on the tape.  This allowed the tape drive to
+determine automatically the encoding for the tape.
+
+9-track magtape could have some peculiar quirks.  VMS Engineering at
+DEC once received a 6250 bpi tape from a customer containing a crash
+dump, but when they tried to read it, the tape had a completely
+different file on it.  The customer verified that they had sent the
+correct tape.  The VMS engineer mounted the tape on a different drive,
+and lo and behold, the crash dump was on the tape!  It turned out that
+the first tape drive was out of adjustment, missed the GCR burst, and
+read the tape as 800 bpi NRZI.  The 6250 bpi crash dump had been
+recorded on top of an earlier 800 bpi file, but the old file was still
+readable at 800 bpi.
+
+-Paul W.
+

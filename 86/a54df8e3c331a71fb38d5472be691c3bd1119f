@@ -1,0 +1,364 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id b593f0d3
+	for <ml@inbox.vuxu.org>;
+	Wed, 10 Jul 2019 00:29:12 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DCCBF9488E; Wed, 10 Jul 2019 10:29:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 10110947D8;
+	Wed, 10 Jul 2019 10:28:56 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=mhorton-net.20150623.gappssmtp.com header.i=@mhorton-net.20150623.gappssmtp.com header.b="n+FT6jPH";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1A7B6947D8; Wed, 10 Jul 2019 10:28:55 +1000 (AEST)
+Received: from mail-pf1-f180.google.com (mail-pf1-f180.google.com
+ [209.85.210.180])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6A38D947D5
+ for <tuhs@minnie.tuhs.org>; Wed, 10 Jul 2019 10:28:54 +1000 (AEST)
+Received: by mail-pf1-f180.google.com with SMTP id g2so188537pfq.0
+ for <tuhs@minnie.tuhs.org>; Tue, 09 Jul 2019 17:28:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mhorton-net.20150623.gappssmtp.com; s=20150623;
+ h=subject:to:cc:references:from:message-id:date:user-agent
+ :mime-version:in-reply-to:content-language;
+ bh=vF1ZO9Y21z/xcQqXPg4EGkSxMYuv1OgEf9b0VCD3sig=;
+ b=n+FT6jPH8ypXK7PbYhiQGyVS8zZX9w7b0L6exhkR8CQl5RbGP2WYeH58LmmIyAlR8S
+ XIA1dubRVHnmbk6JiPKfzj0idEGxNMH9vP0pchfMrxJTTRUfj8XZUZZyhPa64cs0HRXH
+ wq/4JioyOQu6uJ2mulqKKr2ee66dKLdJWnQ0Abeh0gZgnVUVOdcWK0smlmhEQIiSuqIn
+ lCk5/bD4NlkiKjLQjVIr7/oLESkGfHvhJqei8WgVDzoALg4Xy0HnWUie8fTw2p1Jwfh8
+ FD1RNTeA50Lu0S3ACU4TGdc49Q+pH2Es3+VFmmOdaysirQ03JTDDb+3EWTceXkTWKOJk
+ oA0g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+ :user-agent:mime-version:in-reply-to:content-language;
+ bh=vF1ZO9Y21z/xcQqXPg4EGkSxMYuv1OgEf9b0VCD3sig=;
+ b=od1rzB9vFLjWNN0bAomI/spyXET92eILJpZbPo0S9tShP3L8vp3H+Ra4bBWmcC6gj8
+ 8IykyHqdwQ0PAJPJJ3I915f9v/J4FpcCwzRn1hSfQcFYqKEXBy6Edtb0qsSbtpng19U2
+ 5HAX21lmELQhHA89E9yYJtsEFMxzxSJs9OUUTRtp+VETk+KXFeunkaV2H53xhU6PueIW
+ gs1cOyHwFxi3D4ZTVykWZx+Qpb7OWGb1dBKiECdM1lVxHQ/fDT3LR934VrZVlqvmY3cr
+ dKECrYw5HPm05jY48ZwSUADOsZnRtzTH/RTOIAYZjZMJ8P7c6l7B0+aB2t3UdYN2TYse
+ Ecmg==
+X-Gm-Message-State: APjAAAUtZoDh1M7hMaOot6Vb3TQxpth+4/ZndlgG9VDBqWDVguyghSn6
+ 0YzU1bLS6DI5fg8D7of1VCtTbPqM
+X-Google-Smtp-Source: APXvYqz4ZxHw/5g6ITV/Xm+lZ22bLt981eOtB2X+ugoW5EHTu7nK+2COgPI3RzwJp5sLQxR/VpgQEQ==
+X-Received: by 2002:a17:90a:8c06:: with SMTP id
+ a6mr3248209pjo.45.1562718533525; 
+ Tue, 09 Jul 2019 17:28:53 -0700 (PDT)
+Received: from [192.168.1.12] (ip72-197-202-72.sd.sd.cox.net. [72.197.202.72])
+ by smtp.gmail.com with ESMTPSA id
+ o16sm218311pgi.36.2019.07.09.17.28.52
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Tue, 09 Jul 2019 17:28:52 -0700 (PDT)
+To: Dan Cross <crossd@gmail.com>
+References: <c43a0f17-276e-d023-4cf2-d42f072b05f6@mhorton.net>
+ <03f3d34a-bc7f-4b26-559e-101ccd614ef3@mhorton.net>
+ <CAEdTPBcLginUW5m0pgD-VSgPEARJ+t2OT-yg=u91vuHv+yh3bg@mail.gmail.com>
+ <bfcab0c2-cde4-4540-b155-59d8eb5758b6@www.fastmail.com>
+ <CAEdTPBcGjFN-=hmZwfyRSzXis95kK8sZXQ4zNDUF3ywJTg_bcg@mail.gmail.com>
+ <CAEdTPBdKUUuNushJAEt_himoPf___kADN3ZEVir19LyQKwwODA@mail.gmail.com>
+ <30de4da1-be33-b546-a277-37afe5632e6e@mhorton.net>
+ <ecd73119-45fa-7108-d59c-6833e4e0dabc@spamtrap.tnetconsulting.net>
+ <CAEdTPBe8fmw9kyUcAxte1oQzWQ6830+7M9NuR5EN-_HQcm59Fg@mail.gmail.com>
+ <CAEdTPBcOk+vYnYO8RgVF941cjxfqjBnDs1400XbmYSk+FK_bcA@mail.gmail.com>
+ <5cb16efc-4c88-9750-a5d0-2ef20dd79746@mhorton.net>
+ <CAEoi9W4Fj9qEXwsFwYsW75Z8+cr+P00oWQRO-1g9j30TWo9Rrw@mail.gmail.com>
+From: Mary Ann Horton Gmail <mah@mhorton.net>
+Message-ID: <5d09495c-7f36-e20e-965d-b05a2105df85@mhorton.net>
+Date: Tue, 9 Jul 2019 17:28:52 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.2
+MIME-Version: 1.0
+In-Reply-To: <CAEoi9W4Fj9qEXwsFwYsW75Z8+cr+P00oWQRO-1g9j30TWo9Rrw@mail.gmail.com>
+Content-Type: multipart/alternative;
+ boundary="------------E5ECF71B6E43BB21FDEF0E87"
+Content-Language: en-US
+Subject: Re: [TUHS] Floppy to modern files for Usenet maps
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This is a multi-part message in MIME format.
+--------------E5ECF71B6E43BB21FDEF0E87
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+Hi, Dan,
+
+My plane gets into SeaTac at 11 AM Wed. I'm still at home and can still 
+print these tonight.
+
+Thanks,
+
+     Mary Ann
+
+On 7/9/19 5:06 PM, Dan Cross wrote:
+> Amazingly, I got `leroy` to build on a modern(ish) system. Mary Ann, 
+> are you in Renton right now?
+>
+> On Tue, Jul 9, 2019 at 7:23 PM Mary Ann Horton Gmail <mah@mhorton.net 
+> <mailto:mah@mhorton.net>> wrote:
+>
+>     Thanks, Henry, you found my mistake.
+>
+>     I've corrected the links to the Sept 1983 maps and verified that
+>     the date in the map is September.  Would you please rerun that one? :)
+>
+>     The extra icons in the legend are nice!
+>
+>     Yes, I agree doing this on a plotter would be better. I recall
+>     Brian Reid doing just that as a product demo of an HP plotter at
+>     one Usenix. I had such a poster, I was going to bring it this week
+>     but I can't find it. Now I know where he got his data...
+>
+>     Thanks,
+>
+>         Mary Ann
+>
+>     On 7/9/19 3:02 PM, Henry Bent wrote:
+>>     On Tue, 9 Jul 2019 at 17:46, Henry Bent <henry.r.bent@gmail.com
+>>     <mailto:henry.r.bent@gmail.com>> wrote:
+>>
+>>         On Tue, 9 Jul 2019 at 17:39, Grant Taylor via TUHS
+>>         <tuhs@minnie.tuhs.org <mailto:tuhs@minnie.tuhs.org>> wrote:
+>>
+>>             On 7/9/19 2:54 PM, Mary Ann Horton Gmail wrote:
+>>             > Any chance you could do the same for this file? It
+>>             looks smaller, but
+>>             > it's a couple weeks newer so it's possible it's somehow
+>>             better.
+>>
+>>             While searching for the 2nd article for the May, I found
+>>             the following
+>>             articles:
+>>
+>>             Link - Usenet graphic map of North America, part 1 of 2
+>>               -
+>>             https://groups.google.com/forum/message/raw?msg=net.sources/ZoPcfdMPIzQ/pEPpCV6m77QJ
+>>
+>>             Link - Usenet graphic map of North America, part 2 of 2
+>>               -
+>>             https://groups.google.com/forum/message/raw?msg=net.sources/cE_tkMNKZ_U/JoR7KGTJ_3YJ
+>>
+>>             The dates of these articles are September 21, 1983.
+>>
+>>
+>>
+>>             -- 
+>>             Grant. . . .
+>>             unix || die
+>>
+>>
+>>         Thanks Grant, Mary Ann found what I needed and I'm working
+>>         away.  Somehow in going back over what I used to build a
+>>         working setup I managed to break my working setup, so I'm
+>>         trying to fix that to get the next set of files output.
+>>
+>>         -Henry
+>>
+>>
+>>     OK, here's the second set of Usenet maps, again in raw plot and
+>>     SVG form.  The only difference with the "g" maps, produced with
+>>     the gmap.leroy script, seems to be the addition of a few
+>>     graphical icons.
+>>
+>>     https://drive.google.com/file/d/1Y6PU1NJv8mdVr1SQsQUDnUjNlq6N2bvv/view?usp=sharing
+>>     https://drive.google.com/file/d/1JpbMTzhmJD-amLCpYOWMPQCHyCsrC_ck/view?usp=sharing
+>>     https://drive.google.com/file/d/1WRhiPTj1URUGNuxCh-8ERuK0FnQ_i1tk/view?usp=sharing
+>>     https://drive.google.com/file/d/1plhCfaP1Uyxu5wAgtQEyPEA88r8JLHIW/view?usp=sharing
+>>
+>>     I'm pretty sure this is how they would have looked originally,
+>>     cluttered as they are.  The nice thing about them being in a
+>>     vector format, though, is that you could blow them up to poster
+>>     size if you wanted to.
+>>
+>>     -Henry
+>
+
+--------------E5ECF71B6E43BB21FDEF0E87
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <p>Hi, Dan,</p>
+    <p>My plane gets into SeaTac at 11 AM Wed. I'm still at home and can
+      still print these tonight.</p>
+    <p>Thanks,</p>
+    <p>    Mary Ann<br>
+    </p>
+    <div class="moz-cite-prefix">On 7/9/19 5:06 PM, Dan Cross wrote:<br>
+    </div>
+    <blockquote type="cite"
+cite="mid:CAEoi9W4Fj9qEXwsFwYsW75Z8+cr+P00oWQRO-1g9j30TWo9Rrw@mail.gmail.com">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <div dir="ltr">Amazingly, I got `leroy` to build on a modern(ish)
+        system. Mary Ann, are you in Renton right now?</div>
+      <br>
+      <div class="gmail_quote">
+        <div dir="ltr" class="gmail_attr">On Tue, Jul 9, 2019 at 7:23 PM
+          Mary Ann Horton Gmail &lt;<a href="mailto:mah@mhorton.net"
+            moz-do-not-send="true">mah@mhorton.net</a>&gt; wrote:<br>
+        </div>
+        <blockquote class="gmail_quote" style="margin:0px 0px 0px
+          0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">
+          <div bgcolor="#FFFFFF">
+            <p>Thanks, Henry, you found my mistake.</p>
+            <p>I've corrected the links to the Sept 1983 maps and
+              verified that the date in the map is September.  Would you
+              please rerun that one? :)</p>
+            <p>The extra icons in the legend are nice!</p>
+            <p>Yes, I agree doing this on a plotter would be better. I
+              recall Brian Reid doing just that as a product demo of an
+              HP plotter at one Usenix. I had such a poster, I was going
+              to bring it this week but I can't find it. Now I know
+              where he got his data...</p>
+            <p>Thanks,</p>
+            <p>    Mary Ann<br>
+            </p>
+            <div class="gmail-m_2573274473463005595moz-cite-prefix">On
+              7/9/19 3:02 PM, Henry Bent wrote:<br>
+            </div>
+            <blockquote type="cite">
+              <div dir="ltr">
+                <div dir="ltr">On Tue, 9 Jul 2019 at 17:46, Henry Bent
+                  &lt;<a href="mailto:henry.r.bent@gmail.com"
+                    target="_blank" moz-do-not-send="true">henry.r.bent@gmail.com</a>&gt;
+                  wrote:<br>
+                </div>
+                <div class="gmail_quote">
+                  <blockquote class="gmail_quote" style="margin:0px 0px
+                    0px 0.8ex;border-left:1px solid
+                    rgb(204,204,204);padding-left:1ex">
+                    <div dir="ltr">On Tue, 9 Jul 2019 at 17:39, Grant
+                      Taylor via TUHS &lt;<a
+                        href="mailto:tuhs@minnie.tuhs.org"
+                        target="_blank" moz-do-not-send="true">tuhs@minnie.tuhs.org</a>&gt;
+                      wrote:<br>
+                      <div class="gmail_quote">
+                        <blockquote class="gmail_quote"
+                          style="margin:0px 0px 0px
+                          0.8ex;border-left:1px solid
+                          rgb(204,204,204);padding-left:1ex">On 7/9/19
+                          2:54 PM, Mary Ann Horton Gmail wrote:<br>
+                          &gt; Any chance you could do the same for this
+                          file? It looks smaller, but <br>
+                          &gt; it's a couple weeks newer so it's
+                          possible it's somehow better.<br>
+                          <br>
+                          While searching for the 2nd article for the
+                          May, I found the following <br>
+                          articles:<br>
+                          <br>
+                          Link - Usenet graphic map of North America,
+                          part 1 of 2<br>
+                            - <br>
+                          <a
+href="https://groups.google.com/forum/message/raw?msg=net.sources/ZoPcfdMPIzQ/pEPpCV6m77QJ"
+                            rel="noreferrer" target="_blank"
+                            moz-do-not-send="true">https://groups.google.com/forum/message/raw?msg=net.sources/ZoPcfdMPIzQ/pEPpCV6m77QJ</a><br>
+                          <br>
+                          Link - Usenet graphic map of North America,
+                          part 2 of 2<br>
+                            - <br>
+                          <a
+href="https://groups.google.com/forum/message/raw?msg=net.sources/cE_tkMNKZ_U/JoR7KGTJ_3YJ"
+                            rel="noreferrer" target="_blank"
+                            moz-do-not-send="true">https://groups.google.com/forum/message/raw?msg=net.sources/cE_tkMNKZ_U/JoR7KGTJ_3YJ</a><br>
+                          <br>
+                          The dates of these articles are September 21,
+                          1983.<br>
+                          <br>
+                          <br>
+                          <br>
+                          -- <br>
+                          Grant. . . .<br>
+                          unix || die<br>
+                          <br>
+                        </blockquote>
+                        <div><br>
+                        </div>
+                        <div>
+                          <div dir="ltr">
+                            <div>Thanks Grant, Mary Ann found what I
+                              needed and I'm working away.  Somehow in
+                              going back over what I used to build a
+                              working setup I managed to break my
+                              working setup, so I'm trying to fix that
+                              to get the next set of files output.</div>
+                            <div><br>
+                            </div>
+                            <div>-Henry<br>
+                            </div>
+                            <div><br>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </blockquote>
+                  <div><br>
+                  </div>
+                  <div>OK, here's the second set of Usenet maps, again
+                    in raw plot and SVG form.  The only difference with
+                    the "g" maps, produced with the gmap.leroy script,
+                    seems to be the addition of a few graphical icons.<br>
+                  </div>
+                  <div><br>
+                  </div>
+                  <div><a
+href="https://drive.google.com/file/d/1Y6PU1NJv8mdVr1SQsQUDnUjNlq6N2bvv/view?usp=sharing"
+                      target="_blank" moz-do-not-send="true">https://drive.google.com/file/d/1Y6PU1NJv8mdVr1SQsQUDnUjNlq6N2bvv/view?usp=sharing</a><br>
+                    <a
+href="https://drive.google.com/file/d/1JpbMTzhmJD-amLCpYOWMPQCHyCsrC_ck/view?usp=sharing"
+                      target="_blank" moz-do-not-send="true">https://drive.google.com/file/d/1JpbMTzhmJD-amLCpYOWMPQCHyCsrC_ck/view?usp=sharing</a><br>
+                    <a
+href="https://drive.google.com/file/d/1WRhiPTj1URUGNuxCh-8ERuK0FnQ_i1tk/view?usp=sharing"
+                      target="_blank" moz-do-not-send="true">https://drive.google.com/file/d/1WRhiPTj1URUGNuxCh-8ERuK0FnQ_i1tk/view?usp=sharing</a><br>
+                    <a
+href="https://drive.google.com/file/d/1plhCfaP1Uyxu5wAgtQEyPEA88r8JLHIW/view?usp=sharing"
+                      target="_blank" moz-do-not-send="true">https://drive.google.com/file/d/1plhCfaP1Uyxu5wAgtQEyPEA88r8JLHIW/view?usp=sharing</a></div>
+                  <div><br>
+                  </div>
+                  <div>I'm pretty sure this is how they would have
+                    looked originally, cluttered as they are.  The nice
+                    thing about them being in a vector format, though,
+                    is that you could blow them up to poster size if you
+                    wanted to.<br>
+                  </div>
+                  <div><br>
+                  </div>
+                  <div>-Henry<br>
+                  </div>
+                </div>
+              </div>
+            </blockquote>
+          </div>
+        </blockquote>
+      </div>
+    </blockquote>
+  </body>
+</html>
+
+--------------E5ECF71B6E43BB21FDEF0E87--

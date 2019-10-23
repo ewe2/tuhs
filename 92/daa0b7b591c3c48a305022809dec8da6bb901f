@@ -1,0 +1,45 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 4 May 2008 11:03:52 +1000
+Subject: [Unix-jun72] Dealing with 0407 a.outs in the V1 kernel
+In-Reply-To: <2901.1209825347@mini>
+References: <2901.1209825347@mini>
+Message-ID: <20080504010352.GA14058@minnie.tuhs.org>
+
+On Sat, May 03, 2008 at 10:35:47AM -0400, Brad Parker wrote:
+> And it runs, but nothing happens.  I have not debugged it much.  Wish we
+> had a working v1 as.
+
+I think getting the V1 kernel to grok 0407 a.outs should be easier. Here are
+snippets from the V1 and V2 a.out man pages:
+
+1st Edition                               2nd Edition
+-----------                               -----------
+The header always contains 6 words:       The header always contains 8 words:
+ 1  a "br .+14" instruction [205(8)]       1  a "br .+20" instruction [207(8)]
+ 2  the size of the program text           2 the size of the program text
+ 3  the size of the symbol table           3 the size of the initialised data
+ 4  the size of the relocation bits area   4 the size of the uninit (bss) data
+ 5  the size of a data area                5 the size of the symbol table
+ 6  a zero word, unused at present         6 the entry location, always 0
+                                           7 stack size required, always 0
+                                           8 a flag indicating relocation bits
+                                             have been suppressed
+
+
+When I wrote the Apout support for V1 and V2, I found that all of an 0405
+a.out was loaded into memory including the header, but the 0407 a.out is
+loaded into memory MINUS the 8-word header.
+
+So, I'm guessing, in the kernel's sysexec: code, where it does
+
+        cmp     core,$405       / br .+14 is first instruction if file is
+                                / standard a.out format
+
+we have to add a section that recognises 0407, adds up the size of text,
+data and bss (words 2, 3, 4), saves that in u.count, and loads the
+rest of the a.out into memory but with the 8-word header removed.
+
+Cheers,
+	Warren
+
+

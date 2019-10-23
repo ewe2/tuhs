@@ -1,0 +1,68 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Thu, 25 May 2017 21:31:03 +0200
+Subject: [TUHS] Early Unix Spider network
+In-Reply-To: <mailman.880.1495676169.3779.tuhs@minnie.tuhs.org>
+References: <mailman.880.1495676169.3779.tuhs@minnie.tuhs.org>
+Message-ID: <DC29453D-8C50-4A35-9373-7CD3840E756E@planet.nl>
+
+
+>> It is a paper copy, but I can make a scan for you.
+> 
+> That makes it sounds like it might not be possible to put it online?
+> What's the exact title, so I can look and see if it's already online?
+> I'm pretty sure I've got a hardcopy of some Spider thing, but it would
+> probably take me a while to find it... ;-)
+
+The report I have is:
+"SPIDER-a data communication experiment", Tech Report 23 , Bell Lab, 1974.
+I did not find it online, but it may be out there somewhere.
+
+I think it can be public now, but doing some checks.
+
+> OK, the only one I have is 'nfs'. Here's the source, and man page:
+> 
+>  http://ana-3.lcs.mit.edu/~jnc/tech/unix/s2/nfs.a
+>  http://ana-3.lcs.mit.edu/~jnc/tech/unix/man6/nfs.6
+
+Many thanks! There is some puzzling stuff in there that I'd like to
+figure out, but that is easier to discuss once the report is online.
+
+Also, it turns out that the TIU driver was in Warren's repo all along:
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/nsys/dmr/tdir/tiu.c
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/man/man4/tiu.4
+It's fun to read that the V4 man page says "The precise nature of the
+UNIX interface has not been defined yet." and Noel's version says:
+"The precise nature of the UNIX interface is defined elsewhere." (yet
+the dates are the same!).
+
+Some things are surprising (to me, at least):
+
+First of all, opening a connection to the File Store is a single open on
+data channel 1:
+http://chiselapp.com/user/pnr/repository/Spider/artifact/854a591c0e7a3a54?ln=26
+I would expected the code to first have sent a connection request to the
+switch on control channel 1. Perhaps the File Store was an integral part
+of the switch/router (a Tempo minicomputer 
+ftp://bitsavers.informatik.uni-stuttgart.de/pdf/tempoComputers/TEMPO-1_ad_Nov69.pdf)
+with channel 1 functionality hardwired.
+
+Next, the code has a hackish form of non-blocking I/O:
+http://chiselapp.com/user/pnr/repository/Spider/artifact/55ee75831bd98d6c?ln=35,37
+I'm puzzled about the alarm() sys call. That did not exist in 1973 -- or did it
+only exist in Bell Labs private builds?
+
+The code calls snstat(), for instance here:
+http://chiselapp.com/user/pnr/repository/Spider/artifact/55ee75831bd98d6c?ln=38
+That seems to be a sys call to here:
+http://chiselapp.com/user/pnr/repository/Spider/artifact/2c7d65073a7cb0a5?ln=474,524
+Could that be the tiu sys call (#45) in the sysent.c table for V4-V6?
+
+
+
+
+
+
+
+
+
+

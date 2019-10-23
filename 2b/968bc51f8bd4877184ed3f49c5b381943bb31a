@@ -1,0 +1,76 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Wed, 25 Nov 2015 11:14:51 +0100
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <5654FC2E.9010207@bitsavers.org>
+References: <CAH1jEzYW9DBrSE0A=NnREq8qyq6vOQ6nWN6d-dwEa3mp1r20Gw@mail.gmail.com>
+ <26595.1448268040@cesium.clock.org> <5654FC2E.9010207@bitsavers.org>
+Message-ID: <20151125111451.Horde.YYentpTkevlAUuLEIvnGxYQ@avocado.salatschuessel.net>
+
+
+Al Kossow <aek at bitsavers.org> wrote:
+
+> On 11/23/15 12:40 AM, Erik E. Fair wrote:
+>> The undergrads who used that system to learn Unix ported many
+>> a BSD
+>> utility to that system (at least the ones that weren't too RAM-hungry),
+>> starting with BerkNet so we could move files around easily & have E-mail.
+>>
+>>
+>
+> That reminds me that you are going to run into utilities that use the
+> overlaying ld that jumps through hoops to get large programs (vi) to  
+> run in a 16 bit address space.
+
+Good point. I was also thinking if 2.11 is realy the right choice to use
+for porting. From what I understood:
+
+- The PDP11 can only access up to 64KB address space.
+- 2.11 uses overlay to "show" and "hide" memory into this 64K address
+   space.
+
+A Z8001 can address up to 128 segments of 64KB. Means, a single array can
+only be up to 64KB, but you can have 8MB of memory per "section". My system
+has 3 MMUs while one is dedicated to the code section and one to the data
+section. So my Code section can be max up to 8MB and my data section can be
+up to additional 8MB. Currently my system has up to 5.5MB of RAM (but can
+be upgraded to 16MB easily)
+
+I was thinking if 4.3 BSD would be better to port as the whole overlay logic
+which is implemented in 2.11 could make 2.11 maybe to complex to port? I
+mean, all this overlay logic would not be needed for the Z8001 and it maybe
+would not even work. (remember - I plan to use my existing SYSIII compiler
+which knows nothing about overlaying!)
+
+What I understand for 4.3 BSD is, that it is meant to run on machines with
+a memory configuration where the memory is adressable in "one block" which
+is of course not true for the Z8001. But - the compiler/assembler handles
+all this adressing for C code so why should it be imported on how the is
+addressed internaly?
+
+Additionaly, my system has NO floating point support. The current SYSIII
+uses a lengthy floating point emulation Assembler Source to "work around"
+that:
+https://github.com/OlliL/P8000/blob/master/WEGA/src/uts/conf/fpe.s
+
+I saw, that 2.11 also has some FPU-emulation. What about 4.3?
+
+Could 4.3 be a better choice? If so - which 4.3 should I use?
+
+In general - I'm looking for a good target OS. It should be not too
+complex (-> "modern") but should provide a TCP/IP stack which is my
+main motivation in porting at all.
+
+
+> I'll dig through my archives and see if there was a Z8000 version of pcc
+> in the MIT compiler kit.
+
+That would be great - maybe you could also answer my private mail about
+the Onyx C8002 I sent you some days ago ;)
+The compilers for Z8000 I found so far where either able to address 64K
+only, or where able to only generate COFF-format objects which I can't
+link on my SYSIII...
+
+
+Oliver
+
+

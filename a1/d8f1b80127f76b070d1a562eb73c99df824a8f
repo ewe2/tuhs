@@ -1,0 +1,61 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Wed, 30 Apr 2008 20:21:20 +1000
+Subject: [Unix-jun72] Disassembler in progress
+Message-ID: <20080430102120.GA84492@minnie.tuhs.org>
+
+Guys, I'm writing a PDP-11 a.out disassember. I think it will be useful for
+a couple of reasons:
+
+ - we will be able to convert the extant 1972 binaries back into some form
+   of source code. It won't be as good as the real thing, but it will be
+   better than the binary.
+ - we have some source code in fragmentary form on the s1 tape, see
+   http://minnie.tuhs.org/UnixTree/1972_stuff/. Some of the fragments
+   are identifiable, some are not. We might be able to use the
+   diassembled binaries to identify some of the fragments, and even
+   reconstruct a hybrid original/diassembled version of the source
+   for some of the 1972 applications.
+
+Right now, here's what I've got: disassembly of the top of 1972 ls:
+
+    sys        break: 00
+    mov        $01,044260
+    mov        sp,r5
+    mov        (r5)+,043732
+    tst        (r5)+
+    dec        043732
+    mov        043732,043734
+    bgt        040056
+    mov        $042542,r5
+    mov        (r5)+,r4
+    cmpb        (r4)+,$055
+    bne        040174
+    dec        043734
+
+and the top of the frag19 file:
+
+        sys     break; end+512.
+        mov     $1,obuf
+        mov     sp,r5
+        mov     (r5)+,count
+        tst     (r5)+
+        dec     count
+        mov     count,ocount
+        bgt     loop
+        mov     $dotp,r5
+loop:
+        mov     (r5)+,r4
+        cmpb    (r4)+,$'-
+        bne     1f
+        dec     ocount
+
+At the moment it's a 1-pass disassembler. I want to make it 2-pass: on the
+first pass I will try to identify labels for branches, functions, strings and
+variable locations (and given them arbitrary names); on the second pass
+I'll print out the instructions with reference to the labels.
+None of the binaries have symbol tables, unfortunately.
+
+It's a start, anyway.
+	Warren
+
+

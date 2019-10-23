@@ -1,0 +1,90 @@
+From: szigi@ik.bme.hu (SZIGETI Szabolcs)
+Date: Mon, 8 Jul 2002 15:52:34 +0200
+Subject: [TUHS] Re: Porting Unix v6 to i386
+References: <20020707154509.A172@muppet.labs.de> <200207080109.g68193F96557@minnie.tuhs.org> <20020708123307.A160@muppet.labs.de>
+Message-ID: <001a01c22686$b6d28bc0$26f34298@magosix>
+
+> > My apologies, I had forgotten to import it. It's now available
+> > at http://www.tuhs.org/Archive/Other/V6on286
+> >
+> > with the mirror sites to follow soon.
+>
+> Great!
+> Now it's time to figure out how to compile this stuff.
+
+Hi,
+
+
+Some hints:
+
+First of all, the code is currently broken. Something is wrong, and it will
+not be able to mount the root fs or something, but shouldn't be hard to fix,
+because it used to work, and i did something wrong when playing with the
+code some years ago, with no backup to revert to.
+
+Originally, I used the commnad line tools of Borland C++ 3.0 to compile. You
+need Turbo Assembler, so the Borland C++ 1.0, which is freely available from
+Borland as "antique software" is not enough, you'll need the professional
+version at least, because it has the command line assembler.
+
+There is a top level makefile, which will create UN.EXE, this is the unix
+kernel. You run it under plain MSDOS, it will switch to protected mode, and
+with shift-esc it will return to DOS (do a sync before !). Probably it
+wouldn't be hard to make it work without DOS as a boot loader :-), but i
+never did it.
+
+If compiled with -DSTANDSH, the kernel will be built with a built-in shell
+(see KEN/UPROC.C for the command), that can be used to do some basic setup.
+It will for example create the /dev/tty entries on a blank root disk. (You
+still need the mkfs utility under dos to make a blank disk). I suggest to
+use a floppy as a root disk for initial trials.
+If you omit STANDSH, it will look for /etc/init to run.
+
+
+On the directory layout:
+CONF contains c.c, the device switch table
+DMR contains most of the device drivers
+H contains the kernel header files
+INCLUDE - the user header files
+KEN - rest of the kernel
+
+The low level kernel code is very ugly, as it evolved from experimenting
+with protected mode. There are lots of things, that i'm not proud of :-)
+
+SRC/CLIB0 - the C library
+SRC/SYSC - the syscall user side interface
+SRC/UTIL - the utilities and such, most should work
+UTIL - MSDOS utils to compile
+
+In the UTIL directory, there are the following utlities:
+
+c2a - used to compile the kernel, it search-and-replaces some stuff in the
+assemlby code, i donát exactly remember why, but it has to do something with
+the segmenent names.
+
+exe2v6 - utility to convert MSDOS exe program to a.out. See
+SRC/UTIL/Makefile for how to make such an exe. The programs have a built in,
+fixed size stack, because Borland C had problems separating code and stack
+segment. It could brobably be fixed, but i didn't do it, instead opted for
+fixed size stack, adjustable at compile time.
+
+exetr - it can transfer a file to unix via a floppy drive, i donát remember
+how it works, i think you put one file to a floppy, and use the kernel-shell
+to write it to a file-system. It is a really ugly idea :-)
+
+dumpfs - it is broken, it was intended to back-up a filesystem
+
+mkfs - MSDOS mode mkfs, answer the questions, you'll get the filesystem.
+There is no sanity check whatsoever, so be careful, it can screw your
+harddrive, if given wrong sector numbers.
+
+
+Have fun with it, and if you have questions, feel free to write me.
+
+Regards,
+
+    Szabolcs
+
+
+
+

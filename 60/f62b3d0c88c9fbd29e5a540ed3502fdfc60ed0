@@ -1,0 +1,128 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id c819f399
+	for <ml@inbox.vuxu.org>;
+	Sat, 12 Jan 2019 11:14:09 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0BA6D9467B; Sat, 12 Jan 2019 21:14:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9207994666;
+	Sat, 12 Jan 2019 21:13:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3031F94666; Sat, 12 Jan 2019 21:13:28 +1000 (AEST)
+Received: from lb1-smtp-cloud9.xs4all.net (lb1-smtp-cloud9.xs4all.net
+ [194.109.24.22])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 44AFA93D29
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 21:13:27 +1000 (AEST)
+Received: from [192.168.1.105] ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPSA
+ id iHECgv7bHMWvEiHEDgfC38; Sat, 12 Jan 2019 12:13:25 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 12.1 \(3445.101.1\))
+Date: Sat, 12 Jan 2019 12:13:24 +0100
+References: <mailman.1.1547258402.6716.tuhs@minnie.tuhs.org>
+To: tuhs@minnie.tuhs.org
+In-Reply-To: <mailman.1.1547258402.6716.tuhs@minnie.tuhs.org>
+Message-Id: <D10210D4-B796-44C5-8862-866B5FFD6CBC@planet.nl>
+X-Mailer: Apple Mail (2.3445.101.1)
+X-CMAE-Envelope: MS4wfKlh0xpvuKnC82bFPHcfxCrOxF5RsYg3XHWEr5N9ZazjDaBtFNmEC8QS4hXjDCrOgOfiiw1Fhv5yWz0EAn5ZzwdW0HG2zSAONWfXhDI6q/XWAZgqmb/r
+ z6lO5CcudSIqi58o3FVTAo355L05zoiHlH/d1v0exk4voMonOWncmt6q
+Subject: Re: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+> / uses the system sleep call rather than the standard C library
+> / sleep (sleep (III)) because there is a critical race in the
+> / C library implementation which could result in the process
+> / pausing forever. This is a horrible bug in the UNIX process
+> / control mechanism.
+> 
+> Quoted without comment from me!
+
+Intriguing comment. I think your v6+ system probably has a lot of
+PWB stuff in there. The libc source for sleep() in stock V6 is:
+
+.globl	_sleep
+sleep = 35.
+
+_sleep:
+	mov	r5,-(sp)
+	mov	sp,r5
+	mov	4(r5),r0
+	sys	sleep
+	mov	(sp)+,r5
+	rts	pc
+
+The PWB version uses something alarm/pause based, but apparently
+gets it wrong:
+
+.globl	_sleep
+alarm = 27.
+pause = 29.
+rti = 2
+
+_sleep:
+	mov	r5,-(sp)
+	mov	sp,r5
+	sys	signal; 14.; 1f
+	mov	4(r5),r0
+	sys	alarm
+	sys	pause
+	clr	r0
+	sys	alarm
+	mov	(sp)+,r5
+	rts	pc
+
+1:
+	rti
+
+I think the race occurs when an interrupt arrives between the sys alarm
+and the sys pause lines, and the handler calls sleep again.
+
+sleep() in the V7 libc is a much more elaborate C routine.
+
+When I first read the race condition comment, I thought the issue would
+be like that of write:
+
+_write:
+	mov	r5,-(sp)
+	mov	sp,r5
+	mov	4(r5),r0
+	mov	6(r5),0f
+	mov	8(r5),0f+2
+	sys	0; 9f
+	bec	1f
+	jmp	cerror
+1:
+	mov	(sp)+,r5
+	rts	pc
+.data
+9:
+	sys	write; 0:..; ..
+
+This pattern appears in several V6 sys call routines, and would
+not be safe when used in a context with signal based multi-
+threading.
+
+
+

@@ -1,0 +1,40 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 22 May 2017 21:33:41 -0400 (EDT)
+Subject: [TUHS] Unix with TCP/IP for small PDP-11s
+Message-ID: <20170523013341.CAA4118C095@mercury.lcs.mit.edu>
+
+    > From: Clem Cole
+
+    > So some other mechanism (also discussed here) needed to be created to
+    > avoid blocking in the application.
+    > ...
+    > Rand, UNET & Chaos had something else that gave the save async function,
+    > who's name I've forgotten at the moment
+
+I don't think the RAND code had the non-blocking stuff; AFAICR, all it had was
+named pipes (effectively). Jack Haverty at BBN defined and implemented two new
+calls (IIRC, 'capac()' and 'await()') to do non-blocking I/O. The
+documentation for that is in the 'BBN' branch at TUHS:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=BBN-V6/doc/ipc/await
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=BBN-V6/doc/ipc/ipc
+
+My memory might be incorrect, but I don't think it was asynchronous (i.e. a
+process issued a read() or write(), and that returned right away, before the
+I/O was actually done, and the system notified the process later when the I/O
+actually completed).
+
+I actually did implement asyn I/O for an early LAN device driver - and just to
+make it fun, the device was a DMA device, and we didn't want the overhead of a
+copy, so the DMA was direct to buffers in the process - i.e. 'raw' I/O. So
+that required some major system tweaks, to keep the process from being swapped
+out - or moved around - while the I/O was pending.
+  
+    > I believe Noel posted the code for same in the last year from one of the
+    > MIT kernels
+
+I found it on the dump of an MIT machine, but it was never run on any machine
+at MIT - we just had the source in case we had any use fot it.
+
+       Noel
+

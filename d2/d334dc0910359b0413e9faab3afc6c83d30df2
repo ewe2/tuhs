@@ -1,0 +1,81 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4999e21a
+	for <ml@inbox.vuxu.org>;
+	Sat, 31 Aug 2019 01:21:58 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 516169C0C2; Sat, 31 Aug 2019 11:21:56 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 73F229C0A1;
+	Sat, 31 Aug 2019 11:21:39 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 84AD99C0A1; Sat, 31 Aug 2019 11:21:37 +1000 (AEST)
+X-Greylist: delayed 443 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 31 Aug 2019 11:21:37 AEST
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 2FD6A9C092
+ for <tuhs@tuhs.org>; Sat, 31 Aug 2019 11:21:37 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id E9F491570CE9;
+ Fri, 30 Aug 2019 18:13:52 -0700 (PDT)
+To: Clem Cole <clemc@ccc.com>
+In-reply-to: Your message of "Fri, 30 Aug 2019 20:58:13 -0400."
+ <CAC20D2Pp5hpZraaANsXg0Sgc-sU3fJ4=_N17ogQii3=p-H4Oeg@mail.gmail.com>
+References: <1567196510.21824.for-standards-violators@oclsc.org>
+ <CAC20D2OJ=uNZ0yMwpL13TPPW_q9tJeY6559gwsDGUYVkUin+TA@mail.gmail.com>
+ <20190830215202.GA974@mcvoy.com>
+ <CAC20D2Pp5hpZraaANsXg0Sgc-sU3fJ4=_N17ogQii3=p-H4Oeg@mail.gmail.com>
+Comments: In-reply-to Clem Cole <clemc@ccc.com>
+ message dated "Fri, 30 Aug 2019 20:58:13 -0400."
+From: Bakul Shah <bakul@bitblocks.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <94184.1567214032.1@bitblocks.com>
+Date: Fri, 30 Aug 2019 18:13:52 -0700
+Message-Id: <20190831011359.E9F491570CE9@mail.bitblocks.com>
+Subject: Re: [TUHS] dmr streams & networking [was: Re: If not Linux,
+ then what?]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, 30 Aug 2019 20:58:13 -0400 Clem Cole <clemc@ccc.com> wrote:
+>
+> Actually not in lock step.  They were independent.  One was called the
+> executor and the other the fixer.  When a fault was detected the executor
+> was sent wait stated while the fixer handled the fault and refilled the
+> TLB.   Once the TLB was set to instruction was allowed to complete.    Btw
+> when the 68010 was released the pals on the board were changed to allow the
+> executor to actually take the fault and do something else while the fixer
+> replaced the TLB entry
+
+As I remember, the issue with 68000 was that instructions were
+not restartable so in case of accessing memory that didn't
+exist, you couldn't take a segfault and do anything useful.
+This is why you needed a second processor to deal with an
+external MMU. There would have been no TLB unless you actually
+added an external TLB -- but an external CAM would've been
+very expensive. May be a direct map?
+
+What we did at Fortune was to utilize a 4 entry external map:
+text, data, extra and stack.  When a new function was invoked
+it would do a 'probe'. If the probe caused a segfault, stack
+was extended in the handler. The probe didn't have to be
+restartable. So we didn't need a second 68k. This logic may
+have been in the V7 port we started from.

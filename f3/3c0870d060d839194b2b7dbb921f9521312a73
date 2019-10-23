@@ -1,0 +1,52 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Thu, 17 Jul 2014 09:58:52 -0600
+Subject: [TUHS] shutdown for pre-v7 unix
+In-Reply-To: <CAGGBd_ocQ_NouK7upV9YE119i8N2M1dqunJ1bG4HV4N7Awf-uA@mail.gmail.com>
+References: <CADxT5N5aUTFQ3-XYPDsW3tX6qYwQs6eT89XctquK05mdo10LxA@mail.gmail.com>
+ <alpine.BSF.2.00.1407170710560.61582@aneurin.horsfall.org>
+ <CAGGBd_ocQ_NouK7upV9YE119i8N2M1dqunJ1bG4HV4N7Awf-uA@mail.gmail.com>
+Message-ID: <699EC97F-61D6-4102-99E1-8752E8CBD381@bsdimp.com>
+
+
+On Jul 16, 2014, at 8:09 PM, Dan Stromberg <drsalists at gmail.com> wrote:
+
+> On Wed, Jul 16, 2014 at 2:12 PM, Dave Horsfall <dave at horsfall.org> wrote:
+>> On Wed, 16 Jul 2014, Mark Longridge wrote:
+>> 
+>>> I've been typing sync;sync at the shell prompt then hitting ctrl-e to
+>>> get out of simh to shutdown v5 and v6 unix.
+>> 
+>> The "correct" way used to be:
+>> 
+>>    sync
+>>    sync
+>>    sync
+> 
+> 3 sync's was net.wisdom for a long time, but some discussions in the
+> Linux mailing lists suggested that 2 was enough all along.
+> 
+> The first schedules all dirty buffers to be flushed to disk.
+> 
+> The second does the same, but to provide an ordering guarantee,
+> doesn't return until the dirty buffers from the first are finished.
+> 
+> Hence the 2.
+> 
+> But I'm a relative newcomer to *ix - I didn't get involved until SunOS 4.
+
+But it wasn’t about the ordering…
+
+The reason three syncs were recommended was that you needed time to pass to flush the buffers, and some early versions would only schedule the I/O and not wait for it to actually complete before returning. Later versions waited, but by then the disks had buffers of their own that would get missed up if you didn’t wait a smidge before turning them off. So what the second two syncs really accomplished was the passage of time before you did anything stupid.
+
+I’m not so sure about the “ordering guarantee” logic presented in that thread. There’s no “barrier” that the first sync puts in that the second sync waits for. Earlier discussions have suggested the first sync flushes all the dirty blocks and sent out the superblock marked dirty as well. The second sync would see no I/O has happened and send out the superblock clean. And the third sync was because of {lots of theories here}, but mostly was for the passage of time to keep the rule simple.
+
+Warner
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 842 bytes
+Desc: Message signed with OpenPGP using GPGMail
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140717/e5a7d0a4/attachment.sig>
+

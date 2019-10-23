@@ -1,0 +1,30 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 15 Aug 2016 10:54:52 +1000
+Subject: [TUHS] fstat(2) on pipes?
+In-Reply-To: <alpine.BSF.2.11.1608151037130.10703@aneurin.horsfall.org>
+References: <20160815001140.GA16138@minnie.tuhs.org>
+ <alpine.BSF.2.11.1608151037130.10703@aneurin.horsfall.org>
+Message-ID: <20160815005452.GA21951@minnie.tuhs.org>
+
+On Mon, Aug 15, 2016 at 10:41:02AM +1000, Dave Horsfall wrote:
+> Probably not much use to you, but back in Ed6 I did modify it to return
+> the amount of data in the pipe.
+
+7th Ed seems to return the amount of free space in the pipe, if I read
+the code correctly:
+
+fstat()
+{
+   ...
+   /* Call stat1() with the current offset in the pipe */
+   stat1(fp->f_inode, uap->sb, fp->f_flag&FPIPE? fp->f_un.f_offset: 0);
+}
+
+stat1()
+{
+   ...
+   ds.st_size = ip->i_size - pipeadj;
+}
+
+Cheers, Warren
+

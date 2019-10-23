@@ -1,0 +1,36 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 19 Mar 2017 02:37:12 -0400 (EDT)
+Subject: [TUHS] 4.3BSD help: getty ignoring modem status
+Message-ID: <20170319063712.3E54C18C09F@mercury.lcs.mit.edu>
+
+    > From: Warren Toomey
+
+    > So, DCD and CTS are being dropped, but getty (or something) isn't
+    > responding and (presumably) sending a HUP signal to the shell.
+    > Is there anybody with some modem or getty knowledge that can help?
+
+I know very little of 4.x, but I did write a V6 DZ driver, back in the
+Cenozoic or some such time period... :-)
+
+Looking at the 4.3Tahoe (which particular 4.3 version is in question here,
+anyway?) DZ driver:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=4.3BSD-Tahoe/usr/src/sys/vaxuba/dz.c
+
+I find it hard (without further digging) to figure out how it gets from where
+it should discover carrier has gone away (in dzrint(), from dztimer()) to the
+rest of the system; they have added some linesw[] thing I don't know about.
+
+Looking at the 4.2 driver:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=4.2BSD/usr/src/sys/vaxuba/dz.c
+
+it seems (in the same routine) to do the right thing:
+
+               gsignal(tp->t_pgrp, SIGHUP);
+
+so in that version, it's sending a SIGHUP to the whole pgroup when the
+carrier goes away - which should be the right thing.
+
+	Noel
+

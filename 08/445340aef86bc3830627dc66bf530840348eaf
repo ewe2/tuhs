@@ -1,0 +1,78 @@
+From: jrvalverde@cnb.uam.es (=?ISO-8859-15?Q?Jos=E9?= R. Valverde)
+Date: Mon, 9 Aug 2004 15:16:43 +0200
+Subject: [TUHS] Emulators
+In-Reply-To: <Pine.LNX.4.44.0408091509560.27583-100000@cl.drevlanka.ru>
+References: <Pine.LNX.4.44.0408091509560.27583-100000@cl.drevlanka.ru>
+Message-ID: <20040809151643.0b5707ea.jrvalverde@cnb.uam.es>
+
+On Mon, 9 Aug 2004 15:22:28 +0400 (MSD)
+Sergey Lapin <slapin at drevlanka.ru> wrote:
+> Hi all!!!
+> 
+> While educating people some unix stuff (at time, spare from work as 
+> admin), I have a need for making some simple UNIX-like  environment for 
+> people to try to type some simple commands. Now I need to make it possible 
+> to do it remotely. Are there any emulators, that are capable to run V5/6/7 
+> or (better) 4.2BSD, and accessible by telnet or something like that?
+> Additional thing I need is vi, any emulator that is capable of
+> running vi could make me happy!!! 
+> 
+I think you can do this with SIMH. Various scenarios come to mind:
+UNIX v5/6/7
+	AFAIK you don't have support for IP on these by default, hence
+
+	- separate instances for each user: this requires multiplying
+the UNIX disks for each user, hence requires more space. OTOH, starting
+the system reduces to writing a script to start simh and calling it
+from the login script
+
+	- many users sharing the same instance: there's only one copy of
+the system and everybody logs-in on it, saves space, but takes more work.
+You can set up simh to attach a number of serial lines to telnet ports
+and ask people to telnet to those ports. This is akin to coming into a
+computer room and looking for a free terminal (only you can't see until
+you try). This may be enhanced substituting the login script of a normal
+account by a new one that tries the ports in turn looking for a free one
+automatically.
+
+4.x BSD, ULTRIX 3.1, 2.11bsd
+	I've been able to run 4.3 from TUHS images without any problem.
+I configured the network following the standard procedures and using a
+valid IP, and it works as a standalone machines allowing incoming/outgoing
+IP connections. No problem here.
+
+> Emulation is needed because of unlimited virtualization possibility, 
+> unlimited variation of configurations, and, of course, zero time for 
+> recover after root errors. simh runs fast 60 instances on P233.
+> 
+> But now I need vi :(
+> 
+
+That's a toughie. VI is big and demands a lot from the system (on ancient
+machines). You'll need to configure them with extra memory.. It does not
+depend on the emulator itself, mind you, but on the operating system 
+providing the required support libraries. 
+
+There are small-footprint editors around, but most I found require curses
+so you'd need to port curses back to these ancient systems.
+
+There is a simplistic vi-clone called s whose source code appeared in "A 
+Software Tools Sampler", by Web Miller. You can get the sources from his
+site
+	http://globin.cse.psu.edu/globin/html/software.html
+
+The book says it worked on 4.x BSD. I was back-porting it to V7 just
+before holidays but found some problems and left it until I find more
+spare time to work on it.
+
+If you can get it to work or find another one that works, let us know, I
+for one would welcome it.
+
+				j
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+

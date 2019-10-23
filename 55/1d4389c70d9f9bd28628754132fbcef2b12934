@@ -1,0 +1,127 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sun, 21 Feb 2016 15:05:39 -0600
+Subject: [TUHS] Unix v6 File System information
+In-Reply-To: <CAC20D2O8s_8XnCbAvxRXVJCxdgtFCW7vyzgKs_gNvf36+2PuRQ@mail.gmail.com>
+References: <20160221182749.8937718C0ED@mercury.lcs.mit.edu>
+ <CAC20D2O8s_8XnCbAvxRXVJCxdgtFCW7vyzgKs_gNvf36+2PuRQ@mail.gmail.com>
+Message-ID: <56CA26A3.20206@gmail.com>
+
+
+
+On 2/21/16 12:59 PM, Clem Cole wrote:
+>
+> ​ Will Senn asked
+>
+>     > Supposing I created a byte faithful representation of a V6 filesystem 
+>
+>      > on my mac, would I then be able to load the file in simh as an
+>     RK05 and
+>      > mount and access its files and directories from a V6 instance?
+>
+>
+> ​ Not 100% sure how to parse this... but that is exactly how simh (and 
+> Ersatz11)​
+> ​ work.
+> You have a UNIX file on your mac and at the simh interactive command 
+> system, you "attach" it as the data for the simulated RK05.
+> ​ But it's a manual process to do the attachment AND more importantly,
+> since Mac OSx just sees it as bits, as a minimum you need to write 
+> tools to push/pull V6 "files" from the image. This is the same as the 
+> "DOS Tools" trick you see in a lot of UNIX systems that know how to 
+> "grok" DOS/FAT file system images.   You would need to do the same 
+> thing. If you poke around the Warren's TUHS archives, you might find 
+> some of this already there.
+>
+> ​What many of us do it attach a file as a virtual disk but instead of 
+> using a UNIX file system format, use it is a tape image.   Then use 
+> tar/cpio or whatever if you already a tool on both sides that can 
+> interpret the bits.   Hence, the v6tar discussion of a few weeks ago. 
+>   The UNIX ar(1) format is sometimes used also, since it was common.   
+> cpio -c also works, but that was not on the research systems.​   My 
+> old room mate, Tom Quarles, wrote a really good ANSI tape 
+> reader/writer for BSD UNIX.  That should back port to v6 with a little 
+> work, particularly if you the "typesetter C" compiler for V6 which 
+> supported enough of the V7 C.   The advantage of the ANSI tape format 
+> is that its common with the DEC systems as well as UNIX.
+>
+>
+> That said, you can be smarter and more automatic.   As Noel says 
+> Ersatz11 supports a virtual shared disk (the same way VMware and 
+> Parallels) do.   Writing such a device for simh would be cool and in 
+> fact useful for many different emulators.  Warning there are a lot of 
+> dragons hidden with such a shared FS.   At is definitely doable, but 
+> is going to take some work.
+>
+> The other thing you could do that might be a little less work, but 
+> would be Mac specific, is Mac OSX has the FUSE file system emulation 
+> that stuff that Google released.  If hacked up support for the old 
+> Unix FS, you could mount the V6 "disk" image as Mac OSx disk and see 
+> the bits with normal tools.   I've thought about doing this but I have 
+> never had the time.  If I ever became a serious user of the simh, I 
+> would probably want something more like this.
+>
+> Clem
+>
+
+Thanks Clem. I know that in theory, this should be super 
+straightforward, but it seems that theory and reality are uncomfortable 
+with each other around me and this question. I've tried maybe 7 dozen 
+different approaches to getting 1bsd.tar.gz files to be accessible to v6 
+with more than a handful of files at a time. The vast majority of these 
+methods were flawed in their conception, but some "should have worked" 
+by all accounts, and yet, no joy (pun intended). I can use the paper 
+tape punch method or others to copy one file at a time, but that's 
+tedious. All of the other methods folks have suggested, I've tried, but 
+frustratingly, it just doesn't seem possible to perform the "back in the 
+day" install of 1bsd on v6:
+
+Berkeley UNIX Software Tape
+     Jan 16, 1978    TP 800BPI
+
+     To extract contents do:
+       tp xm ./setup; sh setup; tp xm
+
+     See accompanying document
+Second label on the tape:
+
+     The contents of this tape are
+     distributed to UNIX licensees
+     only, subject to the software
+     agreement you have with Western
+     Electric and an agreement with
+     the University of California.
+
+
+For example, it seems like using tar2mt on the gunzipped tarball and 
+attaching to tm0 should work, but when running tp xm on it, it fails 
+(something about directory checksum). I know the tarball is good, not so 
+sure about the mt image (tried it with default blocksize and 512 as well).
+
+In the absence of positive confirmation of someone else's successful 
+experience installing 1bsd, I backburner this problem every so often and 
+carry on with my other investigations. When someone suggests something 
+new, or I think of some new angle, I fire up the sim and try installing 
+again. Hence, my occasional queries that seem to be retreads.
+
+Now that I have more experience with the SimH simulator, PDP-11 
+architecture/programming, and success at moving files around DEC OS'es, 
+I feel oh so close to a breakthrough on this one sticky problem :). 
+Hence my latest interest in the file system. I figure if I can 
+understand the format I may be able to check the conversion of the 
+tarball to a v6 consumable filesystem and determine why it's not working.
+
+Why, oh why, didn't someone save a tape image, rather than a tarball, 
+given that tar on v6 was so hokey?!
+
+Thanks,
+
+Will
+
+
+
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160221/c63c3802/attachment-0001.html>
+

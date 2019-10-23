@@ -1,0 +1,178 @@
+From: wkt@cs.adfa.edu.au (Warren Toomey)
+Date: Thu, 28 Oct 1999 09:48:08 +1000 (EST)
+Subject: When did the `dc' command first appear?
+In-Reply-To: <19991026221501.47539@mojave.worldwide.lemis.com> from Greg Lehey at "Oct 26, 1999 10:15: 1 pm"
+Message-ID: <199910272348.JAA26787@henry.cs.adfa.edu.au>
+
+In article by Greg Lehey:
+> > There's a binary of dc from either 1st or 2nd Edition in the PUPS Archive:
+> > 	-r---wxrw- 0/0            6846 Apr 14 06:50 1973 bin/dc
+> 
+> Wouldn't that be the Third Edition with that timestamp?  I won't
+> comment again about the permissions.
+> Greg
+
+The binary is an 0405 a.out file. I'm told by Norman Wilson, who has
+paper copies of the 2nd & 3rd Edition manuals, that 0405 binaries didn't
+exist in 2nd & 3rd Edition.
+
+I also believe that the files in the s2.tar tarball sent in by Dennis
+are a whole year off, and so the date above should be Apr 14, 1972.
+That dates the file just before the release of 2nd Edition.
+
+I really need to sit down & outline my reasons for believing that the
+dates are a year out. I'll do so soon & email it here!
+
+Cheers all,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA41918
+	for pups-liszt; Thu, 28 Oct 1999 09:49:29 +1000 (EST)
+Received: from nose.cita.utoronto.ca (nose.cita.utoronto.ca [128.100.76.157])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id JAA41914
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 28 Oct 1999 09:49:18 +1000 (EST)
+From: norman@nose.cita.utoronto.ca
+Message-Id: <199910272349.JAA41914 at minnie.cs.adfa.edu.au>
+Subject: dc and date numerology
+To: pups at minnie.cs.adfa.edu.au
+Date: Wed, 27 Oct 1999 19:48:50 -0400
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Greg Lehey wondered about the date in
+
+> There's a binary of dc from either 1st or 2nd Edition in the PUPS Archive:
+>
+> 	-r---wxrw- 0/0            6846 Apr 14 06:50 1973 bin/dc
+
+1973 is indeed post-Second-Edition.  But it's not the right date; just as
+the permission flags were different in the early years, so was the date
+representation.  Here are some gleanings from old manuals that tell the
+story.
+
+The relatively recent ls or tar or whatnot that printed the line above
+presumably interpreted the date as if it were in modern form: seconds since
+1 Jan 1970 UTC.  So the raw number stored in the i-node was probably about
+105000000 decimal (30 Apr 1973 in my time zone), or about 1200 days into the
+epoch.
+
+But the file system described in the First Edition manual takes the date
+as a count of clock ticks since 1 Jan 1971.  The clock ticked at 60Hz,
+so the date is really about 1200/60 = 20 days into the epoch; if this file
+came from a 1e file system, it was written on 21 Jan 1971.
+
+The trouble with keeping a 60Hz clock in a 32-bit number is that it takes just
+a couple of years before it overflows.  A band-aid had been stuck on by the time
+the Third Edition manual was printed: the base date changed to 1 Jan 1972.  So
+maybe bin/dc was written on 21 Jan 1972 instead.  There's no way to tell just
+from the bits in the i-node.
+
+The modern time format (1-second resolution) appeared in the Fourth Edition manual.
+It is probably not a coincidence that the file system format changed a lot at
+the same time; groups appeared, permission modes changed to approximately their
+current form, directory entries changed, and so on.
+
+The 60Hz scheme seems to have come from the PDP-7, on which it made more sense;
+the -7 has 36-bit words, so a 60Hz counter lasts 16 times longer.  I bet the
+base date changed at least once between the original PDP-7 system and the PDP-11
+as well, since 1 Jan 1971 seems too recent for the PDP-7 system.
+
+See http://www.cita.utoronto.ca/~norman/old-unix/old-fs.html for many more such
+grotty details, collected in an insomniac night with a stack of old manuals some
+months ago.
+
+Norman Wilson
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA42069
+	for pups-liszt; Thu, 28 Oct 1999 10:02:33 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA42060
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 28 Oct 1999 10:02:26 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id KAA26898
+	for pups at minnie.cs.adfa.edu.au; Thu, 28 Oct 1999 10:02:25 +1000 (EST)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <199910280002.KAA26898 at henry.cs.adfa.edu.au>
+Subject: Re: dc and date numerology
+In-Reply-To: <199910272349.JAA41914 at minnie.cs.adfa.edu.au> from "norman at nose.cita.utoronto.ca" at "Oct 27, 1999  7:48:50 pm"
+To: 
+Date: Thu, 28 Oct 1999 10:02:25 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by norman at nose.cita.utoronto.ca:
+> Greg Lehey wondered about the date in
+> > 	-r---wxrw- 0/0            6846 Apr 14 06:50 1973 bin/dc
+> 
+> 1973 is indeed post-Second-Edition.  But it's not the right date; just as
+> the permission flags were different in the early years, so was the date
+> representation.  Here are some gleanings from old manuals that tell the
+> story.
+
+[ much omitted ]
+ 
+Norman details the fact that early Unixes stored time in 60ths of a second,
+i.e the normal clock tick, and as such, a 32-bit integer overflows in
+around 2.5 years.
+
+However, I think Norman is not exactly right when he said that the
+tar archive was reinterpreting this 1/60 sec time in units of seconds.
+
+Dennis Ritchie, with help from Keith Bostic and a DECtape drive, managed to
+retrieve these files from an old DECtape. These old files were stored in
+tap(1) archive format.
+
+Dennis wrote a program to read in the tap(1) format archives and extract
+their contents while trying to maintain the _correct_ permissions and
+timestamps. Here is his email describing this:
+
+	The tapes were written in either the 'tap' or 'tp' format, which
+	are similar in that they have a directory of up to 192 entries at
+	the start with names and other information including the size and
+	tape address of the files.  'tp' was the later format, and was in
+	use by November 1973, the date of the 4th edition manual.  With
+	`tap', the times associated with the files were recorded in pre-modern
+	units: sixtieths of a second, from an origin that changed.  The
+	first three editions of the manual had BUGS sections noting that
+	32 bits can represent only about 2.5 years in this unit, and this
+	implied continuing crises as the time overflowed.
+
+	I believe that the change to use seconds for Unix time took place
+	along with the change to the C version of the operating system,
+	which occurred about the end of the summer of 1973, and also that
+	the change from `tap' to `tp' took place at the same time.  (This
+	is consistent with the dates of the 3rd and 4th edition manuals).
+	
+	Thus the dates recorded with the `tp' tapes probably correspond
+	reliably to the modification dates of the files at the time of
+	saving them (of course, this gives only a upper bound on their
+	creation, since they might have been copied or trivially touched
+	just before saving them).
+	
+	Recovering the proper dates for the `tap' tapes is less reliable,
+	because there was at least one change of epoch (from 1971 to 1972)
+	during the period they could possibly have been produced.  I believe
+	that the 1972 epoch is most likely the correct one for the tapes here.
+
+In other words, Dennis had to guess the epoch when recovering these files.
+He got it right with the `nsys' kernel files, because there is enough other
+data lying around documenting the kernel rewrite from assembly to C, and
+the inclusion of pipes into the kernel.
+
+However, with the s2.tar archive, I think Dennis got the epoch one year out,
+i.e everything should be dated a year earlier. The most obvious is that
+there are so many 0405 magic a.out files in the archive, and apparently
+this a.out format disappeared in the 2nd Edition.
+
+Cheers all,
+	Warren
+
+

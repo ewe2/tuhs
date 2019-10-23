@@ -1,0 +1,103 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Wed, 15 Mar 2017 12:13:04 +1100
+Subject: [TUHS] X, Suntools, and the like
+In-Reply-To: <CAH1jEzav9Y0vM75GaVqVBj=0nXmjdjucF+mx=FBkRO4QP8Soeg@mail.gmail.com>
+References: <011901d29cf3$a5e41560$f1ac4020$@ronnatalie.com>
+ <CAH1jEzY5g6zGSxsXEHc+Q7mYyegU+aSr-zpfJ0cwRfSGSUdgCg@mail.gmail.com>
+ <CAH1jEzb7eSr0xcoBX8bfzL6batBfxOF+8jhbVFs=x1CFWAJ65g@mail.gmail.com>
+ <CAH1jEzY38dmbASRLMrQnoX0-eANA0YBW=j=LLC1y1axi=672yg@mail.gmail.com>
+ <CAH1jEzbYS8fJgNGFMa+2SoLUWCQQAxVSuxrZp-z2uunXS+R8GQ@mail.gmail.com>
+ <CAH1jEza89JHeTZBQ6y_wvu7iVjW+qV2_Ucg1gWbWnhG2Jc9rLg@mail.gmail.com>
+ <CAH1jEzaZxATj5BPu2+d213PpUQqH8Q0LnA2syXxCm4LvpXPqYg@mail.gmail.com>
+ <CAH1jEza6NO3UcZsR4foQwqFosJWRdYCn5FQfxDy596Nj_+SKdA@mail.gmail.com>
+ <CAH1jEzYK04=fDQ8FAu2PvKS=heZK_Da=LB=cQ4g9nZybM-DsMA@mail.gmail.com>
+ <CAH1jEzYMRu_e4Az1+Ns7JA0K5FUjRCrvjOkWVC85WodtLaB52g@mail.gmail.com>
+ <CAH1jEzZQXAS+bwqV76J8_WkUD-3tR7P_z-mQrRkFv-Khm-R4Eg@mail.gmail.com>
+ <CAH1jEzY2L1k4_QNUFtscovpD1_gORPRVY_=n47dmBY3fh=JUXA@mail.gmail.com>
+ <CAH1jEza5F4oyQ8bByypWevLW3RwZ4Q4Zfz-roiGi5ksyGup9Zw@mail.gmail.com>
+ <CAH1jEzb9Rv+iER45NSCGfFerrXaD1v8PN=j92iOg7oU=4q62Rw@mail.gmail.com>
+ <CAH1jEzav9Y0vM75GaVqVBj=0nXmjdjucF+mx=FBkRO4QP8Soeg@mail.gmail.com>
+Message-ID: <CAH1jEzZrXT=6+Qu1=o60_aJ6z0zCxW7Vfvbpxh0TKU+aYOvhKw@mail.gmail.com>
+
+Hmm yes although perhaps controversially I see this as a bad feature and
+one area where Microsoft actually gets it right. Despite the old issues of
+"DLL Hell" which have largely been resolved by standardizing all DLLs and
+in newer code by using assemblies... you have to admit that they provide a
+direct, local API (indeed ABI) to every subsystem you would want to use,
+here I am thinking of GDI, but also lots of things that would require
+ioctls (CD burning, say) or domain specific languages (such as Postscript)
+on Linux. This makes it really easy for Windows developers to use the
+feature and the interface is fast and reliable. And where a domain specific
+language is actually NEEDED (printing to a Postscript printer on Windows,
+or RDP-type desktop remoting etc) it is easy to insert a proxy DLL or
+object or device driver that does the necessary scrambling and
+unscrambling. It is not so easy to go the other way as it requires
+extensive emulation (think of ghostscript driving my Canon non-PS printer).
+
+I wrote about this issue earlier using some examples like an "ESC ["
+capable terminal as opposed to a memory mapped local console, or an "AT"
+capable external modem as opposed to an internal "WinModem" that just
+exposes its D/A and A/D converters with minimal signal processing and needs
+the host to do the heavy lifting. Same thing applies to a graphics
+terminal. Of course it should be programmed at a high level by specifying
+shapes, etc to be drawn, regions to be blitted, clipping regions and pens
+etc, a font manager, and it should be possible to load bitmaps, etc, into
+its offscreen memory and/or create offscreen drawing buffers, if these
+features are used correctly by applications then it is of course trivial to
+add a remoting proxy driver similar to Microsoft's RDP, or indeed X Windows.
+
+But the difficulty with X Windows is that the remoting layer is always
+there, even though it is almost completely redundant today. This hurts
+performance but more importantly it requires extensive workarounds as you
+described, which add enormous extra complexity and in my view sharply
+increase the learning curve and setup costs. Having said that, Xlib does
+offer a decent API/ABI so if we just code to that it's not TOO bad, I would
+like to see the rest of it deprecated though, and vendors encouraged to
+implement Xlib with whatever backend seems appropriate.
+
+The ridiculous thing here is that X setup is so damn convoluted and
+incestuously tied in with the window, session and display managers, THAT IT
+IS IMPOSSIBLE TO RUN X REMOTELY ANYMORE AND HAVE A FULL FEATURED DESKTOP, I
+have tried many times and have had various tries at thin clients and
+terminal serving in my home network and it basically fell over because
+environments like Gnome do not support multiple sessions of the same home
+directory, not to mention numerous other problems that mean if you login
+remotely you basically just get a blank screen with a default X cursor and
+maybe a context menu that can run an Xterm. Bleh! In my experience you have
+to use a remoter like VNC and guess what that does, tricks X into thinking
+it's running locally and then intervenes further up in the display stack to
+do the actual remoting.
+
+It's a complete dog's breakfast and frankly could never compete with
+Windows in any realistic way. I use it because it is the least bad of the
+available options (no way am I having advertising in my start menu and my
+computer loaded with bloatware and spyware before I even open the box, and
+no way am I putting up with vague messages like "Something went wrong" or
+"Windows is making some checks to optimize your experience" or whatnot),
+and because my computer is so fast despite being 6yrs old that X only feels
+borderline sluggish, i.e. is tolerable. But so much better would be
+possible with a redesign. CUPS is also a dogs breakfast and hugely
+unreliable, Windows GDI printing just wins hands down for all the same
+reasons. End rant.
+
+Nick
+
+On Mar 15, 2017 5:49 AM, "Ron Natalie" <ron at ronnatalie.com> wrote:
+
+Nice thing about X was that it would talk to remote displays.    I still
+remember sitting in the Pentagon demonstrating that the Suntools screen
+lock wasn't particularly secure.
+Then there was NeWS.   This was Gosling's first attempt at a deployable
+language.    However PostScript (even with Owen Densmore's class
+extensions), while a reasonable intermediary language is really sucky to
+actually develop.   Java was a bit more refined.
+
+Of course, lots of things either implement X under the native window system
+or backdoor X with local extensions.    We got around doing high frame rate
+image work on X via the SharedMemoryExtension and the ability to flip
+buffers on the retrace interval (both extensions, but commonly implemented
+by many servers).
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170315/bdcb123b/attachment.html>
+

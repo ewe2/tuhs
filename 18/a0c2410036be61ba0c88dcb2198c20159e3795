@@ -1,0 +1,688 @@
+From: cdl@mpl.ucsd.edu (Carl Lowenstein)
+Date: Mon, 6 Sep 1999 23:04:02 -0700 (PDT)
+Subject: Diff between 11/20 and 11/45?
+Message-ID: <199909070604.XAA04723@mpl.ucsd.edu>
+
+> From: Warren Toomey <wkt at cs.adfa.edu.au>
+> Subject: Diff between 11/20 and 11/45?
+> To: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+> Date: Tue, 7 Sep 1999 09:56:09 +1000 (EST)
+> 
+> 	Dennis Ritchie has unearthed some really old Unix a.out
+> executables from around 1st Edition - 2nd Edition period: see
+> Distributions/research/1973_stuff in the PUPS Archive.
+> 
+> These executables were written for a PDP-11/20. Are there any significant
+> USER-MODE differences between the 11/20 and later PDP-11 models? I'm
+> thinking missing instructions, different addressing mode behaviour etc.
+
+There's a good table in the back of the more recent micro-11 manuals.
+
+The first genuine user-mode difference that I remember coming across was
+an incompatibility in the result of
+
+	MOV SP, -(SP)
+
+It isn't really clear to me why one would want to use this particular
+instruction, however it turned out to hang both BASIC and FOCAL at the
+time.  A zero-length patch wasn't too hard to figure out.
+
+    carl
+
+        carl lowenstein         marine physical lab     u.c. san diego
+        {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+                                                  clowenstein at ucsd.edu
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA03173
+	for pups-liszt; Wed, 8 Sep 1999 10:13:57 +1000 (EST)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA03169
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 10:13:51 +1000 (EST)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id LAA09862
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 11:28:16 +1000 (EST)
+Date: Tue, 7 Sep 1999 11:28:16 +1000 (EST)
+From: johnh@psych.usyd.edu.au
+Message-Id: <199909070128.LAA09862 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re:  Diff between 11/20 and 11/45
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+There is huge difference between the machines, but not backwards!
+
+The 11/20 doesn't have :-
+
+		EIS instructions like div, mul, ash etc
+		FPU instructions like fmul ...
+		MMU no memory management of any sort, 56Kb memory, 8Kb I/O page
+		    and hence no user modes, 16 bit addressing
+
+So a program written for a 11/20 should work untouched on an 11/45 except for
+some very minor (and ugly) instruction sequences involving using the same
+register for both source and destination eg mov r2,-(r2), or jmp (r2)+.
+The behaviour of the trace trap and T bit is also different.
+
+There is a list of differences some some of the PDP/11 handbooks (perhaps the
+latter architecture book).
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA03319
+	for pups-liszt; Wed, 8 Sep 1999 10:38:29 +1000 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA03314
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 10:38:20 +1000 (EST)
+Received: (qmail 4222 invoked from network); 8 Sep 1999 10:56:15 +1000
+Received: from trowel.geac.com.au (203.1.26.189)
+  by caveman.geac.com.au with SMTP; 8 Sep 1999 10:56:15 +1000
+Received: (qmail 27184 invoked from network); 8 Sep 1999 11:04:35 +1000
+Received: from fgh.geac.com.au (202.6.67.163)
+  by trowel.geac.com.au with SMTP; 8 Sep 1999 11:04:35 +1000
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au?r with ESMTP id KAA21475
+    for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 10:50:40 +1000
+X-Envelope-From: dave at horsfall.org
+X-Envelope-To: <pups at minnie.cs.adfa.edu.au>
+X-Authentication-Warning: fgh.geac.com.au: dave owned process doing -bs
+Date: Wed, 8 Sep 1999 10:50:39 +1000 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: KE11-A! (was Diff between 11/20 and 11/45?)
+In-Reply-To: <199909070110.LAA12638 at henry.cs.adfa.edu.au>
+Message-ID: <Pine.GSO.4.10.9909081049430.19899-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 7 Sep 1999, Warren Toomey wrote:
+
+> I also see that unit 1 lives at 777300 - 777316, and the date a.out
+> executable does this:
+
+Yep; I read through my own 11/20 handbook, and I remembered that
+EAE weirdness.
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA03361
+	for pups-liszt; Wed, 8 Sep 1999 10:43:07 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA03354
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 10:42:59 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id RAA15948
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 17:49:36 -0700 (PDT)
+Date: Tue, 7 Sep 1999 17:49:36 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199909080049.RAA15948 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Carl Lowenstein <cdl at mpl.ucsd.edu>
+> The first genuine user-mode difference that I remember coming across was
+> an incompatibility in the result of
+> 
+> 	MOV SP, -(SP)
+
+	Similarily
+
+		MOV R0,(R0)+
+
+	won't work as expected on some 11s.  I suspect that the even less
+	likely case of "mov pc,-(pc)" won't work either :-)
+
+> It isn't really clear to me why one would want to use this particular
+> instruction, however it turned out to hang both BASIC and FOCAL at the
+
+	Fairly common when setting up call frames, etc.  You want the
+	address of where the arguments start and since they're pushed on the
+	stack 'sp' is the value you want.
+
+	There's a comment in 2BSD (I think it came from V7) where mention is 
+	made that "we can't do sp,-(sp) because it won't work on the 11/40".
+
+> time.  A zero-length patch wasn't too hard to figure out.
+
+	Hmmm, interesting.  The workaround I saw took an extra instruction.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA03462
+	for pups-liszt; Wed, 8 Sep 1999 10:53:48 +1000 (EST)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA03458
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 10:53:43 +1000 (EST)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id LAA22126
+	for pups at minnie.cs.adfa.edu.au; Wed, 8 Sep 1999 11:07:37 +1000 (EST)
+Date: Wed, 8 Sep 1999 11:07:37 +1000 (EST)
+From: johnh@psych.usyd.edu.au
+Message-Id: <199909080107.LAA22126 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: KE11-A! (was Diff between 11/20 and 11/45?)
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+Are, I was afraid of that. The KE11-A wasn't a real CPU option, but
+was a peripheral that sat on the Unibus
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA03506
+	for pups-liszt; Wed, 8 Sep 1999 10:58:18 +1000 (EST)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id KAA03501
+	for <PUPS at MINNIE.CS.ADFA.edu.AU>; Wed, 8 Sep 1999 10:58:10 +1000 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.edu.AU;
+          Tue, 7 Sep 1999 21:12:00 -0400
+Date: Tue, 7 Sep 1999 21:12:00 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <990907211200.2020016c at trailing-edge.com>
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>These executables were written for a PDP-11/20. Are there any significant
+>USER-MODE differences between the 11/20 and later PDP-11 models? I'm
+>thinking missing instructions, different addressing mode behaviour etc.
+
+Well, first of all, there is no "User mode" on the 11/20 unless you have
+a KT11 installed.  Everything is kernel mode with no KT11.  Maybe the
+executables are trying to go out and directly bang on the console CSR's,
+the switch register, or the interrupt vectors themselves?
+
+11/20's also frequently had the EAE (Extended Arithmetic Element)
+installed, to make up for the fact that there was no multiply, divide,
+or multiple shift instructions in the native instruction set (and
+wouldn't be until the EIS came along.)  The EAE was a peripheral
+living in I/O space (773000-777316); you wrote the operands to the EAE
+locations and read the results later.  You can put a EAE in a machine
+with EIS, but generally you only did this if you had some binaries without
+sources using the EAE (I know of several sites running 11/24's and 11/44's
+with EAE's today)
+
+There are many other differences, especially dealing with "funny" address
+modes.  Generally, folks like me who have to code so that something works
+across all the -11's know better than to do these things, but back when
+there was *only* the 11/20 some folks didn't know any better and used
+them anyway.
+
+First, we have instructions that use the same register as source
+and destination, with an auto-increment one or the other:
+
+1.  OPR R,(R)+ on an 11/20 increments R before it's used as a source
+operand.  On an 11/45 the initial contents of R are used.
+
+2.  Same thing for OPR R,-(R).
+
+3.  JMP (R)+ or JSR reg,(R)+ increments R before putting it in the PC
+on the 11/20; on the 11/45 R isn't incremented until after the old
+value is put in the PC.
+
+4.  On an 11/20, JMP %R traps to 4; on an 11/45, JMP %R traps to 10
+
+5.  On an 11/20, SWAB does not change the V flag; on every other machine,
+SWAB clears V.  (In the 11/20 processor handbook, it *says* that SWAB
+clears the V flag, but that's not the way the machine actually worked!)
+
+6.  On an 11/20, R0-R7 can be used by the program at addresses 177700-
+177717; on any other machine, they can't be used that way and will
+result in a non-existent memory (NXM) trap.  This can be used for some
+neat tricks where you run code out of the registers (which of course
+is quite non-portable!)
+
+There's lots more differences, having to do with T bits and interrupt
+handling, but I don't know if you're getting that far... and these
+aren't things that you have to worry about in user mode, anyway.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA03564
+	for pups-liszt; Wed, 8 Sep 1999 11:03:51 +1000 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA03558
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 11:03:40 +1000 (EST)
+Received: (qmail 4832 invoked from network); 8 Sep 1999 11:21:32 +1000
+Received: from trowel.geac.com.au (203.1.26.189)
+  by caveman.geac.com.au with SMTP; 8 Sep 1999 11:21:32 +1000
+Received: (qmail 27748 invoked from network); 8 Sep 1999 11:29:48 +1000
+Received: from fgh.geac.com.au (202.6.67.163)
+  by trowel.geac.com.au with SMTP; 8 Sep 1999 11:29:49 +1000
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au?r with ESMTP id LAA21756
+    for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 11:15:48 +1000
+X-Envelope-From: dave at horsfall.org
+X-Envelope-To: <pups at minnie.cs.adfa.edu.au>
+X-Authentication-Warning: fgh.geac.com.au: dave owned process doing -bs
+Date: Wed, 8 Sep 1999 11:15:48 +1000 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: Diff between 11/20 and 11/45?
+In-Reply-To: <199909070604.XAA04723 at mpl.ucsd.edu>
+Message-ID: <Pine.GSO.4.10.9909081103330.19899-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Mon, 6 Sep 1999, Carl Lowenstein wrote:
+
+> The first genuine user-mode difference that I remember coming across was
+> an incompatibility in the result of
+> 
+> 	MOV SP, -(SP)
+
+Anything involving the same register as src and dst in this way was,
+err, different...
+
+And I have an annotation that the JSR does not behave as documented.
+Unlike page 91, the sequence is not (tmp) <- (dst) / v(SP) <- reg /
+reg <- PC / PC <- (tmp).  The first ISP code is not present i.e. the
+SP is decremented first, not saved, and the last is PC <- (dst).
+
+> It isn't really clear to me why one would want to use this particular
+> instruction, however it turned out to hang both BASIC and FOCAL at the
+> time.  A zero-length patch wasn't too hard to figure out.
+
+Some sort of frame pointer linking, on an architecture that didn't
+have separate frame pointers (like the Vax)?
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA03594
+	for pups-liszt; Wed, 8 Sep 1999 11:05:14 +1000 (EST)
+Received: from timaxp.trailing-edge.com (timaxp.trailing-edge.com [63.73.218.130])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA03588
+	for <PUPS at MINNIE.CS.ADFA.edu.AU>; Wed, 8 Sep 1999 11:05:07 +1000 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.edu.AU;
+          Tue, 7 Sep 1999 20:48:50 -0400
+Date: Tue, 7 Sep 1999 20:48:50 -0400
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <990907204850.202001b4 at trailing-edge.com>
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>	MOV SP, -(SP)
+>
+>It isn't really clear to me why one would want to use this particular
+>instruction
+
+"MOV SP" is often-used shorthand for "MOV some-non-zero-value", since no
+sane implementation would ever have a zero in the SP.  So this would
+put a non-zero value on top of the stack (perhaps as a flag, to be
+cleared by CLR (SP) when ready) - at least on machines where this was legal!
+
+On which machine does this fail, BTW?  On a 11/15, 11/20, 11/23, 11/35
+or 11/40 this ought to work, decrementing SP by two before putting it on
+the stack, and on the 11/03, 11/04, 11/05, 11/10, 11/34, and 11/45
+SP is decremented by two before being put on the stack, according to my
+notes.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA03973
+	for pups-liszt; Wed, 8 Sep 1999 11:47:41 +1000 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id LAA03969
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 11:47:34 +1000 (EST)
+Received: (qmail 24470 invoked from network); 7 Sep 1999 14:18:39 +1000
+Received: from trowel.geac.com.au (203.1.26.189)
+  by caveman.geac.com.au with SMTP; 7 Sep 1999 14:18:39 +1000
+Received: (qmail 12323 invoked from network); 7 Sep 1999 14:26:41 +1000
+Received: from fgh.geac.com.au (202.6.67.163)
+  by trowel.geac.com.au with SMTP; 7 Sep 1999 14:26:41 +1000
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au?r with ESMTP id OAA21437
+    for <pups at minnie.cs.adfa.edu.au>; Tue, 7 Sep 1999 14:13:31 +1000
+X-Envelope-From: dave at horsfall.org
+X-Envelope-To: <pups at minnie.cs.adfa.edu.au>
+X-Authentication-Warning: fgh.geac.com.au: dave owned process doing -bs
+Date: Tue, 7 Sep 1999 14:13:30 +1000 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: Diff between 11/20 and 11/45?
+In-Reply-To: <199909062356.JAA12397 at henry.cs.adfa.edu.au>
+Message-ID: <Pine.GSO.4.10.9909071404290.19123-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 7 Sep 1999, Warren Toomey wrote:
+
+> I've got a few working. cat works. ls and date run, but sort of give
+> strange outputs.
+
+What sort of strange output?  My guess is that kernel-wise, date-handling
+would have changed.
+
+> These executables were written for a PDP-11/20. Are there any significant
+> USER-MODE differences between the 11/20 and later PDP-11 models? I'm
+> thinking missing instructions, different addressing mode behaviour etc.
+
+Ummm...  No floating point (all emulated), and I seem to recall that
+it didn't even have multiply/divide; could this be the problem?  The
+/20 was certainly a subset of the "classic" 11.  No memory management,
+but users won't see that.  Also had some quirks, long-forgotten.
+
+My experience is based on the GT-40, which was basically a /20 with a
+graphics processor attached to it (which had a mean Lunar Lander game!).
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA04594
+	for pups-liszt; Wed, 8 Sep 1999 14:30:23 +1000 (EST)
+Received: from mpl.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA04581
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 14:29:58 +1000 (EST)
+Received: (from cdl at localhost)
+	by mpl.ucsd.edu (8.8.8+Sun/8.8.8) id VAA07676
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 21:43:16 -0700 (PDT)
+Date: Tue, 7 Sep 1999 21:43:16 -0700 (PDT)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <199909080443.VAA07676 at mpl.ucsd.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From owner-pups at minnie.cs.adfa.edu.au Tue Sep  7 18:24 PDT 1999
+> Date: Tue, 7 Sep 1999 17:49:36 -0700 (PDT)
+> From: "Steven M. Schultz" <sms at moe.2bsd.com>
+> To: pups at minnie.cs.adfa.edu.au
+> Subject: Re: Diff between 11/20 and 11/45?
+> 
+> > From: Carl Lowenstein <cdl at mpl.ucsd.edu>
+> > 
+> > 	MOV SP, -(SP)
+> 
+> 	Similarily
+> 
+> 		MOV R0,(R0)+
+> 
+> 	won't work as expected on some 11s.  I suspect that the even less
+> 	likely case of "mov pc,-(pc)" won't work either :-)
+> 
+> > It isn't really clear to me why one would want to use this particular
+> > instruction, however it turned out to hang both BASIC and FOCAL at the
+> 
+> 	Fairly common when setting up call frames, etc.  You want the
+> 	address of where the arguments start and since they're pushed on the
+> 	stack 'sp' is the value you want.
+> 
+> 	There's a comment in 2BSD (I think it came from V7) where mention is 
+> 	made that "we can't do sp,-(sp) because it won't work on the 11/40".
+> 
+> > time.  A zero-length patch wasn't too hard to figure out.
+> 
+> 	Hmmm, interesting.  The workaround I saw took an extra instruction.
+
+Abbreviated due to fading memory over the years, but refreshed by some
+of the current discussion.  The patch was zero-length but involved more
+than the one instruction.  Something similar to:
+
+	MOV SP, -(SP)		MOV SP, R0
+	MOV (sP), R0		MOV R0, -(SP)
+
+The net result being that the initial value of SP is now both in R0 and
+on the stack.  Without doing both a SRC and DST operation on SP in the
+same instruction, which is the thing that is incompatible across different
+processor hardware.
+
+    carl
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA04681
+	for pups-liszt; Wed, 8 Sep 1999 14:51:11 +1000 (EST)
+Received: from mpl.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA04676
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 14:50:06 +1000 (EST)
+Received: (from cdl at localhost)
+	by mpl.ucsd.edu (8.8.8+Sun/8.8.8) id WAA08055
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 22:03:09 -0700 (PDT)
+Date: Tue, 7 Sep 1999 22:03:09 -0700 (PDT)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <199909080503.WAA08055 at mpl.ucsd.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> Date: Tue, 7 Sep 1999 14:13:30 +1000 (EST)
+> From: Dave Horsfall <dave at fgh.geac.com.au>
+> To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+> Subject: Re: Diff between 11/20 and 11/45?
+> X-No-Archive: Yes
+> 
+> On Tue, 7 Sep 1999, Warren Toomey wrote:
+> 
+> > I've got a few working. cat works. ls and date run, but sort of give
+> > strange outputs.
+> 
+> What sort of strange output?  My guess is that kernel-wise, date-handling
+> would have changed.
+
+It occurs to me that really early Unix used a time word in PDP-11 ticks,
+not seconds.  So it ran out of time a lot sooner than 2038, like maybe
+only a year after it started, at 60 ticks per second, 31.5 Megaseconds per
+year.  This information was gleaned from a Mt.Xinu calendar from a few
+years ago.
+
+    carl
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA04812
+	for pups-liszt; Wed, 8 Sep 1999 15:28:58 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA04808
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 15:28:46 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id WAA17669
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 22:40:58 -0700 (PDT)
+Date: Tue, 7 Sep 1999 22:40:58 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199909080540.WAA17669 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Diff between 11/20 and 11/45?
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Howdy -
+
+> From: Carl Lowenstein <cdl at mpl.ucsd.edu>
+> Abbreviated due to fading memory over the years, but refreshed by some
+> of the current discussion.  The patch was zero-length but involved more
+
+	It has been a long long ('quad'? ;)) time since I first encountered
+	the problem.
+
+> than the one instruction.  Something similar to:
+> 
+> 	MOV SP, -(SP)		MOV SP, R0
+> 	MOV (SP), R0		MOV R0, -(SP)
+
+	Ah, thank you for bringing that memory back to the front of the brain!
+	If R0 is available for that then yes indeed that'll do the trick very
+	nicely.
+
+> on the stack.  Without doing both a SRC and DST operation on SP in the
+> same instruction, which is the thing that is incompatible across different
+> processor hardware.
+
+	The 11/45 (and 70) behave as "expected" as do the KDJ-11 systems
+	(11/73, etc) so unless a person had an 11/40 (or a /20) around it
+	would be fairly easy to get bit by the "feature".
+
+	When it comes time for MMU "features" I know of one difference between
+	the KDJ-11 and the other members that had an MMU (11/44, /70, etc). Was
+	fun tracking it down but not something I'd want to do again ;)
+
+	Steven
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id QAA04962
+	for pups-liszt; Wed, 8 Sep 1999 16:17:43 +1000 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id QAA04957
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 16:17:35 +1000 (EST)
+Received: (qmail 10263 invoked from network); 8 Sep 1999 16:34:56 +1000
+Received: from trowel.geac.com.au (203.1.26.189)
+  by caveman.geac.com.au with SMTP; 8 Sep 1999 16:34:56 +1000
+Received: (qmail 1789 invoked from network); 8 Sep 1999 16:43:20 +1000
+Received: from fgh.geac.com.au (202.6.67.163)
+  by trowel.geac.com.au with SMTP; 8 Sep 1999 16:43:20 +1000
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au?r with ESMTP id QAA24887
+    for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 16:29:17 +1000
+X-Envelope-From: dave at horsfall.org
+X-Envelope-To: <pups at minnie.cs.adfa.edu.au>
+X-Authentication-Warning: fgh.geac.com.au: dave owned process doing -bs
+Date: Wed, 8 Sep 1999 16:29:16 +1000 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+To: PDP Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: Re: Diff between 11/20 and 11/45?
+In-Reply-To: <199909080540.WAA17669 at moe.2bsd.com>
+Message-ID: <Pine.GSO.4.10.9909081618240.19899-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 7 Sep 1999, Steven M. Schultz wrote:
+
+> > 	MOV SP, -(SP)		MOV SP, R0
+> > 	MOV (SP), R0		MOV R0, -(SP)
+> 
+> 	Ah, thank you for bringing that memory back to the front of the brain!
+> 	If R0 is available for that then yes indeed that'll do the trick very
+> 	nicely.
+
+Yep, I remember that now!  Often thought it was odd, but it worked
+on all platforms.
+
+The convention was that R0/1 were scratch (used to return results)
+and R2/3/4 had to be saved (they were the caller's first three register
+variables).  R5 was used as a frame pointer (?) and R6/7 you know
+better as SP/PC.
+
+> 	The 11/45 (and 70) behave as "expected" as do the KDJ-11 systems
+> 	(11/73, etc) so unless a person had an 11/40 (or a /20) around it
+> 	would be fairly easy to get bit by the "feature".
+
+We had 40s, and used to dream of owning a 70...  I learned a lot about
+porting Edition 6 to the /23, /60, etc.
+
+> 	When it comes time for MMU "features" I know of one difference between
+> 	the KDJ-11 and the other members that had an MMU (11/44, /70, etc). Was
+> 	fun tracking it down but not something I'd want to do again ;)
+
+Do you recall the PC-board hack on the sep-ID machines that changed
+the MFPI instruction to do something that was expressly prohibited?
+Something about allowing a user program to access something else, for
+some obscure hack or other...
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id UAA05921
+	for pups-liszt; Wed, 8 Sep 1999 20:30:43 +1000 (EST)
+Received: from amber.dds.nl (amber.dds.nl [194.109.21.10])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id UAA05917
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 20:30:34 +1000 (EST)
+Received: from feline.dds.nl (feline.dds.nl [194.109.20.19])
+	by amber.dds.nl (8.9.3/8.9.1) with ESMTP id MAA25230
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 12:39:41 +0200 (MET DST)
+Received: from fatima.dds.nl (hsmade at fatima.dds.nl [194.109.20.21])
+	by feline.dds.nl (8.9.3/8.9.1) with SMTP id MAA16806
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 8 Sep 1999 12:41:33 +0200 (MET DST)
+Date: Wed, 8 Sep 1999 12:41:32 +0200 (MET DST)
+From: Wim Fournier <hsmade@dds.nl>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Newbie question
+Message-ID: <Pine.GSO.3.90.990908123352.21899B-100000 at fatima.dds.nl>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi,
+
+I am the happy owner of a pdp-11/94. I've got it from our local telecom 
+provider (kpn). As I am not a specialist on these machines, I would like 
+to ask some questions:
+- My pdp won't accept mains... when I supply power it doesn't do 
+anything.. I've heard it could be something with the power-supply not 
+being closed.. but I cannot find what it is.. it's fully closed.
+
+- I've got sdi / tu80 and an other diskcontroller... What type of disks 
+can I use to boot from?? (disks = floppy / tape / harddrive)
+
+- What about the 2 connectors at the back.. 1 has 3 pins and can be 
+connected to the mains regulator (or something (a box for switching the 
+mains)) an other one has got 2 pins and no info...
+
+- Is there some info on hardware to connect at the diverse controllers 
+(modem / serial??)
+
+GreetZz
+
+Wim Fournier
+
+hsmade at dds.nl
+
+

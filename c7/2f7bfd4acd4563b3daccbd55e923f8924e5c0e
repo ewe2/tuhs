@@ -1,0 +1,51 @@
+From: peter.jeremy@alcatel.com.au (Peter Jeremy)
+Date: Fri, 15 Feb 2002 14:08:29 +1100
+Subject: [TUHS] Re: Porting Unix v6 to i386
+In-Reply-To: <20020214143050.J241@goldberry.poofy.goof.com>; from
+ agrier@poofygoof.com on Thu, Feb 14, 2002 at 02:30:50PM -0800
+References: <no.id@cim.alcatel.com.au>
+ <20020214143050.J241@goldberry.poofy.goof.com>
+Message-ID: <20020215140829.G78085@gsmx07.alcatel.com.au>
+
+On 2002-Feb-14 14:30:50 -0800, "Aaron J. Grier" <agrier at poofygoof.com> wrote:
+>support for PDP-11 was added to gcc a few months ago.  I don't think
+>it's been well tested, but support exists in current versions of
+>binutils and gcc.
+>
+>http://pdp11.nocrew.org/
+>
+>there's also support for the m68hc11/12 which are 16-bit.
+
+This is only cross-compilation support.  gcc was never designed to be
+hosted in a 16-bit environment.  An i386 gcc is:
+   text    data     bss     dec     hex filename
+1660236   22836   97104 1780176  1b29d0 /usr/libexec/cc1
+
+Even taking into account the savings with 16-bit int's and pointers,
+you won't get the data segment below 64k - and most of gcc's structures
+are dynamically allocated.
+
+>it seems like support for 80{,1,2}86 in gcc should be possible; it just
+>hasn't been done yet.
+
+Given that i386 is already supported, adding support for 16-bit x86
+would be fairly easy.  The only major work would be handling the
+16-bit addressing modes.
+
+>another compiler that might be worth looking at is SDCC
+>http://sdcc.sourceforge.net/ which is currently targeted towards 8-bit
+>MCUs.
+
+Again, no x86 support and I don't believe the code generation is
+that good.
+
+>of course bootstrapping via the original K&R compiler would be the
+>"classic" way to do it, though.  ;)
+
+The PDP-11 is orthogonal and so PCC doesn't have to worry about
+getting particular operands into particular registers.  I suspect
+that supporting the i386's idiosyncracies would be non-trivial.
+
+Peter
+
+

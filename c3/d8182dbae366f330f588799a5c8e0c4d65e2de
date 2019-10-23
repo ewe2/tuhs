@@ -1,0 +1,94 @@
+From tuhs-bounces@minnie.tuhs.org Sun Nov  4 23:41:56 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	FAKE_REPLY_C,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 03b12324
+	for <ml@inbox.vuxu.org>;
+	Sun, 4 Nov 2018 23:41:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DAE10A2237; Mon,  5 Nov 2018 09:41:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EFE67A21F7;
+	Mon,  5 Nov 2018 09:41:39 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E06FBA21D9; Mon,  5 Nov 2018 08:50:20 +1000 (AEST)
+X-Greylist: delayed 1269 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Mon, 05 Nov 2018 08:50:15 AEST
+Received: from imap.thunk.org (imap.thunk.org [74.207.234.97])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 987BEA1FBC
+ for <tuhs@tuhs.org>; Mon,  5 Nov 2018 08:50:15 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=thunk.org; 
+ s=ef5046eb;
+ h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID
+ :Subject:To:From:Date:Sender:Reply-To:Cc:Content-ID:Content-Description:
+ Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
+ In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+ List-Post:List-Owner:List-Archive;
+ bh=ewqup0y7Kz4Brwm4H5JDMOL033V1nQuUXYhoaru27Zs=; b=c0gmpXoVMDRXZtOaUQfFm2ieS5
+ NaRxSRbm6/gq4sLsEu3+f9ndG3SdNQ/rYedRSUxWE1VXtJliyywpVvFhLjkCgFbeZm8o8yH+1Wrvs
+ q2c3xmeNiyqK2Lt/fFn7ZmdzBwWKKv+NtWEDyyx13qbr6q38fVB5DQv4ie2+HVKuQHuA=;
+Received: from root (helo=callcc.thunk.org)
+ by imap.thunk.org with local-esmtp (Exim 4.89)
+ (envelope-from <tytso@thunk.org>)
+ id 1gJQtF-0000OD-NB; Sun, 04 Nov 2018 22:29:05 +0000
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id E27A47A5186; Sun,  4 Nov 2018 17:29:03 -0500 (EST)
+Date: Sun, 4 Nov 2018 17:29:03 -0500
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Message-ID: <20181104222903.GA24498@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+User-Agent: Mutt/1.10.1 (2018-07-13)
+X-SA-Exim-Connect-IP: <locally generated>
+X-SA-Exim-Mail-From: tytso@thunk.org
+X-SA-Exim-Scanned: No (on imap.thunk.org); SAEximRunCond expanded to false
+Subject: Re: [TUHS] Unix APIs: elegant or not?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, 4 Nov 2018, Chris Hanson wrote:
+> Every piece of code that wants to call, say, read(2) needs to handle
+> not only real errors but also needs to special-case EINTR and retry
+> the read. Thus you should virtually never use read(2), only ever
+> something like this:
+> ...
+> And do this for every classic system call, since virtually no client
+> code should ever have to care about EINTR. It was early an
+> implementation expediency that became API and that everyone now has
+> to just deal with because you can’t expect the system call interface
+> you use to do this for you.
+>
+>This is the sort of wart that should’ve been fixed by System V and/or BSD 4 at latest.
+
+But it *was* fixed in BSD, and it's in POSIX as the SA_RESTART flag to
+sigaction (which gives you BSD signal semantics).
+
+POSIX supports both the original V7 and BSD signal semantics, because
+by then there were programs which expected system calls to be
+interrupted by signals (and to be fair, there are times when that's
+the more convenient way of handling an interrupt, as opposed to using
+setjump/longjump to break out of a restartable system call).
+
+					- Ted
+
+P.S.  The original implementation of ERESTARTSYS / ERESTARTNOHAND /
+ERESTARTNOINTR errno handling in Linux's system call return path was
+my fault.  :-)

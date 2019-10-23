@@ -1,0 +1,35 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Thu, 10 Jul 2014 18:43:57 +1000
+Subject: [TUHS] Excise process from a pipe
+In-Reply-To: <CA+Z8kA7v=Uy3xRVhgYhxqwNv4kxS31uO55GK695nfdj8pWBjzA@mail.gmail.com>
+References: <201407100249.s6A2nMh3017869@coolidge.cs.dartmouth.edu>
+ <20140710045223.GA19076@www.oztivo.net>
+ <CA+Z8kA7v=Uy3xRVhgYhxqwNv4kxS31uO55GK695nfdj8pWBjzA@mail.gmail.com>
+Message-ID: <20140710084357.GA27008@www.oztivo.net>
+
+>    On Thu, Jul 10, 2014 at 2:52 PM, Warren Toomey <[1]wkt at tuhs.org> wrote:
+>      Â  Â  Â  Â  close fd 0 and fd 1
+>      Â  Â  Â  Â  dup() read end of pipe 1 to be stdin (fd 0)
+>      Â  Â  Â  Â  dup() write end of pipe 2 to be stdout (fd 1)
+>      Â  Â  Â  Â  exec("/bin/cat")
+
+On Thu, Jul 10, 2014 at 03:06:11PM +1000, Christopher Vance wrote:
+>    Hi, Warren.
+>    That still leaves a process, even if it is a relatively lean one.
+
+Hi Chris! Very true.
+
+>    Besides your fd 0 is presumably already the read end of the input pipe,
+>    and fd 1 is already the write end of the output pipe. You could
+>    probably reduce the whole thing to the last line.
+
+Of course. If the shell set up the pipeline then we only have to exec("cat")
+and leave /bin/cat shuffling the data from one pipe-end to the other.
+
+As there are two distinct pipes, each with their own buffers, I can't see
+a way of coalescing them into a single pipe without, as Chris suggests,
+some kernelly goodness. Indeed, ugliness and complexity kernel-wise!
+
+Cheers, Warren
+
+

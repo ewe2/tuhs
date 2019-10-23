@@ -1,0 +1,101 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Fri, 09 Jun 2017 14:21:57 -0700
+Subject: [TUHS] Array index history
+In-Reply-To: <09918D02-9DA7-46B8-873E-A60489570400@kdbarto.org>
+Message-ID: <e067d88d677a358404d7b561256e6e49c845c81f@webmail.yaccman.com>
+
+I'd like to comment on the technical difficulty of array bounds
+checking.   First of all, there are two kinds.   The simple kind
+computes the index and simply checks that the address is within the
+array.  This can be done fairly easily -- create a pointer to the end
+of the array, and test against it (and with a bit more work,
+"pre-test" loops so you don't need to test each element).  If you
+ignore possible negative subscripts, it's even easier.  And it
+catches a lot of the ugliest bugs.  The harder version checks the
+range of each index in a multidimensional array separately.  This is
+quite a bit more work, although it too can be optimized significantly
+with enough work.  And if C didn't conflate arrays and pointers, I
+suspect this would have been added to C long ago.
+
+But C does conflate arrays and pointers.   When an array is passed
+to a function, all that is passed is the location.  There is no clue
+what the size is.  To even pass in the "end of array" pointer gets
+expensive, since more registers need to be saved and loaded on each
+call.  Correct negative subscripts are not unheard of when passing
+part of an array into a functions.  And utilities like malloc get
+more complicated as well, and for some of malloc's other uses (e.g.,
+in class object creation) the checks would be inappropriate.  And
+finally, because pointers are extensively used in data structures,
+pointer conventions are often used when using arrays (e.g., passing in
+NULL when an array argument is not present or needed).
+
+There is yet another problem.  If array size or shape information
+were somehow passed with arrays, it would be unkind for the language
+to give the programmer no way to find out what the size(s) are.  This
+desire ultimately leads to a rich calling convention like that of
+MATLAB where you can have multiple function outputs, determine how
+many inputs are present, and inputs will disclose their size and shape
+on request.  Good to program in, but function calls are quite a bit
+more expensive.
+
+Realizing that most system code at the time of C's invention was still
+written in assembler and PDP-11's were almost too small in memory to
+do anything interesting (my laptop currently has roughly 243,000 times
+the memory space of a PDP-11!), C's conventions provided a big
+improvement in code correctness with a small cost when compared to
+assembler... 
+
+Steve
+
+----- Original Message -----
+From: david@kdbarto.org
+To:<tuhs at minnie.tuhs.org>
+Cc:
+Sent:Thu, 8 Jun 2017 11:20:24 -0700
+Subject:Re: [TUHS] Array index history
+
+ Arnold gets it right on the Pascal indexing.
+
+ In UCSD Pascal you could specify any array bounds you would like and
+ the compiler would 0 base them for you by always doing a subtraction,
+ or addition if your min was negative, of your min array index. So a
+little
+ run time cost for non-zero based arrays.
+
+ I’m not sure how other Pascal compilers did this.
+
+ I find it interesting that there are now a slew of testing programs
+ (Valgrind, Address Sanitizer, Purify, etc) that will add the
+‘missing’
+ array bounds checking for C.
+
+ David
+
+ > On Jun 7, 2017, at 10:01 AM, tuhs-request at minnie.tuhs.org wrote:
+ > 
+ > Date: Wed, 07 Jun 2017 07:20:43 -0600
+ > From: arnold at skeeve.com
+ > To: tuhs at tuhs.org, ag4ve.us at gmail.com
+ > Subject: Re: [TUHS] Array index history
+ > Message-ID: <201706071320.v57DKhmJ026303 at freefriends.org>
+ > Content-Type: text/plain; charset=us-ascii
+ > 
+ > Pascal (IIRC) allowed you to specify upper and lower bounds,
+something
+ > like
+ > 
+ > foo : array[5..10] of integer;
+ > 
+ > with runtime bounds checking on array accesses. (I could be wrong
+---
+ > it's been a LLLLOOONNNGGG time.)
+ > 
+ > HTH,
+ > 
+ > Arnold
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170609/2cd98147/attachment.html>
+

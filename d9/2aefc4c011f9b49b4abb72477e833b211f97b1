@@ -1,0 +1,102 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Sat, 12 Aug 2017 20:39:53 -0700
+Subject: [TUHS] origin of string.h and ctype.h
+In-Reply-To: <201708130158.v7D1wJJM026143@coolidge.cs.Dartmouth.EDU>
+Message-ID: <fad1f52c0d4027058cf5258c4758ba0e159f9a98@webmail.yaccman.com>
+
+
+Don't have much to add except to note that early FORTRANs had a
+version of IF that took three statement numbers and did a (gasp) GOTO
+to the first if the expression in the IF was negative, to the second
+if it was 0, and to the third if it was positive.   And some
+mainframes had an instruction that did exactly that as well...
+
+Steve
+
+----- Original Message -----
+From: "Doug McIlroy" <doug@cs.dartmouth.edu>
+To:<tuhs at minnie.tuhs.org>
+Cc:
+Sent:Sat, 12 Aug 2017 21:58:19 -0400
+Subject:[TUHS] origin of string.h and ctype.h
+
+ Jon Steinhart <jon at fourwinds.com> asked this question (not on tuhs).
+ It highlights some less well known contributors to research Unix.
+
+ > I'm trying to find out who came up with strcmp and the idea of
+ > returning -1,0,1 for a string comparison. I can see that it's not
+in
+ > my V6 manual but is in V7. Don't see anything in Algol, PL/I, BCPL,
+or B
+
+ The -1,0,1 return from comparisons stems from the interface of qsort,
+ which was written by Lee McMahon. As far as I know, the interface for
+ the comparison-function parameter originated with him, but
+conceivably
+ he borrowed it from some other sort utility. The
+negative-zero-positive
+ convention for the return value encouraged (and perhaps was motivated
+by)
+ this trivial comparison function for integers
+ int compar(a,b) { return(a-b); }
+ This screws up on overflow, so cautious folks would write it with
+ comparisons. And -1,0,1 were the easiest conventional values to
+return:
+ int compar(a,b) {
+ if(a<b) return(-1);
+ if(a>b) return(1);
+ return(0);
+ }
+ qsort was in v2. In v3 a string-comparison routine called "compar"
+ appeared, with a man page titled "string comparison for sort". So the
+ convention was established early on.
+
+ Compar provided the model for strcmp, one of a package of basic
+string
+ operations that came much later, in v7, under the banner of string.h
+ and ctype.h.
+
+ These packages were introduced at the urging of Nils-Peter Nelson, a
+ good friend of the Unix lab, who was in the Bell Labs comp center.
+ Here's the story in his own words.
+
+ I wrote a memo to dmr with some suggestions for additions to C. I
+asked
+ for the str... because the mainframes had single instructions to
+implement
+ them. I know for sure I had a blindingly fast implementation of
+isupper,
+ ispunct, etc. I had a table of length 128 integers for the ascii
+character
+ set; I assigned bits for upper, lower, numeric, punct, control, etc.
+So
+ ispunct(c) became
+
+ #define PUNCT 0400
+ return(qtable[c]&PUNCT)
+ instead of
+ if(c==':' || c ==';' || ...
+ [or
+ switch(c) {
+ default:
+ return 0;
+ case ':':
+ case ';':
+ ...
+ return 1;
+ }
+ MDM]
+ dmr argued people could easily write their own but when I showed
+ him my qtable was 20 times faster he gave in. I also asked for type
+ logical which dmr implemented as unsigned, which was especially
+useful
+ when bitfields were implemented (a 2 bit int would have values -2,
+-1,
+ 0, 1 instead of 0, 1, 2, 3). I requested a way to interject
+assembler,
+ which became asm() (yes, a bad idea).
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170812/c5568a90/attachment.html>
+

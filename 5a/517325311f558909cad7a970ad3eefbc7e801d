@@ -1,0 +1,174 @@
+From: sysyphus@crl.com (Danny R. Brown)
+Date: Mon, 18 Dec 1995 17:24:12 -0800 (PST)
+Subject: What is lonex?
+Message-ID: <Pine.SUN.3.91.951218171736.5935B-100000@crl12.crl.com>
+
+Greetings:
+  I've been playing with the mail system. Mailing to root brings up
+                 can't find usr/lonex/xmail
+This in itself is not a problem, as I only tried this to see what would
+happen. However, I am curious as to what the lonex directory is (was).
+It does not appear in my listing of the contents of tape 2.
+Cheers!
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id PAA16920; Tue, 19 Dec 1995 15:01:03 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id TAA04159; Mon, 18 Dec 1995 19:59:39 -0800
+Date: Mon, 18 Dec 1995 19:59:39 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512190359.TAA04159 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: What is lonex?
+
+Hi -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+> Subject: What is lonex?
+
+	LONEX _was_ "Laboratory Office Network EXperiment" - a project
+	I worked on for many years (we started with V7) and which just ended 
+	a couple or three years ago.  We used 11/44s and 70s right up till 
+	the end - by which point they were all running 2.11BSD.  It was a 
+	really neat system - had a common user namespace (YP before there was 
+	YP;-)) amoungst all systems, a (for the time) spiffy text-mode menuing 
+	interface to shield users from the fact it was Unix and so on.
+
+>   I've been playing with the mail system. Mailing to root brings up
+>                  can't find usr/lonex/xmail
+
+	The sendmail.cf as distributed in the 'GENERIC' system kit wasn't
+	cleaned up enough.  That reference to a local mailer that I use
+	should have been removed.
+
+	Several things to note:
+
+	1) the sendmail.fc file does not exist - on purpose.  You'll need to
+	   perform step 2 and then do a "/usr/lib/sendmail -bz" to freeze
+	   (pre-process for faster loading) the config file.
+
+	2) the sendmail.cf file is not suitable for use without customizing
+	   (filling in the domain name, relay system, etc).
+
+	3) The aliases database (/usr/lib/aliases.{dir,pag}) are not present,
+	   on purpose.  You'll want to edit /usr/lib/aliases to suit local
+	   tastes and then do "/usr/lib/sendmail -bi" to create the dbm
+	   aliases database.
+
+> This in itself is not a problem, as I only tried this to see what would
+> happen. However, I am curious as to what the lonex directory is (was).
+
+	It's a directory I keep local works of art such as the local mailer
+	'xmail' which knew the details about routing mail within the "Office
+	Network" we ran.
+
+> It does not appear in my listing of the contents of tape 2.
+
+	It shouldn't have been there at all.
+
+	You should have something like:
+
+# Mlocal,       P=/bin/mail, F=rlsDFMmn, S=10, R=20, A=mail -d $u
+Mlocal, P=/usr/lonex/bin/xmail, F=lsSDFMmn, S=10, R=20, A=xmail -f $g $u
+
+	in sendmail.cf.  Simply reverse the commented status of the two
+	lines to be:
+
+Mlocal,       P=/bin/mail, F=rlsDFMmn, S=10, R=20, A=mail -d $u
+# Mlocal, P=/usr/lonex/bin/xmail, F=lsSDFMmn, S=10, R=20, A=xmail -f $g $u
+
+	And you'll be all set.
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id PAA00802; Mon, 5 Feb 1996 15:05:34 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA14311; Mon, 5 Feb 1996 15:05:45 +1100
+From: wkt@dolphin.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9602050405.AA14311 at dolphin>
+Subject: Happy New Year
+To: oldunix at minnie.cs.adfa.oz.au
+Date: Mon, 5 Feb 1996 15:05:45 +1100 (EST)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+Hi all,
+        I thought I'd mail to the old unix list to see if you were all
+still alive & hope the new year goes well for you. It's been a quiet few
+months. I've not heard back from Keith Bostic about his archive. However,
+I'm presenting a paper about PDP Unixes at the local Australian Unix Users
+Group summer conference next week, should be fun.
+
+Cheers,
+	Warren	wkt at cs.adfa.oz.au
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id JAA01828; Tue, 6 Feb 1996 09:23:15 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA27644; Tue, 6 Feb 1996 09:22:59 +1100
+From: wkt@dolphin.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9602052222.AA27644 at dolphin>
+Subject: Re: Happy New Year
+To: Milo.Velimirovic at uwlax.edu
+Date: Tue, 6 Feb 1996 09:22:59 +1100 (EST)
+Cc: oldunix at minnie.cs.adfa.oz.au
+In-Reply-To: <9602051823.AA01619 at fingers.acs.uwlax.edu> from "Milo Velimirovic" at Feb 5, 96 12:23:36 pm
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Milo Velimirovic:
+> 
+> Hi,
+> 
+> I'm still alive and well. Thanks for hte note.
+> 
+> I have precious little time to spend with my pdp11's. I'm still looking for
+> a legal Unix to run on either my 11/34 or 11/44. In the meantime I make do
+> with a NeXT cube. 
+> 
+> If possible please make your paper publicly available.
+
+You can now get it at http://minnie/Seminars :-)
+
+I'm still working on licences.
+
+	Warren
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id KAA01873; Tue, 6 Feb 1996 10:03:38 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA01070; Tue, 6 Feb 1996 10:03:18 +1100
+From: wkt@csadfa.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9602052303.AA01070 at dolphin>
+Subject: Re: Happy New Year
+To: wkt at dolphin.cs.adfa.oz.au (Warren Toomey)
+Date: Tue, 6 Feb 1996 10:03:17 +1100 (EST)
+Cc: Milo.Velimirovic at uwlax.edu, oldunix at minnie.cs.adfa.oz.au
+In-Reply-To: <9602052222.AA27644 at dolphin> from "Warren Toomey" at Feb 6, 96 09:22:59 am
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Warren Toomey:
+> 
+> In atricle by Milo Velimirovic:
+> > 
+> > Hi,
+> > 
+> > I'm still alive and well. Thanks for hte note.
+> > 
+> > I have precious little time to spend with my pdp11's. I'm still looking for
+> > a legal Unix to run on either my 11/34 or 11/44. In the meantime I make do
+> > with a NeXT cube. 
+> > 
+> > If possible please make your paper publicly available.
+> 
+> You can now get it at http://minnie/Seminars :-)
+
+Er, um, http://minnie.cs.adfa.oz.au/Seminars/
+
+	Warren
+
+

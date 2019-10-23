@@ -1,0 +1,73 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Tue, 3 Jan 2017 13:33:24 -0500
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <586be7b3.TVbwM5I7Y6v2DJC8%schily@schily.net>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <586bb9dc.iVkFRSLWnXd79ger%schily@schily.net>
+ <AEA71495-53ED-4A19-A1F1-4C8FB20627DB@kdbarto.org>
+ <586be7b3.TVbwM5I7Y6v2DJC8%schily@schily.net>
+Message-ID: <CAC20D2OkX_xcB0AyZXkhtaA10P+mzeC=_jL8dDXJVEUxZwf9kQ@mail.gmail.com>
+
+On Tue, Jan 3, 2017 at 1:04 PM, Joerg Schilling <schily at schily.net> wrote:
+
+> "True64" did use the ILP64 model
+
+
+DEC's Tru64 for Alpha defaulted to LP64 (ex-DECie, Tru64 hacker et al).
+You could get ILP64 with compiler switches, but Tru64 was the first of the
+LP64 systems.    We chaired the 64 bit team between the vendors and ISV
+etc, but I'll not drag that dirt here.
+
+As I like to point out, the greatest gift DEC had to the industry was their
+64 bit (LP64) DEC C and C++​ compiler, after 3-5 years before SGI, Sun et
+al. (much of that work lives today as the Intel compiler BTW).    As a
+result the ISV had to make their code clean.  When Sun, IBM et al followed
+suite a few years later, that had better code to work with***.    Besides
+the Gimpel Flexelint  <http://www.gimpel.com/html/flex.htm> (a very cool
+program and I recommend it highly for serious programmers in the key of
+what Larry has been discussing); Judy Ward's incredible diagnostics in the
+DEC C++ front-end was the only tool that I know of that really told you
+what was going on in your code (funny, I literally am typing this message
+after I just returned from lunch with her today, and we we talking about
+what we had to do in those days to help people).
+
+Since, I've taken on the topic in Quora so I'll not overly repeat myself
+here - there in more detail in that post.  But it really comes down to the
+this:  early (v7 and before) C code assumed sizeof(int) == sizeof(*int).
+When the Vax was introduced, it was just easier to  go ILP32 when moving
+code from the old compilers and in the case of the Vax that made sense but
+was not always true.  I personally built an early 68000 compiler that was
+LP32 and the MIT guys did it ILP32 in their compiler.  I had no tools like
+we would have later, so porting code to the 68000 could >>sometimes<< be an
+issue.   The MIT compiler (or its children) became the standard C compiler
+for most of the 68000 code [we both were "right"  depending on your design
+preference - speed of port vs speed of execution].
+
+When we did Alpha, we had >>long discussions<< about word size.   It was
+agreed that LPxx was not reasonably safe (and that proved to be true).  The
+problem was that -1 @ 64bits is not 0xFFFFFFFF and those sorts of errors
+>>were<< riddled through much code.
+
+
+Today, I think many of those error have been found, and the fact that most
+Intel*64 compilers use LP64 also and code pretty much works is a tribute to
+that work.    That said, when we start using a 128bit int, I'm sure "dirty"
+code will appear.   If I recall, the Gimpel guys will warning you when you
+have a bit mask.
+
+*** Picking on a Sun and the Sun ISV's here a little.   I love to tell the
+stories (<-- plural) of ISV's that found their bugs rate on Solaris drop
+after the Tru64 port; because we forced them to clean up their act some.
+The Sun compiler would accept most anything and generate code, and as Larry
+says, much of the resultant code was garbage.   While I can write crappy
+program in any language, a compiler with excellent warnings or tools like
+Flexelint, will not rid you of structural stuff, it will at least make what
+it written unambiguous and thus less likely to take a surprising nose dive
+in the field.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170103/5348308e/attachment.html>
+

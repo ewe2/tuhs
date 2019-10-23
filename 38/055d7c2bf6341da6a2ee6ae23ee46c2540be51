@@ -1,0 +1,777 @@
+From: staylor@mrynet.com (S. Akmentins-Teilors)
+Date: Wed, 25 Aug 1999 14:13:40 +0000
+Subject: Modified Supnik emulator for the 11
+Message-ID: <199908252113.OAA15059@mrynet.com>
+
+Hi folks.
+
+Having had absolutely no luck getting the Begemot emulator
+to work under FreeBSD 4.0-CURRENT, I've been modifying the 
+Supnik 2.3d emulator for the pdp-11.
+
+So far, I've replaced the KL11 code with a DL11 driver that
+handles four lines.  Additionally, I stole the networked
+tty_net driver from the begemot which now provides telnet
+access to all four ports.  Additionally, I'm working on a
+DZ-11 driver as-we-speak, and will do the DEQNA next.
+These four ports work great on the RSTS/E and 2.11 images
+I have.
+
+As well, I've tweaked the clock timing to significantly
+improve timekeeping for my machine.
+
+Also, I have been modifying an ANSI magtape util package
+(ansir/ansiw/survey) to deal with the mt images that the
+supnik package produces.  Makes for easy exchange into
+RSTS, etc.
+
+Is anyone else out the hacking it up and interested in sharing
+any work?
+
+And if anyone has managed to get the Begemot emulator
+working on recent FreeBSD-4.0-CURRENT versions, I'd be
+grateful if you could share the information and changes with me.
+
+Thanks and regards,
+			-skots
+--
+Scott G. Akmentins-Taylor     InterNet: staylor at mrynet.com
+MRY Systems			        staylor at mrynet.lv
+    (Skots Gregorijs Akmentins-Teilors -- just call me "Skots")
+		----- Labak miris neka sarkans -----
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id HAA33694
+	for pups-liszt; Thu, 26 Aug 1999 07:55:06 +1000 (EST)
+Received: from shelbyville.oai.com (IDENT:root@[204.57.59.144])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id HAA33684
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 07:54:57 +1000 (EST)
+Received: (from mirian at localhost)
+	by shelbyville.oai.com (8.8.8/8.8.8) id RAA08490;
+	Wed, 25 Aug 1999 17:52:23 -0400 (EDT)
+From: Mirian Crzig Lennox <lennox@alcita.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Modified Supnik emulator for the 11
+References: <199908252113.OAA15059 at mrynet.com>
+Original-Sender: lennox at alcita.com
+Organization: Alcita Technologies, Inc.
+Date: 25 Aug 1999 17:52:22 -0400
+In-Reply-To: staylor at mrynet.com's message of "Wed, 25 Aug 1999 14:13:40 +0000"
+Message-ID: <m3iu63plyh.fsf at shelbyville.oai.com>
+Lines: 22
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+staylor at mrynet.com (S. Akmentins-Teilors) writes:
+> 
+> So far, I've replaced the KL11 code with a DL11 driver that
+> handles four lines.  Additionally, I stole the networked
+> tty_net driver from the begemot which now provides telnet
+> access to all four ports.  Additionally, I'm working on a
+> DZ-11 driver as-we-speak, and will do the DEQNA next.
+> These four ports work great on the RSTS/E and 2.11 images
+> I have.
+
+Really!  So far I have had no luck getting Supnik 2.3 to work with the 
+elfje rl02 images on the PUPS archive.  I've always had to use the
+significantly-hacked-up 2.2 emulator instead.  What did you change
+and/or what disk images are you using?
+
+I would love to find an arrangement that makes it possible to run an
+emulated 2.11bsd system with large-capacity RP06 images.. that would
+allow one to have around a quarter-gig of disk space. :)
+
+-- 
+Mirian Crzig Lennox                                Systems Anarchist
+              Invest in America -- buy a Congressman!
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA33801
+	for pups-liszt; Thu, 26 Aug 1999 08:12:04 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA33797
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 08:11:55 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id PAA18433
+	for pups at minnie.cs.adfa.edu.au; Wed, 25 Aug 1999 15:08:53 -0700 (PDT)
+Date: Wed, 25 Aug 1999 15:08:53 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199908252208.PAA18433 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Modified Supnik emulator for the 11
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Scott -
+
+	Howdy!
+
+> From: staylor at mrynet.com (S. Akmentins-Teilors)
+
+> Having had absolutely no luck getting the Begemot emulator
+> to work under FreeBSD 4.0-CURRENT, I've been modifying the 
+
+	Hmmm, the Begemot emulator is difficult to set up due to an
+	inscrutable configfile format but it runs here under BSD/OS 4.0.1
+	after making a couple 'tweeks'.
+
+	I wonder if the problems you're having are due to FreeBSD switching
+	to ELF.  At one time BSD/OS used a.out also and "P11" built/ran
+	just fine - the the OS switched to ELF and P11 would no longer build.
+	I had thought simply editing the instab.s would be enough but after
+	doing that P11 wouldn't run right at all.
+
+	What I did was add a "-u" option to 'geni' and then regenerate the
+	instab.s file ("geni -u ...") _without_ the underscore characters
+	present.  The compiler no longer generates leading '_' characters so
+	having them in the instab.s file causes problems.  Regenerating 
+	and assembling instab.s cleared up all the problems I was having.
+
+	Below are the changes I've made to P11 - some are specific to getting
+	the various IOprogs to run under BSD/OS but the changes to geni.c
+	are OS independent.
+
+	THe other change I had to make was to 'devices.c' to speed up the
+	clock - it's still not right for a PPro-200 but is better than it
+	was (the clock was running far too slow, now it's just ~10% too slow).
+
+> And if anyone has managed to get the Begemot emulator
+> working on recent FreeBSD-4.0-CURRENT versions, I'd be
+
+	Not FreeBSD but if you're getting bit by the same thing I did earlier
+	under another BSD that switched from a.out to ELF the changes below
+	may be useful to you.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+*** ./Utils/geni.c.old	Sat Oct 11 14:01:39 1997
+--- ./Utils/geni.c	Thu Aug 19 21:07:56 1999
+***************
+*** 49,54 ****
+--- 49,55 ----
+  int 	code;			/* current instruction code */
+  int	ccc;			/* current microinstruction count */
+  int	coo = -1;		/* what output to generate */
++ int	no_ul = 0;		/* Don't generate leading _ */
+  int	profiler_output;
+  char	*ul;			/* the undeline character, if needed */
+  char	*ofile;			/* output file name */
+***************
+*** 123,131 ****
+  	int	opt;
+  
+  	set_argv0(argv[0]);
+! 	while((opt = getopt(argc, argv, "vmpo:")) != EOF)
+  		switch(opt) {
+  
+  		case 'v':
+  			verbose++;
+  			break;
+--- 124,135 ----
+  	int	opt;
+  
+  	set_argv0(argv[0]);
+! 	while((opt = getopt(argc, argv, "uvmpo:")) != EOF)
+  		switch(opt) {
+  
++ 		case 'u':
++ 			no_ul++;
++ 			break;
+  		case 'v':
+  			verbose++;
+  			break;
+***************
+*** 275,284 ****
+  tab_out_i386as()
+  {
+  	printf("\t.file\t\"%s\"\n", ifile);
+! 	printf("\t.globl\t_instab\n");
+  	printf(".text\n");
+  	printf("\t.align\t2\n");
+! 	printf("_instab:\n");
+  	for(code = 0; code < 0x10000; code++) {
+  		printf("\t.long\t");
+  		for(ccc = 0; ccc < 4; ccc++)
+--- 279,288 ----
+  tab_out_i386as()
+  {
+  	printf("\t.file\t\"%s\"\n", ifile);
+! 	printf("\t.globl\t%s\n", no_ul ? "instab" : "_instab");
+  	printf(".text\n");
+  	printf("\t.align\t2\n");
+! 	printf("%s:\n", no_ul ? "instab" : "_instab");
+  	for(code = 0; code < 0x10000; code++) {
+  		printf("\t.long\t");
+  		for(ccc = 0; ccc < 4; ccc++)
+***************
+*** 632,637 ****
+--- 636,646 ----
+  	switch(coo) {
+  
+  	case COO_i386as:
++ 		if (no_ul)
++ 			{
++ 			ul = "";
++ 			break;
++ 			}
+  	case COO_sun_as:
+  	case COO_i386_aout:
+  		ul = "_";
+*** ./IOProgs/epp_bpf.c.old	Sat Oct 11 14:02:28 1997
+--- ./IOProgs/epp_bpf.c	Wed Jun 17 22:16:50 1998
+***************
+*** 341,347 ****
+  			panic("read(bpf): %s", strerror(errno));
+  		bpf_ptr = bpf_buf;
+  		bpf_end = bpf_buf + ret;
+! 		INFO("read_input: bpf_read = %d.\n", ret);
+  	}
+  
+  	/*
+--- 341,347 ----
+  			panic("read(bpf): %s", strerror(errno));
+  		bpf_ptr = bpf_buf;
+  		bpf_end = bpf_buf + ret;
+! 		info("read_input: bpf_read = %d.\n", ret);
+  	}
+  
+  	/*
+***************
+*** 351,357 ****
+  	bpf_ptr = bpf_ptr + BPF_WORDALIGN(h->bh_hdrlen + h->bh_caplen);
+  
+  	if(h->bh_caplen < h->bh_datalen) {
+! 		INFO("caplen(%lu) < datalen(%lu) ??? - packet dropped.\n", h->bh_caplen, h->bh_datalen);
+  		ret = 0;
+  	} else {
+  		*pbuf = (u_char *)h + h->bh_hdrlen;
+--- 351,357 ----
+  	bpf_ptr = bpf_ptr + BPF_WORDALIGN(h->bh_hdrlen + h->bh_caplen);
+  
+  	if(h->bh_caplen < h->bh_datalen) {
+! 		info("caplen(%lu) < datalen(%lu) ??? - packet dropped.\n", h->bh_caplen, h->bh_datalen);
+  		ret = 0;
+  	} else {
+  		*pbuf = (u_char *)h + h->bh_hdrlen;
+***************
+*** 360,366 ****
+  
+  	*more = bpf_ptr < bpf_end;
+  
+! 	INFO("read_input: %d. (more=%d)\n", ret, *more);
+  
+  	return ret;
+  }
+--- 360,366 ----
+  
+  	*more = bpf_ptr < bpf_end;
+  
+! 	info("read_input: %d. (more=%d)\n", ret, *more);
+  
+  	return ret;
+  }
+*** ./IOProgs/epp_tun.c.old	Sat Jan 31 02:52:26 1998
+--- ./IOProgs/epp_tun.c	Tue Aug 17 19:47:37 1999
+***************
+*** 13,19 ****
+--- 13,21 ----
+  # include <sys/ioctl.h>
+  # include <sys/select.h>
+  # include <net/if.h>
++ #ifndef	__bsdi__
+  # include <net/if_var.h>
++ #endif
+  # include <net/if_tun.h>
+  # include "epp.h"
+  # include "../libutil/util.h"
+***************
+*** 44,50 ****
+  	argv += optind;
+  
+  	if(argc != 3)
+! 		panic("need one arg");
+  
+  	parse_ether(my_ether, argv[1]);
+  	parse_ether(other_ether, argv[2]);
+--- 46,52 ----
+  	argv += optind;
+  
+  	if(argc != 3)
+! 		panic("need two args");
+  
+  	parse_ether(my_ether, argv[1]);
+  	parse_ether(other_ether, argv[2]);
+*** ./Config/M-i386-bsdi.old	Sun Oct 12 07:10:03 1997
+--- ./Config/M-i386-bsdi	Wed Jun 17 20:50:19 1998
+***************
+*** 27,33 ****
+   * define the cookie for the geni program (look into Utils/geni.c) 
+   * If you want geni output an object file (see later) this cookie
+   * is used only for the profiler output */
+! /* # define MAKE_GENIS */
+  # define MAKE_GENIE_COOKIE "i386-as"
+  
+  /* define command to set data limit to K kilobytes, if you need it */
+--- 27,33 ----
+   * define the cookie for the geni program (look into Utils/geni.c) 
+   * If you want geni output an object file (see later) this cookie
+   * is used only for the profiler output */
+! # define MAKE_GENIS
+  # define MAKE_GENIE_COOKIE "i386-as"
+  
+  /* define command to set data limit to K kilobytes, if you need it */
+***************
+*** 43,49 ****
+  
+  /* if you have the gnu libbfd and liberty you can geni have to output
+   * object code instead of C or assembler. You must define the following: */
+! # define MAKE_HAVE_LIBBFD
+  
+  /* if you have it, you may have to set up the right paths. */
+  # define MAKE_CC_BFD_INCL 	-I/usr/gnu/include
+--- 43,49 ----
+  
+  /* if you have the gnu libbfd and liberty you can geni have to output
+   * object code instead of C or assembler. You must define the following: */
+! /* # define MAKE_HAVE_LIBBFD */
+  
+  /* if you have it, you may have to set up the right paths. */
+  # define MAKE_CC_BFD_INCL 	-I/usr/gnu/include
+*** ./device.c.old	Sat Oct 11 14:17:24 1997
+--- ./device.c	Thu Aug 19 23:05:53 1999
+***************
+*** 7,14 ****
+   * generic device support
+   */
+  
+! # define TINTERVAL	20	/* msecs between clock ticks */
+! 
+  
+  typedef struct Async	Async;
+  typedef struct Timer	Timer;
+--- 7,14 ----
+   * generic device support
+   */
+  
+! # define TINTERVAL	16	/* msecs between clock ticks */
+! 				/* Should be 16.666666 for US 60hz */
+  
+  typedef struct Async	Async;
+  typedef struct Timer	Timer;
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA33844
+	for pups-liszt; Thu, 26 Aug 1999 08:18:19 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA33839
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 08:18:11 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id PAA18523
+	for pups at minnie.cs.adfa.edu.au; Wed, 25 Aug 1999 15:17:56 -0700 (PDT)
+Date: Wed, 25 Aug 1999 15:17:56 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199908252217.PAA18523 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Modified Supnik emulator for the 11
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Mirian Crzig Lennox <lennox at alcita.com>
+> Really!  So far I have had no luck getting Supnik 2.3 to work with the 
+> elfje rl02 images on the PUPS archive.  I've always had to use the
+
+	Hmm, I've been using Supnik's 2.3 emulator (on and off - I prefer
+	running the real 11/73 though most of the time) and now that "vi"
+	works (there was a bug in the "div" instruction which Bob fixed not
+	all that long ago for 2.3) the emulator's more useful than it was.
+
+> significantly-hacked-up 2.2 emulator instead.  What did you change
+> and/or what disk images are you using?
+	
+	You might try using the 2.11 images from the PUPS CD instead.  Create
+	a "tape file" (the instructions are in the 2.11 distribution directory)
+	and then use a "toggle in" bootstrap for the "mt" device.  
+
+	The config file I use for this is:
+
+set cpu 22B
+set cpu 2048K
+set rp0 rp06
+set rl0 rl02
+set rl1 rl02
+set rl2 rl02
+set rl3 rl02
+set tm0 locked
+at rp0 rp0
+at rl0 root.rl02
+at rl1 usr1.rl02
+at rl2 usr2.rl02
+at rl3 usr3.rl02
+at rk0 junk0.rk05
+at rk1 junk1.rk05
+at rk2 junk2.rk05
+at rk3 junk3.rk05
+at rk4 junk4.rk05
+at rk5 junk5.rk05
+at rk6 junk6.rk05
+at rk7 junk7.rk05
+at tm0 mt0
+at tm1 mt1
+# at tm1 /zip/mt0
+
+	Place your "2.11 boot tape file" (the 'makesimtape' program which is
+	also available in the archive and on the CD is used to create Supnik
+	emulator tape files) in to the file "mt0" and then follow the
+	instructions in the setup/install documentation on how to boot a tape
+	if you don't have tape bootroms (it's less than a dozen instructions
+	you need to toggle in the octal for).
+
+
+	Oh - and since the "RP06" disk is just an image to the host computer
+	(to the PDP-11 it is a RP06 ;)) the  image IS interchangeable between
+	emulators - I've used the same RP06 image under both (obviously not
+	at the same time) the Supnik and Begemot emulators.  Works fine.
+
+	The biggest problem with the Supnik emulator is that the clock runs
+	far far too fast (at least with a PPro-200 running the emulator) and
+	after running for an extended period of time the PDP-11 system ends
+	up several hours in the future. 
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA33945
+	for pups-liszt; Thu, 26 Aug 1999 08:25:13 +1000 (EST)
+Received: from begemot.org (negara.cs.waikato.ac.nz [130.217.248.112])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA33939
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 08:25:02 +1000 (EST)
+Received: (from joerg at localhost)
+	by begemot.org (8.9.2/8.9.2) id KAA11280;
+	Thu, 26 Aug 1999 10:25:27 +1200 (NZST)
+	(envelope-from joerg)
+Date: Thu, 26 Aug 1999 10:25:27 +1200
+From: "Joerg B. Micheel" <joerg@begemot.org>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au, joerg at begemot.org
+Subject: Re: Modified Supnik emulator for the 11
+Message-ID: <19990826102527.A11262 at begemot.org>
+References: <199908252208.PAA18433 at moe.2bsd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+In-Reply-To: <199908252208.PAA18433 at moe.2bsd.com>; from Steven M. Schultz on Wed, Aug 25, 1999 at 03:08:53PM -0700
+Organization: Begemot Computer Associates
+Operating-System: ... powered by FreeBSD
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wed, Aug 25, 1999 at 03:08:53PM -0700, Steven M. Schultz wrote:
+> ! # define TINTERVAL	16	/* msecs between clock ticks */
+> ! 				/* Should be 16.666666 for US 60hz */
+
+That's correct. I believe there are also problems with p11 missing
+a couple of timer interrupts. All of the complaints are entirely
+appropriate, the whole thing needs major cleanup. I hope one of us
+will finally get around doing some serious work on it again, soon.
+
+	Joerg
+-- 
+Joerg B. Micheel			Email: <joerg at begemot.org>
+Begemot Computer Associates		Phone: +64 7 8562148
+6 Kakanui Avenue, Hillcrest		Fax:   +64 7 8562148
+Hamilton, New Zealand			Pager: +64 868 38222
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA34224
+	for pups-liszt; Thu, 26 Aug 1999 08:57:38 +1000 (EST)
+Received: from mrynet.com (pups at mrynet.com [24.234.53.177])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA34220
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 08:57:26 +1000 (EST)
+Received: (from pups at localhost)
+	by mrynet.com (8.9.3/8.9.3) id PAA15765;
+	Wed, 25 Aug 1999 15:56:49 -0700 (PDT)
+	(envelope-from pups)
+Posted-Date: Wed, 25 Aug 1999 15:56:49 -0700 (PDT)
+Message-Id: <199908252256.PAA15765 at mrynet.com>
+From: pups@mrynet.com (PUPS mailing list)
+Date: Wed, 25 Aug 1999 15:56:49 +0000
+X-Mailer: Mail User's Shell (7.2.6 beta(3) 11/17/96)
+To: Mirian Crzig Lennox <lennox at alcita.com>
+Subject: Re: Modified Supnik emulator for the 11
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> staylor at mrynet.com (S. Akmentins-Teilors) writes:
+
+> > So far, I've replaced the KL11 code with a DL11 driver that
+> > handles four lines.  Additionally, I stole the networked
+> > tty_net driver from the begemot which now provides telnet
+> > access to all four ports.  Additionally, I'm working on a
+> > DZ-11 driver as-we-speak, and will do the DEQNA next.
+> > These four ports work great on the RSTS/E and 2.11 images
+> > I have.
+> 
+> Really!  So far I have had no luck getting Supnik 2.3 to work with the 
+> elfje rl02 images on the PUPS archive.  I've always had to use the
+> significantly-hacked-up 2.2 emulator instead.  What did you change
+> and/or what disk images are you using?
+
+I've changed nothing at all really as far as 2.11 goes.  Worked just 
+dandy even before my hacking.
+
+> I would love to find an arrangement that makes it possible to run an
+> emulated 2.11bsd system with large-capacity RP06 images.. that would
+> allow one to have around a quarter-gig of disk space. :)
+
+The complexities of begemot, and the relative ease of use of Supnik
+was the driving force behind my sticking it out with Supnik.   I figured
+I'd make it do what I want, since I could make it work in the first place.
+Since I'm into the actual hardware emulation, as well as device drivers,
+it is fulfilling my need here until I ever get a real PDP-11 again.
+
+-skots
+--
+Scott G. Akmentins-Taylor     InterNet: staylor at mrynet.com
+MRY Systems			        staylor at mrynet.lv
+    (Skots Gregorijs Akmentins-Teilors -- just call me "Skots")
+		----- Labak miris neka sarkans -----
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA34419
+	for pups-liszt; Thu, 26 Aug 1999 09:17:34 +1000 (EST)
+Received: from mrynet.com (pups at mrynet.com [24.234.53.177])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA34414
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 09:17:26 +1000 (EST)
+Received: (from pups at localhost)
+	by mrynet.com (8.9.3/8.9.3) id QAA15909;
+	Wed, 25 Aug 1999 16:16:59 -0700 (PDT)
+	(envelope-from pups)
+Posted-Date: Wed, 25 Aug 1999 16:16:59 -0700 (PDT)
+Message-Id: <199908252316.QAA15909 at mrynet.com>
+From: pups@mrynet.com (PUPS mailing list)
+Date: Wed, 25 Aug 1999 16:16:59 +0000
+X-Mailer: Mail User's Shell (7.2.6 beta(3) 11/17/96)
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Subject: Re: Modified Supnik emulator for the 11
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> > From: staylor at mrynet.com (S. Akmentins-Teilors)
+> 
+> 	THe other change I had to make was to 'devices.c' to speed up the
+> 	clock - it's still not right for a PPro-200 but is better than it
+> 	was (the clock was running far too slow, now it's just ~10% too slow).
+
+The same similar tweak on Supnik has me to within seconds on the hour.  They're
+all gonna start losing it under load anyways, but that's life when running
+an emulator under non-RT ;)
+
+> > And if anyone has managed to get the Begemot emulator
+> > working on recent FreeBSD-4.0-CURRENT versions, I'd be
+> 
+> 	Not FreeBSD but if you're getting bit by the same thing I did earlier
+> 	under another BSD that switched from a.out to ELF the changes below
+> 	may be useful to you.
+
+Actually, I had resolved issue of linking and the prepended underscores before.  
+The compile has always been clean, but the program simply doesn't work.
+For example, run with -b from the command line, it returns the shell prompt
+almost immediately.  Otherwise, when booting it simply indicates:
+	DCOK = 1 asserted
+and goes back to the emulator prompt.
+That happens regardless of disk image used, etc... I can't effect anything
+other than these exhibitions.
+
+Perhaps somewith with access to 4.0-CURRENT, and who has worked with the
+code itself could find the time to figured it out? ;)
+
+-skots
+--
+Scott G. Akmentins-Taylor     InterNet: staylor at mrynet.com
+MRY Systems			        staylor at mrynet.lv
+    (Skots Gregorijs Akmentins-Teilors -- just call me "Skots")
+		----- Labak miris neka sarkans -----
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA34673
+	for pups-liszt; Thu, 26 Aug 1999 09:53:48 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA34669
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 09:53:36 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.1) id JAA07610;
+	Thu, 26 Aug 1999 09:53:30 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <199908252353.JAA07610 at henry.cs.adfa.edu.au>
+Subject: Re: Modified Supnik emulator for the 11
+In-Reply-To: <199908252113.OAA15059 at mrynet.com> from "S. Akmentins-Teilors" at "Aug 25, 1999  2:13:40 pm"
+To: staylor at mrynet.com (S. Akmentins-Teilors)
+Date: Thu, 26 Aug 1999 09:53:30 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by S. Akmentins-Teilors:
+[Supnik emulator improvements]
+> Is anyone else out the hacking it up and interested in sharing
+> any work?
+> 			-skots
+
+I'm sure Bob Supnik would appreciate your changes.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA36011
+	for pups-liszt; Thu, 26 Aug 1999 15:26:58 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA36007
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 15:26:51 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id WAA20951
+	for pups at minnie.cs.adfa.edu.au; Wed, 25 Aug 1999 22:26:27 -0700 (PDT)
+Date: Wed, 25 Aug 1999 22:26:27 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199908260526.WAA20951 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Modified Supnik emulator for the 11
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: staylor at mrynet.com (S. Akmentins-Teilors)
+> 
+> The same similar tweak on Supnik has me to within seconds on the hour. They're
+> all gonna start losing it under load anyways, but that's life when running
+> an emulator under non-RT ;)
+
+	Actually my problem with the Supnik emulator is that the clock runs
+	_very_ fast - the "PDP11" ends up being hours ahead of the real time
+	after recompiling a kernel or two.
+
+	p11 on the other hand tends to run slow - tweeking the device.c value
+	was aimed at speeding up the clock.  
+
+>Actually,I had resolved issue of linking and the prepended underscores before. 
+
+	With a change to 'geni.c' or by editing the instab.s file?
+
+> For example, run with -b from the command line, it returns the shell prompt
+> almost immediately.  Otherwise, when booting it simply indicates:
+> 	DCOK = 1 asserted
+
+	Yep - that's what I was seeing until I regenerated the instab.s file
+	by running 'geni'.  The emulator would compile and link with a 
+	manually edited instab.s file but simply would not run correctly.  
+
+	Since the same RP06 image worked with the Supnik emulator I knew it
+	wasn't in the 2.11BSD area.
+
+	Steven
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id RAA36475
+	for pups-liszt; Thu, 26 Aug 1999 17:02:07 +1000 (EST)
+Received: from mrynet.com (pups at mrynet.com [24.234.53.177])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id RAA36471
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 26 Aug 1999 17:02:00 +1000 (EST)
+Received: (from pups at localhost)
+	by mrynet.com (8.9.3/8.9.3) id AAA17892;
+	Thu, 26 Aug 1999 00:01:40 -0700 (PDT)
+	(envelope-from pups)
+Posted-Date: Thu, 26 Aug 1999 00:01:40 -0700 (PDT)
+Message-Id: <199908260701.AAA17892 at mrynet.com>
+From: pups@mrynet.com (PUPS mailing list)
+Date: Thu, 26 Aug 1999 00:01:40 +0000
+X-Mailer: Mail User's Shell (7.2.6 beta(3) 11/17/96)
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Subject: Re: Modified Supnik emulator for the 11
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> Hi -
+Hi - :)
+
+> > From: staylor at mrynet.com (S. Akmentins-Teilors)
+> 
+> 
+> >Actually,I had resolved issue of linking and the prepended underscores before. 
+> 
+> 	With a change to 'geni.c' or by editing the instab.s file?
+
+It was a change to geni.c.   The Begemot I have (2.3) had apparent mods
+already done for FreeBSD, but I still had to hack geni to resolv the
+underscores.   it was a simple change though, as I recall.
+
+> > For example, run with -b from the command line, it returns the shell prompt
+> > almost immediately.  Otherwise, when booting it simply indicates:
+> > 	DCOK = 1 asserted
+> 
+> 	Yep - that's what I was seeing until I regenerated the instab.s file
+> 	by running 'geni'.  The emulator would compile and link with a 
+> 	manually edited instab.s file but simply would not run correctly.  
+
+I tried the patches against the virgin begemot 2.3 code, and I'm still 
+seeing the unresolved's due to underscores.   Just FYI that they don't
+apply to the Flea-3.0-CURRENT.
+
+Thanks HEAPs tho ;)
+			-skots
+--
+Scott G. Akmentins-Taylor     InterNet: staylor at mrynet.com
+MRY Systems			        staylor at mrynet.lv
+    (Skots Gregorijs Akmentins-Teilors -- just call me "Skots")
+		----- Labak miris neka sarkans -----
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA38512
+	for pups-liszt; Fri, 27 Aug 1999 02:36:18 +1000 (EST)
+Received: from Zeke.Update.UU.SE (IDENT:2026 at Zeke.Update.UU.SE [130.238.11.14])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA38503
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 27 Aug 1999 02:36:04 +1000 (EST)
+Received: from localhost (bqt at localhost)
+	by Zeke.Update.UU.SE (8.8.8/8.8.8) with SMTP id SAA23443;
+	Thu, 26 Aug 1999 18:34:41 +0200
+Date: Thu, 26 Aug 1999 18:34:39 +0200 (MET DST)
+From: Johnny Billquist <bqt@Update.UU.SE>
+To: Mirian Crzig Lennox <lennox at alcita.com>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: Modified Supnik emulator for the 11
+In-Reply-To: <m3iu63plyh.fsf at shelbyville.oai.com>
+Message-ID: <Pine.VUL.3.93.990826183419.23125A-100000 at Zeke.Update.UU.SE>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 25 Aug 1999, Mirian Crzig Lennox wrote:
+
+> I would love to find an arrangement that makes it possible to run an
+> emulated 2.11bsd system with large-capacity RP06 images.. that would
+> allow one to have around a quarter-gig of disk space. :)
+
+RP06 are 176 MB... :-)
+
+	Johnny
+
+Johnny Billquist                  || "I'm on a bus
+                                  ||  on a psychedelic trip
+email: bqt at update.uu.se           ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+
+

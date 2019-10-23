@@ -1,0 +1,58 @@
+From: michael@kjorling.se (Michael =?utf-8?B?S2rDtnJsaW5n?=)
+Date: Sat, 28 Apr 2018 16:33:51 +0000
+Subject: [TUHS] rm command
+In-Reply-To: <c97f4604-7e46-3e34-f1d0-5ed58763c5ff@nomadlogic.org>
+References: <20180425221716.B4C6718C086@mercury.lcs.mit.edu>
+ <alpine.BSF.2.21.999.1804280201170.62425@aneurin.horsfall.org>
+ <alpine.BSF.2.02.1804271412490.38781@frieza.hoshinet.org>
+ <c97f4604-7e46-3e34-f1d0-5ed58763c5ff@nomadlogic.org>
+Message-ID: <20180428163351.GG20510@h-174-65.A328.priv.bahnhof.se>
+
+On 27 Apr 2018 11:17 -0700, from pete at nomadlogic.org (Pete Wright):
+>>>    On my FreeBSD server:
+>>> 
+>>>     % ls -l /bin/ps
+>>>     -r-xr-xr-x  1 root  wheel  35640 Oct 15  2017 /bin/ps
+>>> 
+>>>    On my crappy MacBook:
+>>> 
+>>>     % ls -l /bin/ps
+>>>     -rwsr-xr-x  1 root  wheel  51200 Jul 15  2017 /bin/ps
+>> 
+>> Debian 9:
+>> 
+>> nicci at jesustheasus:~$ ls -l $(which ps)
+>> -rwxr-xr-x 1 root root 129336 Nov 22  2016 /bin/ps
+>> 
+>> Debian 8 kFreeBSD:
+>> 
+>> [usotsuki at licca ~]$ ls -l $(which ps)
+>> -rwxr-xr-x 1 root root 93088 Mar  6  2015 /bin/ps
+
+Debian 7 is the same, except /bin/ps is 93120 bytes there.
+
+
+> interesting how the gnu userland marks ps as owner-writable, not
+> sure it matters, but interesting...
+
+That's more likely the package manager, or the packaging done by the
+package maintainer, than it is anything about GNU per se.
+
+I've got a gazillion 0755 0:0 binaries on my system. In fact, running
+`ls -l /usr/bin | grep -v '^.rwx'` on my desktop Debian box returns
+only a handful of hits, all of which are u=rws and a few of which are
+g=r-s.
+
+If you're root enough to take advantage of the owner-writable bit on a
+file owned by root, then you're root enough to make quite a mess even
+if they were mode 0555 or even 0111.
+
+If you want weird, then tell me why on Earth /bin/ping _really_ needs
+to be setuid root on Linux (has no one heard of capabilities?), or why
+/bin/fusermount is, of all modes they could choose from, `-rwsr-xr--`.
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael at kjorling.se
+  “The most dangerous thought that you can have as a creative person
+              is to think you know what you’re doing.” (Bret Victor)
+

@@ -1,0 +1,67 @@
+From: dgunix@gmail.com (DG UX)
+Date: Sat, 31 Jul 2010 21:49:32 +0300
+Subject: [TUHS] Making progress with old DG/UX virtualization. Need advice.
+Message-ID: <AANLkTin1yeFg1Y2A-pzz+-iKBX2yfj5UoP2V9-TMMpnZ@mail.gmail.com>
+
+As you might remember from a previous post, I am trying to virtualize
+/ emulate an old Data General UNIX system to a VM env'.
+This is my progress so far (after a lot of reading, searching and
+understanding who is who and what does it all mean) :
+
+1. I've DD'ed an exact copy of the raw system disk as an image on my Linux box.
+2. Loaded it up with most virtualization products out there - VMware,
+VirtualBox, Xen/KVM/Qemu, Bochs and such.
+ They all work, ie, bootloader works and getting a DG/UX menu to
+choose my proper kernel/system disk.
+3. This is where they fail, as they cannot find the system's original
+Adaptec PCI SCSI Controller (which is an AIC-7880 chip).
+ Most VM products only support LSI/BusLogic SCSI, and IDE of course.
+
+As I see it, I have a few things I can do to make it work:
+
+1. write an Adaptec driver for a VM product.
+2. write an LSI/BusLogic driver for DG/UX or implement virtio drivers into it.
+3. get IDE support working.
+
+1st 2 options, as I understand from software eng' and other
+professionals, are very difficult.
+The 3rd option is interesting :
+
+On one hand, I have an config file with all of DG/UX's supported
+hardware, IDE is simply not there (would love for someone else to have
+a look if possible. Just say so and I'll send you the file).
+_and_  docs say "Data General has not tested or qualified the use  of
+IDE devices in AViiON AV 2100 systems".
+
+_BUT_, on the other hand, BIOS seems to have plenty of IDE config
+options and also docs say:
+
+ "IDE Interface - Disabled/Auto" , "OnBoard IDE Controller - enabled".
+" The AV 2100 board set consists of  a system board with six PCI
+expansion slots, three ISA expansion slots, and several embedded
+controller devices (PCI video, SCSI, Network, and IDE).
+
+and "..A SCSI-III AIC-7880 controller for connecting up to seven 8-bit
+narrow SCSI devices.  You can also connect a mixture of fifteen 8-bit
+narrow and 16-bit wide SCSI devices to the controller—maximum of seven
+8-bit narrow SCSI devices. PCI-enhanced Integrated Drive Electronics
+(IDE) hard disk interface that supports two hard disk drives"
+
+Also " Since the lower bay contains a SCSI CD-ROM drive, only one
+other SCSI device can be installed.  You can install an IDE device in
+the remaining bay. "
+
+And much more. The question is, if I have an exact image of the
+primary disk and I did try to load it via an IDE drive (in Qemu/
+VirtualBox etc), didn't work out. Like last time, bootloader booted up
+and then hang after trying to load the kernel.
+
+Is there something I can try and do as a different config in my image file?
+Anything else you can think of?
+Please let me know if you need any file sent over.
+Any help would be greatly appreciated.
+
+Thanks,
+Adam
+
+

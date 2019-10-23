@@ -1,0 +1,84 @@
+From: charles.unix.pro@gmail.com (Charles Anthony)
+Date: Tue, 21 Nov 2017 14:47:54 -0800
+Subject: [TUHS] A man easter-egg (gimme gimme gimme)
+In-Reply-To: <CANiMCTPZuCuCt7pbN=EDh4zfi_XnWJ7_Tqj1BLuH81OKC83c7g@mail.gmail.com>
+References: <CANiMCTPZuCuCt7pbN=EDh4zfi_XnWJ7_Tqj1BLuH81OKC83c7g@mail.gmail.com>
+Message-ID: <CANV78LQ=iiRL1XO7xwtv+faER6ZLJWF8=gexdAA4-ab1AnY5gA@mail.gmail.com>
+
+On Tue, Nov 21, 2017 at 1:03 PM, Edouard KLEIN <edouardklein at gmail.com>
+wrote:
+
+> Hi all,
+>
+> An easter-egg in the version of man that is installed on the most popular
+> Linux distros has recently been discovered after being there for 6 years:
+>
+> https://unix.stackexchange.com/questions/405783/why-does-
+> man-print-gimme-gimme-gimme-at-0030
+>
+> It is for example discussed here:
+> https://news.ycombinator.com/item?id=15747313
+>
+> It makes man print 'gimme gimme gimme' if called at "Half past twelve", as
+> in the ABBA song.
+>
+> I check on BSD, but man seems to be a shell script on FreeBSD, so it's
+> immune from the easter egg:
+> https://github.com/freebsd/freebsd/blob/master/usr.bin/man/man.sh
+>
+> Do you have any UNIX easter-egg stories ? Putting some in, or discovering
+> one...
+>
+> Was this kind of humor tolerated in the professional settings where UNIX
+> first circulated, or was it frowned upon ?
+>
+>
+I didn't discover this one, but came across documentation of it when
+researching the 3b2. (http://ferretronix.com/tech/3b2/):
+
+The AT&T 3b2 (System V R3.2)
+
+lboot prompts you with “Enter path name:”
+> enter “magic mode”
+> lboot replies “POOF!” “A hollow voice says (directory)”
+> Instead of load-and-run, it loads the kernel
+> and then breakpoints before entering with the message
+> “You are standing inside of a large unexecuted /boot/KERNEL
+> The only exit you see is at 0x108000”
+
+
+It's in the source code: (/usr/src/uts/3b2/boot/lboot/subr.c)
+
+                /*
+                 * check for secret "magic mode" feature
+                 */
+                if (0 == strcmp(sp,"magic")) {
+                    char *mp;
+
+                    if ((mp=strtok((char*)NULL,"\r\n\t ")) == NULL || 0 !=
+strcmp(mp,"mode"))
+                        break;
+
+                    MagicMode = TRUE;
+                    printf("\nPOOF!");
+
+                    if ((mp=strtok((char*)NULL,"\r\n\t ")) != NULL)
+                        {
+                        if (*mp == '/')
+                            ++mp;
+
+                        strcat(strcpy(slash_boot,"/"), mp);
+
+                        printf("   A hollow voice says \"%s\".",
+slash_boot);
+                        }
+
+                    printf("\n");
+                    continue;
+                }
+
+-- Charles
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171121/2d770a5c/attachment.html>
+

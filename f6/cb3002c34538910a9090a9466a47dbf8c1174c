@@ -1,0 +1,125 @@
+From: pete@dunnington.u-net.com (Pete Turnbull)
+Date: Sat, 19 Jan 2002 22:18:32 GMT
+Subject: [pups] 2.11BSD disklabel-programm
+In-Reply-To: "lothar felten" <lothar.felten@gmx.net>
+        "Re: [pups] 2.11BSD disklabel-programm" (Jan 19, 20:47)
+References: <PKEKIKBJNMFKLFAMAKINKEDPCBAA.lothar.felten@gmx.net>
+Message-ID: <10201192218.ZM9996@mindy.dunnington.u-net.com>
+
+On Jan 19, 20:47, lothar felten wrote:
+> hi there!
+>
+> well the pdp was once a pdp 11/23+ so
+> enclosure and backplane should be
+> the same as a 11/23 (ba 23).
+
+If I were to be really picky, I'd say you meant microPDP-11/23.  11/23-plus
+would mean a BA11-S enclosure with a different type of backplane :-)
+
+> backplane should
+> be Q22/CD configuration, but
+> i´ll open the box and look for the 501-
+> number to be sure.
+
+Not the 54- number, that's only the PCB part.  The backplane itself has a
+model number; for a BA23 it should be H9728-A.
+
+In an H9728-A the top three slots are Q22/CD-interconnect, and the rest are
+Q22/Q22 serpentine (the 11/23-plus backplanes are different).  When I
+replied to your earlier email I assumed you just gave the order of the
+boards, not the layout.  The layout should be (reverse the positions of CPU
+and memory if you wish):
+
+    ---------KDJ11-B-CPU---------
+    ---------MSV11-memory--------
+    ------------RLV12------------
+    ----RQDX3----   ----TQK50----
+        empty       ----DEQNA----
+
+I'm guessing you have a single memory board, probably an MSV11-Q (M7551),
+and an RLV12 (M8061, one quad board) rather than an RLV11 (two quad boards)
+-- if not, that makes a difference to the layout.  I'm also guessing at a
+DEQNA (M7504) rather than any other Ethernet controller, but it makes no
+difference to the placement, so long as it's a dual-height board.  If you
+added another dual-height board it would go under the RQDX3 (M7555), the
+next would go under that, and the next under the DELQA, etc.  The
+arrangement of the slots after the first three is called "serpentine" or
+occasionally "zig-zag".
+
+> on the back there
+> is a sticker saying this is a 11/73. the
+> cpu-board is a 11/83.(i´ll pass
+> the number too).
+
+All the KDJ11-B processors, whether 11/73 or 11/83, use the same printed
+circuit board and module number.  There were some differences about whether
+an FPU could be fitted (due to an error on the original boards); those that
+would not take an FPU were only sold as KDJ11-BC and all had 15MHz clocks.
+ Others with 15MHz clocks were sold as KDJ11-BB (upgradeable but FPU not
+fitted).  There are also some with 18MHz clocks, these were sold as
+KDJ11-BE, -BF, or higher.  Normally an 11/83 has a KDJ11-BE or higher
+suffix.  Early 11/73 are 15MHz.  Just to add to the confusion, the -Bx
+suffix actually refers to the EPROMs on the board, not the clock speed or
+the FPU.  The *only* difference between a normal KDJ11-BE or -BF or -BH is
+the firmware in the EPROMs.
+
+However, the biggest difference between 11/83 and 11/73 is whether the
+memory is used as QBus memory, or PMI memory, which is faster.  All of the
+KDJ11-B boards can use PMI memory.  Beware, not all quad memory boards are
+PMI-capable, but all the 1MB and bigger ones that I can think of are.
+
+> do all 11/83 use PMI ?
+
+Yes.  They will work with QBus memory instead (and if you put a PMI board
+after the processor instead of before it, it will run as normal QBus
+memory)
+but then what you have is effectively an 11/73, not an 11/83.
+
+> but the memory seems to work, or has
+> the cpu board some memory on it?
+
+No, there's no memory on the CPU board, but the memory you have is running
+as QBus memory.
+
+> when i picked up the box they booted it, i
+> suppose this configuration was the
+> way they used it there and should have
+> worked.
+> the RD54 controller has a 50pin ribboncable
+> wich goes to a small board (wich
+> was hanging on the backside) and a small
+> frontpanel (from a 11/83 or 73) was
+> hanging on it.
+
+Literally "hanging"?  Not fixed to the front of the BA23?  Is this actually
+a floor-standing (or possibly rack-mounting) BA23 with space for a TK50 and
+a drive unit, or a rackmount BA11-S or BA11-N chassis with no space for
+drives?
+
+> it looks like
+>
+> *************
+> *     *'''''*    O is a round hole (to hold a batch?)
+> *  O  *'''''*    '' is a big hole (power switch i suppose)
+> *     *'''''*
+> *************
+> *  X     B  *    X = run on/off ?(green led) B = reset ?
+> *  X     X  *    X = write protect (red)  X = online(green) for disk 0 ?
+> *  X     X  *    X = write protect (red)  X = online(green) for disk 1 ?
+> *************
+> X is a switch with led B is a button with led
+> i never saw a pdp with this frontpanel
+
+Neither have I.  DEC used pushbuttons for the disk controls on microPDP-11
+panels.  Each section is separate, though; it sounds like someone has
+replaced the pushbuttons or used third-party sub-panels.  The round hole
+(if this is an original DEC panel) is for the badge that says whether it's
+a microPDP-11/23, microPDP-11/73, microPDP-11/83, microPDP-11/53, etc.  The
+rectangular hole is for the power switch in a BA23 or BA123 cabinet.
+
+-- 
+Pete						Peter Turnbull
+						Network Manager
+						University of York
+
+

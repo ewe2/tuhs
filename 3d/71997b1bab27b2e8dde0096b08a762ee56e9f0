@@ -1,0 +1,83 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 0b4bc0de
+	for <ml@inbox.vuxu.org>;
+	Fri, 12 Apr 2019 14:51:45 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B1BE19508C; Sat, 13 Apr 2019 00:51:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8DBB295077;
+	Sat, 13 Apr 2019 00:51:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1514895074; Sat, 13 Apr 2019 00:51:04 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3F6E595074
+ for <tuhs@tuhs.org>; Sat, 13 Apr 2019 00:51:03 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 4876F18C0A9; Fri, 12 Apr 2019 10:51:02 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20190412145102.4876F18C0A9@mercury.lcs.mit.edu>
+Date: Fri, 12 Apr 2019 10:51:02 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] "Fork considered harmful"
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Richard Salz
+
+    > Any view on this?
+    > https://www.microsoft.com/en-us/research/publication/a-fork-in-the-road/
+
+Having read this, and seen the subsequent discussion, I think both sides have
+good points.
+
+What I perceive to be happening is something I've described previously, but
+never named, which is that as a system scales up, it can be necessary to take
+one subsystem which did two things, and split it up so there's a custom
+subsystem for each.
+
+I've seen this a lot in networking; I've been trying to remember some of the
+examples I've seen, and here's the best one I can come up with at the moment:
+having the routing track 'unique-ID network interface names' (i.e. interface
+'addresses') - think 48-bit IEEE interface IDs' - directly. In a small
+network, this works fine for routing traffic, and as a side-benefit, gives you
+mobility. Doesn't scale, though - you have to build an 'interface ID to
+location name mapping system', and use 'location names' (i.e. 'addresses') in
+the routing.
+
+So classic Unix 'fork' does two things: i) creates a new process, and ii) replicates
+the environment/etc of an existing process. (In early Unix, the latter was pretty
+simple, but as the paper points out, it has now become a) complex and b) expensive.)
+
+I think the answer has to include decomposing the functionality of old fork()
+into several separate sub-primitives (albeit not all necessarily directly
+accessible to the user): a new-process primitive, which can be bundled with a
+number of different alternatives (e.g. i) exec(), ii) environment replication,
+iii) address-space replication, etc) - perhaps more than one at once.
+
+So that shell would want a form of fork() which bundled in i) and ii), but
+large applications might want something else. And there might be several
+variants of ii), e.g. one might replicate only environment variables, another
+might add I/O channels, etc.
+
+In a larger system, there's just no 'one size fits all' answer, I think.
+
+	  Noel
+

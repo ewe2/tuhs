@@ -1,0 +1,31 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Tue, 7 Nov 2017 11:44:48 +0100
+Subject: [TUHS] void *, caddr_t and struct sockaddr* in 4.1x and 4.2 BSD
+Message-ID: <B8DD993C-960B-4EB4-854D-5B07043F7F67@planet.nl>
+
+Many thanks for all that background to the origins of void pointers.
+
+Now for applying that to the early sockets API.
+
+In the first (1981) and second (4.1a, April 1982) revision of that API, socket addresses were passed as a fixed 16-byte structure, essentially the same as the current struct sockaddr. By the time of the third revision (4.1c/4.2, 1983) of that API it had become a variable sized opaque object, passed around as a pointer and a size.
+
+The 1983 4.2BSD system manual (http://www.cilinder.be/docs/bsd/4.2BSD_Unix_system_manual.pdf) describes it that way, e.g. defining connect() as:
+
+connect(s, name, namelen);
+        int s; caddr_t name; int namelen;
+
+Note the use of caddr_t in the user level signature. Yet, the actual source code for 4.1c/4.2 BSD only uses caddr_t in the kernel (as pointed out on this list), but continues to use struct sockaddr * in the user land interface. It would seem to me today that void * would have been a more logical choice and with void * having been around for about 3 years in 1983, it might have seemed logical back then as well -- after all, this use case is similar to the malloc() use case. It would have avoided the need for a longish type cast in socket api calls (without further loss of type safety, as that was already lost with the required cast from e.g. struct sockaddr_un* to struct sockaddr* anyway).
+
+Related to this, from the "4.2bsd IPC Primer” (1983, https://www2.eecs.berkeley.edu/Pubs/TechRpts/1983/CSD-83-145.pdf , page 5), it would appear that the format of socket addresses was perhaps unfinished business:
+
+- Apparently at some point in time simple strings were considered as unix domain addresses, i.e. not a sockaddr_un structure. Maybe it was limping on this thought that caused the prototype soackaddr structure not to have a size field — having had that would have simplified the signature of many socket API functions (interestingly, it would seem that such a size field was added in 4.3BSD some 6, 7 years later).
+
+- The examples show no type casts. This may have been for didactical clarity, but perhaps it also suggests a signature with void* semantics.
+
+I’d be happy for any background on this.
+
+Also, about halfway down this page http://tech-insider.org/vms/research/1982/0111.html there is mention of CSRG technical report #4, "CSRG TR/4 (Proposals for the Enhancement of Unix on the Vax)”. I think this may be the initial discussion document from the summer of 1981 that evolved into the 4.2 system manual. Would anybody have a copy of that document?
+
+Paul
+
+

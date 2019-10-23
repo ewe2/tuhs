@@ -1,0 +1,134 @@
+From: neozeed@gmail.com (Jason Stevens)
+Date: Wed, 11 Aug 2010 11:05:06 -0400
+Subject: [TUHS] 2.11 BSD question... (exe sizes)
+In-Reply-To: <4C627129.2050509@softjar.se>
+References: <mailman.1.1281492002.20712.tuhs@minnie.tuhs.org>
+	<4C627129.2050509@softjar.se>
+Message-ID: <AANLkTinyV3h9SYY0no+yXVifi=7scaBz1e-205zoNb8G@mail.gmail.com>
+
+The 'problem' is with the de driver...Basically SIMH flags something wrong
+with all incoming packets, and the driver thinks they are all corrupt...
+
+in the procedure derecv
+
+                   if ((rp->r_flags &
+(RFLG_ERRS|RFLG_FRAM|RFLG_OFLO|RFLG_CRC))||
+                       (rp->r_flags&(RFLG_STP|RFLG_ENP)) !=
+(RFLG_STP|RFLG_ENP) ||
+                       (rp->r_lenerr & (RERR_BUFL|RERR_UBTO|RERR_NCHN)) ||
+                       len < ETHERMIN || len > ETHERMTU) {
+
+something here is being passed wrong.. I've just changed the statement to
+if(1==2) to keep the logic flow...
+
+Anyways the same issue cropped up with 4.2 BSD & the VAX 11/780
+
+On my pdp-11 the ini I'm using is:
+
+set cpu 11/94 4M
+set cpu cis
+set cpu idle
+set xu ena
+att xu slirp
+;attach tm0 211bsd.tap
+attach tm0 ircii-4.4.source.tap
+set rp0 rp06
+attach rp0 auto.dsk
+set rq dis
+set rk dis
+set rl dis
+set hk dis
+set rx dis
+set tq dis
+set dz lines=8
+att dz 1000
+boot rp0
+
+I'm also using a version of SIMH that I've replaced the libpcap with SLiRP
+from Qemu.. It's basically a user mode ip stack to do NAT.  The advantage is
+that they always have the same ip address, and it doesn't
+require escalated privileges to run.
+
+On Wed, Aug 11, 2010 at 5:45 AM, Johnny Billquist <bqt at softjar.se> wrote:
+
+> Jason Stevens <neozeed at gmail.com> wrote:
+>
+>  I managed to get 2.11 installed on SIMH, and hacked the de driver to work
+>> (pretty much the same thing I did for 4.2 BSD on the 11/780) and now I've
+>> gotten it networking.
+>>
+>
+> Huh? What did you hack with the qe driver? Was that in 2.11BSD? I didn't
+> know there was any problems with it in the first place.
+>
+> Or is there some problem in simh that you fixed?
+>
+>  I'll admit I'm not all that swift on the pdp-11, but I get the impression
+>>
+>> that the maximum exe size is 128kb with 64kb of instructions, and 64kb of
+>> data?  Isn't there something that can be done with overlays or some other
+>> linker thing to act like an 8086/80286 with the large memory model (ie
+>> multiple segments...?)
+>>
+>
+> Yes and no. In principle, the maximum size of a program is 64K instruction
+> and 64K data. That's as much as is directly addressable. With overloays you
+> can extend that somewhat, but there are limitations and restrictions.
+>
+>
+>  I've been trying to build ircII-4.4 and I can't figure out how to link
+>> something that big... I've tried the -Z and -O flags to ld to no avail.
+>>
+>> Clearly I'm doing either something wrong, or impossible or stupid.
+>>
+>> FWIW, here is the size of the same program on the VAX
+>>
+>> myname# ls -l irc-4.4
+>> -rwxr-xr-x  1 root       413696 Jun  8 08:46 irc-4.4*
+>> myname# size irc-4.4
+>> text    data    bss     dec     hex
+>> 293888  67584   20784   382256  5d530
+>>
+>> I have a feeling that 300kb of text, along with 67kb of data is just too
+>> much...?
+>>
+>> Any pointers would be appreciated!
+>>
+>
+> You'll need to trim some fat off.
+>
+> Points to remember:
+> 64K data is the max. There is no way to use overlays to get more data
+> space. Overlays can only extend the instruction space.
+> Overlays and the main program share the same address space. That is, the
+> size of the main code and the largest overlay segment together must not
+> exceed 64K. So, overlays is just a way to move parts of the program in and
+> out of your basic 64K address space.
+> When you link a program, you'll be able to see the sizes of all segments as
+> well as the main program.
+>
+> As an example, this is how tcsh looks like:
+>
+> Test:/# size /bin/tcsh
+>
+> text    data    bss     dec     hex
+> 48960   14844   11986   75790   1280e   total text: 140864
+>        overlays: 15424,16000,14144,14016,16256,16064
+>
+> Notice how text+max(sizeof overlays) is less than 64K.
+>
+> All that said, you can easily find IRC clients who are much smaller than
+> that... :-)
+>
+>        Johnny
+>
+> --
+> Johnny Billquist                  || "I'm on a bus
+>                                  ||  on a psychedelic trip
+> email: bqt at softjar.se             ||  Reading murder books
+> pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20100811/96ac7b37/attachment.html>
+

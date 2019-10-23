@@ -1,0 +1,142 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Sat, 5 May 2018 22:53:36 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180505130653.8D85618C079@mercury.lcs.mit.edu>
+References: <20180505130653.8D85618C079@mercury.lcs.mit.edu>
+Message-ID: <627cfce8-979d-13dc-fba2-ee955c41113d@update.uu.se>
+
+On 2018-05-05 15:06, Noel Chiappa wrote:
+>      > From: Johnny Billquist
+> 
+>      >> in MERT 'segments' (called that) were a basic system primitive, which
+>      >> users had access to.
+> 
+>      > the OS gives you some construct which can easily be mapped on to the
+>      > hardware.
+> 
+> Right. "A logical segment is a piece of contiguous memory, 32 to 32K 16-bit
+> words long ... Associated with each segment are an internal segment
+> identifiern and an optional global name." So it's clear how that maps onto the
+> PDP-11 memory management hardware - and a MERT 'segment' might use more than
+> one 'chunk'.
+
+Aha! But then it is not actually giving programs direct access and 
+manipulation of the hardware. It is a software construct and service 
+offered by the OS, and the OS might fiddly around with various hardware 
+to give this service.
+
+So the hardware is totally invisible after all. You might understand how 
+the OS realize the service using the PDP-11 hardware, but the program 
+itself cannot manipulate the hardware, and is in fact totally oblivious 
+to how the hardware works.
+
+>      > It's actually not my definition. Demand paging is a term that have been
+>      > used for this for the last 40 years, and is not something there is much
+>      > contention about.
+> 
+> I wasn't talking about "demand paging", but rather your use of the term
+> "virtual memory":
+
+Ok. It wasn't totally clear, since you also use a different term for 
+demand paging...
+
+>      >>> Virtual memory is just *virtual* memory. It's not "real" or physical
+>      >>> in the sense that it has a dedicated location in physical memory
+>      >>> ... Instead, each process has its own memory, which might be mapped
+>      >>> somewhere in physical memory, but it might also not be.  And one
+>      >>> processes address 0 is not the same as another processes address
+>      >>> 0. They both have the illusion that they have the full memory address
+>      >>> range to them selves, unaware of the fact that there are many
+>      >>> processes who also have that same illusion.
+> 
+> I _like_ having an explicit term for the _concept_ you're describing there; I
+> just had a problem with the use of the _term_ "virtual memory" for it - since
+> that term already has a different meaning to many people.
+> 
+> Try Googling "virtual memory" and you turn up things like this: "compensate
+> for physical memory shortages by temporarily transferring data from RAM to
+> disk". Which is why I proposed calling it "virtual addressing" instead.
+
+Like I said. In the last few years, there has been a growing problem 
+with lots of people not understanding virtual memory. I blame it on the 
+monoculture we now have, where all people know, have been exposed to, 
+and read any code about is x86 and Linux. And thus, they are at a point 
+where they created some concepts in their heads, and anything that does 
+not match all their preconceived ideas becomes weird.
+
+The wikipedia article on virtual memory on and off have had such 
+problems as well. It's not perfect now, but it has improved a lot from 
+how it was for a while. But it has also been more correct at times as 
+well. The discussions page is really enlightening.
+
+But anyway, I certainly hope things have not in general degenerated 
+enough that virtual memory actually have taken on a different meaning. 
+There is also the constant issue that pops up with these "revisionist" 
+interpretations that there are plenty of old documentation and 
+references that contains definitions and usage of the term virtual 
+memory that does not fit with their very restrictive interpretation.
+
+> Anyway, this conversation has been very helpful in clarifying my thinking
+> about virtual memory/paging. I have updated the CHWiki article based on it:
+> 
+>    http://gunkies.org/wiki/Virtual_memory
+> 
+> including the breakdown into three separate (but related) concepts: i) virtual
+> addressing, ii) demand loading, and iii) paging. I'd be interested in any
+> comments people have.
+
+I might take a peek when I have some time.
+
+>      > Which also begs the question - was there also a RK11-A?
+> 
+> One assumes there much have been RK11-A's and -B's, otherwise they wouldn't
+> have gotten to RK11-C... :-)
+
+Right. :-)
+
+>      > And the "chunks" on a PDP-11, running Unix, RSX or RSTS/E, or something
+>      > similar is also totally invisible.
+> 
+> Right, but not under MERT - although there clearly a single 'software' segment
+> might use more than one set of physical 'chunks'.
+
+Well. The PDP-11 chunks certainly, from your description above, would 
+appear to be invisible to programs running under MERT. MERT provides a 
+segment mechanism, which programs can use, but programs cannot play with 
+the hardware. Thus, the hardware is invisible to the program. The MERT 
+segment is visible, but such a segment might then involve one or more 
+hardware "chunks". The program don't know, and do not deal with them 
+individually or directly. In fact, the program would not even need to be 
+aware of what the hardware have, or do. It's really invisible to the 
+program. The MERT segment thingy is not a direct access or map to the 
+hardware.
+
+Or at least it is not, if I understood you correctly.
+
+Those MERT segments sounds identical to the PLAS functionality provided 
+by DEC OSes.
+
+> Actuallly, Unix is _somewhat_ similar, in that processes always have separate
+> stack and text/data 'areas' (they don't call them 'segments', as far as I
+> could see) - and separate text and data 'areas' too, when pure code is in
+> use; and any area might use more than one 'chunk'.
+> 
+> The difference is that Unix doesn't support 'segments' as an OS primitive, the
+> way MERT does.
+
+Right. But these are also not direct translations of the hardware 
+functionality. The fact that these segments can be more than 8K should 
+be enough of an argument showing that this is not the same as the 
+hardware, and that the program do not know, care, or need to understand 
+how the PDP-11 "chunks" actually appear or work.
+(And I'll probably revert to saying pages after this reply, it's too 
+much work to try and use a separate name for them.)
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

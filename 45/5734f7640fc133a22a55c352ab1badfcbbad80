@@ -1,0 +1,120 @@
+From: spedraja@gmail.com (SPC)
+Date: Thu, 15 May 2014 08:51:15 +0200
+Subject: [TUHS] Unix on an 11/23 (Was: Work I've done with a PDP-11
+	simulator)
+In-Reply-To: <20140515004132.88ADF18C101@mercury.lcs.mit.edu>
+References: <20140515004132.88ADF18C101@mercury.lcs.mit.edu>
+Message-ID: <CACytpF8OoatuVFF6NFycO2T0rKE-pQ=_b6ib+cVcDhcdF5Qpjg@mail.gmail.com>
+
+Great work, Noel. A lot of thanks (to you but for the rest of helpers too).
+
+I'll keep a reference of this message and try it as soon as possible... the
+disruptive fact (in terms of time) here is to put up-to-date both the
+PDP-11/23-PLUS and RL02. Once I do that will embark on your hack.
+
+
+Gracias | Regards - Saludos | Greetings | Freundliche Grüße | Salutations
+​
+-- 
+*Sergio Pedraja*
+-- 
+mobile: +34-699-996568
+twitter: @sergio_pedraja | skype: Sergio Pedraja
+--
+http://plus.google.com/u/0/101292256663392735405
+http://www.linkedin.com/in/sergiopedraja
+http://www.quora.com/Sergio-Pedraja
+http://spedraja.wordpress.com
+https://www.xing.com/profile/Sergio_Pedraja <http://spedraja.wordpress.com/>
+-----
+No crea todo lo que ve, ni crea que está viéndolo todo
+
+
+
+2014-05-15 2:41 GMT+02:00 Noel Chiappa <jnc at mercury.lcs.mit.edu>:
+
+>     >> I got one PDP-11/23-PLUS without any kind of disk (by now, I got one
+>     >> RL12 board plus one RL02 drive pending of cleaning and
+> arrangement)...
+>     >> I guess if could be possible to run V6 in this machine. There's any
+>     >> kind of adaptation of this Unix version (or whatever) to run under ?
+>
+>     > IIRC the README page for that set of disk images indicates that in
+> fact
+>     > they originally came off an 11/23, so they should run fine on yours.
+>
+> So I was idly looking through main.c for the Shoppa Unix (because it
+> printed
+> some unusual messages when it started, and I wanted to see that code), and
+> I
+> noticed it had some fancy code for dealing with the clock, and that
+> tickled a
+> very dim memory that LSI-11's had some unusual clock thing. So I decided I
+> had better check up on that...
+>
+> I got out an LSI-11 manual, and it looked like the 23 should work, even for
+> the 'vanilla' V6 from the Bell distro. But I decided I had better check it
+> to
+> be sure, so I fired up the simulator, mounted a Bell disk, set the cpu type
+> to '23', and booted 'rkunix'. Which promptly halted!
+>
+> After a bit of digging, it turned out that the problem is that the 11/23
+> doesn't have a switch register! It hit a kernel NXM trying to touch it -
+> and then another trying to read it in the putchar() routine trying to do a
+> panic(), at which point it died a horrible death.
+>
+> So I added a SR (you can create all sorts of bizarre hybrids like that with
+> Ersatz-11, like 11/40's with 11/45 type floating point :-), and then it
+> booted fine. The clock even worked!
+>
+>
+> So you will have to use the Shoppa disk to boot (but see below), or we'll
+> have to spin you a special vanilla V6 Unix that doesn't try to touch the
+> SR -
+> that shouldn't be much work, I only found two place in the code that touch
+> it.
+>
+> I did try the Shoppa 'unix', and it booted fine on an 11/23.
+>
+> Two things to check for, though: first, your 11/23 _has_ to have the MMU
+> chip
+> (that's the large DIP package with one chip on it nearest the edge of the
+> card), so if yours looks like this:
+>
+>   http://www.psych.usyd.edu.au/pdp-11/Images/23.jpeg
+>
+> you're OK. Without the MMU chip, most variants of Unix will not run on the
+> 23
+> (although there's something called MiniUnix, IIRC, which runs on an LSI-11,
+> which would probably run on a /23 without an MMU).
+>
+>
+> Here's the part that might be a problem: To run any of the Unixes on the
+> Shoppa disk, you also have to have the FPP chip too (that's the second
+> large
+> DIP package with two chips on it - the image above does not include that
+> chip, so if yours looks like that, you have a minor problem, and I will
+> have
+> to build you a Unix or something).
+>
+> All of the Unixes on the Shoppa disk have to have the FPP, except one - and
+> that one wants an RX floppy as the root/swap device! The others will all
+> crash (I tried one, to make sure) if you try and boot them on an 11/23
+> without the FPP.
+>
+> I could try patching the binary on the one that doesn't expect to use the
+> FPP
+> to use the RL as the root, or either i) build you a vanilla V6 for a 23
+> (above), or ii) figure out how to build systems on the Shoppa disk, and
+> build
+> you a Unix there which i) uses the RL as the root/swap, and ii) does not
+> expect to have the FPP.
+>
+> But let's first find out exactly what you have...
+>
+>         Noel
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140515/a3d9fe88/attachment.html>
+

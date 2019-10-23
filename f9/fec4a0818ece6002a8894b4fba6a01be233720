@@ -1,0 +1,74 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Sat, 13 May 2017 21:24:11 -0700
+Subject: [TUHS] C declarations.
+In-Reply-To: Your message of "Sat, 13 May 2017 21:59:57 EDT."
+ <57639684-050B-4995-859F-876CAFE4BE9C@serissa.com>
+References: <015401d2caa0$79762650$6c6272f0$@ronnatalie.com>
+ <68E8DC0A-D1B8-4FF0-AD26-ACDC57E308AF@pobox.com>
+ <20170511223232.GM4341@mcvoy.com>
+ <015b01d2caa7$c658c020$530a4060$@ronnatalie.com>
+ <20170513012415.GZ4341@mcvoy.com>
+ <025701d2cb92$ec8182a0$c58487e0$@ronnatalie.com>
+ <20170513122050.GF9980@yeono.kjorling.se>
+ <0CF82AC1-E835-4C06-813F-D9EFD2C12290@tfeb.org>
+ <20170513124247.GG9980@yeono.kjorling.se>
+ <57639684-050B-4995-859F-876CAFE4BE9C@serissa.com>
+Message-ID: <20170514042411.93CCB124AEA4@mail.bitblocks.com>
+
+On Sat, 13 May 2017 21:59:57 EDT Lawrence Stewart <stewart at serissa.com> wrote:
+>
+> * - But I have never been able to remember the syntax for function pointers.  > I always "man qsort" to refresh my memory.
+
+The way I remember:
+
+given *x[] or *x(), x /sticks/ to the /right/ first. Thus
+
+int *x[];	// x is array of ptr to int
+int *x();	// x is a function returning ptr to int
+
+If you don't want a var to stick to its right, separate using
+using parentheses.
+
+int (*x)[];	// x is a ptr to array of ints
+int (*x)();	// x is a ptr to function returning int
+int *(*x)[];	// x is a ptr to array of ptrs to int
+
+This sort of also works for multiple variables in one declaration. Given
+
+int *x, y;	// * /sticks/ to the right (x) first, so not available for y.
+
+Now if they'd allowed parenthesizing the type, as in
+
+(int *)x, y;
+
+we would see that both x & y are of type int *. That would've also allowed
+declaring multiple vars in one declaration where the previous rule applies!
+
+(int*)(*f,*g)();
+
+Part of the confusion is * is tacked on at the front while []
+& () at the back of a variable.  Someone (Chandy?) had
+proposed unifying this syntax but it didn't go anywhere.  I
+think the author used @ in a suffix place though I don't
+recall any other details.  But if you put the var all the way
+to the right and read a declaration right to left, it works:
+
+int*[] x	// x is a array of ptr to ints
+int() f		// f is a function returning it
+int*()* f	// f is a ptr to function returning ptr to int
+int*()* f,g	// f & g are ptrs to function returning ptr to int
+
+This is only slightly weird if you are used to the current syntax
+but you can easily retrain yourself.
+
+IMHO, where evolution of C, Scheme and most programming
+languages goes wrong is doing evolutionary design by
+committee.  Most users grasp what is easier to use vs what is
+hard but they don't have the aesthetic sense or imagination or
+training to make things simple. And in large groups popularity
+or force of personality or some other irrelevant attribute
+wins not aesthetics.  Language evolution IMHO must be done by
+benevolent dictatorship or a guild of like minded people who
+have worked together for a long time!  Go seems to have
+adapted that style....
+

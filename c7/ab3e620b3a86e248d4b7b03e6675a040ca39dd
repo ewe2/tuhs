@@ -1,0 +1,85 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sun, 18 Dec 2011 23:26:47 +0100
+Subject: [TUHS] recreating C source from binary
+Message-ID: <20111218232647.Horde.Q3mEU6Qd9PdO7minRi6UVUA@avocado.salatschuessel.net>
+
+
+Hi,
+
+I'm trying to re-create the source files for the Z8000 UNIX I have
+on my Z8000 system (it is a S8000+ZEUS clone).
+Easy programs like sync.c where easy. But when argc/argv is involved,
+I'm not able to generate 1:1 matching binary code.
+
+I'm working on /etc/unlink for now.
+
+I tried the following C file:
+
+char whatstr[] = "@[$]unlink.c  2.1  07/23/82 21:19:30 - 87wega3.2";
+
+main(argc, argv)
+int argc;
+char **argv;
+{
+         if(argc!=2) {
+                 write(2, "Usage: /etc/unlink name\n", 24);
+                 exit(1);
+         }
+         unlink(argv[1]);
+         exit(0);
+}
+
+The original ASM code for the beginning of main() until the argc
+check is:
+
+0042                 abf3  dec     r15,#4
+0044             5df60000  ldl     %0000(r15),rr6
+0048             0b070002  cp      r7,#%0002
+
+
+The ASM code my C file generates is:
+
+0042                 abf3  dec     r15,#4
+0044                 1df6  ldl     @r15,rr6
+0046             0b070002  cp      r7,#%0002
+
+keep in mine, that r15 is considered as the "stack pointer".
+
+I wonder how to get the ldl from the original binary.
+I also tried to declare argv with "char *argv[]" which
+resulted in the same code. Forcing the compiler to store
+argv into a register by using the "register" keyword results
+in completly different code:
+
+(sp = stack pointer = r15)
+
+#17 adb unlink
+ADB: P8000 1.6
+? 0x0042/i
+%0042:          dec     sp,#6
+?
+%0044:          ld      %0004(sp),r14
+?
+%0048:          ld      %0002(sp),r7
+?
+%004c:          ld      r14,r6
+?
+%004e:          cp      r7,#%0002
+? $q
+#18
+
+
+Maybe  the C compiler used to compile /etc/unlink differs from
+the C compiler shipped with the system (maybe an older version)
+but I don't want this to be true for now ;)
+
+Anyone with deeper ASM and C knowledge than me sees what could
+be done here?
+
+Before someone asks - yes I'm sure the source file was in C
+and not ASM based on the whatstr. Symboltable of the original
+/etc/unlink is empty as well (striped binary).
+
+Regards, Oliver
+
+

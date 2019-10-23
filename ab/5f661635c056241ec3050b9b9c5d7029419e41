@@ -1,0 +1,105 @@
+From: cdl@mpl.ucsd.edu (Carl Lowenstein)
+Date: Tue, 6 Apr 2004 15:37:52 -0700 (PDT)
+Subject: [TUHS] Booting v6
+Message-ID: <200404062237.i36MbqN03262@opihi.ucsd.edu>
+
+> From: "Bill Cunningham" <billc_2 at charter.net>
+> To: <tuhs at minnie.tuhs.org>
+> Date: Tue, 6 Apr 2004 06:30:01 -0400
+> Subject: [TUHS] Booting v6
+> 
+>     I was looking through the old archives at the old UNIX Dennis Ritchie
+> submitted. I would like to know how to boot this. I can't seem to compile
+> the PDP emulator(s) with djgpp or a non-linux system. I can with my linux.
+
+See below for a session log showing booting 6th Ed Unix on a Linux system.
+
+> Dennis said this version of unix was compiled with assembly, then into C if
+> I'm not mistaken.
+
+I'm pretty sure that by 6th Ed the system was mostly C, with only a
+few assembly routines.
+
+> Now the PDPs they were the machines with no monitors just
+> printer tty type output correct?
+
+High-resolution bit-mapped graphics at any reasonable price came along
+a few years after 6th Ed.  Unix.  Character-cell CRT terminals that
+could display 72x12 up to 80x24 characters on a screen were available
+in 1975, but were pretty expensive.
+
+Instructions for booting "uv6swre" are contained in the file "simh_swre.txt".
+To make things easier for myself, I did the following:
+$ cp unix0_v6_rk.dsk rk0.dsk
+and so on for 1, 2, 3.
+This gives me copies of the distribution disks that I can work with
+without losing the originals.  Then I made a startup file "run.conf"
+to contain the commands for the emulator.  Here is the result of a
+very recent session:
+- - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -
+Script started on Tue 06 Apr 2004 03:09:12 PM
+PDT helium3$ cat run.conf
+set cpu u18
+set cpu 256k
+attach rk0 rk0.dsk
+attach rk1 rk1.dsk
+attach rk2 rk2.dsk
+attach rk3 rk3.dsk
+boot rk0
+
+helium3$ pdp11 run.conf
+
+PDP-11 simulator V3.1-0
+Disabling XQ
+@unix
+
+login: root
+# date
+Sat Aug 20 12:19:47 EDT 1994
+# ls -l
+total 182
+drwxr-xr-x  2 bin      1040 Jan  1  1970 bin
+drwxr-xr-x  2 bin       352 Jan  1  1970 dev
+drwxr-xr-x  2 bin       304 Aug 20 12:19 etc
+drwxr-xr-x  2 bin       336 Jan  1  1970 lib
+drwxr-xr-x 17 bin       272 Jan  1  1970 mnt
+drwxr-xr-x  2 bin        32 Jan  1  1970 mnt2
+-rw-rw-rw-  1 root    28472 Aug 20 12:01 rkunix
+-rwxr-xr-x  1 bin     28636 Aug 20 11:38 rkunix.40
+drwxrwxrwx  2 bin       144 Aug 20 12:14 tmp
+-rwxr-xr-x  1 bin     28472 Aug 20 12:01 unix
+drwxr-xr-x 13 bin       224 Aug 20 12:22 usr
+drwxr-xr-x  2 bin        32 Jan  1  1970 usr2
+# stty
+speed 110 baud
+erase = '#'; kill = '@'
+even odd -nl echo -tabs cr1 
+# sync;sync
+# 
+Simulation stopped, PC: 034316 (ADD #26,R2)
+sim> bye
+Goodbye
+helium3$ exit
+
+Script done on Tue 06 Apr 2004 03:10:09 PM PDT
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Notes:  the simh command for emulating a Unibus PDP11 with 18-bit
+addressing is now "set cpu u18".
+
+In the line "@unix" the "@" is the prompt from the boot program, "unix"
+is your response to it.  Root has no password.
+
+The disks are mounted	rk1 on /usr
+			rk2 on /usr/source
+			rk3 on /mnt
+
+The default character erase and line kill characters shown by stty
+are not what anyone is used to these days.
+
+    carl
+-- 
+    carl lowenstein         marine physical lab     u.c. san diego
+                                                 clowenst at ucsd.edu
+
+

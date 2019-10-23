@@ -1,0 +1,39 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Thu, 21 Sep 2017 11:56:49 -0700
+Subject: [TUHS] Sockets and the true UNIX
+In-Reply-To: Your message of "Thu, 21 Sep 2017 09:13:38 -0700."
+ <201709211613.v8LGDcuN015299@darkstar.fourwinds.com>
+References: <20170921160112.ctpv4a52t5rjcqzg@matica.foolinux.mooo.com>
+ <201709211613.v8LGDcuN015299@darkstar.fourwinds.com>
+Message-ID: <20170921185705.2A31A156E523@mail.bitblocks.com>
+
+On Thu, 21 Sep 2017 09:13:38 -0700 Jon Steinhart <jon at fourwinds.com> wrote:
+Jon Steinhart writes:
+> 
+> Maybe this is naive of me, but I have never liked parts of the sockets
+> interface.  I understand that at some level it was a political/legal
+> keeping the networking code independent of the rest of the kernel.
+> >From a technical and historical standpoint, I view it as the tip of
+> the iceberg bloating the number of system calls.
+
+In a sense the socket interface is a lower level interface
+compared to other syscalls. But complicated by the fact that
+it tries to be general.
+
+> In particular, I have often thought that it would have been a better
+> and more consistent with the philosophy to have it implemented as
+> open("/dev/tcp") and so on.  Granted that networking added some new
+> functionality that justified some of the system calls, just not socket().
+
+This is more or less how plan9 networking is done.  Among
+other things you can write scripts that can do networking even
+though the shell knows nothing about networking.  See
+    http://doc.cat-v.org/plan_9/4th_edition/papers/net/
+
+The key is to realize that each protocol defines its own
+namespace so this fits naturally in plan9.  Allowing services
+(programs, kernel or drivers) to define their own namespaces
+and making them accessible via a tiny interface to any program
+is the main invention of plan9.  Similarly ctl files instead
+of ioctls.
+

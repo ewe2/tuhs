@@ -1,0 +1,488 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a2eebcbf
+	for <ml@inbox.vuxu.org>;
+	Wed, 11 Sep 2019 15:37:49 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 086B79479C; Thu, 12 Sep 2019 01:37:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B4AD194790;
+	Thu, 12 Sep 2019 01:37:04 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="dLpcDzFc";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5D72794790; Thu, 12 Sep 2019 01:37:02 +1000 (AEST)
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com
+ [209.85.221.44])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 0AFC19478D
+ for <tuhs@tuhs.org>; Thu, 12 Sep 2019 01:37:01 +1000 (AEST)
+Received: by mail-wr1-f44.google.com with SMTP id t16so25108458wra.6
+ for <tuhs@tuhs.org>; Wed, 11 Sep 2019 08:37:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=QG63DpiFw3h/I2iVUPResgP+5B923oiMpf7OrZjoDsU=;
+ b=dLpcDzFc3pkbGjHpAMYCx+pIg6nlZ60txoSJZ9DR1DC80uemkCmJ2Qc87VLH8JJ0Lk
+ nWXFsBzUkzF55MeomGu9nxEmyz2OGKUJQBELgg2GxSOr9kJ+mq7kXOWKSdMOCelA9dKf
+ wJJvhfMecX8mdZC1JWVqy+fK4u0hgjWekvIdI=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=QG63DpiFw3h/I2iVUPResgP+5B923oiMpf7OrZjoDsU=;
+ b=teTzI3lTCRjwoGqHAAIAOkp/SWj5Xm9kv9SwTU2rS2hkfujxOQxJpljaPSTEnz4Yc+
+ 75VED1g2No0ptsrj0B/b96yVRdV2E0ZBrUUJeuz+06fFT+YCEhgMfDb5UZ4fG6RqAum6
+ jfcsP2u9RjL3T7nJvXd44/OKlQsIxi/x7bmnyczS5iz7zjcC4KAigsWiC1XuMZYwUL/L
+ 3MJnopOXtw7bGzJU7/a5b2c+d0DHlVLDPmbYsG4h5IvCB/poyjrIgAmw5IwoxuFpBxJd
+ HIQTTuTxIZOM/n5EayyWiqKTU6nbHiLCFM2yJIU4L38mjgjgRKkwkoeyUFzRGguHKHfO
+ Bq9w==
+X-Gm-Message-State: APjAAAXSMMxypxC1LqTZqpk2UGF4ZZ6RnMopWJEnQmNFIJmBZudKggy6
+ AK3R+r6m+kzu6birZGSsMlNyPb59dz58Xtv7dTUP8vqWq08dbA==
+X-Google-Smtp-Source: APXvYqw0JsJtirxfDX2q+z2G8VHA950OUSRM1LNd2AoNWtKF4vbpRZqPq1SBG+fIjE1caTUHWDWl5ZTOjrK5Hz2jJ8U=
+X-Received: by 2002:a5d:640f:: with SMTP id z15mr29680144wru.217.1568216219105; 
+ Wed, 11 Sep 2019 08:36:59 -0700 (PDT)
+MIME-Version: 1.0
+References: <CANCZdfpEu6OxvmhDGSa3Cw4TSpfcbBOFbJjU7nZU-C_JFGFdRA@mail.gmail.com>
+ <CAC20D2Pz+gwyeuVYcHFbJaimHtrt+sKSvCFp=hMZNoAWr4G09Q@mail.gmail.com>
+ <CANCZdfpsXnbaQJo54qw689-unmVb35114PrOuNXHrcyp2Cng5g@mail.gmail.com>
+In-Reply-To: <CANCZdfpsXnbaQJo54qw689-unmVb35114PrOuNXHrcyp2Cng5g@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Wed, 11 Sep 2019 11:36:32 -0400
+Message-ID: <CAC20D2MuABFQw_R2HyUFsg8Dpum+LNn6ixneO2C7Te8ECtZ3PA@mail.gmail.com>
+To: Warner Losh <imp@bsdimp.com>
+Content-Type: multipart/alternative; boundary="000000000000abcf8c059248ca2f"
+Subject: Re: [TUHS] PWB vs Unix/TS
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000abcf8c059248ca2f
+Content-Type: text/plain; charset="UTF-8"
+
+below...
+
+On Tue, Sep 10, 2019 at 11:53 PM Warner Losh <imp@bsdimp.com> wrote:
+
+>
+> "The Programmer's Workbench was started in 1973,[2]
+> <https://en.wikipedia.org/wiki/PWB/UNIX#cite_note-Mashey-2> by Evan Ivie
+> and Rudd Canaday to support a computer center for a 1000-employee Bell Labs
+> division" is what wikipedia says, though that reference is in a acm queue
+> article by Mashey...
+>
+That syncs and if Mash wrote the dates, I believe them  I thought it was a
+year or two later by the time they were done.  But it is what I said.  PWB
+was done to support the mainframe shops.
+
+
+
+> but I've never actually used SCCS.
+>
+That's a shame - I still use it for simple things.  Lots less overhead than
+things like git.   Somebody rewrote it in C++ and you can google it.
+Larry's been trying to get me to switch to bitkeeper and I probably should,
+but I admit SCCS has been good enough for a long time and the commands are
+screwed in the roms in my fingers.
+
+
+
+
+>
+> Several timelines have, without references, Unix/TS or some variant of
+> that going back to the V4 time frame. It's at best murky. There's some
+> references in https://wiki.tuhs.org/doku.php?id=misc:snippets:mert1 including
+> the post by Dan DeJegar which I had trouble parsing the ins and outs of.
+>
+As I said, aps or Ted are more likely to be the sources.  They were part of
+the original USG team.   Steve just said he did not go over there until
+System V time (which was what I was afraid).
+
+And thanks for refreshing the bits in my brain... Dan DeJagar not Dale....
+  I'll look at this and see if I can parse it for you in any way.
+
+
+
+> Yea, the Columbus crew added a lot to the different versions, and merged
+> from them, according to the above link and a few other sources.
+>
+Yeah, Phil Karn and Mary Ann both talked about that -- Mary Ann is on this
+list she may be able to add some of the missing details.
+
+I was never 100% sure where Columbus fit into the puzzle, but that team did
+a lot of cool stuff.  Real-Time was their thing. The Indiana Hill crew (Tom
+Bishop) did the 3B4000 and all of the SSI work linked to the support the
+ESS development.
+
+
+
+> Yes. There's some confusion as PWB and UNIX/TS become a USG thing that
+> turns into System III and then the influx of CB-UNIX that's added before
+> System V. How all that relates to USG, I'm quite unclear on still...
+>
+As I said, aps or Ted lived it from the USG side. I'll try to dig up
+Armando and see what he can tell you,
+
+
+
+>
+> From the above recollection of Dan DeJAger...
+>
+Interesting...   as I said, let me look at what he says and see what I can
+add.
+
+
+>  I've seen lots of references to UNIX/TS, but no versions, so this makes
+> some sense... And it appears they go back further than V6...
+>
+It's possible, the first I saw any of the results was on top of V6, when
+Ted brought some of it to CMU.
+
+
+>  Yea, the detailed part of my history ends with the progeny of V7 (and I
+> only have room for some, I've found maybe 3 dozen different systems that
+> started out with V7 and then merge in System III or System V code for later
+> versions or some variation on this theme).
+>
+That's because that was what the external (commercial) licenses allowed.
+Each license subsumed the previous one. So if you had started a product
+based on V7 (like DEC, HP, and Microsoft) you could ship with the System
+III license (I remember that was >>huge<< issue with the vendors, which
+AT&T was not super happy to accept - again this is the start of the
+'consider it standard' stuff and they wanted everyone to use the bits from
+Summit as the basis of their products, which was a problem because each
+vendor had its own value add.
+
+Later when OSF was created, this is part of the genesis of the 'Stable
+License Terms' in OSF's founding principles.
+
+So if you were a new company (say Masscomp or Stellar) from a legal
+standpoint you started with the latest release (System III for the former,
+SVR2 the later).  BTW, Sun is an interesting case, which I get too in a
+minute.
+
+DEC/HP/MSFT had started their engineering development for
+Ultrix/HP-UX/Xenix on the original V7 license, so by the time of the System
+III negotiation complete that had already been shipping some amount of
+systems using V7 and their original licenses.  What the System III license
+did was change the terms in some ways to help them.  But since the
+engineering was solidly underweight for Ultrix, DEC kept their V7/BSD
+kernel, MSFT switched Xenix to System III based (and then sold the whole
+mess to SCO).  HP kept the V7/BSD kernel, but added all the System III
+differences so it looked like System III the running program and used the
+System III command system for a user.
+
+At Masscomp, since we need to be on a 68K, we started with a V7/BSD kernel
+from MIT's RTS labs, called NU (which TI and Apple both used also BTW).
+ The command system was originally basically System III based but added BSD
+commands as needed.  I joined to start the VM work and we folded the RTU
+(real-time) stuff we had worked on with NU into 4.1 then 4.1C to be the
+kernel, added MP support and we shipped (and it is what Larry originally
+used).   The company quickly got sucked in the AT&T vs BSD fight, since the
+AT&T and UCB command system were similar but different and about 1/3 of our
+customers were University (BSD) types and the other 1/2 US
+Gov/Commercial (att) and rest did not care.
+
+Like HP, at first we tried add switches and create a super set of commands
+(RTU 1.x).   This was a losing battle for a small company so, we gave up,
+and our solution was "universes".  I created something I called
+'conditionally dependant symbolic links' (CDSL - which I would resurrect in
+Tru64 for the Cluster work) and we added the 'att' and 'ucb' commands to
+set a variable in the kernel.  We then had two sets of commands  (/usr/att
+and /usr/ucb).  Of course, this caused a new set of problems of trying to
+do bug fixes in the two command streams [BTW: Pyramid would try the
+Universe trick also as did a couple of other folks; but I don't know how
+they implemented it - as I say, I did it with CDSL].
+
+A couple of years later at Stellar we took a different tact.   We started
+with the licensed kernel (SVR2) and hacked in what it was missing (SMP
+support, sockets, a new/parallel FS) and added any BSD commands that were
+not there, but left it as an otherwise System V system.
+
+As I say, Sun was interesting.   They started as a firm after Masscomp, but
+shipped their first systems (Stanford Sun Terminal boards running UNIX)
+using Asa Romberger's V7 license (Unisoft).  When they got their own UNIX
+license, it would have been a System III license like Masscomp the other
+folks at that point.   From a technical stand point, they of course had
+BSD; but I think they also had some of the MIT/NU stuff (like Jack Test's C
+compiler and Tom Teixeria's 68k assembler).  So SunOS was based on BSD
+while they shipped off an AT&T System III license (which was an anathema to
+AT&T marketing, although it was allowed in that license).    Larry can tell
+us how much pressure they felt with the V7/BSD command systems in the
+market; but certainly since they originally sold to the Vax replacement
+market - it did not seem like it mattered (until later).
+
+When the SVR3 License came out, that was the 'best' from the licensee's
+standpoint.  AT&T had finally backed off some of the more onerous terms,
+but if you were not grandfathered into with an original V7 license, you had
+to officially use their code -- although how strict and how/if they tried
+to enforce I don't know.   (HP-UX was and still is a 'BSD' kernel from a
+structural standpoint, but the user would never know.  I know IBM switch to
+the SVr3 license (in fact bought it out) and I believe both HP and DEC
+switched to using it to ship also (DEC was grandfathered to V7, so it was
+terms switch for them.   I think at some point HP also bought out it
+licenses, although I do not believe DEC ever did, Sun was another story
+altogether).
+
+OSF would eventually use the IBM SVR3 license as its base [which makes me
+believe IBM must have had a V7 redistribution license too.  Somebody like
+Charlie Saurer might know].  Anyway, IBM, DEC and HP all shipped OSF
+'licensed' systems although only DEC would switch to an OSF/1 based kernel.
+
+The quick story on Sun is that as Larry has pointed out there was a deal at
+the CEO level that brought SunOS and SVR4 together to create what would
+eventually would become Solaris 2.0 (I'll let Larry can fill in those
+details, as it was not truly SVR4 nor SunOS when it was done).  AT&T, ney
+Novell, ney SCO would eventually create SVR5 which was different yet.
+Chorus was working on what was to be SVR6 to compete with the OSF RI's
+Mach4 based system, but I don't think that ever shipped.
+
+--000000000000abcf8c059248ca2f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">below...</font=
+></div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail=
+_attr">On Tue, Sep 10, 2019 at 11:53 PM Warner Losh &lt;<a href=3D"mailto:i=
+mp@bsdimp.com" target=3D"_blank">imp@bsdimp.com</a>&gt; wrote:<br></div><bl=
+ockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-lef=
+t:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div dir=3D=
+"ltr"><br></div><div class=3D"gmail_quote"><div><span style=3D"font-family:=
+sans-serif;font-size:14px">&quot;The Programmer&#39;s Workbench was started=
+ in 1973,</span><sup id=3D"m_-893621230409134693gmail-m_4339843185466604177=
+gmail-cite_ref-Mashey_2-0" class=3D"m_-893621230409134693gmail-m_4339843185=
+466604177gmail-reference" style=3D"line-height:1;unicode-bidi:isolate;white=
+-space:nowrap;font-size:11.2px;font-family:sans-serif"><a href=3D"https://e=
+n.wikipedia.org/wiki/PWB/UNIX#cite_note-Mashey-2" style=3D"text-decoration-=
+line:none;color:rgb(11,0,128);background:none" target=3D"_blank">[2]</a></s=
+up><span style=3D"font-family:sans-serif;font-size:14px">=C2=A0by Evan Ivie=
+ and Rudd Canaday to support a computer center for a 1000-employee Bell Lab=
+s division&quot; is what wikipedia says, though that reference is in a acm =
+queue article by Mashey...</span></div></div></div></blockquote><div><div c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><fo=
+nt color=3D"#93c47d">That syncs and if Mash wrote the dates, I believe them=
+=C2=A0 I thought it was a year or two later by the time they were done.=C2=
+=A0 But it is what I said.=C2=A0 PWB was done to support the mainframe shop=
+s.</font></div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote"=
+ style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);p=
+adding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div>but I&#39=
+;ve never actually used SCCS.<br></div></div></div></blockquote><div><span =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><f=
+ont color=3D"#93c47d">That&#39;s a shame - I still use it for simple things=
+.=C2=A0 Lots less overhead than things like git.=C2=A0 =C2=A0Somebody rewro=
+te it in C++</font></span><font color=3D"#93c47d">=C2=A0<span class=3D"gmai=
+l_default" style=3D"font-family:arial,helvetica,sans-serif">and you can goo=
+gle it.</span></font></div><div><div class=3D"gmail_default" style=3D"font-=
+family:arial,helvetica,sans-serif"><font color=3D"#93c47d">Larry&#39;s been=
+ trying to get me to switch to bitkeeper and I probably should, but I admit=
+ SCCS has been good enough for a long time and the commands are screwed in =
+the roms in my fingers.</font></div><br></div><div><br></div><div>=C2=A0</d=
+iv><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bord=
+er-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div =
+class=3D"gmail_quote"><div></div><div><br></div><div>Several timelines have=
+, without references, Unix/TS or some variant of that going back to the V4 =
+time frame. It&#39;s at best murky. There&#39;s some references in=C2=A0<a =
+href=3D"https://wiki.tuhs.org/doku.php?id=3Dmisc:snippets:mert1" target=3D"=
+_blank">https://wiki.tuhs.org/doku.php?id=3Dmisc:snippets:mert1</a>=C2=A0in=
+cluding the post by Dan DeJegar which I had trouble parsing the ins and out=
+s of.</div></div></div></blockquote><div><div class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">As I sa=
+id, aps or Ted are more likely to be the sources.=C2=A0 They were part of t=
+he original USG team.=C2=A0 =C2=A0Steve just said he did not go over there =
+until System V time (which was what I was afraid).</font></div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font c=
+olor=3D"#93c47d"><br></font></div><div class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">And thanks for=
+ refreshing the bits in my brain... Dan DeJagar not Dale....=C2=A0 =C2=A0 I=
+&#39;ll look at this and see if I can parse it for you in any way.</font></=
+div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"m=
+argin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left=
+:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div>Yea, the Columbus cr=
+ew added a lot to the different versions, and merged from them, according t=
+o the above link and a few other sources.<br></div></div></div></blockquote=
+><div><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sa=
+ns-serif"><font color=3D"#93c47d">Yeah, Phil Karn and Mary Ann both talked =
+about that -- Mary Ann is on this list she may be=C2=A0able to add some of =
+the missing details.</font></span><font color=3D"#93c47d">=C2=A0</font></di=
+v><div><font color=3D"#93c47d"><br></font></div><div><span class=3D"gmail_d=
+efault"><font color=3D"#93c47d">I was never 100% sure where Columbus fit in=
+to the puzzle, but that team did a lot of cool stuff.=C2=A0 Real-Time was t=
+heir thing. The Indiana Hill crew (Tom Bishop) did the 3B4000 and all of th=
+e SSI work linked to the support the ESS development.</font></span></div><d=
+iv><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif"><br></span></div><div><span class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif"></span>=C2=A0</div><blockquote class=3D"gm=
+ail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,=
+204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div=
+>Yes. There&#39;s some confusion as PWB and UNIX/TS become a USG thing that=
+ turns into System III and then the influx of CB-UNIX that&#39;s added befo=
+re System V. How all that relates to USG, I&#39;m quite unclear on still...=
+</div></div></div></blockquote><div><div class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#b6d7a8">As I said, a=
+ps or Ted lived it from the USG side. I&#39;ll try to dig up Armando and se=
+e what he can tell you,</font></div><br></div><div>=C2=A0</div><blockquote =
+class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px sol=
+id rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_=
+quote"><div>=C2=A0</div><div>From the above recollection of Dan DeJAger...<=
+/div></div></div></blockquote><div><span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">Interesting.=
+..=C2=A0 =C2=A0as I said, let me look at what he says and see what I can ad=
+d.</font></span></div><div><span class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif"></span>=C2=A0</div><blockquote class=3D"gmai=
+l_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,20=
+4,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote"><div>=
+=C2=A0I&#39;ve seen lots of references to UNIX/TS, but no versions, so this=
+ makes some sense... And it appears they go back further than V6...</div></=
+div></div></blockquote><div><span class=3D"gmail_default" style=3D"font-fam=
+ily:arial,helvetica,sans-serif"><font color=3D"#93c47d">It&#39;s possible, =
+the first I saw any of the results was on top of V6, when Ted brought some =
+of it to CMU.</font></span></div><div><span class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif"></span>=C2=A0</div><blockquote =
+class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px sol=
+id rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_=
+quote"><div>=C2=A0Yea, the detailed part of my history ends with the progen=
+y of V7 (and I only have room for some, I&#39;ve found maybe 3 dozen differ=
+ent systems that started out with V7 and then merge in System III or System=
+ V code for later versions or some variation on this theme).=C2=A0</div></d=
+iv></div></blockquote><div><div class=3D"gmail_default" style=3D"font-famil=
+y:arial,helvetica,sans-serif"><font color=3D"#93c47d">That&#39;s because th=
+at was what the external (commercial) licenses allowed.=C2=A0 Each license =
+subsumed the previous one. So if you had started a product based on V7 (lik=
+e DEC, HP, and Microsoft) you could ship with the System III license (I rem=
+ember that was &gt;&gt;huge&lt;&lt; issue with the vendors, which AT&amp;T =
+was not super happy to accept - again this is the start of the &#39;conside=
+r it standard&#39; stuff and they wanted everyone to use the bits from Summ=
+it as the basis of their products, which was a problem because each vendor =
+had its own value add.</font></div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif"><font color=3D"#93c47d"><br></font></=
+div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif"><font color=3D"#93c47d">Later when OSF was created, this is part of =
+the=C2=A0genesis of the &#39;Stable License Terms&#39; in OSF&#39;s foundin=
+g principles.</font></div><div class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif"><font color=3D"#93c47d"><br></font></div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><f=
+ont color=3D"#93c47d">So if you were a new company (say Masscomp or Stellar=
+) from a legal standpoint you started with the latest release (System III f=
+or the former, SVR2 the later).=C2=A0 BTW, Sun is an interesting case,=C2=
+=A0which I get too in a minute.</font></div><div class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#93c47d"><br>=
+</font></div><div class=3D"gmail_default" style=3D"font-family:arial,helvet=
+ica,sans-serif"><font color=3D"#93c47d">DEC/HP/MSFT had started their engin=
+eering development for Ultrix/HP-UX/Xenix on the original V7 license, so by=
+ the time of the System III negotiation=C2=A0complete that had already been=
+ shipping some amount of systems using V7 and their original licenses.=C2=
+=A0 What the System III license did was change the terms in some ways to he=
+lp them.=C2=A0 But since the engineering was solidly underweight for Ultrix=
+, DEC kept their V7/BSD kernel, MSFT switched Xenix to System III based (an=
+d then sold the whole mess to SCO).=C2=A0 HP kept the V7/BSD kernel, but ad=
+ded all the System III differences so it looked like System III the running=
+ program and used the System III command system for a user.</font></div></d=
+iv><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif"><font color=3D"#93c47d"><br></font></div><div class=3D"gmail_default"=
+ style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">A=
+t Masscomp, since we need to be on a 68K, we started with a V7/BSD kernel f=
+rom MIT&#39;s RTS labs, called NU (which TI and Apple both used also BTW).=
+=C2=A0 =C2=A0The command system was originally basically System III based b=
+ut added BSD commands as needed.=C2=A0 I joined to start the VM work and we=
+ folded the RTU (real-time) stuff we had worked on with NU into 4.1 then 4.=
+1C to be the kernel, added MP support and we shipped (and it is what Larry =
+originally used).=C2=A0 =C2=A0The company quickly got sucked in the AT&amp;=
+T vs BSD fight, since the AT&amp;T and UCB command system were similar but =
+different and about 1/3 of our customers were University (BSD) types and th=
+e other 1/2 US Gov/Commercial=C2=A0(att) and rest did not care.</font></div=
+><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-ser=
+if"><font color=3D"#93c47d"><br></font></div><div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#93c47d">Lik=
+e HP, at first we tried add switches and create a super set of commands (RT=
+U 1.x).=C2=A0 =C2=A0This was a losing battle for a small company so, we gav=
+e up, and our=C2=A0</font><span style=3D"color:rgb(147,196,125)">solution w=
+as &quot;universes&quot;.=C2=A0 I created something I called &#39;condition=
+ally dependant symbolic links&#39; (CDSL - which I would resurrect=C2=A0in =
+Tru64 for the Cluster work) and we added the &#39;</span>att<span style=3D"=
+color:rgb(147,196,125)">&#39; and &#39;ucb&#39; commands to set a variable =
+in the kernel.=C2=A0 We then had two sets of commands=C2=A0 (/usr/att and /=
+usr/ucb).=C2=A0 Of course, this caused a new set of problems of trying to d=
+o bug fixes in the two command streams [BTW: Pyramid would try the Universe=
+ trick also as did a couple of other folks; but I don&#39;t know how they i=
+mplemented it - as I say, I did it with CDSL].</span></div><div class=3D"gm=
+ail_default" style=3D"font-family:arial,helvetica,sans-serif"><span style=
+=3D"color:rgb(147,196,125)"><br></span></div><div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif"><span style=3D"color:rgb(14=
+7,196,125)">A couple of years later at Stellar we took a different tact.=C2=
+=A0 =C2=A0We started with the licensed kernel (SVR2) and hacked in what it =
+was missing (SMP support, sockets, a new/parallel FS) and added any BSD com=
+mands that were not there, but left it as an otherwise System V system.</sp=
+an></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif"><span style=3D"color:rgb(147,196,125)"><br></span></div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><spa=
+n style=3D"color:rgb(147,196,125)">As I say, Sun was interesting.=C2=A0 =C2=
+=A0They started as a firm after Masscomp, but shipped their first systems (=
+Stanford Sun Terminal boards running UNIX) using Asa Romberger&#39;s V7 lic=
+ense (Unisoft).=C2=A0 When they got their own UNIX license, it would have b=
+een a System III license like Masscomp the other folks at that point.=C2=A0=
+ =C2=A0From a technical stand point, they of course had BSD; but I think th=
+ey also had some of the MIT/NU stuff (like Jack Test&#39;s C compiler and T=
+om Teixeria&#39;s 68k assembler).=C2=A0 So SunOS was based on BSD while the=
+y shipped off an AT&amp;T System III license (which was an anathema to AT&a=
+mp;T marketing, although it was allowed in that license).=C2=A0 =C2=A0 Larr=
+y can tell us how much pressure they felt with the V7/BSD command systems i=
+n the market; but certainly since they originally sold to the Vax replaceme=
+nt market - it did not seem like it mattered (until later).</span></div><di=
+v class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+<span style=3D"color:rgb(147,196,125)"><br></span></div><div class=3D"gmail=
+_default" style=3D"font-family:arial,helvetica,sans-serif"><span style=3D"c=
+olor:rgb(147,196,125)">When the SVR3 License came out, that was the &#39;be=
+st&#39; from the licensee&#39;s standpoint.=C2=A0 AT&amp;T had finally back=
+ed off some of the more onerous terms, but if you were not grandfathered in=
+to with an original V7 license, you had to officially use their code -- alt=
+hough how strict and how/if they tried to enforce I don&#39;t know.=C2=A0 =
+=C2=A0(HP-UX was and still is a &#39;BSD&#39; kernel from a structural stan=
+dpoint, but the user would never know.=C2=A0 I know IBM switch to the SVr3 =
+license (in fact bought it out) and I believe both HP and DEC switched to u=
+sing it to ship also (DEC was grandfathered to V7, so it was terms switch f=
+or them.=C2=A0 =C2=A0I think at some point HP also bought out it licenses, =
+although I do not believe DEC ever did, Sun was another story altogether).=
+=C2=A0 =C2=A0</span></div><div class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif"><span style=3D"color:rgb(147,196,125)"><br></s=
+pan></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica=
+,sans-serif"><span style=3D"color:rgb(147,196,125)">OSF would eventually us=
+e the IBM SVR3 license as its base [which makes=C2=A0me believe IBM must ha=
+ve had a V7 redistribution license too.=C2=A0 Somebody like Charlie Saurer =
+might know].=C2=A0 Anyway, IBM, DEC and HP all shipped OSF &#39;licensed&#3=
+9; systems although only DEC would switch to an OSF/1 based kernel.</span><=
+/div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans=
+-serif"><span style=3D"color:rgb(147,196,125)"><br></span></div><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><span s=
+tyle=3D"color:rgb(147,196,125)">The quick story on Sun is that as Larry has=
+ pointed out there was a deal at the CEO level that brought SunOS and SVR4 =
+together to create what would eventually would become=C2=A0Solaris 2.0 (I&#=
+39;ll let Larry can fill in those details, as it was not truly SVR4 nor Sun=
+OS when it was done).=C2=A0 AT&amp;T, ney Novell, ney SCO would eventually =
+create SVR5 which was different yet.=C2=A0 Chorus was working on what was t=
+o be SVR6 to compete with the OSF RI&#39;s Mach4 based system, but I don&#3=
+9;t think that ever shipped.</span></div><div><br></div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><div dir=3D"ltr"><div class=3D"gmail_quote=
+"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;borde=
+r-left:1px solid rgb(204,204,204);padding-left:1ex">
+</blockquote></div></div>
+</blockquote></div></div>
+
+--000000000000abcf8c059248ca2f--

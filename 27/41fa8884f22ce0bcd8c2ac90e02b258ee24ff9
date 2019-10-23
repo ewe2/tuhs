@@ -1,0 +1,444 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id cc68e966
+	for <ml@inbox.vuxu.org>;
+	Mon, 21 Oct 2019 15:45:38 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9B0399B936; Tue, 22 Oct 2019 01:45:37 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CBA3893D91;
+	Tue, 22 Oct 2019 01:45:02 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="pSEHN4/8";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A773B93D91; Tue, 22 Oct 2019 01:44:59 +1000 (AEST)
+Received: from mail-ed1-f48.google.com (mail-ed1-f48.google.com
+ [209.85.208.48])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B425F93D8C
+ for <tuhs@tuhs.org>; Tue, 22 Oct 2019 01:44:58 +1000 (AEST)
+Received: by mail-ed1-f48.google.com with SMTP id v8so10397126eds.2
+ for <tuhs@tuhs.org>; Mon, 21 Oct 2019 08:44:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=fO0LY1NFAYWaML3pStYTWzAhW1koO+n0hWMI7uKbhps=;
+ b=pSEHN4/8fdap/JhUcmN/qvxQt3HpECX9CHXWlS9lE26tSZlOw+vYKJ1zaausgLoCE6
+ dyF2MBzU/68A8ROo6EA88zP7ZNJ/WHkboel5U2WtKjzZAouU3BYzgvmcLzgR4XApBD/m
+ be16QJqp8pcrbAH4tzPKehERk6EIDZb8uczVVDDCvp1esEaJEYZw0LkWICbOr61vg5Az
+ M1lv0O4kvvFUq/tAxfU5YpUDjwRDAh0+aWLyqVl1qx8BFA4cHuiIuo55UOrY0JiVOcpd
+ tl2VRumMVX+K56LY9FRuhE6cX8ep4DwGtUzybT5qb7x6wFn+IoFdaamE10we8TOwB+4Q
+ HEfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=fO0LY1NFAYWaML3pStYTWzAhW1koO+n0hWMI7uKbhps=;
+ b=gb9h6KfzCtUjuP5dEe76FyD27RtCsWLZh3t82SDlxNv1wHDj6BFmoqyCBQcRu/57ye
+ Zjd7hlTEKq6koM3kBPIdTA6kzD6Aol7FV6v1uCo8NIcnm6S3fQsELoWsBWfWBAhDHs/u
+ enF9TEG//rX+YyQ1R2nJAj/meltFe5QODz2Rp2fhwEE13HPXOr7kC5F7Uj/MelDoO6ml
+ /nP47hD1IxMgUAPBn6PGsAaks6BXEv0dIICdUlnHWg6578jLd3TEpK8t7HbbzMVjs/6W
+ PKdETSF7oTqJ/O39JMEvA6mrerXKU2eclJrJ7u+RZkoLMLw3CP3YVbEKDHGojLKd1j0U
+ DU9g==
+X-Gm-Message-State: APjAAAVzEYdpeTzo5yTgYfRojenV1FkeI5wf7YAmEHDxS1fYui6cXiHL
+ XRGLsiEYhugeJm8IdB6pyoBV9RgoOp3jHQzycyYhi65pR/NWyA==
+X-Google-Smtp-Source: APXvYqxMNCkw+iThsrKiGK9A/4Fary37RPFbTw3Y1wfFCBiIzH9cfW4gbTFjfV/N+AqLMk5KdIokLjEkVMSoHzb9Mus=
+X-Received: by 2002:a17:906:b318:: with SMTP id
+ n24mr22272659ejz.248.1571672697193; 
+ Mon, 21 Oct 2019 08:44:57 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191021115829.C05FB18C09F@mercury.lcs.mit.edu>
+In-Reply-To: <20191021115829.C05FB18C09F@mercury.lcs.mit.edu>
+From: Abhinav Rajagopalan <abhinavrajagopalan@gmail.com>
+Date: Mon, 21 Oct 2019 21:14:20 +0530
+Message-ID: <CANOZ5ri7Ec83232g51pkayK1BK8veSrUHGQW0czN=7H3WRM==Q@mail.gmail.com>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Content-Type: multipart/alternative; boundary="000000000000d1ca7e05956d908a"
+Subject: Re: [TUHS] PDP-7 UNIX filesystem
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000d1ca7e05956d908a
+Content-Type: text/plain; charset="UTF-8"
+
+Thanks, mkdir actually seems to go back to V4.
+
+Also, V4 was the first to have the kernel in a 'high level language' C,
+from the V4 tree,
+
+The files in nsys/ come from nsys.tar.gz
+> <http://minnie.tuhs.org/Archive/Distributions/Research/Dennis_v3/nsys.tar.gz>,
+> which was donated by Dennis Ritchie. This is a version of the kernel quite
+> close to that released in Fourth Edition, but *without pipes*. Dennis
+> Ritchie writes:
+
+
+
+> This is a tar archive derived from a DECtape labelled "nsys". What is
+> contains is just the kernel source, written in the pre-K&R dialect of C. It
+> is intended only for PDP-11/45, and has setup and memory-handling code that
+> will not work on other models (it's missing things special to the later,
+> smaller models, and the larger physical address space of the still later
+> 11/70.) It appears that it is intended to be loaded into memory at physical
+> address 0, and transferred to at location 0.
+
+
+The efforts behind the PDP-7 file system were quite tedious and was a
+general directed graph, only word addressable which meant lack of path
+names as it ignored null chars, the link call being used to link
+directories together which is where dd arises as the precursor to .. today.
+The required files for the user was just linked in together in their dirs.
+
+Quoting from DMR's Evolution of the Unix Time-sharing system,
+
+So that every user did not need to maintain a link to all directories of
+> interest, there existed a directory called *dd* that contained entries
+> for the directory of each user. Thus, to make a link to file *x* in
+> directory *ken*, I might do
+
+ln dd ken ken
+> ln ken x x
+> rm ken
+>
+This scheme rendered subdirectories sufficiently hard to use as to make
+> them unused in practice. Another important barrier was that there was no
+> way to create a directory while the system was running; all were made
+> during recreation of the file system from paper tape, so that directories
+> were in effect a nonrenewable resource.
+
+
+No mkdir/mknode while the system was running, the whole file system had to
+be recreated from the paper tape each time! Thank DEC for the PDP-11. And
+of course, no pipes until '72. Earlier parent had pondered on the write
+permissions required to execute programs, this below explanation from the
+paper might help.
+
+Another mismatch between the system as it had been and the new process
+> control scheme took longer to become evident. Originally, the read/write
+> pointer associated with each open file was stored within the process that
+> opened the file. (This pointer indicates where in the file the next read or
+> write will take place.) The problem with this organization became evident
+> only when we tried to use command files. Suppose a simple command file
+> contains
+
+ls
+> who
+
+and it is executed as follows:
+
+sh comfile >output
+
+The sequence of events was
+
+1) The main shell creates a new process, which opens *outfile* to receive
+> the standard output and executes the shell recursively.
+
+2) The new shell creates another process to execute *ls*, which correctly
+> writes on file *output* and then terminates.
+
+3) Another process is created to execute the next command. However, the IO
+> pointer for the output is copied from that of the shell, and it is still 0,
+> because the shell has never written on its output, and IO pointers are
+> associated with processes. The effect is that the output of *who*
+> overwrites and destroys the output of the preceding *ls* command.
+
+Solution of this problem required creation of a new system table to contain
+> the IO pointers of open files independently of the process in which they
+> were opened.
+
+
+Source: https://www.bell-labs.com/usr/dmr/www/hist.html
+
+
+
+On Mon, Oct 21, 2019 at 5:28 PM Noel Chiappa <jnc@mercury.lcs.mit.edu>
+wrote:
+
+>     > From: Abhinav Rajagopalan
+>
+>     > I only now realized that only mknod existed, up until a long time,
+> only
+>     > later on with the GNU coreutils did mkdir as a command come into
+>     > existence.
+>
+> Huh? See:
+>
+>     https://minnie.tuhs.org//cgi-bin/utree.pl?file=V6/usr/man/man1/mkdir.1
+>
+> (And probably before that, that was the quickest one to find?)
+>
+> Maybe that was a typo for 'mkdir as a system call'? (I recall having to do
+> a
+> fork() to execute 'mkdir', back when.) But 4.2 had mkdir().
+>
+>        Noel
+>
+>
+
+-- 
+
+Abhinav Rajagopalan
+
+--000000000000d1ca7e05956d908a
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default" style=3D"fon=
+t-family:courier new,monospace;font-size:small"></div><div dir=3D"ltr"><div=
+ dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D=
+"ltr"><div class=3D"gmail_default" style=3D"font-family:courier new,monospa=
+ce;font-size:small"><div class=3D"gmail_default" style=3D"font-family:couri=
+er new,monospace;font-size:small">Thanks, mkdir actually seems to go back t=
+o V4.</div><div class=3D"gmail_default" style=3D"font-family:courier new,mo=
+nospace;font-size:small"><br></div><div class=3D"gmail_default" style=3D"fo=
+nt-family:courier new,monospace;font-size:small">Also, V4 was the first to =
+have the kernel in a &#39;high level language&#39; C, from the V4 tree,</di=
+v><div class=3D"gmail_default" style=3D"font-family:courier new,monospace;f=
+ont-size:small"><p style=3D"text-align:left;color:rgb(0,0,0);text-transform=
+:none;text-indent:0px;letter-spacing:normal;font-family:Times New Roman;fon=
+t-size:16px;font-style:normal;font-variant:normal;font-weight:400;text-deco=
+ration:none;word-spacing:0px;white-space:normal"></p><blockquote class=3D"g=
+mail_quote" style=3D"margin:0px 0px 0px 0.8ex;padding-left:1ex;border-left-=
+color:rgb(204,204,204);border-left-width:1px;border-left-style:solid"><font=
+ face=3D"times new roman,serif">The files in nsys/ come from=20
+<a href=3D"http://minnie.tuhs.org/Archive/Distributions/Research/Dennis_v3/=
+nsys.tar.gz">
+nsys.tar.gz</a>, which was donated by Dennis Ritchie. This is a version of =
+the
+kernel quite close to that released in Fourth Edition, but <u>without pipes=
+</u>.
+Dennis Ritchie writes:</font> </blockquote><div>=C2=A0</div><blockquote cla=
+ss=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;padding-left:1ex;borde=
+r-left-color:rgb(204,204,204);border-left-width:1px;border-left-style:solid=
+"><font face=3D"times new roman,serif">This is a tar archive derived from a=
+ DECtape labelled &quot;nsys&quot;. What is contains
+is just the kernel source, written in the pre-K&amp;R
+dialect of C.
+It is intended only for PDP-11/45, and has setup and memory-handling
+code that will not work on other models (it&#39;s missing things special
+to the later, smaller models, and the larger physical address space
+of the still later 11/70.)  It appears that it is intended to be loaded
+into memory at physical address 0, and transferred to at location 0.
+</font></blockquote><div><font face=3D"times new roman,serif"></font><br></=
+div><div>The efforts behind the PDP-7 file system were quite tedious and wa=
+s a general directed graph, only word addressable which meant lack of path =
+names as it ignored null chars, the link call being used to link directorie=
+s together which is where dd arises as the precursor to .. today. The requi=
+red files for the user was just linked in together in their dirs.=C2=A0</di=
+v><div><br></div><div>Quoting from DMR&#39;s Evolution of the Unix Time-sha=
+ring system,</div><div><p style=3D"text-align:left;color:rgb(0,0,0);text-tr=
+ansform:none;text-indent:0px;letter-spacing:normal;font-family:Times New Ro=
+man;font-style:normal;font-variant:normal;font-weight:400;text-decoration:n=
+one;word-spacing:0px;white-space:normal"></p><blockquote class=3D"gmail_quo=
+te" style=3D"margin:0px 0px 0px 0.8ex;padding-left:1ex;border-left-color:rg=
+b(204,204,204);border-left-width:1px;border-left-style:solid"><font face=3D=
+"times new roman,serif">So that every user did not need
+to maintain a link to all directories of interest,
+there existed a directory
+called
+<i>dd</i>
+that contained entries for the directory of each
+user.
+Thus, to make a link to file
+<i>x</i>
+in directory
+<i>ken</i>,
+I might do</font>
+</blockquote><p></p><dl style=3D"text-align:left;color:rgb(0,0,0);text-tran=
+sform:none;text-indent:0px;letter-spacing:normal;font-family:Times New Roma=
+n;font-size:16px;font-style:normal;font-variant:normal;font-weight:400;text=
+-decoration:none;word-spacing:0px;white-space:normal"><dt></dt><dd><pre><tt=
+></tt><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;p=
+adding-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;bo=
+rder-left-style:solid"><tt>ln dd ken ken
+ln ken x x
+rm ken</tt><tt><br></tt></blockquote></pre></dd></dl><span style=3D"text-al=
+ign:left;color:rgb(0,0,0);text-transform:none;text-indent:0px;letter-spacin=
+g:normal;font-style:normal;font-variant:normal;font-weight:400;text-decorat=
+ion:none;word-spacing:0px;display:inline;white-space:normal;float:none;back=
+ground-color:rgb(255,255,255)">
+<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;padding=
+-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;border-l=
+eft-style:solid"><font face=3D"times new roman,serif">This scheme rendered =
+subdirectories sufficiently hard to use
+as to make them unused in practice.
+Another important barrier was that there was no way to create a directory
+while the system was running;
+all were made during recreation of the file system
+from paper tape, so that directories were in effect
+a nonrenewable resource.
+</font></blockquote></span><b></b><i></i><u></u><sub></sub><sup></sup><stri=
+ke></strike><font face=3D"times new roman,serif"></font><br></div><div>No m=
+kdir/mknode while the system was running, the whole file system had to be r=
+ecreated from the paper tape each time! Thank DEC for the PDP-11. And of co=
+urse, no pipes until &#39;72. Earlier parent had pondered on the write perm=
+issions required to execute programs, this below explanation from the paper=
+ might help.<br></div><div><p style=3D"text-align:left;color:rgb(0,0,0);tex=
+t-transform:none;text-indent:0px;letter-spacing:normal;font-style:normal;fo=
+nt-variant:normal;font-weight:400;text-decoration:none;word-spacing:0px;whi=
+te-space:normal"></p><blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;padding-left:1ex;border-left-color:rgb(204,204,204);border-le=
+ft-width:1px;border-left-style:solid"><font face=3D"times new roman,serif">=
+Another mismatch between the system as it had been
+and the new process control scheme took longer to become
+evident.
+Originally, the read/write pointer associated with
+each open file was stored within the process that opened
+the file.
+(This pointer indicates where in the file the next
+read or write will take place.)
+The problem with this organization became evident only
+when we tried to use command files.
+Suppose a simple command file contains
+</font></blockquote><p></p><dl style=3D"text-align:left;color:rgb(0,0,0);te=
+xt-transform:none;text-indent:0px;letter-spacing:normal;font-family:Times N=
+ew Roman;font-size:16px;font-style:normal;font-variant:normal;font-weight:4=
+00;text-decoration:none;word-spacing:0px;white-space:normal"><dt></dt><dd><=
+tt><pre><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex=
+;padding-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;=
+border-left-style:solid">ls
+who
+</blockquote></pre></tt></dd></dl><span style=3D"text-align:left;color:rgb(=
+0,0,0);text-transform:none;text-indent:0px;letter-spacing:normal;font-famil=
+y:Times New Roman;font-style:normal;font-variant:normal;font-weight:400;tex=
+t-decoration:none;word-spacing:0px;display:inline;white-space:normal;float:=
+none;background-color:rgb(255,255,255)">
+<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;padding=
+-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;border-l=
+eft-style:solid">and it is executed as follows:
+</blockquote></span><dl style=3D"text-align:left;color:rgb(0,0,0);text-tran=
+sform:none;text-indent:0px;letter-spacing:normal;font-family:Times New Roma=
+n;font-size:16px;font-style:normal;font-variant:normal;font-weight:400;text=
+-decoration:none;word-spacing:0px;white-space:normal"><dt></dt><dd><tt><pre=
+><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;paddin=
+g-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;border-=
+left-style:solid">sh comfile &gt;output
+</blockquote></pre></tt></dd></dl><span style=3D"text-align:left;color:rgb(=
+0,0,0);text-transform:none;text-indent:0px;letter-spacing:normal;font-style=
+:normal;font-variant:normal;font-weight:400;text-decoration:none;word-spaci=
+ng:0px;display:inline;white-space:normal;float:none;background-color:rgb(25=
+5,255,255)">
+<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;padding=
+-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;border-l=
+eft-style:solid"><font face=3D"times new roman,serif">The sequence of event=
+s was
+</font></blockquote></span><p style=3D"text-align:left;color:rgb(0,0,0);tex=
+t-transform:none;text-indent:0px;letter-spacing:normal;font-family:Times Ne=
+w Roman;font-size:16px;font-style:normal;font-variant:normal;font-weight:40=
+0;text-decoration:none;word-spacing:0px;white-space:normal"></p><span style=
+=3D"text-align:left;color:rgb(0,0,0);text-transform:none;text-indent:0px;le=
+tter-spacing:normal;font-family:Times New Roman;font-size:16px;font-style:n=
+ormal;font-variant:normal;font-weight:400;text-decoration:none;word-spacing=
+:0px;display:inline;white-space:normal;float:none;background-color:rgb(255,=
+255,255)">
+</span><dl style=3D"text-align:left;color:rgb(0,0,0);text-transform:none;te=
+xt-indent:0px;letter-spacing:normal;font-style:normal;font-variant:normal;f=
+ont-weight:400;text-decoration:none;word-spacing:0px;white-space:normal" co=
+mpact>
+<dt><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;pad=
+ding-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;bord=
+er-left-style:solid"><font face=3D"times new roman,serif">1) The main shell=
+ creates a new process, which opens
+<i>outfile</i>
+to receive the standard output and executes the shell
+recursively.
+</font></blockquote></dt><dt><blockquote class=3D"gmail_quote" style=3D"mar=
+gin:0px 0px 0px 0.8ex;padding-left:1ex;border-left-color:rgb(204,204,204);b=
+order-left-width:1px;border-left-style:solid"><font face=3D"times new roman=
+,serif">2) The new shell creates another process to execute
+<i>ls</i>,
+which correctly writes on file
+<i>output</i>
+and then terminates.
+</font></blockquote></dt><dt><blockquote class=3D"gmail_quote" style=3D"mar=
+gin:0px 0px 0px 0.8ex;padding-left:1ex;border-left-color:rgb(204,204,204);b=
+order-left-width:1px;border-left-style:solid"><font face=3D"times new roman=
+,serif">3) Another process is created to execute the next command.
+However, the IO pointer for the output is copied from
+that of the shell,
+and it is still 0, because the shell has never written
+on its output, and IO pointers are associated with processes.
+The effect is that the output of
+<i>who</i>
+overwrites and destroys the output of the preceding
+<i>ls</i>
+command.
+</font></blockquote></dt></dl><span style=3D"text-align:left;color:rgb(0,0,=
+0);text-transform:none;text-indent:0px;letter-spacing:normal;font-family:Ti=
+mes New Roman;font-size:16px;font-style:normal;font-variant:normal;font-wei=
+ght:400;text-decoration:none;word-spacing:0px;display:inline;white-space:no=
+rmal;float:none;background-color:rgb(255,255,255)">
+</span><p style=3D"text-align:left;color:rgb(0,0,0);text-transform:none;tex=
+t-indent:0px;letter-spacing:normal;font-family:Times New Roman;font-size:16=
+px;font-style:normal;font-variant:normal;font-weight:400;text-decoration:no=
+ne;word-spacing:0px;white-space:normal">
+</p><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;pad=
+ding-left:1ex;border-left-color:rgb(204,204,204);border-left-width:1px;bord=
+er-left-style:solid"><font face=3D"times new roman,serif">Solution of this =
+problem required creation of a new
+system table to contain the IO pointers
+of open files independently of the process in which they
+were opened.=C2=A0</font></blockquote><div>=C2=A0</div></div><div>Source: <=
+a href=3D"https://www.bell-labs.com/usr/dmr/www/hist.html">https://www.bell=
+-labs.com/usr/dmr/www/hist.html</a>=C2=A0</div><p></p></div><b></b><i></i><=
+u></u><sub></sub><sup></sup><strike></strike><br></div></div></div></div></=
+div></div></div></div></div><br><div class=3D"gmail_quote"><div class=3D"gm=
+ail_attr" dir=3D"ltr">On Mon, Oct 21, 2019 at 5:28 PM Noel Chiappa &lt;<a h=
+ref=3D"mailto:jnc@mercury.lcs.mit.edu">jnc@mercury.lcs.mit.edu</a>&gt; wrot=
+e:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0=
+.8ex;padding-left:1ex;border-left-color:rgb(204,204,204);border-left-width:=
+1px;border-left-style:solid">=C2=A0 =C2=A0 &gt; From: Abhinav Rajagopalan<b=
+r>
+<br>
+=C2=A0 =C2=A0 &gt; I only now realized that only mknod existed, up until a =
+long time, only<br>
+=C2=A0 =C2=A0 &gt; later on with the GNU coreutils did mkdir as a command c=
+ome into<br>
+=C2=A0 =C2=A0 &gt; existence.<br>
+<br>
+Huh? See:<br>
+<br>
+=C2=A0 =C2=A0 <a href=3D"https://minnie.tuhs.org//cgi-bin/utree.pl?file=3DV=
+6/usr/man/man1/mkdir.1" target=3D"_blank" rel=3D"noreferrer">https://minnie=
+.tuhs.org//cgi-bin/utree.pl?file=3DV6/usr/man/man1/mkdir.1</a><br>
+<br>
+(And probably before that, that was the quickest one to find?)<br>
+<br>
+Maybe that was a typo for &#39;mkdir as a system call&#39;? (I recall havin=
+g to do a<br>
+fork() to execute &#39;mkdir&#39;, back when.) But 4.2 had mkdir().<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Noel<br>
+<br>
+</blockquote></div><br clear=3D"all"><br>-- <br><div class=3D"gmail_signatu=
+re" dir=3D"ltr"><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr=
+"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div><d=
+iv dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D=
+"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div dir=3D"ltr"><div dir=
+=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div><span style=3D"font-family:=
+courier new,monospace"><br></span></div><div><span style=3D"font-family:cou=
+rier new,monospace"><span style=3D"color:rgb(0,0,0)">Abhinav Rajagopalan</s=
+pan></span></div><div><span><span style=3D"color:rgb(68,68,68)"><br></span>=
+</span></div><div><font color=3D"#666666" face=3D"tahoma, sans-serif" style=
+=3D"background-color:rgb(255,0,0)"><br></font></div></div></div></div></div=
+></div></div></div></div></div></div></div></div></div></div></div></div></=
+div></div></div></div></div></div></div></div></div></div></div></div>
+
+--000000000000d1ca7e05956d908a--

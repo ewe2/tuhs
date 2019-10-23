@@ -1,0 +1,55 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu,  7 Aug 2014 08:30:12 -0400 (EDT)
+Subject: [TUHS] alloc.s is missing from unix v5
+Message-ID: <20140807123012.9CE2B18C0DE@mercury.lcs.mit.edu>
+
+    > From: Mark Longridge <cubexyz at gmail.com>
+
+    > In Unix v6 there is a file in the TUHS archives
+    > V6/usr/source/s4/alloc.s
+    > ..
+    > In v5 the command "ar t /lib/libc.a" lists the files in the c library
+    > and that includes alloc.o
+
+Well, at least you have the binary. Dis-assembly time! :-)
+
+    > so there should be a source file somewhere.
+
+Ha-ha-ha-ha-HAH! You _are_ an optimist!
+
+
+I'm not joking about the dis-assembly. Not to worry, it's not too bad (I had
+to do it to retrieve the source for the V6 RL bootstraps - and you've got
+symbols too), and you've got the V6 alloc.s to guide you - with luck, it did
+not get re-written between V5 and V6, and you may have minimal (no?) changes
+to deal with?
+
+I don't know which debugger V5 has (db or cdb); if neither, you can spin up a
+V6 and do the disassembly there.
+
+Do "db alloc.o > alloc.s" and then type '0?<RETURN>' followed by a whole
+bunch of RETURNs. (You can do plain 'db alloc.o' first, to see about how many
+CR's you need.) Next do a "nm alloc.o" to get as many symbols as you can.
+
+At that point, I would extract your prototype alloc.s from the emulated
+machine so you can use a real editor to work on it. (You should have a way
+to get files in and out of the simulated machine; that was one of the
+first things I did with my V6 work:
+
+  http://www.chiappa.net/~jnc/tech/V6Unix.html
+
+although if you're using SIMH I don't know if that has a way to import
+files - a big advantage to using Ersatz-11, although one I didn't know
+about when I picked it.)
+
+You may need to go back and do a "xxx/" {with appropriate value for "xxx"}
+plus a few CR's to get static constants, but at that point you should have
+all the raw data you need to re-create the V5 alloc.s. Obviously, start
+by having your proto-allocV5.s in one window, and compare with the
+allocV6.s in another... like I said, you may luck out.
+
+The final step, of course, is 'as alloc.s', and then 'cmp a.out alloc.o'.
+
+	Noel
+
+

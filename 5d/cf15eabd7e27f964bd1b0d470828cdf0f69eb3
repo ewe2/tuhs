@@ -1,0 +1,28 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed,  9 Dec 2015 17:01:26 -0500 (EST)
+Subject: [TUHS] v6tar from v7 on v6, too large?
+Message-ID: <20151209220126.7FF7818C0C9@mercury.lcs.mit.edu>
+
+    > Yes the V6 kernel runs in split I and D mode, but it doesn't end up
+    > supporting any more data.  I.e. the kernel is still a 407 (or 410) file.
+    > _etext/_edata/_end are still referencing the same 64K space.
+
+Err, actually, not really.
+
+The thing is that to build the split-I/D kernel, one sets the linker to
+produce an output file which still contains the relocation bits. That is then
+post-processed by 'sysfix', which does wierd magic (moves the text up to
+020000, in terms of address space; and puts the data _below_ the text, in the
+actual output file). So while the files concerned may have a '407' in their
+header, they definitely aren't what one normally finds in a linked 407 or 410
+file.
+
+In particular, data addresses start at 0, and can run up to 0140000 (i.e. up
+to 56KB), while text addreses start at 020000 and can run up to 0160000. So,
+_etext/_edata/_end are not, in fact, in the same 64K space. And the total of
+data (initialized and un-initialized) together with the text can be much
+larger than 64KB - up to 112KB (modor so.
+
+	Noel
+
+

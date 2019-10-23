@@ -1,0 +1,197 @@
+From: afrb2@hermes.cam.ac.uk (A.F.R. Bain)
+Date: Fri, 12 Sep 1997 11:10:43 +0100 (BST)
+Subject: Bootstrap Idea
+In-Reply-To: <199709112331.JAA09209@henry.cs.adfa.oz.au>
+Message-ID: <Pine.SOL.3.95q.970912110133.5219A-100000@green.csi.cam.ac.uk>
+
+On Fri, 12 Sep 1997, Warren Toomey wrote:
+
+> All,
+> 	I had an idea about bootstrapping images into PDP-11s, please shoot
+> it down! Ok, I don't know much about the -11 hardware, how hard would it
+> be to bootstrap as follows:
+> 
+> 	hand-toggle in a small bit of code, which
+> 	sucks in a bigger bootstrap over a serial line, which
+> 	then can pull in a disk image over the serial line & write to disk
+
+Well I've started to use this approach allready and have written most of
+the code.  My scenario is that I have an 11/34 with one RK05, and no other
+operating systems.  I have access to almost unlimited number of PDP-11
+serial cards, and other unix boxes.
+
+The PDP 11 is configured with two serial ports, one the standard serial
+console, the other a 9600 baud serial line.  These go to the two serial
+ports on my PC running (which incendtally runs linux).  First I send a
+program (binary) as console emulator instructions to the PDP on the
+console line.  This program is basically a hacked version of 
+/mdec/tboot.s (TU10 boot) which provides getc() and putc() and other bits
+and bobs.  It reads in from console a number (rather than a file name)
+which is the length of the program to load.  This is read in from the
+second serial port and loaded into memory.  I then jump to this and start 
+going.  
+
+So the procedure is (1) Load tboot.s via console (2) load RKF to format
+RK-05 (this works fine) (2) load the copy program whose name escapes me at
+the moment, and transfer the tape image to the RK-05.  (3) Boot the RK-05.
+
+This seemed to work, and progress was only interupted by the need to move
+the PDP-11 from Cambridge to home!  I have copies of all the programs
+which need a little finishing off, but I could let people have copies if
+they are interested.  Incidentally I assembled the on Supnik's emulator
+and then punched them out to the virtual PTP.
+
+In fact I also have a longish document which goes through the entire
+process with all the code (and some new comments) to try and explain how
+it all works.
+
+All this was done using V5 unix code btw.
+
+>
+ > Flaws:	need different bootstraps for different disks 
+> 	need different bootstraps for different serial hardware
+> 	how to deal with bad blocks?
+> 	very slooow
+> 
+> Other problems: 5th, 6th Edition came as RK05 images. We could probably
+> 	build images for different drives.
+> 	7th Edition did a mkfs during installation, but I don't know if
+> 	bad blocks were ever dealt with.
+> 
+> Anyway, this solution would allow a simple program + disk images to be
+> put on your nearby PC running Linux/whatever, so no tapes or tape drives
+> would be required.
+
+It is slow -- but that doesn't matter if you can go somewhere else while
+it happens (as long as your RK-05 doesn't catch fire)
+
+Alan
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id NAA04307
+	for pups-liszt; Sat, 13 Sep 1997 13:07:30 +1000 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id NAA04302
+	for <pups at minnie.cs.adfa.oz.au>; Sat, 13 Sep 1997 13:07:25 +1000 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id NAA24922 for pups at minnie.cs.adfa.oz.au; Sat, 13 Sep 1997 13:07:43 +1000 (EST)
+Received: from csadfa.cs.adfa.oz.au (csadfa.cs.adfa.oz.au [131.236.20.6]) by henry.cs.adfa.oz.au (8.7.5/8.7.3) with ESMTP id TAA13378 for <wkt at henry.cs.adfa.oz.au>; Fri, 12 Sep 1997 19:19:00 +1000 (EST)
+Received: from oxmail4.ox.ac.uk (oxmail4.ox.ac.uk [163.1.2.33])
+	by csadfa.cs.adfa.oz.au (8.8.5/8.8.5) with SMTP id TAA18733
+	for <wkt at cs.adfa.oz.au>; Fri, 12 Sep 1997 19:16:26 +1000 (EST)
+Received: from europa.ox.ac.uk (actually host max18.public.ox.ac.uk) 
+          by oxmail4 with SMTP (PP); Fri, 12 Sep 1997 10:18:32 +0100
+Message-Id: <m0x9RhP-0003d7C at europa.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob)
+Subject: Re: Bootstrap Idea
+To: wkt at cs.adfa.oz.au
+Date: Fri, 12 Sep 1997 10:07:35 +0100 (BST)
+In-Reply-To: <199709112331.JAA09209 at henry.cs.adfa.oz.au> from "Warren Toomey" at Sep 12, 97 09:31:22 am
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+>All,
+>	I had an idea about bootstrapping images into PDP-11s, please shoot
+>it down! Ok, I don't know much about the -11 hardware, how hard would it
+>be to bootstrap as follows:
+>
+>	hand-toggle in a small bit of code, which
+>	sucks in a bigger bootstrap over a serial line, which
+>	then can pull in a disk image over the serial line & write to disk
+
+
+Well, for what it's worth here's my contribution. I have been able to
+set up working v5 and v6 systems on my 11/34c (which uses an RK05
+drive) uisng the distributed images (thanks Warren). 
+
+The key here I think is to make use of the excellent work that has
+been already done on the various PDP-11 emulators. The emulator I use
+is that of Bob Supnic, which runs wonderfully on my Linux box.
+
+v6 is available as an image of a tape. The docs helpfully say:
+
+This is a copy of the Sixth Edition distribution tape which was sent
+to me by Ken Wellsch. The file v6.tape.gz is the tape image, with the
+first 100 512-byte tape blocks containing tape bootstrap stuff. Blocks
+100 - 4099 are the RK05 root image, blocks 4100 - 8099 are the /usr
+RK05 image, and the blocks 8100 - 12099 are the /doc RK05 image.
+
+It is trivial with the UNIX command dd to split the tape image into
+its constituent parts:
+
+	1) Tape bootstap (useless for me)
+	2) RK05 root image
+	3) RK05 /usr image
+	4) RK05 /doc image
+
+I can then start the Supnic emulator, attach the three RK05 images to
+drives 0, 1 and 2 and boot. My system has only a single RK05 drive. As
+a result I had to mess around in the emulator to create a fresh RK05
+image containing a useful subset of the root and /usr images. In
+practice it's not too hard to get v6 onto a single RK05 pack -- I
+think it's only necessary to lose stuff like the spell disctionary and
+so on.
+
+I also wanted support for a second DL11 serial line, so I used the
+emulator (and some extra emulated disk space) to rebuild the kernel.
+
+Once I was happy with the disk image I'd created, it was time to
+transfer it to real hardware. My 11/34c runs RT11 and I was able to
+get hold of a small stripped down Kermit server-only program from John
+Wilson. I forget the name of this utility, but it's available from
+ftp.dbit.com. The stardard RT11 Kermit that I have is unable to
+transfer entire disk images, the Wilson implementation can do so.
+
+Booting the 11/34c from RX01 floppy (one RK05 drive only, remember) I
+ran the Kermit server. From the PC end it was straightforward to
+transfer the image: "PUT imagefile.img RK01:". Aside from a
+spectacular RK05 head crash that put my machine out of action for a
+while, all was well.
+
+For v7, I started with a single RL02 image. That would boot on the
+simulator. I added a couple of emulated RK05s to the emulator set up
+and proceded to build a single RK05 which would (just!) hold a
+bootable v7 image. I warn you that v7 on a 2.5Mb disk is tight, but it
+can be done. Having built the image, I rebuilt the kernel to enable
+RK05 support (and a second serial line, again) and disable the other
+disk drivers. That kernel went onto my new image. Again, the same
+Kermit trick enabled the image to be transferred to the 11/34a.
+
+If anyone wants these RK05 bootable image files, please let me know
+(rjm at swift.eng.ox.ac.uk - not this address)!
+
+A few points though:
+
+1) RK05s packs _can not have_ bad blocks. There is no bad block
+revectoring on these drives. A bad block on a pack suggests the pack
+is ready for the dumpster. This makes life a little easier. I'm not
+sure how you'd deal with bad block revectoring on an RL01/RL02 for
+example. I guess it's not too hard, but I shan't speculate there.
+
+2) My 11/73, on the other hand, uses an RD53 (last time I looked). I'm
+not sure if the emulator can deal with these kind of drives. In any
+case, support for MSCP drives only came with 2BSD, which I've not
+played with. Maybe the same emulator tricks can be employed to get
+RDxx images, modulo the bad blocks problem.
+
+3) If you don't have a PDP-11 operating system running, the Kermit
+approach won't be much use. There may be a stand-alone file transfer
+program that can write to raw devices. No idea -- perhaps someone
+needs to write this (both for the PDP and the PC ends).
+
+Hope this helps.
+
+Cheers,
+Bob
+
+-- 
+------------------------------------------------------------------------------
+Bob Manners                       (My REAL address is: rjm at swift.eng.ox.ac.uk)
+BOB'S COMPUTER MUSEUM:               http://swift.eng.ox.ac.uk/rjm/museum.html
+------------------------------------------------------------------------------
+
+
+

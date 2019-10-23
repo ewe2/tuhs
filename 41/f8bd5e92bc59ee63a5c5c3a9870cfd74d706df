@@ -1,0 +1,96 @@
+From: norman@nose.cs.utoronto.ca (norman@nose.cs.utoronto.ca)
+Date: Sun, 16 Apr 2000 14:43:14 -0400
+Subject: Early file system layouts (was: Splitting / and /usr)
+Message-ID: <200004172217.IAA38973@minnie.cs.adfa.edu.au>
+
+Warren is right that even the First Edition manual says that init
+mounts /usr, implying that /usr was a distinct file system even that
+early.  It seems to me that the original question Greg forwarded
+from the NetBSD list was also after when /usr/bin appeared, which
+isn't necessarily the same date.
+
+A possible answer from old manuals:
+
+- Second Edition sh(I) (dated 3/15/72):
+	If the first argument is the name of an executable file,
+	it is invoked; otherwise the string "/bin/" is prepended
+	to the argument.  (In this way the standard commands,
+	which reside in "/bin", are found.)  If the "/bin" file
+	exists, but is not executable, it is used by the shell
+	as a command file.
+
+- Third Edition sh(I) (dated 1/15/73):
+	If the first argument is the name of an executable file,
+	it is invoked; otherwise the string "/bin/" is prepended
+	to the argument.  (In this way most standard commands,
+	which reside in "/bin", are found.)  If no such command
+	is found, the string "/usr" is further prepended (to give
+	"/usr/bin/command") and another attempt is made to execute
+	the resulting file.  (Certain "overflow" commands live in
+	"/usr/bin".)  If the "/usr/bin" file exists, but is not
+	executable, it is used by the shell as a command file.
+
+Notice the odd detail that non-executable files in /bin (early on)
+or /usr/bin (later) get special treatment.  Does this mean that
+shell scripts that weren't in /usr/bin had to be invoked explicitly
+via `sh script' instead of just `script'?
+
+Even deeper historic trivia: it occurred to me to check the fragments
+of the PDP-7 system I have on paper to see whether /usr existed then.
+I was quickly reminded that it almost certainly didn't because subdirectories
+weren't really used then; there were no pathnames in that system.
+(You could open only files in the working directory, though you could
+link from another directory.)  When asked to invoke `x', the shell first
+tried to open `x', then to link `x' from directory `system' and open the
+result.  (Presumably it remembered to remove the needless link after the
+open, but I'm not quite certain; the old paper copy is missing a few
+lines just there.)  So even the name `bin' doesn't date back quite to
+the beginning.
+
+Norman Wilson
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA39649
+	for pups-liszt; Tue, 18 Apr 2000 10:10:53 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA39645
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 18 Apr 2000 10:10:42 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id KAA42226
+	for pups at minnie.cs.adfa.edu.au; Tue, 18 Apr 2000 10:10:41 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200004180010.KAA42226 at henry.cs.adfa.edu.au>
+Subject: Re: Early file system layouts
+In-Reply-To: <200004172217.IAA38973 at minnie.cs.adfa.edu.au> from "norman at nose.cs.utoronto.ca" at "Apr 16, 2000  2:43:14 pm"
+To: 
+Date: Tue, 18 Apr 2000 10:10:41 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by norman at nose.cs.utoronto.ca:
+> - Second Edition sh(I) (dated 3/15/72):
+> 	If the first argument is the name of an executable file,
+> 	it is invoked; otherwise the string "/bin/" is prepended
+> 	to the argument.  (In this way the standard commands,
+> 	which reside in "/bin", are found.)  If the "/bin" file
+> 	exists, but is not executable, it is used by the shell
+> 	as a command file.
+> Notice the odd detail that non-executable files in /bin (early on)
+> or /usr/bin (later) get special treatment.  Does this mean that
+> shell scripts that weren't in /usr/bin had to be invoked explicitly
+> via `sh script' instead of just `script'?
+
+Can't tell, we don't have the source code. In the Nsys kernel (dated
+just before the 4th Edition), files must have the execute bit on or
+they can't be exec(2)d.
+
+	Warren
+
+

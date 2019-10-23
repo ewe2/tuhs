@@ -1,0 +1,82 @@
+From: luvisi@andru.sonoma.edu (Andru Luvisi)
+Date: Wed, 27 Nov 2002 23:20:28 -0800 (PST)
+Subject: [pups] 2.11BSD networking on simh
+In-Reply-To: <000101c29684$ab563bc0$8d69580c@who>
+Message-ID: <Pine.LNX.4.44.0211272256000.643-201000@gladen>
+
+On Wed, 27 Nov 2002, Gregg C Levine wrote:
+> Hello from Gregg C Levine
+> I've been trying to get that notion to work, since it was announced.
+> Can you post an explanation, regarding how you constructed your 2.11
+> setup? Was it built from disk dumps, or from one of the previously
+> built, and stored collections, on the Minnie, file server?
+
+I used the files from PDP-11/Distributions/ucb/2.11BSD/ in the collection
+and built a tape image using a short perl script which I attached as
+"mktap.pl".  I got the file format from the comments in the "mtdump"
+program from the "simtools.zip" archive (on simh.trailing-edge.com), and
+how to put the files onto the tape from the HOWTO file in the 2.11BSD
+directory.  From there I pretty much just followed the HOWTO.
+
+The system is mostly functional.  fsck still complains about a file that
+it creates.  I stuck it all in one 128 meg file system, so I'm thinking of
+making another disk and file system just to stick the fsck temporary file
+on during boot.
+
+> Also, a
+> posting of the startup script would be nice, along with what you are
+> running this on. That way, we can possibly reproduce your problems for
+> ourselves. Especially since this is one of my personal projects. And
+> most importantly of all, what was the date on your simh download?
+
+I'm running it on a Linux 2.2 box.  My ethernet card is a 3c905B in case
+it matters.  I have attached my startup file as "simh".
+
+I am using simhv210-1.zip, which as I write this is still the latest one
+on the site.
+
+Any ideas to try?  Hve you had any luck?
+
+Andru
+-- 
+Andru Luvisi, Programmer/Analyst
+
+Quote Of The Moment:
+  Great spirits have always encountered violent opposition from
+  mediocre minds.
+                  -- Albert Einstein
+  
+  They laughed at Einstein.  They laughed at the Wright Brothers.
+  But they also laughed at Bozo the Clown.
+                  -- Carl Sagan
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: mktap.pl
+Type: application/x-perl
+Size: 1104 bytes
+Desc: 
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20021127/6c78d227/attachment.bin>
+-------------- next part --------------
+set tto 7b
+
+set dz lines=8
+set dz 7b
+attach -am dz 4000
+
+set ts enable
+set rq enable
+
+set RK disable
+set HK disable
+set TC disable
+set TM disable
+
+set xq type=deqna
+set xq mac=00-50-56-01-01-01
+set xq sanity=on
+attach xq eth0
+
+set cpu 3072k
+attach rq root.dsk
+boot rq
+

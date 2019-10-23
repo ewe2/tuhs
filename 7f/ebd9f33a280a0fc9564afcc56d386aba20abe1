@@ -1,0 +1,44 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sun, 15 Nov 2015 15:43:49 +0100
+Subject: [TUHS] link() syscall implementation
+In-Reply-To: <m2y4e0p4d7.fsf@fastmail.com>
+References: <20151114133415.Horde.waGYhqdGBssNHzZf3_TcC5x@avocado.salatschuessel.net>
+ <20151114135635.Horde.6nqJB5AyLmQsx2fCZX4iZtZ@avocado.salatschuessel.net>
+ <20151114161757.Horde.RL0PZVub39UDZ9-Qr0wtXdW@avocado.salatschuessel.net>
+ <m2bnawqnze.fsf@fastmail.com>
+ <20151114224205.Horde.pNedl1JFkdNwTKQKHr6OiXv@avocado.salatschuessel.net>
+ <m2y4e0p4d7.fsf@fastmail.com>
+Message-ID: <20151115154349.Horde.6dHXDRnHFazVunVIgPsob3u@avocado.salatschuessel.net>
+
+
+Random832 <random832 at fastmail.com> wrote:
+
+> Oliver Lehmann <lehmann at ans-netz.de> writes:
+>> OK - it is not temporarily copied to rr4, but directly modfied in
+>> rr2 and then assigned to u.u_dirp. It should be "the same" - But
+>> - ln(1) does not work with this code. Instead of creating a
+>> hardlink, it creates a new empty file (different inode).
+>
+> Are you sure this is where the problem is?
+
+Not any longer - I tried it again with
+
+u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);
+
+and it seems to work now - no idea what went wrong the last time
+I tried it.
+
+#1 rm /z/tmp/*
+#2 echo "test" > /z/tmp/hugo
+#3 ln /z/tmp/hugo /z/tmp/walter
+ls#4  -li /z/tmp
+total 2
+  2452 -rw-rw-rw- 2 wega     system        5 Nov 15 02:44 hugo
+  2452 -rw-rw-rw- 2 wega     system        5 Nov 15 02:44 walter
+#5
+
+I still have direct modification of rr2 and not the copy to rr4,
+so if I would aim for binary equalness it is still not the same,
+but it seems that it can't be done another way.
+
+

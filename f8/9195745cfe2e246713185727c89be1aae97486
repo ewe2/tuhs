@@ -1,0 +1,54 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 19 Mar 2003 09:59:03 -0800 (PST)
+Subject: [pups] 2.11BSD "make unix" aborts Error 141
+Message-ID: <200303191759.h2JHx3402619@moe.2bsd.com>
+
+Hi -
+
+> From: norman at nose.cs.utoronto.ca (Norman Wilson)
+> 0141 (octal) is 'a.  141 decimal is 0215 octal, i.e. carriage return with
+> parity.
+
+	And I remembered that (correctly as it turns out) without looking
+	at ascii(7) <g>
+
+> What seems more likely is that 141 decimal is 0200 + 13 decimal.  If a
+> simple value returned by wait, that means SIGPIPE + core image, which
+> seems unlikely.  If an exit status as displayed by the shell, it just
+
+	It's, if I recall, being displayed by 'make'.   There's no coredump
+	so the interpretation of 0141 is that of an exit status.  It's been
+	a while since I've looked into the problem - it was quite annoying
+	to run the sequence (that was causing make to cease) manually and not
+	have it happen the same way.
+	a 'shell'
+
+> means SIGPIPE (128 + signal number).  Or is signal 13 different in 2.11
+> than in V7?  (That seems even less likely.)
+
+	Ah, ok - that makes sense too.  No, SIGPIPE is the same as it's always
+	been since it was first defined as 13
+
+> SIGPIPE doesn't seem entirely unreasonable as an accident that could
+> happen if something goes wrong in the assembly-language-code-tweaking
+> part of the kernel build.
+
+	But something is causing the assembler to exit prematurely and break
+	the pipe in the first place.
+
+	SIGPIPE happens, of course, when a writer process writes to a pipe
+	where the receiving/reading process has exited.   'as' is exiting
+	prematurely - that can be determined by looking at the partially
+	created (or empty) .s file that gets left behind.
+
+> Of course if it's a random value handed to sys exit, all rules are off.
+
+	What might be needed is a decent (or existent ;)) syscall tracing
+	capability.  That combined with the capability to "coredump a non-0
+	exit process) might be enough to track down what's causing 'as'
+	to depart the scene prematurely.
+
+	Cheers,
+	Steven Schultz
+
+

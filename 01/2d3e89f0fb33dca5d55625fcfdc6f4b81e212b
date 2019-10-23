@@ -1,0 +1,45 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Fri, 2 May 2008 12:31:22 +1000
+Subject: [Unix-jun72] Anyone working on V1 mkfs?
+In-Reply-To: <20080502005808.GA79200@minnie.tuhs.org>
+References: <20080501234225.GA77327@minnie.tuhs.org> <5372.1209688415@mini>
+	<20080502005808.GA79200@minnie.tuhs.org>
+Message-ID: <20080502023122.GA82050@minnie.tuhs.org>
+
+On Fri, May 02, 2008 at 10:58:08AM +1000, Warren Toomey wrote:
+> On another note, I thought of taking V6 mkfs.c as a start-point to rewrite
+> V1 mkfs.
+
+I gave up and decided to write mkfs from scratch :-)
+
+I'm a bit baffled on the i-node map and list. The V1 filesystem(5) manual says:
+
+	I-numbers below 41 (base 10) are reserved for special files, and
+	are never allocated; the first bit in the i-node free map refers
+	to i-number 41. Therefore the byte number in the i-node map for
+	i-node i is (i-41)/8 and offset (i-41)%8 bits from the right...
+
+	I-numbers begin at 1, and the storage for i-nodes begins at block 2.
+	Also, i-nodes are 32 bytes long, so 16 of them fit into a block.
+	Therefore, i-node i is located in block (i+31)/16 of the file system,
+	and begins 32*((i+31)%16) from its start.
+
+	I-node 41 (base 10) is reserved for the root directory.
+
+Now, I am assuming that this means:
+
+  a) the i-mode bitmap is missing bits 0 to 40, but
+  b) the actual i-nodes 0 to 40 do exist, and
+  c) the system can still "read i-node 7", even if it can't allocate i-node 7.
+
+Following the manual, the root directory i-node is number 41, so its
+bit in the bitmap is (41-41)/8==0, offset (41-41)%8== bit 0. But the
+actual i-node used is still i-node 41, so that is on block (41+31)/16==block4,
+offset 256.
+
+Let me know if that sounds right, or if I'm off-base somewhere.
+
+Thanks,
+	Warren
+
+

@@ -1,0 +1,121 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Mon, 14 Nov 2005 15:31:31 -0500
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <20051114194946.GE6574@gsmx07.alcatel.com.au>
+Message-ID: <516f1c8b7d12b350914dd4da655f4e41@coraid.com>
+
+> On 2005-Nov-14 10:45:13 -0500, Brantley Coile <brantley at coraid.com> wrote:
+> I was assuming split I+D, with the data segment fixed at 64K.  This
+> means that you have (64K + code) per process.  If you have code plus
+> data in 64K then you can fit more, but I think that was getting to
+> be a squeeze even on V6.  (And would definitely write off something
+> like 2BSD).
+
+i don't know that it's a squese.  a version of v6 ran on an lsi-11
+with very little ram.  there is only two process required to run in
+v6, init and the shell.  sched doesn't count; it has no user space.
+> 
+>>the mit x86 stuff would be where i'd start.  i haven't looked to see
+>>if you need to tweak the assignment operators to avoid having
+>>to s/=+/+=/, but it might already be done.
+> 
+> Given an open-source compiler, it would be fairly easy to retrofit the
+> =+ operators into the lexer.  (Probably easier than cleaning up the
+> code).  The alternative is to start with something later (eg 2BSD) but
+> code quality then becomes far more of an issue (because 2BSD tends to
+> push the I-space limits in lots of areas).
+
+very good point.  it'll be easier that i thought.
+> 
+>>it's all 16 bit stuff: port of PCC, assembler and loader.
+> 
+> The x86 instruction set and registers are nothing like as regular and
+> orthogonal as the PDP-11.  In particular, there are _no_ general
+> purpose registers - every register has has a particular purpose and
+> either you need to do data-flow analysis to work out what register to
+> load something into, or you (basically) give up and load from memory
+> as needed.  You could port PCC but this would be much more difficult
+> than (say) a M68K port.  You'd probably need a fairly decent peep-hole
+> optimiser to get good results.
+
+the mit is already ported.  every thing you said about how ugly
+the x86 is and how nice the pdp-11 was, i agree with.  i have lived
+with both of them and with the 68k.  although the 68k's A and D registers
+are kind of a hacky.  but not mater, mit's already done the work.
+
+as far as trying to optimize the register use, i think that for modern
+pentium processors it's not that important.  L1 caches are very fast
+and function about as fast as local registers anyway.  this the the good
+thing about a very bad instruction set with too few registers.  the 
+vendor has to invent very clever ways to stay competitive with better
+systems.  in a way the hardware is doing all the optimzation for us.
+
+> 
+> Wesley Parish mentioned bcc and OpenWatcom.  I looked into the former
+> and it's probably the best starting point (though, with due respect to
+> BDE, the code it generates could be better).  Assuming that Unix fits
+> into the C subset implemented by bcc, you'd be better off spending the
+> effort on improving bcc than porting PCC.  At the time I looked,
+> OpenWatcom was either still vapourware or not self-hosting.
+
+again, no port required.  the mit x86 stuff has already done that.
+i have code with the following readme.
+
+---
+Directory setup:
+   c86, lib86:	for 8087-equiped systems.
+  nc86,nlib86:	for non-8087 systems.
+
+You should install the following files into some directory on your
+search path (on our system we use /usr/local):
+
+	cc86		; shell script implements "cc" but for 8086
+	a86/a86		; the assembler
+	a86/ld86	; the loader
+	a86/cvt86	; .ld output to .com file (a la IBM DOS) conversion
+	c86/c86		; the C compiler
+
+Regular 4.1BSD programs used:
+
+	ar		; used for preparing loader libraries
+	/lib/cpp	; C preprocessor
+
+The cc86 script expects to find the libc.a and crt files in
+/projects/compilers/8086/lib86 -- if you don't put them there, you'll
+have to update cc86...
+
+The compiler produces assembly language output suitable for a86.
+It is a 16-bit compiler; output code does not touch the segment
+regs, so it is possible to have separate instruction and data
+segments (see lib86/csu/crt0.a86 for the start up routine we use
+on our IBM Personal computer to set up the segment regs, etc. from
+info in the .com file).  Currently floating point and long arithmetic
+is implemented using 8087 instructions.
+
+Although the assembler produces ".b" files, they have exactly the
+same format as ".o" files under 4.1BSD -- things like nm and size will
+work, and, most importantly, ld.  Using ld with the -N, -X and -r
+options (see cc86 for an example) will produce a file that cvt86 can
+convert into an IBM DOS format .com file for the IBM Personal Computer.
+---
+
+looking at the source files, it's definitly PCC.
+(and it already does the =+ stuff.)
+
+
+you keep tempting me!  (get behind me, Satan!)
+
+> 
+>>an enjoyable discussion.  wish i had time to work on it.
+> 
+> Agreed.
+> 
+> -- 
+> Peter Jeremy
+> 
+> This email may contain privileged/confidential information. You may not copy or disclose this email to anyone without the written permission of the sender.  If you have received this email in error please kindly delete this message and notify the sender.  Opinions expressed in this email are those of the sender and not necessarily the opinions of the employer. 
+> 
+> This email and any attached files should be scanned to detect viruses.  No liability will be accepted by the employer for loss or damage (whether caused by negligence or not) as a result of email transmission.
+
+
+

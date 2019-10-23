@@ -1,0 +1,70 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id bdd4a214
+	for <ml@inbox.vuxu.org>;
+	Tue, 1 Jan 2019 00:39:37 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7B336AF37B; Tue,  1 Jan 2019 10:39:36 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 33896AF367;
+	Tue,  1 Jan 2019 10:39:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8B2D4AF363; Tue,  1 Jan 2019 10:39:17 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3867794140
+ for <tuhs@minnie.tuhs.org>; Tue,  1 Jan 2019 10:39:17 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id BECD735E0E8; Mon, 31 Dec 2018 16:39:16 -0800 (PST)
+Date: Mon, 31 Dec 2018 16:39:16 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Will Senn <will.senn@gmail.com>
+Message-ID: <20190101003916.GB15969@mcvoy.com>
+References: <5f8d3f32-3cd1-7dbe-6e59-25b8c577f9f9@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5f8d3f32-3cd1-7dbe-6e59-25b8c577f9f9@gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] building world using sh run in /usr/source in v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Dec 31, 2018 at 06:29:11PM -0600, Will Senn wrote:
+> cp a.out /etc/init
+> Can't create new file.
+> 
+> A little digging around points to the problem - some files are owned by
+> daemon, others by root:
+> 
+> -rwsrwsr--?? 1 daemon???? 3246 Oct 10 12:54 cron
+> -rwxrwxr--?? 1 root???????? 2054 May 13 23:50 init
+
+This smells like a file system that is corrupted (I used to hack UFS
+a few decades back).
+
+Can you do a 
+
+ls -l | od -c
+
+because I want to see what those ?? are.
+
+And cron is really 3246 bytes?  And 2054 for init?  Don't those seem
+too small?  Linux's cron is 44472 and that's with shared libs, I'm
+assuming that v6 didn't have shared libs, it's all static.

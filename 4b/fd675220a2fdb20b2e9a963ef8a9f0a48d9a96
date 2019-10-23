@@ -1,0 +1,23 @@
+From: tfb@tfeb.org (Tim Bradshaw)
+Date: Sun, 12 Jan 2014 21:19:14 +0000
+Subject: [TUHS] History of chown semantics
+In-Reply-To: <20140110171819.GA14513@mercury.ccil.org>
+References: <F174F3EE-BFED-4561-9A1A-B4D33D179513@tfeb.org>
+ <alpine.NEB.2.02.1401090914270.4786@t1.m.reedmedia.net>
+ <20140109191336.GD24304@mercury.ccil.org>
+ <5128EE1B-28A2-4D5E-AE32-BEC6652DF1A1@tfeb.org>
+ <20140110171819.GA14513@mercury.ccil.org>
+Message-ID: <8F58DE51-60E5-4E41-AAEF-78CAC3C08DBC@tfeb.org>
+
+On 10 Jan 2014, at 17:18, John Cowan wrote:
+> 
+> Blunt, I don't mind.  But an explanation would be useful.
+
+Well, just in order.
+
+Quotas actually don't seem to be used very much.  Instead people Greenspun it by confining applications to distinct filesystems and some kind of volume manager.  Changing a quota now consists of adding "disks" (which are of course actually chunks of space carved out of some underlying array and probably don't correspond to real disk boundaries at all) to the volume manager, and then resizing the filesystem on the fly.  If you want to reduce the "quota" you're in for hours of I/O as the FS evacuates the disks, if you can do it at all.  One day they will discover NFS over IP/ethernet with quotas.
+
+Privilege separation is more sorted out.  People (regulators, auditors, the organisation itself) are extremely interested in knowing who can see and do what.  Root access seems to be typically pretty sorted by now (no-one has it except under some kind of auditable breakglass process) and controlling per-user access is getting tied down where it hasn't been, usually by elaborate sudo rules for the various role users (unix admin, oracle admin, business users etc).  Most of this really needs MAC, but the practical problem seems to be that the rule-based things (like sudo) implementing the access controls become so complex people can't understand them (I think the sudoers file where I work is 10,000 lines).  I think more sophisicated privilege models (which all the flavours probably have now, but in incompatible ways) would probably make the complexity worse.
+
+Sorry, this is off-topic, although in some ways it's relevant I suppose: using a system like Unix in an environment for which it really wasn't designed leads to insane complexity.
+

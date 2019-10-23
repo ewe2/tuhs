@@ -1,0 +1,175 @@
+From: asbesto@freaknet.org (asbesto)
+Date: Tue, 4 Nov 2003 19:41:38 +0000
+Subject: [TUHS] pdp11/34 can't boot. help us ! 
+In-Reply-To: <20031104150038.GB9037@freaknet.org>
+References: <20031103094916.GE2101@freaknet.org>
+	<20031104150038.GB9037@freaknet.org>
+Message-ID: <20031104194138.GA12518@freaknet.org>
+
+
+> No. the "broken" board is the M7891, 128Kx18 bit MOS memory. The
+> broken chip is E15, a simple SN74LS175.
+> Some images of the work in progress here:
+> http://www.freaknet.org/asbesto/pdp11/
+> stay tuned! :)
+
+well,
+
+pdp11/34 don't boot :(
+
+same problem. so here i want to describe anything i can. 
+
+CPU boards:
+
+slot	conn	option		module		addr	vect
+------------------------------------------------------------
+1	a-f	cpu		m8266		n/a	n/a
+2	a-f	cpu		m8265		n/a	n/a
+3	c-f	ky11-lb		m7859		n/a	n/a
+4	a-b	boot		m9312
+4	c-f	dl11-w		m7856		177560	60
+5	a-f	ms11-ld		m7891
+6	a-f	rl11		m7762		174400	160
+7	c-f	rx211		m8256		177170	264
+8	c-f	dl11-wc		m7856		176500	300
+9	a-b	unibus		m9202
+9	c-f	u/q bim?(*)	m8217
+10	a-b	unibus		m9202
+10	c-f	convert.	m7066
+11	a-f	generat.	m7067
+12	a-f	bitmap		m7068
+13	a-f	  =               =
+14	a-f	  =               =
+15	a-f	  =		  =
+16
+17
+18	a-b	uni/term	m9302
+18	c-d	video		a011
+19	a-b-f	reg.kw11	m7952 (this is written)
+(19     a-b	???		m9403
+        c-f	reg.kw11	m7952  this is what i see in CPU)
+20	a-b	qbus/ter	m9400
+20	c-f	dma cont	m8026
+21	c-f	q-bus cont	m8036
+22	c-f	a/d mur		a017
+
+(*) unreadable
+-------------------------------------------------------------------	
+
+well, this is the list as is taped on the CPU cover, compiled by hand.
+i have verified, and all boards are in the place described here, 
+except (1)
+
+
+So, let's try to boot:
+----------------------
+
+1) turning on the chassis 
+
+2) turning on the RX02 floppy module, from rear switch
+
+3) pressing WRITE PROT and turning on the RL02 DISK module, from 
+   rear switch
+
+4) turning on the CPU module, from rear switch 
+
+5) checking that disk is UNLOADED (LOAD unpressed).. at this time,
+   all 4 RL02 lights are turned ON: LOAD, 0 READY, FAULT and WRITE PROT.
+
+6) turning on main CPU from frontal knob (from DC OFF to DC ON):
+   fan & rumors, "DC ON" red led led on. 
+   inside the cpu:
+   - RED led on M7891 board on 
+     (this led, identified as "D3" on my schemes, is described as
+     "PAR ERR INDICATOR", connected to pin 6 of E33, a 74S74. 
+   - The green led on the board is OFF. looking at the board, i can
+     see that is JUMPERED! so, it CAN'T turn on ... someone know why ? 
+   - in every restart, the display show a different number (this is
+     normal, i think)
+   - RL02 Lights status: LOAD is on, 0 READY is off, FAULT is off and 
+     WRITE PROT is on.
+
+7) pressing LOAD, the LOAD light turn OFF, the disk will spin up 
+   and after about 30 seconds the "0 READY" white light turn on. 
+
+8) pressing "CTRL-BOOT" on the CPU CONSOLE will flash FAULT lights on 
+   RL02 just for an istant, and after this nothing happen:
+   - RL02 lights status is : LOAD off, READY on, FAULT off, WRITE PROT on.
+   - CPU show "165504" and RUN led is off. BUS ERR led is off. MAINT is
+     off, the only led on is "DC ON".
+
+9) pressing again CTRL-BOOT obtain the same effect.
+
+during this, nothing happen on serial console.
+
+------------
+
+Booting manually (inserting the octal code to boot from RL02):
+
+this is the boot code, found in "E-10 Loading Software Bootstrap":
+
+location	contents
+001000		012701
+001002		174400
+001004		012761
+001006		000013
+001010		000004
+001012		012711
+001014		000004
+001016		105711
+001020		100376
+001022		005061
+001024		000002
+001026		005061
+001030		000004
+001032		012761
+001034		177400
+001036		000006
+001040		012711
+001042		000014
+001044		105711
+001046		100376
+001050		005007
+
+HORRIBLE NEWS:
+==============
+
+i wrote stuff in 001000, and i read OTHER THINGS. so i can't
+manually boot!!!
+
+writing 111111,222222,333333,444444,555555,666666,777777, i
+read    000111,000000,000110,000440,000101,002640,000100
+
+but i read every time different contents :(((
+
+maybe i have to add the bootstrap code in a different location?
+maybe the 7891 board is totally broken ???
+
+maybe the problem was the substitution of the SN74LS175N with an
+hitachi HD74LS175P ?
+
+HELP!!!
+
+==============================================================
+
+Photos of boot sequence, chips, schematics details and something
+can be seen on http://www.freaknet.org/asbesto/pdp11. sorry for the 
+bad quality but they was taken from a color quickcam.
+
+we are working on a pdp11 section of www.freaknet.org to collect any
+useful information.
+
+any help will be appreciated (and ... maybe .. any SPARE PART :)
+
+-- 
+[asbesto : freaknet medialab : radio#cybernet : GPG key on  keyservers]
+[ MAIL ATTACH, SPAM, HTML, WORD, and msgs larger than 95K > /dev/null ]
+[http://www.freaknet.org/asbesto IW9HGS http://kyuzz.org/radiocybernet]
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: not available
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20031104/e89e6397/attachment.sig>
+

@@ -1,0 +1,77 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri,  9 Jan 2015 13:06:07 -0500 (EST)
+Subject: [TUHS] single user mode in v5 & v6
+Message-ID: <20150109180607.E198918C0CE@mercury.lcs.mit.edu>
+
+    > From: Noel Chiappa
+
+    > For some reason, the code for /etc/init .. bashes the command line so
+    > it just has '-' in it, so it looks just like a shell.
+
+BTW, that may be accidental, not a deliberate choice - e.g. someone copied
+another line of code which exec'd a shell, and didn't change the second arg.
+
+    > I fixed my copy so it says "/etc/init", or something like that. ... I
+    > can upload the 'fixed' code tomorrow.
+
+The change is pretty minor: in this piece of code:
+
+	case reboot:
+		termall();
+		execl(init, minus, 0);
+		reset();
+
+just change the execl() line to say:
+
+		execl(init, init, 0);
+
+
+    >> I'm not sure if unix of the v6 or v5 era was designed to go from multi
+    >> user to single user mode and then back again.
+
+    > I seem to recall there's some issue, something like in some cases
+    > there's an extra shell left running attached to the console
+
+So the bug is that in going from single-user to multi-user, by using "kill -1
+1" in single-user with the switch register set for multi-user, it doesn't
+kill the running single-user shell on the console. The workaround to that bug
+which I use is to set the CSWR and then ^D the running shell.
+
+In general, the code in init.c isn't quite as clean/clear as would be optimal
+(which is part of why I haven't tried to fix the above bug), but _in general_
+it does support going back and forth.
+
+
+    > From: Ronald Natalie
+
+    > our init checked the switch register to determine whether to bring up
+    > single or multiuser
+
+I think that's standard from Bell, actually.
+
+    > I believe our system shutdown if you kill -1-1 (HUP to init).
+
+The 'stock' behaviour is that when that happens, it checks the switch
+register, and there are three options (the code is a little hard to follow,
+but I'm pretty sure this is right):
+
+- if it's set for single-user, it shuts down all the other children, and
+brings up a console shell; when done, it does the next
+- if it's set for 'reboot', it just shuts down all children, and restarts
+the init process (presumably so one can switch to a new version of the init
+without restarting the whole machine);
+- if it's not set for either, it re-reads /etc/ttys, and for any lines which
+have switched state in that file, it starts/kills the process listening to
+that line (this allows one to add/drop lines dynamically).
+
+
+    > From: Clem Cole
+
+    > it's probably worth digging up the v6 version of fsck.
+
+That's on that MIT V6 tape, too. Speaking of which, time to write the code to
+grok the tape...
+
+	Noel
+
+

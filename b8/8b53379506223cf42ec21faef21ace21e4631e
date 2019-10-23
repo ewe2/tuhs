@@ -1,0 +1,67 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Wed, 04 Jan 2017 10:51:37 -0800
+Subject: [TUHS] Unix stories
+In-Reply-To: <017201d266ab$cda885a0$68f990e0$@ronnatalie.com>
+Message-ID: <6a969f4310c22211e164a971e27a3af9121176cd@webmail.yaccman.com>
+
+Let me contaminate this philosophical discussion with some history.
+
+Long long ago, computers were slow and didn't have much memory. 
+Because C was targeting system code, it was important to make things
+run efficiently.  And the PDP-11 had autoincrement and
+autodecrement  hardware.
+Early machines also had some kinds of memory management, but most
+specified a base and limit.  DEC allowed you to protect the end of a
+block of memory, which made it possible to grow the stack backwards
+and still be able to add more stack space if you ran out.  But many
+other machines required that the stack grow upwards.
+The problem this caused was when you had
+    foo( f(), g() )
+In backward-growing stacks, the most efficient thing was to call g
+first, then f.
+In forward-growing stacks, the most efficient thing was to call f
+first, then g.
+For whatever reason, Dennis decided that efficiency on a particular
+architecture was more important than consistency, so when f() and g()
+had side effects, their order was undefined.
+Autoincrement and Autodecrement also got tarred by the same brush:
+     foo( *p++, *p++ )
+had a slew of "correct" implementations, including ones where p was
+incremented twice AFTER the call of foo had returned.  The situation
+became critical when getc() was implemented as a macro that pulled
+bytes out of an I/O buffer and used autoincrement to do so.  After
+some discussion, what I implemented in PCC was that all side effects
+of an argument must be carried out before the next argument was
+evaluated.  This still didn't solve the argument order problem, but
+it did cut down the space of astonishing surprises.
+
+These rules provided rich fodder for Lint, when it came along,
+although the function side effect issue was beyond its ken.
+
+Steve
+
+----- Original Message -----
+From: "Ron Natalie" <ron@ronnatalie.com>
+To:"Random832" <random832 at fastmail.com>, "Steffen Nurpmeso"
+<steffen at sdaoden.eu>
+Cc:<tuhs at minnie.tuhs.org>
+Sent:Wed, 4 Jan 2017 11:58:41 -0500
+Subject:Re: [TUHS] Unix stories
+
+ There's a trademark between allowing the compiler to reorder things
+and having a defined order of operations.
+ Steps like that are well-defined in Java for instance. C lets the
+compiler do what it sees fit.
+
+ Note that it's not necessarily any better in assembler. There are
+RISC architectures where load-followed-by-store and vice versa may not
+always be valid if done in quick succession. Requiring the compiler to
+insert sequence points typically wastes a lot of cycles. Assembler
+programmers tend to think about what they are doing, the C compiler
+tries to do some of this on its own and its not clairvoyant.
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170104/06487f69/attachment.html>
+

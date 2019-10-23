@@ -1,0 +1,61 @@
+From: kevin.bowling@kev009.com (Kevin Bowling)
+Date: Sat, 30 Sep 2017 13:29:55 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <1506784652.28254.for-standards-violators@oclsc.org>
+References: <1506784652.28254.for-standards-violators@oclsc.org>
+Message-ID: <CAK7dMtAwcZB0UTMTaiYghLnuHqtyDf9kXPL3=YoVoHsvXoxFVQ@mail.gmail.com>
+
+I never really considered proc vs sysctl as deeply as this discussion.
+Both seem like a little bit of a stretch and cause some impedance
+mismatch in ways they are actually used.  For instance on FreeBSD you
+can pass opaque structures around and that's how some of the utils
+work -- these aren't displayed using sysctl(8).  So now you have ABI
+over a text API anyway.
+
+I seem to recall proc is loosely deprecated in Linux anyway in favor
+of sysfs.  GregKH mentioned people misuse both, for instance making
+them output pretty histograms instead of simple text values, that
+defeat the fundamental design tenants of these interfaces -- which is
+to try and maintain a stable API.
+
+One thing I think Linux did pretty well is the whole object
+orientation in C thing with kobject, and that nets you automatic sysfs
+directories and nodes for pretty much everything.
+
+Lots of gymnastics trying to solve a fundamentally more simple problem
+of a text API vs ABI, hierarchy and maybe some object orientation.  At
+risk of ridicule, I think the AIX ODM was the best planned and
+executed take on all that :)
+
+Regards,
+
+On Sat, Sep 30, 2017 at 8:17 AM, Norman Wilson <norman at oclsc.org> wrote:
+> Warner Losh:
+>
+>   It's an abundance of caution thing. This code had security problems in the
+>   past, we're not 100% sure that we've killed all the issues, though we
+>   believe we have.
+>
+> ====
+>
+> And if there isn't anyone who's actively interested in the
+> code, willing to dig in to clean it up and make security
+> issues less likely, deal with multiprocessing matters, and
+> so on, that's a perfectly reasonable stance.
+>
+> I think it's an unfortunate result, and I wonder how much
+> of it comes from a cultural view that sysctl >> /proc.
+> (Recall how Ken and Dennis originally resisted Doug's push
+> for pipelines and filters, because--as Dennis once put it
+> in a talk--it just wasn't the way programs worked?)
+>
+> But as someone who is sometimes credited with removing
+> more code than he wrote while working on the latter-day
+> Research kernel, it's hard for me to argue with the principle.
+> A lot of the code I tossed out was complicated stuff that
+> was barely used if used at all, and that nobody was willing
+> to step up to volunteer to maintain.
+>
+> Norman Wilson
+> Toronto ON
+

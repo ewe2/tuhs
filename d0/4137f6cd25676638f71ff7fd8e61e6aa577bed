@@ -1,0 +1,647 @@
+From: migieger@bawue.de (M. Giegerich)
+Date: Wed, 22 Jan 2003 08:08:37 +0530
+Subject: [pups] FreeBSD-4.7, p11-2.9, 2.11bsd
+In-Reply-To: <20030121024506.GA369@luva.home>
+References: <20030119130247.GA18906@luva.home> <20030119155823.GA19800@luva.home> <20030119231811.B29049@bcr4.uwaterloo.ca> <20030120090710.M57315@MissSophie.unixag-kl.fh-kl.de> <20030121024506.GA369@luva.home>
+Message-ID: <20030122023837.GA385@luva.home>
+
+On Tue, Jan 21, 2003 at 08:15:06AM +0530, M. Giegerich wrote:
+...
+> I may post a summary on how to get this running
+> as I needed quite some reading in different mails
+> of the pups archive... (may make life easier for
+> others).
+
+Done before memory fades away...
+
+If there is anybody trying this out, I would appre-
+ciate some feedback on this primer.
+
+
+Installing 2.11BSD on the PDP11 emulator p11 on FreeBSD
+=======================================================
+
+This relates to FreeBSD 4.7-RELEASE-p3 (the most current
+4.7 RELEASE as on Jan. 19, 2003).
+
+You'll need Harti Brandt's PDP11 emulator. I used the
+latest non-beta release p11-2.9 dated Mar. 1st, 2001.
+To build p11, libbegemot is needed too (libbegemot-1.9
+dated Mar. 1st, 2001). Both are available at
+ftp://ftp.fokus.gmd.de/pub/cats/usr/harti/p11.
+
+116847 Mar  1  2001 libbegemot-1.9.tar.gz
+298755 Mar  1  2001 p11-2.9.tar.gz
+MD5 (libbegemot-1.9.tar.gz) = 92bc75e99c5bc778f59adf412ea085ea
+MD5 (p11-2.9.tar.gz) = ffabf9752895d34396b2d5b38947c8dc
+
+(My decision to use p11 was based on the fact, that
+it's much less cpu hungry than Bob Supnik's sim
+package).
+
+The 2.11BSD distribution I use is 2.11_rp_unknown.gz
+from http://www.tuhs.org/Archive/PDP-11/Boot_Images.
+
+34600118 Feb  1 1998 2.11_rp_unknown.gz
+MD5 (2.11_rp_unknown.gz) = d57863a498edc4598da84eb5bc88b3a2
+
+After downloading you'll want to build libbegemot
+and p11. Both is painless.
+
+Building libbegemot
+-------------------
+
+cd work
+tar xvzf ../libbegemot-1.9.tar.gz
+find libbegemot-1.9 | xargs chown user.group
+(May be omitted, but on my system file ownership
+was messed up).
+cd libbegemot-1.9
+./configure
+gmake
+gmake install
+
+Building p11
+------------
+
+cd work
+tar xvzf ../p11-2.9.tar.gz
+find p11-2.9 | xargs chown user.group
+(May be omitted, but on my system file ownership
+was messed up).
+cd p11-2.9
+./configure --with-begemot=/usr/local
+gmake
+gmake install
+
+Configuring p11
+---------------
+
+The config file is in /usr/local/share/p11/p11conf.
+Minimal changes are required:
+
+Check for "define diskdir /home/private/p11/disks"
+and change according to your setup. I gunzip'ed
+2.11_rp_unknown.gz to /var/tmp/disks/RP_211bsd_root
+to maintain the file naming of Harti. Beware, it
+expands to 174 MB.
+
+I also changed the sync time for the emulated rp
+disk from 600000 to 4000 (as indicated in the docu-
+mentation of p11.texi).
+That is "ctrl rp 17776700 0254 5 4000" instead of
+the original "ctrl rp 17776700 0254 5 600000".
+
+(I changed the deqna's network driver from tun0
+to tun3 too, as I'm using tun0 for dialup pur-
+poses).
+
+Last, I commented out the Linux tun and tap as well
+as the FreeBSD tap networking entries.
+
+My p11conf reads
+
+/usr/local/share/p11/p11conf
+++++++++++++++++++++++++++++
+
+--- snip --- snip --- snip ---
+# Copyright (c)1994-2000 Begemot Computer Associates. All rights reserved.
+# See the file COPYRIGHT for details of redistribution and use.
+#
+# $Id: p11conf.in,v 1.6 2000/12/01 12:27:00 hbb Exp $
+
+#
+# This configuration file is somehow tailored to my setup, but it is usable
+# as a fallback in any case. Make a private copy and change it as you need it.
+#
+
+#
+# Documentation for the configuration syntax is not yet ready :-( so here
+# is a short version. You may look also in main.c
+#
+# The file is read line by line. If the line is empty or starts with a #
+# it is ignored. The first word of each line is a keyword and determines how
+# the rest of the line is interpreted:
+#
+#  define NAME [VALUE]
+#	Define a variable (or change it's value). Variables can be access by
+#	the $(NAME) construct. Substitution takes place on VALUE, but not on
+#	NAME. Referencing an undefined variable is an error unless the form
+#	$(NAME?) is used, in which case an empty string is substituted.
+#
+#  set OPTION [VALUE]
+#	Set OPTION to value and define a variable OPTION with the given VALUE.
+#	There are global and controller specific options. Global options
+#	should be set outside all controller declarations (outside 'ctrl'-'end'
+#	blocks.
+#	Subsitution is done on VALUE but not on OPTION.
+#	Options are:
+#
+#	libdir		- this is where help and configuration files are looked
+#			  for as well as rom images (global).
+#	iodir		- directory for the IO programs (global).
+#	clock_rate	- clock ticks per second (usually 50 or 60). (global).
+#	cpu_options	- these are the jumpers on the KDJ11A (ctrl KDJ11A).
+#	csw_enable	- enable the console switch register (default) (ctrl KDJ11A).
+#	csw		- starting contents of the switches (ctrl KDJ11).
+#	maxreq		- maximum number of pending line clock interrupts
+#			  (default is 1) (ctrl KDJ11A).
+#	localtime	- toy clock should report local time, not GMT (ctrl toy).
+#
+#  include FILE
+#	Include the given FILE. Substitution takes place on FILE.
+#
+#  print LINE
+#	Print LINE on stdout after performing substitutions.
+#
+#  if EXPR
+#	Substitute on EXPR, evaluate it and process the following lines up to
+#	a matching else, elif of endif if EXPR is non-zero. There is a limit
+#	on nested if's.
+#
+#  elif EXPR
+#	If all if-clauses where false up to now, perform substitution, compute
+#	EXPR and process all lines up to the matching else, elif or endif if
+#	EXPR is non-zero.
+#
+#  else
+#	If all if-clauses where false up to now, process all lines up to the
+#	matching endif.
+#
+#  endif
+#	Ends an if construct.
+#
+#  ctrl NAME [ARGS]
+#	Plug in the given controller into the backplane. Substitution is done
+#	on ARGS. What ARGS are needed depends on the concrete controller.
+#	Note, that controllers are plugged in bottom-down, i.e. the last one
+#	gets nearest to memory (which is automatically inserted), which in turn
+#	gets nearest to the CPU. The controller line may be followed by
+#	device lines which must be followed by end 'end' line.
+#
+#  dev [ARGS]
+#	Connect a device to the current controller. Substitution is done on
+#	ARGS and if this yields empy ARGS, the line is ignored. ARGS depends
+#	on the controller.
+#
+#  end
+#	End the current controller definition.
+#
+#  eval NAME [EXPR]
+#	Compute EXPR after performing substitutions and assign the result as
+#	a signed decimal integer to NAME.
+#
+#
+# Expressions consists of the usual +, -, *, /, %, (, ), == and !=.
+# The following builtin functions are available:
+#
+#	acess(FILE, MODE)
+#		Check whether FILE is accessable (mode may be one or more
+#		of 'f', 'r', 'w' and 'x'. Returns 1 if ok.
+#
+#	eq(STR1,STR2)
+#		Compare the two strings after stripping leading and trailing
+#		space and return 1 of they are equal.
+#
+#	exec(COMMAND)
+#		Execute COMMAND with sh -c and return the exit code of the
+#		shell (this may or may not be the exit code of the command).
+#
+
+if !defined(diskdir)
+  define diskdir /var/tmp/disks
+endif
+
+define RP_211_BOOT	0 $(diskdir)/RP_211bsd_root 1999
+define RP_41_BOOT	0 $(diskdir)/RP_rsx_4.1boot 2000
+define RP_41_SRC	1 $(diskdir)/RP_rsx_4.1src 2001
+
+#
+# standard rlv12 controller with four drives attached
+# numbers are csr, vector, interrupt level and ms between msyncs
+#
+ctrl rl 017774400 0160 4 60000
+end
+
+#
+# rp06 disk controller with 2 drives attached
+# numbers are csr, vector, interrupt level and ms between msyncs
+#
+ctrl rp 017776700 0254 5 4000
+if defined(BOOT)
+ if eq($(BOOT),211)
+  print Booting 2.11BSD
+	dev $(RP_211_BOOT)
+ elif eq($(BOOT),RSX)
+  print Booting RSX4.1
+	dev $(RP_41_BOOT)
+	dev $(RP_41_SRC)
+ endif
+endif
+end
+
+#
+# kl11a async interface with up to 4 lines
+# kl0 is console
+# numbers are csr, vectors, interrupt level, driver program and parameters
+# for driver program
+# drivers:
+#	tty_tty [-7] device
+#	tty_net [-7] [-t] [-lLogFile] port-number
+#	tty_xterm [-7] [-t title] [-g geometry] [-p position] [-i] [-x xterm-args]
+#	tty_fifo [-7] fifo-name
+#	tty_file [-7] [-p pidfile] [-e eof-seq] [-c] file-or-prog [args...]
+#
+ctrl kl
+	dev 017777560 060 064 4 tty_net -t -7 10000
+	dev 017776500 0300 0304 4 tty_net -t -7 10001
+#	dev 017776510 0310 0314 4 tty_fifo /tmp/fifo
+end
+
+#
+# MRV12 rom option
+# args are csr and file containing boot-rom
+#
+if !defined(BOOT_ROM)
+  if access(boot.rom, r)
+    define BOOT_ROM boot.rom
+  elif access(Boot/boot.rom, r)
+    define BOOT_ROM Boot/boot.rom
+  else
+    define BOOT_ROM $(libdir)/boot.rom
+  endif
+endif
+ctrl mr 017777520 $(BOOT_ROM)
+end
+
+#
+# parallel lp interface
+# numbers are csr, vector and interrupt level
+# the device line contains either a filename or a '|' which creates a pipe
+# followed by the program to pipe in and optional args
+#
+ctrl lp 017777514 0200 4
+end
+
+#
+# DEQNA ethernet controller
+# I can't distribute my ROM's image. So check whether there is any. If not
+# don't plug in the thing. You can create a file consisting of 0's and use
+# that instead. Use either tun or tap (hey - tap let's you use MOPR/MOPDL or
+# DreckNet or ...)
+#
+if !defined(QNA_ROM)
+  if access(qna.rom, r)
+    define QNA_ROM qna.rom
+  elif access($(libdir)/qna.rom, r)
+    define QNA_ROM $(libdir)/qna.rom
+  endif
+endif
+
+if defined(QNA_ROM)
+  ctrl qna 017774440 5 0x08:0x00:0x2b:0x07:0x82:0x6c 0xf8:0x7a $(QNA_ROM)
+# FreeBSD:
+	dev epp_tun /dev/tun3 0x08:0x00:0x2b:0x07:0x82:0x6c 0x08:0x00:0x2b:0x07:0x82:0x00
+# Linux:
+#	dev epp_tun /dev/net/tun 0x08:0x00:0x2b:0x07:0x82:0x6c 0x08:0x00:0x2b:0x07:0x82:0x00
+
+# FreeBSD:
+#	dev epp_tap /dev/tap0
+# Linux:
+#	dev epp_tap /dev/net/tun
+
+#	eval dummy exec(ifconfig tap0 <your host> up)
+#	eval dummy exec(ifconfig tap0)
+  end
+endif
+
+#
+# Tape controller
+#
+ctrl tm 017772520 0224 5
+end
+
+#
+# The toy clock.
+#
+ctrl toy 017777526
+#  set localtime yes
+#  set offs_year 10
+#  set settoy 12:30:00 12/31/74
+end
+
+#
+# Plug in the memory board.
+#
+ctrl mem
+end
+
+#
+# Plug in processor board
+#
+ctrl KDJ11A
+  if defined(CSW)
+    set csw $(CSW)
+  endif
+end
+--- snip --- snip --- snip ---
+
+Next create a 4096 byte file called qna.rom in
+/usr/local/share/p11 filled with binary 0s as per
+instructions in p11conf.
+
+That's it.
+
+Running p11
+-----------
+
+Invoke the emulator as `p11 -DBOOT=211` and you will
+be presented with
+
+--- screen output ---
+# p11 -DBOOT=211
+/usr/local/share/p11/p11conf,126: Booting 2.11BSD
+173000 K -> 17773000 = 000005:	reset	
+@
+--- screen output ---
+
+Then switch to another virtual terminal (vty) and
+telnet into the p11 emulator on port 10000.
+
+--- screen output ---
+# telnet localhost 10000
+Trying ::1...
+telnet: connect to address ::1: Connection refused
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+--- screen output ---
+
+Switch back to the p11 emulator vty and enter
+
+--- screen output ---
+@17773000g (without the @, that's p11's prompt).
+--- screen output ---
+
+And one more switch back to the 2.11bsd vty will
+show you
+
+--- screen output ---
+Begemot boot PROM; V0.3
+Copyright (c) 1998-2000 Begemot Computer Associates. All rights reserved.
+boot>
+--- screen output ---
+
+Enter
+
+--- screen output ---
+boot>BOOT RP (again without "boot>")
+--- screen output ---
+
+and you will get
+
+--- screen output ---
+73Boot from xp(0,0,0) at 0176700
+: 
+--- screen output ---
+
+Hit enter, wait a little  and you will be greeted by
+
+--- screen output ---
+: xp(0,0,0)unix
+Boot: bootdev=05000 bootcsr=0176700
+
+2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET 1998
+    root at pdp11.begemot.com:/usr/src/sys/HIPPON
+
+attaching qe0 csr 174440
+qe0: DEC DEQNA addr 08:00:2b:07:82:6c
+attaching lo0
+
+phys mem  = 2097152
+avail mem = 1647872
+user mem  = 307200
+
+January 20 19:51:18 init: configure system
+
+lp 0 csr 177514 vector 200 attached
+rl 0 csr 174400 vector 160 attached
+tm 0 csr 172520 vector 224 attached
+xp 0 csr 176700 vector 254 attached
+cn 1 csr 176500 vector 300 attached
+cn 2 csr 176510 vector 310 skipped:  No CSR.
+cn 3 csr 176520 vector 320 skipped:  No CSR.
+cn 4 csr 176530 vector 330 skipped:  No CSR.
+erase, kill ^U, intr ^C
+#
+--- screen output ---
+
+That's 2.11BSD's single user console.
+
+Configure 2.11BSD for networking
+--------------------------------
+
+(Do yourself a favour and invoke tcsh).
+
+You'll need to configure 
+
+/etc/hosts
+/etc/netstart
+/etc/networks
+/etc/resolv.conf
+
+and invoke once `/etc/mkhosts /etc/hosts`.
+
+To explain the entries in these files, I'll use
+freebsd.home and 192.168.0.33 as the hostname and
+the ip address of the FreeBSD host system, pdp11
+and 192.168.0.45 as the hostname and ip address
+of the 2.11BSD system on the p11 emulator. The
+domain name for both will be home.
+
+/etc/hosts
+++++++++++
+
+--- snip --- snip --- snip ---
+127.0.0.1	localhost
+192.168.0.33	freebsd.home
+192.168.0.45	pdp11.home
+--- snip --- snip --- snip ---
+
+/etc/netstart
++++++++++++++
+
+--- snip --- snip --- snip ---
+#!/bin/sh -
+
+#	@(#)netstart	5.2.1 (2.11BSD) 1996/11/16
+
+INET=`testnet`
+if [ $INET = YES ]; then
+	echo Assuming NETWORKING system ...		>/dev/console 2>&1
+else
+	echo Assuming non-networking system ...		>/dev/console 2>&1
+fi
+export INET
+
+# DON'T EVEN THINK ABOUT RUNNING ROUTED ON A PDP-11!!!  Just set routedflags
+# to "NO" and set up a default gateway below.
+#
+routedflags=NO
+rwhod=YES
+named=NO
+
+# myname is my symbolic name
+# my-netmask is specified in /etc/networks
+# my-default-address should be set to some machine where you
+#	want to send all your packets, by default.
+#
+
+hostname=pdp11.home
+hostid=2B07826C
+netmask=255.255.255.0
+broadcast=192.168.0.255
+default=freebsd.home
+
+hostname $hostname					>/dev/console 2>&1
+hostid $hostid						>/dev/console 2>&1
+
+if [ $INET = YES ]; then
+	# ifconfig imp0 inet netmask $netmask $hostname broadcast $broadcast up -trailers >/dev/console 2>&1
+	# ifconfig en0 inet netmask $netmask $hostname broadcast $broadcast up -trailers >/dev/console 2>&1
+	# ifconfig ec0 inet netmask $netmask $hostname broadcast $broadcast up -trailers arp >/dev/console 2>&1
+	# ifconfig il0 inet netmask $netmask $hostname broadcast $broadcast up -trailers >/dev/console 2>&1
+	ifconfig qe0 inet netmask $netmask $hostname broadcast $broadcast up -trailers >/dev/console 2>&1
+	arp -s hippo 08:00:2b:07:82:00
+	# ifconfig sl0 inet 192.254.254.2 192.254.254.1 -arp -trailers >/dev/console 2>&1
+	# slattach /dev/ttyS6 9600
+	arp -s 192.168.0.45 08:00:2b:07:82:6c pub
+	arp -s 192.168.0.33 00:06:29:13:7a:18 pub
+	ifconfig lo0 inet localhost up -trailers	>/dev/console 2>&1
+
+	route add $hostname localhost 0		>/dev/console 2>&1
+	route add default $default 1		>/dev/console 2>&1
+fi
+--- snip --- snip --- snip ---
+
+/etc/networks
++++++++++++++
+
+--- snip --- snip --- snip ---
+localnet 127
+home 192.168.0
+--- snip --- snip --- snip ---
+
+/etc/resolv.conf
+++++++++++++++++
+
+--- snip --- snip --- snip ---
+domain home
+nameserver 192.168.0.33
+--- snip --- snip --- snip ---
+
+In /etc/netstart you need to set the arp entries
+of both freebsd and pdp11 with their respective
+ethernet mac addresses (pdp11's qe0 mac address
+is set in p11conf). See /etc/netstart above.
+
+Now don't forget to invoke `/etc/mkhosts /etc/hosts`.
+
+After that (exit tcsh, if you were in and) exit csh
+hitting .
+The 2.11BSD system will go multi user and show you
+
+--- screen output ---
+# ^D
+Fast boot ... skipping disk checks
+checking quotas: done.
+Assuming NETWORKING system ...
+add host pdp11.home: gateway localhost
+add net default: gateway freebsd.home
+starting system logger
+preserving editor files
+clearing /tmp
+standard daemons: update cron accounting.
+starting network daemons: inetd rwhod printer.
+starting local daemons:.
+Mon Jan 20 20:27:36 PST 2003
+Jan 20 20:27:36 pdp11 January 20 20:27:36 init: kernel security level changed from 0 to 1
+
+
+2.11 BSD UNIX (pdp11.home) (console)
+
+login:
+--- screen output ---
+
+You login as root with password "begemot1" (without
+the "").
+
+--- screen output ---
+login: root
+Password:
+
+Last login: Mon Jan 20 20:15:16 from freebsd
+2.11 BSD UNIX #11: Tue Jan 6 16:57:02 MET 1998
+[1] root--> 
+--- screen output ---
+
+Before you'll be able to network to freebsd, you'll
+need to setup the tun device on its side. Switch
+to a vty on freebsd and as root enter `ifconfig
+tun0 freebsd pdp11 up`.
+
+Go back to the pdp11 vty and try
+
+--- screen output ---
+[1] root--> ping freebsd.home
+PING freebsd.home (192.168.0.33): 56 data bytes
+64 bytes from 192.168.0.33: icmp_seq=0 ttl=64 time=40 ms
+64 bytes from 192.168.0.33: icmp_seq=1 ttl=64 time=40 ms
+64 bytes from 192.168.0.33: icmp_seq=2 ttl=64 time=40 ms
+64 bytes from 192.168.0.33: icmp_seq=3 ttl=64 time=40 ms
+^C
+--- freebsd.home ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 40/0/40 ms
+[2] root-->
+--- screen output ---
+
+Shutting down
+-------------
+
+To shut down pdp11 issue `halt`:
+
+--- screen output ---
+[2] root--> halt
+Jan 20 20:29:12 pdp11 January 20 20:29:12 halt: -; halted by root
+Jan 20 20:29:13 pdp11 syslogd: going down on signal 15
+syncing disks... done
+halting
+--- screen output ---
+
+After pdp11 is halted you switch to the p11 vty and
+issue "x" (without "")
+
+--- screen output ---
+@17773000g
+000014 K -> 00123214 = 012767:	mov	#1,12456
+[4   - kl]
+@xDCOK = 1 asserted
+--- screen output ---
+ ^
+The emulator returns you to the command prompt of
+your FreeBSD system. 
+There issue `ifconfig tun0 freebsd pdp11 down` to
+delete the unneeded tun interface.
+
+Todos
+-----
+
+Explore which patches (if any) from ftp://moe.2bsd.com/
+pub/2.11BSD are incorporated into this 2.11BSD distri-
+bution. Maybe Steven can comment on this...
+
+-- 
+M. Giegerich, mail: migieger at vsnl.com, phone: +91.(0)80.5530154
+
+

@@ -1,0 +1,108 @@
+From: jp@spektr.ludvika.se (Jorgen Pehrson)
+Date: Fri, 17 Apr 1998 23:46:33 +0200 (CEST)
+Subject: Slightly offtopic...
+Message-ID: <Pine.NEB.3.96.980417233447.17135B-100000@spektr.ludvika.se>
+
+Hi,
+I have a little problem installing 2.11BSD on my PDP11/83. I have a TK50
+tape with the distribution and a TK50 drive from a uvaxII. The controller
+board is a M7546 that comes from another vax. The original tape drive in
+this PDP is an TK25 drive which I have disconnected. How should the
+TK50controller be strapped? The TK25 answered at 17772520. Should the TK50
+be there as well? (I haven't got a clue howthe QBus works... I know it's
+some kind of cascading thing though so I guess it matters in what order
+the boards are placed in the machine)
+
+Thanks for any help!
+
+--
+Jorgen Pehrson                  HP 9000/380 (NetBSD/hp300 1.3)
+jp at spektr.ludvika.se            DECstation 5000/200 (NetBSD/pmax 1.3)
+http://spektr.ludvika.se/museum VAXstation 2000 (VMS 5.5-2)
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id KAA16303
+	for pups-liszt; Sat, 18 Apr 1998 10:00:04 +1000 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id JAA16294
+	for <pups at minnie.cs.adfa.oz.au>; Sat, 18 Apr 1998 09:59:58 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.8.5/8.8.5) id QAA06940;
+	Fri, 17 Apr 1998 16:50:25 -0700 (PDT)
+Date: Fri, 17 Apr 1998 16:50:25 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199804172350.QAA06940 at moe.2bsd.com>
+To: jp at spektr.ludvika.se, pups at minnie.cs.adfa.oz.au
+Subject: Re: Slightly offtopic...
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Jorgen -
+
+	Hello.  
+
+> From: Jorgen Pehrson <jp at spektr.ludvika.se>
+
+> I have a little problem installing 2.11BSD on my PDP11/83. I have a TK50
+> tape with the distribution and a TK50 drive from a uvaxII. The controller
+> board is a M7546 that comes from another vax. The original tape drive in
+> this PDP is an TK25 drive which I have disconnected. How should the
+> TK50controller be strapped? The TK25 answered at 17772520. Should the TK50
+
+	That is the correct address for the first TS controller in the system.
+
+	Despite the name ("TK25") the TK25 is a TS device and not a TMSCP 
+	device.
+
+> be there as well? (I haven't got a clue howthe QBus works... I know it's
+
+	No.  The TK50 should be at the first TMSCP address which is 172150.
+
+	You do not have to (indeed, you can not) set the vector on the M7546
+	because TMSCP devices are 'programmable' - the kernel will assign
+	a unique vector to the controller at boot time.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id KAA16404
+	for pups-liszt; Sat, 18 Apr 1998 10:38:22 +1000 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id KAA16399
+	for <pups at minnie.cs.adfa.oz.au>; Sat, 18 Apr 1998 10:38:17 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.8.5/8.8.5) id RAA07251;
+	Fri, 17 Apr 1998 17:38:02 -0700 (PDT)
+Date: Fri, 17 Apr 1998 17:38:02 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199804180038.RAA07251 at moe.2bsd.com>
+To: jp at spektr.ludvika.se, pups at minnie.cs.adfa.oz.au
+Subject: ERROR in previous mail item (TMSCP)
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Hello -
+
+	I looked at the wrong line in the dtab file earlier.  
+
+	The primary TMSCP address (where the TQK50 adaptor should go) is
+	174500.  I accidentally gave the address of the first MSCP ('ra')
+	earlier.
+
+	So if you have both a TK50 and a TK25 the boards should be set like
+	this
+
+		TK25	172520
+		TK50	174500
+
+	Sorry for any confusion I caused.
+
+	Steven
+
+
+

@@ -1,0 +1,36 @@
+From: random832@fastmail.com (Random832)
+Date: Mon, 09 Nov 2015 23:11:42 -0500
+Subject: [TUHS] PWB contributions
+References: <201511090139.tA91dCvK006536@coolidge.cs.Dartmouth.EDU>
+ <627C631F-2B0E-45FC-97DB-7A8FE4DBB3B8@ccc.com>
+ <alpine.NEB.2.11.1511091612300.28638@t1.m.reedmedia.net>
+Message-ID: <87r3jyfq81.fsf@fastmail.com>
+
+"Jeremy C. Reed" <reed at reedmedia.net> writes:
+> By the way, I don't have experience with the CR3 control register, and
+> don't really understand what it means from the hardware perspective.
+
+If I understand correctly, it's not hardware, it's part of the kernel
+tty driver. There's a two bit field in the stty flags, for selecting a
+delay mode. The purpose of the delay was to allow the terminal time to
+process it (i.e. to physically move the carriage, for a printing
+terminal) - the kernel would wait before sending more characters.
+
+As can be seen in tty.c (link below), CR1 caused a delay of 5 units, and
+CR2 a delay of 10 units. CR3 had no meaning in the standard kernel, and
+so some custom version of the kernel could have interpreted it to have
+some other meaning.
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/sys/dev/tty.c
+
+It's not clear where this was actually done. The 3BSD kernel used
+CR3 to indicate that (if I read it correctly) a number of padding
+characters depending on the column position should be inserted.
+
+P.S. Somewhat confusingly, searching for "CR3" finds a page about
+"control registers" of the _intel 386_, of which CR3 has something to do
+with "paging" in the virtual memory sense of the word. This has nothing
+to do with the topic under discussion.
+
+
+

@@ -1,0 +1,85 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id df9156a2
+	for <ml@inbox.vuxu.org>;
+	Tue, 16 Apr 2019 12:53:22 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B7A5F94BFE; Tue, 16 Apr 2019 22:53:20 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id ACFE494927;
+	Tue, 16 Apr 2019 22:52:41 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EADA694927; Tue, 16 Apr 2019 22:52:38 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 682B194924
+ for <tuhs@tuhs.org>; Tue, 16 Apr 2019 22:52:38 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 333B918C0BE; Tue, 16 Apr 2019 08:52:37 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20190416125237.333B918C0BE@mercury.lcs.mit.edu>
+Date: Tue, 16 Apr 2019 08:52:37 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Paper discussing Unix boot process?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Charles Anthony
+
+    > The Multics System Initialization Program Logic Manual. 139 pages of
+    > somewhat detailed information. 
+
+I was going to mention the Multics init PLM! :-) Needless to say, it's
+probably not a good candidate for the original goal - a document describing
+how an OS boots - it's simply too complicated for ordinary mortals! (Reading
+it makes _my_ head hurt!) There are a couple of reasons it's so complex.
+
+Multics is not a monolitic OS, the way most versions of Unix are (although I
+gather this is no longer quite true of Linux); the OS isn't this large blob
+of bits you load into memory and start. Its structure makes heavy use of the
+segmentation model supported by the hardware. Moreover, although the first
+segments loaded aren't paged, many of the later ones are. (This makes sense
+in the context of the times; with limited core main memory, you wouldn't want
+to devote massive chunks of main memory to have the entire OS always
+resident.)
+
+However, this all makes for a more complex booting process; the standard
+Multics boot tape (a Multics System Tape) contains many modules, which get
+linked in individually at boot time. (In V6 terms - the version I'm most
+familiar with - it's as if a Unix boot tape contained 'lib1' and 'lib2', and
+the bootstrap included a linker to build the OS binary in memory.) And in fact
+the modules come in in tranches, and some of the earlier one are available for
+use in loading later tranches (e.g. paging).
+
+This does have some advantages, though; e.g. the MST is the same for all
+Multics machines (including the initial boot of a new machine); the system is
+customized to the particular configuration during the bootstrap process. This
+is actually not too crazy, there are reasons this makes sense.
+
+For one, the whole 'information utility' concept (where Multics admittedly
+went down the wrong path, in terms of the future of computers); a single
+giant machine (multi-processor, multi-memory bank, multi-I/O controller). The
+thing is that any of these could be switched out if it developed a fault, but
+then you have to be able to boot that new configuration. (In particular,
+Multics wasn't a master-slave multi-processor system, they're all the same;
+but only one CPU runs for most of booting, the others are started and added
+once the system is running. But the 'bootstrap CPU' might change if the
+original bootstrap CPU develops a fault...)
+
+	Noel

@@ -1,0 +1,51 @@
+From: hellwig.geisse@mni.thm.de (Hellwig Geisse)
+Date: Sat, 21 Nov 2015 15:03:07 +0100
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <20151121140022.Horde.ZwPZMYWApn-dXiuNCkiDWDA@avocado.salatschuessel.net>
+References: <20151121140022.Horde.ZwPZMYWApn-dXiuNCkiDWDA@avocado.salatschuessel.net>
+Message-ID: <1448114587.9367.39.camel@papa2>
+
+Hi Oliver,
+
+On Sa, 2015-11-21 at 14:00 +0100, Oliver Lehmann wrote:
+> Is there a good "HOWTO" for "first things first" as implementing
+> disklabel seems to require quite some "device work" before the
+> first "hello world" is there - is there something else which
+> should be could be done first and does not require so much to
+> port (the whole disk subsystem on that machine is different
+> from "usual" disk subsystems as it is handled via a PIO)
+
+I don't have an exact HOWTO for porting BSD, but we gathered
+some experience in these things while porting NetBSD to our
+processor ECO32.
+
+First and most important is a working tool-chain (which in case
+of BSD means GCC). You should really know your tools, because
+you will frequently dig deep into them to understand various
+aspects of e.g. linker scripts. We totally underestimated the
+amount of work to be done here.
+
+Then you must decide if you will do cross-development, or if you
+can do it on a running BSD system. Even if so, you will have to
+generate a file system for the target BSD system from which you
+boot your machine. You can do that with the tools included in BSD,
+but they are not running yet. (Btw, byte-order is an especially
+nasty thing in this context.)
+
+Memory management was another area which required a fair amount
+of work. I have no experience with 2.11 BSD, but in case of NetBSD
+the code is divided into at least three layers to obtain a good
+degree of re-usability for different architectures. Alas, the
+documentation was rather poor, and the relevant book ("The Design
+and Implementation of the 4.4 BSD Operating System" by McKusick
+et al.) is a bit outdated.
+
+The project of porting BSD to a yet unsupported machine is
+certainly feasible, and is indeed a valuable experience. But
+don't expect to have it done in only a couple of weeks... :-)
+
+Good luck!
+Hellwig
+
+
+

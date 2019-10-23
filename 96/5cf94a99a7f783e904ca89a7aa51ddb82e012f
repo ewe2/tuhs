@@ -1,0 +1,38 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 13 Jan 2017 14:53:28 -0500
+Subject: [TUHS] 2.11BSD cross compiling update
+In-Reply-To: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+References: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+Message-ID: <1484337208.3105634.847053496.3432DDEC@webmail.messagingengine.com>
+
+On Fri, Jan 13, 2017, at 12:57, Nick Downing wrote:
+> I then ended up doing a fair bit of re-engineering, how this came
+> about was that I had to port the timezone compiler (zic) to run on the
+> Linux cross compilation host, since the goal is eventually to build a
+> SIMH-bootable disk (filesystem) with everything on it. This was a bit
+> involved, it crashed initially and it turned out it was doing
+> localtime() on really small and large values to try to figure out the
+> range of years the system could handle. On the Linux system this
+> returns NULL for unreasonable time_t values which POSIX allows it to
+> do. Hence the crash. It wasn't too obvious how to port this code. (But
+> whatever I did, it had to produce the exact same timezone files as a
+> native build).
+
+You know that the timezone file format that it uses is still in use
+today, right? There's extra data at the end in modern ones for 64-bit
+data, but the format itself is cross-platform, with defined field widths
+and big-endian byte order.
+
+What do you get when you compare the native built timezone files with
+one from your linux host's own zic? It *should* only differ by the
+version number in the header [first five bytes "TZif2" vs "TZif"] and
+the 64-bit section, if you're giving it the same input files. And I bet
+you could take the current version of the code from IANA and, if it
+matters to you, remove the parts that output the 64-bit data. If nothing
+else, looking at the modern code and the version in 2.11BSD side-by-side
+will let you backport bug fixes.
+
+(Note: Technically, the version present in most Linux systems is a fork
+maintained with glibc rather than the main version of the code from
+IANA)
+

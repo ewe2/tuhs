@@ -1,0 +1,87 @@
+From tuhs-bounces@minnie.tuhs.org Fri Aug 24 14:32:32 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id efe66c2b
+	for <ml@inbox.vuxu.org>;
+	Fri, 24 Aug 2018 14:32:32 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AC952A1A1E; Sat, 25 Aug 2018 00:32:31 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0F14BA1A22;
+	Sat, 25 Aug 2018 00:32:13 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EC99BA1A1A; Sat, 25 Aug 2018 00:32:09 +1000 (AEST)
+Received: from smtp-out-2.mxes.net (smtp-out-2.mxes.net [67.222.241.118])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9C369A1A19
+ for <tuhs@minnie.tuhs.org>; Sat, 25 Aug 2018 00:32:09 +1000 (AEST)
+Received: from Customer-MUA (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id 4E57627540
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 10:32:08 -0400 (EDT)
+From: <ron@ronnatalie.com>
+To: "'TUHS'" <tuhs@minnie.tuhs.org>
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+ <20180823231413.QeahD%steffen@sdaoden.eu>
+ <20180824141348.1NLUE%steffen@sdaoden.eu>
+In-Reply-To: <20180824141348.1NLUE%steffen@sdaoden.eu>
+Date: Fri, 24 Aug 2018 10:32:05 -0400
+Message-ID: <1f6201d43bb7$3b9ebde0$b2dc39a0$@ronnatalie.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Content-Language: en-us
+Thread-Index: AQH3zlNvMlrtv6MB59xlfwkPSkONzgIFVidhAaJlGA8CkAVU7AIgXNtopEUOpcA=
+X-Sent-To: <dHVoc0BtaW5uaWUudHVocy5vcmc=>
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+That's a different issue (as I alluded to in my post).   Alignment on
+machines is a different problem.   Type "punning" isn't the problem, the
+compiler is propely converting one
+pointer type to another but the operand is not correctly aligned.   
+
+In the case I'm referring to, the Univac and the HEP encode partial word
+sizes in the pointer.    If you take the literal bits from one pointer to
+another (as if you stored it in a union),
+then you end up referring to the wrong sized operand in the subsequent
+operation.    Had you converted it to void* or explicitly forced a
+conversion wih the cast, the compiler 
+would have taken care of converting the pointer for you.
+
+It's very odd when you find the machine storing the WRONG SIZE operand from
+the pointer type in use.
+As I said, it wasn't hard to fix (just grep for all the afflicted unions),
+but it took a bit of long kernel debug sessions to figure out what was
+happening.
+
+> -----Original Message-----
+> From: Steffen Nurpmeso <steffen@sdaoden.eu>
+> I have found the link in the history of my browser, the story was
+> 
+>   http://pzemtsov.github.io/2016/11/06/bug-story-alignment-on-x86.html
+> 
+
+
+

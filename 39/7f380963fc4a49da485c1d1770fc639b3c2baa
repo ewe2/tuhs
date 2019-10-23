@@ -1,0 +1,97 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 30 Apr 2003 08:56:58 -0700 (PDT)
+Subject: [pups] 2.11BSD device config trouble
+Message-ID: <200304301556.h3UFuwb20269@moe.2bsd.com>
+
+Hi -
+
+> From: Jochen Kunz <jkunz at unixag-kl.fh-kl.de>
+> > > cn 1 csr 176540 vector 344 no address found for kl/dl-11
+> > 	Is 'cn 1 ...' line 38 of the /etc/dtab file?
+> Yes: 
+> cn      1 176540 344    5       cnrint  cnxint
+
+	Interesting.   I do not recall any particular problem getting 
+	additional DL devices recognized (the 11/93 had 7 of them).
+
+	Seeing the 'no address found' error is *strange* though - that
+	would indicate that 'autoconfig' could not find 'cnrint' or 'cnxint'
+	in the /unix symbol table.   Look at /sys/autoconfig and you can
+	see where that message is coming from.
+
+	If you do 
+
+		nm /unix | egrep 'cnxint|cnrint' 
+
+	what do you see?
+
+> NKL             4               # KL11, DL11
+> The card has four ports, one of them is the console. (The M8192 CPU card
+> has no SLU / ROM / ...) 
+	
+	Ah, ok.   My 11/73 has a SLU/ROM card and the console is on that.  I
+	also have a DHV installed (alas, the system is powered down now
+	so I can not check for more information).
+
+> But I would prefere to get the DHV11 working. It seams that this device
+> is more suitable for multi user operation. 
+
+	Yes, it's a little better.  Not as nice as a DHQ-11 though (which can
+	run in DHU or DHV modes - with DHU mode having much better silo 
+	handling).
+
+	I forget the exact error you were getting on the DHV but if it was
+	'no interrupt' then it might be that the DHV clone is not behaving
+	exactly like a DEC DHV
+
+	In /sys/autoconfig/dhvauto.c here is how the probing attempts to
+	force an interrupt:
+
+dhvprobe(addr,vector)
+        struct dhvdevice *addr;
+        int vector;
+{
+    if ( grab ( &(addr->dhvcsr) ) & DHV_CS_MCLR )
+        DELAY(35000L);
+    if ( grab ( &(addr->dhvcsr) ) & (DHV_CS_MCLR|DHV_CS_DFAIL) )
+        return ( 0 );
+    stuff ( DHV_CS_RI | DHV_CS_RIE, &(addr->dhvcsr) );
+    DELAY(3500L);
+    stuff ( 0, &(addr->dhvcsr) );
+    return(ACP_IFINTR);
+}
+
+	Either 3500 microseconds (very approximately of course) is too short 
+	of a wait _or_ the method of trying to generate an interrupt is 
+	not correct.    You can try changing 'ACP_IFINTR' to 'ACP_EXISTS'
+	which tells autoconf to not care if the device interrupted or not.
+
+> ** Last Mounted on /
+> ** Root file system
+> ** Phase 1 - Check Blocks and Sizes
+> ** Phase 2 - Check Pathnames
+> ** Phase 3 - Check Connectivity
+> ** Phase 4 - Check Reference Counts
+> ** Phase 5 - Check Free List
+> BLK(S) MISSING
+> SALVAGE? y
+> 
+> ** Phase 6 - Salvage Free List
+> 1364 files, 11625 used, 2430 free
+> 
+> ***** FILE SYSTEM WAS MODIFIED *****
+> 
+> But on the next reboot I get the same when running fsck. Any hints? 
+
+	How are you rebooting?  With the "reboot" command or by using the
+	'halt' button?   You do not want to use the 'reboot' command because
+	that does a "sync" which flushes the disc cache (and superblock) back
+	out to disc - that overwrites the work that 'fsck' did.
+
+	A few 'missing' blocks is not a serious problem though and can be
+	ignored.
+
+	Cheers,
+	Steven Schultz
+
+

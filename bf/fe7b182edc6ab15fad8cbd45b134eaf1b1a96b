@@ -1,0 +1,111 @@
+From: mxs46@k2.scl.cwru.edu (Michael Sokolov)
+Date: Mon, 30 Nov 1998 20:02:02 -0500
+Subject: System Industries MSCP disk controller problem
+Message-ID: <199812010102.UAA21295@skybridge.scl.cwru.edu>
+
+   Dear Ladies and Gentlemen,
+   
+   I wonder, is anyone here familiar with System Industries (SI) Q-bus MSCP
+controllers for ESDI disks? The VAX I'm working has one. It's quad-height
+board with connectors for 4 ESDI drives. I couldn't find a model number or
+anything like that, but there is a sticker on one of the chips that says
+"SYS IND" on it (that's how I deduced that it's SI). The problem I'm having
+is that I have no idea how to configure it. It has two DIP switch packs,
+one with 4 switches and one with 10. Originally it was configured to be the
+secondary disk MSCP controller at 160334. I want it to be the primary one
+at 172150. I tried every reasonable switch combination I could think of,
+but no luck.
+   
+   What's even worse is that I can't leave it as secondary either. For some
+reason its configuration makes the CPU (KA650) unhappy. When I pull it out,
+the CPU passes all power-up tests beautifully. When I put it in, I still
+get to the ">>>" prompt eventually, but first I get a load of error
+messages from the self-tests. Then when I try to boot from DUB0, it tells
+me "DEVASSIGN", suggesting that it doesn't recognize the second disk MSCP
+controller at all. All docs I have suggest that 160334 is the correct
+address for secondary disk MSCP. It's in the floating address range,
+though, so I suspected that it's the side effect of adding or removing
+other cards. I tried making the configuration as close to the original as I
+could. No luck still. The only card I had to pull out is the secondary
+TMSCP (Emulex QT13 9-track tape controller), because it appears totally
+toast (the CPU refuses to power up with that infamous 9 when this card is
+present). But then secondary TMSCP should be AFTER secondary disk MSCP in
+the floating address space, right? I tried some more investigation and by
+pure accident I discovered that the SI controller also responds somehow to
+160400. What the hell is that address for? Could this be what makes the CPU
+unhappy?
+   
+   Does anyone have any clues? Is anyone here familiar with SI MSCP disk
+controllers? TIA for any help.
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: mxs46 at k2.scl.cwru.edu
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id OAA12137
+	for pups-liszt; Tue, 1 Dec 1998 14:27:04 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id OAA12127
+	for <PUPS at MINNIE.CS.adfa.edu.AU>; Tue, 1 Dec 1998 14:26:35 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.adfa.edu.AU;
+          Mon, 30 Nov 1998 22:24:21 -0500
+Date: Mon, 30 Nov 1998 22:24:21 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <981130222421.2de00129 at trailing-edge.com>
+Subject: Re: System Industries MSCP disk controller problem
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>   I wonder, is anyone here familiar with System Industries (SI) Q-bus MSCP
+>controllers for ESDI disks? The VAX I'm working has one. It's quad-height
+>board with connectors for 4 ESDI drives. I couldn't find a model number or
+>anything like that, but there is a sticker on one of the chips that says
+>"SYS IND" on it (that's how I deduced that it's SI). The problem I'm having
+>is that I have no idea how to configure it. It has two DIP switch packs,
+>one with 4 switches and one with 10. Originally it was configured to be the
+>secondary disk MSCP controller at 160334. I want it to be the primary one
+>at 172150. I tried every reasonable switch combination I could think of,
+>but no luck.
+
+This sounds a lot like the Webster WQESD, which was repackaged
+and sold by many different folks (Sigma, DSD, Qualogy, American
+Digital, etc.)
+
+If it is a repackaged WQESD, SW9 on the 10-switch pack was originally
+on, with SW10 and SW5-8 off, to put the CSR at 160334.  
+To set it to be 172150, you put SW10 on, and SW5-9 off.
+
+Then again, it might not be a repackaged WQESD, but instead a Dilog
+or Emulex.
+
+Is there a 10-pin header on the card edge?  Can you describe the positions
+and types of "big chips" on the board?
+   
+>pure accident I discovered that the SI controller also responds somehow to
+>160400. What the hell is that address for? Could this be what makes the CPU
+>unhappy?
+
+It might be because you've enabled the on-board PDP-11 bootstrap,
+a very big no-no when used in a Microax system.  (This
+bootstrap effectively tries to jam code by DMA into main memory,
+and can wreak all sorts of havoc on a Microvax.)  Some
+other switches also set the interrupt priority, and this being
+off can also confuse some tests and OS's.
+
+As to your power-on self-test woes, you're going to have to tell
+us what's in the system and what slot it lives in, as well as what
+sort of backplane it's all in.
+
+Incidentally, I happen to use a Webster WQESD in my 4.3BSD-Reno
+machine, and am very happy with it there.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+

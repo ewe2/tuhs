@@ -1,0 +1,123 @@
+From tuhs-bounces@minnie.tuhs.org Fri Aug 24 01:41:48 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id daa3b53a
+	for <ml@inbox.vuxu.org>;
+	Fri, 24 Aug 2018 01:41:48 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1F36EA1A8D; Fri, 24 Aug 2018 11:41:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D1261A1A1A;
+	Fri, 24 Aug 2018 11:41:36 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6F6B8A1A1A; Fri, 24 Aug 2018 11:41:35 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id CAFC7A1A19
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 11:41:34 +1000 (AEST)
+Received: from mob.bitblocks.com (mob.bitblocks.com [192.168.125.11])
+ by mail.bitblocks.com (Postfix) with ESMTP id 91D38156E408;
+ Thu, 23 Aug 2018 18:41:20 -0700 (PDT)
+Content-Type: text/plain;
+	charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 11.5 \(3445.9.1\))
+From: Bakul Shah <bakul@bitblocks.com>
+In-Reply-To: <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+Date: Thu, 23 Aug 2018 18:41:19 -0700
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <4130AFB4-1740-46BC-AA98-F9D01549049C@bitblocks.com>
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+To: "<ron@ronnatalie.com>" <ron@ronnatalie.com>
+X-Mailer: Apple Mail (2.3445.9.1)
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+
+> On Aug 23, 2018, at 3:17 PM, <ron@ronnatalie.com> <ron@ronnatalie.com> =
+wrote:
+>=20
+>=20
+>=20
+>> I haven't done much BSD kernel programming in last 15 years but this =
+is
+> not my recollection. BSD used caddr_t, typedefed to char*, sort of as =
+void
+> *. IIRC void*=20
+>> came in common use after BSD unix first came about. Why use a union =
+when a
+> cast will do? :-) The union trick is more likely to be used for =
+esoteric
+> things=20
+>> (like getting at fl.pt. bytes) or for more complex types or probably =
+by
+> people with lots of programming experience in pascal and not so much =
+in C
+> (in Pascal=20
+>> you *had* to use untagged variant records if you wanted to cheat!). =
+In C,
+> all that void* does is allow you to avoid casts in some cases.
+>=20
+> Your recollections are certainly wrong.    I spent a lot of time =
+tracing
+> down why the Kernel crashed doing I/O and traced it to this and spent =
+a
+> while undoing it as I stated.
+> This union was right in the middle of the buf struct:
+>=20
+> 	union {
+> 	    caddr_t b_addr;		/* low order core address */
+> 	    int	*b_words;		/* words for clearing */
+> 	    struct filsys *b_filsys;	/* superblocks */
+> 	    struct dinode *b_dino;	/* ilist */
+> 	    daddr_t *b_daddr;		/* indirect block */
+> 	} b_un;
+> There were a number of other places that did the same thing.   It's
+> OFFICIALLY now in undefined behavior by the standard (though of course =
+that
+> didn't exist in the BSD days) ,
+> to store in one element of the union and retrieve it via another.   =
+This is
+> one of the reasons why.
+
+Note that this is a legitimate use of union. That is,
+unless I misunderstood what you meant by it, there is
+no "conversion by union" as you call it or "cheating"
+as I call it or type punning. There is no put one thing
+in and take another thing out. Now it may be that
+someone misused such a union. This is easy to do as,
+unlike Pascal, C has no tagged variant record & it is
+user's responsibility to use it right.
+
+>=20
+> This isn't the only place it occurs.
+>=20
+> Void* came out with the V7 compiler, if I recall properly.   The BSD =
+kernel
+> looks as if it requires such a later compiler (it uses bit fields =
+which the
+> earlier compilers didn't support).
+
+=46rom what I recall {c,m,re}alloc() returned a char*, not a void *.
+I don't have K&R1 handy at the moment so can't recall if void* was
+mentioned in the book (if not, that could be one reason for a lack of
+its use).=

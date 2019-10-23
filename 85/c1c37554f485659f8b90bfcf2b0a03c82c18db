@@ -1,0 +1,125 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 28 Apr 2018 16:40:08 -0400 (EDT)
+Subject: [TUHS] /dev/drum
+Message-ID: <20180428204008.5D76D18C094@mercury.lcs.mit.edu>
+
+    > From: Johnny Billquist
+
+    > Gah. If I were to try and collect every copy made, it would be quite a
+    > collection.
+
+Well, just the 'processor handbook's (the little paperback things), I have
+about 30. (If you add devices, that probably doubles it.) I think my
+collection is complete.
+
+
+    > So there was a total change in terminology early in the 11/45 life, it
+    > would appear. I wonder why. ... I probably would not blame some market
+    > droids.
+
+I was joking, but also serious. I really do think it was most likely
+marketing-driven. (See below for why I don't think it was engineering-driven,
+which leaves....)
+
+I wonder if there's anything in the DEC archives (a big chunk of which are now
+at the CHM) which would shed any light? Some of the archives are online there,
+e.g.:
+
+  http://www.bitsavers.org/pdf/dec/pdp11/memos/
+
+but it seems to be mostly engineering (although there's some that would be
+characterized as marketing).
+
+
+    > one of the most important differences between segmentation and pages are
+    > that with segmentation you only have one contiguous range of memory,
+    > described by a base and a length register. This will be a contiguous
+    > range of memory both in virtual memory, and in physical memory.
+
+I agree completely (although I extend it to multiple segments, each of which
+has the characterstics you describe).
+
+Which is why I think the original DEC nomenclature for the PDP-11's memory
+management was more appropriate - the description above is _exactly_ the
+functionality provided for each of the 8 'chunks' (to temporarily use a
+neutral term) of PDP-11 address space, which don't quack like most other
+'pages' (to use the 'if it quacks like a duck' standard).
+
+
+One query I have comes from the usual goal of 'virtual memory' (which is the
+concept most tightly associated with 'pages'), which is to allow a process to
+run without all of its pages in physical memory.
+
+I don't know much about PDP-11 DEC OS's, but do any of them do this? (I.e.
+allow partial residency.)  If not, that would be ironic (in view of the later
+name) - and, I think, evidence that the PDP-11 'chunks' aren't really pages.
+
+
+BTW, did you know that prior to the -11/45, there was a memory management
+device for the PDP-11 which provided 'real' paging, the KT11-B? More here:
+
+  http://gunkies.org/wiki/KT11-B_Paging_Option
+
+I seem to recall some memos in the memo archive that discussed it; I _think_
+it mentioned why they decided not to go that way in doing memory management
+for the /45, but I forget the details? (Maybe the performance hit of keeping
+the page tables in main memory was significant?)_
+
+
+    > With segmentation you cannot have your virtual memory split up and
+    > spread out over physical memory.
+
+Err, Multics did that; the process' address space was split up into many
+segments (a true 2-dimensional naming system, with 18 bits of segment number),
+which were then split up into pages, for both virtual memory ('not all
+resident'), and for physical memory allocation.
+
+Although I suppose one could view that as two separate, sequential steps -
+i.e. i) the division into segments, and ii) the division of segments into
+pages. In fact, I take this approach in describing the Multics memory system,
+since it's easier to understand as two independent things.
+
+    > You can also have "holes" in your memory, with pages that are invalid,
+    > yet have pages higher up in your memory .. Something that is impossible
+    > with segmentation, since you only have one set of registers for each
+    > memory type (at most) in a segmented memory implementation.
+
+You seem to be thinking of segmentation a la Intel 8086, which is a hack they
+added to allow use of more memory (although I suspect that PDP-11 chunks were
+a hack of a similar flavour).
+
+At the time we are speaking of, the Intel 8086 did not exist (it came along
+quite few years later). The systems which supported segmentation, such as
+Multics, the Burroughs 5000 and successors, etc had 'real' segmentation, with
+a full two-dimensional naming system for memory. (Burroughs 5000 segment
+numbers were 10 bits wide.)
+
+    > I mean, when people talk about segmented memory, what most everyone
+    > today thinks of is the x86 model, where all of this certainly is true.
+
+It's also (IMNSHO) irrelevant to this. Intel's brain-damage is not the
+entirety of computer science (or shouldn't be).
+
+(BTW, later Intel xx86 machines did allow you have to 'holes' in segments, via
+the per-segment page tables.)
+
+
+    > it would be very wrong to call what the PDP-11 have segmentation
+
+The problem is that what PDP-11 memory management does isn't really like
+_either_ segmentation, or paging, as practised in other machines. With only 8
+chunks, it's not like Multics etc, which have very large address spaces split
+up into many segments. (And maybe _that_'s why the name was changed - when
+people heard 'segments' they thought 'lots of them'.)
+
+However, it's not like paging on effectively all other systems with paging,
+because in them paging's used to provide virtual memory (in the sense of 'the
+process runs with pages missing from real memory'), and to make memory
+allocation simple by use of fixed-size page frames.
+
+So any name given PDP-11 'chunks' is going to have _some_ problems. It just
+thing 'segmentation' (as you defined it at the top) is a better fit than the
+alternative...
+
+   Noel
+

@@ -1,0 +1,135 @@
+From: tuhs@cuzuco.com (Brian S Walden)
+Date: Thu, 9 Jan 2014 19:15:55 -0500 (EST)
+Subject: [TUHS] History of chown semantics
+Message-ID: <201401100015.s0A0FttO021699@cuzuco.com>
+
+so RJE first, yes as written it did require that chown() work as non-root,
+as it ran as the "rje" euid and did chown() files to the user's uid, I do
+not believe that was the cause of the chown() semantics change, just a use
+of it. iOne could do the same thing by other means (run as root, have a
+setuid 0, file owner changer, etc) if chown(2) was root only. Why did I
+believe that?
+
+in section V.
+
+    (iv) Make changes to the UNIX system only after much delibera-
+         tion, and only when major gains can be made. Avoid chang-
+         ing the UNIX system's interfaces, and isolate any such changes
+         as much as possible. Stay close to the Research UNIX system,
+         in order to take advantage of continuing improvements.
+
+OK now lets look at a passage from VI --
+
+    A good many UNIX (as opposed to PWB/UNIX) systems are run
+    as "friendly-user" systems, and are each used by a fairly small
+    number of people who often work closely together. A large frac-
+    tion of these users have read/write permissions for most (or all)
+    of the files on the system, have permission to add commands to
+    the public directories, are capable of "re-booting" the operating
+    system, and even know how to repair damaged file systems.
+    The PWB/UNIX system, on the other hand, is most often found
+    in a computer-center environment.
+
+So the old way, no one even really needs chown() everybody had access to
+everything.
+
+then 8.1 
+
+    The first major set of reliability improvements concerned the
+    handling of disk files. It is a fact of life that time-sharing sys-
+    tems are continually short of disk space; 
+		...
+    long-term tape backup copies, on the other hand, offer users the
+    chance to delete files that they might want back at some time in
+    the future, without requiring them to make "personal" copies
+
+disk is always full, and users are discourged from making multiple copies
+of f and even encourge to remove stuff you do not need right now and get
+it from backup later, let alone making copies of someone else's files.
+
+next from 8.4, while its abouttrying to solve the uid shortage
+(only 256 at the time) it shows you the users' mind set, groups tended to
+functionally operate as single user, but everyone still wanted a unique id.
+
+   .... depended heavily on the
+   characteristics of the PWB/UNIX user community, which, as mentioned
+   above, consists mostly of groups of cooperating users,
+   rather than of individual users working in isolation from one
+   another. Typical behavior and opinions in these groups were:
+      (i) Users in such a group cared very little about how much
+          protection they had from each other, as long as their files
+          were protected from damage by users outside their group.
+     (ii) A common password was often used by members of a
+          group, even when they owned distinct user-IDs. This was
+          often done so that a needed file could be accessed without
+          delay when its owner was unavailable.
+     (iii) Most users were willing to have only one or two
+           user-IDs per group, but wanted to retain their own login names
+           and login directories.  We also favored such a distinction, because
+           experience showed that the use of a single login name by
+           more than a few users almost always produced cluttered
+           directory structures containing useless files.
+
+so the group members would know each othesr passwords (but there were many
+groups on the same machine) thus non-root chown() become self-service in
+sharing of files between group members, without the need of system
+administrator involvment.  while one could give their files to someone
+outside the group, it is not productive.
+
+And then --
+
+    to improve the security of files, a few commands were
+    changed to create files with read/write permission for their own-
+    ers, but read-only for everyone else. The net effect of these
+    changes was to greatly enlarge the size of the user community
+    that could be served, without destroying the convenience of the
+    UNIX system and without requiring widespread and fundamental
+    changes
+
+
+shows the need to lock down file access, which means if you are sharing
+in Research UNIX you did not need to chown() files, you could
+just write them, but PWB will lock it down so a different group cannot
+muck with it.
+
+Now you are going to say this could all be done with proper use of group ids
+and group permissions.  I agree, but in practice it was not done, as PWB
+even consdidered the complete removal of gids, but only decided against it
+as they would have to change too much software --
+
+     considered was that of
+     decreasing the available number of the so-called "group-IDs," or
+     removing them entirely, and using the bits thus freed to increase
+     the number of distinct user-IDs. Although attractive in many
+     ways, this solution required a change in the interpretation of
+     information stored with every single disk file (and every backup
+     copy thereof), changes to large numbers of commands, and a fun-
+     damental departure from the Research UNIX system during a time
+     when thought was being given to possible changes to that
+     system's protection mechanisms. For these reasons, this solution
+     was deemed unwise.
+
+> From: Clem Cole <clemc at ccc.com>
+>
+> Brian - I know the paper and Mash - the 3rd author and lived the times ;-)
+> 
+> I just don't see how having the ability to give away a file to some one
+> else made it easier for anyone - system programmer or admin.   The idea of
+> giving a device back begs the question of how did you get ownership in the
+> first place.
+> 
+> The one thing I could think of was something like the RJE system that you
+> would wanted to have made your files be owned by the RJE system, have them
+> send it to the mainframe, get back information and then give the results
+> back to you.   If they wanted to do that subsystem with out a root style
+> privilege, you would need some way to give files away.
+> 
+> But I can think of other ways to do that without needing the chown(2) call
+> to work with that semantic, so I really don't understand what it was used.
+> 
+> To me, it does not seem to be worth much.   As I said have to ask Mash if
+> he remembers why it was considered a good idea.
+> 
+> Clem 
+
+

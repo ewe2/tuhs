@@ -1,0 +1,65 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Mon, 23 Apr 2018 22:59:19 -0600
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180424044941.7C703156E510@mail.bitblocks.com>
+References: <mailman.125.1524526228.3788.tuhs@minnie.tuhs.org>
+ <9a5e49bb-f235-4b87-445b-1532d8facd2f@update.uu.se>
+ <e91f3dba-c563-f8f1-44a9-f7beffc08e7c@spamtrap.tnetconsulting.net>
+ <20180424044941.7C703156E510@mail.bitblocks.com>
+Message-ID: <CANCZdfqhSVs-TT9vrtAg3TiNBTzHZJJVaG1ceRHJGAJaCpa-HA@mail.gmail.com>
+
+On Mon, Apr 23, 2018 at 10:49 PM, Bakul Shah <bakul at bitblocks.com> wrote:
+
+> On Mon, 23 Apr 2018 22:32:26 -0600 Grant Taylor via TUHS <
+> tuhs at minnie.tuhs.org> wrote:
+> >
+> > I had always assumed that the outer edge (what I thought was the end of
+> > the disk) was faster than the inner edge (what I thought was the
+> > beginning of the disk) because of geometry.  However, as Ronald stated,
+> > hard drives were constant angular density.  Thus negating what I
+> > originally thought about speed.
+>
+> Constant angular velocity means faster "linear" velocity for
+> tracks further away from the center.  Since 1990 or so disk
+> tracks are divided up in 16 or so "zones", where outer zones
+> have more blocks per track.  This translates to higher
+> throughput.
+>
+> A modern Seagate Exos SAS disk may have a range of 279MB/s
+> (outermost) to 136MB/s (innermost) or 300MB/s to 210MB/s for
+> faster disks (15Krpm).  Disk vendors don't seem to break this
+> range out for consumer drives. But you can measure it using
+> tools like diskinfo on FreeBSD. For example:
+>
+> # diskinfo -t /dev/ada4 # this is an 5 year old 1TB WD "Black" disk.
+> /dev/ada4
+>         ...
+>         Not_Zoned       # Zone Mode <<== this seems wrong.
+>
+
+That's right. This is for BIO_ZONE stuff, which has to do with host managed
+and host aware SMR drive zones. That's different than the zones you are
+talking about.
+
+
+>         ...
+> Transfer rates:
+>         outside:       102400 kbytes in   0.972176 sec =   105331
+> kbytes/sec
+>         middle:        102400 kbytes in   1.088977 sec =    94033
+> kbytes/sec
+>         inside:        102400 kbytes in   1.804460 sec =    56748
+> kbytes/sec
+>
+
+Yes. This matches our experience where we get 1.5x better on the low LBAs
+than the high LBAs. We're looking to 'short stroke' the drive to the first
+part of it to get better performance... Toss a filesystem on top of it, and
+have a more random workload and it's down to about 30% better than using
+the whole drive....
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180423/5e564894/attachment-0001.html>
+

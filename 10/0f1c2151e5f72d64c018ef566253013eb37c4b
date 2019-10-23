@@ -1,0 +1,166 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 1 Dec 2016 16:28:32 -0500
+Subject: [TUHS] looking for 4.1a BSD full kernel source
+In-Reply-To: <B69F6919-FAD4-4F60-AD51-6F32D59E5916@planet.nl>
+References: <A886ECFA-0764-4F4D-830A-D2CC309DD203@planet.nl>
+ <0f3795f4-fb98-3370-510c-347a272dddae@aueb.gr>
+ <38CA85C9-C005-49C5-8BD5-3FC65FC170BF@planet.nl>
+ <CAC20D2NJVnRr+cJ0Jvmrcs4gEEE1_8HZ8t=i3+S-oczQPHVYSw@mail.gmail.com>
+ <B69F6919-FAD4-4F60-AD51-6F32D59E5916@planet.nl>
+Message-ID: <CAC20D2NgmFNusYQVR4AN0nZRUQgvvFO8be0GpfYOYrysnFYvfg@mail.gmail.com>
+
+below...
+
+On Thu, Dec 1, 2016 at 3:13 PM, Paul Ruizendaal <pnr at planet.nl> wrote:
+
+> Clem,
+>
+> Many thanks for your informative post!
+
+​Most welcome.​
+
+
+>
+>
+> > Assuming I can read the tape, I know I do have a copy of 4.1a
+> distribution on 9-track.
+> That is great news. Let me know once you had a chance to look at it. I am
+> in no hurry, so whenever you have time, even if that is months from now.
+
+​My queue keeps getting bigger.  I need to retire so I have time for my
+home projects ;-)​
+
+
+
+>
+>
+> > Diomidis is correct, 4.1a use Joy/Cooper/Leffler reimplementation of of
+> the BBN stack, not the original BBN stack.
+> I suspected as much, but I am happy to hear it confirmed. I've been told
+> on several occasions that 4.1a contained the original BBN stack.
+
+​Truth is the basic stuff will be pretty similar.   The big thing they
+share is mbuf code and how basic IP/TCP state machines.   The primary
+changes will be that it's not using open/nami and started to get rid of the
+ioctl hacks IIRC.​  It's been a long time since I looked at those stacks.
+
+The original BBN release was >>tuned<< for 4.1BSD but was based on their
+"portable" IP/TCP release.  So it's what was used for the HP3000 and few
+other systems that DARPA wanted IP stacks.    Again this is more obvious
+when you look at the mbuf stuff.  Rob needed a specific OS kernel
+independent way of handling memory, so he wrote his own handler and then
+spliced the few things it needed into the local kernel.
+
+Joy kept that code for a long time, although in later and later versions of
+the BSD stack (i.e. by NET2) the mbuf code has been rehashed by many and
+deviated from Rob's stuff in many ways.
+
+
+
+
+>
+>
+> > The BBN stack (Gurwitz et al) was for 4.1 (and other UNIX and non-Unix
+> systems).   I do not believe I have a copy of that tape.  Rob or maybe Eric
+> Cooper might.
+> >
+> > How Sam added the code into the UCB SCCS, I never knew (you can ask him
+> directly, he is still findable these days).   Eric Cooper took the basic
+> BBN distribution and put it on the UCB 4.1 systems around campus >>before<<
+> Joy started the sockets work i.e. the installation was done by installing
+> 4.1, then taking the BBN tape and installing it as is.
+>
+> I can confirm all this. I do have several copies of the BBN tapes from '81
+> and '82, they survived in Kirk McKusick's archive.
+
+​You mean on his CD's - if so can you send me a path.  I'll try to peak at
+them.  I have the CD's at home, although not online.​
+
+
+
+
+> They indeed contain material that is 'copied over' a clean 4 or 4.1 build
+> tree. The first complete BBN beta is from May 1981 and Joy started on his
+> network code in October 1981.
+
+​FYI:  I don't remember it as a beta, but you might be right.  I thought it
+was the official distribution.   BTW it supported the BBN 1822 interface
+and the Xerox 3Mbit boards with the Xerox taps on the Vax.  I wrote a 3Com
+driver for it and Sam and I hacked up an InterLan and DEC drivers when we
+finally got 10M cable.     We had had a single (3Mbit) Xerox cable that
+went through Cory and over to the 5th floor of Evan and then hit its limit.
+  But at 3Mbit, it was a huge step of from the Berk-Net (9600 baud serial
+over DZ-11 ports).​
+
+3Com, DEC and InterLan all were working on Unibus ethernet board at
+different stages of readiness.   3Com must have been shipping for about
+18-24 mons by then, because I had used them on Tektronix (I was their first
+customer) but UCB was using the Xerox gear when we started.   DEC had
+donated some of their gear to the CAD team, so we had those board before
+Joy/Sam did in Evans.   Since I had one "pure DEC" system of our 3 780s in
+the CAD group (most of the Vaxen at UCB had non-DEC gear), I was often an
+early "test system" for Sam.
+
+
+
+
+>
+>
+> > BTW: about 3 years later, the BBN2 stack comes out from Rob and team and
+> it is actually even more interesting; because it now uses the sockets
+> interface (not the Chaosnet/UofI nami trick), and adds a number of both
+> performance enhancements (Van Jacobson's work, etc.) as well as a more
+> complete implementation of the IP stack.   I >>might<< have a copy of that
+> tape squirreled away; but I'll have to look.
+>
+> I think this might be the material that appears in the BSD source tree in
+> 1985, right?
+
+​I don't remember/know if it ever got put directly into the BSD tree.   Rob
+released it independent of the BSD kit and you needed and BBN license to
+get it.   It was what we used at Stellar​, because it was easier to make
+parallel and we were adding it into a more System V then BSD-ish kernel
+(the Stellar box was a 4 "core" system in its CPU).
+
+There was definitely some bad blood at the time.  BBN had the contract to
+support IP/TCP not UCB.  So the stacks did diverge.   Most (commercial)
+people used the BSD 4.2 ( and later NET2) implementation because they got
+it from UCB and did not get the separate BBN license.  Arpanet contractors
+got the BBN2 code automatically, but I don't think many of folks installed
+it unless they needed some feature that BBN had that UCB did not.  The
+National Labs are likely to have picked it up; but not all of the
+Universities.
+
+
+
+
+> Van Jacobson's work is ~1988, I think, but I could well be mistaken.
+
+​Van was at LBL (up the hill as we used to say).    He started with the BSD
+4.2 code, but he was talking with Rob pretty regularly.   I know by the
+time we did Stellar,  IIRC:  both Van and Rob​ were part of the DARPA
+advisors committee (predecessor to the IETF).  I do remember when we were
+at Stellar, Van and Rob were talking because we were doing the
+threading/parallel lock stuff and I'm pretty sure Rob traded some of our
+work for something Van was doing at the time.
+
+
+
+> I think the main performance improvement between the 1982 and the 1985
+> version was a switch from a kernel thread model to a software interrupt
+> model, but as yet I haven't grasped why this is better and my assumption
+> may be incorrect.
+
+​I should know, but frankly do not remember.   I suspect if I started to
+stare at the code, some of those bits will refill the cache in my brain.
+IIRC it was related to the amount of state that needed to be
+saved/switched.  In the thread model, I believe you need the complete
+context, but in the Interrupt model and are sharing whatever context the
+kernel has at the time of the interrupt.​
+
+
+​Clem​
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20161201/b543e35d/attachment-0001.html>
+

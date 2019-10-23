@@ -1,0 +1,83 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 16 Feb 2018 07:45:16 -0800
+Subject: [TUHS] Do Interface specifications such POSIX or the LSB Still
+ Matter
+In-Reply-To: <CAC20D2Otjay-dMfMRBHTmBEVgRUKCN+2nKHayWwtdFb2RO7CDQ@mail.gmail.com>
+References: <CAC20D2PqfaQcHLZ9QCrRxAXM7rYeFBO1nLb2cwoj=sNvu=mYRw@mail.gmail.com>
+ <781FBCD1-A2D9-4F6A-A0CF-452C243900E8@pobox.com>
+ <CAC20D2Otjay-dMfMRBHTmBEVgRUKCN+2nKHayWwtdFb2RO7CDQ@mail.gmail.com>
+Message-ID: <20180216154516.GB14249@mcvoy.com>
+
+On Fri, Feb 16, 2018 at 10:19:37AM -0500, Clem Cole wrote:
+> On Wed, Feb 14, 2018 at 5:45 PM, David Arnold <davida at pobox.com> wrote:
+> > is there really still a market for commercially-licensed installable
+> > software packages?  The set of things that cannot be delivered via the web,
+> > and are not available as Free/Open Source is ever-shrinking.
+> 
+> ???I agree with the later, but for the folks that have traditionally made a
+> market in the former (think commercial HPC - geo science, mech-e cad,
+> financial, chemistry, etc..) - they have codes [often in Fortran] and years
+> and year of data that those codes have been used to create an validate.
+> 
+> Ever-shrinking is right, but those folks have very valuable (billions of
+> dollars) invested in that data and their businesses behind them.   The code
+> they use is proprietary and closed.
+> 
+> As I said in another message, the test matrix for the folks that develop
+> that code got unwieldy.
+
+Meh, not really.  Until Git ate our market, we supported everything you
+might imagine.  Windows, MacOS, Linux-{x86,x86_64,sparc,ppc,itanium,mips},
+AIX, IRIX, HP-UX, Solaris.
+
+Source base of 2.6 million lines of code and docs.
+
+The coding part that was bad was Windows vs Posix, that was painful (no
+fork on Windows, had to map windows error codes to errnos, link, stat,
+utime, sockets, all had to be emulated, file names mapped from unix to
+windows and back again, etc, etc).
+
+The rest of it was pretty easy.  We limited our stuff to very basic
+stuff, we shipped our own stdio (based on NetBSD's) because we stacked
+stuff on top of it 
+
+	/*
+	 * Open a stdio handle to file that is gzipped
+	 * After the fpush you can fread/gets/fseek/whatever.
+	 */
+	FILE *f = fopen(file, "r");
+	fpush(&f, fopen_zip(f->fh, "r"));
+
+For a long time I was careful about what we used in libc, I'd been burned
+by realloc() implementations that didn't work.  In the last 5 years or so
+I loosened up about that, the bugs were always in the odd ball Unixes and
+they had gone away.
+
+I think it gets harder the more "fancy" you get.  If you are doing 
+commandline/compute stuff it's pretty easy.
+
+Want GUI stuff that is cross platform?  That's a mess, we went with 
+Tcl/Tk (which will drive the pure lisp people even more crazy, sorry;
+we "solved" that problem with a byte code compiler that took a C like
+dialect and spit out tcl byte codes).  Probably would do Qt or something
+else today (didn't want to have C++ in the tool chain 20+ years ago).
+
+Want video?  Oh, my.
+
+Want sound?  Oh, my.
+
+I don't see any standard trying to fix that cross platform, windows and
+Linux are too different.  Though maybe the Linux on windows stuff solves
+that?  I dunno.
+
+> Containers is the only alternative I have seen so far that might solve
+> this, but .... that same folks don't like no stinking OS between their app
+> and the HW, so using virtualization technology to solve a problem is
+> usually a no-no.
+
+Netflix does a lot in AWS.  And they care about performance.  But they 
+code around the variance that you get from containers, I could see that
+as an issue for the old school fortran people.
+
+I'm sort of struggling to see what problem it is you want to solve.
+

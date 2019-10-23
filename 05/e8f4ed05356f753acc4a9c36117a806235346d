@@ -1,0 +1,175 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Sun, 29 Apr 2018 17:37:46 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180428204008.5D76D18C094@mercury.lcs.mit.edu>
+References: <20180428204008.5D76D18C094@mercury.lcs.mit.edu>
+Message-ID: <b41923db-a29a-c712-81f0-defa9f29bfc5@update.uu.se>
+
+On 2018-04-28 22:40, Noel Chiappa wrote:
+>      > From: Johnny Billquist
+> 
+>      > Gah. If I were to try and collect every copy made, it would be quite a
+>      > collection.
+> 
+> Well, just the 'processor handbook's (the little paperback things), I have
+> about 30. (If you add devices, that probably doubles it.) I think my
+> collection is complete.
+
+I have no idea how many different editions DEC printed. There were 
+certainly several done for some models, as well as several books that 
+covered different combinations of models. All in all, 30 does not 
+surprise me. And I would not be surprised if it were even more...
+
+>      > So there was a total change in terminology early in the 11/45 life, it
+>      > would appear. I wonder why. ... I probably would not blame some market
+>      > droids.
+> 
+> I was joking, but also serious. I really do think it was most likely
+> marketing-driven. (See below for why I don't think it was engineering-driven,
+> which leaves....)
+> 
+> I wonder if there's anything in the DEC archives (a big chunk of which are now
+> at the CHM) which would shed any light? Some of the archives are online there,
+> e.g.:
+> 
+>    http://www.bitsavers.org/pdf/dec/pdp11/memos/
+> 
+> but it seems to be mostly engineering (although there's some that would be
+> characterized as marketing).
+
+Yeah. I've read a bunch of those memos in the past. I don't think they 
+in general were concerned with terminology, so I'm not surprised if you 
+don't find anything relevant there.
+
+>      > one of the most important differences between segmentation and pages are
+>      > that with segmentation you only have one contiguous range of memory,
+>      > described by a base and a length register. This will be a contiguous
+>      > range of memory both in virtual memory, and in physical memory.
+> 
+> I agree completely (although I extend it to multiple segments, each of which
+> has the characterstics you describe).
+
+Right. The I think we're on the same page. I won't comment further on 
+the x86 which I mentioned before, since I think we can all agree that 
+that one is really brain damaged.
+
+> Which is why I think the original DEC nomenclature for the PDP-11's memory
+> management was more appropriate - the description above is _exactly_ the
+> functionality provided for each of the 8 'chunks' (to temporarily use a
+> neutral term) of PDP-11 address space, which don't quack like most other
+> 'pages' (to use the 'if it quacks like a duck' standard).
+
+This is where I disagree. The problem is that the chunks in the PDP-11 
+do not describe things from a zero offset, while a segment do. Only 
+chunk 0 is describing addresses from a 0 offset. And exactly which chunk 
+is selected is based on the virtual address, and nothing else.
+
+It's a good analogy to view segments in the same way as you might view 
+them in object files, or sometimes even in executables. One segment is a 
+more or less self contained chunk, described by one segment descriptor, 
+or whatever you want to call them.
+This is not possible to do on a PDP-11 with the chunks we have.
+
+> One query I have comes from the usual goal of 'virtual memory' (which is the
+> concept most tightly associated with 'pages'), which is to allow a process to
+> run without all of its pages in physical memory.
+> 
+> I don't know much about PDP-11 DEC OS's, but do any of them do this? (I.e.
+> allow partial residency.)  If not, that would be ironic (in view of the later
+> name) - and, I think, evidence that the PDP-11 'chunks' aren't really pages.
+
+Demand paging really is a separate thing from virtual memory. It's a 
+very bad thing to try and conflate the two.
+
+There is nothing about virtual memory that says that you do not have to 
+have all of your virtual memory mapped to physical memory when the 
+process is running. Virtual memory is just *virtual* memory. It's not 
+"real" or physical in the sense that it has a dedicated location in 
+physical memory, which would be the same for all processes talking about 
+that memory address. Instead, each process has its own memory, which 
+might be mapped somewhere in physical memory, but it might also not be. 
+And one processes address 0 is not the same as another processes address 
+0. They both have the illusion that they have the full memory address 
+range to them selves, unaware of the fact that there are many processes 
+who also have that same illusion. And meanwhile, the OS has it's own 
+idea about the memory, and the OS also knows how the physical memory is 
+used, and keeps resources, and the allocation of them, under control on 
+behalf of the processes, without the processes knowing this.
+Without virtual memory, each process would have to deal with physical 
+memory, and then each process would have to be aware of all the other 
+processes that use memory, and make sure that no two processes try to 
+use the same memory, or chaos ensues.
+
+You can do virtual memory with segmentation as well. Since this also 
+means have a translation between your virtual address and a physical 
+address. It's just that the translations are a bit easier and more 
+straight forward with segments.
+
+> BTW, did you know that prior to the -11/45, there was a memory management
+> device for the PDP-11 which provided 'real' paging, the KT11-B? More here:
+> 
+>    http://gunkies.org/wiki/KT11-B_Paging_Option
+
+I knew about it, but have never read any technical details. Interesting 
+read.
+
+> I seem to recall some memos in the memo archive that discussed it; I _think_
+> it mentioned why they decided not to go that way in doing memory management
+> for the /45, but I forget the details? (Maybe the performance hit of keeping
+> the page tables in main memory was significant?)_
+
+There might have been several reasons, but performance would most likely 
+be one of them.
+
+>      > With segmentation you cannot have your virtual memory split up and
+>      > spread out over physical memory.
+> 
+> Err, Multics did that; the process' address space was split up into many
+> segments (a true 2-dimensional naming system, with 18 bits of segment number),
+> which were then split up into pages, for both virtual memory ('not all
+> resident'), and for physical memory allocation.
+> 
+> Although I suppose one could view that as two separate, sequential steps -
+> i.e. i) the division into segments, and ii) the division of segments into
+> pages. In fact, I take this approach in describing the Multics memory system,
+> since it's easier to understand as two independent things.
+
+Yes. I definitely view that as two independent things stacked on top of 
+each other. And it would appear you do too. :-)
+
+And that allows such a spread, as well as holes, through the paging 
+part. The segmentation part does not allow for it.
+
+>      > it would be very wrong to call what the PDP-11 have segmentation
+> 
+> The problem is that what PDP-11 memory management does isn't really like
+> _either_ segmentation, or paging, as practised in other machines. With only 8
+> chunks, it's not like Multics etc, which have very large address spaces split
+> up into many segments. (And maybe _that_'s why the name was changed - when
+> people heard 'segments' they thought 'lots of them'.)
+> 
+> However, it's not like paging on effectively all other systems with paging,
+> because in them paging's used to provide virtual memory (in the sense of 'the
+> process runs with pages missing from real memory'), and to make memory
+> allocation simple by use of fixed-size page frames.
+> 
+> So any name given PDP-11 'chunks' is going to have _some_ problems. It just
+> thing 'segmentation' (as you defined it at the top) is a better fit than the
+> alternative...
+
+Agreed that there is some problem in classifying them either way. 
+However, the objection against pages are solely based on the fact that 
+they are not fixed in size, while with segments, it becomes much more 
+strange.
+
+But how do you then view modern architectures which have different sized 
+pages? Are they no longer pages then?
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

@@ -1,0 +1,173 @@
+From: wkt@henry.cs.adfa.oz.au (Warren Toomey)
+Date: Sun, 3 Jan 1999 22:51:45 +1100 (EST)
+Subject: Yet Another Apout Version
+Message-ID: <199901031151.WAA26388@henry.cs.adfa.oz.au>
+
+Hmm,
+	The tarball of Apout that I put up for ftp had a file missing,
+and a serious bug which caused 2.11BSD ls -l to go into an infinite loop.
+I've removed this version and placed a new version of Apout in:
+
+	ftp://minnie.cs.adfa.edu.au/pub/PDP-11/Sims/Apout/
+
+Things are looking good. With a small bit of manual help, I was
+able to run make in 2.11BSD /usr/src/bin, which rebuilds all of
+the binaries in /bin.
+
+I've even (nearly) been able to build the GENERIC 2.11BSD kernel
+in /sys/GENERIC, but I get:
+
+# make
+   ....
+ld -X -i -o unix scb.o  mch_backup.o mch_click.o mch_copy.o .....
+sys_process.o  syscalls.o ufs_mount.o -Z hk.o init_main.o kern_prot.o
+tty_pty.o quota_kern.o quota_subr.o  quota_ufs.o vm_swp.o vm_swap.o
+vm_proc.o -Z ht.o tm.o ts.o -Z tmscp.o tmscpdump.o  -Z rl.o
+mch_fpsim.o ingreslock.o ufs_disksubr.o -Z rx.o kern_sysctl.o
+vm_sched.o vm_text.o -Z kern_pdp.o kern_xxx.o ufs_syscalls2.o mem.o
+ufs_subr.o rk.o sys_pipe.o  kern_sig2.o toy.o subr_log.o -Z  -Z
+-Z   -Z  -Z  -Z  -Y  vers.o -lkern param.o
+Undefined:
+_proc
+_file
+_text
+*** Exit 1
+
+Stop.
+# ls -l unix
+-rw-------  1 root       195480 Jan  3 03:41 unix
+
+Steven, any ideas as to the problem? I had to do two operations manually
+(using 32-bit native tools):
+
+sh ../conf/newvers.sh
+/bin/ed - param.s < ../conf/:comm-to-bss
+
+Cheers all,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id EAA01186
+	for pups-liszt; Mon, 4 Jan 1999 04:17:03 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id EAA01181
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 4 Jan 1999 04:16:50 +1100 (EST)
+Received: from dosdev (pm7-94.dial.qual.net [205.212.2.94])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id WAA04342
+	for <pups at minnie.cs.adfa.edu.au>; Sun, 3 Jan 1999 22:16:30 +0500
+Message-Id: <199901031716.WAA04342 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 3 Jan 1999   17:16:23 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: Time machine
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Dear PUPS/TUHS members,
+
+Have you ever wished to have a time machine? Have you ever wished to travel
+back to 1988, to the time when 4.3BSD-Tahoe was the latest release and the SCCS
+deltas corresponding to it were the most recent deltas? Well, at least I do.
+
+Although unfortunately real time travel is still limited to the X-Files, I have
+come up with a pretty good approximation, a time machine program. This program
+turns the Universe clock backwards on a given SCCS file, pruning it down to a
+given delta, specified either as an SID or as a delta serial number. The bulk
+of the work is done by the SCCS rmdel command. This command, however, can only
+delete one delta at a time and still leaves an audit trail in the delta table.
+My package consists of a shell script and two C programs that compensate these
+deficiencies. The result is that the SCCS file becomes byte-for-byte identical
+to the one that existed at the time you have chosen, just like with a real time
+machine!
+
+I include this package below as a uuencoded gzipped tarball. See the README
+file inside.
+
+Sincerely,
+Michael Sokolov
+Cellular phone: 216-217-2579
+ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+Enclosure: uuencoded tmachine.tar.gz:
+
+begin 644 tmachine.tar.gz
+M'XL(`)3,CS8``.T9:V_;-K!?S5]Q29TFSN+8DE]`TQ08DA8HT&Y`TWY*@U66
+M:)NS)`HD'<];\]]W1UJVE*1MMB(QMN@`P]+I>&^2=^2[8,I'(N9/[A$`H-_M
+M`O[[[7:;_@%ZGOLG\+L^4O2[G4&[WQETZ6NOYS^!^]2I`@=!'#^'9!KQV`2Q
+MT`:,$HE],\.8L<*7$MEAR&IA",U?H2E+P\LTK,CM>8EWB4/QPW6J37OH_PWO
+M7_U\^N[5_<KXSOSW/42Z^8^/O0ZBNH-!MYK_#P$?)AR,2#@D03 at 1*8<L"*?!
+MF$,H4XV36(,<@2&BG$!/>!R##I7(#`1I!&8NX81E2HY5D.B#TG)@OQ?G,Z!`
+MS>$$<GH(%`>1&IY&'&DE##D3Z:6<XMMP8467),HT7AQ`*@U$0O'0Q(N<;*:Y
+M.F3LM5`H.)1)AMN:_5`0AJ1JEJ8B'<-N at EO?KE4H!1X)<XN9S`D]`)WQ4(P6
+M-(ZH0JE(-L0R#(Q`3\%(*C<>G3$4::`$U["0,Y@$EQQ^GVG#0L4#@U:13W+R
+M($I$:C&*?`1G)R=GI'N"*&UUNSTZ0K-4S@$Y1 at MR&MJ^Q=@'7$EG*K6</Z;B
+MDBMT=8A*3F&(`^>!BC">*`_&^#%UTFCW/R"O/,?E>BW'3%I&MI!3BZA:^I#H
+M(`ZT^<T&D['YA*LB9NDD,IP4H`_@/I`?YD%J2-,IY]DAO,&=`GU"P<Y'H6,T
+M<(%#%335V9M30!\U at S-\W<.P$8+\A(]+:5R)((9TE at RY.F"*$R.#=L6+AO/<
+MRCR8"TR@(;I11DM1(88PPG#&"TNKUC08099(1-!(#<NH8<H%B4O)(**!<#@,
+MIA[I2`\^F69*,HG>\F88[`2M$)CK&-MLD4\IJ<084R4NQL%.&.L]8VX9P];\
+M at Q$1X/[M4F?7S:1(ILAE."/7CL@*8N8<9H)A3)F#LV&6\NB0G?*8&TNA<VL=
+M4XH7,=.8W-KZ:XYQ6<T-%(7>GL5&'U:[\W\<2O7:/<GXSO[?\;Q5_3_P!STB
+M[WN=:O]_"'@JTC">11Q>:!,)>3AYR=BE%+A#!2+>2_2XP<))H&`?'X_87ZPV
+MRF9&TP?<%$W$E6H<L1K_0Y@]#Y^N&&[>N+8'(MT+U#C$!4V-+QL62>]'2V[[
+MA+;\7K]Y^PKVM5O]]BD/\\>`^&-NTCO*(!;#A1:X%./2CPC'"1'Y<XQKTWG/
+M\R^.&)*/P&H`6\?0 at R]?K"+G_L5Y^X)0N\W=(M)SR&`7GCV[CE2[#5:K67]L
+ME_HA+%/P*<KW:RO_4[I-#EE*S]D<6]X-0'MKU at 8XAC:2U=`2?`R,%#DY_`0^
+M<;A"K\:X+A>'>':(?2Q06V)6LR[$+R.9\=1Q\RX.8%NM%%I2',,O']^^)9LR
+M#)]4.2V1Y?XO\^D0G_F*SYKH=E8=QZH8OS*_[C5^9<K;F7:)J:,?C3FF('G[
+M`-<1'_.!!C:^;9E3'!-D&?]/[;9G4\`BEZ&>%$*=1W>UXRY#2Z7;WM&1"Z;-
+MN\@L,E0EPLB<^]T+"A(E:V33E%[NIO,M2M]-:VVU_H[:/ZJ%UF&0CI9CMTF/
+M"'9"V-&PLU_X1=L'\*S@$'I#/S3@!73NJN66S7?G8">;9LFQ=:CE41MB438E
+M<IPEZVEB::UL.^%.[63>TD:%2;9G=2&-&DO&R[GGHE1B:KE>L9O\G`&9PNB.
+M]M9+U?:.1O67W(E!*47N[/C;/%]*@.-5`J!=>0(0DN_>=,L56VM:G%^D;F35
+M)6]2?HZP0]#<K0XVP=U[;E\1561$>,5MO]&FA7_3.UD%_P;RFOX^96!!-^CU
+MOG[^.^AWEO6?U_7Z]ORWWZG.?QX$GFZUAB)MZ0E["KB9I6/7,8YD',LYM;FT
+MSFCJ;C,I7`?O^O[5V89K'U<G+/9(A$?,GFP<MV9:M0 at 5MRR"V5ZUB+:(XCGS
+M<6LB$]Y*M)S*6%ZV\@QM%6A*Y\I?'5`^RJX7SZ7J'M1]0-*LM>Y_ZG6'62US
+MB&%A9HD]V^Y3*P]4@(D4/J.=-SE\9I%DM;H[S6FJ.A'7/49M.4LNUZQ\5B\=
+M>J^Y%:5_QFUS20\OB8]*H#FZF]Z31$;0Q;X+A]7=.5/S3WHI54GEP_;[R;'O
+M]']>O]W+Y[_O]?M$/NCWJOG_$+#Q_H^^%/JYK_9P_KHR+U\J?:,+N]Y=>:Z'
+M6-5B1&/-R5_NL4G0*\NP4"Q86>PA;G0.5E.=:^=JX5OUT_^\'["\HS)O5^-'
+M-XK\_6]4^:OZWK]K?5\LYUV);(.PMM.]KW4KU_OKJIR,?5\T%M6GFX%LIG`?
+M2V7:5#R1ESQR)Z`Z5Z)<GY?2X<<J[OF$.MB]-4=2<;7:%C*M7#IOL/_;]/I3
+M0045;`ZJ^__'#=7]?W7_7]W_5_?_U?W_XX3J_O]QP\;/?ZK[_^K^O[K_K^[_
+MJ_O_ZOZ_@@>'ZO[_<4-U_U_=_U?W_X\7-M[_5??_U?U_=?^_L?O_OP%(*:`Y
+$`$```/Z_
+`
+end
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA01508
+	for pups-liszt; Mon, 4 Jan 1999 06:21:26 +1100 (EST)
+Received: from trantor.cosmic.com (xensei-PPP-0227.xensei.com [207.31.197.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id GAA01503
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 4 Jan 1999 06:21:13 +1100 (EST)
+Received: (from mirian at localhost)
+          by trantor.cosmic.com (8.8.7/8.8.4)
+	  id OAA17969; Sun, 3 Jan 1999 14:20:03 -0500
+From: Mirian Crzig Lennox <mirian@xensei.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Ancient SunOS source
+References: <199812161520.KAA28340 at seedlab1.cropsci.ncsu.edu>
+Original-Sender: mirian at xensei.com
+Organization: The Cosmic Computing Corporation of Alpha Centauri
+Date: 03 Jan 1999 14:20:02 -0500
+In-Reply-To: "User Rdkeys Robert D. Keys"'s message of "Wed, 16 Dec 1998 10:20:18 -0500 (EST)"
+Message-ID: <m31zlccgf1.fsf at trantor.cosmic.com>
+Lines: 10
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Last month, there was some discussion about getting Sun to release the
+sources to old SunOS 4.1 under the Ancient UNIX source licence.  I'm
+curious as to what progress has been made on that.  I'm
+enthusiastically looking forward to hopefully being able to run
+SunOS-4.1.3 with full source on an old Sun 3/80.
+
+-- 
+Mirian Crzig Lennox                                Systems Anarchist
+          "There's a New World Order coming every minute.
+                      Make mine extra cheese."
+
+

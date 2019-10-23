@@ -1,0 +1,175 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 93aa3091
+	for <ml@inbox.vuxu.org>;
+	Thu, 15 Aug 2019 22:46:54 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 201409BBD3; Fri, 16 Aug 2019 08:46:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 346E49BB76;
+	Fri, 16 Aug 2019 08:46:36 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="xl58OOar";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E4B029BB77; Fri, 16 Aug 2019 08:46:33 +1000 (AEST)
+Received: from mail-qt1-f179.google.com (mail-qt1-f179.google.com
+ [209.85.160.179])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3C40B9BB74
+ for <tuhs@tuhs.org>; Fri, 16 Aug 2019 08:46:33 +1000 (AEST)
+Received: by mail-qt1-f179.google.com with SMTP id l9so4128669qtu.6
+ for <tuhs@tuhs.org>; Thu, 15 Aug 2019 15:46:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=M7a00JylN7MClXmVIElstpVqflbUR+dDkt/+X15mYhE=;
+ b=xl58OOarjZIggJQxwTRowudTiN0bNcr7/ZJigspAttRFyAsUMTneDwlQQsiec+ztPu
+ XV7zmxDWHOaDYn7cvGftBU8CM6mtN487x7iwG84MMgBZuWLRDYykYnnzJD9H16l/LSbZ
+ t0lK6r5K9xPdi8sPzryo+GohQHlgFJwAbbWvBxpFld/7AB5OtrdLeHgobRS5f91nPvIR
+ bMvw9PXqCTlqSeKHkwKYpVoA4VUhOhJ4WwWGJOM7Bw9aFCkGJWieF8b2w7O3uEUcTEvd
+ s9aMWWvwjqJFvPbajxA99QmBnxhk/TP+dh6SDlo1eAP1T0FVjIXrjUVkRuKdrIgEp+K5
+ 1/DQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=M7a00JylN7MClXmVIElstpVqflbUR+dDkt/+X15mYhE=;
+ b=lqsMNiiBGjP41ktG6h/ez1HFZI+3sNVkRuSITZh32B5QtSG7zqWRD+i6X4oAQjS1zc
+ okUVwK6SdR4Dh11vSCjHSaqnX7sBPZNMvqCLd0WxuC/J4m+jH6/4CHuFYYi8Q4TAj0p8
+ b48QD9/TXqBxL8gFBTqokn+HU8dOXf12ip3Rek0bbTzv1ygK+xWLZrYjRvWexphL82B/
+ mx/8w7hUOTAgsM2vS5C5GhGFc6IRtZhLuunPYPsszP2sujizGFJdwRXMZyd2O3O0T1Qi
+ JdBMYCLHJFUR+j3UXYO8SdHP53tgGiH/hH418z/5mrC6ZdShKdBDS688xw/CYQHvZstR
+ ox7w==
+X-Gm-Message-State: APjAAAUBQ4Q9dRRVL2i+8iZ4+q+0kKMPU6fN/0mG2ACkOBjzYnZPDRug
+ VywdCzQatL5pY7AE65STQuIVXtXuloZ9MAZ7t33jleMnPEKrfA==
+X-Google-Smtp-Source: APXvYqwXgJYmR1a3rFe04SLI+uNdRfVRaukFWXXcV7K9VLni8XHB9QCP23NMkfVy++zXfyEkUlWCuxY1TbfJx8kjc2c=
+X-Received: by 2002:ac8:128c:: with SMTP id y12mr6060604qti.242.1565909192167; 
+ Thu, 15 Aug 2019 15:46:32 -0700 (PDT)
+MIME-Version: 1.0
+References: <20190802201448.GA5889@minnie.tuhs.org>
+ <e00fc7d7-7182-1d0f-261e-6701af92c690@deitygraveyard.com>
+ <20190802230348.GA22981@minnie.tuhs.org>
+ <CANCZdfoP7GQtU3mOx9E3GDw+f+dFBRYOHm2pi+K+yWre3qDo=A@mail.gmail.com>
+In-Reply-To: <CANCZdfoP7GQtU3mOx9E3GDw+f+dFBRYOHm2pi+K+yWre3qDo=A@mail.gmail.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Thu, 15 Aug 2019 16:46:21 -0600
+Message-ID: <CANCZdfpPXzWXpS4abphwADbvSatSOUG0jTOB_zF3m0fZo7LRZw@mail.gmail.com>
+To: Warren Toomey <wkt@tuhs.org>
+Content-Type: multipart/alternative; boundary="000000000000266a5805902fa50c"
+Subject: Re: [TUHS] Video of PDP-7 with Graphics-2?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000266a5805902fa50c
+Content-Type: text/plain; charset="UTF-8"
+
+On Thu, Aug 15, 2019 at 4:08 PM Warner Losh <imp@bsdimp.com> wrote:
+
+>
+>
+> On Fri, Aug 2, 2019 at 5:04 PM Warren Toomey <wkt@tuhs.org> wrote:
+>
+>> On Fri, Aug 02, 2019 at 06:49:19PM -0400, Jim Carpenter wrote:
+>> > On 8/2/19 4:14 PM, Warren Toomey wrote:
+>> > > Hi all, I'm chasing the Youtube video of the PDP-7 at Bell Labs where
+>> > > people are using it to draw circuit schematics.
+>> >
+>> > A Bell Labs video? The only Bell Labs video I remember seeing that had
+>> > someone doing circuit schematics had it being done on a PDP-5. The -7
+>> was
+>> > shown later doing music stuff. (That's the -7 that I thought maybe Unix
+>> > started life on.)
+>>
+>> Thanks Jim, Is it this one?
+>> https://www.youtube.com/watch?v=iwVu2BWLZqA
+>>
+>> They mention a Graphics-1 device, so maybe I'm getting this confused
+>> with the PDP-7 and the Graphics-2.
+>>
+>
+> The early one for the circuit simulator is definitely on a PDP-5 and I
+> presume the Graphics-1 display. You can see the PDP 5 letters on one of the
+> cabinets. How do you know that the music was composed on the PDP-7 that
+> appears from 9:20-10:30? Cool paper tape feeding sequence, though, you
+> gotta admit :) (well, unless you waited for far too many of those to run
+> back in the day).
+>
+
+Oh! I've found the right set of photos to make a good case this is a
+PDP-7...
+
+https://docs.google.com/presentation/d/1lNmjaJhuqKSbpDU96sc3Kia3d-Ag0DVylMzW6APdWEY/edit?usp=sharing
+
+has an early version of a slide I'll be using in my talk next month.
+
+Comments?
+
+Warner
+
+--000000000000266a5805902fa50c
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Thu, Aug 15, 2019 at 4:08 PM Warne=
+r Losh &lt;<a href=3D"mailto:imp@bsdimp.com">imp@bsdimp.com</a>&gt; wrote:<=
+br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8e=
+x;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr"=
+><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote"><div dir=3D"ltr"=
+ class=3D"gmail_attr">On Fri, Aug 2, 2019 at 5:04 PM Warren Toomey &lt;<a h=
+ref=3D"mailto:wkt@tuhs.org" target=3D"_blank">wkt@tuhs.org</a>&gt; wrote:<b=
+r></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex=
+;border-left:1px solid rgb(204,204,204);padding-left:1ex">On Fri, Aug 02, 2=
+019 at 06:49:19PM -0400, Jim Carpenter wrote:<br>
+&gt; On 8/2/19 4:14 PM, Warren Toomey wrote:<br>
+&gt; &gt; Hi all, I&#39;m chasing the Youtube video of the PDP-7 at Bell La=
+bs where<br>
+&gt; &gt; people are using it to draw circuit schematics.<br>
+&gt; <br>
+&gt; A Bell Labs video? The only Bell Labs video I remember seeing that had=
+<br>
+&gt; someone doing circuit schematics had it being done on a PDP-5. The -7 =
+was<br>
+&gt; shown later doing music stuff. (That&#39;s the -7 that I thought maybe=
+ Unix<br>
+&gt; started life on.)<br>
+<br>
+Thanks Jim, Is it this one?<br>
+<a href=3D"https://www.youtube.com/watch?v=3DiwVu2BWLZqA" rel=3D"noreferrer=
+" target=3D"_blank">https://www.youtube.com/watch?v=3DiwVu2BWLZqA</a><br>
+<br>
+They mention a Graphics-1 device, so maybe I&#39;m getting this confused<br=
+>
+with the PDP-7 and the Graphics-2.<br></blockquote><div><br></div><div>The =
+early one for the circuit simulator is definitely on a PDP-5 and I presume =
+the Graphics-1 display. You can see the PDP 5 letters on one of the cabinet=
+s. How do you know that the music was composed on the PDP-7 that appears fr=
+om 9:20-10:30? Cool paper tape feeding sequence, though, you gotta admit :)=
+ (well, unless you waited for far too many of those to run back in the day)=
+.</div></div></div></blockquote><div><br></div><div>Oh! I&#39;ve found the =
+right set of photos to make a good case this is a PDP-7...</div><div><br></=
+div><div><a href=3D"https://docs.google.com/presentation/d/1lNmjaJhuqKSbpDU=
+96sc3Kia3d-Ag0DVylMzW6APdWEY/edit?usp=3Dsharing">https://docs.google.com/pr=
+esentation/d/1lNmjaJhuqKSbpDU96sc3Kia3d-Ag0DVylMzW6APdWEY/edit?usp=3Dsharin=
+g</a></div><div><br></div><div>has an early version of a slide I&#39;ll be =
+using in my talk next month.</div><div><br></div><div>Comments?</div><div><=
+br></div><div>Warner</div></div></div>
+
+--000000000000266a5805902fa50c--

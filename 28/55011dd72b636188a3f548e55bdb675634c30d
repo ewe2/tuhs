@@ -1,0 +1,42 @@
+From: fair-tuhs@netbsd.org (Erik E. Fair)
+Date: Wed, 30 Dec 2015 10:06:57 -0800
+Subject: [TUHS] v6 RK05 bootloader question
+In-Reply-To: <568387EF.6010407@gmail.com>
+References: <685C2CB4-B23B-4A9C-833D-EE27B37B7ECF@mailbox.org>
+Message-ID: <22302.1451498817@cesium.clock.org>
+
+Related minicomputer booting story:
+
+I cut my computing teeth on the PDP-11's competitor, the Data General NOVA minicomputer. Edson de Castro supposedly proposed the architecture to Ken Olson, and when Ken said "no", Edson left DEC and founded DG - much as we've seen companies in Silicon Valley beget each other when some smart engineers get annoyed with their bosses. Fairchild begat Intel and AMD, Cisco begat Juniper, et alia.
+
+Rather than memory-mapped I/O, the NOVA had I/O instructions, and six bits of device codes. Every interrupt handler I saw for the NOVA ended in the same self-modifying code sequence: if your OS doesn't handle the device that has interrupted, put the device code into an interrupt dismiss instruction in the next location, fall into it to shut the device up, and return from interrupt.
+
+Booting the NOVA (provided you knew the device code of the device you wanted to boot from) was simplicity itself:
+
+Power everything up.
+
+Mount the media (disk, tape) including any positioning as required
+
+Put I/O device online (frequently an explicit act involving a switch)
+
+Set the CPU front panel switches to the 6-bit device code
+
+Hit in order the momentary contact switches: STOP, RESET, START
+
+The CPU would read the device code from the front panel switches, read the first record (of arbitrary size) from the device into RAM starting at location 0, and set the program counter (PC) to zero and begin execution of whatever was read in from the I/O device.
+
+Disks had a primary booter in the first 512 bytes (so, 256 16-bit instructions & data) which would read in the rest of whatever OS you were booting. Necessarily, that booter needed to know where to load the OS from on disk.
+
+Since "page zero" of the NOVA (the first 256 words of RAM) was a critical resource (direct reference from anywhere else in RAM rather than using space-expensive indirect addressing, plus, there were some autoincrement and autodecrement locations - reading them caused the stored value to change - handy for counters and pointers), the booter usually got overwritten.
+
+Booting an OS from tape was easier because of the arbitrary record size: you could fit a whole tape OS into a single record and start running immediately - no intermediate boot code required. OTOH, tape OSes were really slow when all their files were on very slow tape drives (if you were lucky, you had vacuum column tape drives - faster for positioning).
+
+Life got lots easier when PROMs got big & cheap enough for on-board firmware like IEEE 1275 (OpenBoot/Open Firmware, a formalization of Sun's forth-based firmware).
+
+So far as I know, Unix (DG/UX) didn't come to DG until the Eclipse MV ("Eagle") 32-bit computer of literary fame.
+
+	ancient history,
+
+	Erik <fair at netbsd.org>
+
+

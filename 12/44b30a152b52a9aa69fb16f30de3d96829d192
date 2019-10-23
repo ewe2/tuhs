@@ -1,0 +1,44 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 13 Jul 2014 19:21:20 -0400 (EDT)
+Subject: [TUHS] Hello World compiled in v1/v2
+Message-ID: <20140713232120.CB77818C0BE@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall <dave at horsfall.org>
+
+    > crt0.s -> C Run Time (support). It jiggers the stack pointer in some
+    > obscure manner
+
+It's the initial startup; it sets up the arguments into the canonical C form,
+and then calls main(). (It does not do the initial stack frame, a canonical
+call to CSV from inside main() will do that.) Here are the exact details:
+
+On an exec(), once the exec() returns, the arguments are available at the
+very top of memory: the arguments themselves are at the top, as a sequence of
+zero-terminated byte strings. Below them is an array of word pointers to the
+arguments, with a -1 in the last entry. (I.e. if there are N arguments, the
+array of pointers has N+1 entries, with the last being -1.) Below that is a
+word containing the size of that array (i.e. N+1).
+
+The Stack Pointer register points to that count word; all other registers
+(including the PC) are cleared.
+
+All CRT0.s does is move that argument count word down one location on the
+stack, adjust the SP to point to it, and put a pointer to the argument
+pointer table in the now-free word (between the argument count, and the first
+element of the argument pointer table). Hence the canonical C main() argument
+list of:
+
+	int	argc;
+	int	**argv;
+
+If/when main() returns, it takes the return value (passed in r0) and calls
+exit() with it. (If using the stdio library, that exit() flushes the buffers
+and closes all open files.) Should _that_ return, it does a 'sys exit'.
+
+There are two variant forms: fcrt0.s arranges for the floating point
+emulation to be loaded, and hooked up; mcrt0.s (much more complicated)
+arranges for process monitoring to be done.
+
+	Noel
+
+

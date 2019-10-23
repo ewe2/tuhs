@@ -1,0 +1,88 @@
+From: jgevaryahu@hotmail.com (Jonathan Gevaryahu)
+Date: Thu, 17 Sep 2015 00:42:17 -0400
+Subject: [TUHS] Did realloc ever zero the new memory?
+In-Reply-To: <20150914032045.GM3796@eureka.lemis.com>
+References: <201509130032.t8D0WvPl024634@tahoe.cs.Dartmouth.EDU>
+ <20150913011501.GF2103@mcvoy.com>
+ <alpine.BSF.2.11.1509131559390.72879@aneurin.horsfall.org>
+ <20150914032045.GM3796@eureka.lemis.com>
+Message-ID: <BLU436-SMTP10A7EC9CEEA31EF2963B7CC75A0@phx.gbl>
+
+On 9/13/2015 11:20 PM, Greg 'groggy' Lehey wrote:
+> On Sunday, 13 September 2015 at 16:09:55 +1000, Dave Horsfall wrote:
+>> On Sat, 12 Sep 2015, Larry McVoy wrote:
+>>
+>>> That's a really good point.  Anyone like these?
+>>>
+>>> void *alloc(size_t bytes);
+>>> void *realloc(void *old, size_t want);
+>>>
+>>> void *zalloc(size_t bytes);
+>>> void *zealloc(void *old, size_t want);
+>>>
+>>> So alloc is new, we can have that.  Realloc() is OK?  Or not?  Does the
+>>> current one have weird semantics?
+>>>
+>>> zalloc/zealloc are new, we can have those.
+>>>
+>>> If you guys like these I can push on Linus and the glibc people.
+>> I'll vote for those, although my dev days are pretty much over.  I've
+>> never liked malloc() etc not clearing memory, although it has been, ahem,
+>> useful, in the past...
+> http://xkcd.com/927/
+>
+> Greg
+Why not crealloc? pronounced 'cereal-oc'? it would behave the same as 
+realloc, but explicitly zeroes the area upon allocating it (and maybe 
+also upon reducing the size of the area, it zeroes the area freed, or 
+zeroes the area the memory structure was previously located at, if the 
+whole memory structure has to be moved.)
+
+Borrowing from 
+http://pubs.opengroup.org/onlinepubs/009695399/functions/realloc.html :
+
+The /crealloc/() function shall change the size of the memory object 
+pointed to by /ptr/ to the size specified by /size/. The contents of the 
+object shall remain unchanged up to the lesser of the new and old sizes. 
+If the new size of the memory object would require movement of the 
+object, the space for the previous instantiation of the object is 
+zeroed, then freed. If the new size is larger, the contents of the newly 
+allocated portion of the object are explicitly set to the value of 0. If 
+/size/ is 0 and /ptr/ is not a null pointer, the object pointed to is 
+zeroed, then freed. If the space cannot be allocated, the object shall 
+remain unchanged.
+
+If /ptr/ is a null pointer, /crealloc/() shall be equivalent to 
+/calloc/() 
+<http://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html> 
+for the specified size.
+
+If /ptr/ does not match a pointer returned earlier by /calloc/() 
+<http://pubs.opengroup.org/onlinepubs/009695399/functions/calloc.html>, 
+/malloc/() 
+<http://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html>, 
+/realloc/() or /crealloc/() or if the space has previously been 
+deallocated by a call to /free/() 
+<http://pubs.opengroup.org/onlinepubs/009695399/functions/free.html>, 
+/realloc/() or /crealloc/(), the behavior is undefined.
+
+The order and contiguity of storage allocated by successive calls to 
+/crealloc/() is unspecified. The pointer returned if the allocation 
+succeeds shall be suitably aligned so that it may be assigned to a 
+pointer to any type of object and then used to access such an object in 
+the space allocated (until the space is explicitly freed or 
+reallocated). Each such allocation shall yield a pointer to an object 
+disjoint from any other object. The pointer returned shall point to the 
+start (lowest byte address) of the allocated space. If the space cannot 
+be allocated, a null pointer shall be returned.
+
+
+-- 
+Jonathan Gevaryahu AKA Lord Nightmare
+jgevaryahu at gmail.com
+jgevaryahu at hotmail.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150917/3ae728f5/attachment.html>
+

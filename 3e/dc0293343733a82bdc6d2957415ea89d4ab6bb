@@ -1,0 +1,175 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Wed, 25 Nov 2015 12:56:56 +0100
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <CAH1jEzY0WJ1HMgAJYuwWw8b0epi3Ev6mLp7eb230r3mbCcseMg@mail.gmail.com>
+References: <CAH1jEzYW9DBrSE0A=NnREq8qyq6vOQ6nWN6d-dwEa3mp1r20Gw@mail.gmail.com>
+ <26595.1448268040@cesium.clock.org> <5654FC2E.9010207@bitsavers.org>
+ <20151125111451.Horde.YYentpTkevlAUuLEIvnGxYQ@avocado.salatschuessel.net>
+ <CAH1jEzY2d-dVgjtLRKEQwTJcvAk000kAx7+T63QgMyfyKs0TbA@mail.gmail.com>
+ <CAH1jEzY0WJ1HMgAJYuwWw8b0epi3Ev6mLp7eb230r3mbCcseMg@mail.gmail.com>
+Message-ID: <20151125125656.Horde.Ig6s1CBXkowBNyqca0D4dGJ@avocado.salatschuessel.net>
+
+Hi Nick,
+
+why can't I just "reuse" my SYSIII linker which has all the support for
+segmented and unsegmented binaries what a.out does not support. The Zilog
+format is called s.out.
+
+I thought I could teach the BSD kernel how to execute s.out binaries
+(how to execute them is already there in my SYSIII sources) and I could
+just reuse the ld and sld (for segmented programms) from my SYSIII?
+
+Please check the header for all the magics currently supported.
+https://github.com/OlliL/P8000/blob/master/WEGA/src/head/s.out.h
+
+So why should I use the COFF assembler at all? I plan to do the development
+on my current SYSIII-System where I have all the toolchain available....
+
+I still don't see the need of an cross-compiler-environment while I have
+the real hardware there capable of compiling my code.... I would just go
+and fill up the BSD kernel with functionality, reboot the system, load the
+kernel and do that until it goes up and tries to mount rootfs. When
+this happens, I'll go and teach my boot0-loader UFS and start creating an
+UFS harddisk and put the kernel onto that. Until that point I could even
+test all my stuff on my SYSIII-Filesystem. And I guess it will be LOTS of
+time until I reach the step when the rootfs is being accessed.
+
+Oliver
+
+Nick Downing <downing.nick at gmail.com> wrote:
+
+> Oh yeah, the other thing i was going to say was you'd be well advised to
+> use the "ld" that comes with 2.11bsd, which generates a.out (a header of
+> about 16 bytes followed by the raw code and data segments), as well as its
+> somewhat primitive *.o file format (which is an a.out executable followed
+> by relocation and linkage tables, so *.o objects are actually executable if
+> they contain a main() function and no unresolved linkage).
+>
+> What you could do is create a small converter that changes your COFF or
+> whatever objects into the right format. Then everything will just work(tm).
+> The linker itself is a bit hard to modify IIRC, it's a split I/D executable
+> that basically constructs the output executable in its D address space so
+> memory is a bit tight and some tricks are used like doing separate passes
+> for code and data.
+>
+> Having said all that, I think in my case I took a simple Z80 assembler and
+> linker that were open sourced and not too horrible internally, and
+> understood Intel HEX records, and then I simply had the IAR compiler (a
+> commercial product) generate assembly and I didn't use the IAR assembler or
+> linker. Then I modified the linker to create a either an original style
+> (non split I/D) a.out executable or a special extended a.out executable
+> that was similar to split I/D except the instructions were in multiple
+> pages 4kbytes in size and the data was up to 56kbytes in size, so they
+> could share the 64kbyte logical address space (the first 4kbytes was
+> permanently mapped regardless of context switches and contained interrupt
+> and trap handlers).
+>
+> You probably won't need to go to the above extremes, but you could easily
+> modify my linker to create normal a.out executables with/without split I/D
+> if you're wanting to use HEX records as the input rather than 2.11bsd's *.o
+> files. Only thing is it's a cross linker, the code is quite simple but it
+> won't link big executables from a small address space the way 2.11bsd "ld"
+> would do.
+>
+> Nick
+> On 25/11/2015 10:26 PM, downing.nick at gmail.com wrote:
+>
+>> According to this:
+>>
+>> https://archive.org/stream/bitsavers_zilogz80000mmu_742400/z8010_mmu_djvu.txt
+>> You could use only segment 0 and program the code MMU to point segment 0
+>> to some physical address and the data and stack MMUs to point segment 0 to
+>> some other physical address and you have a split I/D system capable of
+>> running 2.11bsd assuming the compiler knows nothing of segments as you
+>> said. Or, as outlined in my previous posts you can use a compiler that has
+>> 23-bit pointers and understands how to output the high 7 bits as the
+>> segment and the low 16 bits as the logical address each time it
+>> dereferences a pointer (if such a compiler exists) and port 4.3bsd.
+>>
+>> Nick
+>> On 25/11/2015 9:15 PM, "Oliver Lehmann" <lehmann at ans-netz.de> wrote:
+>>
+>>>
+>>> Al Kossow <aek at bitsavers.org> wrote:
+>>>
+>>> On 11/23/15 12:40 AM, Erik E. Fair wrote:
+>>>>
+>>>>> The undergrads who used that system to learn Unix ported many
+>>>>> a BSD
+>>>>> utility to that system (at least the ones that weren't too RAM-hungry),
+>>>>> starting with BerkNet so we could move files around easily & have
+>>>>> E-mail.
+>>>>>
+>>>>>
+>>>>>
+>>>> That reminds me that you are going to run into utilities that use the
+>>>> overlaying ld that jumps through hoops to get large programs (vi) to run
+>>>> in a 16 bit address space.
+>>>>
+>>>
+>>> Good point. I was also thinking if 2.11 is realy the right choice to use
+>>> for porting. From what I understood:
+>>>
+>>> - The PDP11 can only access up to 64KB address space.
+>>> - 2.11 uses overlay to "show" and "hide" memory into this 64K address
+>>>   space.
+>>>
+>>> A Z8001 can address up to 128 segments of 64KB. Means, a single array can
+>>> only be up to 64KB, but you can have 8MB of memory per "section". My
+>>> system
+>>> has 3 MMUs while one is dedicated to the code section and one to the data
+>>> section. So my Code section can be max up to 8MB and my data section can
+>>> be
+>>> up to additional 8MB. Currently my system has up to 5.5MB of RAM (but can
+>>> be upgraded to 16MB easily)
+>>>
+>>> I was thinking if 4.3 BSD would be better to port as the whole overlay
+>>> logic
+>>> which is implemented in 2.11 could make 2.11 maybe to complex to port? I
+>>> mean, all this overlay logic would not be needed for the Z8001 and it
+>>> maybe
+>>> would not even work. (remember - I plan to use my existing SYSIII compiler
+>>> which knows nothing about overlaying!)
+>>>
+>>> What I understand for 4.3 BSD is, that it is meant to run on machines with
+>>> a memory configuration where the memory is adressable in "one block" which
+>>> is of course not true for the Z8001. But - the compiler/assembler handles
+>>> all this adressing for C code so why should it be imported on how the is
+>>> addressed internaly?
+>>>
+>>> Additionaly, my system has NO floating point support. The current SYSIII
+>>> uses a lengthy floating point emulation Assembler Source to "work around"
+>>> that:
+>>> https://github.com/OlliL/P8000/blob/master/WEGA/src/uts/conf/fpe.s
+>>>
+>>> I saw, that 2.11 also has some FPU-emulation. What about 4.3?
+>>>
+>>> Could 4.3 be a better choice? If so - which 4.3 should I use?
+>>>
+>>> In general - I'm looking for a good target OS. It should be not too
+>>> complex (-> "modern") but should provide a TCP/IP stack which is my
+>>> main motivation in porting at all.
+>>>
+>>>
+>>> I'll dig through my archives and see if there was a Z8000 version of pcc
+>>>> in the MIT compiler kit.
+>>>>
+>>>
+>>> That would be great - maybe you could also answer my private mail about
+>>> the Onyx C8002 I sent you some days ago ;)
+>>> The compilers for Z8000 I found so far where either able to address 64K
+>>> only, or where able to only generate COFF-format objects which I can't
+>>> link on my SYSIII...
+>>>
+>>>
+>>> Oliver
+>>> _______________________________________________
+>>> TUHS mailing list
+>>> TUHS at minnie.tuhs.org
+>>> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>>>
+>>
+
+
+
+

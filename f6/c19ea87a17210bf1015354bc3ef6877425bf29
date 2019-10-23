@@ -1,0 +1,108 @@
+From tuhs-bounces@minnie.tuhs.org Wed Aug 22 15:46:45 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ad44c517
+	for <ml@inbox.vuxu.org>;
+	Wed, 22 Aug 2018 15:46:44 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6056DA1B21; Thu, 23 Aug 2018 01:46:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DFEE0A1A94;
+	Thu, 23 Aug 2018 01:46:32 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0E119A1A94; Thu, 23 Aug 2018 01:46:32 +1000 (AEST)
+Received: from hacklheber.piermont.com (hacklheber.piermont.com [166.84.7.14])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AA929A1A89
+ for <tuhs@minnie.tuhs.org>; Thu, 23 Aug 2018 01:46:31 +1000 (AEST)
+Received: from snark.cb.piermont.com (localhost [127.0.0.1])
+ by hacklheber.piermont.com (Postfix) with ESMTP id 907AB281;
+ Wed, 22 Aug 2018 11:46:30 -0400 (EDT)
+Received: from jabberwock.cb.piermont.com (jabberwock.cb.piermont.com
+ [10.160.2.107])
+ by snark.cb.piermont.com (Postfix) with ESMTP id 6F4172DF61C;
+ Wed, 22 Aug 2018 11:46:30 -0400 (EDT)
+Date: Wed, 22 Aug 2018 11:46:30 -0400
+From: "Perry E. Metzger" <perry@piermont.com>
+To: Paul Winalski <paul.winalski@gmail.com>
+Message-ID: <20180822114630.31557ebe@jabberwock.cb.piermont.com>
+In-Reply-To: <CABH=_VRaKv-yn8VFXbxuUGN8=KeM-=_tNtBaoQGFQZsDesBjjA@mail.gmail.com>
+References: <88DDC574-96EA-4B3D-97A2-28157BF3B9D7@163.com>
+ <20180821213743.4931661.91186.9539@texoma.net>
+ <20180822094452.73ca043f@jabberwock.cb.piermont.com>
+ <CABH=_VRaKv-yn8VFXbxuUGN8=KeM-=_tNtBaoQGFQZsDesBjjA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] About Unix header files
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, 22 Aug 2018 11:29:40 -0400 Paul Winalski
+<paul.winalski@gmail.com> wrote:
+> On 8/22/18, Perry E. Metzger <perry@piermont.com> wrote:
+> >
+> > To my knowledge, object file formats still don't have information
+> > about type signatures, and linkers still don't care about types.
+> > This is actually a problem. It would probably prevent a lot of
+> > errors if those things changed.
+> 
+> For a linker to enforce (or warn about) type and call signature
+> matching, it would have to know the type and call semantics of each
+> particular language,
+
+Not necessarily. One could produce a language-independent way of
+signaling what the type signatures are (perhaps with normalized
+language-dependent strings) and the linker could just check that they
+match.
+
+I've seen several languages (like OCaml) hack around the lack of this
+by providing an auxiliary file for a pre-link phase to check off
+of. It would be nicer if the linker could just handle that.
+
+And, as I noted, this would doubtless prevent a _lot_ of bugs.
+
+One could simply decorate the symbols with a
+(language, semi-opaque "type string") pair, and the linker could just
+verify that they matched without understanding semantics.
+
+> Not impossible, but a difficult and cumbersome problem, particularly
+> as language and compiler implementation semantics vary over time.
+
+As I noted, there are ways to get around that.
+
+> C++ and other strongly-typed languages typically hack around the
+> problem using name decoration.  Not elegant, but effective.
+
+Name mangling for C++ is needed for another reason, too, which is that
+a single "name" foo might be multiple different concrete functions
+depending on what type it is invoked on.
+
+> Has anyone experimented with building Unix using C++, to take
+> advantage of strong typing?  My guess is no--it would be a Herculean
+> task likely to introduce more bugs than it would fix.
+
+C++ doesn't have strong typing in the modern sense. It also has some
+small incompatibilities with C's syntax and semantics, sufficient that
+you can't just (say) compile the Linux kernel with a C++ compiler and
+have it work.
+
+Perry
+-- 
+Perry E. Metzger		perry@piermont.com

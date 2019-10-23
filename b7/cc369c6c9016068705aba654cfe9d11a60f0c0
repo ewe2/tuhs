@@ -1,0 +1,35 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Fri, 29 Dec 2017 20:52:00 -0500
+Subject: [TUHS] origin of C header files
+In-Reply-To: <fd3b30a3c9531404ba67c9abcfcd2581ddc9aa2c@webmail.yaccman.com>
+References: <CAC20D2OEHZ8X4BUSaR9WgahawM81guaxzCFEzAvR5FeWyC9eXw@mail.gmail.com>
+ <fd3b30a3c9531404ba67c9abcfcd2581ddc9aa2c@webmail.yaccman.com>
+Message-ID: <CABH=_VTdaxXqsoi=YUAwChtY3=5HvPeoX4vxmpOmiTjkiYW0TQ@mail.gmail.com>
+
+On 12/29/17, Steve Johnson <scj at yaccman.com> wrote:
+> I begged Dennis for a solution, and he came up with #line,
+> which allowed you to say to the C compiler "treat the next line as if
+> it were line nnn in file fff, and following lines as successor lines
+> in file fff.  It instantly solved the problem, and was used multiple
+> times for various applications (probably most notably cfront).  So
+> far as I know, many languages including FORTRAN, Pascal and Python do
+> not have such a mechanism, making it awkward to use them as
+> preprocessor targets.
+
+Language processing systems where the preprocessor functionality is
+implemented as a part of the compiler itself never had the "associate
+the error message with the line in the original source" problem that
+you described.  The compiler could keep an internal table mapping the
+lexical output of the preprocessor to the source lines/files that went
+into the preprocessor phase.  Most (all?) of DEC's and IBM's compilers
+operate this way.
+
+In keeping with UNIX's philosophy of "one image/one purpose", C's
+preprocessor functionality was in a separate image from the compiler
+itself.  There are many advantages to this design, including that cpp
+can then be used for other languages than C.  But is has the
+disadvantage of introducing the source correlation problem that
+required the introduction of #line.
+
+-Paul W.
+

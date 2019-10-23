@@ -1,0 +1,93 @@
+From: spedraja@gmail.com (SPC)
+Date: Mon, 12 May 2014 19:20:48 +0200
+Subject: [TUHS] Work I've done with a PDP-11 simulator
+In-Reply-To: <20140512170617.32C2318C0DB@mercury.lcs.mit.edu>
+References: <20140512170617.32C2318C0DB@mercury.lcs.mit.edu>
+Message-ID: <CACytpF9EXy+prwSnz1tsSsiKG46cgQMRjhmvStNizMoXVDdE0Q@mail.gmail.com>
+
+Mmm... clearly a marginal case (derive it to another thread if you consider
+it opportune), but... I got one PDP-11/23-PLUS without any kind of disk (by
+now, I got one RL12 board plus one RL02 drive pending of cleaning and
+arrangement)... I guess if could be possible to run V6 in this machine.
+There's any kind of adaptation of this Unix version (or whatever) to run
+under ?
+
+Kind regards
+
+Saludos | Greetings | Freundliche Grüße | Salutations
+​
+-- 
+*Sergio Pedraja*
+-- 
+mobile: +34-699-996568
+twitter: @sergio_pedraja | skype: Sergio Pedraja
+--
+http://plus.google.com/u/0/101292256663392735405
+http://www.linkedin.com/in/sergiopedraja
+http://www.quora.com/Sergio-Pedraja
+http://spedraja.wordpress.com
+https://www.xing.com/profile/Sergio_Pedraja <http://spedraja.wordpress.com/>
+-----
+No crea todo lo que ve, ni crea que está viéndolo todo
+
+
+
+2014-05-12 19:06 GMT+02:00 Noel Chiappa <jnc at mercury.lcs.mit.edu>:
+
+>     > From: John Cowan <cowan at mercury.ccil.org>
+>
+>     > Well, provided the compiler is honest, contra [Ken].
+>
+> A thought on this:
+>
+> The C compiler actually produces assembler, which can be (fairly easily)
+> visually audited; yes, yes, I know about disassembly, but trust me, having
+> done some recently (the RL bootstrap(s)), disassembled code is a lot harder
+> to grok!
+>
+> So, really, to find the Thompson hack, we'd have to edit the binaries of
+> the
+> assembler!
+>
+> For real grins, we could write a program to convert .s format assembler to
+> .mac syntax, run the results through Macro-11, and link it with the other
+> linker... :-)
+>
+>
+> Also, I found on what's going on here:
+>
+>     > What was wierd was that in the new one, the routine csv is one word
+>     > shorter (and so is csv.o). So now I don't understand what made them
+> the
+>     > same sizes!? The new ones should have been one word shorter!? Still
+>     > poking into this...
+>
+> The C compiler is linked with the -n flag, which produces pure code. What
+> the linker documentation doesn't say (and I never realized this 'back in
+> the
+> day') is that when this option is used, it rounds up the size of the text
+> segment to the nearest click (0100).
+>
+> So, in c2 (which is what I was looking at), the last instruction is at
+> 015446, _etext is at 015450, but if you look at the executable header, it
+> lists a text size of 015500 - i.e. 030 more bytes. And indeed there are 014
+> words of '0' in the executable file before the data starts.
+>
+> And if you link c2 _without_ the -n flag, it shows 015450 in the header as
+> the text size.
+>
+> So that's why the two versions of all the C compiler phases were the same
+> size (as files); it rounded up to the same place in both, hiding the
+> one-word
+> difference in text size.
+>
+>         Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140512/67af16d1/attachment.html>
+

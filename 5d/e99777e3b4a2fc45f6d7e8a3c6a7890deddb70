@@ -1,0 +1,88 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Fri, 9 Sep 2016 10:07:20 -0700
+Subject: [TUHS] Comments on "C"
+In-Reply-To: <201609081235.u88CZS8W017103@coolidge.cs.Dartmouth.EDU>
+References: <201609081235.u88CZS8W017103@coolidge.cs.Dartmouth.EDU>
+Message-ID: <a0ac163678cfeb29cb52935e1f703218.squirrel@webmail.yaccman.com>
+
+Well, I have a list too -- unfortunately, I had a hand in a couple of
+these...
+
+The first is the syntax for casts.  When we were porting Unix from the
+PDP-11 to the Interdata (32-bits) we discovered we needed casts badly, but
+all of the proposals for syntax sucked.  Since the C grammar was in Yacc
+by then, I played around with various ideas, and hit on the "simple"
+notion that you just can make a declaration and remove the variable, and
+voila, you had something that was unambiguous and, in simple cases, rather
+nice -- (int), (int *).  Unfortunately, the sometimes awkward syntax for
+declarations got all of its grottiness magnified when condensed into a
+cast.  It turned out to be one of those things that was easy to write and
+impossible to read.  That said, I'm not a great fan of
+static_cast<xxx>(yyy) either...
+
+Another issue is bit fields.  The question is how to lay out the bit
+fields in a word -- if you say
+
+union {
+    short ss;
+    struct {
+        int sgn:1;
+        int man:15;
+    }
+};
+
+does sgn refer to the sign bit of ss or the low-order bit?  The answer in
+PCC was that it depended on whether the machine was big-endian or
+little-endian...    (remember big-endian machines?).
+
+On the one hand, we had little choice, because we wanted int a:8 to act
+like char a in a structure.  But the problem was, it made it difficult to
+design things, like network protocols, that might communicate between
+machines with different byte orders.  Machines like the MIPS, that could
+do a sex change with the press of a button, were particularly painful...
+
+With respect to the I/O library, indeed the decision to keep I/O out of
+the language was the correct one, especially because I/O in those days
+meant tape drives, line printers and punched cards for most machines.  But
+the basic library was already there in B, and I believe was lifted, at
+least in part, from BCPL.
+
+It tends to be forgotten, but one of the most innovative things in Unix
+was the conception of files as arrays of bytes that, because of their
+simplicity, could be created almost as afterthoughts.  The mainframes of
+the day, and even the time sharing systems built on them, treated file
+creation as a big deal.  In the Honeywell time sharing system, you created
+files by entering a file-creation subsystem, where you were interactively
+asked 10 questions, including the device name, initial size, maximum size,
+record size, blocking factor (don't ask!) and who was allowed to write the
+file and who was not allowed to read it.  After answering these questions,
+the subsystem begged the OS to create a file -- much of the time, it was
+allergic to one of the answers, and required you to go through all the
+questions again.  If you got through the process unscathed, the system
+printed out "Successful!"
+(yes, the exclamation point was there).
+
+I remember in early days showing someone Unix and typing
+    echo hello >foo
+and showing them that foo was now a file.  The usual response was a gasp
+and a dropped jaw, followed by confusion...
+
+Steve
+
+
+
+
+
+
+
+
+
+
+
+
+>> After about 30 years of C, there are only three things I would
+> have liked to see:
+>
+
+
+

@@ -1,0 +1,60 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Fri, 1 Dec 2017 11:11:56 -0500
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+Message-ID: <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+
+Right... that's one of the reasons we created AST's and tried to get them
+in the POSIX spec and an alternative to signals.  Instead of trying to
+'fix' them, we decided to  inject a new scheme with better semantics (like
+being queued, prioritized, guaranteed to be delivered).  They were *.4 for
+a while and got replaced with sigqueue which sort helps but does not solve
+the issues.
+
+I'm always torn, do you add a new interface and risk bloat, or try to
+extend the old.   We never did it in RTU, but talked about it for Stellix
+(and never did it there either), but we toyed with making AST's the kernel
+primitive and then trying to build signals from them in a user space
+library -> which at the time, we thought you can do.  Although there are
+some strange side effects of signals that you would have really think
+through.   They have been extended again with POSIX and SVR4 so I'm not so
+sure,
+
+It's hard because if I/O (like DMA) is in progress, what are the proper
+semantics to exit/roll back?   When do you stop the transfer and what
+happens.   When doing direct to/from disk (like a in a real-time system),
+this can get tricky.
+
+Traditional UNIX semantics were that when a DMA was started, the process is
+blocked at high priority until the I/O completes.   Which is fine in the
+standard case, but begs the question of what happens when things go south.
+signals match an easy implementation of the V6 kernel.    BSD did try to
+fix them a little, but we all know that caused as many issues as it solved.
+
+Clem
+
+On Fri, Dec 1, 2017 at 10:53 AM, Dan Cross <crossd at gmail.com> wrote:
+
+> On Fri, Dec 1, 2017 at 10:44 AM, Larry McVoy <lm at mcvoy.com> wrote:
+>
+>> Does anyone remember the reason that processes blocked in I/O don't catch
+>> signals?  When did that become a thing, was that part of the original
+>> design or did that happen in BSD?
+>>
+>> I'm asking because I'm banging on FreeBSD and I can wedge it hard, to
+>> the point that it won't recover, by just beating on tons of memory.
+>
+>
+> My understanding was that signal delivery only happens when the process is
+> *running* in the kernel. If the process is sleeping on IO then it's not
+> running, so the signal isn't delivered.
+>
+>         - Dan C.
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171201/7cf1a165/attachment.html>
+

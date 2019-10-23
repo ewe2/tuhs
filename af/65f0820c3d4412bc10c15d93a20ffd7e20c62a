@@ -1,0 +1,306 @@
+From: wkt@henry.cs.adfa.edu.au (Warren Toomey)
+Date: Thu, 18 Feb 1999 09:25:47 +1100 (EST)
+Subject: Pro/Venix
+In-Reply-To: <36CA5B0D.8A2B2629@halcyon.com> from "David C. Jenner" at "Feb 16, 1999 10: 0:45 pm"
+Message-ID: <199902172225.JAA16961@henry.cs.adfa.edu.au>
+
+In article by David C. Jenner:
+> It seems to me that Pro/Venix is a potential candidate for the PUPS
+> archive, the snag being DEC/Compaq residual interests in it.  PUPS
+> covers the AT&T part, VenturCom has "given away" their part, and
+> DEC/Compaq is all that's left.
+> 
+> So:
+> 	1) Could this be a PUPS addition, if a good copy be found?
+> 	2) If someone has a copy, but worries about the DEC/Compaq
+> 	   aspects, can a good copy of the disks I have be acquired?
+> 	   (Anyone in this category might want to respond directly
+> 	    to me instead of posting to the mailing lists.)  After
+> 	   all a PUPS licensee is 99.999% covered, and DEC/Compaq
+> 	   objections are probably to worry about the AT&T part,
+> 	   which the Ancient Unix license covers...
+> 
+> Dave
+
+If we could get DEC/Compaq to allow access to Pro/Venix by UNIX source
+license holders, then yes I would certainly add it to the Archive. If
+there's no source code, and SCO are happy, then it could go up for anon ftp.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id KAA14692
+	for pups-liszt; Thu, 18 Feb 1999 10:21:58 +1100 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id KAA14687
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 18 Feb 1999 10:21:50 +1100 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.1/8.9.1) id KAA18103
+	for pups at minnie.cs.adfa.edu.au; Thu, 18 Feb 1999 10:23:55 +1100 (EST)
+	(envelope-from wkt)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id KAA14652
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 18 Feb 1999 10:16:35 +1100 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.1/8.9.1) id KAA18083
+	for pups at minnie.cs.adfa.oz.au; Thu, 18 Feb 1999 10:18:40 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <199902172318.KAA18083 at henry.cs.adfa.edu.au>
+Subject: Help with regs on Pro serial ports
+To: pups at minnie.cs.adfa.oz.au (Unix Heritage Society)
+Date: Thu, 18 Feb 1999 10:18:40 +1100 (EST)
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I'm trying to help get the kernel for the version of 2.9BSD ported to the
+Pro-350. The patches supplied by Rick Macklem are slightly incomplete, e.g
+there is no config shell script which knows about the new device drivers etc.
+
+Anyway, one vital missing file is pcreg.h, which holds the structure
+describing the registers of the serial ports on the Pro-350. By perusing
+the file dev/pc.c, I've worked out that the struct looks something like:
+
+
+struct pcdevice {
+	??? baud;
+	??? cdb;
+	??? csa;
+	??? csb;
+	??? csr;
+	??? dbuf;
+	??? mc0;
+	??? mc1;
+	??? mode;
+	??? stat;
+}
+
+where the fields are not in the correct order, and I have no idea what
+C type each is. If anybody can help recreate this file, could they
+email me?!
+
+I've included below the C comments at the top of dev/pc.c.
+
+If anybody has Rick Macklem's email address, could they pass that on too?
+I will email him and see if he's got a more complete set of patches somewhere.
+
+Many thanks in advance,
+
+	Warren
+
+/*
+ * This driver handles the two serial ports on the back of the
+ * pro3xx system unit. Although not software compatible, they
+ * are handled as minor device 0 & 1 respectively, for the printer
+ * and communication port. Modem control is included but no sync
+ * serial support for the com. port.
+ * NOTE: The DSR line in the printer port is used for carrier
+ * detect so terminals or modems should be cabled accordingly.
+ * Local terminal cables should jumper DTR-CDT so that the carrier
+ * will appear to be up or PC_SOFTCAR defined and devs or'd with 0200.
+ * NOTE2: The interrupt service routines are as follows:
+ *      plrint - printer port receive
+ *      plxint - printer port transmit
+ *      cmintr - communication port com. interrupt
+ * Modem transition interrupts are NOT used.
+ */
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id LAA15025
+	for pups-liszt; Thu, 18 Feb 1999 11:31:53 +1100 (EST)
+Received: from europe.std.com (europe.std.com [199.172.62.20])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id LAA15018
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 18 Feb 1999 11:31:38 +1100 (EST)
+Received: from world.std.com by europe.std.com (STD1.2/BZS-8-1.0)
+	id TAA08265; Wed, 17 Feb 1999 19:31:29 -0500 (EST)
+Received: by world.std.com (TheWorld/Spike-2.0)
+	id AA13175; Wed, 17 Feb 1999 19:31:29 -0500
+Date: Wed, 17 Feb 1999 19:31:29 -0500
+From: allisonp@world.std.com (Allison J Parent)
+Message-Id: <199902180031.AA13175 at world.std.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.9BSD:  mbuf.h
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+<Venix/Pro is freely available on the Internet at ftp.update.uu.se,
+<but Pro/Venix seems to be a little harder to find.  Pro/Venix is
+<much to be preferred because you can reconfigure the kernel (in
+<binary) to include different drivers, etc.
+
+The UU.SE and gatway.dec.com version of it I ahve running on my PRO-350
+for the last year or more.
+
+I'd like to have SLIP/PPP running on it or even be able to tweek it.
+
+<	1) Could this be a PUPS addition, if a good copy be found?
+
+Oh hand I'd say yes.  
+
+Allison
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id LAA15035
+	for pups-liszt; Thu, 18 Feb 1999 11:32:11 +1100 (EST)
+Received: from europe.std.com (europe.std.com [199.172.62.20])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id LAA15024
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 18 Feb 1999 11:31:45 +1100 (EST)
+Received: from world.std.com by europe.std.com (STD1.2/BZS-8-1.0)
+	id TAA08273; Wed, 17 Feb 1999 19:31:41 -0500 (EST)
+Received: by world.std.com (TheWorld/Spike-2.0)
+	id AA13305; Wed, 17 Feb 1999 19:31:41 -0500
+Date: Wed, 17 Feb 1999 19:31:41 -0500
+From: allisonp@world.std.com (Allison J Parent)
+Message-Id: <199902180031.AA13305 at world.std.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.11BSD, non-split i/d issues
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+<As already mentioned in previous messages, I'm working on getting
+<2.9BSD onto a Pro 350.  I'm using 2.9BSD as a starting point because
+<it claims to support machines without split i/d.  The 350 uses the
+<F-11 chipset, which I have read does not support split i/d.
+
+The F11 does not do I&D split but does have user/system.  
+
+<I would prefer to use 2.11BSD because I understand it's still actively
+<used, and not as buggy as 2.9.  But everything I've read about 2.11BSD
+<says that it needs split i/d to run.  Can anyone give me more detail
+<about this?  Was support for machines without split i/d removed from
+<the kernel, or is it just that some of the programs are too big to fit
+<in a single 64k segment?
+
+It's my understanding that 2.11 will run on F11 systems (pro350 and 11/23)
+if properly configured but the only binaries loose are for split I&D.
+So if properly configured you can get 2.11 to utilize the user/system
+spaces.
+
+Allison
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id MAA15404
+	for pups-liszt; Thu, 18 Feb 1999 12:32:52 +1100 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id MAA15399
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 18 Feb 1999 12:32:38 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id RAA05895
+	for pups at minnie.cs.adfa.oz.au; Wed, 17 Feb 1999 17:25:53 -0800 (PST)
+Date: Wed, 17 Feb 1999 17:25:53 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199902180125.RAA05895 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.11BSD, non-split i/d issues
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: allisonp at world.std.com (Allison J Parent)
+> The F11 does not do I&D split but does have user/system.  
+
+	Correct.  Some systems also have an 18bit only MMU which restricts
+	memory to 248kb max (others have a 22bit MMU and can physically
+	have more memory).
+
+> It's my understanding that 2.11 will run on F11 systems (pro350 and 11/23)
+> if properly configured but the only binaries loose are for split I&D.
+
+	Not likely.  The kernel won't fit in 48kb that I know of.  And there
+	will be no networking support since that requires supervisor mode
+	which non-split I/D systems don't have.
+
+> So if properly configured you can get 2.11 to utilize the user/system spaces.
+
+	The skeleton of a Makefile for non-split a kernel exists but it 
+	will take much work (it is essentially just a list of file that may
+	or may not be 100% current) to kick into shape.  Also, remember that
+	programs like 'csh', 'vi' and so on are not only split I/D but 
+	overlaid - they will not run on a non-split machine. 
+
+	Steven Schultz
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id MAA15443
+	for pups-liszt; Thu, 18 Feb 1999 12:44:04 +1100 (EST)
+Received: from math.uwaterloo.ca (kcwellsc at math.uwaterloo.ca [129.97.216.42])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id MAA15438
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 18 Feb 1999 12:43:48 +1100 (EST)
+Received: (from kcwellsc at localhost)
+	by math.uwaterloo.ca (8.8.8/8.8.8) id UAA01509;
+	Wed, 17 Feb 1999 20:43:28 -0500 (EST)
+From: Ken Wellsch <kcwellsc@math.uwaterloo.ca>
+Message-Id: <199902180143.UAA01509 at math.uwaterloo.ca>
+Subject: Re: Venix (was Re: 2.9BSD:  mbuf.h)
+To: djenner at halcyon.com
+Date: Wed, 17 Feb 1999 20:43:27 -0500 (EST)
+Cc: entropy at zippy.bernstein.com, pups at minnie.cs.adfa.oz.au
+In-Reply-To: <36CAEA1F.D5D7C838 at halcyon.com> from "David C. Jenner" at Feb 17, 99 08:11:12 am
+Organization: University of Waterloo, Math Faculty Computing Facility (Alumni)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+| I don't have any docs on the DECNA, but they must exist.  It's
+| probably pretty close to the DEQNA.
+
+The DECNA uses one of the earlier Intel network chips.  It lives
+on the CTI bus, a bus like no other.  I believe the DEQNA is T-11
+based and lives on the vastly better known Q-bus...  -- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id FAA18371
+	for pups-liszt; Fri, 19 Feb 1999 05:47:10 +1100 (EST)
+Received: from math.uwaterloo.ca (kcwellsc at math.uwaterloo.ca [129.97.216.42])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id FAA18366
+	for <pups at minnie.cs.adfa.oz.au>; Fri, 19 Feb 1999 05:46:55 +1100 (EST)
+Received: (from kcwellsc at localhost)
+	by math.uwaterloo.ca (8.8.8/8.8.8) id NAA05766;
+	Thu, 18 Feb 1999 13:46:36 -0500 (EST)
+From: Ken Wellsch <kcwellsc@math.uwaterloo.ca>
+Message-Id: <199902181846.NAA05766 at math.uwaterloo.ca>
+Subject: Re: Venix (was Re: 2.9BSD:  mbuf.h)
+To: simul8 at simul8.demon.co.uk (James Lothian)
+Date: Thu, 18 Feb 1999 13:46:35 -0500 (EST)
+Cc: pups at minnie.cs.adfa.oz.au
+In-Reply-To: <01BE5B64.56247680 at SONAR> from "James Lothian" at Feb 18, 99 01:14:51 pm
+Organization: University of Waterloo, Math Faculty Computing Facility (Alumni)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I'm going to give up as I seem to remember nothing anymore... sigh.
+Allison also sent e-mail saying the DEQNA is not T-11 based.  I guess
+I'm thinking of an RQDX3.  I've had no place to unpack my old iron in
+over three years and certainly miss being able to pick up the part in
+question before foaming at the mouth spouting nonsense. Many apologies
+for suggesting such major inaccuracies.  -- Ken
+
+P.S.  Allison describe the DEQNA as a state-driven device with PALs
+      (I think) and that "big F" may the the gate array also mentioned.
+
+| From simul8 at simul8.demon.co.uk  Thu Feb 18 12:27:23 1999
+| 
+| Just for the sake of being picky... the DEQNA is based on an Intel 
+| microcontroller chip (something 8085-ish, I think). The ethernet chipset
+| seems to be Fairchild (it's certainly got a big F on it.)
+| 
+| James
+
+

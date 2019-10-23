@@ -1,0 +1,176 @@
+From: sms@moe.2bsd.com (Steven M. Schultz)
+Date: Mon, 21 Dec 1998 13:59:57 -0800 (PST)
+Subject: Problems booting 2.11 on a 11/84
+Message-ID: <199812212159.NAA07290@moe.2bsd.com>
+
+Hi -
+
+> From: Rick Copeland <rickgc at calweb.com>
+> I have connected a Fujisu M2444 9 track to an Emulex TC13 that is in my
+> 11/84. The following is what happens when I try to boot a BSD 2.11 tape
+> that I made on my uVax3600/TU81+ (@6250 bpi):
+
+	What CSR do you have the TC13 set for?
+
+> 	Enter device name and unit number then press the RETURN key: MS0
+> 	Trying MS0	(tape starts rolling)
+> 
+> 	Starting ROM boot  
+> 
+> 	140276		(tape stops)
+> 	@
+
+	The Boot ROM did it's job of reading in the 512 byte boot record and
+	transferring control to location 0.
+
+	The bootblock relocates itself to 48kb which is 0140000.
+
+> cables on the M2444 the LED on the TC13 comes on and the M2444 will not do
+> anything.
+
+	I don't think the problem is cabling in this case.  
+
+	If you have another system that you can view the sources with the
+	file you really need to have in front of you at this time is
+	/usr/src/sys/pdpstand/mtboot.s
+
+	The section of code where the system is halting (with added octal 
+	offsets) is:
+
+0262		bne	ctlerr
+0264		bit	$!1000,hter(csr)	/ any drive errs except HTER_FCE
+0272		beq	bumpaddr		/ no, go bump address
+	ctlerr:
+0274		halt
+
+	The label 'ctlerr' is shared but it indicates that a controller
+	error was encountered out of the 'tmtscom' common logic (shared between
+	the MT and MS drivers):
+
+tmtscom:
+	bit	$100200,(csr)		/ error or ready?
+	beq	tmtscom			/ neither, keep looking
+	bmi	ctlerr			/ error - go halt
+
+
+	The thing to try is when the system halts looking at the registers
+	(R0 thru R5) _and_ the tape controller registers (starting at 0172520).
+
+	It's also possible to look at the command buffer being presented to
+	the controller by looking at offset 0460 (0140460).  Not sure how useful
+	that will be though.
+
+	It might be possible to single step the processor starting at location
+	0 as long as R0 and R1 are set up correctly (R0 has the unit number
+	and R1 the control register address which is 172522 for MS and MT
+	devices).
+
+	Steven
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id JAA16654
+	for pups-liszt; Tue, 22 Dec 1998 09:18:17 +1100 (EST)
+Received: from carp.gbr.epa.gov (carp.gbr.epa.gov [204.46.159.110])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id JAA16649
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 22 Dec 1998 09:18:08 +1100 (EST)
+Received: (from mjenkins at localhost)
+	by carp.gbr.epa.gov (8.8.8/8.8.8) id QAA15443
+	for pups at minnie.cs.adfa.oz.au; Mon, 21 Dec 1998 16:17:50 -0600 (CST)
+	(envelope-from mjenkins)
+Date: Mon, 21 Dec 1998 16:17:50 -0600 (CST)
+From: Mike Jenkins <mjenkins@carp.gbr.epa.gov>
+Message-Id: <199812212217.QAA15443 at carp.gbr.epa.gov>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: Unix History Diagram
+In-Reply-To: <199812142344.KAA05594 at henry.cs.adfa.oz.au>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+There is a diagram at The Internet Operating System Counter which is at
+http://www.hzo.cubenet.de/ioscount/.  Take the "Unix networking" link.
+It was published in iX, a German magazine.
+
+Mike
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id NAA17356
+	for pups-liszt; Tue, 22 Dec 1998 13:44:57 +1100 (EST)
+Received: from allegro.lemis.com (allegro.lemis.com [192.109.197.134])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id NAA17348
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 22 Dec 1998 13:44:47 +1100 (EST)
+Received: from freebie.lemis.com (freebie.lemis.com [192.109.197.137])
+	by allegro.lemis.com (8.9.1/8.9.0) with ESMTP id NAA01429;
+	Tue, 22 Dec 1998 13:14:15 +1030 (CST)
+Received: (from grog at localhost)
+	by freebie.lemis.com (8.9.1/8.9.0) id NAA08618;
+	Tue, 22 Dec 1998 13:14:16 +1030 (CST)
+Message-ID: <19981222131415.A85005 at freebie.lemis.com>
+Date: Tue, 22 Dec 1998 13:14:15 +1030
+From: Greg Lehey <grog@lemis.com>
+To: Mike Jenkins <mjenkins at carp.gbr.epa.gov>, pups at minnie.cs.adfa.oz.au
+Subject: Re: Unix History Diagram
+References: <199812142344.KAA05594 at henry.cs.adfa.oz.au> <199812212217.QAA15443 at carp.gbr.epa.gov>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 0.91.1i
+In-Reply-To: <199812212217.QAA15443 at carp.gbr.epa.gov>; from Mike Jenkins on Mon, Dec 21, 1998 at 04:17:50PM -0600
+WWW-Home-Page: http://www.lemis.com/~grog
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Monday, 21 December 1998 at 16:17:50 -0600, Mike Jenkins wrote:
+> There is a diagram at The Internet Operating System Counter which is at
+> http://www.hzo.cubenet.de/ioscount/.  Take the "Unix networking" link.
+> It was published in iX, a German magazine.
+
+As I feared when I heard it came from iX, it's *very* inaccurate.
+For example, it claims that 1BSD was derived from 32/V (should have
+been 3BSD), derives 1BSD from 1BSD and 4.1BSD (should be 4BSD) from
+the second 1BSD (should be 3BSD), derives ``BSDI'' from 4.3BSD, when
+in fact BSD/OS is derived from 4.4BSD, doesn't mention System V(.1) or
+System V.3, etc.  And all this is OS code, not networking code.
+
+Greg
+--
+See complete headers for address, home page and phone numbers
+finger grog at lemis.com for PGP public key
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA21472
+	for pups-liszt; Wed, 23 Dec 1998 06:06:48 +1100 (EST)
+Received: from mail.calweb.com (mail.calweb.com [208.131.56.12])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id GAA21466
+	for <pups at minnie.cs.adfa.oz.au>; Wed, 23 Dec 1998 06:06:34 +1100 (EST)
+Received:  by mail.calweb.com (8.8.6/8.8.6) with SMTP id LAA20458
+	for <pups at minnie.cs.adfa.oz.au>; Tue, 22 Dec 1998 11:06:23 -0800 (PST)
+X-SMTP: helo rgc from rickgc at calweb.com server @12.22.0.83 ip 12.22.0.83
+Message-Id: <3.0.32.19981222111606.008f4450 at pop.calweb.com>
+X-Sender: rickgc at pop.calweb.com
+X-Mailer: Windows Eudora Pro Version 3.0 (32)
+Date: Tue, 22 Dec 1998 11:16:49 -0800
+To: pups at minnie.cs.adfa.oz.au (Unix Heritage Society)
+From: Rick Copeland <rickgc@calweb.com>
+Subject: Emulex TU13 Dip Switch Layout?
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Dear PUPS List, 
+
+I have an Emulex TU13 tape drive interface.  Does anyone on the list have
+the dip switch layout so that I can program them properly?
+
+Thank You,
+
+Merry Christmas,
+
+Rick Copeland
+
+
+
+

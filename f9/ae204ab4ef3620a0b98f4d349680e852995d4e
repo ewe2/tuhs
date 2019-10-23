@@ -1,0 +1,253 @@
+From: tytso@mit.edu (Theodore Ts'o)
+Date: Sun, 14 May 2017 00:30:24 -0400
+Subject: [TUHS] The evolution of Unix facilities and architecture
+In-Reply-To: <20170511222547.GJ4341@mcvoy.com>
+References: <20170511140729.2262B18C09A@mercury.lcs.mit.edu>
+ <CAC20D2MDG0Mc3jJcbvZYXCo_FZcswt_no=3ajqvx45r-q9gKow@mail.gmail.com>
+ <CANCZdfrbxzkMesjPPX3A0qcHL-Hz_g+k1F2PtBicOkZv3JB5Cw@mail.gmail.com>
+ <CAC20D2Ndb54AqUx=qn48Rkc37b7pr9rwEVs+m+Aq1zR6ALjw6w@mail.gmail.com>
+ <013b01d2ca96$6901b370$3b051a50$@ronnatalie.com>
+ <20170511222547.GJ4341@mcvoy.com>
+Message-ID: <20170514043024.pezg5eqslpcqsd5m@thunk.org>
+
+On Thu, May 11, 2017 at 03:25:47PM -0700, Larry McVoy wrote:
+> This is one place where I think Linux kicked Unix's ass.  And I am not
+> really sure how they did it, I have an idea but am not positive.  Unix
+> file systems up through UFS as shipped by Sun, were all vulnerable to
+> what I call the power out test.  Untar some big tarball and power off
+> the machine in the middle of it.  Reboot.  Hilarity ensues (not).
+> 
+> You were dropped into some stand alone shell after fsck threw up its
+> hands and it was up to you to fix it.  Dozens and dozens of errors.
+> It was almost always faster to go to backups because figuring that 
+> stuff out, file by file (which I have done more than once), gets you
+> to the point that your run "fsck -y" and go poke at lost+found when
+> fsck is done, realize that there is no hope, and reach for backups.
+> 
+> Try the same thing with Linux.  The file system will come back, starting
+> with, I believe, ext2.
+> 
+> My belief is that Linux orders writes such that while you may lose data
+> (as in, a process created a file, the OS said it was OK, but that file 
+> will not be in the file system after a crash), but the rest of the file 
+> system will be consistent.  I think it's as if you powered off the
+> machine a few seconds earlier than you actually did, some stuff is in
+> flight and until they can write stuff out in the proper order you may
+> lose data on a hard reset.
+
+So the story is a bit complicated here, and may be an example of
+"worse is better" --- which is ironically one of those things which is
+used as an explanation for why BSD/Unix won ever though the Lisp was
+technically superior[1] --- but in this case, it's Linux that did
+something "dirty", and BSD that did something that was supposed to be
+the "better" solution.
+
+[1] https://www.jwz.org/doc/worse-is-better.html
+
+So first let's talk about ext2 (which indeed, does not have file
+system journalling; that came in ext3).  The BSD Fast File System goes
+to a huge amount of effort to make sure that writes are sent to the
+disk in exactly the right order so that fsck can actually fix things.
+This requires that the disk not reorder writes (e.g., write caching is
+disabled or in write-through mode).  Linux, in ext2, didn't bother
+with trying to get the write order correct at all.  None.  Nada.  Zip.
+Writes would go out in whatever order dictated by the elevator
+scheduler, and so on a power failure or a kernel crash, the order in
+which metadata writes would be sent to the disk was completely
+unconstrained.
+
+Sounds horrible, right?  In many ways, it was.  And I lost count of
+how often NetBSD and FreeBSD users would talk about how primitive and
+horrible ext2 was in comparison to FFS, which had all of this
+excellent engineering work to make sure writes happened in the correct
+order such that fsck was guaranteed to always be able to fix things.
+
+So why did Linux get away with it?  When I wrote the fsck for ext2, I
+knew that anything can and would happen, so it was implemented so that
+it was extremely paranoid about not ever losing any data.  And if
+there was a chance that an expert could recover the data, e2fsck would
+stop and ask the system administrator to take a look.  In the case
+that the user ran with fsck -y, the default was drop files into
+lost+found, where as in some cases with the FFS fsck, it "knew" that
+in a particular case, the order in which writes were staged out the
+right thing to do was to let the unlink complete, so it would let the
+refcount go to zero, or stay at zero.
+
+The other thing that we did in Linux is that I made sure we had a
+highly functional "debugfs" tool.  This tool served two purposes.  The
+first was it made it very easy for me to creat a regression test suite
+for fsck.  As far as I know, none of the other major file systems at
+the time had an fsck with a regression test suite --- and I was
+religious about adding tests as I added functionality, and as I fixed
+bugs.  The debugfs tool made it easy for me to create test case file
+systems that was corrupted in various interesting ways.  The other use
+of debugfs was that it made it easy for experts to do file system
+recovery after a crash, if there was some really precious file that
+they needed to try to recover.
+
+So this is why this is a great example of "worse is better".  In Linux,
+ext2 was ***incredibly*** sloppy about how it handled write ordering
+--- it didn't do anything at all.  But as a consequence we developed
+tools that were extremely good to compensate, and in practice, it was
+extremely rare (although it did happen on occasion) that files would
+get lost or the file systme could end up in a state where fsck would
+not be able to recover without manual intervention by a system
+administrator using debugfs.
+
+But the other thing to note here is that in the PC era, most disk
+drives ran with write caching enabled, with writeback caching so that
+the hard drive could do its own elevator shceduling.  So having a file
+system that very carefully scheduled writes to make sure they happened
+in the write order didn't help you a *bit* unless you configured your
+hard drive to disable writeback caching --- at which point you would
+take a massive speed hit.
+
+This is ultimately also one weaknesses of Soft Updates --- it requires
+that you disable writeback caching, since it works by letting the OS
+control the order in which writes hit stable storage.  With
+journalling you don't have to do that; but the tradeoff is that when
+you do a journal commit, you need typically two cache flush
+operations.  (Or a cache flush followed by a FUA write of the commit
+block, if the disk supports FUA.)
+
+
+
+There is another example of how Linux embraced the "worse is better"
+philosophy in ext3, and that has to do with how we do journalling.
+The sophisticated way to do journalling is to do logical journalling.
+This is where what you write in the in journal is "set bit XXX in the
+allocation bitmap", or "update the mtime to YYYY".  And in this way,
+you can batch multiple file system operations into a single block
+written to the journal.  Solaris/UFS and Irix uses this much more
+sophisticated form of journalling.  (Actually, older versions of
+Solaris did use volume-level journalling, which is basically what
+ext3/ext4 uses, but they upgraded to the much more "right", more
+advanced thing, which is logical journalling.)
+
+Ext3 uses phyiscal, or volume-level journalling.  This journalling
+works on the block level --- so if we flip a bit in an allocation
+bitmap, we log the entire 4k block to the journal.  By default, we
+only do a journal commit every five seconds (unless an fsync happens
+first), so there could be multiple changes to a single inode table
+blocks that can be batched together, but it's still true that for a
+given metadata-heavy workload, a file system which uses logical
+journalling will tend require many fewer blocks written to the journal
+than a file system such as ext3/ext4 which uses physical block
+journalling.
+
+Why did Linux get away with it?  Number one, most workloads aren't
+really modify metadata all _that_ intensively, and 12k of sequential
+writes versus 32k of sequential writes doesn't actually take that much
+more time.  Secondly, Ted's law of PC-class hardware ("most PC-class
+hardware is crap") comes into play, and turns physical journalling
+into an advantage.  PC class hardware tends not to have power fail
+interrupts, and when power drops, and the voltage levels on the power
+rails start drooping, DRAM tends to go insane and starts returning
+garbage long before the DMA engine and the hard drive stops
+functioning.
+
+So if your system is doing logical journalling, after the file system
+commits a transaction, it will start writing the inode table block to
+the permanent location on disk.  If at that point you get a power
+drop, garbage can get written to the inode table block, and if the
+file system is using logical journalling, on reboot the mtime field
+can get updated from the logical journal --- but the rest of the inode
+table block is still garbage.
+
+In contrast, since ext3 was using physical block journalling, even if
+various metadata blocks get corrupted due to writes from failing DRAM
+during a power drop, when we replay the journal, this will restore the
+entire metadata block, and Things Just Worse.
+
+I have talked to an XFS engineer from SGI, and this was definitely a
+thing which SGI discovered the hard way.  After they discovered this
+problem, they added extra capacitors to the power supply, added a
+power fail interrupt, and taught Irix so that when the power fail
+interrupt was triggered, it would frantically cancel DMA transfers in
+order to avoid this problem.  I do not know how many of the other
+Legacy Unix systems figured out this failure mode --- and I can't
+claim that we were brilliant enough to design a system to avoid this
+problem.  It just so happened that the brute-force design that we
+chose was very well suited for crappy (but way cheaper than a Sun Fire
+E10k :-) PC-class hardware.
+
+> I copied Ted, who had his fingers deep in that code, maybe he can correct
+> me where I got it wrong.  Details aside, I think this is a place where
+> Linux moved the state of the art significantly forward.  There are other
+> places but this one is a big deal IMHO, maybe the biggest deal.
+
+So I'm not really sure we can claim to have "moved the state of the
+art".  There certainly wasn't any brilliant computer science
+innovations here.  That sort of thing is more like Soft Updates, of
+which Valerie Aurora (formerly Henson) once wrote,
+
+   "I've read this paper at least 15 times, and each time I when get
+   to page 7, I'm feeling pretty good and thinking, "Yeah, okay, I
+   must be smarter now than the last time I read this because I'm
+   getting it this time," - and then I turn to page 8 and my head
+   explodes." --- https://lwn.net/Articles/339337/
+
+I will be the first to admit that with ext2/ext3/ext4, especially in
+the early days, it was much more about brute force engineering, and
+regression testing, and much less about "moving the state of the art".
+Certainly those of us who were working on Linux weren't trying to get
+papers published in peer reviewed journals or conferences!  (And I've
+always thought that Greg Ganger was _way_ smarter than I.  :-)
+
+And if the Lisp Machine hackers looked down on BSD, and complained
+that BSD adopted the "Worse is Better" philosophy, while Lisp strived
+for the true, elegant, Correct technical solution, it's perhaps
+especially interesting to consider that if anything, Linux was an even
+more radical example of the "Worse is Better" philosophy.
+
+Cheers,
+
+					- Ted
+
+P.S.  There is yet another example of "Worse is Better" in how Linux
+had PCMCIA support several years before FreeBSD/NetBSD.  However, if
+you ejected a PCMCiA card in a Linux system, there was a chance (in
+practice it worked out to be about in 1 in 5 times for a WiFI card, in
+my experience) that the system would crash.  The *BSD's took a good
+2-3 years longer to get PCMCIA support, but when they did, it was rock
+solid.  Of course, if you are a laptop user, and are happy to keep
+your 802.11 PCMCIA card permanently installed, guess which OS you were
+likely to prefer --- "sloppy but works, mostly", or "it'll get there
+eventually, and will be rock solid when it does, but zip, nada, right now"?
+
+
+> 
+> --lm
+> 
+> On Thu, May 11, 2017 at 04:37:29PM -0400, Ron Natalie wrote:
+> > I remember the pre-fsck days.   It was part of my test to become an operator at the UNIX site at JHU that I could run the various manual checks.
+> > 
+> > The V6 file system wasn???t exactly stable during crashes (lousy database behavior), so there was almost certainly something to clean up.
+> > 
+> >  
+> > 
+> > The first thing we???d run was icheck.   This runs down the superblock freelist and all the allocated blocks in the inodes.     If there were missing blocks (not in a file or the free list), you could use icheck ???s
+> > 
+> > to rebuild it.    Similarly, if you had duplicated allocations in the freelist or between the freelist and a single file.   Anything more complicated required some clever patching (typically, we???d just mount readonly, copy the files, and then blow them away with clri).
+> > 
+> >  
+> > 
+> > Then you???d run dcheck.   As mentioned dcheck walks the directory path from the top of the disk counting inode references that it reconciles with the link count in the inode.   Occasionally we???d end up with a 0-0 inode (no directory entires, but allocated???typically this is caused by people removing a file while it is still open, a regular practice of some programs for their /tmp files.).    clri again blew these away.
+> > 
+> >  
+> > 
+> > Clri wrote zeros all over the inode.   This had the effect of wiping out the file, but it was dangerous if you got the i-number wrong.    We replaced it with ???clrm??? which just cleared the allocated bit, a lot easy to reverse.
+> > 
+> >  
+> > 
+> > If you really had a mess of a file system, you might get a piece of the directory tree broken off from a path to the root.   Or you???d have an inode that icheck reported dups.   ncheck would try to reconcile an inumber into an absolute path.
+> > 
+> >  
+> > 
+> > After a while a program called fsdb came around that allowed you to poke at the various file system structures.    We didn???t use it much because by the time we had it, fsck was fast on its heals.
+> > 
+> 
+> -- 
+> ---
+> Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+

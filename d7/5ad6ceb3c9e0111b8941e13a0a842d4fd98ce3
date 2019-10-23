@@ -1,0 +1,89 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Fri, 27 Oct 2017 23:38:23 -0700
+Subject: [TUHS] Charles Forsyth on putting Unix on a diet.
+In-Reply-To: Your message of "Fri, 27 Oct 2017 19:34:11 -0700."
+ <921D6FFC-DD60-406F-B90E-EC40DB638624@orthanc.ca>
+References: <20171027103648.4030118C08A@mercury.lcs.mit.edu>
+ <CAC20D2MEkvO_yOYjiR0_reL7VB=GmtHS0RTGCBEf56_ZWPc7Ew@mail.gmail.com>
+ <alpine.BSF.2.02.1710270922200.5457@frieza.hoshinet.org>
+ <CALMnNGiKFq4UpdOxqoit1+24vakP=qH6bn+PsQxtApSQOVKOXg@mail.gmail.com>
+ <20171028020100.26A50156E7D7@mail.bitblocks.com>
+ <921D6FFC-DD60-406F-B90E-EC40DB638624@orthanc.ca>
+Message-ID: <20171028063838.265B2156E7D7@mail.bitblocks.com>
+
+On Fri, 27 Oct 2017 19:34:11 -0700 Lyndon Nerenberg <lyndon at orthanc.ca> wrote:
+Lyndon Nerenberg writes:
+> > I wish there was a way to evolve plan9 into a modern Unix.
+> > Making an existing modern Unix diet into a lean OS is close to
+> > impossible.
+> 
+> But if you try to turn Plan9 into a lean UNIX, you lose everything that
+> Plan9 advocates.  In particular, I don't see how you can possibly
+> integrate namespaces into UNIX in any meaningful way.  Without those,
+> it's no longer Plan9, and therefore a pointless endeavour.
+
+As you may know I have been a 9fan for a long time & would
+love if plan9 became mainstream. But I just don't see any hope
+of a wider acceptance of Plan9.  My perception is that plan9
+itself has not evolved a lot in 20-30 years. May be its
+original structure is good enough or may be it just hasn't had
+a large enough set of innovative users. The small group of
+plan9 users continue to mostly use the stuff built by the Bell
+lab guys.  I think it would be a real shame to see plan9
+become a relic. The road not taken. Would be nice if we can do
+something about it.
+
+IMHO, the best hope to keep it alive is to pull a reverse C++
+trick!  C++, which is now a much more complex beast of a PL,
+initally got accepted because "it was compatible with C".  So
+the idea here is to provide a Unix compatible (complex) API as
+a library to allow running a lot of existing s/w and entice
+people to write new s/w to a simpler but more composable API.
+
+It won't make plan9 advocates happy and it won't have a
+"plan9" API but this seems doable to me.  Start with the Plan9
+kernel so you've already got process centric and mountable
+namespaces. Next "port" linux or freebsd API. Write a set of
+library functions that implement various Unix API calls by
+calling on the plan9 API. Mutate the latter as necessary.  [As
+an example, if 9P is found lacking, enhance it or replace it]
+This is not unlike implementing linux API on top of a
+microkernel. Concurrently port some kernel resident critical
+subsystems from Unix to become user mode programs
+communicating via 9p (or its child). All the while keeping an
+eye on performance and complexity.
+
+If done right, I think we can do away with containers & jails
+for cloud based s/w, without any loss of security.o
+
+So that is my pipe dream!
+
+> > A unix kernel boils down to a few subsystems: device drivers +
+> > device switch, scheduling, VM, networking and network switch,
+> > filesystems + filesystem switch, interrupt handling, process
+> > management. Some graphics support. A bunch of this can be
+> > pushed out of the kernel without much loss of efficiency.  And
+> > may be the original design decisions of Unix need to be
+> > revisited for 21st century hardware.
+> 
+> The release of the 10th Edition UNIX source is much more enlightening. 
+> Here you can see a fully functional UNIX with what, 29?, system calls? 
+> And you can see the genesis of many of the Plan9 concepts (/proc,
+> dial(), mk, mux, etc).
+
+I don't know much about it.
+
+In a separate message you wrote:
+
+> But as a thought experiment, I have long wondered how one might approach
+> the UNIX kernel with the view of removing ioctl(2).  What would the
+> aftermath look like?  That's probably the most invasive attack Plan9
+> could take on UNIX.  It would be very interesting to see what falls out.
+>  It might be practical to attempt this with 10th Edition, just to see
+> ...
+
+That is the "dieting" approach. Much harder as you have to
+constantly watch out you haven't broken anything.  But if you
+start with plan9, ioctl() is already gone! However, it can be
+implemented as a library function for dusty decks.
+

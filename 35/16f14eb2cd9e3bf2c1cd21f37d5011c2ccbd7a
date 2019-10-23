@@ -1,0 +1,48 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 10 Jul 2014 08:11:11 -0700
+Subject: [TUHS] Excise process from a pipe
+In-Reply-To: <20140710151021.3ABE018C09F@mercury.lcs.mit.edu>
+References: <20140710151021.3ABE018C09F@mercury.lcs.mit.edu>
+Message-ID: <20140710151111.GE24876@mcvoy.com>
+
+In BitKeeper we've got lots of code that deals with jiggering where
+stdout goes.  Making that work on all the Unix variants and Windows has
+been, um, challenging.  Making what you are talking about work is gonna
+be a mess of buffer management and it's going to be hard to design system
+calls that would work and still give you reasonable semantics on the pipe.
+Consider calls that want to know if there is data in the pipe followed
+by a reconnect.
+
+If you really think that this could be done I'd suggest trying to write
+the man page for the call.  I'm not trying to be snarky, in my personal
+experience I've found the best way to prove out my own ideas is to try
+and document them for other programmers.  If the docs feel like they
+make sense then the idea usually has merit.  I don't know how I'd write
+the docs for this stuff and have it work with the existing semantics.
+
+On Thu, Jul 10, 2014 at 11:10:21AM -0400, Noel Chiappa wrote:
+>     > From: Larry McVoy <lm at mcvoy.com>
+> 
+>     > Every utility that you put in a pipeline would have to be reworked to
+>     > pass file descriptors around
+> 
+> Unless the whole operation is supported in the OS directly:
+> 
+> 	if ((pipe1 = process1->stdout) == process2->stdin) &&
+> 	   ((pipe2 = process2->stdout) == process3->stdin) {
+> 		prepend_buffer_contents(pipe1, pipe2);
+> 		process1->stdout = process2->stdout;
+> 		kill_pipe(pipe1);
+> 		}
+> 
+> to be invoked from the chain's parent (e.g. shell).
+> 
+> (The code would probably want to do something with process2's stdin and
+> stdout, like close them; I wouldn't have the call kill process2 directly, that
+> could be left to the parent, except in the rare
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+

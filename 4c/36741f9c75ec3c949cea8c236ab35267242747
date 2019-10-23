@@ -1,0 +1,44 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Fri, 2 May 2008 10:58:08 +1000
+Subject: [Unix-jun72] Anyone working on V1 mkfs?
+In-Reply-To: <5372.1209688415@mini>
+References: <20080501234225.GA77327@minnie.tuhs.org> <5372.1209688415@mini>
+Message-ID: <20080502005808.GA79200@minnie.tuhs.org>
+
+On Thu, May 01, 2008 at 08:33:35PM -0400, Brad Parker wrote:
+> The hardware bootstrap process is in the man pages - it looks somewhat
+> rational.  I have not studied it but I think the fun part will be making
+> a dectape image which has the binaries to be populated.
+
+I was hoping to have a populated filesystem to start with, because we
+should be able to run V1 bin/check using Apout, to check the filesystem.
+ 
+> Having said all that, having a working mkfs would be would be very handy
+> and would make setting up  a boot disk much easier!
+
+The V1 manual for filesystem(5) say "Blocks 0 and 1 are collectively known
+as the super-block for the device". Can you confirm that block 0 is part
+of the super-block, i.e. it's not reserved for bootstrap code? If block 0
+is the super-block, it should contain a word (# of bytes in free-map) followed
+by lots of 0177 bytes, which are the free-map.
+
+On another note, I thought of taking V6 mkfs.c as a start-point to rewrite
+V1 mkfs. I'm trying to work out what f_m and f_n do:
+
+        if(fsys[n] == 'r') {
+                if(f == 'k') {
+                        f_n = 24;	/* RK, why these numbers? */
+                        f_m = 3;
+                }
+                if(f == 'p') {
+                        f_n = 10;	/* RP, why these numbers? */
+                        f_m = 4;
+                }
+        }
+
+Finally, are we going to use RK03 or RK05, as the sizes are different?
+
+Thanks all,
+	Warren
+
+

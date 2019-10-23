@@ -1,0 +1,69 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Tue, 21 Feb 2017 08:47:28 -0800
+Subject: [TUHS] Mach for i386 / Mt Xinu or other
+In-Reply-To: <20170221120218.E07BA18C10B@mercury.lcs.mit.edu>
+References: <20170221120218.E07BA18C10B@mercury.lcs.mit.edu>
+Message-ID: <20170221164728.GZ20341@mcvoy.com>
+
+On Tue, Feb 21, 2017 at 07:02:18AM -0500, Noel Chiappa wrote:
+> So there is a question here, though, and I'm curious to see what others who
+> were closer to the action think. Why _did_ Linux succeed, and not a Unix
+> derivative? (Is there any work which looks at this question? Some Linux
+> history? If not, there should be.)
+
+http://www.mcvoy.com/lm/bitmover/lm/papers/srcos.html
+
+is worth a read, I was very much in the middle of all this at the time.
+
+I think Linux succeeded because:
+
+    - it was free and GPLed.  BSD license is nice but it has the problem
+      that people can take it closed source and not give back changes.
+
+    - no lawsuit
+
+    - Linus (as mentioned, much stronger leader than any in the Unix world)
+
+    - no religion.  I can't make this point hard enough.  At Sun, we couldn't
+      change any API, any utility, it was compat to the point that it was not
+      useful.  Look at SVr4/Solaris /proc and then look at Linux /proc.  The
+      Linux one is way, way, way, way more useful, you can dig shit out with
+      shell scripts.  The rest of the Unix world was blindly posix compat
+      even when posix compat made no sense.  Linux was glorious in that 
+      Linus wanted compat but was willing to break it for good reasons.
+
+    - good enough
+
+    - fun, all the cool kids were there.
+
+Here is perhaps something that will resonate with this crowd.  When I was
+teaching OS at Stanford, for file systems I made people go through the
+thought process on when you write what (think the sync writes so the FS
+isn't busted when you crash).
+
+For years, the BSD guys insisted that Linux was doing it wrong because
+they didn't do the sync writes, they did ordered writes (but the BSD
+guys didn't understand the write ordering so they thought it was busted,
+as did I).  
+
+But Linux wasn't busted, they had carefully gone through the process
+of figuring out when stuff had to be first so that you could survive
+a crash.
+
+The BSD guys refused to believe that it was possible, they were stuck
+on writes had to be synchronous in order to get a file system that 
+wasn't corrupted on a crash.
+
+I eventually started convincing them that Linux had it right by saying
+just untar some big tarball and unplug the power in the middle of that
+on a system with UFS and a system with ext2.  Tell me what happens when
+you power it up.  Answer?  The UFS based system dropped you into a fsck
+nightmare of unattached inodes, the ext2 based systems lost some data
+but the file system was fine.
+
+Obviously, the Linux approach won, it's better.  Way better, higher 
+performance and a much better user experience.  But the traditional
+Unix guys had to be dragged kicking and screaming, over a decade, 
+into that world.  It's stuff like that that made Unix stagnate while
+Linux forged ahead.
+

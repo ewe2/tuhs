@@ -1,0 +1,48 @@
+From: torek@torek.net (Chris Torek)
+Date: Fri, 01 Dec 2017 11:10:25 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: Your message of "Fri, 01 Dec 2017 09:26:03 -0800."
+ <20171201172603.GO3924@mcvoy.com>
+Message-ID: <201712011910.vB1JAPVD068905@elf.torek.net>
+
+FYI, the way signals actually work is that they are delivered
+only by crossing through the user/kernel boundary.  (That mostly
+even includes those that kill a process entirely, except that
+there's some optimizations there for some cases.  If the CPU
+is running in user space for some *other* process, we have to
+arrange for the signalled process to be scheduled to run, or
+if it's on another CPU, take an interrupt so as to get into the
+kernel and hence cross that boundary.)
+
+This part is natural, since signal delivery means "run a function
+in user space, with user privileges". If you're currently *in*
+the kernel on behalf of some user process, that means you have to
+get *out* of it in that same process.
+
+This is why signals interrupt system calls, making them return
+with EINTR.  To avoid having system calls that haven't really
+started -- have not done anything yet -- from returning EINTR,
+the BSD and POSIX SA_RESTART options work by just making the
+"resume" program counter address point back to the "make system
+call" instruction.  Essentially:
+
+    frame->pc -= instruction_size;
+
+This can't be done if the system call has actually done something,
+so read() or write() on a slow device like a tty will return a
+short count (not -1 and EINTR).
+
+The BSD implementation these days is to call the various *sleep
+kernel functions (msleep, tsleep, etc) with PCATCH "or"-ed into
+the priority to indicate that it is OK to have a signal interrupt
+the sleep.  If so, the sleep call returns ERESTART (a special
+error code that the syscall handler notices and does the "subtract
+from frame->pc" trick).  In the old days, PCATCH was implied by
+the sleep priority; all we did was make it an explicit flag,
+and do manual unwinding (the V6 kernel used the equivalent of
+longjmp to get to the EINTR-returner so that the main line code
+path did not have to check).  The I/O subsystem generally calls
+*sleep without PCATCH, though.
+
+Chris
+

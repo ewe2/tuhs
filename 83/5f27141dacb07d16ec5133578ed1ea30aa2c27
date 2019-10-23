@@ -1,0 +1,104 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sat, 31 Dec 2016 12:35:54 +1100
+Subject: [TUHS] 2.11BSD on a Z180 (was: merry christmas)
+In-Reply-To: <019c01d26200$3c30aa30$b491fe90$@ronnatalie.com>
+References: <mailman.1.1482976801.31902.tuhs@minnie.tuhs.org>
+ <c77e8050-faec-626d-9f11-644bad115bd2@update.uu.se>
+ <019c01d26200$3c30aa30$b491fe90$@ronnatalie.com>
+Message-ID: <CAH1jEzZMqE1UvtLXQ1fkj5Tb7UV_gSExs9uVhW98a-O1YtTtaw@mail.gmail.com>
+
+Yes, OK, I see that there are unanticipated problems with the 2BSD
+Z180 port. Basically I had thought that the kernel ran like a
+userspace program, I knew there might be overlays involved with the
+code space, but I hadn't realized there are also overlays with the
+data space (from what you say I guess the mbufs are accessed using a
+kind of a "far" pointer). Anyway, I will check into it further.
+
+Based on the previous day's conversations I got inspired to continue
+the project, I got out the 2.11BSD toolchain which I had ported to a
+modern machine as a cross compiler (actually Mac OSX although I was
+using it like a poor man's Linux)... started again using Linux and a
+different way of building that would require less change to the
+Makefiles, fixed all compile warnings, fixed many bugs, it now
+produces:
+bin/ar
+bin/as
+bin/cc
+bin/ld
+bin/nm
+lib/c0
+lib/c1
+lib/c2
+lib/cpp
+lib/crt0.o
+lib/libc.a
+lib/mcrt0.o
+usr/bin/lorder
+usr/bin/ranlib
+usr/lib/libc_p.a
+
+The executables above are x86-64 Linux ELF executables that work alike
+to the corresponding PDP-11 2.11BSD a.out executables, except that
+hard coded paths like /usr/include or /usr/lib have an extra prefix
+added to them, at the moment it works like this:
+  /home/nick/src/2bsd_cc.git/bin/cc contains a hard coded executable
+path of /home/nick/2bsd_cc.git/lib.cpp
+  /home/nick/src/2bsd_cc.git/lib/cpp contains a hard coded include
+path of /home/nick/src/2bsd_cc.git/usr/include
+and so on, these are set up at build time. Changes to the makefiles
+are pretty minimal, in the libc source directory I had to change
+things a bit to make it refer to the cross compiler rather than the
+native compiler, by changing stuff like "cc" to "${CC}" and adding
+stuff like:
+  DESTDIR=../../..
+  CC=${DESTDIR}/bin/cc
+and so forth. The revised toolchain if compiled with -DPDP11 will be
+more-or-less as original, so it should not break the self-hosted
+compile system (up to possible minor breakage because I haven't tested
+this mode yet), for instance if the original code looked like this:
+  int some_function();
+  ...
+  some_function(a) int a; { some code }
+then it would now look like this:
+  int some_function PARAMS((int a));
+  ...
+  int some_function(a) int a; { some code }
+where the PARAMS macro is set up appropriately depending on whether we
+are compiling on the PDP-11 or the modern Linux machine.
+
+One significant difference with the cross toolchain is that I have
+translated the PDP-11 assembler /bin/as from assembler into C. So I
+guess it will be slightly slower and use slightly more memory, but I
+doubt the difference would be noticeable in practice. In future when I
+merge my changes into 2.11BSD and fix any breakage, I'll probably just
+delete the as0.s, as2.s and replace with as0.c, as2.c. Also I fixed
+some memory allocation bugs and illegal pointer dereferences in the
+other utilities that just happened to be benign on PDP-11.
+
+Anyway, I'm pretty stoked because after successfully building the C
+library, etc, with the cross toolchain, I compiled a hello world
+program and copied it into the running simh system, it executed
+without problems. When I compiled the same program on the self-hosted
+compile system in the running simh system everything was the same
+except the final executable, I will have to pay a bit of attention to
+the lorder and tsort stuff when it builds the C library, to make sure
+everything comes out in a predictable way for comparison.
+
+I will test this more extensively in the coming weeks, e.g. by
+building a kernel using the cross toolchain and checking it's the
+same. I am nearly ready to put the cross toolchain on bitbucket, but I
+just want to take a bit of care before doing "git commit" to make sure
+it's not capturing any junk I don't want in there, so I will do it
+later. I had better pay some attention to the family :) Happy new year
+everyone.
+
+cheers, Nick
+
+On Fri, Dec 30, 2016 at 5:20 AM, Ron Natalie <ron at ronnatalie.com> wrote:
+> Yes.   Before the networking code in, the kernels on the non-split I/D machines got by with using a couple of the segments to make code overlays.    The mbufs required a overlay register of their own and once you got the minimal data segment as well as the top one for the stack, you just couldn't do it with 8 total.   With Split I/D you had 8 code and 8 data segments and that you could make work.
+>
+> It was a boon for me.   I had started with Noel's MIT C Gateway but abandoned it for my own "Little OS" based version (Noel had been exiled to the Bahamas or some warm place and the MIT code was lacking in some necessary featuers for us).   I took all the non-split I/D machines around the lbs... everything from PDP-11/23's and 11/24's up to some 11/34's we had.   Eventually, UNIX got too big for even the 11/70's that were left, and those were turned into ( rather compute heavy) routers as well.
+>
+> The 11/34's were an another amusing piece of recycling.   A contractor sold those to the government to be graphics remotes for our CDC 7600 mainframe.   Each one had a Vector General graphics station, an 11/34 with a couple of RK05's, a punched card reader, and a DQ11 and 56KB modem.   The contractor couldn't get the things to work with the mainframes, and Mike Muuss's standard answer to extra compute hardware was to put UNIX on it.   We did, and Mike wrote the early version of the BRL CAD for the Vector General (this was 1980, I remember him giving a talk on this at the Univ. of Delaware UUG).     We took the DQ/modems to make an early BRLNET (pre-IP) link.    Late one summer evening Mike and I wrote a version of ASTEROIDS for the system.   We finished about dawn, and when the real ballistic researchers came in that morning to play it they decided our physics was all wrong so by the time we returned later, it had been recoded.    Such was the lab in those days.
+>
+

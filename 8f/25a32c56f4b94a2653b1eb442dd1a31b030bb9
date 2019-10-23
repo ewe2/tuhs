@@ -1,0 +1,43 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu,  9 Feb 2017 09:31:06 -0500 (EST)
+Subject: [TUHS] Code bloat (was: How Unix brings people together,
+	or it's a small...)
+Message-ID: <20170209143106.0304B18C11C@mercury.lcs.mit.edu>
+
+    > From: Paul Ruizendaal
+
+    > The best one seems to have been the 3Com stack, which puts IP in the
+    > kernel and TCP in a daemon.
+
+I've gotta get the MIT V6 one online.
+
+Incoming demux is in the kernel; all of the TCP, and everything else, is in
+processes along with the application - one process per application instance.
+It sounds like it might be clunky, but it's not: there are a couple of
+different TCP's (a small, low performance one for things like User TELNET,
+timer servers, yadda-yadda; a bigger, higher-performance one for things like
+FTP), and the application just calls them as subroutine libraries
+(effectively). Since there's no IPC overhead, the performance is pretty good.
+
+Unfortumately, a lot of the stuff never migrated from personal directories to
+the system folder, so I have to go curate out the personal files (or, more
+likely, move them all to a system folder) before I can release it all.
+
+
+    > Perhaps economizing on fragmentation and and window management is
+    > better.
+
+Fragmentation, perhaps - but good window management is a must.
+
+    > I wonder if just putting the code for this state in the kernel and
+    > handling only the state changes and other states in a daemon is perhaps
+    > the best split on constrained hardware.
+
+I don't think that's a good idea; cutting the TCP in two parts, which have to
+communicate over an interface is going to be _really_ ugly: do you have one
+copy of the connection state data (in which case one them has to go through an
+interface to get to it), or two (synchronization issues). If you want a small
+kernel footprint, take the MIT approach.
+
+       Noel
+

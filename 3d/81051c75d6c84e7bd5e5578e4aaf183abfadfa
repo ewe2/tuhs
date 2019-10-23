@@ -1,0 +1,107 @@
+From: tytso@mit.edu (Theodore Ts'o)
+Date: Fri, 2 Feb 2018 12:00:28 -0500
+Subject: [TUHS] Dynamics between BSD and Linux
+In-Reply-To: <CAK7dMtDeHNZ+at_htwLZngEDzEZ+OAYZDDz5V545VmaPdTAncA@mail.gmail.com>
+References: <CAK7dMtDeHNZ+at_htwLZngEDzEZ+OAYZDDz5V545VmaPdTAncA@mail.gmail.com>
+Message-ID: <20180202170028.GA2268@thunk.org>
+
+On Wed, Jan 31, 2018 at 01:39:25AM -0700, Kevin Bowling wrote:
+> Linux has been described as influenced by Minix and System V.  The Minix
+> connection is well discussed.  The SysV connection something something
+> Linus had access to a spec manual.
+
+For many of us it was POSIX.1 1990.  I implemented Job Control from
+the POSIX.1 spec, and then recompiled bash, and it worked the first
+time out of the box.  The Berkeley man pages are not bad, but the
+POSIX spec was much more of a formal POSIX spec.
+
+> But I’d guess reality would be more gradual — new contributors that
+> liked CSRG BSD would have mostly gravitated to the continuations in
+> 386/BSDi/Net/Free that were concurrent to early and formative Linux
+> development.. so there’d be an implicit vacuum of BSD people for
+> Linux development.
+
+I'll note that my first experiencing hacking kernels was the BSD
+4.3+Reno; but it was mostly what I perceived as the toxicity of a
+certain core team member (way worse than the caricature of Linus as
+portrayed by the press) that caused me to decide to stick with Linux
+than with *BSD.
+
+> The kinds of BSD things I am talking about are ufs, kqueue, jails, pf,
+> Capsicum.  Linux has grown alternatives, but with sometimes willful
+> ignorance of other technology. It seems clear epoll was not a good design
+> from the start.
+
+In some cases, the ideas were carefully considered, and they were
+rejected.  For example, Soft Updates was one that we looked and we
+decided that it was too complicated, and would restrict who could add
+new features to the file system afterwards.  This LWN article, "Soft
+Updates, Hard Problems"[1] was written much later, but it's a good
+summary of our reasons.
+
+[1] https://lwn.net/Articles/339337/
+
+In other cases, it was a case of parallel evolution.  Work done on
+epoll, was at least partially funded by IBM as part of the Linux
+Scalability Effort, and the basic design had been fixed in advance.  I
+wasn't working on that myself, but I vaguely recall that there were
+potential Microsoft patent concerns that constrained the epoll design.
+
+> Despite jails not being taken to the logical conclusion of
+> modern containers like zones, the architecture is fundamentally closer
+> aligned to how people want to securely use containers versus namespaces and
+> cgroups.
+
+The original goal of cgroups and namespace was not for
+security/isolation.  Cgroups in particular was something Google had
+implemented for to allow a large number of jobs on a single shared
+system.  The jobs all belonged to different Google teams/product
+groups, so mutually distrustful job owners weren't part of the design
+requirements; efficiency to decrease compute TCO was the overarching
+goal.
+
+Using cgroups for containers is something that a startups like Docker
+drove, and "time to market" and "keep the VC's happy" were far more
+happy than to "delay product launch for years while we burn VC money
+to reimplement BSD jails".
+
+> This seems strange to me as BSD people are generally open to other /ideas/,
+> we have to be careful with Linux code due to license incompatibility, but
+> the converse is does not seem true either in interest in other ideas or
+> license hampering code flow.
+
+I'll note that I implemnted e2fsck using a lot of ideas about how to
+speed up fsck for the BSD FFS from a paper published in the 1989
+Usenix conference in Baltimore.  The core idea was to cache data and
+cleverly reorder how various consistency checks were done by fsck so
+that metadata blocks would not need read more than once in most cases.
+These techniques sped up fsck by a factor of 2-3 I contacted the
+author and was told those ideas were never picked up by BSD.  Oh well,
+BSD's loss, Linux ext3's gain.  :-)
+
+> The history of UNIX is spectacularly successful because different groups
+> got together at the table and agreeed on the ideas.  Is there room for that
+> in the modern era where Linux is the monopoly OS?  The Austin Group is
+> still a thing but it’s not clear people in any of the Freenix communities
+> really care about evolving the standards.  I get that, but not so much
+> completely burrying ones head in the sand to what other OSes are doing.  Is
+> there any future for UNIX as an “open system” in this climate or are people
+> going to go there separate ways?
+
+I don't think it's really about "wilful ignorance".  It's more about
+economic considerations and what you can get your employer to pay for.
+I can think of a lot of times were my design was driven by the amount
+of headcount I could get authorized, and how much time I had before
+code freeze for this year's Android release.
+
+Some of these considerations don't apply if the work is done by
+starving hobbiest, or by academics who can use cheap grad student
+labor.  But I suspect here have also be cases where "minimal
+publishable unit" has also driven the way certain work has landed
+into, for example the Coda File System, which I was told "contained
+the remanants of a dozen Ph.D. theses", and was the code was too ugly
+and debt-ridden to be salvaged.  (Which is why Intermezzo was started;
+alas, that never went anywhere.)
+
+						- Ted
+

@@ -1,0 +1,65 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Sat, 14 Nov 2015 13:34:15 +0100
+Subject: [TUHS] link() syscall implementation
+Message-ID: <20151114133415.Horde.waGYhqdGBssNHzZf3_TcC5x@avocado.salatschuessel.net>
+
+Hi,
+
+I'm struggling on reimplementing the C code for the link()
+syscall.
+
+Usually on SYSIII and V7 you have something like:
+
+
+link()
+{
+	register struct inode *ip, *xp;
+	register struct a {
+		char	*target;
+		char	*linkname;
+	} *uap;
+
+[...]
+	u.u_dirp = (caddr_t)uap->linkname;
+[...]
+}
+
+The problem now on my system is, u_dirp in the user struct
+is saddr_t (*long) and not caddr_t (*char) and I wonder how
+I have to assign uap->linkname.
+The original ASM code looks like:
+
+_link::
+{
+	dec	fp,#~L2
+	ldm	_stkseg+4(fp),r8,#6
+	ldl	rr8,_u+36
+[...]
+	ldl	rr2,rr8(#4)
+	ldl	rr4,rr2
+	and	r4,#32512
+	ldl	_u+78,rr4
+[...]
+
+I had the same problem already 7 years ago but didn't came up
+with a solution back then.
+
+http://home.salatschuessel.net/quest/problems.php
+
+What came to my mind in the meantime is the following and maybe
+someone can check if this is right:
+
+1. _u+78 (u.u_dirp) contains a pointer - so what is assigned
+    here in ASM is a memory address.
+2. The memory notation for accessing segmented data on Z8001
+    seems to be 0xSS00XXXX where SS is the segment number up
+    to 127 and XXXX is the relative address in that segment.
+3. This means ANDing 0xSS00 with 0x7F00 means to strip out
+    all invalid data from the segment-position of the address,
+    to make sure it  can only be between 0 and 127 (0x0000 and
+    0x7F00).
+
+I wonder how the assignment of uap->linkname to u.u_dirp has
+to be done correctly?!
+
+

@@ -1,0 +1,57 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sun, 11 May 2014 19:13:29 -0400 (EDT)
+Subject: [TUHS] Work I've done with a PDP-11 simulator
+Message-ID: <1399850019.15503.for-standards-violators@oclsc.org>
+
+  The web page mentions files-11 which is ODS-1.
+
+Technically (it is all coming back to me now):
+
+FILES-11 is a family of file systems that started in RSX-11
+(or perhaps before but that's the oldest instance I know).
+
+ODS-1 is really FILES-11 ODS-1; ODS is `on-disk [something].'
+
+RSX-11 used ODS-1.  VMS used ODS-2.  I'm not sure of all
+the differences offhand, but they were substantial enough
+that we ended up writing two different programs to fetch
+files to UNIX from RSX and VMS volumes (we had the latter
+to deal with too).  Certainly the directory entries were
+different between the two: ODS-1 used RADIX-50-encoded
+file names with at most six characters plus an at-most-three-
+character `extension' (a term which newbies sometimes
+improperly import into UNIX as well); I forget the exact
+filename rules in VMS, but filenames certainly could be
+longer than six characters.
+
+I've found the early-1980s programs I remembered.  There
+were two, getrsx.c and getvms.c; two programs, one for
+each file-system format.  They are surely full of ancient
+sloppiness that won't compile or won't work right under
+a modern C compiler, and they make assumptions about byte
+order.  I'll spend some time in the next few days going over
+them and see if I can quickly get something workable.
+
+A footnote as to their origin: in the world where we wrote
+these programs, we had not only multiple systems, but
+shared disk drives.  The disk drives themselves were
+dual-ported; the controllers we used could connect to
+multiple hosts as well.  Each system had its own dedicated
+disk drives, but the UNIX systems could also see the drives
+belonging to the RSX and VMS systems; hence the file-fetching
+programs, since this was well before the sort of networking
+we take for granted these days.
+
+On the other hand, we had several UNIX systems which spoke
+uucp to one another, and that was occasionally used for
+large file transfers.  To speed that up, I taught uucico
+a new protocol, whereby control information still went over
+a serial line, but data blocks were transferred over a
+chunk of raw shared disk (with appropriate locks, of course).
+
+It was a simpler world back then, but that made it a lot more fun.
+
+Norman Wilson
+Toronto ON
+
+

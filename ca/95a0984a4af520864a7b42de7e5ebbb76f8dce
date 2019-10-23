@@ -1,0 +1,266 @@
+From: pino@dohd.org (Martijn van Buul)
+Date: Mon, 5 Feb 2001 22:24:46 +0100
+Subject: [pups] Strange problems on an uPDP 11/53+
+Message-ID: <20010205222446.A3608@mud.stack.nl>
+
+After 52 days, my uPDP 11/53+ has suddenly been acting rather strange.
+/usr/include got 'replaced' by /usr/new, to be precise. At the time,
+I was the only user. Seeing this, I immediately halted the system,
+expecting a load of file system errors upon boot. None showed up, and
+/usr/include is back to itself again. However, programs which *used*
+to be running perfectly (like my work-in-progress ps) suddenly fail,
+with a "not enough memory for saving info".
+
+Any hints?
+
+-- 
+    Martijn van Buul -  Pino at dohd.org - http://www.stack.nl/~martijnb/
+	 Geek code: G--  - Visit OuterSpace: mud.stack.nl 3333
+   Kees J. Bot: The sum of CPU power and user brain power is a constant.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA70139
+	for pups-liszt; Tue, 6 Feb 2001 11:46:34 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA70135
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 6 Feb 2001 11:46:30 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f160ZHg18114
+	for pups at minnie.cs.adfa.edu.au; Mon, 5 Feb 2001 16:35:17 -0800 (PST)
+Date: Mon, 5 Feb 2001 16:35:17 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200102060035.f160ZHg18114 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Strange problems on an uPDP 11/53+
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Martijn van Buul <pino at dohd.org>
+> After 52 days, my uPDP 11/53+ has suddenly been acting rather strange.
+> /usr/include got 'replaced' by /usr/new, to be precise. At the time,
+
+	Oops!   
+
+> I was the only user. Seeing this, I immediately halted the system,
+> expecting a load of file system errors upon boot. None showed up, and
+> /usr/include is back to itself again. However, programs which *used*
+> to be running perfectly (like my work-in-progress ps) suddenly fail,
+> with a "not enough memory for saving info".
+
+> Any hints?
+
+	How much memory is on the system now after the reboot.   The only
+	thing that pops into mind is that the system is running without
+	enough memory.    If part of the memory on the system dropped out
+	earlier that would (possibly) explain the strange behaviour was
+	seen.   Rebooting/reseting the system would cause the system to
+	recount memory.
+
+	A program can get 'ENOMEM' as an error two ways: 1) exceeding the
+	maximum 64KB dataspace (stack + data) or 2) the system has run out
+	of swap or the maps ('coremap' and/or 'swapmap') have become too
+	fragmented.
+
+	Two commands that can be useful in obtaining more information are
+
+		sysctl hw
+
+	and 
+
+		pstat -s
+
+	"sysctl hw" will give several lines of output - the two you'd be
+	interested in are 
+
+	hw.physmem = 2097152
+	hw.usermem = 415744
+
+	'physmem' is the amount of memory physically present and 'usermem' is
+	the amount current free and available for user programs.
+
+	"pstat -s" will give a swap space usage summary.
+
+	Steven Schultz
+	sms at Moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA71926
+	for pups-liszt; Tue, 6 Feb 2001 18:41:36 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mud.stack.nl (mud.stack.nl [131.155.141.98])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA71922
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 6 Feb 2001 18:41:32 +1100 (EST)
+	(envelope-from martijnb at stack.nl)
+Received: by mud.stack.nl (Postfix, from userid 587)
+	id D00657F08; Tue,  6 Feb 2001 08:39:28 +0100 (CET)
+Date: Tue, 6 Feb 2001 08:39:28 +0100
+From: Martijn van Buul <pino@dohd.org>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Strange problems on an uPDP 11/53+
+Message-ID: <20010206083928.A15141 at mud.stack.nl>
+Reply-To: Martijn van Buul <pino at dohd.org>
+References: <200102060035.f160ZHg18114 at moe.2bsd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.3.3i
+In-Reply-To: <200102060035.f160ZHg18114 at moe.2bsd.com>; from sms at moe.2bsd.com on Mon, Feb 05, 2001 at 04:35:17PM -0800
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Steven M. Schultz wrote:
+> Hi -
+> 
+> > From: Martijn van Buul <pino at dohd.org>
+> > After 52 days, my uPDP 11/53+ has suddenly been acting rather strange.
+> > /usr/include got 'replaced' by /usr/new, to be precise. At the time,
+> 
+> 	Oops!   
+
+
+Well, strange things are afoot indeed. About the same time, 1 machine
+crashed (A DEC Alpha running OpenBSD), 2 started acting very strangely,
+and had to be rebooted (My PDP, and a Wintel box running Windows 2000),
+and a 4th machine (A Wintel box running Minix-VMD) suddenly had some
+problems reading his harddisk and using its network (but recovered). The
+strange thing is that these machines aren't related in any way but one:
+they're standing quite near to eachother. Do I hear EMC somewhere?
+
+ 
+> > Any hints?
+> 
+> 	How much memory is on the system now after the reboot.
+
+1.5 MB. 798 Kilowords. 
+
+>       The only thing that pops into mind is that the system is running
+>       without enough memory.    If part of the memory on the system dropped
+>       out earlier that would (possibly) explain the strange behaviour was
+> 	seen.   Rebooting/reseting the system would cause the system to
+> 	recount memory.
+
+Well, the machine had 1.5 MB before it crashed.. It's doubtlessly some
+memory fault, but it *seems* to be a temporal one.
+
+> 
+> 	"sysctl hw" will give several lines of output - the two you'd be
+> 	interested in are 
+> 
+> 	hw.physmem = 2097152
+
+hw.physmem = 1572864
+
+> 	hw.usermem = 415744
+
+hw.usermem = 313472
+
+> 	'physmem' is the amount of memory physically present and 'usermem' is
+> 	the amount current free and available for user programs.
+
+Should be enough. 'cc' works without problems - only my ps with debug
+info seems to be affected; it might not be a memory issue, but a "ps can't
+determine the right amount of processes"-issue.. 
+
+I've checked it, and this seems to be the case. Ps thinks that there are
+0 processes running, and does a 
+ outargs = (struct psout *)calloc(nproc, sizeof(struct psout));
+on that. With 'nproc' being 0, this returns a NULL pointer, but doesn't
+mean that the process is out of memory.
+
+Having no ps is very annoying; finding back those 4 children spawned
+by a httpd can be a nuisance then. pstat -p works, but it isn't comfortable:)
+
+> 	"pstat -s" will give a swap space usage summary.
+
+15/59 swapmap entries
+910 kbytes swap used, 6263 kbytes free
+
+-- 
+    Martijn van Buul -  Pino at dohd.org - http://www.stack.nl/~martijnb/
+	 Geek code: G--  - Visit OuterSpace: mud.stack.nl 3333
+   Kees J. Bot: The sum of CPU power and user brain power is a constant.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id DAA75027
+	for pups-liszt; Wed, 7 Feb 2001 03:47:05 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA75023
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 7 Feb 2001 03:46:56 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f16Ga3301595;
+	Tue, 6 Feb 2001 08:36:03 -0800 (PST)
+Date: Tue, 6 Feb 2001 08:36:03 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200102061636.f16Ga3301595 at moe.2bsd.com>
+To: pino at dohd.org, sms at moe.2bsd.com
+Subject: Re: [pups] Strange problems on an uPDP 11/53+
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi --
+
+> Well, strange things are afoot indeed. About the same time, 1 machine...
+> they're standing quite near to eachother. Do I hear EMC somewhere?
+
+	Time to increase the shielding around the computer room, eh? ;-)
+
+> Well, the machine had 1.5 MB before it crashed.. It's doubtlessly some
+> memory fault, but it *seems* to be a temporal one.
+
+	I do not think it is a memory/hardware problem - that was just a
+	guess (not a very good one at that ;)).
+
+> hw.usermem = 313472
+
+	That's fine.
+
+> Should be enough. 'cc' works without problems - only my ps with debug
+
+	What about the standard 'ps' that came with the system?
+
+> info seems to be affected; it might not be a memory issue, but a "ps can't
+> determine the right amount of processes"-issue.. 
+> I've checked it, and this seems to be the case. Ps thinks that there are
+> 0 processes running, and does a 
+>  outargs = (struct psout *)calloc(nproc, sizeof(struct psout));
+
+	Ah, ok - malloc() used to actually return a non-NULL pointer when
+	presented with a size request of 0.  That was an error and was changed
+	(I forget the exact update/patch number).  There were a couple programs
+	in the system that relied on the old behaviour and those had to be
+	fixed.
+
+> on that. With 'nproc' being 0, this returns a NULL pointer, but doesn't
+> mean that the process is out of memory.
+
+	Right, the ENOMEM error was overloaded by malloc().  An argument
+	can be made that EINVAL should have been returned instead by malloc()
+	if 0 was passed in.
+
+> Having no ps is very annoying; finding back those 4 children spawned
+> by a httpd can be a nuisance then. pstat -p works, but it isn't comfortable:)
+
+	Are you are using the traditional 'nlist()' method of reading
+	the kernel symbol table to look for 'nproc' and '_proc'?  If so
+	is there a permissions problem?  /dev/*mem needs to be group=kmem, mode
+	640, the /unix image should be mode 644 and the 'ps' program setgid
+	to kmem.   If there is a problem reading the kernel symbol table
+	then 'nproc' will remain 0 which is what you're seeing.
+
+	Another way of examining some kernel variables (proc table, file table,
+	etc) is with the "sysctl" call.  It's much faster since it doesn't
+	have to do a sequential scan of the /unix symbol table.   You can
+	look in /usr/src/ucb/w.c at the function 'readpr()' to see how to
+	examine the proc table using sysctl.  
+
+	Steve
+
+

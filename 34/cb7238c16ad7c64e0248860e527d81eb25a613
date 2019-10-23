@@ -1,0 +1,63 @@
+From: norman@nose.cs.utoronto.ca (Norman Wilson)
+Date: Fri, 13 Dec 2002 20:21:47 -0500
+Subject: [TUHS] flaky webster or sigma WQESD4 and RQD11 controllers on KA650???
+Message-ID: <200212140122.gBE1Mgn37146@minnie.tuhs.org>
+
+If you can read this, the 4-port Wombat (Webster/Sigma ESDI controller)
+in the KA650 system through which this mail must pass on its way out
+is working fine, as it has since I installed it in that system a year
+and a half ago.
+
+According to my notes, I had no trouble communicating with the onboard
+diagnostic monitor (with the board in another KA650 reserved for system
+testing).  I used the monitor quite a bit, starting it many times,
+first because it took me a long time to realize that the terminator
+had been left installed backwards in one of the drives (so the drive
+wasn't visible to the controller no matter what I did to the cables).
+I don't think I tried the serial port on the back of the Wombat board;
+instead I uttered the magic commands to load and run the Wombat communication
+program on the VAX itself.  I'd expect this to be more timing-sensitive
+than the hardware port.  In any case it worked fine.
+
+Once the controller could see the disks (and I'd done some formatting
+and some testing with the diagnostics), I tested the Wombat under my
+oddball version of UNIX, and found what may be an MSCP implementation
+botch.  A UNIBUS/QBUS MSCP storage port gets only one interrupt vector;
+it is supposed to set one of two flags to indicate whether it is interrupting
+because there were no command slots and it freed one, or because there
+were no messages waiting to be read and it supplied one.  The Wombat
+appeared often to be tardy in setting the `message waiting' flag; my
+port driver often received an interrupt, checked the flags, found nothing
+to do, and of course dismissed the interrupt without realizing that
+the controller had in fact reported an I/O completion.  (And of course
+if I halted the system and took a crash dump I found the flag set.
+It took some real-time tracing to uncover the problem.)
+
+It is easy to work around this--instead of relying on the flag, one
+can go look at the message descriptors to see if there's a new message--
+so that is what my driver now does.  I have a vague memory that the
+original Ultrix MSCP driver, whence the current BSD one is probably
+descended and the current Ultrix one more distantly, already did it
+that way.  Silly me, I programmed from the protocol spec rather than
+just blindly copying someone else's unexplained code ...
+
+None of this explains why Bob Keys is having trouble, but it does
+suggest to me that the Wombat firmware might have other subtle bugs
+that are tickled by particular systems, perhaps even timing-dependent
+problems.  (I haven't checked, but it could well be that the interrupt-
+flag bug would be invisible to a KA630 because it took a little longer
+to get to that part of the interrupt routine.)
+
+I have two Wombat boards with slightly different firmware.  (One is
+labelled RQD11-EC and its diagnostic monitor calls itself WOMBAT;
+the other is branded by SpectraLogic, I forget what model it calls
+itself, but the monitor calls itself SLEUTH.)  My notes don't say
+whether they both displayed the interrupt botch.  I do know that
+communications with the diagnostic monitor worked fine with both.
+The RQD11-EC claimed to have firmware (or perhaps diagnostic monitor)
+version 2.38.
+
+Norman Wilson
+Toronto ON
+
+

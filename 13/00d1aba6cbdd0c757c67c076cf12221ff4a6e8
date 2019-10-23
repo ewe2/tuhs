@@ -1,0 +1,308 @@
+From tuhs-bounces@minnie.tuhs.org Tue Sep  4 10:24:33 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_ADSP_CUSTOM_MED,
+	DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 36b4f354
+	for <ml@inbox.vuxu.org>;
+	Tue, 4 Sep 2018 10:24:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 84EAFA1A81; Tue,  4 Sep 2018 20:24:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 29030A1A29;
+	Tue,  4 Sep 2018 20:24:08 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b=kEe+ng22;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2D960A1A29; Tue,  4 Sep 2018 20:24:05 +1000 (AEST)
+Received: from mail-qk1-f177.google.com (mail-qk1-f177.google.com
+ [209.85.222.177])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6A7ECA1A26
+ for <tuhs@tuhs.org>; Tue,  4 Sep 2018 20:24:04 +1000 (AEST)
+Received: by mail-qk1-f177.google.com with SMTP id 130-v6so1984758qkd.10
+ for <tuhs@tuhs.org>; Tue, 04 Sep 2018 03:24:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=9CPB0iW0tGtyEOIwOWKxeMJP9cDkbGMe+gEfJYkuP/s=;
+ b=kEe+ng22Mdd/DUsMF1IwKTA6eaHgTpVugaZs/uZ8s8k2c7GWZMw28YzK5Olx2gdPK5
+ CJB8LHp/5om4r2E8UGAlgXUvhz5pXpGO+P8DuZ8AiGAKmdHZHklO4Z6fmB6CuF8x9ZBl
+ B2OhZT4vv5bIn5olDbGcjgqnRqcfdEjGb4aVUASuZ01hSRdQUiuTXmfzQVFWfz1iC5EG
+ WkNVCCaq6GkHhRpdz/CtrAIsXLpjcrBR3DbH4VhYpLHNyXatgIP60AUeGQj3gt46xeGQ
+ D0jcn2DWvmccrgWsqHLVe/4hTBUkugOqiu9/qfcIMk5bQBseXAOOtn/H8zYnO53giy+n
+ CSow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=9CPB0iW0tGtyEOIwOWKxeMJP9cDkbGMe+gEfJYkuP/s=;
+ b=s310M8dF8KWVmVwDDSV+sXuFCA0YGJ+5HwF9ATiqliHyxciguQ3ji+yrI7k62UICae
+ b6SFhzbmoFup690Jo4sfy0yh/QVusbLdHYMos3vVUMzQviE2k2q8L4YBSZNYdaJbfCVS
+ n38+o8B6dHOwVCChGjtx0oxG2tUJrhzAOTLHOn2igrnfy/3TX/YNgA+bSb6voVmrsA8H
+ dSW1V5Sx3QLDx/29RpErDiydKS85L+XeHg7QPmVrnuORQvdfYm1/w4Oz71DGvhDeX08m
+ KXVGTWXTD+j4YekKtRUkzhVDHQ3K0DlEgIay2kxaqmJ81RnOT1IQATWbay9qUZGWXsYH
+ jnnQ==
+X-Gm-Message-State: APzg51CdZfc9Lb49rPCtjEmerLsipNwF77i9ZV83uZChUfRgqukuKw+G
+ 0CJNxTVjbf5PW472YTRPEx2vRdp/NI/1KTxU67s=
+X-Google-Smtp-Source: ANB0VdZ6FV6nPo+Ik1TGDEODJm3PnqywhgaAYZrwfEflMC6+iScPIweFMMWIFhiHF2eDN1pwRNPxs6nnak/f6E+rOuI=
+X-Received: by 2002:a37:2381:: with SMTP id
+ j123-v6mr27538823qkj.259.1536056643446; 
+ Tue, 04 Sep 2018 03:24:03 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAC20D2ODDO+OTUf8wA4bXu9M5M0kswJqT97qRAnV9EOzMGKRvQ@mail.gmail.com>
+ <20180831215636.-eCEx%ca6c@bitmessage.ch>
+ <CAD-qYGqsq=kZKrHcqUws4mpjV9VGnpNFb31ubUOZ67yOfZMWZA@mail.gmail.com>
+ <20180903180401.u4MVs%ca6c@bitmessage.ch> <20180903181133.GB81368@wopr>
+ <20180903185616.ZnkRk%ca6c@bitmessage.ch>
+ <CALMnNGgwaGU842g3y8aAdjrjwFPHxR4ysuddKLeKqoGJ2=LDtA@mail.gmail.com>
+ <CAP6exYJTE_p8QYcLCN98kbqZaqPogenv6BTx5wVQKED7Kugiwg@mail.gmail.com>
+ <CALMnNGj8gP=aPwNSTy82d33ffcU6naEZ=2==xs-N6kf-j9Dg0Q@mail.gmail.com>
+In-Reply-To: <CALMnNGj8gP=aPwNSTy82d33ffcU6naEZ=2==xs-N6kf-j9Dg0Q@mail.gmail.com>
+From: Dan Cross <crossd@gmail.com>
+Date: Tue, 4 Sep 2018 06:23:26 -0400
+Message-ID: <CAEoi9W4Od+SP-27+OMu5Uqt_Jpmmy+NYvyZbp9O8YAUeG-fAZw@mail.gmail.com>
+To: Andy Kosela <akosela@andykosela.com>
+Content-Type: multipart/alternative; boundary="000000000000966d720575090eb7"
+Subject: Re: [TUHS] cat -v and other complaints
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000966d720575090eb7
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Sep 4, 2018 at 5:35 AM Andy Kosela <akosela@andykosela.com> wrote:
+
+> On Tuesday, September 4, 2018, ron minnich <rminnich@gmail.com> wrote:
+>>
+>> On Mon, Sep 3, 2018 at 11:11 PM Andy Kosela <akosela@andykosela.com>
+>> wrote:
+>>
+>>> That was one of the main reasons I disliked Plan9.  It embraced the
+>>> "windows interface" trend of the mid 80s.
+>>>
+>>
+>> well, you can believe that, and I can't stop you, but it's wrong.
+>>
+>
+> Can you elaborate more on your point of view?
+>
+
+I don't mean to speak for Ron, but I think I know where he's coming from.
+
+There has been a slow shift in the way we use computer interfaces and the
+> start of the "windows computing" revolution certainly happened around mid
+> 80s with companies like Apple, Microsoft or Commodore developing their own
+> version of GUI (which goes back to Xerox PARC of course).  Unix received X
+> Window System from MIT in 1984.
+>
+
+Don't mistake "windows" (as in "stacking window manager") for "bitmapped
+graphical displays."
+
+At the time people thought that GUI is the best and most useful interface
+> for the new era and text terminal computing is about to die pretty soon.
+> Well it took at least 10 more years to happen and the introduction of World
+> Wide Web and Windows 95 certainly help solidify it.
+>
+> When Plan 9 was created in the mid-late 80s exactly those ideas
+> circulated.  Nothing comes from nothing, everything has its historical
+> context.  In the late 80s in order to "innovate" it was natural to think
+> that abandoning text terminals is a "progress".
+>
+
+This is conflating two things: textual interfaces and the graphical
+presentation of those interfaces. Plan 9 is about both.
+
+Unix was born in an era where the TTY (that is, tele-typewriter, as in
+"prints to paper") was still very much a force in mediating the interaction
+between user and computer. That evolved rather quickly to the "green
+screen" terminals of the 70s and early 80s, but the paradigm was basically
+the same: the serial terminal was a window showing the tail of an infinite
+scroll of data. The "terminal", as in the TTY, was and is a central
+abstraction in Unix.
+
+By the late 80s, when plan9 got started, the paradigm had shifted: machines
+now had relatively high resolution bitmapped graphical interfaces, and by
+and large you weren't sitting in front of a serial terminal anymore. Being
+tied to a single "terminal" was a hindrance and led to a lot of complexity
+(job control, terminal interactions with process groups, POSIX sessions,
+signals and ioctls for window-size changes for programs that wanted to
+continue believing that they're using a serial terminal, even though they
+haven't been for years...).
+
+Plan9 wanted to take advantage of the new graphics functionality but didn't
+want to be chained to the complexity associated with obsolete hardware
+(e.g., the TTY abstraction, which _still persists_ and has its fingers in
+weird parts of the kernel).
+
+They still wanted a text-oriented interface though, and that's what plan9
+provides. You sweep out a rio window and it's running a shell. Text in acme
+is usually editable and there aren't a lot of strange glyphs to click on;
+commands are strings. And you're no longer chained to a "terminal": I can
+have many shells running in many windows and they're all more or less the
+same. And it allowed them to move beyond the limitations of
+cursor-addressed user interfaces. They could, for example, write (or more
+precisely adapt) text editors like `sam`, which is fundamentally a textual
+program but uses the GUI to very nice effect. It may seem dated by today's
+standards, but it still works very nicely (indeed, I had to run a coworker
+through a sam session last Thursday; he was a continent away from me
+connecting to a plan9 system but we were able to do what needed to be done
+relatively quickly because it's all text and so simple...).
+
+I remember when I was in high school driving over to New Jersey and going
+to Bell Labs and meeting Dennis Ritchie for the first time (a college
+student I knew was doing an internship there and let me come visit). Dennis
+showed me plan9 on his gnot (this was back in the 8.5 days), and
+specifically talked about this: the focus was text, which was editable,
+could be manipulated, combined, split apart, was self-explanatory etc,
+instead of little icons like MS Windows and the Mac which were
+simultaneously static and cryptic. It *is* a textual interface, though it's
+*presented* and *multiplexed* via a bitmapped graphics display.
+
+I distinctly remember feeling blown away by the powerful marriage of text
+with bitmapped displays; it was a GUI for a Unix-like experience done
+right. They didn't sacrifice anything, but they gained so much more.
+
+Unix was born in the different era.  Same with the original IBM PC.  That
+> is why they revolve around pure text interface.
+>
+
+Unix and the PC date from radically different eras.
+
+The original IBM PC had a graphics adapter, and that was the expected mode
+of interaction, not the serial port. Granted that adapter was pretty weak,
+but it was there. Using a PC, you were using a graphical representation of
+your text interface. Unlike a serial terminal, where you simply emit the
+text to the terminal and the terminal deals with displaying it, writing an
+interface for CGA or MGA -- even in text mode -- involves scrolling the
+buffer, handling line feeds, tab and backspace expansion, and all the rest
+of it in software (granted, lots of serial drivers for Unix handle tab and
+BS expansion, too). But you, the programmer, have to manually keep track of
+your position in that little 4k buffer. You have to deal with moving the
+cursor around, etc.
+
+        - Dan C.
+
+--000000000000966d720575090eb7
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_quote"><div dir=3D"lt=
+r">On Tue, Sep 4, 2018 at 5:35 AM Andy Kosela &lt;<a href=3D"mailto:akosela=
+@andykosela.com">akosela@andykosela.com</a>&gt; wrote:</div><blockquote cla=
+ss=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex">On Tuesday, September 4, 2018, ron minni=
+ch &lt;<a href=3D"mailto:rminnich@gmail.com" target=3D"_blank">rminnich@gma=
+il.com</a>&gt; wrote:<blockquote class=3D"gmail_quote" style=3D"margin:0px =
+0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div=
+ dir=3D"ltr"><div class=3D"gmail_quote"><div dir=3D"ltr">On Mon, Sep 3, 201=
+8 at 11:11 PM Andy Kosela &lt;<a href=3D"mailto:akosela@andykosela.com" tar=
+get=3D"_blank">akosela@andykosela.com</a>&gt; wrote:</div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><div>That was one of the main reasons I di=
+sliked Plan9.=C2=A0 It embraced the &quot;windows interface&quot; trend of =
+the mid 80s.</div></blockquote><div><br></div><div>well, you can believe th=
+at, and I can&#39;t stop you, but it&#39;s wrong.</div></div></div></blockq=
+uote><div><br></div><div>Can you elaborate more on your point of view?</div=
+></blockquote><div><br></div><div>I don&#39;t mean to speak for Ron, but I =
+think I know where he&#39;s coming from.</div><div><br></div><blockquote cl=
+ass=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid=
+ rgb(204,204,204);padding-left:1ex"><div>There has been a slow shift in the=
+ way we use computer interfaces and the start of the &quot;windows computin=
+g&quot; revolution certainly happened around mid 80s with companies like Ap=
+ple, Microsoft or Commodore developing their own version of GUI (which goes=
+ back to Xerox PARC of course).=C2=A0 Unix received X Window System from MI=
+T in 1984.</div></blockquote><div><br></div><div>Don&#39;t mistake &quot;wi=
+ndows&quot; (as in &quot;stacking window manager&quot;) for &quot;bitmapped=
+ graphical displays.&quot;</div><div><br></div><blockquote class=3D"gmail_q=
+uote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,2=
+04);padding-left:1ex"><div>At the time people thought that GUI is the best =
+and most useful interface for the new era and text terminal computing is ab=
+out to die pretty soon.=C2=A0 Well it took at least 10 more years to happen=
+ and the introduction of World Wide Web and Windows 95 certainly help solid=
+ify it.</div><div><br></div><div>When Plan 9 was created in the mid-late 80=
+s exactly those ideas circulated.=C2=A0 Nothing comes from nothing, everyth=
+ing has its historical context.=C2=A0 In the late 80s in order to &quot;inn=
+ovate&quot; it was natural to think that abandoning text terminals is a &qu=
+ot;progress&quot;.</div></blockquote><div><br></div><div>This is conflating=
+ two things: textual interfaces and the graphical presentation of those int=
+erfaces. Plan 9 is about both.</div><div><br></div><div>Unix was born in an=
+ era where the TTY (that is, tele-typewriter, as in &quot;prints to paper&q=
+uot;) was still very much a force in mediating the interaction between user=
+ and computer. That evolved rather quickly to the &quot;green screen&quot; =
+terminals of the 70s and early 80s, but the paradigm was basically the same=
+: the serial terminal was a window showing the tail of an infinite scroll o=
+f data. The &quot;terminal&quot;, as in the TTY, was and is a central abstr=
+action in Unix.</div><div><br></div><div>By the late 80s, when plan9 got st=
+arted, the paradigm had shifted: machines now had relatively high resolutio=
+n bitmapped graphical interfaces, and by and large you weren&#39;t sitting =
+in front of a serial terminal anymore. Being tied to a single &quot;termina=
+l&quot; was a hindrance and led to a lot of complexity (job control, termin=
+al interactions with process groups, POSIX sessions, signals and ioctls for=
+ window-size changes for programs that wanted to continue believing that th=
+ey&#39;re using a serial terminal, even though they haven&#39;t been for ye=
+ars...).</div><div><br></div><div>Plan9 wanted to take advantage of the new=
+ graphics functionality but didn&#39;t want to be chained to the complexity=
+ associated with obsolete hardware (e.g., the TTY abstraction, which _still=
+ persists_ and has its fingers in weird parts of the kernel).</div><div><br=
+></div><div>They still wanted a text-oriented interface though, and that&#3=
+9;s what plan9 provides. You sweep out a rio window and it&#39;s running a =
+shell. Text in acme is usually editable and there aren&#39;t a lot of stran=
+ge glyphs to click on; commands are strings. And you&#39;re no longer chain=
+ed to a &quot;terminal&quot;: I can have many shells running in many window=
+s and they&#39;re all more or less the same. And it allowed them to move be=
+yond the limitations of cursor-addressed user interfaces. They could, for e=
+xample, write (or more precisely adapt) text editors like `sam`, which is f=
+undamentally a textual program but uses the GUI to very nice effect. It may=
+ seem dated by today&#39;s standards, but it still works very nicely (indee=
+d, I had to run a coworker through a sam session last Thursday; he was a co=
+ntinent away from me connecting to a plan9 system but we were able to do wh=
+at needed to be done relatively quickly because it&#39;s all text and so si=
+mple...).</div><div><br></div><div>I remember when I was in high school dri=
+ving over to New Jersey and going to Bell Labs and meeting Dennis Ritchie f=
+or the first time (a college student I knew was doing an internship there a=
+nd let me come visit). Dennis showed me plan9 on his gnot (this was back in=
+ the 8.5 days), and specifically talked about this: the focus was text, whi=
+ch was editable, could be manipulated, combined, split apart, was self-expl=
+anatory etc, instead of little icons like MS Windows and the Mac which were=
+ simultaneously static and cryptic. It *is* a textual interface, though it&=
+#39;s *presented* and *multiplexed* via a bitmapped graphics display.</div>=
+<div><br></div><div>I distinctly remember feeling blown away by the powerfu=
+l marriage of text with bitmapped displays; it was a GUI for a Unix-like ex=
+perience done right. They didn&#39;t sacrifice anything, but they gained so=
+ much more.</div><div><br></div><blockquote class=3D"gmail_quote" style=3D"=
+margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-lef=
+t:1ex"><div>Unix was born in the different era.=C2=A0 Same with the origina=
+l IBM PC.=C2=A0 That is why they revolve around pure text interface.</div><=
+/blockquote><div><br></div><div>Unix and the PC date from radically differe=
+nt eras.</div><div><br></div><div>The original IBM PC had a graphics adapte=
+r, and that was the expected mode of interaction, not the serial port. Gran=
+ted that adapter was pretty weak, but it was there. Using a PC, you were us=
+ing a graphical representation of your text interface. Unlike a serial term=
+inal, where you simply emit the text to the terminal and the terminal deals=
+ with displaying it, writing an interface for CGA or MGA -- even in text mo=
+de -- involves scrolling the buffer, handling line feeds, tab and backspace=
+ expansion, and all the rest of it in software (granted, lots of serial dri=
+vers for Unix handle tab and BS expansion, too). But you, the programmer, h=
+ave to manually keep track of your position in that little 4k buffer. You h=
+ave to deal with moving the cursor around, etc.</div><div><br></div><div>=
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Dan C.</div><div><br></div></div></div></div>
+
+--000000000000966d720575090eb7--

@@ -1,0 +1,558 @@
+From: sysyphus@crl.com (Danny R. Brown)
+Date: Thu, 30 Nov 1995 21:37:28 -0800 (PST)
+Subject: Compiling BSD2.11 w/DEQNA support
+Message-ID: <Pine.SUN.3.91.951130212910.360B-100000@crl10.crl.com>
+
+Greetings:
+  All I did was add 1 DEQNA, 3 DLV's (total 4), 1 DLV. Has anyone tried 
+this? The Makefile proceeds without errors until the final (massive)
+link run. Then it says
+                        too big for type 431
+and exits code 2.
+I tried playing with Makefile, deleted some modules, like the rk, which
+I do not have, and moved a couple around. Same result.
+Obviously I'm new at this. Any assistance appreciated.
+
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id IAA07678; Sat, 2 Dec 1995 08:10:21 +1100
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <04592-0 at oxmail.ox.ac.uk.>; Fri, 1 Dec 1995 18:33:53 +0000
+Message-Id: <m0tLaNC-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: Serial lines and v6 ...
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Fri, 1 Dec 1995 18:39:49 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 2794
+
+
+Having given up trying to work out why v6 runs on my /34a, and v5
+doesn't, I've turned my mind to the problem of trying to get a second
+DL11 up and running so I can use a terminal as well as my trusty
+teletype.
+
+I've set up a second DL11 on CSR address 176500, vector 300. This
+device is set for 96008N1, for what it's worth, and works just fine
+under RT11.
+
+I rebuilt the v6 kernel to enable a second DL11 interface. I have no
+guide to the source, so all this is based on my guesswork. Needless to
+say, it doesn't work, and I'm now out of ideas:
+
+Modified /usr/sys/dmr/kl.c, the KL/DL-11 driver source. I'm assured
+that the KL11 is an ancient serial interface ...
+
+Extract from said file ...
+
+/* base address */
+#define KLADDR 0177560 /* console */
+#define KLBASE 0176500 /* kl and dl11-a */
+#define DLBASE 0175610 /* dl-e */
+#define NKL11 1
+#define NDL11 0
+#define DSRDY 02
+#define RDRENB 01
+
+I simply changed the number of KL11's from one to two:
+
+#define NKL11 2
+
+A further comment in the code says:
+
+ * set up minor 0 to address KLADDR
+ * set up minor 1 thru NKL11-1 to address from KLBASE
+ * set up minor NKL11 on to addresss from DLBASE
+
+What this is saying is that minor 0 will be 0177560 (my console, which
+works fine), minor 1 will be 0176500 (which should be my second
+DL11). The code even does what the comment says ... ;)
+
+So I rebuild the kernel, reboot.
+
+Now, /etc/mknod /dev/tty1 c 0 1
+
+makes the device, and
+
+echo Hi >/dev/tty1
+
+gives:
+
+/dev/tty1: cannot create
+
+What is up? Naturally if I set up a login for that terminal by editing
+/etc/ttys, the process loops and causes a great deal of disk
+thrashing. Something is clearly up with the configuration of the
+device drivers here ...
+
+Does anyone know how I'm supposed to do this properly? Advice and
+guidance would be much appreciated ...
+
+
+*********************************************************************
+On a completely different note, would someone be so kind as to give me
+the source for a very small Bourne shell and accompanying utilities
+(/bin/test etc...) that I could port to v6 without too much difficulty?
+*********************************************************************
+
+
+Thanks,
+
+Bob.
+
+
+--
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+       "Wall Street or Crack Dealer Avenue,
+        the last routes left to the American Dream" - Jello Biafra
+----------------------------------------------------------------------------
+
+
+
+Received: from mail.crl.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id BAA07165; Sat, 2 Dec 1995 01:12:02 +1100
+Received: from crl10.crl.com by mail.crl.com with SMTP id AA20411
+  (5.65c/IDA-1.5 for <oldunix at minnie.cs.adfa.oz.au>); Fri, 1 Dec 1995 06:10:08 -0800
+Received: by crl10.crl.com id AA04477
+  (5.65c/IDA-1.5 for oldunix at minnie.cs.adfa.oz.au); Fri, 1 Dec 1995 06:03:51 -0800
+Date: Fri, 1 Dec 1995 06:03:50 -0800 (PST)
+From: "Danny R. Brown" <sysyphus@crl.com>
+To: oldunix at minnie.cs.adfa.oz.au
+Subject: Followup to compiling BSD2.11 w/Deqna
+Message-Id: <Pine.SUN.3.91.951201055825.4424A-100000 at crl10.crl.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+
+
+Uh, sorry... I rebuilt the unmodified GENERIC kernal. It also terminates
+abnormally, same point, same message. I'm going to sleep for a while
+and then go out and buy another Unix book. 
+
+*************************************************************************
+*      A Personal Message from   *                BASILISK              *
+*          Danny R. Brown        *     "Try our other fine flavors!"    *
+*       ( sysyphus at crl.com )     *            (404) 392-1691            *
+*        Pager:(404)397-0516     *            LYNC host mode            *
+*************************************************************************
+
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id PAA08538; Sat, 2 Dec 1995 15:13:32 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id UAA17751; Fri, 1 Dec 1995 20:05:36 -0800
+Date: Fri, 1 Dec 1995 20:05:36 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512020405.UAA17751 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: Followup to compiling BSD2.11 w/Deqna
+
+Hello -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+> Subject: Followup to compiling BSD2.11 w/Deqna
+> 
+> 
+> Uh, sorry... I rebuilt the unmodified GENERIC kernal. It also terminates
+> abnormally, same point, same message. I'm going to sleep for a while
+> and then go out and buy another Unix book. 
+
+	That is strange.  The GENERIC kernel should build with no problems -
+	efforts were made to keep the Make.* files in /sys/conf in sync with
+	the GENERIC system.
+
+	Alas, it sounds like I didn't keep the template Makefiles current
+	enough ;-(
+
+	I doubt there are any books out there that know anything about
+	overlays - it's a a lost art from what I've seen.
+
+	I'll follow up with a mini tutorial on how to build a kernel.  One
+	note for now:  it is 99.999% certain that after configuring a
+	non-GENERIC kernel you will get a size error from the linker and you
+	will have to adjust the overlay layout in your kernel build directory.
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id QAA08620; Sat, 2 Dec 1995 16:16:02 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA14858; Sat, 2 Dec 1995 16:15:38 +1100
+From: wkt@csadfa.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9512020515.AA14858 at dolphin>
+Subject: Re: Serial lines and v6 ...
+To: rjm at swift.eng.ox.ac.uk (Bob Manners)
+Date: Sat, 2 Dec 1995 16:15:38 +1100 (EST)
+Cc: oldunix at minnie.cs.adfa.oz.au
+In-Reply-To: <m0tLaNC-00000DC at swift.eng.ox.ac.uk> from "Bob Manners" at Dec 1, 95 06:39:49 pm
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Bob Manners:
+> I rebuilt the v6 kernel to enable a second DL11 interface. I have no
+> guide to the source, so all this is based on my guesswork. Needless to
+> say, it doesn't work, and I'm now out of ideas:
+
+Bob, check out the manual for mkconf(1), and also the documentation
+about rebuilding the Unix kernel in /usr/doc/setup??. I'm sure it
+mentions the DL code, so that might get you going. I'm at home & don't
+have my paper copies at hand. But looking at the v7 docs, maybe you
+need to put a line like
+
+1 kl
+
+in your config file. Don't put 2 kl, the software automatically counts
+the console.
+
+> On a completely different note, would someone be so kind as to give me
+> the source for a very small Bourne shell and accompanying utilities
+> (/bin/test etc...) that I could port to v6 without too much difficulty?
+
+Yeah, v6 comes with all of these in /usr/src/cmd :-) Maybe you meant
+something else?
+
+	Warren
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id QAA08617; Sat, 2 Dec 1995 16:01:43 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id VAA18261; Fri, 1 Dec 1995 21:01:42 -0800
+Date: Fri, 1 Dec 1995 21:01:42 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512020501.VAA18261 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: Compiling BSD2.11 w/DEQNA support
+
+Greetings -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+>   All I did was add 1 DEQNA, 3 DLV's (total 4), 1 DLV. Has anyone tried 
+> this? The Makefile proceeds without errors until the final (massive)
+> link run. Then it says
+>                         too big for type 431
+> and exits code 2.
+> I tried playing with Makefile, deleted some modules, like the rk, which
+> I do not have, and moved a couple around. Same result.
+> Obviously I'm new at this. Any assistance appreciated.
+
+	This is not unexpected.  In fact I was placing bets with myself
+	as to when the first person would encounter the 'too big' message ;-)
+
+	As distributed only the GENERIC kernel will (or should - apparently
+	I screwed up) configure and build without errors.
+
+	What to do when the linker complains about the size of a kernel
+	is not covered in the documentation - sorry 'bout that, perhaps I'll
+	take the mini-tutorial below and add it to the setup documentation
+	some day.
+
+	As a bit of background here is what goes on when a kernel is
+	configured:
+
+		cd /sys/conf
+		cp GENERIC PICKLE
+		vi PICKLE
+		  ... turn on/off desired featuers,drivers,etc ...
+		./config PICKLE
+
+		At this point the 'config' script creates the directory
+		/sys/PICKLE and populates it with various .h files describing
+		what devices are present and so on.  Also copied into
+		/sys/PICKLE are the various _prototype_ Makefiles: Makefile,
+		Make.pdp, Make.pdpuba, etc.  Of these makefiles you are 
+		only concerned with "Makefile" - the others should almost
+		_never_ be edited.
+
+		cd ../PICKLE
+		make
+
+		ld: too big for type 431
+
+	First - what does that message mean?  '431' is the magic number for
+	a split I/D overlaid executable.  Kernels are *always* split I/D
+	and overlaid.
+
+	The 'too big' part of the message means that the base segment and/or
+	one of the overlays is larger than allowed.  What are the limits
+	on the sizes (I hear you ask)?
+
+	Kernels are a special case of overlaid program (user mode programs
+	may be overlaid too but have less restrictive size rules).  The
+	BASE segment (non-overlaid portion)  may be up to 56kb (57344) bytes
+	in size.  Each of the 15 (maximum) overlays (OV1 thru OV15) may be
+	up to 8kb (8192) bytes.
+
+	When 'ld' gives you a "too big" message the first thing you should
+	do is:
+
+		size unix.o
+
+	That will produce something similar to:
+
+text    data    bss     dec     hex
+58304   7778    41206   107288  1a318   total text: 119360
+        overlays: 8192,6976,7680,7616,8000,7872,7680,7040
+
+	As we see the base segment is over 57344.  To reduce the base we
+	must move one of the files from the BASE group to one of the OV groups.
+	Which one?  It is not critical but a the general rule is:
+
+		The smallest one which will solve the problem.
+
+	It is perfectly ok to put device drivers in overlays - especially
+	disk drivers which tend to move large chunks of data per interrupt
+	or call.  It is desireable to keep terminal drivers in the base but
+	nothing bad will happen if you need to put one (such as dh.o) into
+	an overlay.
+
+	Next, look in the Makefile at the line starting with "BASE=" and do:
+	a "size " command on all the files listed in the BASE section.
+
+	How much do we need to reduce the base?  58304 - 57344 = 960.  So, 
+	we need to find a .o (or more than one - it's the total of sizes
+	that counts) in the BASE that is >= 960 bytes of text.
+
+	In my kernel the overlay description looks like this:
+
+BASE=   br.o cons.o dh.o dhu.o dhv.o dr.o dz.o hk.o ht.o init_sysent.o \
+        kern_clock.o kern_descrip.o kern_mman.o kern_proc.o kern_prot.o \
+	kern_subr.o kern_synch.o machdep.o ram.o kern_fork.o \
+	rk.o ra.o rx.o si.o subr_rmap.o sys_inode.o sys_kern.o \
+	tm.o tty.o tty_conf.o tty_subr.o tty_tb.o ufs_alloc.o \
+	ufs_bio.o ufs_dsort.o ufs_fio.o ufs_inode.o ufs_namei.o \
+	vm_sched.o vm_text.o xp.o quota_subr.o
+OV1=    sys_generic.o ufs_syscalls.o
+OV2=    kern_acct.o kern_exec.o kern_exit.o kern_resource.o
+OV3=    kern_time.o sys_process.o ufs_mount.o ufs_subr.o \
+	uipc_syscalls.o
+OV4=    dkbad.o kern_sig.o mem.o subr_xxx.o trap.o tty_pty.o tty_tty.o
+OV5=    quota_kern.o quota_ufs.o quota_sys.o ufs_bmap.o \
+	sys_pipe.o
+# OV6 gets the (hopefully) never used routines
+OV6=    clock.o dn.o init_main.o kern_pdp.o machdep2.o subr_prf.o syscalls.o \
+	subr_log.o toy.o vm_swap.o
+OV7=    tmscp.o lp.o vm_swp.o rl.o mch_fpsim.o ts.o
+OV8=    kern_sysctl.o ingreslock.o ufs_disksubr.o kern_xxx.o vm_proc.o
+
+	We see that
+
+		size kern_subr.o ufs_dsort.o
+
+	gives
+
+		text	data	bss
+		820	34	0
+		272	0	0
+
+	820 + 272 = 1092
+
+	58304 - 1092 = 57212
+
+	which is great!  It's below 57344.  So, we've found the .o files which
+	when moved to an overlay will generate a valid kernel.  Where should
+	we put it?
+
+	Well - OV2 looks a little small, is there room there?  8192-6976=1216.
+	Yes, there is room.
+
+	So, the kern_subr.o and ufs_dsort.o files are removed from the BASE
+	section and added to OV2:
+
+BASE=   br.o cons.o dh.o dhu.o dhv.o dr.o dz.o hk.o ht.o init_sysent.o \
+        kern_clock.o kern_descrip.o kern_mman.o kern_proc.o kern_prot.o \
+	kern_synch.o machdep.o ram.o kern_fork.o \
+	rk.o ra.o rx.o si.o subr_rmap.o sys_inode.o sys_kern.o \
+	tm.o tty.o tty_conf.o tty_subr.o tty_tb.o ufs_alloc.o \
+	ufs_bio.o ufs_fio.o ufs_inode.o ufs_namei.o \
+	vm_sched.o vm_text.o xp.o quota_subr.o
+OV2=    kern_acct.o kern_exec.o kern_exit.o kern_resource.o kern_subr.o \
+	ufs_dsort.o
+
+	Then exit the editor and type "make".  And voila - no error and
+	doing "size unix" yields:
+
+text    data    bss     dec     hex
+57280   7778    41206   106264  19f18   total text: 119424
+        overlays: 8192,8064,7680,7616,8000,7872,7680,7040
+
+	Perfect!
+
+	*NEVER* simply delete files from the Makefile!  If you did not select
+	a device in the config file - the .o is 0 bytes in size.  If for
+	example you do not have an RK05 configured do a "size rk.o" and
+	you will see that it is "0 0 0".  The .o is only 16 bytes long.
+
+	That is why you didn't notice any difference when moving/deleting
+	files - they didn't have anything in them.  "size" is your friend
+	when adjusting overlays - trust him.
+
+	NOTE: There are some .o files which *must not* be moved out of the
+	base segment.  These are identified as such in the Makefile.
+
+	NOTE: You can not have any gaps in the overlays.  This means that
+	there can not be a 0 length (empty) overlay between two populated
+	overlays.  The last overlay used may be empty.
+
+	IF all the overlays are full - then add OV7, OV8, OV9, etc lines
+	(up to OV15) as needed and put .o files in them.  The Makefile will
+	use the new OV lines automatically.
+
+	I hope this makes things a little bit clearer for anyone building
+	a 2.11BSD kernel.
+
+	Good Luck!
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id QAA08686; Sat, 2 Dec 1995 16:40:51 +1059
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA15007; Sat, 2 Dec 1995 16:41:05 +1100
+From: wkt@dolphin.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9512020541.AA15007 at dolphin>
+Subject: Re: Compiling 2.11 - also 2.9BSD
+To: oldunix at minnie.cs.adfa.oz.au
+Date: Sat, 2 Dec 1995 16:41:04 +1100 (EST)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Steven M. Schultz:
+> 	Kernels are a special case of overlaid program (user mode programs
+> 	may be overlaid too but have less restrictive size rules).  The
+> 	BASE segment (non-overlaid portion)  may be up to 56kb (57344) bytes
+> 	in size.  Each of the 15 (maximum) overlays (OV1 thru OV15) may be
+> 	up to 8kb (8192) bytes.
+
+Firstly, thanks to Steven for a great email. Yes, add it to the docs NOW
+before you forget! Secondly, most of what Steven said also applies to
+2.9BSD, because it also uses overlays. However, v6 and v7 do not use
+overlays, so you can't use these techniques with them.
+
+Ciao,
+	Warren
+
+
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id RAA08737; Sat, 2 Dec 1995 17:04:04 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id WAA18663; Fri, 1 Dec 1995 22:03:57 -0800
+Date: Fri, 1 Dec 1995 22:03:57 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512020603.WAA18663 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, wkt at dolphin.cs.adfa.oz.au
+Subject: Re: Compiling 2.11 - also 2.9BSD
+
+Hello -
+
+> From: wkt at dolphin.cs.adfa.oz.au (Warren Toomey)
+> 
+> In article by Steven M. Schultz:
+> > 	Kernels are a special case of overlaid program (user mode programs
+> > 	may be overlaid too but have less restrictive size rules).  The
+> > 	BASE segment (non-overlaid portion)  may be up to 56kb (57344) bytes
+> > 	in size.  Each of the 15 (maximum) overlays (OV1 thru OV15) may be
+> 
+> Firstly, thanks to Steven for a great email. Yes, add it to the docs NOW
+> before you forget! Secondly, most of what Steven said also applies to
+> 2.9BSD, because it also uses overlays. However, v6 and v7 do not use
+
+	You're quite welcome.
+
+	I should have had another sentence in the paragraph above:  the
+	kernel overlays must be between 48kb and 56kb.  56 is the max,
+	but the kernel also has a minimum BASE size of 48kb (but this is
+	all too easy to achieve ;-)).
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: from wlv.iipo.gtegsc.com by minnie.cs.adfa.oz.au (8.6.8/8.3) with ESMTP id GAA11449; Mon, 4 Dec 1995 06:32:19 +1100
+Received: (from sms at localhost) by wlv.iipo.gtegsc.com (8.6.10/8.6.12) id LAA07500; Sun, 3 Dec 1995 11:30:55 -0800
+Date: Sun, 3 Dec 1995 11:30:55 -0800
+From: "Steven M. Schultz" <sms@wlv.iipo.gtegsc.com>
+Message-Id: <199512031930.LAA07500 at wlv.iipo.gtegsc.com>
+To: oldunix at minnie.cs.adfa.oz.au, robin at falstaf.demon.co.uk,
+        sms at wlv.iipo.gtegsc.com, sysyphus at crl.com
+Subject: Re: Followup to compiling BSD2.11 w/Deqna
+
+Hi Robin -
+
+> From: Robin Birch <robin at falstaf.demon.co.uk>
+> 
+> Hi Steve,
+> The most recent version (Rev 280) will build GENERIC fine but previous ones
+> didn't.  The makefile required tweaking.  Maybe all he needs is the last few
+> patches.
+ 
+	That is most likely what happened - I'd made some changes to the
+	kernel just before creating the Rev 277 images (which is what was
+	entered into Warren's archive) and didn't double check that the
+	GENERIC kernel would build correctly.
+
+	I don't believe I've mentioned it on this mailing list yet but the
+	complete collection of 2.11BSD patches/updates are available via
+	anonymous FTP to the host FTP.IIPO.GTEGSC.COM in the directory
+	/pub/2.11BSD.  There have been 4 updates released recently: 278 thru 
+	281.
+
+	Cheers.
+
+	Steven
+
+Received: from relay-4.mail.demon.net by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id AAA11045; Mon, 4 Dec 1995 00:40:40 +1100
+Received: from post.demon.co.uk by relay-4.mail.demon.net id msg.ad18368;
+          3 Dec 95 13:38 GMT
+Received: from falstaf.demon.co.uk by relay-3.mail.demon.net id sg.aa13167;
+          3 Dec 95 13:37 GMT
+Received: (from robin at localhost) by falstaf.demon.co.uk (8.6.9/8.6.9) id NAA00267; Sun, 3 Dec 1995 13:36:18 GMT
+Date: Sun, 3 Dec 1995 13:36:18 GMT
+From: Robin Birch <robin@falstaf.demon.co.uk>
+Message-Id: <199512031336.NAA00267 at falstaf.demon.co.uk>
+To: oldunix at minnie.cs.adfa.oz.au, sms at wlv.iipo.gtegsc.com, sysyphus at crl.com
+Subject: Re: Followup to compiling BSD2.11 w/Deqna
+X-SMTP-Posting-Host: falstaf.demon.co.uk [Sun, 3 Dec 95 13:37:29 GMT]
+X-SMTP-Posting-Host: post.demon.co.uk [Sun, 3 Dec 95 13:38:32 GMT]
+
+Hi Steve,
+The most recent version (Rev 280) will build the GENERIC fine but previous ones
+didn't.  The makefile required tweaking.  Maybe all he needs is the last few
+patches.
+
+Cheers
+
+Robin
+
+Received: from relay-4.mail.demon.net by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id AAA11043; Mon, 4 Dec 1995 00:38:03 +1100
+Received: from post.demon.co.uk by relay-4.mail.demon.net id sg.an16194;
+          3 Dec 95 13:36 GMT
+Received: from falstaf.demon.co.uk by relay-3.mail.demon.net id g.aa12803;
+          3 Dec 95 13:35 GMT
+Received: (from robin at localhost) by falstaf.demon.co.uk (8.6.9/8.6.9) id NAA00261; Sun, 3 Dec 1995 13:34:28 GMT
+Date: Sun, 3 Dec 1995 13:34:28 GMT
+From: Robin Birch <robin@falstaf.demon.co.uk>
+Message-Id: <199512031334.NAA00261 at falstaf.demon.co.uk>
+To: oldunix at minnie.cs.adfa.oz.au, sysyphus at crl.com
+Subject: Re: Compiling BSD2.11 w/DEQNA support
+X-SMTP-Posting-Host: falstaf.demon.co.uk [Sun, 3 Dec 95 13:35:31 GMT]
+X-SMTP-Posting-Host: post.demon.co.uk [Sun, 3 Dec 95 13:36:25 GMT]
+
+Hi,
+Well I havn't tried your mix but a DEQNA fits ok.  What you need to do is do
+a size on the unix file that has been generated and workout which overlays 
+are blowing the loader.  If you add the size of the base code and any overlay
+together they can't be more than 64k.  Then just move things between overlays
+and base until they work.  You don't have to delete the modules that you don't
+want, they don't add anything.
+
+Good luck, it can be tricky but it does work after you have pushed a few modules
+around.
+
+Robin
+
+

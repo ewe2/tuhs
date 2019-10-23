@@ -1,0 +1,30 @@
+From: lyndon@orthanc.ca (Lyndon Nerenberg)
+Date: Tue, 5 Dec 2017 18:26:05 -0800
+Subject: [TUHS] shell PS1/PS2 which survive cut-paste
+In-Reply-To: <20171206012824.GA20970@wopr>
+References: <CAKr6gn2LGqRaasTE6+iDxFQU=YeD5mFSmSa22Uq=LP-M=umt8Q@mail.gmail.com>
+ <20171206012824.GA20970@wopr>
+Message-ID: <CBC017EB-5377-452A-A0E5-479761E04BBC@orthanc.ca>
+
+
+> On Dec 5, 2017, at 5:28 PM, Kurt H Maier <khm at sciops.net> wrote:
+> 
+> I've used :; and ::; to good effect. Since : is a no-op, it just inserts
+> noise into the history.
+
+This fragment lives in my ${HOME}/.env on pretty much every machine I log in to.  If you 'export ENV=${HOME}/.env' in .profile, then configure sudo/doas to pass ENV through unmolested, this will follow you as you switch uids.
+
+ _hostname=$(hostname | sed -e 's/\.hushmail\(inc\)*\.com$//')
+ awd=$(which awd 2>/dev/null)
+ if [ "${awd}" == "" ] ; then
+        awd=':'
+ fi
+ setprompt () { PS1=": $(id -un)@$_hostname:$(pwd); " ; }
+ cd () { command cd "$@" && setprompt && ${awd} ; }
+ setprompt
+
+It works with pretty much every Bourne/Korn shell variant I've stumbled across.  Adjust the _hostname bit to match the domains of the systems you regularly log in to, and drop the awd bits if you don't use plan9port.
+
+--lyndon
+
+

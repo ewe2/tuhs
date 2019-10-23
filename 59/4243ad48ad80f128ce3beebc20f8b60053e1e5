@@ -1,0 +1,445 @@
+From: lars@nocrew.org (lars brinkhoff)
+Date: 12 Apr 2000 14:05:16 +0200
+Subject: Help running 2.11 on Supnik 2.3d
+In-Reply-To: Warren Toomey's message of "Wed, 12 Apr 2000 09:49:23 +1000 (EST)"
+Message-ID: <85ln2jsewz.fsf@junk.nocrew.org>
+
+I've tried running the image in /Boot_Images/2.11_on_rl02 on
+Supnik's emulator version 2.3d, but the root filsystem seems
+corrupted, with many binaries being unexecutable, bad block
+error messages, etc.
+
+Does anyone know how to successfully boot this image?
+
+If this is the wrong place for this kind of question, or if
+there's a FAQ on this, then please point me in the right
+direction.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA92766
+	for pups-liszt; Thu, 13 Apr 2000 08:33:33 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA92762
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 13 Apr 2000 08:33:27 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id IAA06177;
+	Thu, 13 Apr 2000 08:33:16 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200004122233.IAA06177 at henry.cs.adfa.edu.au>
+Subject: Re: Help running 2.11 on Supnik 2.3d
+In-Reply-To: <85ln2jsewz.fsf at junk.nocrew.org> from lars brinkhoff at "Apr 12, 2000  2: 5:16 pm"
+To: lars at nocrew.org (lars brinkhoff)
+Date: Thu, 13 Apr 2000 08:33:16 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by lars brinkhoff:
+> I've tried running the image in /Boot_Images/2.11_on_rl02 [from the PUPS
+> Archive] on Supnik's emulator version 2.3d, but the root filsystem seems
+> corrupted, with many binaries being unexecutable, bad block
+> error messages, etc.
+> 
+> Does anyone know how to successfully boot this image?
+
+Hmm, if I get a chance I'll try it here. Has anybody used this image
+successfully?
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA94344
+	for pups-liszt; Thu, 13 Apr 2000 13:23:56 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA94340
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 13 Apr 2000 13:23:38 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id UAA16968;
+	Wed, 12 Apr 2000 20:22:56 -0700 (PDT)
+Date: Wed, 12 Apr 2000 20:22:56 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200004130322.UAA16968 at moe.2bsd.com>
+To: lars at nocrew.org, pups at minnie.cs.adfa.edu.au
+Subject: Re: Help running 2.11 on Supnik 2.3d
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi --
+
+> From: lars brinkhoff <lars at nocrew.org>
+> I've tried running the image in /Boot_Images/2.11_on_rl02 on
+> Supnik's emulator version 2.3d, but the root filsystem seems
+> corrupted, with many binaries being unexecutable, bad block error messages, 
+> etc.
+> 
+> Does anyone know how to successfully boot this image?
+
+	Yes.  The problem is not with the images (although the whole "on rl02"
+	is a pain - you're far better off using the "xp" or large disk support
+	that Bob added).
+
+> If this is the wrong place for this kind of question, or if
+> there's a FAQ on this, then please point me in the right direction.
+
+	This is a very good place to ask this type of question.
+
+	And now the moment you've been waiting for:  "the Answer" ;)
+
+	2.11BSD is *very* upset at having to run in 256kb of memory.  since
+	the kernel plus buffer cache (and other data structures) can easily
+	exceed 200kb there is not enough memory left over to run a program.
+	Programs such as 'fsck' are fairly large split I/D programs and won't
+	fit in the remaining ~56kb or so.
+
+	The quick fix to the problem is adding the line:
+
+		set cpu 2048K
+
+	to the config file before running the simulator.  That will give the
+	simulated PDP-11 2Mb of memory which is a real nice size.  Oh, if
+	memory is a concern on the system then "set cpu 1024K" will work
+	well.  Since there's no networking involved 1Mb will be quite adequate.
+	If you were using "P11" (the Begemot emulator) and had the full IP/TCP
+	stack, etc then the kernel+networking+buffers can reach close to 400Kb
+	and you might want to use 2Mb for the memory size.
+
+	You might also look into the latest version (2.5) of the Begemot
+	emulator.  The two key advantages of P11 are:  1) a emulated DEQNA so
+	you can place the PDP11 on a network, 2) It keeps _good_ time
+	(version 2.4 and earlier had severe timeskew when running compute
+	bound programs, 2.5 is awesomely better and within range of "ntp"
+	to keep the clock correct).  P11 also supports (as does Bob Supnik's
+	simulator) large disks such as the RP06 which is much nicer than
+	4 RL02s and a batch of RK05s.
+
+	Hmmm, I'm not sure which rev level of 2.11BSD is in the "on_rl02"
+	images - I hope it has the "bounce buffer support" to handle the 18bit
+	RK controller on a 22bit bus...   If the RK images show corrupt or the
+	kernel crashes then I would suspect the kernel is a bit too old.
+
+	Unpack the "211bsd_on_rl02" images from the .gz images, edit the
+	"script" file to increase the system memory and you should be all
+	set to go.
+
+	Steven
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA94566
+	for pups-liszt; Thu, 13 Apr 2000 14:56:35 +1000 (EST)
+Received: from freebie.lemis.com (root at freebie.lemis.com [192.109.197.137])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA94562
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 13 Apr 2000 14:56:26 +1000 (EST)
+Received: (from grog at localhost)
+	by freebie.lemis.com (8.9.3/8.9.0) id OAA45453
+	for pups at minnie.cs.adfa.oz.au; Thu, 13 Apr 2000 14:26:23 +0930 (CST)
+Date: Thu, 13 Apr 2000 14:26:23 +0930
+From: Greg Lehey <grog@lemis.com>
+To: UNIX Heritage Society <pups at minnie.cs.adfa.oz.au>
+Subject: Early file system layouts (was: Splitting / and /usr)
+Message-ID: <20000413142623.A45386 at freebie.lemis.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 1.0pre2i
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Saw this on a NetBSD list.
+
+Greg
+
+----- Forwarded message from "Alistair G. Crooks" <agc at ftp.netbsd.org> -----
+
+> Date: Wed, 12 Apr 2000 01:31:41 -0700 (PDT)
+> To: kre at munnari.oz.au
+> Cc: current-users at netbsd.org
+> Precedence: list
+> Delivered-To: current-users at netbsd.org
+>
+> Robert,
+>
+> [Off topic warning]
+>
+>>> Did you not know that /usr was split off only because the disks were too
+>>> small to keep everything on one way back in the early days
+>>
+>> That's how I heard it too - but this split must have occurred way back
+>> very early in the days before anyone outside Bell Labs had ever heard of
+>> unix (as I remember it, even the CACM paper had /usr in it).
+>
+> I believe that the topic of splitting / and /usr was discussed
+> at the Glasgow University meeting of the UKUUG, which was around
+> 1978, if my memory serves me well. As the first copy of V5 and V6
+> came out of the labs in the 1975/1976 timeframe, I suspect it came
+> later. I don't have my copy of the CACM paper to hand, so I can't
+> check dates.
+>
+> Whilst I attented the University there at that time, I didn't attend
+> the conference - more fool me.
+>
+> I suspect that Alistair Kilgour or Zdravko Podolski could provide
+> more information, or any of the Bell Labs alumni who were there.
+>
+> agc
+
+----- End forwarded message -----
+----- Forwarded message from Robert Elz <kre at munnari.OZ.AU> -----
+
+> To: "Alistair G. Crooks" <agc at ftp.netbsd.org>
+> Cc: current-users at netbsd.org
+> Date: Thu, 13 Apr 2000 10:36:15 +1000
+> Precedence: list
+> Delivered-To: current-users at netbsd.org
+>
+>     Date:        Wed, 12 Apr 2000 01:31:41 -0700 (PDT)
+>     From:        "Alistair G. Crooks" <agc at ftp.netbsd.org>
+>     Message-ID:  <200004120831.BAA06860 at nbftp.isc.org>
+>
+>> [Off topic warning]
+>
+> Ditto - but recording history sometimes has its uses...
+>
+>> I believe that the topic of splitting / and /usr was discussed
+>> at the Glasgow University meeting of the UKUUG, which was around
+>> 1978,
+>
+> It was definitely done before that.
+>
+> Unfortunately, I can't find a 5th edition manual (or even a reprinted
+> facsimilie thereof at the minute), but the 6th edition manual for sh(1)
+> says ...
+>
+> 	If the first argument [ on a command line ] is the name of an
+> 	executable file, it is invoked; otherwise the string `/bin' is
+> 	prepended to the argument.  (In this way most standard commands,
+> 	which reside in `/bin', are found.)  If no such command is found,
+> 	the string `/usr' is further prepended (to give `/usr/bin/command')
+> 	and another attempt is made to execute the resulting file.  (Certain
+> 	lesser-used commands live in `/usr/bin'.)
+>
+> The sixth edition manual is dated May 75, but the date on the sh man page
+> is 5/15/74 (which I interpret as the 15th of May, 1974).
+>
+> For those who are new to unix (within the last 20 years) note that there
+> was no notion of a user settable path...
+>
+>> I don't have my copy of the CACM paper to hand, so I can't
+>> check dates.
+>
+> I have checked now, and it says nothing either way, so that is no help.
+> Kernighan's "Unix for Beginners" (of a generally similar vintage) gives
+> a diagrammatic view of the filesystem tree, in which all that exists in
+> /usr are user directories, though that is not really conclusive.
+>
+>> I suspect that Alistair Kilgour or Zdravko Podolski could provide
+>> more information, or any of the Bell Labs alumni who were there.
+>
+> I will see if Dennis will tell me...
+>
+> kre
+>
+
+----- End forwarded message -----
+----- Forwarded message from Robert Elz <kre at munnari.OZ.AU> -----
+
+> To: "Alistair G. Crooks" <agc at ftp.netbsd.org>, current-users at netbsd.org
+> Date: Thu, 13 Apr 2000 12:45:05 +1000
+> Precedence: list
+> Delivered-To: current-users at netbsd.org
+>
+>     Date:        Thu, 13 Apr 2000 10:36:15 +1000
+>     From:        Robert Elz <kre at munnari.OZ.AU>
+>     Message-ID:  <353.955586175 at munnari.OZ.AU>
+>
+>> I will see if Dennis will tell me...
+>
+> He did, ...
+>
+>   But early; definitely by the time of the "nsys" system, the
+>   first C version, which was 1973.
+>
+> And ...
+>
+>   The point of /usr/bin was really to find a place to put
+>   those binaries.  (The .5MB disk was pretty cramped even
+>   with with two of them, as we later had).
+>
+> which (if we ever needed it) is confirmation or the original reason...
+>
+> kre
+>
+
+----- End forwarded message -----
+
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA94737
+	for pups-liszt; Thu, 13 Apr 2000 15:32:38 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA94732
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 13 Apr 2000 15:32:26 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id PAA08492;
+	Thu, 13 Apr 2000 15:32:02 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200004130532.PAA08492 at henry.cs.adfa.edu.au>
+Subject: Re: Early file system layouts (/ and /usr split)
+In-Reply-To: <20000413142623.A45386 at freebie.lemis.com> from Greg Lehey at "Apr 13, 2000  2:26:23 pm"
+To: grog at lemis.com (Greg Lehey)
+Date: Thu, 13 Apr 2000 15:32:02 +1000 (EST)
+Cc: current-users at netbsd.org
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+[ This came to me from a NetBSD mailing list, via Greg Lehey ]
+
+Someone said.....
+> >>> Did you not know that /usr was split off only because the disks were too
+> >>> small to keep everything on one way back in the early days
+
+Someone else said....
+> > I believe that the topic of splitting / and /usr was discussed
+> > at the Glasgow University meeting of the UKUUG, which was around
+> > 1978, if my memory serves me well. As the first copy of V5 and V6
+> > came out of the labs in the 1975/1976 timeframe, I suspect it came
+> > later. I don't have my copy of the CACM paper to hand, so I can't
+> > check dates.
+
+The answer is: UNIX had / and /usr split by at least the time of the
+July 1974 CACM paper ``The UNIX Time-sharing system''.
+
+Here is the evidence:
+
+At http://minnie.cs.adfa.edu.au/PUPS/Images/ken-and-den.txt and
+   http://minnie.cs.adfa.edu.au/PUPS/Images/ken-and-den.jpg
+
+you will find a picture of Ken and Dennis at the PDP-11/20 around 1972.
+The commentary in the text file from John Holden tell us that the disk
+drives are RF-11 and RK03 drives.
+
+RF-11 drives were fixed head drives with 512K of storage with fast access.
+RK03s and RK05s could store 2M, but were not as fast as RF-11s.
+
+The source code to (nearly) 3rd Edition UNIX, dated August 31, 1973, only
+has drivers for two disks, RF-11s and RK05s. This source code is in the
+PUPS Archive, http://minnie.cs.adfa.edu.au/PUPS. You need a Unix src license.
+
+Now, the July 1974 CACM paper says this:
+
+	In our installation, for example, the root directory resides
+	on the fixed-head disk, and the large disk drive, which contains
+	user's files, is mounted by the system initialization program; ....
+
+To me, this strongly indicates that / and /usr were split by at least
+July 1974, if not the earlier date of August 1973.
+
+Cheers all,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA94865
+	for pups-liszt; Thu, 13 Apr 2000 15:50:31 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA94861
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 13 Apr 2000 15:50:24 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id PAA08605;
+	Thu, 13 Apr 2000 15:50:17 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200004130550.PAA08605 at henry.cs.adfa.edu.au>
+Subject: Re: Early file system layouts (/ and /usr split)
+In-Reply-To: <200004130532.PAA08492 at henry.cs.adfa.edu.au> from Warren Toomey at "Apr 13, 2000  3:32: 2 pm"
+To: wkt at cs.adfa.edu.au
+Date: Thu, 13 Apr 2000 15:50:17 +1000 (EST)
+Cc: grog at lemis.com, current-users at netbsd.org
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Warren Toomey:
+> The answer is: UNIX had / and /usr split by at least the time of the
+> July 1974 CACM paper ``The UNIX Time-sharing system''.
+
+I just found some more evidence. The 2nd Edition UNIX manual is dated
+June 1972, but the actual man pages have their date of last modification.
+
+The manual for init(7), dated 15th June 1972, says:
+
+[ If console switches are set to 173030, a shell is attached to the
+  console immediately, i.e single-user mode ]
+
+	Otherwise, init does some housekeeping: the mode of each DECtape
+	file is changed to [read-write] (in case the system crashed during
+	a tap command); directory /usr is mounted on the RK0 disk; directory
+	/sys is mounted on the RK1 disk.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA94952
+	for pups-liszt; Thu, 13 Apr 2000 15:59:25 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA94946
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 13 Apr 2000 15:59:16 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id PAA08671;
+	Thu, 13 Apr 2000 15:59:06 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200004130559.PAA08671 at henry.cs.adfa.edu.au>
+Subject: Re: Early file system layouts (/ and /usr split)
+In-Reply-To: <200004130550.PAA08605 at henry.cs.adfa.edu.au> from Warren Toomey at "Apr 13, 2000  3:50:17 pm"
+To: wkt at cs.adfa.edu.au
+Date: Thu, 13 Apr 2000 15:59:06 +1000 (EST)
+Cc: wkt at cs.adfa.edu.au, grog at lemis.com, current-users at netbsd.org
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Warren Toomey:
+> In article by Warren Toomey:
+> > The answer is: UNIX had / and /usr split by at least the time of the
+> > July 1974 CACM paper ``The UNIX Time-sharing system''.
+> 
+> I just found some more evidence.
+
+And more, from the 1st Edition init(7) man page dated 3rd November, 1971.
+
+	Directory usr is assigned via sys mount as resident on the RK disk.
+
+and sys mount means the mount(2) system call.
+
+Cheers,
+	Warren
+
+

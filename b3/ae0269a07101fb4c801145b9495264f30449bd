@@ -1,0 +1,40 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 12 May 2017 20:44:23 -0400 (EDT)
+Subject: [TUHS] The evolution of Unix facilities and architecture
+Message-ID: <20170513004423.F3A9C18C099@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall
+
+    > Err, isn't that the sticky bit, not the setuid bit?
+
+Oh, right you are. I just looked in the code for ptrace(), and assumed that
+was it.
+
+The fix is _actually_ in sys1$exec() (in V6) and sys1$getxfile() (in PWB1 and
+the MIT system:
+
+	/*
+	 * set SUID/SGID protections, if no tracing
+	 */
+
+	if ((u.u_procp->p_flag&STRC)==0) {
+                if(ip->i_mode&ISUID)
+			if(u.u_uid != 0) {
+				u.u_uid = ip->i_uid;
+				u.u_procp->p_uid = ip->i_uid;
+				}
+
+The thing is, this code is identical in V6, PWB1, and MIT system!?
+
+So now I'm wondering - was this really the bug? Or was there some
+bug in ptrace I don't see, which was the actual bug that's being
+discussed here.
+
+Because is sure looks like this would prevent the exploitation that I
+described (start an SUID program under the debugger, then patch the code).
+
+Or perhaps somehow this fix was broken by some other feature,, and that
+introduced the exploit?
+
+	  Noel
+

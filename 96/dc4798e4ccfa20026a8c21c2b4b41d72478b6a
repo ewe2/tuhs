@@ -1,0 +1,94 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 752defea
+	for <ml@inbox.vuxu.org>;
+	Fri, 2 Aug 2019 11:42:24 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DA4AF9BAB6; Fri,  2 Aug 2019 21:42:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B8D809BA7E;
+	Fri,  2 Aug 2019 21:41:49 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 026199BA7E; Fri,  2 Aug 2019 21:41:47 +1000 (AEST)
+X-Greylist: delayed 1389 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Fri, 02 Aug 2019 21:41:45 AEST
+Received: from ppsw-31.csi.cam.ac.uk (ppsw-31.csi.cam.ac.uk [131.111.8.131])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A4BF19B84E
+ for <tuhs@tuhs.org>; Fri,  2 Aug 2019 21:41:45 +1000 (AEST)
+X-Cam-AntiVirus: no malware found
+X-Cam-ScannerInfo: http://help.uis.cam.ac.uk/email-scanner-virus
+Received: from grey.csi.cam.ac.uk ([131.111.57.57]:48186)
+ by ppsw-31.csi.cam.ac.uk (ppsw.cam.ac.uk [131.111.8.137]:25)
+ with esmtps (TLSv1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
+ id 1htVZv-000Pxw-Kr (Exim 4.92.1)
+ (return-path <dot@dotat.at>); Fri, 02 Aug 2019 12:18:31 +0100
+Date: Fri, 2 Aug 2019 12:18:30 +0100
+From: Tony Finch <dot@dotat.at>
+To: arnold@skeeve.com
+In-Reply-To: <201908020835.x728ZUal026532@freefriends.org>
+Message-ID: <alpine.DEB.2.20.1908021139530.11612@grey.csi.cam.ac.uk>
+References: <201908011235.x71CZP2B035023@tahoe.cs.Dartmouth.EDU>
+ <CAC0cEp8oZ6kYXZGrwSVKM64MdkKCEMnkwu_62k9z+bne9x-Gaw@mail.gmail.com>
+ <201908020835.x728ZUal026532@freefriends.org>
+User-Agent: Alpine 2.20 (DEB 67 2015-01-07)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] Additional groups and additional directory permissions
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org, doug@cs.dartmouth.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+arnold@skeeve.com <arnold@skeeve.com> wrote:
+> Arthur Krewat <krewat@kilonet.net>:
+> > There's also the setgid bit on directories, that when files are created,
+> > they will be in the group that the parent directory has on it.
+>
+> IIRC this was a Sun invention. It was in SunOS 4.x, and may even have
+> been in SunOS 3.x.
+
+When Bill Joy added the "multi-group stuff" to BSD all directories became
+implicitly set-gid:
+
+https://svnweb.freebsd.org/csrg/sys/ufs/ffs/ffs_inode.c?r1=4818&r2=5855
+
+This is in SCCS revision 4.8 so I think it appeared in 4.2BSD
+
+As I understand it, when group support was improved in System V they did
+not change creat() to match BSD but instead used the directory set-gid bit
+to provide opt-in BSD semantics. I don't know if this was in Solaris or
+earlier?
+
+> > Also, I don't think it's been mentioned, but there's the setuid bit on
+> > directories - otherwise known as the sticky bit. When set, even if you
+> > have rights to "write" the directory (meaning, delete files), you can't
+> > delete those owned by other users. Useful for /tmp
+>
+> Also a SunOS invention, IIRC.
+
+BSD again :-) SCCS revision 6.6 so I think it appeared in 4.3BSD
+
+https://svnweb.freebsd.org/csrg/sys/ufs/ffs/ufs_lookup.c?r1=15809&r2=16046
+
+Tony.
+-- 
+f.anthony.n.finch  <dot@dotat.at>  http://dotat.at/
+Mull of Galloway to Mull of Kintyre including the Firth of Clyde and North
+Channel: Variable 1 to 3, becoming easterly or southeasterly 2 to 4 later.
+Smooth, occasionally slight at first in North Channel. Showers for a time near
+shore. Good.

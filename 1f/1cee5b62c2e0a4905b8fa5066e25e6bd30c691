@@ -1,0 +1,51 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 18 Jul 2014 11:33:45 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140718153345.DC5EA18C0B4@mercury.lcs.mit.edu>
+
+    >> the downstream process is in the middle of a read call (waiting for
+    >> more data to be put in the pipe), and it has already computed a pointer
+    >> to the pipe's inode, and it's looping waiting for that inode to have
+    >> data.
+
+    > I think it would be necessary to make non-trivial adjustments to the
+    > pipe and file reading/writing code to make this work; either i) some
+    > sort of flag bit to say 'you've been spliced, take appropriate action'
+    > which the pipe code would have to check on being woken up, and then
+    > back out to let the main file reading/writing code take another crack
+    > at it
+    > ...
+    > I'm not sure I want to do the work to make this actually work - it's
+    > not clear if anyone is really that interested? And it's not something
+    > that I'm interested in having for my own use.
+
+So I decided that it was silly to put all that work into this, and not get it
+to work. I did 'cut a corner', by not handling the case where it's the first
+or last process which is bailing (which requires a file-pipe splice, not a
+pipe-pipe; the former is more complex); i.e. I was just doing a 'working proof
+of concept', not a full implementation.
+
+I used the 'flag bit on the inode' approach; the pipe-pipe case could be dealt
+with entirely inside pipe.c/readp(). Here's the added code in readp() (at the
+loop start):
+
+	if ((ip->i_flag & ISPLICE) != 0) {
+		closei(ip, 0);
+		ip = rp->f_inode;
+		}
+
+It worked first time!
+
+In more detail, I had written a 'splicetest' program that simply passed input
+to its output, looking for a line with a single keyword ("stop"); at that
+point, it did a splice() call and exited.  When I did "cat input | splicetest
+| cat > output", with appropriate test data in "input", all of the test data
+(less the "stop" line) appeared in the output file!
+
+For the first time (AFAIK) a process succesfully departed a pipeline, which
+continued to operate! So it is do-able. (If anyone has any interest in the
+code, let me know.)
+
+	Noel
+
+

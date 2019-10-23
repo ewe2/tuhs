@@ -1,0 +1,82 @@
+From: arnold@skeeve.com (arnold@skeeve.com)
+Date: Mon, 22 Jan 2018 12:36:17 -0700
+Subject: [TUHS] OT: Need help from a *BSD guru
+In-Reply-To: <201801221436.w0MEa5Jt005358@freefriends.org>
+References: <201801220810.w0M8ABbq002485@freefriends.org>
+ <201801221436.w0MEa5Jt005358@freefriends.org>
+Message-ID: <201801221936.w0MJaHZe017381@freefriends.org>
+
+The problem had to do with the "inplace" extension for gawk that enables
+in-place editing of files, ala perl or GNU sed -i. On BSD systems,
+I was getting failures from the test suite. E.g., on a regular system,
+inplace1.ok looks like:
+
+-----------------------
+before
+gawk: inplace:47: warning: inplace_begin: disabling in-place editing for invalid FILENAME `-'
+stdin start
+is bar replaced?
+stdin end
+after
+-----------------------
+
+On a BSD system, I get:
+
+-----------------------
+before
+gawk: inplace:47: warning: inplace_begiafter
+abling in-place editing for invalid FILENAME `-'
+stdin start
+is bar replaced?
+stdin end
+-----------------------
+
+There's some kind of buffering problem going on. The problem only
+occurs when stdout and stderr are redirected to the same file:
+
+	command line here > _out 2>&1
+
+I tried adding all kinds of calls to fflush in all kinds of places,
+but no luck. Finally, I had an "aha!" moment (an epiphany, if I'm using
+the expensive word correctly :-), and made this change:
+
+diff --git a/main.c b/main.c
+index 55983789..f505c71f 100644
+--- a/main.c
++++ b/main.c
+@@ -246,6 +246,10 @@ main(int argc, char **argv)
+ 	if ((cp = getenv("GAWK_LOCALE_DIR")) != NULL)
+ 		locale_dir = cp;
+ 
++	int flags = fcntl(fileno(stderr), F_GETFL, NULL);
++	flags |= O_APPEND;
++	(void) fcntl(fileno(stderr), F_SETFL, flags);
++
+ #if defined(LOCALEDEBUG)
+ 	initial_locale = locale;
+ #endif
+
+Forching stderr to be in append mode did the trick. WHY does that
+make it work? Beats me. It's not needed on any other system.
+
+Adventures In C Programming ...
+
+Thanks,
+
+Arnold
+
+
+
+
+arnold at skeeve.com wrote:
+
+> Hi All.
+>
+> Looks like I solved my problem on my own; thanks to everyone who
+> replied privately.  I will send a short note detailing the issue 
+> a little later.
+>
+> Thanks!
+>
+> Arnold
+

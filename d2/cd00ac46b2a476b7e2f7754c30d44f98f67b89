@@ -1,0 +1,58 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Sun, 7 May 2017 09:13:11 -0600
+Subject: [TUHS] Discuss of style and design of computer programs from a
+ user stand point
+In-Reply-To: <CAGfO01x_pDxSTtyKFgAu9FYAJBQDtqgdSRmkXAO4TO==73GmYw@mail.gmail.com>
+References: <201705060202.v4622L1J013430@coolidge.cs.Dartmouth.EDU>
+ <5a2d6cc957c2efcd968f35aa5557c7a0e309dd27@webmail.yaccman.com>
+ <20170506091857.GE12539@yeono.kjorling.se> <20170506144011.GF28787@mcvoy.com>
+ <alpine.BSF.2.20.1705070430400.11767@aneurin.horsfall.org>
+ <20170506195049.8FBEA124AEA4@mail.bitblocks.com>
+ <CANCZdfrvwJwsUQjbBdudJ4Ro_uo_yeatVAhYxGZ+rkesUB56Dg@mail.gmail.com>
+ <CAGfO01x_pDxSTtyKFgAu9FYAJBQDtqgdSRmkXAO4TO==73GmYw@mail.gmail.com>
+Message-ID: <CANCZdfonzdbH4dX_HKbtWpGaJtC=-DxZXD3VbFFtKxNNuEZHgA@mail.gmail.com>
+
+On Sat, May 6, 2017 at 7:42 PM, Noel Hunt <noel.hunt at gmail.com> wrote:
+> I was about to suggest using the Plan9 port utilities of the
+> same name but it seems 'uniq' is not coded to handle Runes
+> (aka utf-8). I don't imagine it would be hard to re-write it to
+> handle utf-8.
+
+I guess I should have been clearer on what wouldn't work. It can't
+possibly work for Japanese and Chinese where words aren't separated by
+whitespace. Would cause problems in hybrid languages where words can
+be composed of logograms and sonograms (say Japanese which often use a
+few Kanji with hiragana endings that then run into hiragana particles
+or other grammar elements). Can't work without modification (using
+class names) for Cyrillic because there's no A or Z in words there.
+Won't work in any language that has a discontiguous set of letters,
+which includes many western european languages since all the accented
+or otherwise decorated letters aren't in the range A-Z.
+
+So whether or not the underlying tools can handle UTF-8 encoding,
+there are problems with the original.
+
+If you used:
+
+ tr -cs "[:alpha:]" '\n' | tr "[:upper:]" "[:lower:]" | sort | uniq -c
+| sort -rn | sed ${1}q
+
+you'd still have issues with languages that don't use word separators,
+or write non-alphabetically.
+
+Warner
+
+> On Sun, May 7, 2017 at 11:15 AM, Warner Losh <imp at bsdimp.com> wrote:
+>>
+>> On Sat, May 6, 2017 at 1:50 PM, Bakul Shah <bakul at bitblocks.com> wrote:
+>> > tr -cs A-Za-z '\n' | tr A-Z a-z | sort | uniq -c | sort -rn | sed ${1}q
+>>
+>> The cool thing about this thread is that I learned two things: what tr
+>> -s does, and the Nq does for sed...
+>>
+>> Sadly, this doesn't work so well for text that isn't ASCII-7 english...
+>>
+>> Warner
+>
+>
+

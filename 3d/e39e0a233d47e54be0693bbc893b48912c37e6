@@ -1,0 +1,42 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 25 Jan 2018 14:41:16 -0500
+Subject: [TUHS] V6 UNIX main() oddness
+In-Reply-To: <20180125184259.8B62518C0B0@mercury.lcs.mit.edu>
+References: <20180125184259.8B62518C0B0@mercury.lcs.mit.edu>
+Message-ID: <CAC20D2MRr9ZcrLt4f6NddUUjCURqgdEygnxNAsr=QUM_Z2m29Q@mail.gmail.com>
+
+Seems reasonable to me give the code path and time its being called.  Maybe
+left over from hacking from an earlier kernel requirement and never noticed
+by Ken.  I wonder if the mount table had been set up in some earlier scheme
+and he wanted to make sure it was checked first.  That's the only thing
+that seems logical, but we all miss optimizations.
+ᐧ
+
+On Thu, Jan 25, 2018 at 1:42 PM, Noel Chiappa <jnc at mercury.lcs.mit.edu>
+wrote:
+
+> So, while bringing up V6 on a hardware PDP-11/23 with an RK11 emulator
+> using
+> an SD card for storage which Dave Bridgham and I are doing, I found this
+> piece
+> of code in main() on V6 Unix:
+>
+>         rootdir = iget(rootdev, ROOTINO);
+>         rootdir->i_flag =& ~ILOCK;
+>         u.u_cdir = iget(rootdev, ROOTINO);
+>         u.u_cdir->i_flag =& ~ILOCK;
+>
+> I don't get why two separate calls to iget(), with the same arguments;
+> why not replace the second pair of lines with:
+>
+>         u.u_cdir = rootdir;
+>         rootdir->i_count++;
+>
+> What am I missing?
+>
+>         Noel
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180125/745fbeda/attachment.html>
+

@@ -1,0 +1,76 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Wed, 4 Jun 2008 19:56:09 +0200
+Subject: [TUHS] C <-> ASM problem
+Message-ID: <20080604195609.17240ccb.lehmann@ans-netz.de>
+
+Hi,
+
+while creating a web-page about the open questions of how to create C
+code which compiles through the optimizer run to the same ASM code as the
+original object was made from, I found the fix for one of my two "top"
+questions. 
+
+The (right now) remaining question is here:
+
+	http://pofo.de/P8000/problems.php
+
+
+
+The other (solved) problem was:
+
+I had the following ASM code:
+
+         ldk     r2,#0
+         ldb     rl2,_u+1060
+         ld      r3,r2
+         neg     r3
+         add     r3,#256
+         ldb     rh3,rl3
+         clrb    rl3
+         ld      _u+48,r3
+
+so i created the following C code out of it:
+
+u.u_count = (-u.u_segmts[NUSEGS-1].sg_limit+0x100)<<8;
+
+but this compiled to this ASM code:
+
+         ldk     r2,#0
+         ldb     rl2,_u+1060
+         neg     r2
+         add     r2,#256
+         ldb     rh2,rl2
+         clrb    rl2
+         ld      _u+48,r2
+
+As you can see the copy of r2 to r3 and the further processing with r3 is
+missing here. I also thought "who the fuck would write such an C-code,
+the code must look different". but I did not found the solution what
+could have been written in the C code until I've talked today with a
+colleague of mine at work about ASM and my problems. He isn't familar
+with  Z80(00)-ASM but he used to program ASM years ago with his C64. We
+took the ASM code and simulated it with values:
+
+_u+1060 contains 15 and is loaded to rl2   15	(0x000F / 00000000 00001111)
+this gets negated (2 complement formed)	  -15	(0xFFF1 / 11111111 11110001)
+to that, 256 gets added			  241	(0x00F1 / 00000000 11110001)
+this is 8 bit rightshiftet		61696	(0xF100 / 11110001 00000000)
+the result gets loaded into _u+48
+
+He then got the idea that all this could be aritmetical written
+as ((256 - 15)*256) because -15+256 is == 256-15 and rightshifts are done
+aritmetically by multiplying the value with 256. It could have also been
+done by having 256² - 256*x. This was great. With that information I wrote
+in C:
+
+u.u_count = (256-u.u_segmts[NUSEGS-1].sg_limit)<<8;
+
+And this generated the same ASM code as in the original code 
+problem solved :)
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+

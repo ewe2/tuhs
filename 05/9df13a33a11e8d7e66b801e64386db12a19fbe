@@ -1,0 +1,98 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Tue, 3 Jan 2017 10:20:54 -0800
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <586ba44c.dnHd1Caeq6INr3FG%schily@schily.net>
+References: <CAH1jEzZqs6H9zCyLL1eveAHfEq3SminYBGDyLYwNUxE-h9nDng@mail.gmail.com>
+ <CAH1jEzb_28daq6EOV1GMg8g-OM_sevbf8_EVE7dprgaVvrMiqA@mail.gmail.com>
+ <CAH1jEzZ9TMjd56tAv10Orzof1NmHH7PHfzSY8ZOc4DR3UGvfGQ@mail.gmail.com>
+ <3564F094-9B31-4492-8FDD-716160F45E84@tfeb.org>
+ <02d201d2642f$2bcfe0d0$836fa270$@ronnatalie.com>
+ <95D6B274-6D3F-4610-873A-76F4707AE89B@tfeb.org>
+ <D2B69B82-DB28-489B-A7E4-744111F4624E@kdbarto.org>
+ <20170101202850.GF17848@wopr> <20170101203813.GV5983@mcvoy.com>
+ <586ba44c.dnHd1Caeq6INr3FG%schily@schily.net>
+Message-ID: <20170103182054.GB12264@mcvoy.com>
+
+On Tue, Jan 03, 2017 at 02:17:00PM +0100, Joerg Schilling wrote:
+> Larry McVoy <lm at mcvoy.com> wrote:
+> 
+> > I'd like to know where you can get a better performing OS.  The file systems
+> > scream when compared to Windows or MacOS, they know about SSDs and do the
+> > right thing.  The processes are light weight, I regularly do "make -j"
+> > which on my machines just spawns as many processs as needed.
+> ...
+> 
+> > So if I size it to the number of CPUs it is slightly faster.  On the other
+> > hand, when I tell it just spawn as many as it wants it peaks at about 267
+> > processes running in parallel.
+> >
+> > Solaris, AIX, IRIX, HP-UX, MacOS would all thrash like crazy under that 
+> > load, their context switch times are crappy.
+> >
+> > Source: author of LMbench which has been measuring this stuff since the
+> > mid 1990s.
+> 
+> Could you give a verification for this claim please?
+
+First, it was two claims, fast file system, and fast processes.  You 
+seem to have ignored the second one.  That second one is a big deal 
+for multi process/multi processor jobs.
+
+If you have access to solaris and linux running on the same hardware, 
+get a copy of lmbench and run it.  I can walk you through the results
+and if LMbench has bit rotted I'll fix it.
+
+http://mcvoy.com/lm/bitmover/lmbench/lmbench2.tar.gz
+
+> >From what I can tell, the filesystem concepts in Linux are slow and it is 
+> usually not possible to tell what happened in a given time frame. It however
+> creates the impression that it is fast if you are the only user on a system,
+> but it makes it hard to gauge a time that is comparable to a time retrived 
+> from a different OS. This is because you usually don't know what happened in
+> a given time.
+
+You are right that Linux has struggled under some multi user loads (but then
+so does Netapp and a lot of other vendors whose job it is to serve up files).
+
+There are things you can do to make it faster.  We used to have thousands 
+of clones of the linux kernel and we absolutely KILLED performance by walking
+all those and hardlinking the files that were the same (BitKeeper, unlike
+Git, has a history file for each user file so lots of them are the same 
+across different clones).
+
+The reason it killed performance is that Linux, like any reasonable OS,
+will put files next to each other.  If you unpack /usr/include/*.h
+it is very likely that they are on the same cylinder[s].  When you start
+hardlinking you break that locality and reading back and one directory's
+set of files is going to force a lot of seeks.
+
+So don't do that.
+
+Another thing that Linux [used to have] has is an fsync problem, an fsync
+on any file in any file system caused the ENTIRE cache to be flushed.  
+I dunno if they have fixed that, I suspect so.
+
+My experience is that for a developer, Linux just crushes the performance
+found on any other system.  My typical test is to get two boxes and time
+
+$ cd /usr && time tar cf - . | rsh other_box "cd /tmp && time tar xf -; rm -rf
+/tmp/usr"
+
+I suspect your test would be more like
+
+$ cat > /tmp/SH <<EOF
+cd /
+for i in *
+do	test -d $i || continue
+	tar cf /tmp/$i.tar $i &
+done
+wait
+EOF
+$ time sh /tmp/SH
+
+and it may very well be that Linux doesn't do that well (though I doubt it
+because that's essentially what bkbits.net [our github] was doing and a
+dual processor 1ghz athlon with one spinning disk was happily serving up
+a bizillion clones of the linux kernel and a lot of other stuff).
+
+

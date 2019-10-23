@@ -1,0 +1,103 @@
+From tuhs-bounces@minnie.tuhs.org Sun Jun 17 21:19:06 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 18c376a4
+	for <ml@inbox.vuxu.org>;
+	Sun, 17 Jun 2018 21:19:05 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B5DAEA19E9; Mon, 18 Jun 2018 07:19:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A10ECA19D4;
+	Mon, 18 Jun 2018 07:18:36 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E7B3CA19D4; Mon, 18 Jun 2018 07:18:34 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 38E4DA19D3
+ for <tuhs@tuhs.org>; Mon, 18 Jun 2018 07:18:33 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 5C6B618C092; Sun, 17 Jun 2018 17:18:32 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20180617211832.5C6B618C092@mercury.lcs.mit.edu>
+Date: Sun, 17 Jun 2018 17:18:32 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] core
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+
+    > my scan of it suggests that only the host part of the address which were
+    > extensible
+
+Well, the division into 'net' and 'rest' does not appear to have been a hard
+one at that point, as it later became.
+
+    > The other thing obviously missing in the IEN 28 version is the TTL
+
+Yes... interesting!
+
+    > it has the DF flag in the TOS field, and an OP bit in the flags field
+
+Yeah, small stuff like that got added/moved/removed around a lot.
+
+
+    > the CIDR vs A/B/C stuff didn't really change the rest.
+
+It made packet processing in routers quite different; routing lookups, the
+routing table, etc became much more complex (I remember that change)! Also in
+hosts, which had not yet had their understanding of fields in the addresses
+lobotomized away (RFC-1122, Section 3.3.1).
+
+Yes, the impact on code _elsewhere_ in the stack was minimal, because the
+overall packet format didn't change, and addresses were still 32 bits, but...
+
+
+    > The other bit I find amusing are the various movements of the port
+    > numbers
+
+Yeah, there was a lot of discussion about whether they were properly part of
+the internetwork layer, or the transport. I'm not sure there's really a 'right'
+answer; PUP:
+
+  http://gunkies.org/wiki/PARC_Universal_Packet
+
+made them part of the internetwork header, and seemed to do OK.
+
+I think we eventually decided that we didn't want to mandate a particular port
+name size across all transports, and moved it out. This had the down-side that
+there are some times when you _do_ want to have the port available to an
+IP-only device, which is why ICMP messages return the first N bytes of the
+data _after_ the IP header (since it's not clear where the port field[s] will
+be).
+
+But I found, working with PUP, there were some times when the defined ports
+didn't always make sense with some protocols (although PUP didn't really have
+a 'protocol' field per se); the interaction of 'PUP type' and 'socket' could
+sometimes be confusing/problemtic. So I personally felt that was at least as
+good a reason to move them out. 'Ports' make no sense for routing protocols,
+etc.
+
+Overall, I think in the end, TCP/IP got that all right - the semantics of the
+'protocol' field are clear and simple, and ports in the transport layer have
+worked well; I can't think of any places (other than routers which want to
+play games with connections) where not having ports in the internetwork layer
+has been an issue.
+
+    Noel

@@ -1,0 +1,83 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 17:12:12 +1000
+Subject: [Unix-jun72] C compiler status
+In-Reply-To: <Pine.BSI.4.64.0805042053350.20114@malasada.lava.net>
+References: <20080505060824.GA78841@minnie.tuhs.org>
+	<Pine.BSI.4.64.0805042053350.20114@malasada.lava.net>
+Message-ID: <20080505071212.GA80277@minnie.tuhs.org>
+
+On Sun, May 04, 2008 at 08:59:25PM -1000, Tim Newsham wrote:
+> Simh has a cpu execution history which is already turned on in our
+> configuration file, so at any point when youre at the simh prompt
+> you can "show cpu history" to see the recently executed instructions.
+
+Thanks Tim.
+It looks like we are not starting /usr/lib/c0 properly: the CPU never gets
+to execute at 040000, and we end up in sysbreak without ever calling it.
+I have a CPU history from sysexec at 004250 right up to where it hits a
+supposed HALT instruction in sysbreak at 005752, which previously was
+CMP R1,SP.
+
+Here's the simh and Unix commands I tried:
+
+./simh.cfg
+sim> c
+:login: root
+# /tmp/a.out			# Mount /usr
+# chdir /usr/tmp
+#
+
+Simulation stopped, PC: 007332 (MOV (SP)+,25310)
+sim> break 004250
+sim> c
+
+/usr/lib/c0 z.c a b		# Run pass c0 on z.c, creating a & b tempfiles
+
+Breakpoint, PC: 004250 (JSR R0,5634)
+sim> set CPU HISTORY=0
+sim> set CPU HISTORY=100000
+sim> continue
+
+HALT instruction, PC: 005754 (BCC 5762)
+sim> show CPU HISTORY
+
+I won't include the history here, as it's 49,000 instructions. But if
+anybody wants a look at it, let me know.
+
+Thanks,
+	Warren
+
+
+> 
+> You can also use breakpoints to do some tracing, for example:
+> 
+>     break 1350;ex r0;go
+> 
+> will break at 1350, in syscall right after it figures out what syscall
+> number, dump r0, which has the syscall number, and continue, so that
+> you get a running syscall trace..
+> 
+> The downside to these methods is that they capture the entire operating
+> system, not just a single userland process...  It would be nice if
+> we could rig the emulator to skip over context switches to other
+> processes....   Then again, it's probably a lot easier than debugging
+> with blinking lights and switches...
+> 
+> > 	Warren
+> 
+> I suspect there are some more kernel gotchas left to be found.  The
+> fact that "cc" doesnt work properly could be due to my 0407 patch
+> but could equally be another kernel typo somewhere.  The fact that
+> init doesnt like running getty on other ttys is also making me suspect
+> some hidden kernel bugs...  During one of my tests with "cc" I saw
+> it go into panic (probably good to run with a breakpoint on panic,
+> too!  see build/a.out.syms) after syscall got reentered!
+> 
+> Tim Newsham
+> http://www.thenewsh.com/~newsham/
+> _______________________________________________
+> Unix-jun72 mailing list
+> Unix-jun72 at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/unix-jun72
+
+

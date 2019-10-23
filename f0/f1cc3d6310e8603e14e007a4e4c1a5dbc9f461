@@ -1,0 +1,28 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Wed, 24 May 2017 20:57:00 -0400
+Subject: [TUHS] can't protect files from deletion v5,v6, or v7
+In-Reply-To: <CAEoi9W59e5sZe2xLfTV2zT_PEuXJPdvym3R2J2qQ5H9YYWS1_g@mail.gmail.com>
+References: <CADxT5N6NWDJb-JMKk+PMbY9gQb2PsQpaKKO9XFoMuPQ===_sEA@mail.gmail.com>
+ <CAEoi9W59e5sZe2xLfTV2zT_PEuXJPdvym3R2J2qQ5H9YYWS1_g@mail.gmail.com>
+Message-ID: <021401d2d4f1$d1b89ef0$7529dcd0$@ronnatalie.com>
+
+You have to understand that you can’t directly delete a file in UNIX.   It’s never worked that way.
+
+What you can do is remove the directory reference (in UNIX terms, a link) to the file.   When the link count goes to zero, the inode (which embodies the storage and permissions, etc..) of the file then gets freed up (along with the data blocks comprising the file).
+
+ 
+
+The inode permissions of the file have NEVER had any bearing on whether it can be unlinked or not.   The permission to unlink is that of the directory that contains it.   If the directory is writable, the file can be unlinked from that directory.   If that’s the last link, the file goes away.
+
+ 
+
+RM in many versions checks to see if the file is read only and asks if you are sure, but that is an artificial safety net done by the rm program (which is not present in the unlink system call itself).
+
+ 
+
+ 
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170524/c41748ff/attachment.html>
+

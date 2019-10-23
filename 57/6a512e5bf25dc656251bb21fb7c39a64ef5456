@@ -1,0 +1,105 @@
+From: j.r.engdahl@adelphia.net (Jonathan Engdahl)
+Date: Sun, 23 Feb 2003 21:41:39 -0500
+Subject: [pups] Re: PDP11 - RQDX1 standalone format utility? --> XXDP
+References: <001201c2d98f$b4ff34d0$77b95b8b@ics.forth.gr> <020901c2dad6$e0afcf70$8a00a8c0@arctura> <3E593FD8.2090207@pacbell.net>
+Message-ID: <008501c2dbae$42286050$8a00a8c0@arctura>
+
+You are right: 000137. The funny thing is, I had it right the first time.
+I'll go update the web page.
+
+On the other header fields, I agree with your idea, but for some reason, I
+have this vague recollection that there was a reason for what I did with
+them. It's always a bad idea to second guess something you did a year ago
+and "fix" it (see the 000137 thing). It's working, so I'd best leave it
+alone until it's proven to be broken. I think I remember setting it up that
+way after reading through the source for some boot loader.
+
+Hmm, yes, it was the "boot" program. VTserver squirts down a small loader
+via ODT, which then loads boot.dd. Same as the boot program that the 512
+byte rauboot program loads. This one:
+
+73Boot from ra(0,0,0) at 0172150
+: ra(0,0,0)unix
+
+ Boot.dd knows enough to chat with the console so you can tell it what file
+you want off the virtual tape or hard drive, and it does some decoding of
+the header, but it's limited. Maybe I should go read that code again.
+
+--
+Jonathan Engdahl
+http://users.safeaccess.com/engdahl
+
+"The things which are seen are temporary,
+ but the things which are not seen are eternal."  II Cor. 4:18
+
+----- Original Message -----
+From: "Michael Davidson" <michael_davidson@pacbell.net>
+To: "Jonathan Engdahl" <j.r.engdahl at adelphia.net>
+Cc: <cctech at classiccmp.org>; <pups at minnie.tuhs.org>
+Sent: Sunday, February 23, 2003 4:40 PM
+Subject: Re: [pups] Re: PDP11 - RQDX1 standalone format utility? --> XXDP
+
+
+> Jonathan Engdahl wrote:
+>
+> >I documented the procedure to extract a program from XXDP and put a
+header
+> >on it so that you can boot it from VTserver or a UNIX disk. It has been a
+> >long time since I did this to ZRQCH0, so I practiced on the program that
+I
+> >think Christos needs (ZRQBC1) and sent it to him.
+> >
+> >There's a lot I don't know about the a.out header, so if someone can
+improve
+> >my method, let me know.
+> >
+> >http://users.safeaccess.com/engdahl/xxdp.htm#hackXXDP
+> >
+> There isn't very much to know about the a.out header,
+> and what you are doing looks OK although I would probably
+> have set a_text to 160000 and left a_data and a_bss as 0.
+>
+> While I am not really familiar with the BSD boot code that
+> vtserver uses when loading a program I am almost certain that
+> it will use the entrypoint address in the a.out header and
+> not just jump to address 0. (remember it's an actual program
+> loader that understands a.out format, not just something that
+> only knows how to load a boot block and jump to it)
+>
+> This is confirmed by the fact that the code you are patching
+> into the image at address 0 is wrong if you want it to get
+> you to the restart address.
+>
+> In your example you have:
+>
+> 000020/ 000167
+> 000022/ 145702
+>
+> If this was loaded at address 0 in memory and the boot code
+> jumped to address 0, you would end up at 145706 *not* 145702
+> (of course, you might very well get lucky and still land on
+> an instruction boundary, but you would have skipped the first
+> 2 words of the restart code).
+>
+> If this code were really necessary (and I'm 99.99% sure that
+> it isn't) you would want either:
+>
+> 000137
+> 145702
+>
+> or:
+>
+> 000167
+> 145676
+>
+>
+>
+>
+>
+> _______________________________________________
+> PUPS mailing list
+> PUPS at minnie.tuhs.org
+> http://minnie.tuhs.org/mailman/listinfo/pups
+
+
+

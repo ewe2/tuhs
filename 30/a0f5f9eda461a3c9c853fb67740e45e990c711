@@ -1,0 +1,66 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 24 Nov 2017 16:43:42 -0500 (EST)
+Subject: [TUHS] Harvard and Von Neumann Architectures and Unix
+Message-ID: <20171124214342.A4A8818C0D0@mercury.lcs.mit.edu>
+
+    > From: Will Senn <will.senn at gmail.com>
+
+    > I am curious about how the Harvard Architecture relates to Unix,
+    > historically. If the Harvard Architecture is predicated on the
+    > separation of code from data in order to prevent self-modifying code (my
+    > interpretation)
+
+That's not the 'dictionary' definition, which is 'separate paths for
+instructions and data'. But let's go with the 'no self-modifying code' one for
+the moment.
+
+The thing is that self-modifying code is pretty much an artifact of the dawn
+of computers, before the economics of gates moved from that of tubes, to
+transistors, and also before people understood how important good support for
+subroutines was. (This latter is a reference to how Whirlwind did subroutines,
+with self-modifying code.) Once people had index registers, and lots of
+registers in general, self-modifying code (except for a few small, special
+hacks like bootstraps which had to fit in tiny spaces) became as dead as the
+dodo.
+
+It's just a Bad Idea.
+
+    > then it would seem to me to be somewhat at odds with a Unix philosophy
+    > of extreme abstraction (code, data, it's all 0's and 1's, after all).
+
+The people who built Unix were fundamentally very practical. Self-modifing
+code is not 'practical'. (And note that Unix from V4:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/nsys/ken/text.c
+
+onward has support for pure text - for practical reasons).
+
+    > the PDP-11 itself, with the Unibus and apparently agnostic ISA seem to
+    > summarily reject the Harvard Architecure...
+
+You could say that of a zillion computers. The only recent computer I can
+think of offhand with separate instruction and data paths was the AMD 42K
+(nice chip, I used it in a product we built at Proteon). They had separate
+ports for instructions and data purely for performance reasons. (Our card had
+a pathway which allowed the CPU to write the instruction memory, needed during
+booting, obviously; the details as to how we did it escape me now.)
+
+
+    > From: Jon Steinhart
+
+    > For all intents and purposes instructions were separate from data from
+    > the PDP 11/70 on.
+
+s/70/45/.
+
+And the other -11 memory management (as on the /40, /23, etc) does allow for
+execute-only 'segments' (they call them 'pages' in the later versions of the
+manual, but they're not) - again, separating code from data. Unix used this
+for shared pure texts.
+
+And note that those machines with separate I+D space don't meet the dictionary
+definition either, because they only have one bus from the CPU to memory,
+shared between data and instruction fetches.
+
+       Noel
+

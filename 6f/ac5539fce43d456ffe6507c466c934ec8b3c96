@@ -1,0 +1,42 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Tue, 6 May 2008 21:04:26 -1000 (HST)
+Subject: [Unix-jun72] DC-11 quick hack
+Message-ID: <Pine.BSI.4.64.0805062049550.20114@malasada.lava.net>
+
+Ok, I had some initial success with a quick and dirty hack.
+
+   - apply the attached patch to your simh tree and rebuild pdp11
+     and copy it into your tools directory.
+     - maps the TTIX device into the DC11 space
+     - forces the CSR to return the carry-detect bit as always on
+   - edit build/init.s and uncomment some or all of the ttys
+     build it and place it on your drive:
+     $ vi build/init.s
+     $ tools/as build/init.s
+     $ cp b.out build/root/etc/init
+     $ tools/mkfs -p fs/Readme build/root rf0.dsk rf
+   - copy your simh.cfg to simh2.cfg and add these lines before
+     the "go" line:
+     set ttix en
+     set ttix lines=8
+     att ttix 5555
+   - run "./simh2.cfg"
+
+at this point you can telnet to port 5555 and enjoy a multi user
+unix system.  This lacks a lot of polish and needs a bit of work
+yet, but its quick and dirty.
+
+You'll have to revert to the old init if you want to use the normal
+simh.cfg since the kernel will panic when opening the other ttys
+if the DC11 hardware isnt attached.
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: simh-dc11.patch
+Type: application/x-patch
+Size: 1220 bytes
+Desc: 
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080506/27ed877e/attachment.bin>
+

@@ -1,0 +1,123 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,NUMERIC_HTTP_ADDR,RCVD_IN_DNSWL_NONE,URI_HEX
+	autolearn=no autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 7640c92a
+	for <ml@inbox.vuxu.org>;
+	Sat, 15 Dec 2018 01:55:26 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E0EBDA2274; Sat, 15 Dec 2018 11:55:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BF06EA2264;
+	Sat, 15 Dec 2018 11:54:56 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EA030A1F03; Sat, 15 Dec 2018 11:54:53 +1000 (AEST)
+Received: from lb1-smtp-cloud8.xs4all.net (lb1-smtp-cloud8.xs4all.net
+ [194.109.24.21])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1AFF0A1D03
+ for <tuhs@minnie.tuhs.org>; Sat, 15 Dec 2018 11:54:52 +1000 (AEST)
+Received: from [192.168.1.114] ([80.101.112.122])
+ by smtp-cloud8.xs4all.net with ESMTPA
+ id XzAHgHqLvAdxGXzAIgiUbG; Sat, 15 Dec 2018 02:54:51 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 15 Dec 2018 02:54:49 +0100
+Message-Id: <A818805B-9545-4AE3-9943-02E51BB6E374@planet.nl>
+To: "tuhs@minnie.tuhs.org list" <tuhs@minnie.tuhs.org>
+Mime-Version: 1.0 (Apple Message framework v1283)
+X-Mailer: Apple Mail (2.1283)
+X-CMAE-Envelope: MS4wfLTFu+eMhmS4WZSGOKGALdZ86aCT9IqXELB+dGFYYdhl/i8Okgh5f/PkEaJu79F90hL1FAAUOrT9rCmojQMV98Z+rUNsE4DfNaJJxuhueUbNujmHfMf8
+ 24nbPzO8ftA3RG9YGoNr2U1GeacVmcSvZxSy1aRb204XHsc89R/+rEVE
+Subject: Re: [TUHS] 2.9bsd with networking on 18-bit possible?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+> The journey is documented here:
+> http://1587660.websites.xs4all.nl/cgi-bin/9995/timeline
+>=20
+> The network code is in a different tree, I'll move it over to the =
+above tree over the weekend.
+
+Posted the network bit in the online repo; it's in the v6net directory.
+
+Also fixed the instability - it is quite satisfying to login to v6 from =
+a 'nc' client on modern hardware.
+
+However, I also found that the BBN code from November 1981 is what is =
+says on the can: beta.
+I'll move to the October 1982 code when I find some time.
+
+Paul
+
+PS, this is the 'server' that nc connects to:
+
+#define unchar unsigned char
+#define netaddr unsigned long
+
+#include "con.h"
+#include <stdio.h>
+#include <string.h>
+
+unsigned long
+ipaddr(w,x,y,z)
+	int w,x,y,z;
+{
+	unsigned long ip;
+	ip =3D w;
+	ip =3D (ip<<8)|x;
+	ip =3D (ip<<8)|y;
+	ip =3D (ip<<8)|z;
+	return ip;
+}
+
+struct con con;
+
+void
+child(fd)
+	int fd;
+{
+        close(0);
+        dup(fd);
+        close(1);
+        dup(fd);
+        close(2);
+        dup(fd);
+        close(fd);
+        execl("/bin/sh", "[net-sh]", 0);
+}
+
+main()
+{
+	int i, n, sd;
+       =20
+ 	con.c_mode   =3D CONTCP;
+        con.c_fcon   =3D ipaddr(192,168,1,114);
+        con.c_lcon   =3D ipaddr(172,16,0,2);
+        con.c_fport  =3D 0;
+        con.c_lport  =3D 4000;
+
+	sd =3D open("/net", &con);
+
+	printf("Connected\n", sd);
+	child(sd);
+
+	close(sd);
+}
+
+

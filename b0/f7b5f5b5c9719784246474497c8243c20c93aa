@@ -1,0 +1,86 @@
+From: steffen@sdaoden.eu (Steffen Nurpmeso)
+Date: Thu, 19 Oct 2017 23:03:40 +0200
+Subject: [TUHS] basic tools / Universal Unix
+In-Reply-To: <1508424105.2409028.1144261928.5FC3332C@webmail.messagingengine.com>
+References: <201710182303.v9IN35Bv030527@coolidge.cs.Dartmouth.EDU>
+ <1508385233.3734780.1143734600.41F5D5EE@webmail.messagingengine.com>
+ <20171019143309.SCysT%steffen@sdaoden.eu>
+ <1508424105.2409028.1144261928.5FC3332C@webmail.messagingengine.com>
+Message-ID: <20171019210340.NLwmH%steffen@sdaoden.eu>
+
+Good evening everybody.
+
+Random832 <random832 at fastmail.com> wrote:
+ |On Thu, Oct 19, 2017, at 10:33, Steffen Nurpmeso wrote:
+ |> Random832 <random832 at fastmail.com> wrote:
+ |>|On Wed, Oct 18, 2017, at 19:03, Doug McIlroy wrote:
+ |>|>> But mind you, in preparation of this email i found a bug in
+ |>|>> Busybox sed(1) which simply echoes nothing for the above.
+ |>|> 
+ |>|> I assume that * is a typo for - . If so, sed did just what
+ |>|> -n tells it to--no printing except as called for by p or P.
+ |>|
+ |>|Or, you know, l (the letter ell). Which busybox sed appears to not
+ |>|support at all, rather than somehow misapplying -n to it.
+ |> 
+ |> The letter l, yes.  But it does not fail either, so it knows about
+ |> it, talking version 1.27.something here.
+ |
+ |If you look at the source, it is in the list that is checked for
+ |printing (or not) the 'unsupported command' error message, but there is
+ |no actual code to handle it (and when called *without* -n, it just falls
+ |through and prints once, just like if you'd had no command at all)
+ |
+ |https://git.busybox.net/busybox/plain/editors/sed.c?h=1_3_stable
+
+That is true.
+
+ |I think that makes this a legitimate bug in busybox, rather than simply
+ |an artifact of being a minimal tool that doesn't aim for posix (or
+ |historical unix) conformance.
+
+Yes, it should error out or implement the stuff i think.  The way
+it is is not handable.
+The comments in coreutils/cat.c are postable in this thread too:
+
+/* Rob had "cat -v" implemented as a separate applet, catv.
+[That is Rob AT Landley DOT NET]
+ * See "cat -v considered harmful" at
+ * http://cm.bell-labs.com/cm/cs/doc/84/kp.ps.gz
+[This server has been killed]
+ * From USENIX Summer Conference Proceedings, 1983
+ * """
+ * The talk reviews reasons for UNIX's popularity and shows, using UCB cat
+ * as a primary example, how UNIX has grown fat. cat isn't for printing
+ * files with line numbers, it isn't for compressing multiple blank lines,
+ * it's not for looking at non-printing ASCII characters, it's for
+ * concatenating files.
+ * We are reminded that ls isn't the place for code to break a single column
+ * into multiple ones, and that mailnews shouldn't have its own more
+ * processing or joke encryption code.
+ * """
+ *
+ * I agree with the argument. Unfortunately, this ship has sailed (1983...).
+ * There are dozens of Linux distros and each of them has "cat" which supports -v.
+ * It's unrealistic for us to "reeducate" them to use our, incompatible way
+ * to achieve "cat -v" effect. The actual effect would be "users pissed off
+ * by gratuitous incompatibility".
+
+And, indeed sailing (-vet explicitly compiled in):
+
+  ?0[steffen at essex busybox.git]$ echo −e | cat -vet
+  M-bM-^HM-^Re$
+
+Then again, you know, i personally have problems with -vet and
+think the POSIX sed variant is easier to grasp:
+
+  ?0[steffen at essex busybox.git]$ echo −e | sed -n l
+  \342\210\222e$
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
+

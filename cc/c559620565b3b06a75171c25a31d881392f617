@@ -1,0 +1,56 @@
+From: cubexyz@gmail.com (Mark Longridge)
+Date: Thu, 16 Oct 2014 21:51:56 -0400
+Subject: [TUHS] early cc variable and function names
+Message-ID: <CADxT5N4x_q8zreY_ky7SwNn2OqK07OnqO+uUAm_pRfALo-5iZA@mail.gmail.com>
+
+Hi folks,
+
+I've been looking at Unix v5 cc limitations.
+
+It seems like early cc could only use variable and function names up
+to 8 characters.
+
+This limitation occurs in v5, v6 and v7.
+
+But when using the nm utility to print out the name list I see
+function test1234() listed as:
+000044T _test123
+
+That seems to suggest that only the first 7 characters are
+significant, but when looking at other sources they stated that one
+can use up to 8 characters.
+
+I hacked up a short program to test this:
+
+main()
+{
+        test1234();
+        test1235();
+}
+
+test1234()
+{
+        printf ("\nWorking");
+}
+
+test1235()
+{
+        printf ("\nAlso working");
+}
+
+
+This generated:
+Multiply defined: test5.o;_test123
+
+So it would seem that function names can only be 7 characters in
+length. I am not sure if limitations of early cc were documented
+anywhere. When I backported unirubik to v5 it compiled the longer
+functions without any problem.
+
+Did anyone document these sorts of limitations of early cc? Does
+anyone remember when cc started to use function names longer than 7
+characters?
+
+Mark
+
+

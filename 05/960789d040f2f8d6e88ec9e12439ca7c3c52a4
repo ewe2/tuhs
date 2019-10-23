@@ -1,0 +1,82 @@
+From tuhs-bounces@minnie.tuhs.org Thu Aug 23 14:43:15 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 5f03a3ae
+	for <ml@inbox.vuxu.org>;
+	Thu, 23 Aug 2018 14:43:15 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1AFA5A1C8F; Fri, 24 Aug 2018 00:43:14 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B62E8A1A88;
+	Fri, 24 Aug 2018 00:42:47 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1DBAEA1A88; Fri, 24 Aug 2018 00:42:44 +1000 (AEST)
+Received: from smtp-out-2.mxes.net (smtp-out-2.mxes.net [67.222.241.118])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C466AA1A85
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 00:42:43 +1000 (AEST)
+Received: from Customer-MUA (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id 8450B27506
+ for <tuhs@minnie.tuhs.org>; Thu, 23 Aug 2018 10:42:42 -0400 (EDT)
+From: <ron@ronnatalie.com>
+To: "'TUHS'" <tuhs@minnie.tuhs.org>
+Date: Thu, 23 Aug 2018 10:42:40 -0400
+Message-ID: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Content-Language: en-us
+Thread-Index: AdQ67lhBnlx/IgBHT/CGXnYmAzw6zA==
+X-Sent-To: <dHVoc0BtaW5uaWUudHVocy5vcmc=>
+Subject: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+> Has anyone experimented with building Unix using C++, to take
+> advantage of strong typing?  My guess is no--it would be a Herculean task
+likely to introduce more bugs than it would fix.
+
+I'm not sure what "strong typing" gain you expect to find.   With the
+exception of the void* difference, C++ isn't much more "type strong" than C.
+A lot of the type issues you can find on the Kernel just by turning up the
+compiler warnings (or use lint).
+
+The biggest issue we had was BSD didn't use void* at all.   Had they
+converted pointers to void*, which is in implementation necessarily the same
+as char*,
+C would have done the right thing.   The problem is they did what I call
+"Conversion by union."    They would store a char* into one element of a
+union and read it out of another typed pointer.
+This works fine for a VAX where all pointers are the same format, but fails
+on word address machines (notably in our case the HEP where the target size
+is encoded in the low order bits of the pointer).
+Still, running around and fixing those was only a few hours work.
+
+The DevSwitch is the beginnings of an object oriented philosophy.   Alas,
+the original UNIX used it only for mapping major dev numbers to functions.
+It got some later use for other things like multi filesystemsupport.
+
+The scary supportability thing in the kernel, isn't so much typing, but the
+failuer to "hide" implementation details of one part of the kernel from the
+other.
+

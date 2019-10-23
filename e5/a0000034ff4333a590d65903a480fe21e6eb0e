@@ -1,0 +1,98 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Tue, 28 Nov 2017 13:26:54 -0500
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+References: <009a01d348e9$e3dce200$ab96a600$@ronnatalie.com>
+ <CAJfiPzy6S75+8Ob67Uojgw2vSuxqWvRe=mOCvSJ_bUXQ9WsmRw@mail.gmail.com>
+ <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+Message-ID: <CAEoi9W4Xkk7pfP=q+WV_v=vfFy9PRq9bmjxH4n-mmt=PMOoRbw@mail.gmail.com>
+
+On Tue, Nov 28, 2017 at 12:56 PM, Warner Losh <imp at bsdimp.com> wrote:
+>
+> Ah, the tyranny of  static analysis tools... _exit(0) should be marked
+> such that the tools know it does not return. This means the /*NOTREACHED*/
+> isn't needed. And since there's no real exit path out of  main, the return
+> (0) is equally bogus (because main can't return). Yet lint and other tools
+> have ushered in this insanity.
+>
+
+Hmm; in what way can main() not return? Surely this is true if `_exit(0)`
+is called as this calls the exit system call, which cannot -- by definition
+-- return. But main() itself can return to whatever calls it (usually
+`start`, I'd imagine). For that matter, I'm not aware of any prohibition
+against calling `main()` recursively.
+
+: tempest; cat r.c
+#include <stdio.h>
+
+int
+main(int argc, char *argv[])
+{
+if (argc > 1) {
+argc--; argv++;
+printf("%s", argv[0]);
+if (argc > 1) printf(" ");
+return main(argc, argv);
+}
+printf("\n");
+return 0;
+}
+: tempest; make r
+cc     r.c   -o r
+: tempest; ./r hi from Dan
+hi from Dan
+: tempest;
+
+This is sort of an admittedly weird way to write `echo`, but it seems to
+work ok.
+
+I'm glad to see these days that these sorts of lame false positives have
+> been eliminated...
+>
+
++1.
+
+Then again _exit(0) is a useless optimization. It saves three closes for
+> files that are bound to be closed at image tear down. If it really is that
+> important (absent data, my gut tells me it isn't), then this should be
+> written in assembler. FreeBSD/amd64 would be something like:
+>
+> #include <sys/syscall.h>
+> #include <machine/asm.h>
+>
+> ENTRY(_start)
+> xor %r10, %r10
+> mov $SYS_exit, %eax
+> syscall
+> END(_start)
+>
+> This some small hacks to each arch's SYS.h in libc, this could even be
+> smaller and MI :). this is tiny:
+> -rwxrwxr-x  1 imp  imp  672 Nov 28 10:18 true
+>   text   data   bss   dec   hex   filename
+>     10      0     0    10   0xa   true
+>
+
+This is much smaller than the binary for the assembler program I posted for
+macOS earlier in this thread: the result there was much larger (but due to
+the requirement to have a non-empty data segment in the executable; this
+ends up being page-aligned and filled with zeros).
+
+Contrast that with FreeBSD's /usr/bin/true:
+> -r-xr-xr-x  1 root  wheel  4624 Nov 20 11:56 /usr/bin/true
+>   text   data   bss    dec     hex   filename
+>   1540    481     8   2029   0x7ed   /usr/bin/true
+>
+> which is little more than return(0), but also has a fair amount of
+> copyright and SCCS data.
+>
+
+Is the copyright data actually present in the object file? I see some RCS
+$Id$ strings (in the guise of $FreeBSD:$ stuff) but no copyright strings in
+/usr/bin/true on my system.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171128/bdce1e28/attachment.html>
+

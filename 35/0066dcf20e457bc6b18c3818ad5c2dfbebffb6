@@ -1,0 +1,39 @@
+From: tfb@tfeb.org (Tim Bradshaw)
+Date: Fri, 20 Jan 2017 11:54:48 +0000
+Subject: [TUHS] Oracle euthanizes Solaris 12, expunging it from roadmap
+In-Reply-To: <CAH1jEzbwFYdHEUsusJSdy-R0GgCDkJKZ8Kb_MjqeSDouxtx5eg@mail.gmail.com>
+References: <1484812418.3800555.852554160.1638329B@webmail.messagingengine.com>
+ <1484815787.58807daba38e0@www.paradise.net.nz>
+ <a7d2dca4-3fbe-839d-1a00-4772943ab6e8@kilonet.net>
+ <CAH1jEzbwFYdHEUsusJSdy-R0GgCDkJKZ8Kb_MjqeSDouxtx5eg@mail.gmail.com>
+Message-ID: <D9C7B5B8-2E81-4B84-AF63-EB81D78F862E@tfeb.org>
+
+On 20 Jan 2017, at 02:00, Nick Downing <downing.nick at gmail.com> wrote:
+> 
+> I always found the
+> Solaris system to be pretty much like stepping back in time. And I do
+> not really understand why corporations would want to run Solaris when
+> Linux is vastly more developed.
+
+This is actually exactly why they run it, and also what will lead to its (probable) demise.
+
+Large commercial organisations are entirely made of systems which were written (or, more likely, constructed from a bunch of large third-party bits held together with locally-written glue) a long time ago, which perform some purpose which is assumed to be critical, and which no-one now understands.  They are *assumed* to be critical because no-one dares to poke at them to find out if they really are: if perturbing some system might result in your ATMs not working, you don't, ever, perturb it, even if there is a very good chance that it won't.
+
+These systems need to be maintained somehow, which means two things at the OS level and below (it means related but other things above the OS level): the hardware and OS has to be supportable, and the OS has to pass various standards, usually related to security.  This in turn means that the HW and OS need to be kept reasonably current.
+
+But on top of the OS sits a great mass of code which no-one understands and which certainly was not written by people who understood, well, anything really.  So there will very definitely be hard-wired assumptions about things like filesystem layout and the exact behaviour of various tools, and equally definitely there will not be any checks that things are behaving well: the people who write this stuff are not people who check exit codes.
+
+So, since you need to deploy new versions of the OS, these new versions need to be *very compatible indeed* with old versions.
+
+Technically, this isn't incompatible with adding new features, so long as you don't break the old ones.  But in practice the risk of doing so is so high that things tend to get pretty frozen (have you tested that the behaviour of your new 'mkdir' is compatible in every case with the old one, including in cases where the old one fails but the new one might not, because some code somewhere will be relying on that).  So new features tend to get added off to the side, leaving the old thing alone.
+
+And that's why systems like Solaris seem old-fashioned: they're not old-fashioned, they're just extremely compatible.
+
+And it's also why they slowly die: their market ends up being people who have huge critical legacy systems which they need to maintain, not people who are building new systems.  Indeed even the people with the great legacy chunks of software, when they build new systems, start using the shiny new platforms, because the shiny young people they hire to do this like the new platforms.
+
+Of course, no lessons are ever learned, so these shiny new systems are no more robust than the old ones were, meaning that the currently shiny new platforms they are built on will also gradually deteriorate into the slow death of compatibility (or they won't, and the ATMS will indeed stop working: I am not sure which is the worse outcome)
+
+--tim
+
+
+

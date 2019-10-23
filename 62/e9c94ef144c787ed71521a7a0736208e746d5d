@@ -1,0 +1,37 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Sat, 9 Aug 2014 11:04:39 -0400
+Subject: [TUHS] unix v5 limitations
+In-Reply-To: <CADxT5N4cYkw_p9n=_v02TexgkB2TKMKf+Dqgbzz_i79kB3tgyg@mail.gmail.com>
+References: <CADxT5N4cYkw_p9n=_v02TexgkB2TKMKf+Dqgbzz_i79kB3tgyg@mail.gmail.com>
+Message-ID: <20140809150439.GC13364@mercury.ccil.org>
+
+Mark Longridge scripsit:
+
+> The first problem I had was I couldn't just cp over all the
+> /usr/source/s1 files to the new drive because of "Arg list too long"
+> so I figured I would just create an archive file called all.a which
+> would include all the files in /usr/source/s1 and copy that over.
+
+That is not a cp error: it is the kernel reporting that the limited
+amount of space in userland reserved for command arguments on an exec()
+has been exceeded.  It can still happen in modern systems if directories
+are exceedingly large.
+
+> But then I got "phase error" when I tried to keep adding files to the
+> archive 
+
+"Phase error" means that a file has been modified while "ar" is working
+on it.  The most common reason (which doesn't seem to be relevant in
+this case) is that "ar" is trying to archive the archive.
+
+> ar u all.a /usr/source/s1/b*
+
+If that worked, then "cp /usr/source/s1/b* ." would work too.
+
+-- 
+John Cowan          http://www.ccil.org/~cowan        cowan at ccil.org
+I am expressing my opinion.  When my honorable and gallant friend is
+called, he will express his opinion.  This is the process which we
+call Debate.                   --Winston Churchill
+
+

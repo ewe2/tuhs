@@ -1,0 +1,53 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Sun, 24 Sep 2017 14:38:59 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <20170924203621.GA80203@wopr>
+References: <c38ba7b5-e867-93a3-14a2-c61c90bb49b5@kilonet.net>
+ <alpine.BSF.2.21.1709201036150.89458@aneurin.horsfall.org>
+ <20170923091704.GD10152@darioniedermann.it>
+ <CANuZA8QHNn=6Gg-Sm20s-0PSsS7y26c=uNbNETUX74Tx1A=DWQ@mail.gmail.com>
+ <CALMnNGgMSmqQ56r7xTRNdrDYfRiMieQ48kuZfWtSKd+yjmP2tg@mail.gmail.com>
+ <CAP6exYKxC2g06dSRiM8-0BLN08AEWyO-8a0VAcy3vP4H3-8o8A@mail.gmail.com>
+ <20170924140617.GG28606@mcvoy.com> <20170924203621.GA80203@wopr>
+Message-ID: <49B7FCB8-A086-4FFB-AF3B-4B3BD167EC54@bitblocks.com>
+
+
+> On Sep 24, 2017, at 1:36 PM, Kurt H Maier <khm at sciops.net> wrote:
+> 
+> On Sun, Sep 24, 2017 at 07:06:17AM -0700, Larry McVoy wrote:
+>> +1 on what Ron said.  I don't get the rationale for going back to ptrace.
+>> Anyone know what it is?  Is there a perf issue?
+> 
+> The usual rationale presented is that someone can exhaust the fd table
+> and then you can't get anything done.  Instead of fixing that problem,
+> the popular approach is to add more syscalls, like with getrandom(2).
+
+$ svn log sys/fs/procfs/procfs.c | head
+------------------------------------------------------------------------
+r314690 | badger | 2017-03-04 19:05:24 -0800 (Sat, 04 Mar 2017) | 15 lines
+remove procfs ctl interface
+
+This interface has no in-tree consumers and has been more or less
+non-functional for several releases.
+
+Remove manpage note that the procfs special file 'mem' is grouped to
+kmem. This hasn't been true since r81107.
+
+Remove procfs' README file. It is an out of date duplication of the manpage
+(quoth the README: "since the bsd kernel is single-processor...").
+
+Reviewed by:    vangyzen, bcr (manpage)
+Approved by:    des (procfs maintainer), vangyzen (mentor)
+Differential Revision:  https://reviews.freebsd.org/D9802
+
+------------------------------------------------------------------------
+r232278 | mm | 2012-02-28 16:30:18 -0800 (Tue, 28 Feb 2012) | 5 lines
+
+
+
+There are just a few potential users of /proc and they were already
+using other facilities. plus /proc is an optional facility. All this
+conspired to make /proc less useful in FreeBSD. Unused code is in
+danger of being garbage collected in FreeBSD :-)
+
+

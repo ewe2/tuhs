@@ -1,0 +1,113 @@
+From tuhs-bounces@minnie.tuhs.org Fri Aug 24 12:18:13 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 17ba2750
+	for <ml@inbox.vuxu.org>;
+	Fri, 24 Aug 2018 12:18:12 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AB5C7A1B1E; Fri, 24 Aug 2018 22:18:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8CF55A1A1B;
+	Fri, 24 Aug 2018 22:17:59 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 82C80A1A1B; Fri, 24 Aug 2018 22:17:57 +1000 (AEST)
+Received: from smtp-out-2.mxes.net (smtp-out-2.mxes.net [67.222.241.118])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1E553A1A1A
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 22:17:57 +1000 (AEST)
+Received: from Customer-MUA (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id 4A83F27547;
+ Fri, 24 Aug 2018 08:17:55 -0400 (EDT)
+From: <ron@ronnatalie.com>
+To: "'Bakul Shah'" <bakul@bitblocks.com>
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+ <4130AFB4-1740-46BC-AA98-F9D01549049C@bitblocks.com>
+In-Reply-To: <4130AFB4-1740-46BC-AA98-F9D01549049C@bitblocks.com>
+Date: Fri, 24 Aug 2018 08:17:52 -0400
+Message-ID: <1d5901d43ba4$7bc413b0$734c3b10$@ronnatalie.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Content-Language: en-us
+Thread-Index: AQH3zlNvMlrtv6MB59xlfwkPSkONzgIFVidhAaJlGA8BNF+B9qRgyCpw
+X-Sent-To: <dHVoc0BtaW5uaWUudHVocy5vcmc=>
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: 'TUHS' <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+>> 	union {
+>> 	    caddr_t b_addr;		/* low order core address */
+>> 	    int	*b_words;		/* words for clearing */
+>> 	    struct filsys *b_filsys;	/* superblocks */
+>> 	    struct dinode *b_dino;	/* ilist */
+>> 	    daddr_t *b_daddr;		/* indirect block */
+>> 	} b_un;
+
+>  Note that this is a legitimate use of union. That is, unless I
+misunderstood what you meant by it, there is no "conversion by union" as you
+call it or "cheating"
+> as I call it or type punning. There is no put one thing in and take
+another thing out. Now it may be that someone misused such a union. This is
+easy to do as, unlike Pascal, C has no tagged variant record & it is user's
+responsibility to use it right.
+
+It's not legitimate.   It's undefined behavior in the standards and as
+someone has already posted, Ritchie warned about the issue at the time.
+It is undefined (currently) or in the past (machine dependent) behavior  to
+store in one element of a union and retrieve it by another.
+
+For instance:
+       int x;
+       daddr_t* y;
+
+      u.b_un.b_words = &x;
+      y = u.b_un.b_daddr;
+
+This is syntactically correct, but the code will blow up bizarrely on
+machines where the int* and long* pointers are not in the same format. 
+Now if the datatype was a void* and we did this:
+
+      u.b_vp = & x;
+      y = u.b_vp;
+
+Provided there weren't any alignment issues, this would work as the
+conversion to and from void* would result in the right pointer value.
+
+I can think of three different machines I've worked on that this is a
+problem.   The Delelcor HEP was the one I got caught on because I was
+porting 4.2BSD to it.
+The Univac (er, um, Sperry) 1100 series and I think the DEC10 by derivation
+have the partial word (i.e., anything less than a full 36 bits) encoded in
+the pointers.
+The Crays (being word addressed machines, character types are "simulated")
+have distinct word and char pointers.
+
+void* has to be format the same as char* (don't get me started on this
+idiocy, while it worked for the PDP-11, it's an inane assumption that the
+basic character type is the same as
+the smallest addressable storage unit.    THIS is one of the things that
+should have been fixed about the time void* was conceived).
+
+

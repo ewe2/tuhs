@@ -1,0 +1,157 @@
+From: SHOPPA@trailing-edge.com (Tim Shoppa)
+Date: Sat, 24 Jun 2000 21:18:02 -0400
+Subject: Installing SYSTEM III; stuck!
+Message-ID: <000624211802.2620014a@trailing-edge.com>
+
+OK, I think I'm figuring out how to install Unix System III on a
+11/45.  In particular, I mount the first tape on a MT tape drive, get
+a RP04 up and spinning, and boot from tape:
+
+UNIX tape boot loader
+UNIX -- Initial Load: Tape-to-Disk
+
+The type of disk drive on which the Root file system will reside,
+as well as the type of tape drive that will be used for Tape 1
+must be specified below.
+
+Answer the questions with a 'y' or 'n' followed by
+a carriage return or line feed.
+There is no type-ahead -- wait for the question to complete.
+The character '@' will kill the entire line,
+while the character '#' will erase the last character typed.
+
+RP03 at address 176710?: n
+RP04/5/6 at address 176700?: y
+Drive number (0-7)?: 0
+Disk drive 0 selected.
+
+Mount a formatted pack on drive 0.
+Ready?: y
+
+TU10/TM11 at address 172520?: y
+Drive number (0-7)?: 0
+Tape drive 0 selected.
+
+The tape on drive 0 will be read from the current position
+at 800bpi, 5120 characters (10 blocks) per record,
+and written onto the pack on drive 0 starting at block 0.
+
+Ready?: y
+Size of filesystem to be copied is 6000 blocks.
+What is the pack volume label? (e.g. p0001): p0001
+The pack will be labelled p0001.
+The boot block for your type of disk drive will now be installed.
+
+The file system copy is now complete.
+
+To boot the basic unix for your disk and tape drives
+as indicated above, mount this pack on drive 0
+and read in the boot block (block 0) using
+whatever means you have available; see romboot(8), 70boot(8).
+
+Then boot the program unixhptm using diskboot(8).
+Normally:  #0=unixhptm
+
+The system will initially come up single-user; see init(8).
+If you have an upper case only console terminal,
+you must execute: stty lcase; see stty(1).
+
+After UNIX is up, link the file unixhptm to unix using ln(1).
+        # ln /unixhptm /unix
+
+Set the date(1).
+
+Good Luck!
+
+The tape will now be rewound.
+
+
+[Now I boot from the RP04]:
+
+#0=unixhptm
+
+UNIX/3.0.1: unixhptm
+real mem = 253952 bytes
+avail mem = 187584 bytes
+unix
+single-user
+# ls -l
+total 805
+drwxr-xr-x   2 root     sys           32 Feb 15  1979 bck
+drwxrwxr-x   2 bin      bin         1312 Dec 15  1981 bin
+drwxr-xr-x   2 root     sys          528 Dec 15  1981 dev
+drwxr-xr-x   3 root     sys         1056 Oct 26 14:57 etc
+drwxrwxr-x   2 bin      bin          272 Dec 15  1981 lib
+drwxrwxrwx   2 bin      bin           32 May 31  1980 lost+found
+drwxr-xr-x   2 root     sys           32 Feb 15  1979 mnt
+drwxrwxr-x   3 bin      bin          368 Dec 15  1981 stand
+-rwxrwxr-x   1 sys      sys        51382 Nov  9  1982 unixhpht
+-rwxrwxr-x   1 sys      sys        50778 Sep  3  1980 unixhptm
+-rwxrwxr-x   1 sys      sys        49380 Sep  3  1980 unixrkht
+-rwxrwxr-x   1 sys      sys        48782 Sep  3  1980 unixrktm
+-rwxrwxr-x   1 sys      sys        50172 Sep  3  1980 unixrlht
+-rwxrwxr-x   1 sys      sys        49574 Sep  3  1980 unixrltm
+-rwxrwxr-x   1 sys      sys        49704 Sep  3  1980 unixrpht
+-rwxrwxr-x   1 sys      sys        49106 Sep  3  1980 unixrptm
+drwxr-xr-x   2 sys      sys           32 Aug 19 08:46 usr
+
+But what do I do next?  There's a bunch of 5120-byte-record files still
+on the tape, and the "/bin" on the root filesystem doesn't have "tar" or
+"restor". It *does* have cpio, and I think that's what I want to use.  So
+what's the next step?
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA52023
+	for pups-liszt; Sun, 25 Jun 2000 18:53:46 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA52019
+	for <pups at minnie.cs.adfa.edu.au>; Sun, 25 Jun 2000 18:53:45 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id SAA20860
+	for pups at minnie.cs.adfa.edu.au; Sun, 25 Jun 2000 18:53:22 +1000 (EST)
+	(envelope-from wkt)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA52010
+	for <pups at minnie.cs.adfa.edu.au>; Sun, 25 Jun 2000 18:53:16 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id SAA20841;
+	Sun, 25 Jun 2000 18:52:48 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <200006250852.SAA20841 at henry.cs.adfa.edu.au>
+Subject: Re: Installing SYSTEM III; stuck!
+In-Reply-To: <000624211802.2620014a at trailing-edge.com> from Tim Shoppa at "Jun 24, 2000  9:18: 2 pm"
+To: SHOPPA at trailing-edge.com (Tim Shoppa)
+Date: Sun, 25 Jun 2000 18:52:47 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au (PDP-11 Unix Preservation Society)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Tim Shoppa:
+> But what do I do next?  There's a bunch of 5120-byte-record files still
+> on the tape, and the "/bin" on the root filesystem doesn't have "tar" or
+> "restor". It *does* have cpio, and I think that's what I want to use.  So
+> what's the next step?
+
+From the PDP-11 SysIII in the archive, the files are cpio archives. The
+/usr/src/man/docs/setup file explains what to do next. It's in nroff
+format, but I don't know what macro switch to use to print it out
+correctly. I'll send it in a separate e-mail to avoid clogging up the list.
+
+	Warren
+
+

@@ -1,0 +1,138 @@
+From: gtaylor@tnetconsulting.net (Grant Taylor)
+Date: Thu, 21 Sep 2017 15:02:53 -0600
+Subject: [TUHS] Who is running their own mail server and what do you run?
+In-Reply-To: <1506024308.16659.for-standards-violators@oclsc.org>
+References: <1506024308.16659.for-standards-violators@oclsc.org>
+Message-ID: <d0bb6851-bf44-c897-1a89-0c6cd5df3960@tnetconsulting.net>
+
+On 09/21/2017 02:05 PM, Norman Wilson wrote:
+> I run my own mail server, on systems in my basement. 
+>  It is a setup that no one in their right mind would
+> replicate,
+
+Maybe ... maybe not.
+
+I think a number of TUHS subscribers enjoy special configurations.
+
+> but the details may actually be proper for this list.
+
+I'm only replying to the historical aspects.
+
+> A firewall/gateway system runs a custom SMTP server, 
+> which can do simple filtering based on the SMTP envelope, 
+> SMTP commands, calling IP address and hostname.  It is 
+> also able to call external commands to pass judgement on 
+> a caller or a particular message.
+> 
+> If mail is accepted, it is passed through a simple 
+> MTA and a stupidly-simple queueing setup (the latter 
+> made of shell scripts) to be sent via SMTP to a 
+> different internal system, which uses the same SMTP 
+> server and MTA to deliver to local mailboxes.
+> 
+> Outbound mail is more or less the obvious inverse.
+> 
+> I have put off naming names for dramatic effect.  The 
+> two systems in question are MicroVAX IIIs running 
+> my somewhat-hacked-up version of post-10/e Research 
+> UNIX.  The MTA is early-1990s-vintage upas.  The SMTP 
+> server, SMTP sender, and queuing stuff are my own.
+
+IMHO the dramatic effect was warranted.  (I was thinking that it's not 
+too complex up until you said MicroVAZ III.)
+
+It sounds to me like your MTA is completely separate from the SMTP 
+stack.  -  Would I be correct in guessing that your SMTP stack reads 
+from and writes to ""queues that look like mailboxes to your MTA?
+
+By the way, what you've done sounds very impressive, and likely challenging.
+
+> I wrote the SMTP server originally not long after I left 
+> Bell Labs; I was now in a world where sendmail was the 
+> least-troublesome MTA, but in those days every month 
+> brought news of a new sendmail vulnerability, so I wrote 
+> my own simple server to act as a condom.
+
+I doubt that many of todays script kiddies would do such a thing.  I 
+like it.
+
+> Over time it 
+> grew a bit, as I became interested in problems like 
+> what sorts of breakin attempts are there in real life 
+> (back then one received occasional DEBUG or WIZ commands, 
+> but I haven't seen any since the turn of the century); 
+> what sorts of simple filtering at the SMTP level will 
+> get rid of most junk mail.  The code is more complicated 
+> than it used to be, but is still small enough that I am 
+> reasonably confident that it is safe to expose to the 
+> network.
+> 
+> The SMTP sender and the queueing scripts came later, 
+> when I decided to host my own mail.  Both were designed 
+> in too much of a hurry.
+
+So, what was SMTP used for before you hosted your own email?  Was it a 
+minimal implementation to get logs / outgoing messages off of the box?
+
+> There is no official spam filtering (no bogofilter or 
+> the like).  A few simple rules that really just enforce 
+> aspects of the SMTP standard seem to catch most junk 
+> callers: HELO argument must contain at least one . (standard 
+> says it must be your FQDN) and must not be *.* (I see dozens 
+> of those every day!); sender must not speak until my server 
+> has issued a complete greeting (I follow Wietse Venema in 
+> this: send a line with a continuation marker first, then 
+> sleep five seconds or so, then send a finish).  I also 
+> have a very simple, naive greylisting implementation that 
+> wouldn't work well for a site with lots of users, but is 
+> fine for my personal traffic.  The greylisting is implemented 
+> with a pair of external shell scripts.
+> 
+> I have had it in mind for a long time to consult the Spamhaus 
+> XBL too.  It would be easy enough to do with another plug-in 
+> shell script.  There are stupid reasons having to do with my 
+> current DNS setup that make that impractical for now.
+> 
+> The mail setup works, but is showing its age, as is the 
+> use of Research UNIX and such old, slow hardware as a network 
+> gateway.  One of these years, when I have the time, I'd like 
+> first to redo the mail setup so that mailboxes are stored 
+> on my central file server (a Sun X2200 running Solaris 10, 
+> or perhaps something illumos-based by the time I actually 
+> do all this); then set up a new gateway, probably based on 
+> OpenBSD.  Perhaps I should calculate how much hardware I 
+> could buy from the power savings of turning off just one of 
+> the two MicroVAXes for a year.
+
+Could you keep your working configuration and save power by migrating 
+your configuration to emulation?  Perhaps on a Raspberry Pi or the likes.
+
+> I have yet to see an MTA that is spare enough for my taste, 
+> but the old upas code just doesn't quite do what I want any 
+> more, and is too messy to port around.  (Pursuant to the 
+> conversation earlier here about autoconf: these days I try 
+> to need no configuration magic at all, which works as long 
+> as I stick to ISO C and POSIX and am careful about networking. 
+>  upas was written in messier days.)  At the moment I'm leaning 
+> toward qmail, just because for other reasons I'm familiar with 
+> it, though for my personal use I will want to make a few changes 
+> here and there.  But I'll want to keep my SMTP server because 
+> I am still interested in what goes on there.
+> 
+> Norman Wilson
+> Toronto ON
+
+
+
+-- 
+Grant. . . .
+unix || die
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: smime.p7s
+Type: application/pkcs7-signature
+Size: 3717 bytes
+Desc: S/MIME Cryptographic Signature
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170921/22ae2cf5/attachment.bin>
+

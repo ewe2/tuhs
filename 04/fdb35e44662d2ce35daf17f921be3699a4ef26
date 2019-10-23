@@ -1,0 +1,32 @@
+From: random832@fastmail.com (Random832)
+Date: Thu, 24 Mar 2016 10:41:54 -0400
+Subject: [TUHS] self-reproducing programs
+In-Reply-To: <alpine.LSU.2.00.1603241405180.11434@hermes-2.csi.cam.ac.uk>
+References: <mailman.144.1458776817.15972.tuhs@minnie.tuhs.org>
+ <C562F46A-6AFC-44BE-A482-1C559A9EBF7B@kdbarto.org>
+ <alpine.LSU.2.00.1603241405180.11434@hermes-2.csi.cam.ac.uk>
+Message-ID: <1458830514.3531537.558627306.3CB6781D@webmail.messagingengine.com>
+
+On Thu, Mar 24, 2016, at 10:24, Tony Finch wrote:
+> There was only ever one instance of the
+> program running, but its pid changed hundreds of times per second.
+> 
+> Since it had daemonized, I couldn't use process groups to kill it.
+> 
+> Since it was running as root, I couldn't use `kill -TERM -1` to kill just
+> one user's processes.
+> 
+> Since it was a production server, I reslly didn't want to reboot.
+> 
+> I tried picking a pid somewhat larger than the program's rapidly
+> increasing pid, and ran a script: while !kill $pid; do :; done
+
+Out of a curiosity, if a C program executes kill(-1, SIGSTOP), will it
+itself be stopped? Or can SIGSTOP be ignored?
+
+If so, maybe you could have solved it by stopping everything and then
+continuing everything but the offending program. Of course, then you
+risk that other programs on the system may have side effects from being
+stopped and continued (interrupted system calls they may not be able to
+handle, etc)
+

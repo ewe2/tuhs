@@ -1,0 +1,45 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Wed, 9 Dec 2015 11:55:06 -0600
+Subject: [TUHS] v6tar from v7 on v6, too large?
+In-Reply-To: <20151209045357.8573718C0C5@mercury.lcs.mit.edu>
+References: <20151209045357.8573718C0C5@mercury.lcs.mit.edu>
+Message-ID: <56686AFA.1080205@gmail.com>
+
+
+
+On 12/8/15 10:53 PM, Noel Chiappa wrote:
+>      > From: Will Senn <will.senn at gmail.com>
+>
+>      > The problem is this, when I attempt to execute the v6tar binary on the
+>      > v6 system (it works in v7) it errors out:
+>      > v6tar
+>      > v6tar: too large
+>
+> That's an error message from the shell; the exec() call on the command
+> ('v6tar') is returning an ENOMEM error. Looking in the kernel, that comes from
+> estabur() in main.c; there are a number of potential causes, but the most
+> likely is that 'v6tar' is linked to be split I+D, and your V6 emulation is on
+> a machine that doesn't have split I+D (e.g. an 11/40). If that's not it,
+> please dump the a.out header of 'v6tar', so we can work out what's causing the
+> ENOMEM.
+>
+> 	Noel
+Noel,
+
+I followed the thread you provided and I appreciate the direction. 
+estabur(who thought these names up, I know 8 characters is limiting, but 
+c'mon) is indeed the culprit:
+         if(sep) {
+                 if(cputype == 40)
+                         goto err;
+
+I'm gathering (read still investigating) that the 411 header is read by 
+a loader and the call to estabur is made with a value for sep indicating 
+that it is a split I+D binary, then the cputype is checked and sure 
+enough, it's a PDP-11/40 and the error is generated.
+
+Thanks,
+
+Will
+
+

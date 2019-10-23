@@ -1,0 +1,72 @@
+From: tih@hamartun.priv.no (Tom Ivar Helbekkmo)
+Date: Thu, 17 Dec 2015 16:40:39 +0100
+Subject: [TUHS] Pre-v6 images and 2.11BSD patches
+In-Reply-To: <566C040C.6040705@update.uu.se> (Johnny Billquist's message of
+ "Sat, 12 Dec 2015 12:25:00 +0100")
+References: <mailman.17.1449898266.27456.tuhs@minnie.tuhs.org>
+ <566C040C.6040705@update.uu.se>
+Message-ID: <m2fuz1w0aw.fsf@athene.hamartun.priv.no>
+
+Johnny Billquist <bqt at update.uu.se> writes:
+
+> Yes, I did 448. Various bits and pieces that were fixed there, but
+> unfortunately I haven't managed to reach Steve to get it officially
+> sanctioned.
+
+I've tried to reach him from time to time, as well.  Hope he's OK.
+
+> . Made console 8-bit clean
+
+I did that somewhat differently, when I started running 2.11BSD with a
+console terminal that got multiplexed between different systems.  Here's
+my version, which allows you to change parity on the console:
+
+*** usr/src/sys/pdp/cons.c.ORIG	Sun May 11 11:21:01 1997
+--- usr/src/sys/pdp/cons.c	Tue Dec  2 17:59:27 2014
+***************
+*** 62,68 ****
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = EVENP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+--- 62,68 ----
+  	if ((tp->t_state&TS_ISOPEN) == 0) {
+  		ttychars(tp);
+  		tp->t_state = TS_ISOPEN|TS_CARR_ON;
+! 		tp->t_flags = ANYP|ECHO|XTABS|CRMOD;
+  	}
+  	if (tp->t_state&TS_XCLUDE && u.u_uid != 0)
+  		return (EBUSY);
+***************
+*** 163,170 ****
+  	c = getc(&tp->t_outq);
+  	if (tp->t_flags & (RAW|LITOUT))
+  		addr->dlxbuf = c&0xff;
+! 	else
+  		addr->dlxbuf = c | (partab[c] & 0200);
+  	tp->t_state |= TS_BUSY;
+  out:
+  	splx(s);
+--- 163,174 ----
+  	c = getc(&tp->t_outq);
+  	if (tp->t_flags & (RAW|LITOUT))
+  		addr->dlxbuf = c&0xff;
+! 	else if ((tp->t_flags & (EVENP | ODDP)) == EVENP)
+  		addr->dlxbuf = c | (partab[c] & 0200);
++ 	else if ((tp->t_flags & (EVENP | ODDP)) == ODDP)
++ 		addr->dlxbuf = c | ((partab[c] & 0200) ^ 0200);
++ 	else
++ 		addr->dlxbuf = c;
+  	tp->t_state |= TS_BUSY;
+  out:
+  	splx(s);
+
+
+-tih
+-- 
+Elections cannot be allowed to change anything.  --Dr. Wolfgang Schäuble
+
+

@@ -1,0 +1,116 @@
+From: wrking@tsoft.com (William King)
+Date: Wed, 14 Jun 2000 00:28:13 -0700
+Subject: New: PDP-11 Unix Mailing List
+Message-ID: <000001bfd5d2$1934c380$bf01a8c0@dadaboom.com>
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id VAA67358
+	for pups-liszt; Wed, 14 Jun 2000 21:39:21 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id VAA67354
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 14 Jun 2000 21:39:19 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id VAA36479
+	for pups at minnie.cs.adfa.edu.au; Wed, 14 Jun 2000 21:36:51 +1000 (EST)
+	(envelope-from wkt)
+Received: from junk.nocrew.org (mail@[212.73.17.42])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id TAA66909
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 14 Jun 2000 19:34:59 +1000 (EST)
+	(envelope-from lars at junk.nocrew.org)
+Received: from lars by junk.nocrew.org with local (Exim 3.12 #1 (Debian))
+	for pups at minnie.cs.adfa.edu.au
+	id 1329Wp-0003Na-00; Wed, 14 Jun 2000 11:32:07 +0200
+To: pups at minnie.cs.adfa.edu.au
+Subject: Help reviewing processor features
+From: lars brinkhoff <lars@nocrew.org>
+Date: 14 Jun 2000 11:32:07 +0200
+In-Reply-To: Greg Lehey's message of "Mon, 12 Jun 2000 11:49:12 -0700"
+Message-ID: <85itvcbobs.fsf_-_ at junk.nocrew.org>
+Lines: 75
+User-Agent: Gnus/5.0803 (Gnus v5.8.3) Emacs/20.6
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+The following is source code taken verbatim from my PDP-11 support code
+for the GNU assembler.  Any help correcting errors would be appreciated.
+
+This code tells the assembler what instruction set features to recognize
+depending on what processor the user wants to assemble for.  Individual
+features can also be enabled, e.g. if a processor option is installed.
+
+The instruction set features are:
+        cis             Commersial instruction set (optional on all
+                        processors?).
+        csm             CSM instruction.
+        eis             Extended instruction set: MUL, DIV, ASH, ASHC, and
+                        all of limited-eis.
+        fis             KEV11 floating-point instructions.
+        fpp             FP-11 floating-point instructions.
+        limited-eis     Limited extended instruction set: RTT, MARK, SXT,
+                        XOR, SOB.
+        mfpt            MFPT instruction.
+        multiproc       Multiprocessor instructions: TSTSET, WRTLCK.
+        mxps            MFPS and MTPS instructions.
+        spl             SPLx instructions.
+        ucode           Microcode instructions: LDUB, MED, XFC.
+
+  if (strncmp (buf, "a", 1) == 0)               /* KA11 (11/15/20) */
+    return 1; /* no extensions */
+
+  else if (strncmp (buf, "b", 1) == 0)          /* KB11 (11/45/50/55/70) */
+    return set_option ("eis") &&
+           set_option ("spl");
+
+  else if (strncmp (buf, "da", 2) == 0)         /* KD11-A (11/35/40) */
+    return set_option ("limited-eis");
+
+  else if (strncmp (buf, "db", 2) == 0 ||       /* KD11-B (11/05/10) */
+           strncmp (buf, "dd", 2) == 0)         /* KD11-D (11/04) */
+    return 1; /* no extensions */
+
+  else if (strncmp (buf, "de", 2) == 0)         /* KD11-E (11/34) */
+    return set_option ("eis") &&
+           set_option ("mxps");
+
+  else if (strncmp (buf, "df", 2) == 0 ||       /* KD11-F (11/03) */
+           strncmp (buf, "dh", 2) == 0 ||       /* KD11-H (11/03) */
+           strncmp (buf, "dq", 2) == 0)         /* KD11-Q (11/03) */
+    return set_option ("limited-eis") &&
+           set_option ("mxps");
+
+  else if (strncmp (buf, "dk", 2) == 0)         /* KD11-K (11/60) */
+    return set_option ("eis") &&
+           set_option ("mxps") &&
+           set_option ("ucode");
+
+  else if (strncmp (buf, "dz", 2) == 0)         /* KD11-Z (11/44) */
+    return set_option ("csm") &&
+           set_option ("eis") &&
+           set_option ("mfpt") &&
+           set_option ("mxps") &&
+           set_option ("spl");
+
+  else if (strncmp (buf, "f", 1) == 0)          /* F11 (11/24) */
+    return set_option ("eis") &&
+           set_option ("mfpt") &&
+           set_option ("mxps");
+
+  else if (strncmp (buf, "j", 1) == 0)          /* J11 (11/53/73/83/84/93/94)*/
+    return set_option ("csm") &&
+           set_option ("eis") &&
+           set_option ("mfpt") &&
+           set_option ("multiproc") &&
+           set_option ("mxps") &&
+           set_option ("spl");
+
+  else if (strncmp (buf, "t", 1) == 0)          /* T11 (11/21) */
+    return set_option ("limited-eis") &&
+           set_option ("mxps");
+
+

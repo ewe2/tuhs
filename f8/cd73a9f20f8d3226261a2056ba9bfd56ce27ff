@@ -1,0 +1,46 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sun, 11 Sep 2016 21:43:34 -0400 (EDT)
+Subject: [TUHS] Shell control through external commands
+Message-ID: <20160912014334.434304422E@lignose.oclsc.org>
+
+I remember reading about #! in the early 1980s, and
+having mixed feelings about it, as I still do.  The
+basic idea is fine, if annoyingly limited; but that
+the kernel has to decide, in effect, whether to treat
+a header as binary or text bothers me.  Were I designing
+a new system from scratch today, I'd just make the
+header all text; the small extra space and time for
+the kernel to parse that for binaries doesn't matter
+any more.  It certainly did when #! was invented,
+though.
+
+I had the impression at the time that it came from
+Berkeley, but I think I later heard from the horse's
+mouth that it was originally Dennis's idea.
+
+I don't think anyone has yet laid out the complete
+story of what came before:
+
+1.  Originally, the shell would exec(file), and if
+exec returned ENOEXEC, would open the file and treat
+it as shell commands.
+
+2.  Then came the C shell, and a problem: did file
+contain commands for csh or sh?  A hack emerged:
+if csh encountered a script file, it would read
+the first character; if that was '#' it was a
+csh script, otherwise it handed off to /bin/sh.
+
+None of this helped when some program other than
+the shell called exec on a shell script.  That's one
+reason execlp and execvp appeared.  (The other is that
+they observe $PATH if the command pathname has a
+single element.)
+
+I don't know offhand whether there was ever an execlp/vp
+that implemented the #-means-csh convention.  Anyone
+else remember?
+
+Norman Wilson
+Toronto ON
+

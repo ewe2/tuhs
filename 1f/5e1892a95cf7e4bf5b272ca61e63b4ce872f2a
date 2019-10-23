@@ -1,0 +1,376 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4bcace63
+	for <ml@inbox.vuxu.org>;
+	Thu, 11 Jul 2019 17:06:38 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0BF4794F28; Fri, 12 Jul 2019 03:06:37 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id AB2AC9480A;
+	Fri, 12 Jul 2019 03:06:02 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="o6eiRG9l";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 04DE19480A; Fri, 12 Jul 2019 03:06:00 +1000 (AEST)
+Received: from mail-wr1-f68.google.com (mail-wr1-f68.google.com
+ [209.85.221.68])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C4C38947D8
+ for <tuhs@tuhs.org>; Fri, 12 Jul 2019 03:05:58 +1000 (AEST)
+Received: by mail-wr1-f68.google.com with SMTP id c2so3907305wrm.8
+ for <tuhs@tuhs.org>; Thu, 11 Jul 2019 10:05:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=5WykhfBFGbtPTDUAzY/4RSRUOtbyq+vgSdCjLXTvZg8=;
+ b=o6eiRG9lRArSi8buNcEWMd9iOVFRySRIobY6f8dvINPJFmEPOKH2QFKr6Cz1ZlgAOI
+ Vg8RXL3PkIKUk0sGeDFD6q8BlLjWMm8phKiirVuFepHGIdn+dl3YqDRc4CwPUpnaJTPw
+ prnsikzS0oT08fWe5jRub94z0r3vzT9/XVY/0=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=5WykhfBFGbtPTDUAzY/4RSRUOtbyq+vgSdCjLXTvZg8=;
+ b=GWuLtCwHtnf2liWB4djrg0jOQNwtsReG6dz6tM/uT4pJKXUrB9O7fXvmNAHKFPmYI0
+ N1uYJIJgYs3zc7ThUwDrCHAndBGVxLnnngL6gXSVPyV6q2SpBzuL1+eCsuK3AU88v0eq
+ jM9TK4BiVq/dl848HK/7xeXYbMdBnASdVFjDUwRdFXghUh8Y1bO3TSeD4EEpNihk+g3W
+ GUq4T+ObK7PYmAqY25KVVnjc55souPb3czhWd5Is8N10SgInDJ4/jE1+atj35NTgY3al
+ Nn+HQmMC8ij6JnxBFjmsRCK+DWol27KI5YP2mNRNkO8l0jfPqUonAxvhqN4C6HaGm8jJ
+ H5nQ==
+X-Gm-Message-State: APjAAAVO3TTSvJA234GG0cobvBfZJy4CJpZbOZrqbdiNcIYJdPhRi46N
+ V7LEE85yHZL28COSOW8qpwQBBUwm4vlvLyY9MQr0jA==
+X-Google-Smtp-Source: APXvYqzDHFduCBVqDfsZteOImuQRR6H1cH4uTY281V7dc1IatE7/lviw4oqB+JAZmaRGD/YyUVVbT3PAv8kgC9KiNtU=
+X-Received: by 2002:adf:de90:: with SMTP id w16mr6105217wrl.217.1562864757218; 
+ Thu, 11 Jul 2019 10:05:57 -0700 (PDT)
+MIME-Version: 1.0
+References: <8235a090-c48a-4587-8974-23305233bc33@PU1APC01FT026.eop-APC01.prod.protection.outlook.com>
+ <3CFC8159-08DD-4647-8CEF-FE8D196AB3C9@ccc.com>
+ <ADFDF14544A65F35.7e6e7ae7-83e1-47fa-9568-f5498506233e@mail.outlook.com>
+ <610F6FCB-F24D-4788-953A-83E0E6456622@ccc.com>
+ <CANCZdfrYFuh0XQUBdMU3=E29Wz_Lq9ycJBU5NfOt92Sy1qULfQ@mail.gmail.com>
+In-Reply-To: <CANCZdfrYFuh0XQUBdMU3=E29Wz_Lq9ycJBU5NfOt92Sy1qULfQ@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Thu, 11 Jul 2019 13:05:31 -0400
+Message-ID: <CAC20D2MQ-castDpjCzJvKc5po322AQTF8g=2zgumdfywta8z+Q@mail.gmail.com>
+To: Warner Losh <imp@bsdimp.com>
+Content-Type: multipart/alternative; boundary="000000000000afafdb058d6acee4"
+Subject: Re: [TUHS] PCC for the i386
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000afafdb058d6acee4
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Yup, that was Steve Ward's folks in the MIT/RTS group - it was the NU
+computer work.  John Siber did most of the compiler work (funny, Steve
+Johnson and I were talking about some of that work last night at the UNIX50
+party last night).  tjt wrote the 68K assembler ward's folks used.  I don't
+remember where the Z8000 assembler came, but I'm petty sure that the Intel
+assembler and some of the tools other John had brought back from his
+summers in MH.
+
+I think (but don't know for sure) the Intel 8086 assembler was done at AT&T
+first.  IIRC it may have come out of Dale's group in Columbus.   I do know
+Dale's group had done a Z80 C Compiler using the Ritchie Compiler at some
+point in 1978 timeframe (and at one time I had, but can not seem to find
+it, in my archives).
+
+When Intel released the 386, I believe the AT&T 8086 assembler was updated
+for the new 32 instructions; although who did that/where was done, I'm not
+sure.
+
+Steve is probably the best source for most of this as he managed the team
+in Summit doing the different AT&T front and back ends when they tried to
+centralize the compiler work for UNIX.
+
+On Thu, Jul 11, 2019 at 12:48 PM Warner Losh <imp@bsdimp.com> wrote:
+
+>
+>
+> On Thu, Jul 11, 2019 at 10:31 AM Clem cole <clemc@ccc.com> wrote:
+>
+>> By the time of 4.2 the switch from the  Ritchie and Johnson compilers at
+>> UCB had begun.  Remember the primary output of Rms at that point was ema=
+cs
+>> and gcc.
+>>
+>> CSRG wanted the different backends for C.   ThAts it.  Besides the vax,
+>> Rms had done 68000 and 386 back ends then.
+>>
+>> With the original system V, all of AT&T, Intel and IBM paid Interactive
+>> Systems Corp (aka ISC) to port the System V/Vax code to a 386 ps/2 and a=
+n
+>> Intel reference system that used an ISA bus.  This would be eventually
+>> released in source at the 386 port from AT&T.   As part of the contract
+>> summit supplied the compiler
+>>
+>> I know the AT&T assembler with it=E2=80=99s backwards syntax from Intel =
+was done
+>> before rms did his.  He was compatible with the summit assembler.  I don=
+=E2=80=99t
+>> remember who=E2=80=99s 386 backend came out first.  I think is was the s=
+ummit
+>> compiler but you needed a system v license which UCB did not have.
+>>
+>
+> There's also a fair amount of work at MIT to do Intel code generation for
+> 8086 (small mode) that was extended by Queens College London (I think, I
+> gotta grab the tapes again) to do large mode. I've run into this looking
+> for a compiler for the Venix source restoration project I've been tilting
+> at. I found those based on a cryptic comment I found somewhere online abo=
+ut
+> the tech behind Venix that wasn't from AT&T. I don't know if ISC started
+> with them as a base or not, nor really how the MIT compilers came about,
+> but they claim to be PCC based somehow. Don't know if this helps you on
+> your quest... BTW, I found these when I found the latest pcc-restoration
+> sources didn't have a working i86 backend anymore (there was once one for
+> Minux, but when I built it I couldn't get it to generate sensible code at
+> all).
+>
+> Warner
+>
+>
+>> Clem
+>>
+>> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not
+>> quite.
+>>
+>> On Jul 11, 2019, at 8:50 AM, Jason Stevens <
+>> jsteve@superglobalmegacorp.com> wrote:
+>>
+>> That would make sense.   I was able to find some info on PCC2 here
+>>
+>> http://doc.cat-v.org/unix/unix-before-berkeley/
+>>
+>> I'm guessing along with the adoption of emacs the csrg must have been
+>> further gnu synergy...  Or maybe PCC2 just wasn't available outside of t=
+he
+>> labs?
+>>
+>> Or maybe by '88 gcc was already usurping many of the c compilers of the
+>> era.
+>>
+>>
+>>
+>>
+>>
+>> On Thu, Jul 11, 2019 at 11:37 PM +0800, "Clem cole" <clemc@ccc.com>
+>> wrote:
+>>
+>> I believe the pcc/386 came out of Steve Johnson team at Summit with the
+>>> PCC2 work.
+>>>
+>>> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not
+>>> quite.
+>>>
+>>> On Jul 11, 2019, at 7:53 AM, Jason Stevens <
+>>> jsteve@superglobalmegacorp.com> wrote:
+>>>
+>>> Does anyone know where the 386 port from PCC came from?
+>>>
+>>>
+>>>
+>>> While trying to build a Tahoe userland for the i386, it seems that
+>>> everything was built with GCC=E2=80=A6
+>>>
+>>> Was there a PCC for the i386 around =E2=80=9988-90?  It seems after the=
+ rapid
+>>> demise of the Tahoe/Harris
+>>>
+>>> HCX-9 that the non Vax/HCX-9 platforms had moved to GCC?
+>>>
+>>>
+>>>
+>>> Also anyone know any good test software for LIBC?  I=E2=80=99ve been tr=
+acing
+>>> through some
+>>>
+>>> strange issues rebuilding LIBC from Tahoe, where I had to include some
+>>> bits from
+>>>
+>>> Reno to get diropen to actually work.  I would imagine there ought to
+>>> have been some
+>>>
+>>> platform exercise code to make sure things were actually working instea=
+d
+>>> of say
+>>>
+>>> building as much as you can, and playing rogue for a few hours to make
+>>> sure
+>>>
+>>> its stable enough.
+>>>
+>>>
+
+--000000000000afafdb058d6acee4
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif">Yup, that was Steve Ward&#39;s folks in the MIT/RTS gro=
+up - it was the NU computer work.=C2=A0 John Siber did most of the compiler=
+ work (funny, Steve Johnson and I were talking about some of that work last=
+ night at the UNIX50 party last night).=C2=A0 tjt wrote the 68K assembler w=
+ard&#39;s folks used.=C2=A0 I don&#39;t remember where the Z8000 assembler =
+came, but I&#39;m petty sure that the Intel assembler and some of the tools=
+ other John had brought back from his summers in MH.</div><div class=3D"gma=
+il_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div=
+ class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">I=
+ think (but don&#39;t know for sure) the Intel 8086 assembler was done at A=
+T&amp;T first.=C2=A0 IIRC it may have come out of Dale&#39;s group in Colum=
+bus.=C2=A0 =C2=A0I do know Dale&#39;s group had done a Z80 C Compiler using=
+ the Ritchie Compiler at some point in 1978 timeframe (and at one time I ha=
+d, but can not seem to find it, in my archives).</div><div class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div cla=
+ss=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">When =
+Intel released the 386, I believe the AT&amp;T 8086 assembler was updated f=
+or the new 32 instructions; although who did that/where was done, I&#39;m n=
+ot sure.</div><div class=3D"gmail_default" style=3D"font-family:arial,helve=
+tica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"font-famil=
+y:arial,helvetica,sans-serif">Steve is probably the best source for most of=
+ this as he managed the team in Summit doing the different AT&amp;T front a=
+nd back ends when they tried to centralize the compiler work for UNIX.</div=
+></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr"=
+>On Thu, Jul 11, 2019 at 12:48 PM Warner Losh &lt;<a href=3D"mailto:imp@bsd=
+imp.com">imp@bsdimp.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_=
+quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,=
+204);padding-left:1ex"><div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div=
+ class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Thu, Jul 11=
+, 2019 at 10:31 AM Clem cole &lt;<a href=3D"mailto:clemc@ccc.com" target=3D=
+"_blank">clemc@ccc.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_q=
+uote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,2=
+04);padding-left:1ex"><div dir=3D"auto">By the time of 4.2 the switch from =
+the =C2=A0Ritchie and Johnson compilers at UCB had begun.=C2=A0 Remember th=
+e primary output of Rms at that point was emacs and gcc. =C2=A0 =C2=A0<div>=
+<br></div><div>CSRG wanted the different backends for C. =C2=A0 ThAts it.=
+=C2=A0 Besides the vax, Rms had done 68000 and 386 back ends then. =C2=A0</=
+div><div><br></div><div>With the original system V, all of AT&amp;T, Intel =
+and IBM paid Interactive Systems Corp (aka ISC) to port the System V/Vax co=
+de to a 386 ps/2 and an Intel reference system that used an ISA bus.=C2=A0 =
+This would be eventually released in source at the 386 port from AT&amp;T. =
+=C2=A0 As part of the contract summit supplied the compiler</div><div><br><=
+/div><div>I know the AT&amp;T assembler with it=E2=80=99s backwards syntax =
+from Intel was done before rms did his.=C2=A0 He was compatible with the su=
+mmit assembler.=C2=A0 I don=E2=80=99t remember who=E2=80=99s 386 backend ca=
+me out first.=C2=A0 I think is was the summit compiler but you needed a sys=
+tem v license which UCB did not have.=C2=A0</div></div></blockquote><div><b=
+r></div><div>There&#39;s also a fair amount of work at MIT to do Intel code=
+ generation for 8086 (small mode) that was extended by Queens College Londo=
+n (I think, I gotta grab the tapes again) to do large mode. I&#39;ve run in=
+to this looking for a compiler for the Venix source restoration project I&#=
+39;ve been tilting at. I found those based on a cryptic comment I found som=
+ewhere online about the tech behind Venix that wasn&#39;t from AT&amp;T. I =
+don&#39;t know if ISC started with them as a base or not, nor really how th=
+e MIT compilers came about, but they claim to be PCC based somehow. Don&#39=
+;t know if this helps you on your quest... BTW, I found these when I found =
+the latest pcc-restoration sources didn&#39;t have a working i86 backend an=
+ymore (there was once one for Minux, but when I built it I couldn&#39;t get=
+ it to generate sensible code at all).</div><div><br></div><div>Warner</div=
+><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px=
+ 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div di=
+r=3D"auto"><div>Clem</div><div><br><div id=3D"gmail-m_7208556038932668737gm=
+ail-m_-8828320340208513777AppleMailSignature" dir=3D"ltr">Sent from my PDP-=
+7 Running UNIX V0 expect things to be almost but not quite.=C2=A0</div><div=
+ dir=3D"ltr"><br>On Jul 11, 2019, at 8:50 AM, Jason Stevens &lt;<a href=3D"=
+mailto:jsteve@superglobalmegacorp.com" target=3D"_blank">jsteve@superglobal=
+megacorp.com</a>&gt; wrote:<br><br></div><blockquote type=3D"cite"><div dir=
+=3D"ltr"><div dir=3D"auto" style=3D"direction:ltr;margin:0px;padding:0px;fo=
+nt-family:sans-serif;font-size:11pt;color:black">That would make sense.=C2=
+=A0=C2=A0 I was able to find some info on PCC2 here<br>
+<br>
+</div>
+<div dir=3D"auto" style=3D"direction:ltr;margin:0px;padding:0px;font-family=
+:sans-serif;font-size:11pt;color:black"><a href=3D"http://doc.cat-v.org/uni=
+x/unix-before-berkeley/" target=3D"_blank">http://doc.cat-v.org/unix/unix-b=
+efore-berkeley/</a><br>
+<br>
+</div>
+<div dir=3D"auto" style=3D"direction:ltr;margin:0px;padding:0px;font-family=
+:sans-serif;font-size:11pt;color:black">I&#39;m guessing along with the ado=
+ption of emacs the csrg must have been further gnu synergy...=C2=A0 Or mayb=
+e PCC2 just wasn&#39;t available outside of the labs? <br>
+<br>
+</div>
+<div dir=3D"auto" style=3D"direction:ltr;margin:0px;padding:0px;font-family=
+:sans-serif;font-size:11pt;color:black">Or maybe by &#39;88 gcc was already=
+ usurping many of the c compilers of the era. <br>
+<br>
+</div>
+<div dir=3D"auto" style=3D"direction:ltr;margin:0px;padding:0px;font-family=
+:sans-serif;font-size:11pt;color:black"><span id=3D"gmail-m_720855603893266=
+8737gmail-m_-8828320340208513777OutlookSignature"></span><br>
+</div>
+<br><br><br>
+<div class=3D"gmail_quote">On Thu, Jul 11, 2019 at 11:37 PM +0800, &quot;Cl=
+em cole&quot; <span dir=3D"ltr">&lt;<a href=3D"mailto:clemc@ccc.com" target=
+=3D"_blank">clemc@ccc.com</a>&gt;</span> wrote:<br>
+<br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-=
+left:1px solid rgb(204,204,204);padding-left:1ex">
+
+
+
+
+<div dir=3D"3D&quot;ltr&quot;">
+I believe the pcc/386 came out of Steve Johnson team at Summit with the PCC=
+2 work. =C2=A0<br><br><div id=3D"gmail-m_7208556038932668737gmail-m_-882832=
+0340208513777AppleMailSignature" dir=3D"ltr">Sent from my PDP-7 Running UNI=
+X V0 expect things to be almost but not quite.=C2=A0</div><div dir=3D"ltr">=
+<br>On Jul 11, 2019, at 7:53 AM, Jason Stevens &lt;<a href=3D"mailto:jsteve=
+@superglobalmegacorp.com" target=3D"_blank">jsteve@superglobalmegacorp.com<=
+/a>&gt; wrote:<br><br></div><blockquote type=3D"cite"><div dir=3D"ltr"><div=
+ class=3D"gmail-m_7208556038932668737gmail-m_-8828320340208513777WordSectio=
+n1"><p class=3D"MsoNormal">Does anyone know where the 386 port from PCC cam=
+e from?</p><p class=3D"MsoNormal"><u></u>=C2=A0<u></u></p><p class=3D"MsoNo=
+rmal">While trying to build a Tahoe userland for the i386, it seems that ev=
+erything was built with GCC=E2=80=A6</p><p class=3D"MsoNormal">Was there a =
+PCC for the i386 around =E2=80=9988-90?=C2=A0 It seems after the rapid demi=
+se of the Tahoe/Harris</p><p class=3D"MsoNormal"><span style=3D"font-size:1=
+2pt;font-family:Georgia,serif;color:rgb(26,26,26);background:white">HCX-9 t=
+hat the non Vax/HCX-9 platforms had moved to GCC?<u></u><u></u></span></p><=
+p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Georgia,ser=
+if;color:rgb(26,26,26);background:white"><u></u>=C2=A0<u></u></span></p><p =
+class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Georgia,serif=
+;color:rgb(26,26,26);background:white">Also anyone know any good test softw=
+are for LIBC?=C2=A0 I=E2=80=99ve been tracing through some<u></u><u></u></s=
+pan></p><p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Ge=
+orgia,serif;color:rgb(26,26,26);background:white">strange issues rebuilding=
+ LIBC from Tahoe, where I had to include some bits from<u></u><u></u></span=
+></p><p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Georg=
+ia,serif;color:rgb(26,26,26);background:white">Reno to get diropen to actua=
+lly work.=C2=A0 I would imagine there ought to have been some<u></u><u></u>=
+</span></p><p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family=
+:Georgia,serif;color:rgb(26,26,26);background:white">platform exercise code=
+ to make sure things were actually working instead of say<u></u><u></u></sp=
+an></p><p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Geo=
+rgia,serif;color:rgb(26,26,26);background:white">building as much as you ca=
+n, and playing rogue for a few hours to make sure<u></u><u></u></span></p><=
+p class=3D"MsoNormal"><span style=3D"font-size:12pt;font-family:Georgia,ser=
+if;color:rgb(26,26,26);background:white">its stable enough. </span></p></di=
+v></div></blockquote>
+</div>
+
+</blockquote>
+</div>
+</div></blockquote></div></div></blockquote></div></div>
+</blockquote></div>
+
+--000000000000afafdb058d6acee4--

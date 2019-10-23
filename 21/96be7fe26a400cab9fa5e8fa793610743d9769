@@ -1,0 +1,84 @@
+From: gregg.drwho8@gmail.com (Gregg Levine)
+Date: Sat, 25 Nov 2017 18:21:27 -0500
+Subject: [TUHS] TCP/IP networking in 8th edition unix
+In-Reply-To: <114404DD-68BB-43EF-B5B1-B0CD38852FDC@cheswick.com>
+References: <4B74ABBE-BA03-4D4B-B8C1-B3CE9A6D83CE@planet.nl>
+ <F4215A8C-8F16-4D23-90AA-3DC2249BF5D8@planet.nl>
+ <114404DD-68BB-43EF-B5B1-B0CD38852FDC@cheswick.com>
+Message-ID: <CAC5iaNG1JNM0s5py7Nh54tKQG6Uo9DmNXc-_-1xOitv7GjNkCQ@mail.gmail.com>
+
+Hello!
+Ordinarily I would say "Yes!", but given this list, I'd promptly
+suggest that if it isn't already available via our host's site, then
+he's got first dibs, and then I'll get my copy for a local mirror.
+
+But that's definitely a very interesting method of networking hardware
+together then.
+-----
+Gregg C Levine gregg.drwho8 at gmail.com
+"This signature fought the Time Wars, time and again."
+
+
+On Sat, Nov 25, 2017 at 4:50 PM, William Cheswick <ches at cheswick.com> wrote:
+> On 24Nov 2017, at 6:52 PM, Paul Ruizendaal <pnr at planet.nl> wrote:
+>
+> Found a post by dmr about this in the 'net.unix-wizards' newsgroup:
+> https://groups.google.com/forum/#!topicsearchin/net.unix-wizards/subject$3Astreams/net.unix-wizards/b7W_j_0qASU
+>
+> It would seem that my understanding of it is indeed how dmr designed it.
+>
+> At the end of the post there is an example: "For example, from my machine, I
+> can type "rlogin purdy" and connect to a Sequent machine running 4.2; the
+> TCP connection goes over Datakit to machine "research" where it is gatewayed
+> to a local ethernet that purdy is connected to."
+>
+> I'm not quite sure how on the Sequent machine the Datakit channel would be
+> hooked up to the 4.2BSD TCP stack. Perhaps something equivalent to e.g.
+> 'SLiRP' was used, perhaps there was a pseudo device that hooked into the
+> network interface layer.
+>
+> Paul
+>
+>
+> Nope, not IP over Datakit, as I recall.  It was quite interesting to work at
+> a site (Bell Labs) where there were two distinct network technologies.
+>
+> We connected to a lot of familiar services through Datakit using the
+> application level.  For example, the smtp client in upas connected to an
+> SMTP service thus:
+>        if ((s = ipcopen(path, "")) < 0) {
+> where path might be one of:
+> tcp!bowell!smtp
+> dk!coma/astro/nj!smtp
+> inet!ftp.uu.net!smtp
+>
+> On V10 Unix and in Plan 9, these were handled by stuff that Dave Presotto
+> wrote.  I distributed this code throughout internal AT&T.
+>
+> The first is the obvious tcp connection.  Datakit connected to a server
+> running in V10’s equivalent to inetd.  The last one was a proxy connection,
+> a circuit-level gateway running on a particular host that I supported for
+> many years.  It had a little protocol and initiated the tcp link from the
+> proxy machine.
+>
+> These proxy machines had some interesting features.  For one, I could log
+> the destination of volume of each connection.  For another, all connections
+> to a sensitive site (think porn) seemed to come from the proxy host.  Some
+> porn sites showed their top ten users, and several major corporations were
+> represented there.
+>
+> This library was socks about seven years before socks, originally written by
+> Presotto and Howard Trickey.  The relay program was originally called
+> “gated”, but that wouldn’t do after a while.  I renamed it “proxyd”, and
+> that is the first use of “proxy" in this context that I am aware of.
+>
+>  If you were on AT&T’s intranet and wanted to connect externally, you ripped
+> out the entire socket dance and replaced it with an ipcopen call.  I also
+> distributed common modified clients, like ptelnet, pftp, pfinger, etc.
+>
+> I still have all this code, and I suppose it ought to go in an archival
+> repository.  I can’t imagine that AT&T/Lucent/Alcatel/Nokia would care at
+> this point. Anyone want it?
+>
+>
+

@@ -1,0 +1,296 @@
+From: sms@moe.2bsd.com (Steven M. Schultz)
+Date: Mon, 31 Jul 2000 08:58:00 -0700 (PDT)
+Subject: [pups] Overlays?
+Message-ID: <200007311558.IAA01672@moe.2bsd.com>
+
+HI!
+
+> From: Jorgen Pehrson <jp at spektr.eu.org>
+> I've just installed 2.11BSD on one of my PDPs, from a TK50 tape I just
+> re-discovered in the trunk of my car. And now I'm in the process of
+
+	Wow - those TK50s are quite robust to survive being stored in the
+	truck of a car.  I've had audio tapes that did not survive ;)
+
+> applying patches. When I installed patch 412 and started to rebuild the
+> kernel, ld complains with a "ld: too big for type 431". 
+> Does this means that I have to rearrange stuff between the BASE and the
+> various OV entries?
+
+	Indeed it does mean exactly that.
+
+> How can I find out which overlay is too big? I've tried to do a:
+> 138% root--> size unix.o
+
+	Yep - that is the correct method.
+
+> text    data    bss     dec     hex
+> 52352   6928    37622   96902   17a86   total text: 115520
+>         overlays: 7680,7232,7808,7744,4864,8576,4736,6848,7680
+> 
+> How big is too big? And also if none of the overlays above are too big, I
+> guess it must be the BASE that is too big? 
+
+	I thought I wrote this up at one time but I may have only thought
+	about it ;)
+
+> Is there some sort of documentation anywhere that describe this voodoo
+> stuff and black magic a bit? 
+
+	Is it in one an Appendix to the "Setup&Installation" document?   
+
+	In the case above it is OV6 (overlays are numbered from 1) that is
+	too big.
+
+	The rules are:
+
+		1) BASE can be 56kb (57344) max
+
+		2) OVerlays can be 8kb (8192) max
+
+		3) There can be no 0 length overlays (except for the very
+		    last one).
+
+> Any suggestions on what .o file I should move to what overlay?
+
+	Look at the Makefile - you should see a line that starts "OV6=".  Do
+	a "size" on the .o files listed for OV6.   Pick one that will fix
+	elsewhere - I'd suggest OV5 since it is only 4864 bytes and has lots
+	of room.  You could also move a .o file to the BASE since it has
+	adequate room also.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA20356
+	for pups-liszt; Tue, 1 Aug 2000 09:31:49 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA20352
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 1 Aug 2000 09:31:48 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id JAA18497
+	for pups at minnie.cs.adfa.edu.au; Tue, 1 Aug 2000 09:29:49 +1000 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id DAA18526
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 1 Aug 2000 03:28:25 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id KAA02116;
+	Mon, 31 Jul 2000 10:12:43 -0700 (PDT)
+Date: Mon, 31 Jul 2000 10:12:43 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200007311712.KAA02116 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au, rblair at webteksdesign.com
+Subject: Re: [pups] makesimtape.c
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi!
+
+> From: "Ryan Blair" <rblair at webteksdesign.com>
+> 
+> While reading back through the mailing list messages, trying to find out why
+> my tape images never seem to work, I came across a program that I cannot
+> seem to find. It was mentioned lately as "makesimtape.c" but I cannot find
+> it anywhere in the archives. Anybody have a lead on this?
+
+	Yep - I have a lead (not too surprising since I wrote the program :))
+
+	I think the program's present in the PUPS archive in the top of
+	the 2.11 tree area but it may have been relocated or whatever over
+	time.
+
+	Here's the program - it should compile on just about anything that
+	has the 'mtio' ioctl functions.   It is very similar to 'maketape'
+	(intentional since makesimtape.c started out as a copy of maketape.c).
+
+	Steven Schultz
+	moe.2bsd.com
+
+
+--------------------------
+/*
+ *	@(#)makesimtape.c	2.1 (2.11BSD) 1998/12/31
+ *		Hacked 'maketape.c' to write a file in a format suitable for
+ *		use with Bob Supnik's PDP-11 simulator (V2.3) emulated tape 
+ *		driver.
+ *
+ * 	NOTE: a PDP-11 has to flip the shorts within the long when writing out
+ *	      the record size.  Seems a PDP-11 is neither a little-endian
+ *	      machine nor a big-endian one.
+ */
+
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/uio.h>
+
+#define MAXB 30
+
+	char	buf[MAXB * 512];
+	char	name[50];
+	long	recsz, flipped, trl();
+	int	blksz;
+	int	mt, fd, cnt;
+	struct	iovec	iovec[3];
+	struct	iovec	tmark[2];
+	void	usage();
+
+main(argc, argv)
+	int argc;
+	char *argv[];
+	{
+	int i, j = 0, k = 0;
+	long zero = 0;
+	register char	*outfile = NULL, *infile = NULL;
+	FILE *mf;
+	struct	stat	st;
+
+	while	((i = getopt(argc, argv, "i:o:")) != EOF)
+		{
+		switch	(i)
+			{
+			case	'o':
+				outfile = optarg;
+				break;
+			case	'i':
+				infile = optarg;
+				break;
+			default:
+				usage();
+				/* NOTREACHED */
+			}
+		}
+	if	(!outfile || !infile)
+		usage();
+		/* NOTREACHED */
+/*
+ * Stat the outfile and make sure it either 1) Does not exist, or
+ * 2) Exists but is a regular file.
+*/
+	if	(stat(outfile, &st) != -1 && !(S_ISREG(st.st_mode)))
+		errx(1, "outfile must either not exist or be a regular file");
+		/* NOTREACHED */
+
+	mt = open(outfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+	if	(mt < 0)
+		err(1, "Can not create %s", outfile);
+		/* NOTREACHED */
+
+	mf = fopen(infile, "r");
+	if	(!mf)
+		err(1, "Can not open %s", infile);
+		/* NOTREACHED*/
+
+	tmark[0].iov_len = sizeof (long);
+	tmark[0].iov_base = (char *)&zero;
+
+	while	(1)
+		{
+		if	((i = fscanf(mf, "%s %d", name, &blksz))== EOF)
+			exit(0);
+		if	(i != 2) {
+			fprintf(stderr,"Help! Scanf didn't read 2 things (%d)\n", i);
+			exit(1);
+			}
+		if	(blksz <= 0 || blksz > MAXB)
+			{
+			fprintf(stderr, "Block size %u is invalid\n", blksz);
+			exit(1);
+			}
+		recsz = blksz * 512;	/* convert to bytes */
+		iovec[0].iov_len = sizeof (recsz);
+#ifdef	pdp11
+		iovec[0].iov_base = (char *)&flipped;
+#else
+		iovec[0].iov_base = (char *)&recsz;
+#endif
+		iovec[1].iov_len = (int)recsz;
+		iovec[1].iov_base = buf;
+		iovec[2].iov_len =  iovec[0].iov_len;
+		iovec[2].iov_base = iovec[0].iov_base;
+
+		if	(strcmp(name, "*") == 0)
+			{
+			if	(writev(mt, tmark, 1) < 0)
+				warn(1, "writev of pseudo tapemark failed");
+			k++;
+			continue;
+			}
+		fd = open(name, 0);
+		if	(fd < 0)
+			err(1, "Can't open %s for reading", name);
+			/* NOTREACHED */
+		printf("%s: block %d, file %d\n", name, j, k);
+
+		/*
+		 * we pad the last record with nulls
+		 * (instead of the bell std. of padding with trash).
+		 * this allows you to access text files on the
+		 * tape without garbage at the end of the file.
+		 * (note that there is no record length associated
+		 *  with tape files)
+		 */
+
+		while	((cnt=read(fd, buf, (int)recsz)) == (int)recsz)
+			{
+			j++;
+#ifdef	pdp11
+			flipped = trl(recsz);
+#endif
+			if	(writev(mt, iovec, 3) < 0)
+				err(1, "writev #1");
+				/* NOTREACHED */
+			}
+		if	(cnt > 0)
+			{
+			j++;
+			bzero(buf + cnt, (int)recsz - cnt);
+#ifdef	pdp11
+			flipped = trl(recsz);
+#endif
+			if	(writev(mt, iovec, 3) < 0)
+				err(1, "writev #2");
+				/* NOTREACHED */
+			}
+		close(fd);
+		}
+/*
+ * Write two tape marks to simulate EOT
+*/
+	writev(mt, tmark, 1);
+	writev(mt, tmark, 1);
+	}
+
+long
+trl(l)
+	long	l;
+	{
+	union	{
+		long	l;
+		short	s[2];
+		} foo;
+	register short	x;
+
+	foo.l = l;
+	x = foo.s[0];
+	foo.s[0] = foo.s[1];
+	foo.s[1] = x;
+	return(foo.l);
+	}
+
+void
+usage()
+	{
+	fprintf(stderr, "usage: makesimtape -o outfilefile -i inputfile\n");
+	exit(1);
+	}
+
+

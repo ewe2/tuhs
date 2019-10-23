@@ -1,0 +1,51 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Wed, 3 May 2017 08:54:19 -0400
+Subject: [TUHS] dmr note on BSD's sins
+In-Reply-To: <alpine.BSF.2.20.1705031055190.11767@aneurin.horsfall.org>
+References: <201705030052.v430qp2K004255@coolidge.cs.Dartmouth.EDU>
+ <alpine.BSF.2.20.1705031055190.11767@aneurin.horsfall.org>
+Message-ID: <CAEoi9W5hz74awSWhR5Mi3pgKKkFxo4OGOS8hGzbxSC6Sq2XMXg@mail.gmail.com>
+
+On Tue, May 2, 2017 at 8:59 PM, Dave Horsfall <dave at horsfall.org> wrote:
+
+> On Tue, 2 May 2017, Doug McIlroy wrote:
+> > With Steve's eloquent grump and cat -v on the table, I can't help
+> > re-citing the peerless cardinal sin of
+> >         less --help | wc
+>
+> Speaking of "cat", what really drives me nuts is "cat file | cmd"...
+>
+> What's wrong with "cmd < file" (or to really confuse newbies, "< file
+> cmd")?
+
+
+Ooo! Ooo! Ooo! I've actually got something for this....
+
+First of all, there's nothing strictly speaking *wrong* with 'cmd < file'
+and cat 'cat file | cmd' is definitely overused, often unintentionally and
+out of ignorance.
+
+However, 'cmd <file' requires 'file' as a literal string in the command;
+`cat` can be useful when the file parameter may be optional. E.g., 'cat
+"$@" | ...'. Now some folks will immediately respond by saying, "many
+commands will read from stdin if a filename is not presented on the command
+line, so why not, 'cmd "$@"'?" And that's certainly a valid question, to
+which I would answer that the semantics of a command sometimes subtly
+change when presented with one or more filenames as argument (e.g. 'grep'),
+so using `cat` may suppress that behavior if desired. "But `grep` has the
+`-h` option to tell it not to print the filename!" Yes, but `grep` is just
+*one command* and not *all* of them do. The point being that 'cat' in a
+pipeline has it's place, even if that place is rarely the place we see it.
+
+Another, related use to cover up one of the more odious of recent design
+decisions in Unix-like systems is to use `cat` at the *end* of the
+pipeline. Some programs change behavior if they know that they are writing
+into a tty; one can suppress that if one terminates the pipeline in `cat`.
+This is surely a case of mis-using a feature to mask a bug, but it's often
+useful regardless.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170503/8eae661e/attachment.html>
+

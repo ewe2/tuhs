@@ -1,0 +1,107 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Wed, 03 Jan 2018 18:13:59 -0800
+Subject: [TUHS] OT: critical Intel design flaw
+In-Reply-To: Your message of "Wed, 03 Jan 2018 16:51:03 -0800."
+ <20180104005103.GF1534@mcvoy.com>
+References: <20180103134358.3F16818C098@mercury.lcs.mit.edu>
+ <CAC20D2NEvx_3R_HjzO6r3h6OaAcrpkmWuTRNX7-ApoEz8+KxTg@mail.gmail.com>
+ <C30F8795-EBB0-4734-8550-0BE2B77F07F0@bitblocks.com>
+ <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+ <20180103234025.GA23371@thunk.org> <20180104005103.GF1534@mcvoy.com>
+Message-ID: <20180104021414.6EF88156E523@mail.bitblocks.com>
+
+On Wed, 03 Jan 2018 16:51:03 -0800 Larry McVoy <lm at mcvoy.com> wrote:
+Larry McVoy writes:
+> On Wed, Jan 03, 2018 at 06:40:25PM -0500, Theodore Ts'o wrote:
+> > On Wed, Jan 03, 2018 at 01:27:19PM -0500, Clem Cole wrote:
+> > > > This slowdown (which is not much -- L4 shows it is about 5% or so)
+> > > >
+> > > ???I agree.   We came to the same conclusion in the early/mid 1990's  wit
+> h
+> > > Mach and Chorus.   In fact, the UI 'requirements for modern OS' document
+> > > (which is part of why AT&T got behind Chorus for the never completed
+> > > SVR5/R6 stuff - I'll see if I can find a copy) was based on that work.
+> > > 
+> > > The OS weenies at the time felt that the cost was low enough and hardware
+> > > cheap enough that of course kernels would be the way to go.
+> > 
+> > It's possible to keep the slowdown at 5%, but how much extra
+> > engineering work does it take to get the performance gap down to that
+> > level?  And during that time while the micro kernel team is playing
+> > catchup, if the OS with the monolithic kernel adds new features to the
+> > OS, how much additional time does it take to add those features to the
+> > OS?  (Regardless of whether the features are implemented in userspace,
+> > or in the kernel, or some combination of the two.)
+
+I can't find the specific paper that mentions 5% but see
+Liedke's SOSP97 paper:
+  https://os.inf.tu-dresden.de/pubs/sosp97/ 
+He specifically mentions keeping porting effort low:
+  "In particular, we felt that it was beyond our means to tune
+  Linux to our -kernel in the way the Mach team tuned their
+  single-server Unix to the features of Mach."
+
+Also see  
+  http://os.inf.tu-dresden.de/papers_ps/adam-diplom.pdf
+Where the author reports overall about 17-22% slow down
+compared to native versions of Linux 2.4 or 2.6. Not sure if
+these are multicore version or not.
+
+https://l4linux.org/ shows L4Linux has been ported to
+Linux-4.13.  It would be interesting to see its performance.
+Port of 4.6 was announced in May 2016 and 4.7 in August 2016
+so my guess is porting is more than just recompile but not a
+very significant effort.
+
+> To add to Ted's points.  I was good friends with one of the core guys
+> on the QNX team a long time ago (he died early in 1998 of brain cancer.
+
+Dan Hildebrand? I used QNX in 86 and had read his papers but never
+met him.
+
+> The problem is that most people / companies are not that disciplined.
+
+The whole idea is not to hack on the ukernel endlessly but to
+build apps on top of it. On something like Mill you won't even
+need most of the features of ukernels like L4 or QNX. Best to
+think of them as s/w emulation of needed h/w instructions
+(just like we used to use s/w emulation of floating point math
+on early 68K machines).
+
+> Oh, we need this for $CUSTOMER and this for $BENCHMARK and this for
+> $STANDARD and the easiest way to get it is to shove it into the kernel.
+
+In my view this is a losing game - particularly it if is
+played using performance as the main metric. The the single
+most critical problem today is that of lax security, not a
+lack of performance. It is no longer just the NSA or CIA
+or banks that have to worry about bad guys stealing their
+stuff. We all have to. Even stealing has been
+democratized/massively empowered by the Internet!
+
+My first unix box's CPU was 16 bit unicore cpu running at
+5.6Mhz on a 256KB machine.  Today I am using 4 physical core,
+8 hyperthreaded 64 bit CPU running at 2.5Ghz on a 16GB
+machine.  But I certainly don't feel my productivity has gone
+up even by a factor of 10.  Will I notice if the machine runs
+10% slower if I can get more security? As I mentioned services
+running in the cloud aren't necessary running most effciently.
+So far just the single slowdown due to the Meltdown bug is
+bigger than due to implementing unix on top of a ukernel. And
+we don't even have a solution yet for Spectre.
+
+> I'd argue that microkernels are indeed the best answer but only if you
+> have the best programmers.  Which nobody does even though everyone claims
+> they do.
+> 
+> Monolithic kernels are far more amenable to less than awesome people
+> messing with them.  Sad but true, I'd love a microkernel world but I
+> fear we are too stupid to get it.  Something, something, something,
+> this is why we can't have nice things.
+
+A monlithic kernel reimplemented as a set of services on top
+of ukernel would be even more amenable. But there are too many
+vested interests in the current state of the computer world.
+This is the same point Roger Schell made near the end of his
+interview (see the link in Noel Chiappa's message today).
+

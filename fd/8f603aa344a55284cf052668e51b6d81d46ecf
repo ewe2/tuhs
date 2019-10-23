@@ -1,0 +1,99 @@
+From: clemc@ccc.com (Clem cole)
+Date: Sun, 5 Nov 2017 10:04:22 -0800
+Subject: [TUHS] TERM for v8
+In-Reply-To: <5da5899d-1768-7970-4316-a75c92c7cd54@gmail.com>
+References: <7247d8f1-2100-ff26-fc33-d5e782adea7a@gmail.com>
+ <F8046D9A-19EB-40F4-822F-E2E4A255AFB2@jctaylor.com>
+ <61E89B92-FC04-43B6-9AC2-2752BC146528@ccc.com>
+ <5da5899d-1768-7970-4316-a75c92c7cd54@gmail.com>
+Message-ID: <95C8CDF3-7290-4416-83A9-F9A23058AF3D@ccc.com>
+
+I think the problem is before then.  You need to have the baud rate set before the shell is forked.  For serial ports like DZ and DH that is done in by the values of /etc/ttys   
+
+Sent from my PDP-7 Running UNIX V0 expect things to be almost but not quite. 
+
+> On Nov 5, 2017, at 6:01 AM, Will Senn <will.senn at gmail.com> wrote:
+> 
+> That makes sense. Any idea where to start looking if the console thinks the baudrate is 0 even after setting it (supposedly)? I looked at the source code for stty.c (briefly) and it looks like it oughta work, if ioctl works... other things work ok nl, cr, etc., just speed doesn't have an effect... When I get home later, I'll prolly try putting some print statments in stty.c to see what it thinks it's doing. Here's what I see on the command line in the console:
+> 
+> # stty
+> speed: 0 baud
+> erase = ^H; kill = @; intr = ^?; quit = ^\
+> start = ^Q; stop = ^S; eof = ^D; brk <undef>
+> old even odd -raw -nl echo -lcase -tabs -cbreak -tandem nl0 cr0 ff0 bs0 
+> # stty 9600
+> # stty
+> speed: 0 baud
+> erase = ^H; kill = @; intr = ^?; quit = ^\
+> start = ^Q; stop = ^S; eof = ^D; brk <undef>
+> old even odd -raw -nl echo -lcase -tabs -cbreak -tandem nl0 cr0 ff0 bs0 
+> # 
+> 
+> Will
+> 
+>> On 11/5/17 12:44 AM, Clem cole wrote:
+>> This is a feature of vi.   If the baud rate is perceived to be at or less than a specific value (1200 IIRC) the screen is set to 8 lines at a time to keep repainting low. 
+>> 
+>> This was useful on dialup lines.  
+>> 
+>> Since you have a virtual serial port the baud rate has no bearing other than upper level applications trying to make inferences about the environment such as this. 
+>> 
+>> If you set the baud rate to 19200 or 38400 (EXTA and EXTB in the virgin V7 code base) those were the fastest serial speeds in those days. So any SW should infer the ‘best’ behavior.
+>> 
+>> 
+>> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not quite. 
+>> 
+>> On Nov 4, 2017, at 9:34 PM, William Corcoran <wlc at jctaylor.com> wrote:
+>> 
+>>> 
+>>> I had a similar issue with BSD 2.11. 
+>>> So, I hope this helps. 
+>>> 
+>>> You can use vt100.   However, make sure your baud rate is 9600.
+>>> 
+>>> stty 9600
+>>> 
+>>> (SIMH makes the virtual adjustment so you don’t need to worry about SIMH settings.)
+>>> 
+>>> I am using BSD 2.11 on a Mac with SIMH.  I noticed the console port would have a short window.   But, logging into dz ports were fine.   Setting the console baud rate to match the dz11 settings fixed the issue.
+>>> 
+>>> So, I suspect either a setting in vi that changes the window size on slow devices or it’s hard coded somewhere.  I will take a look. 
+>>> 
+>>> Truly,
+>>> 
+>>> Bill Corcoran
+>>> 
+>>> 
+>>> On Nov 5, 2017, at 12:03 AM, Will Senn <will.senn at gmail.com> wrote:
+>>> 
+>>>> What should I set TERM to on V8 to get the best results on my Mac Terminal. If I set it to vt52, vt100, or vt132, only 8 lines appear at the                     bottom of the terminal window (of about 24 lines):
+>>>> 
+>>>> ---
+>>>> 
+>>>> root::0:4:m0130,m322:/:
+>>>> daemon:x:1:1:m0000,m000:/:
+>>>> sys:sorry:2:1:m0130,m322:/usr/sys:no-login
+>>>> bin:sorry:3:4:m0130,m322:/bin:
+>>>> ken:sorry:6:1:m0130,m322:/usr/ken:
+>>>> dmr:sorry:7:4:mh1092,m069:/usr/dmr:
+>>>> nuucp::238:1:mh2019,m285,uucp:/usr/spool/uucppublic:/usr/lib/uucp/uucico
+>>>> uucp::48:1:mh2019,m285,nowitz:/usr/lib/uucp:
+>>>> "passwd" 20 lines, 770 characters
+>>>> ----
+>>>> 
+>>>> The 8 line window works about like I'd expect - the arrow keys move up and down until the screen needs to scroll, then B's and A's show up. I'm used to that on BSD. Using the j and k keys work better and when I scroll down enough lines, the lines move                     up to fill the whole terminal window and the file can be edited in the full window. Is there a better                     TERM setting that will get 24 lines to show up on file open?
+>>>> 
+>>>> Thanks,
+>>>> 
+>>>> Will
+>>>> 
+>>>> -- 
+>>>> GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+>>>> 
+> 
+> -- 
+> GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171105/5fdd81a1/attachment.html>
+

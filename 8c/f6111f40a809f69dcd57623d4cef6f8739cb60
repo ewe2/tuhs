@@ -1,0 +1,27 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 15 Dec 2017 22:43:58 -0500
+Subject: [TUHS] Partition table rationales?
+Message-ID: <1513395838.858529.1206806712.4081AE92@webmail.messagingengine.com>
+
+Is there any information on the rationales behind the sizes and
+positions of the hardcoded partitions in the rp/hp drivers in V6? There
+are odd gaps of unused space between ones that appear to be intended to
+be used together (I think I have some pieces of the puzzle worked out
+below, but not all).
+
+For the rp driver, only rp[01] uses the whole disk - rp2 and rp3 are
+9200 blocks. The hp partitions looked more complicated, but it looks
+like the manpage is wrong about where partition 2 starts - 84018 vs
+48018. Partitions 0123 are 161584 blocks, 4567 are 162400 blocks. 4567
+start on 100-cylinder boundaries, but are only a bit over 97 cylinders
+long - in fact, they are the same length as rp[01]: 203 RP03 cylinders.
+
+rp6 and rp7 are not mentioned in the manpage, and are 15600 blocks,
+making rp[65] and 47 reasonably non-wasteful configurations.
+
+Is there something special about 9200 blocks? rp2 and rp3 are that size,
+and hp1 is that size rounded to the next cylinder.
+ 
+V7 is much simpler: rp0 is the whole disk, 123 is a non-overlapping set
+with no wasted space. hp[0145], 016, and 017 are non-overlapping sets.
+

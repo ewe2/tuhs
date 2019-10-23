@@ -1,0 +1,126 @@
+From: DSEAGRAV@toad.xkl.com (Daniel A. Seagraves)
+Date: Thu, 9 Dec 1999 13:18:27 -0800
+Subject: 2.11BSD boot looping
+Message-ID: <13506153760.17.DSEAGRAV@toad.xkl.com>
+
+
+[Snip instructions for installing a bootstrap]
+
+No, I got the installation of the bootstrap just fine.  I was told that
+the bootstrap for MSCP disks uses a bug in the UDA50 that some 3rd party
+controllers don't exhibit.  (In my case, I have a Viking UDT SCSI controller)
+
+I was saying I needed to know where/how to change the bootstrap (modify the
+bootstrap, not use a different one) so that it will work.
+
+I got a pointer at some 3BSD stuff on Minnie, but that code used a boot ROM on
+the VAX 750 to get it's job done.
+
+I don't have any MSCP books so I don't know where or how to change the
+bootstrap to make it work on my machine.
+
+-------
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA22820
+	for pups-liszt; Fri, 10 Dec 1999 11:51:06 +1100 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA22816
+	for <pups at minnie.cs.adfa.oz.au>; Fri, 10 Dec 1999 11:50:55 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id QAA18487
+	for pups at minnie.cs.adfa.oz.au; Thu, 9 Dec 1999 16:50:12 -0800 (PST)
+Date: Thu, 9 Dec 1999 16:50:12 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199912100050.QAA18487 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: 2.11BSD boot looping
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: "Daniel A. Seagraves" <DSEAGRAV at toad.xkl.com>
+> I was saying I needed to know where/how to change the bootstrap (modify the
+> bootstrap, not use a different one) so that it will work.
+
+	Hmmm, ok - that wasn't clear.   It read as if the documentation was
+	needed to install a new/different bootblock.
+
+> I got a pointer at some 3BSD stuff on Minnie, but that code used a boot ROM on
+> the VAX 750 to get it's job done.
+
+	Yep - same in 4BSD too, I remember thinking at one time "ah, I'll
+	just use the 4BSD bootcode as a guide" only to find out it was
+	calling into the ROMs.
+
+> I don't have any MSCP books so I don't know where or how to change the
+> bootstrap to make it work on my machine.
+
+	IF the bug is what has been suspected so far then presenting a 
+	vector to the controller during the 4 step init process is what
+	needs to be done.  
+
+	Looking at the standalone MSCP driver (/sys/pdpstand/ra.c) which has
+	the logic to specify a vector even though interrupts are not use the 
+	logic is:
+
+	if (rainit[ctlr] == 0) {
+again:		raaddr->raip = 0;
+		if 	(ra_step(raaddr, RA_STEP1, 1))
+			goto again;
+		raaddr->rasa = RA_ERR | (0154/4);
+		if	(ra_step(raaddr, RA_STEP2, 2))
+			goto again;
+		iomapadr(&racom->ra_ca.ca_ringbase, &bae, &lo16);
+		raaddr->rasa = lo16;
+		if	(ra_step(raaddr, RA_STEP3, 3))
+			goto again;
+		raaddr->rasa = bae;
+		if	(ra_step(raaddr, RA_STEP4, 4))
+			goto again;
+		raaddr->rasa = RA_GO;
+		if (racmd(M_OP_STCON, io) < 0) {
+			printf("%s STCON err\n", devname(io));
+			return(-1);
+		}
+		rainit[ctlr] = 1;
+	}
+
+	Thus it is only done on 'first open'.
+
+	It is in step 1 that the vector divided by 4 needs to be "OR"'d into
+	the work presented to the controller.
+
+	The ra boot block code (/sys/mdec/rauboot.s) has a loop:
+
+/
+/ RA initialize controller
+/
+	mov	$RASTEP1,r0
+	mov	raip,r1
+	clr	(r1)+			/ go through controller init seq.
+	mov	$icons,r2
+1:
+	bit	r0,(r1)
+	beq	1b
+---->>>>
+	mov	(r2)+,(r1)
+	asl	r0
+	bpl	1b
+	mov	$ra+RARSPREF,*$ra+RARSPL / set controller characteristics
+	mov	$ra+RACMDREF,*$ra+RACMDL
+	mov	$RASTCON,r0
+	jsr	pc,racmd
+	mov	unit,*$ra+RAUNIT	/ bring boot unit online
+	mov	$RAONLIN,r0
+	jsr	pc,racmd
+		...
+
+
+
+
+	I suspect that the loop at ---->>> needs to be modified to do something
+	special for step 1.
+
+	Steve
+
+

@@ -1,0 +1,45 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed, 16 Jul 2014 23:55:59 -0400 (EDT)
+Subject: [TUHS] shutdown for pre-v7 unix
+Message-ID: <20140717035559.0375D18C0BE@mercury.lcs.mit.edu>
+
+    > From: Norman Wilson <norman at oclsc.org>
+
+    > I believe that when sync(2) returned, all unflushed I/O had been queued
+    > to the device driver, but not necessarily finished
+
+Yes. I have just looked at update() (the internal version of 'sync') again,
+and it does three things: writes out super-blocks, any modified inodes, and
+(finally) any cached disk blocks (in that order).
+
+In all three cases, the code calls (either directly or indirectly) bwrite(),
+the exact operation of which (wait for completion, or merely schedule the
+operation) on any given buffer depends on the flag bits on that buffer.
+
+At least one of the cases (the third), it sets the 'ASYNC' bit on the buffer,
+i.e. it doesn't wait for the I/O to complete, merely schedules it. For the
+first two, though, it looks like it probably waits.
+
+    > so the second sync was just a time-filling no-op. If all the disks were
+    > in view, it probably sufficed just to watch them until all the lights
+    > ... had stopped blinking.
+
+Yes. If the system is single-user, and you say 'sync', if you wait a bit for
+the I/O to complete, any later syncs won't actually do anything.
+
+I don't know of any programmatic way to make sure that all the disk I/O has
+completed (although obviously one could be written); even the 'unmount' call
+doesn't check to make sure all the I/O is completed (it just calls update()).
+Watching the lights was as good as anything.
+
+    > I usually typed sync three or four times myself.
+
+I usually just type it once, wait a moment, and then halt the machine. I've
+never experienced disk corruption from so doing.
+
+With modern ginormous disk caches, you might have to wait more than a moment,
+but we're talking older machines here...
+
+	Noel
+
+

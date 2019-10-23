@@ -1,0 +1,75 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Tue,  6 Jan 2015 17:45:44 -0500 (EST)
+Subject: [TUHS] pdp11 UNIX memory allocation.
+Message-ID: <20150106224544.393BC18C091@mercury.lcs.mit.edu>
+
+    > From: Clem Cole <clemc at ccc.com>
+
+    > Depends the processor. For the 11/45 class processors, you had a 17th
+    > address bit, which was the I/D choice. For the 11/40 class you shared
+    > the instructions and data space.
+
+To be exact, the 23, 24, 34, 35/40 and 60 all had a single shared space.
+(I have no idea why DEC didn't put it in the 60 - probably helped kill that
+
+otherwise intersting machine, with its UCS, early...). The 44, 45/50/55, 70,
+73, 83/84, and 93/94 had split.
+
+
+    > From: random832 at fastmail.us
+
+    > the calling convention for PDP-11 Unix system calls read their
+    > arguments from directly after the trap instruction (which would mean
+    > that the C wrappers for the system calls would have to write their
+    > arguments there, even if assembly programs could have them hardcoded.)
+
+Here's the code for a typical 'wrapper' (this is V6, not sure if V7 changed
+the trap stuff):
+
+  _lseek:
+	jsr	r5,csv
+	mov	4(r5),r0
+	mov	6(r5),0f
+	mov	8(r5),0f+2
+	mov	10.(r5),0f+4
+	sys	indir; 9f
+	bec	1f
+	jmp	cerror
+  1:
+	jmp	cret
+
+  .data
+  9:
+	sys	lseek; 0:..; ..; ..
+
+Note the switch to data space for storing the arguments (at the 0: label
+hidden in the line of data), and the 'indirect' system call.
+
+
+    > From: Ronald Natalie <ron at ronnatalie.com>
+
+    > Some access at the kernel level can be done with MFPI and MPFD
+    > instructions.
+
+Unless you hacked your hardware, in which case it was possible from user mode
+too... :-)
+
+I remember how freaked out we were when we tried to use MFPI to read
+instruction space, and it didn't work, whereupon we consulted the 11/45
+prints, only to discover that DEC had deliberately made it not work!
+
+
+    > From: Ronald Natalie <ron at ronnatalie.com>
+
+    > After the changes to the FS, you'd get missing blocks and a few 0-0
+    > inodes (or ones where the links count was higher than the links). These
+    > while wasteful were not going to cause problems.
+
+It might be worth pointing out that due to the way pipes work, if a system
+crashed with pipes open, even (especially!) with the disk perfectly sync'd,
+you'll be left with 0-0 inodes. Although as you point out, those were merely
+crud, not potential sourdes of file-rot.
+
+	Noel
+
+

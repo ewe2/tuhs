@@ -1,0 +1,124 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 12 Dec 2015 15:53:54 -0600
+Subject: [TUHS] tar on v6 not creating directories on v6
+Message-ID: <566C9772.9040508@gmail.com>
+
+All,
+
+I'm stuck trying to determine what is going on with v6tar on v6. It 
+seems to work ok for files, but gets confused with subdirectories. I set 
+up a test folder structure:
+
+t/dmr/vs.c
+t/dmr/vt.c
+t/ken/prf.c
+
+then I created a tarball
+tar cvf t.tar t
+
+then I tried to extract the tarball. It made a mess:
+# tar xvf t.tar
+
+Tar: blocksize = 17
+y ?
+tar: t/ken/prf.c - cannot create
+y ?
+y ?
+tar: t/dmr/vs.c - cannot create
+y ?
+y ?
+tar: t/dmr/vt.c - cannot create
+
+That was ugly and all of it was output. What exactly did I wind up with?:
+# ls -l
+total 19
+drwxrwxrwx  2 root       32 Oct 10 12:54 y
+-rw-rw-rw-  1 root     8704 Oct 10 12:54 t.tar
+
+Ugh. Probably don't need the y directory...
+# rmdir y
+y ?
+# ls y
+y not found
+
+Wow! It appears that I am unable to delete the y directory or list it by 
+name. That can't be good. Any ideas of how to remove this directory are 
+welcome.
+
+Not to be deterred by one small failure, I copied the same tarball over 
+to v7 on the off chance that maybe v6tar isn't really for v6, but more 
+for moving files(and directories) over to v7 as Haley and Ritchie 
+describe, and lo and behold tar on v7 is able to extract both files and 
+directories from the same tarball without any trouble:
+
+# tar xvf t.tar
+Tar: blocksize = 17
+x t/ken/prf.c, 2301 bytes, 5 tape blocks
+x t/dmr/vs.c, 1543 bytes, 4 tape blocks
+x t/dmr/vt.c, 834 bytes, 2 tape blocks
+
+# ls -l
+total 18
+drwxrwxr-x 4 root       64 Dec 31 19:27 t
+-rw-rw-r-- 1 root     8704 Dec 31 19:27 t.tar
+
+# ls t
+dmr
+ken
+
+# ls t/dmr
+vs.c
+vt.c
+
+# ls t/ken
+prf.c
+
+Interesting. After looking at the tar source, the question marks in the 
+output appear to be coming from somewhere outside of tar (perhaps mkdir 
+or chown?). Also, the "cannot create" message comes from the following 
+snippet of the tar source, which looks reasonable:
+...
+if ((ofile = creat(dblock.dbuf.name, stbuf.st_mode & 07777)) < 0) {
+                         fprintf(stderr, "tar: %s - cannot create\n", 
+dblock.dbuf.name);
+...
+
+I think this error is simply an effect related to the failure to create 
+the necessary directories properly. The code to do that looks pretty 
+straightforward:
+checkdir(name)
+register char *name;
+{
+         register char *cp;
+         int i;
+         for (cp = name; *cp; cp++) {
+                 if (*cp == '/') {
+                         *cp = '\0';
+                         if (access(name, 01) < 0) {
+                                 if (fork() == 0) {
+                                         execl("/bin/mkdir", "mkdir", 
+name, 0);
+                                         execl("/usr/bin/mkdir", 
+"mkdir", name, 0);
+                                         fprintf(stderr, "tar: cannot 
+find mkdir!\n");
+                                         done(0);
+                                 }
+                                 while (wait(&i) >= 0);
+                                 chown(name, stbuf.st_uid, stbuf.st_gid);
+                         }
+                         *cp = '/';
+                 }
+         }
+}
+
+I speculate that chown is causing the "?" to be displayed. Is it safe 
+enough for me to add printf statements around this code to see what's 
+going on, or is there a better approach?
+
+Thanks,
+
+Will
+
+
+

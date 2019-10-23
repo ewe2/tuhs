@@ -1,0 +1,59 @@
+From: bsw@cuzuco.com (Brian S Walden)
+Date: Sat, 28 Dec 2002 00:19:43 -0500
+Subject: [TUHS] Re: Patches to improve 6th Edition
+Message-ID: <20021228051943.GA6817@panix.com>
+
+Yes there are other bugs you will want to fix as well
+if you are using v6 heavily and not on slow hardware
+(e.g. a simulator).  In the inode allocation route
+(ialloc()) in /usr/sys/ken/alloc.c there is a bug in
+the placement of the loop: tag.  You just have to move
+it up two line to above the while() loop. See the diff below.
+This rare Ken Thompson bug was found in 1988 on an Amdahl UTS machine
+that the hardware finally became fast enough that it caused us panics.
+This bug existed from (at least) the Fifth up until the Eighth
+editions from 1127 (BTL research). The Ninth edition had much
+rewrites in the kernel and the algorthim was changed at that point.
+Since it was in UTS, it must have been in the porting base of
+System V Release 2. This code is the basis for the System V
+filesystem, so it probably didn't exist in BSD releases
+since they used their fast filesystem (cylinder groups, et al.)
+which became UFS. It's amazing thet with the amount of eyes on it
+(via Lions Commentary, etc.) it was not spotted earlier.
+
+It would be good to get a collection of all "unreleased" bug fixes
+that others may have.
+
+
+*** alloc.c.orig        Fri Dec 27 23:23:30 2002
+--- alloc.c     Fri Dec 27 23:23:30 2002
+***************
+*** 163,171 ****
+        int i, j, k, ino;
+  
+        fp = getfs(dev);
+        while(fp->s_ilock)
+                sleep(&fp->s_ilock, PINOD);
+- loop:
+        if(fp->s_ninode > 0) {
+                ino = fp->s_inode[--fp->s_ninode];
+                ip = iget(dev, ino);
+--- 163,171 ----
+        int i, j, k, ino;
+  
+        fp = getfs(dev);
++ loop:
+        while(fp->s_ilock)
+                sleep(&fp->s_ilock, PINOD);
+        if(fp->s_ninode > 0) {
+                ino = fp->s_inode[--fp->s_ninode];
+                ip = iget(dev, ino);
+
+
+In article by Mirian Crzig Lennox:
+> This reminds me that I fixed a couple of "bugs" (some outright bugs,
+> and some mere behaviours which I didn't quite like) in playing with my
+> V6/simh environment, and I'm wondering if there is a place I should
+> submit them in case others might be interested.
+
+

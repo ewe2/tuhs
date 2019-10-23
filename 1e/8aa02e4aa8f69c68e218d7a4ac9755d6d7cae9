@@ -1,0 +1,49 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Wed, 8 Nov 2017 14:56:36 -0500
+Subject: [TUHS] origins of void* -- Apology!
+In-Reply-To: <20171108174450.5564F20334@orac.inputplus.co.uk>
+References: <CANCZdfoLzdp6q4VsXo+cZ_gwMhyRxk2FT-jh2Dz2Ggt5pQdfJg@mail.gmail.com>
+ <7617c69abf46fbe3f206c6208000fe3b26854359@webmail.yaccman.com>
+ <065d01d3575e$f71f6ad0$e55e4070$@ronnatalie.com>
+ <E0183799-3153-4DFD-9879-47515821F8BA@bitblocks.com>
+ <20171108174450.5564F20334@orac.inputplus.co.uk>
+Message-ID: <00d801d358cb$af9a5990$0ecf0cb0$@ronnatalie.com>
+
+Ralph is right.   You don't have to go any further than the old x86 implementations to find machines where the function pointers are bigger than the data pointers.  
+
+Further void* both by the standard and by practical matter MUST have the format of char*.   Any other type of pointer has to be convertible to void*/char* (as both must address the smallest addressable unit).
+Most machines, don't need to actually do any pointer conversion but more than a few do, mostly those that have word addressing as native.
+
+If I recall properly, the CRAY, which didn't really have byte addressing at all, natively, just had the byte offset into word encoded in high order bits.    The UNIVAC has a quite rich "partial word" format encoded in the pointers.    The HEP as well used the low order bits to switch the operand size as well as the offset into the word.
+
+This all works because conversion via normal means converted the from or to the void*/char* and whatever the other data pointer type, as it knows the type of both sides of the conversion.
+The BSD kernels however were ripe with what I call "conversion by union."    It would store one pointer type into a union of one pointer type and retrieve it from another.    Now this is officially undefined behavior
+(as is most use of sockaddr_t in the early days).    I remember spending a few days running around the kernel "fixing" this when doing the HEP port.
+
+
+
+-----Original Message-----
+From: TUHS [mailto:tuhs-bounces@minnie.tuhs.org] On Behalf Of Ralph Corderoy
+Sent: Wednesday, November 8, 2017 12:45 PM
+To: tuhs at minnie.tuhs.org
+Subject: Re: [TUHS] origins of void* -- Apology!
+
+Hi Bakul,
+
+> void* serves a different purpose. It says this is an untyped pointer 
+> (or a ptr to an instance of any type) so no question of size being an 
+> issue.
+
+In C, ignoring POSIX, a void pointer is big enough to hold any pointer to data.  Pointers to data may be different sizes.  And a void pointer can't hold a function pointer, but all function pointers are defined to be the same size.  Thus `void (*)(void)' can be used as a generic function pointer type and cast to other ones when needed.
+
+> It shouldn't even have been "void*". I would've preferred _* and _ 
+> instead of void* and void. Much more appropriate for a concise 
+> language like C!
+
+That's awful.  Might as well say `return' occurs so often, it should have been `@'.  :-)
+
+--
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+
+

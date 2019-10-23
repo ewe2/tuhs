@@ -1,0 +1,104 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 06e7158b
+	for <ml@inbox.vuxu.org>;
+	Thu, 8 Aug 2019 13:38:43 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DA8219BA85; Thu,  8 Aug 2019 23:38:41 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A810B9BA0D;
+	Thu,  8 Aug 2019 23:38:07 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C819C9BA0D; Thu,  8 Aug 2019 23:38:04 +1000 (AEST)
+X-Greylist: delayed 393 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 08 Aug 2019 23:38:03 AEST
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9B1AA9B42B
+ for <tuhs@minnie.tuhs.org>; Thu,  8 Aug 2019 23:38:03 +1000 (AEST)
+Received: from callcc.thunk.org (guestnat-104-133-0-107.corp.google.com
+ [104.133.0.107] (may be forged)) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id x78DVPhH030671
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 8 Aug 2019 09:31:26 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id CFEFF4218EF; Thu,  8 Aug 2019 09:31:24 -0400 (EDT)
+Date: Thu, 8 Aug 2019 09:31:24 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: Warner Losh <imp@bsdimp.com>
+Message-ID: <20190808133124.GA3340@mit.edu>
+References: <7236c9d4-40af-bc49-8aee-5c32d869d2eb@spamtrap.tnetconsulting.net>
+ <CAC20D2PjoKqSfEeBu9pJuOOR772hDhwmUh_k0TbYZU-WTnHSNA@mail.gmail.com>
+ <CANCZdfpPbnB+8GGbzT65dRigDEX=i4qQEsy9MKyV3TnxS8-v2w@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CANCZdfpPbnB+8GGbzT65dRigDEX=i4qQEsy9MKyV3TnxS8-v2w@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+Subject: Re: [TUHS] Pre-init initialization
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society <tuhs@minnie.tuhs.org>,
+ Grant Taylor <gtaylor@tnetconsulting.net>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Aug 07, 2019 at 10:40:06AM -0600, Warner Losh wrote:
+> The move into RAM disks happened as memories grew. This obviated the need
+> to copy a filesystem to a new disk's swap space and then use that to really
+> install the system.
+> 
+> Kernels with bundled RAM disks were a thing in BSD for a long time, though
+> I'm unsure when that functionality entered the code stream. I know the
+> early versions of FreeBSD's installer ran out of a RAM disk loaded off
+> floppies, though that's not the same as initrd since there never was a
+> pivot to something else: just a reboot to boot the real thing.
+
+I implemented loading the root file system as a ramdisk from a floppy
+in 1991 for Linux.  This predates the publication of 386BSD, and I
+wasn't aware of how commercial Unix systems did their initial
+installation and setup.  So as far as I know I came up on it on my
+own, but none of this was especially earthshaking or subtle.
+
+Linux's ramdisk was implemented because most PC's of the day (I was
+using a 40 MHz 386 with only a megabyte of memory) only had a single
+floppy drive (and if they had a second it was a 5.25" drive).  So the
+very first implementation which I did assumed the kernel would be no
+larger than 512k, and looked for Minix file system signature at 512k.
+If it existed, it would load it into the ramdisk and use that as the
+boot region.
+
+Before that, the kernel was loaded from the first floppy, and then
+kernel would prompt the user to eject the boot disk and insert the
+root disk, and hit any key to continue, and then it would mount the
+root disk.  But then the only floppy drive would be tied up with the
+root file system, so that meant there needed to be a second kernel on
+the root floppy, and everything else needed to set up the root image
+would have to be copied to the hard disk, and then you'd have to
+reboot to release the floppy drive so you could install other programs
+that couldn't fit on that initial 1.44MB root floppy.
+
+For people who are interested in the history of initrd used as part of
+the boot process in Linux, please refer to Werner Almesberger's 2000
+paper, "Booting Linux: The History and the Future"[1], presented at the
+Ottawa Linux Symposium.
+
+[1] http://www.almesberger.net/cv/papers/ols2k-9.ps.gz
+
+Cheers,
+
+					- Ted

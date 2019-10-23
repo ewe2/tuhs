@@ -1,0 +1,58 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Sat, 5 Dec 2015 14:11:22 -0600
+Subject: [TUHS] Adding an RP06 disk to a running V7 instance
+Message-ID: <566344EA.7010401@gmail.com>
+
+I have set up v7 following [1] and I would like to better understand the 
+process of adding a disk to the environment. Here is what I know:
+
+The system has one RP06 with two partitions rp0 and rp3 which correspond 
+to the two block devices rp0, rp3, and the two character devices rrp0, 
+and rrp3. The special files look like so:
+brw-r--r-- 1 root    6,  0 Dec 31 19:05 /dev/rp0
+brw-r--r-- 1 root    6,  7 Dec 31 19:04 /dev/rp3
+crw-r--r-- 1 root   14,  0 Dec 31 19:01 /dev/rrp0
+crw-r--r-- 1 root   14,  7 Dec 31 19:01 /dev/rrp3
+
+This meshes with the device classes switches in c.c:
+
+The block device switch:
+struct  bdevsw  bdevsw[] =
+{
+...
+         nulldev, nulldev, hpstrategy, &hptab,   /* hp = 6 */
+...
+}
+
+The character device switch:
+struct  cdevsw  cdevsw[] =
+{
+...
+         nulldev, nulldev, hpread, hpwrite, nodev, nulldev, 0,   /* hp = 
+14 */
+...
+}
+
+I would like to add another RP disk to the environment. After I attach 
+an RP04/05/06 to the system, what should I use as the major/minor device 
+numbers? To put it differently, it doesn't seem correct to me to use 6,1 
+for the block device or 14,1 for the character device on the new drive 
+as it's a completely different disk from rp0 and rp3 which are just 
+partitions on the first drive and have 6,0, 6,7, and 14,0, 14,7. If each 
+RP can have 8 partitions and there can be 8 drives, what is the correct 
+major, minor numbers to use with v7 for multiple devices?
+
+c.c only lists one vector each for the hp device (one block vector where 
+hp = 6, and one char vector where hp = 15).
+
+Thanks,
+
+Will
+
+
+[1] Haley, C. B. & Ritchie, D. M. (1979). Setting Up Unix – Seventh 
+Edition (pp. 497-505) in UNIX programmer's manual, Vol. 2, Revised and 
+Expanded Version. Bell Laboratories: NY.
+
+
+

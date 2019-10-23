@@ -1,0 +1,84 @@
+From: wkt@cs.adfa.edu.au (Warren Toomey)
+Date: Tue, 7 Sep 1999 09:56:09 +1000 (EST)
+Subject: Diff between 11/20 and 11/45?
+Message-ID: <199909062356.JAA12397@henry.cs.adfa.edu.au>
+
+Hi all,
+	Dennis Ritchie has unearthed some really old Unix a.out
+executables from around 1st Edition - 2nd Edition period: see
+Distributions/research/1973_stuff in the PUPS Archive.
+
+[ Actually, I suspect his dates are a year off: they should be 1972 ]
+
+I've printed off the 1st Ed manuals from Dennis' web page, and I'm
+attempting to get my a.out emulator, Apout, to run these old binaries.
+
+I've got a few working. cat works. ls and date run, but sort of give
+strange outputs.
+
+These executables were written for a PDP-11/20. Are there any significant
+USER-MODE differences between the 11/20 and later PDP-11 models? I'm
+thinking missing instructions, different addressing mode behaviour etc.
+
+There is no source code with these binaries, so I can't use that to help
+debug the emulator. I do have the following processor handbooks:
+
+	PDP-11 /20 /15 /R20		1972
+	PDP-11 /45			1973
+	PDP-11 /04 /34 /45 /55 /60	1978-79
+
+I just thought I'd ask for pointers here before I hit them for details.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA27104
+	for pups-liszt; Tue, 7 Sep 1999 11:10:31 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA27099
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 7 Sep 1999 11:10:25 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id LAA12638
+	for pups at minnie.cs.adfa.edu.au; Tue, 7 Sep 1999 11:10:25 +1000 (EST)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <199909070110.LAA12638 at henry.cs.adfa.edu.au>
+Subject: KE11-A! (was Diff between 11/20 and 11/45?)
+To: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Date: Tue, 7 Sep 1999 11:10:25 +1000 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi all,
+	I've just answered my own question. Reading thru the 11/20
+processor handbook, I see the section on the extended arithmetic element,
+KE11-A, which is ``an option to perform multiplication, division,
+multiple position shifts and normalization significantly faster than
+software routines''.
+
+I also see that unit 1 lives at 777300 - 777316, and the date a.out
+executable does this:
+
+
+230:    TRAP 15			time syscall
+232:    MOV #177770,@#177314
+240:    MOV #47432,@#177300
+246:    ADD #5,@#177304
+254:    MOV #7,@#177300
+262:    MOV @#177302,@#177304
+270:    MOV #5,@#177306
+276:    ADD #40622,@#177304
+304:    MOV @#177304,320
+   . . .
+
+So it looks like I need to add KE11-A support to my emulator :-)
+
+Cheers,
+	Warren
+
+

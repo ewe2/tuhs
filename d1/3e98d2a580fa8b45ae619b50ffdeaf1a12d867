@@ -1,0 +1,52 @@
+From: helbig@Informatik.BA-Stuttgart.DE (Wolfgang Helbig)
+Date: Sun, 12 Jan 2003 00:16:42 +0100 (MET)
+Subject: [TUHS] unsigned division in V7's C
+Message-ID: <200301120120.h0C1KrR00556@bsd.korb>
+
+Warren replies:
+>Not sure if:
+>
+>http://www.tuhs.org/Archive/PDP-11/Bug_Fixes/Net.v7bugs/0017
+>
+>is a bug fix for this.
+
+And Dennis replies:
+>Does
+
+>  http://www.cs.bell-labs.com/who/dmr/odd.html#muldiv
+
+>suffice to explain the behavior
+
+Thanks for the replies, but the bug I found is about unsigned int's and
+not long int's.
+
+The V7 C code simply the DIV instruction for unsigned division. The dividend
+is put in the low word of a register pair with the upper word cleared.
+
+When the divisor is >= 2^15, DIV interprets it as a negative integer
+and produces the result (N = 2^16):
+	 N - a/(N-b)	instead of a/b, and
+	 a%(N-b)	instead of a%b.
+
+This explains the bug I've sent yesterday. I is easily fixed, since
+when b >= N/2 and a < N, then a/b is either zero or one.
+
+And there is another bug when using DIV for unsigned integers: If b = 1 and
+a >= N/2, then a/b >= N/2, that is a signed overflow. With V7 on Bob Supniks
+simulator (2.10), I get
+	60000/1: 0, 60000%1: 60000
+DIV did not change the dividend because of overflow.
+
+Again a fix is easy: With unsigned ints, don't use DIV to divide by one.
+
+In all other cases, DIV produces the correct unsigned results, if the dividend
+is less N, that is its high word is zero.
+
+I wonder why these bugs went unnoticed.
+
+Greetings
+
+Wolfgang
+
+
+

@@ -1,0 +1,126 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id fa957a13
+	for <ml@inbox.vuxu.org>;
+	Fri, 11 Jan 2019 23:29:12 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 39B4694670; Sat, 12 Jan 2019 09:29:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8F91E94669;
+	Sat, 12 Jan 2019 09:28:46 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EF95294668; Sat, 12 Jan 2019 09:28:01 +1000 (AEST)
+Received: from lb3-smtp-cloud9.xs4all.net (lb3-smtp-cloud9.xs4all.net
+ [194.109.24.30])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 896BC93D29
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 09:28:00 +1000 (AEST)
+Received: from [192.168.1.114] ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPA
+ id i6DVgqyTGMWvEi6DWgdsPY; Sat, 12 Jan 2019 00:27:58 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 12 Jan 2019 00:27:59 +0100
+Message-Id: <37D0F710-9705-497B-BC4B-51B6E1D5FA1C@planet.nl>
+To: "tuhs@minnie.tuhs.org list" <tuhs@minnie.tuhs.org>
+Mime-Version: 1.0 (Apple Message framework v1283)
+X-Mailer: Apple Mail (2.1283)
+X-CMAE-Envelope: MS4wfGOpPrHk2yhBduqDiai6BQvJDzuBWG0r7V6a4r7iI2sTxCbtK88JVYmFSXn7YkngektfD0NTON3ltVv9CQu+fjhlt21802iiJWYGhoMrBwYdv1VmVDRi
+ wPig/g89+nBZBtl5BD+BuCwosT0y+0K5GPMJlYpKEaB3IT9CTw7fF7Eh
+Subject: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Clem, Ron,
+
+Thanks for the explanations! Some comments below.
+
+>> 1. First of all: I understand that early Unix version numbers and =
+dates
+>> mostly refer to the manual editions, and that core users had more
+>> frequent snapshots of a constantly evolving code base.
+>=20
+> Eh?  They primarily refer to the distributions (Research V6, V7, PWB, =
+the
+> various BSD tapes).
+> I'm not sure what "core users" are referring to.   Most of us had many
+> versions as we hacked and merged the stock releasesx.
+
+I was too brief. I was referring just to the pre-V7 versions, and I had =
+the implicit assumption that alarm() originated at the labs. My =
+understanding was that the labels 5th, 6th and 7th edition had little =
+meaning inside the labs, as there just was a continuously developing =
+code base. Maybe this is a mis-understanding.
+
+> "alarm was introduced as part of Unix/TS" "PWB [..] had both sleep() =
+and alarm() as system calls"
+
+Thanks for those pointers! I'm not sure I fully grasp the lineage of =
+Unix/TS and PWB, but the TUHS wiki has a page about it: =
+https://wiki.tuhs.org/doku.php?id=3Dmisc:snippets:mert1
+
+=46rom that, and from the TUHS Unix Tree web page I get that PWB1.0 from =
+mid 1977 was probably the root source of alarm() for people outside =
+AT&T. As PWB apparently got started much before that, it is possible =
+that alarm() goes back much further as well.
+
+> A bigger networking issue was select() (or the like). It used to be an
+> interesting kludge of running two processes inorder to do =
+simoultaneous
+> read/write before that.
+
+Yes: the NCP Unix team (Grossman/Holmgren/Bunch) also mentioned that as =
+the big issue/annoyance that they ran into in 1975.
+
+As discussed in this list before, 3 years elapsed before Jack Haverty =
+came up with await() for V6. I was told that there was a lot of =
+discussion in the 4.1x/4.2 BSD steering group in 1981/2 whether this =
+functionality should be stateful (like await) or stateless (like =
+select). Looking at the implementations for both, I can see why =
+stateless carried the day.
+
+> Right and select(2) was created by Sam and wnj during the 4.2 =
+development.  I've forgotten which sub-version (it was in 4.1c, but it =
+might have been in b or a before that).  There was a lot of arguing at =
+the time about it's need;  the multiple process solution was considered =
+more 'Unix-like.'
+
+That is an interesting point, and it got me wondering about another =
+related feature that could have been in Unix in the 1975-1980 time =
+frame, being both useful and practical even on a 11/40 class machine, =
+but for some reason wasn't:
+
+It would not seem terribly complex to add non-blocking i/o capability to =
+V6. It could have been implemented as a TTY flag and it is not a big =
+conceptual leap from EINTR to EAGAIN. Adding a 'capacity' field to the =
+sgtty interface would not have been a big leap either. This would have =
+allowed user processes to scan a number of tty lines e.g. once a second =
+in a loop and do processing as needed. In NCP Unix this would not have =
+been hard to extend to network pipes.
+
+The NCP Unix / Arpanet crowd certainly had a need for it, it would have =
+been very useful for Spider/Datakit connections and probably for uucp as =
+well. And from there it is not a million miles to replace the timed user =
+loop with something like select(). Yet non-blocking I/O and select() =
+only appear in 1982.
+
+Maybe in the 1975-1980 time frame this was not felt to be 'how Unix does =
+it'?
+
+

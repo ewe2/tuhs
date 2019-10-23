@@ -1,0 +1,101 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Mon, 22 May 2017 12:29:09 -0400
+Subject: [TUHS] Unix with TCP/IP for small PDP-11s
+In-Reply-To: <80EBBEAA-5774-4594-B69E-00FB1EE0F101@quintile.net>
+References: <35238F37-6324-4D40-A6C0-7957F2E22964@planet.nl>
+ <CAC20D2Mi+iVqoMcHxoaOKwu00-A-V9OPWrAOVoCdH6c6MbKdyQ@mail.gmail.com>
+ <80EBBEAA-5774-4594-B69E-00FB1EE0F101@quintile.net>
+Message-ID: <CAC20D2OXOwYnbwpv8O=E14j-PQRONJrKL6VEyvCc+Reeguy72Q@mail.gmail.com>
+
+The Rand API is documented in a couple of papers that have been discussed
+here previously.   I'll have to do a little googling to find them.   The
+ChaosNET docs are the best MIT docs.
+
+
+The API pretty much worked this way...  there was one simple kernel hook.
+A small mod was done to the old nami routine (what modern UNIX calls
+'lookup'), as a path was being parsed, the rest of the path was left in
+place made available to other routines.
+
+Thus you could open:  /dev/tcp/xxx  and the string xxx was available in
+call that was implementing tcp and was then able to be passed xxx as a
+parameter.  Hence, the traditional open/close/read/write was all that was
+needed.
+
+Joy codified a new API that was supposed to be more network centric and map
+to different network protocols - the thinking being that
+open/close/read/write were insufficient semantics for network operations.
+
+Also, the only other issue at the time was that BSD's select(2) did not
+exist, and the UNIX I/O were 100% synchronous.  So some other mechanism
+(also discussed here) needed to be created to avoid blocking in the
+application.  There were a couple of different schemes with V7's
+multiplexor call was created by Chesson for DataKit (which was similar to
+was used in the UofI code Arpanet code).   Rand, UNET & Chaos had something
+else that gave the save async function, who's name I've forgotten at the
+moment, but I believe Noel posted the code for same in the last year from
+one of the MIT kernels - we had used it at CMU that we had gotten from Rand.
+
+On Mon, May 22, 2017 at 10:51 AM, Steve Simon <steve at quintile.net> wrote:
+
+> hi Clem,
+>
+> do you have pointers to any documentation on the rand/MIT network API?
+>
+> -Steve
+>
+>
+>
+>
+> On 22 May 2017, at 15:09, Clem Cole <clemc at ccc.com> wrote:
+>
+>
+> On Mon, May 22, 2017 at 5:28 AM, Paul Ruizendaal <pnr at planet.nl> wrote:
+>
+>> There are two other routes to TCP/IP on a PDP11 without split I/D:
+>> - 3COM's TCP/IP package (initially an overlay over V7, soon after also
+>> over 2BSD);
+>>
+> ​It's called UNET​
+>
+>
+>
+>
+>> I believe the source to this is lost.
+>>
+> ​So far that is true, there are a couple of leads including a couple of
+> unread tapes in my own basement.   The original authors and I have been in
+> touch.   Assuming we can find and recover it, there is still an open issue
+> of copyright.​
+>
+>
+>
+>
+>> ​.....​
+>>
+>>
+>> Note that these last two options have very different API's
+>>
+> ​Indeed...​
+>
+>
+>
+>
+>> and would not be so easy to work with.
+>>
+> ​Mumble ... it just means post-Joy sockets code does not 'just work.'
+>  UNET uses the Rand interface, which is similar to the interface MIT used
+> for Chaos and Chesson used for the ARPAnet code at UofI, so there are
+> programs that talk to it.   We had mail, ftp and telnet working just fine.​
+>
+> ​ Back in the day and IIRC we were playing with a port of the MIT SUPDUP
+> code but I do not remember if that ever worked on the small address
+> machines.​
+>
+>
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170522/b5457eb2/attachment.html>
+

@@ -1,0 +1,51 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Mon, 27 Nov 2017 11:14:08 -0700
+Subject: [TUHS] Harvard and Von Neumann Architectures and Unix
+In-Reply-To: <20171127165046.GD3430@mcvoy.com>
+References: <20171127161141.2C9E318C08F@mercury.lcs.mit.edu>
+ <20171127165046.GD3430@mcvoy.com>
+Message-ID: <CANCZdfoiZAaa4UF-n2Dz78wA_-PCFQ-T9Q4t5DLYBJG83RJLSg@mail.gmail.com>
+
+On Mon, Nov 27, 2017 at 9:50 AM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> On Mon, Nov 27, 2017 at 11:11:41AM -0500, Noel Chiappa wrote:
+> >     > From: Doug McIlroy
+> >
+> >     > But if that had been in D space, it couldn't have been executed.
+> >
+> > Along those lines, I was wondering about modern OS's, which I gather for
+> > security reasons prevent execution of data, and prevent writing to code.
+> >
+> > Programs which emit these little 'custom code fragments' (I prefer that
+> term,
+> > since they aren't really 'self-modifying code' - which I define as 'a
+> program
+> > which _changes_ _existing_ instructions) must have some way of having a
+> chunk
+> > of memory into which they can write, but which can also be executed.
+>
+> Isn't that how dtrace works?
+>
+
+That's not self modifying code. I've written some self-modifying code (I
+was young, it was sexy, I thought), and it's all about rewriting your own
+instruction stream. And doing so based on data you get so far. Not every
+modification of a text page is self-modifying code.
+
+dtrace, and every debugger that doesn't have hardware assist debug
+registers (or overflows them) modifies the text pages to allow breakpoints,
+watchpoints, tracepoints and the like to work. Even the OS creates code to
+run at runtime. The signal trampoline that's used to return from a signal
+handler in BSD is a small bit of code the OS fills in bits of out of a
+template. It's one of the things that slowed adoption of turning off the X
+bit for stack pages in response to many of the buffer overflow attacks.
+
+On modern architectures, a fair amount of PTE and/or cache dancing needs to
+happen to make this stuff work sometimes. Some processors make this easy
+with dual mappings, others are... what's the right word... tedious.
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171127/59598dd0/attachment.html>
+

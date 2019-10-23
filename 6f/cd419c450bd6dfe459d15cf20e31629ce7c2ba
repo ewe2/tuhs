@@ -1,0 +1,58 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Wed, 29 Mar 2017 00:10:26 +0200
+Subject: [TUHS] Happy birthday, PDP-8!
+In-Reply-To: <mailman.659.1490686648.3779.tuhs@minnie.tuhs.org>
+References: <mailman.659.1490686648.3779.tuhs@minnie.tuhs.org>
+Message-ID: <4dd54b02-7f1a-b594-0e25-009bc650c1c9@update.uu.se>
+
+On 2017-03-28 09:37, jnc at mercury.lcs.mit.edu (Noel Chiappa) wrote:
+
+>
+>     > From: Johnny Billquist
+>
+>     > the PDP-11 have the means of doing this as well....  If anyone ever
+>     > wondered about the strangeness of the JSR instruction of the PDP-11, it
+>     > is precisely because of this.
+>     > ...
+>     > I doubt Unix ever used this, but maybe someone know of some obscure
+>     > inner kernel code that do. :-)
+>
+> Actually Unix does use JSR with a non-PC register to hold the return address
+> very extensively; but it also uses the 'saved PC points to the argument'
+> technique; although only in a limited way. (Well, there may have been some
+> user-mode commands that were not in C that used it, I don't know about that.)
+>
+> First, the 'PC points to arguments': the device interrrupts use that. All
+> device interrupt vectors point to code that looks like:
+>
+> 	jsr r0, _call
+> 	_iservice
+>
+> where iservice() is the interrupt service routine. call: is a common
+> assembler-language routine that calls iservice(); the return from there goes
+> to later down in call:, which does the return from interrupt.
+
+Ah. Thanks for that. I hadn't dug into those parts, but that's the kind 
+of place where I might have suspected it might have been, if anywhere.
+
+> Use of a non-PC return address register is used in every C routine; to save
+> space, there is only one copy of the linkage code that sets up the stack
+> frame; PDP-11 C, by convention, uses R5 for the frame pointer. So that common
+> code (csv) is called with a:
+>
+>      jsr r5, csv
+>
+> which saves the old FP on the stack; CSV does the rest of the work, and jumps
+> back to the calling routine, at the address in R5 when csv: is entered. (There's
+> a similar routine, cret:, to discard the frame, but it's 'called' with a plain
+> jmp.)
+
+Hah! Thinking about it, I actually knew that calling style, but didn't 
+reflect on it, as you're not passing any arguments in the instruction 
+stream in that situation.
+But it's indeed not using the PC as the register in the call, so I guess 
+it should count in some way. :-)
+
+	Johnny
+
+

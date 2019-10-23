@@ -1,0 +1,54 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Tue, 14 Feb 2017 23:46:14 +1100
+Subject: [TUHS] Another odd comment in V6
+In-Reply-To: <0B8503D7-D696-4BB6-A2C7-75A95B603036@planet.nl>
+References: <378063CD-9B94-4AE3-B4BB-F41D2F6BFBF6@planet.nl>
+ <CAH1jEzZsHqxEJpiMizkg6-cLDaaEhzjb9vzicrK0AJaRQT8muQ@mail.gmail.com>
+ <0B8503D7-D696-4BB6-A2C7-75A95B603036@planet.nl>
+Message-ID: <CAH1jEzY6t9p0TsbuEEDisQHpypaGB1_7NUaWHt+7mTUsmdcTAw@mail.gmail.com>
+
+Yes, you are right, I had not paid attention to that pc=opc stuff, in
+fact 2.9 has a comment saying it's backing the PC up but the other
+BSDs do not, so I hadn't noticed that bit. :) I was probably thinking
+of another unix that implements it in the C library not the kernel,
+however it makes no difference conceptually. Interestingly, 2.11BSD
+has ERESTART defined as an errno and does the pc=opc thing if ERESTART
+was to have been returned as the errno. Whereas the other BSDs have
+another variable eosys which has just a few possible values, where one
+of those values (NORMALRETURN or some such) means that errno should be
+checked as well. I like the 2.11BSD way. V7 does not have the pc=opc
+thing and there is no mention of restarting, so I suppose EINTR just
+aborts the interrupted system call.
+cheers, Nick
+
+
+On Tue, Feb 14, 2017 at 11:27 PM, Paul Ruizendaal <pnr at planet.nl> wrote:
+> Hi Nick,
+>
+> Many thanks for that background!
+>
+> I think the quote from the Gabriel paper indeed refers to software
+> interrupts, i.e. signals -- it would not make sense otherwise. The
+> ITS system that the MIT guy referred to is 'large', it ran on PDP10
+> mainframes.
+>
+> I understand how executing a signal handler is piggy-backed on the
+> return from kernel mode. However, when the signal handler is
+> finished it could either continue with the next instruction or
+> re-excute the system call trap instruction. See
+> http://minnie.tuhs.org/cgi-bin/utree.pl?file=2.9BSD/usr/src/sys/sys/trap.c
+> (towards end) for details how this is actually done in 2.9BSD.
+> I think you referred to that mechanism as well.
+>
+> However, my question remains: why is that mysterious comment there,
+> above ttread() in V6, and is there a link with the Gabriel story?
+>
+> Paul
+>
+> On 14 Feb 2017, at 12:27 , Nick Downing wrote:
+>
+>> Well I don't know about this actual conversation in history so I can't
+>> help with that. But I can describe how interrupted system calls work.
+>> [..more..]
+>
+

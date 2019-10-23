@@ -1,0 +1,1021 @@
+From: beast@lintilla2.df.lth.se (Beastly Wolf)
+Date: Sat, 28 Feb 1998 13:55:25 +0100 (MET)
+Subject: That RL02 blues.
+Message-ID: <Pine.SUN.3.91.980228130910.18727B-100000@lintilla2.df.lth.se>
+
+Synopsis:
+I am trying to install an RLV12 and an RL02 drive under ULTRIX so that I
+can generate RL02 disks from the emulator software in the PUPS software 
+library. The ultimate goal is to have a machine where one can copy bootable
+systems to people who do not have any vintage UNIX but have the hardware.
+However!
+There sure is a great fat wall to bump into here....
+
+First try was a uVAX-II that is a part of my collection of vintage
+machines.
+This rig runs Ultrix 4.2 (with updates).
+Here is the system messages when booting the GENERIC kernel:
+
+Loading (a) vmunix ...
+sizes:
+text = 719932
+data = 116224
+bss = 398512
+starting at 0xc19
+ULTRIX V4.2 (Rev. 96) System#1: Mon Feb 23 13:40:07 EST 1998
+real mem  = 7335936
+avail mem = 4779008
+using 179 buffers containing 733184 bytes of memory.
+MicroVAX-II with an fpu
+Q22 bus
+uda0 at uba0
+uq0 at uda0 csr 172150 vec 774 ipl 17
+vvv****The RL02 driver!***vvv
+hl0 at uba0 csr 174400 didn't interrupt
+hl0 at uba0 csr 174400 didn't interrupt 
+^^^***(Observe! Twice! The darn thing at least pretends to try..)***^^^
+klesiu0 at uba0
+uq6 at klesiu0 and so on.
+The system then successfully loads uq16, dz0, ra0 and tms0.
+
+This is what I did so far:
+1) I made a system configuration file containing only the devices I got plus
+hl0 (that is the RL02 driver).
+Same effect as above.
+2) To rule out that this was something in hardware I built an entire new
+machine from scratch using spare parts. Not ONE thing was used from the
+original system. I also installed ULTRIX 4.0 to be sure.
+Guess what...
+When booting the GENERIC kernel, the same thing occured.
+During all test:
+The RL02-drive(s) were spun up with a scratch disk in them.
+On both systems they were set as drive 0 and had terminators.
+
+*despair*
+
+When trying to reach the disk by make-ing a file system on it, the system 
+snorts at me telling me to go and fly a kite. Watch this:
+# newfs /dev/rrl0a rl02
+newfs: /dev/rrl0a: cannot open to read partition table: No such device or 
+address
+newfs: /dev/rrl0a: cannot open: No such device or address
+
+However, the device files are in place. System just can not find the
+board. =/
+
+Any clue anybody? (I know that this is tedious for you all but it is for
+a good cause, okay? )
+
+/Lars Persson
+
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id CAA22081
+	for pups-liszt; Sun, 1 Mar 1998 02:08:57 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from europe.std.com (europe.std.com [199.172.62.20])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id CAA22075
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 02:08:52 +1100 (EST)
+Received: from world.std.com by europe.std.com (8.7.6/BZS-8-1.0)
+	id KAA01150; Sat, 28 Feb 1998 10:08:22 -0500 (EST)
+Received: by world.std.com (TheWorld/Spike-2.0)
+	id AA24580; Sat, 28 Feb 1998 10:08:24 -0500
+Date: Sat, 28 Feb 1998 10:08:24 -0500
+From: allisonp@world.std.com (Allison J Parent)
+Message-Id: <199802281508.AA24580 at world.std.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: That RL02 blues.
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+
+<uq0 at uda0 csr 172150 vec 774 ipl 17
+<vvv****The RL02 driver!***vvv
+<hl0 at uba0 csr 174400 didn't interrupt
+<hl0 at uba0 csr 174400 didn't interrupt 
+<^^^***(Observe! Twice! The darn thing at least pretends to try..)***^^^
+<klesiu0 at uba0
+
+
+That suggests the interrupt grant chain was not intact.  Look to see if 
+one of the slots needs a grant card.  Watch out as a few cards DO NOT
+pass grant!
+
+<Any clue anybody? (I know that this is tedious for you all but it is for
+<a good cause, okay? )
+
+I understand why you would use rl02 they are handy.  I have no experience 
+with them in unix context only Qbus VAX (under VMS) and PDP-11s under 
+rt-11/rsts/rsx-11 so I can't comment on software setup.
+
+Allison
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id DAA22534
+	for pups-liszt; Sun, 1 Mar 1998 03:19:09 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from holyrood.ed.ac.uk (jlothian at holyrood.ed.ac.uk [129.215.166.17])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id DAA22526
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 03:19:03 +1100 (EST)
+Received: (from jlothian at localhost)
+	by holyrood.ed.ac.uk (8.8.7/8.8.7) id QAA20434
+	for pups at minnie.cs.adfa.oz.au; Sat, 28 Feb 1998 16:18:57 GMT
+Date: Sat, 28 Feb 1998 16:18:57 GMT
+Message-Id: <199802281618.QAA20434 at holyrood.ed.ac.uk>
+From: J Lothian <jlothian@holyrood.ed.ac.uk>
+Subject: RL02 meets BSD
+To: pups at minnie.cs.adfa.oz.au
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+I've had an RL02 working on an 11/750 running
+BSD4.3. The RL11 controller only has 16 words of
+buffer memory, so you've got to make sure that other
+devices don't hog the bus too much. In particular,
+UDAs should have their DMA burst set to something like 1.
+Setting it much higher causes the RL11 to get data lates
+as its silo overflows before it gets access to the bus
+to do DMA. However, the RLV12 seems to have a much bigger
+silo (256 bytes?), so this should't be a problem for it. 
+
+The only other things I can think of are bus grant problems
+&c. If you're using an RQDX3 in the same machine, bear in mind
+that it doesn't pass the grants, and so should be the last 
+device on the bus. 
+
+James
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id EAA23015
+	for pups-liszt; Sun, 1 Mar 1998 04:59:19 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from alph02.triumf.ca (alph02.Triumf.CA [142.90.114.18])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with SMTP id EAA23010
+	for <pups at minnie.CS.ADFA.OZ.AU>; Sun, 1 Mar 1998 04:59:13 +1100 (EST)
+Received: by alph02.triumf.ca; id AA14586; Sat, 28 Feb 1998 09:58:27 -0800
+From: Tim Shoppa <shoppa@alph02.triumf.ca>
+Message-Id: <9802281758.AA14586 at alph02.triumf.ca>
+Subject: Re: RL02 meets BSD
+To: jlothian at holyrood.ed.AC.UK (J Lothian)
+Date: Sat, 28 Feb 1998 09:58:27 -0800 (PST)
+Cc: pups at minnie.cs.adfa.oz.au
+In-Reply-To: <199802281618.QAA20434 at holyrood.ed.ac.uk> from "J Lothian" at Feb 28, 98 04:18:57 pm
+X-Mailer: ELM [version 2.4 PL22]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+> The only other things I can think of are bus grant problems
+> &c.
+
+This certainly seems likely to me, too.  What cards are in the
+machine, and in which slots?  What are the switches on the RLV12
+set to?
+
+> If you're using an RQDX3 in the same machine, bear in mind
+> that it doesn't pass the grants, and so should be the last 
+> device on the bus. 
+
+I think you're thinking of the RQDX1/2 here.
+
+Tim.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id PAA24673
+	for pups-liszt; Sun, 1 Mar 1998 15:46:02 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from alph02.triumf.ca (alph02.Triumf.CA [142.90.114.18])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with SMTP id PAA24668
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 15:45:56 +1100 (EST)
+Received: by alph02.triumf.ca; id AA18387; Sat, 28 Feb 1998 20:45:52 -0800
+From: Tim Shoppa <shoppa@alph02.triumf.ca>
+Message-Id: <9803010445.AA18387 at alph02.triumf.ca>
+Subject: Re: CD-ROM from SCO unlikely
+To: sms at moe.2bsd.com (Steven M. Schultz)
+Date: Sat, 28 Feb 1998 20:45:51 -0800 (PST)
+Cc: pups at minnie.cs.adfa.oz.au
+In-Reply-To: <199802280443.UAA00780 at moe.2bsd.com> from "Steven M. Schultz" at Feb 27, 98 08:43:41 pm
+X-Mailer: ELM [version 2.4 PL22]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+> > Incidentally, a couple of weeks ago I made a nice bootable Iomega ZIP
+> > cartridge with the current 2.11 generic kernel and everything in /usr.  It all
+> > barely fits in the 100 Mbytes (well, 3*65536*512 bytes) available, and
+> 
+> 	How "speedy" is a ZIP drive?
+
+In case anyone is interested in the benchmarks, here's a short summary:
+
+Both a Webster ESDC (1 Megabyte cache, Hitachi DK512-12 ESDI drive) and
+an Andromeda SCDC (2 Mbyte cache connected to many SCSI devices, including an
+"internal" SCSI ZIP) are present on my main development machine, a 11/73
+(KDJ11-B) with 2 Mbytes of non-PMI memory.  Caching on both controllers
+was enabled and two benchmarks were done with each disk subsystem.  Times
+reported below are "wall times".  All of this is done under the latest
+release of 2.11BSD using a non-networking system and no other work
+being done on the system.
+
+1.  "make sendmail" took 1159.4 seconds on the WQESD+Hitachi, and 1165.3
+    seconds on the SCDC+ZIP.
+
+2.  "find /usr -print > /dev/null" took 166.4 seconds on the WQESD+Hitachi
+    and 165.0 seconds on the SCDC+ZIP.
+
+It looks like, for most purposes, the ZIP on a good SCSI host adapter is
+just as good as an ESDI drive on a good ESDI controller.  I think
+Steven was expecting to see a substantial hit due to the ZIP's access time,
+but I think that the buffering in the host adapter and in the ZIP drive
+itself makes this a minor concern.
+
+Tim.
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id TAA25119
+	for pups-liszt; Sun, 1 Mar 1998 19:01:49 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from tesla.df.lth.se (tesla.df.lth.se [194.47.252.144])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id TAA25114
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 19:01:42 +1100 (EST)
+Received: from lintilla2.df.lth.se (lintilla2.df.lth.se [194.47.252.38])
+	by tesla.df.lth.se (8.8.8/8.8.8) with SMTP id JAA08233;
+	Sun, 1 Mar 1998 09:01:35 +0100 (MET)
+Received: by lintilla2.df.lth.se (SMI-8.6/SMI-SVR4)
+	id JAA20312; Sun, 1 Mar 1998 09:02:46 +0100
+Date: Sun, 1 Mar 1998 09:02:45 +0100 (MET)
+From: Beastly Wolf <beast@lintilla2.df.lth.se>
+To: Allison J Parent <allisonp at world.std.com>
+cc: pups at minnie.cs.adfa.oz.au
+Subject: Re: That RL02 blues
+In-Reply-To: <199802281508.AA24580 at world.std.com>
+Message-ID: <Pine.SUN.3.91.980301090135.20308A-100000 at lintilla2.df.lth.se>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Grant chain was intact on both machines.
+On the second machine the MSCP device was placed below the RLV12 and the 
+RA disk worked fine!
+/Lars
+
+
+On Sat, 28 Feb 1998, Allison J Parent wrote:
+
+> 
+> <uq0 at uda0 csr 172150 vec 774 ipl 17
+> <vvv****The RL02 driver!***vvv
+> <hl0 at uba0 csr 174400 didn't interrupt
+> <hl0 at uba0 csr 174400 didn't interrupt 
+> <^^^***(Observe! Twice! The darn thing at least pretends to try..)***^^^
+> <klesiu0 at uba0
+> 
+> 
+> That suggests the interrupt grant chain was not intact.  Look to see if 
+> one of the slots needs a grant card.  Watch out as a few cards DO NOT
+> pass grant!
+> 
+> <Any clue anybody? (I know that this is tedious for you all but it is for
+> <a good cause, okay? )
+> 
+> I understand why you would use rl02 they are handy.  I have no experience 
+> with them in unix context only Qbus VAX (under VMS) and PDP-11s under 
+> rt-11/rsts/rsx-11 so I can't comment on software setup.
+> 
+> Allison
+> 
+> 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id TAA25136
+	for pups-liszt; Sun, 1 Mar 1998 19:05:29 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from tesla.df.lth.se (tesla.df.lth.se [194.47.252.144])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id TAA25131
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 19:05:24 +1100 (EST)
+Received: from lintilla2.df.lth.se (lintilla2.df.lth.se [194.47.252.38])
+	by tesla.df.lth.se (8.8.8/8.8.8) with SMTP id JAA08261;
+	Sun, 1 Mar 1998 09:05:21 +0100 (MET)
+Received: by lintilla2.df.lth.se (SMI-8.6/SMI-SVR4)
+	id JAA20317; Sun, 1 Mar 1998 09:06:27 +0100
+Date: Sun, 1 Mar 1998 09:06:26 +0100 (MET)
+From: Beastly Wolf <beast@lintilla2.df.lth.se>
+To: J Lothian <jlothian at holyrood.ed.ac.uk>
+cc: pups at minnie.cs.adfa.oz.au
+Subject: Re: RL02 meets BSD
+In-Reply-To: <199802281618.QAA20434 at holyrood.ed.ac.uk>
+Message-ID: <Pine.SUN.3.91.980301090322.20308B-100000 at lintilla2.df.lth.se>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Both systems have "pirate" drive controllers and they have cards
+that do pass grant signals.
+If I do not remember wrongly, I think that only RQDX-1 had the
+"feature" of not passing the grant chain.
+But we placed all RQDX controller at the bottom anyhow even
+though they worked further up.
+THis is of academical interest only since I do not have holes
+in the grant chain and do not have an RQDX controllers AND
+I have devices below the drive controller in the first case
+that do work!
+/Lars
+
+On Sat, 28 Feb 1998, J Lothian wrote:
+
+> I've had an RL02 working on an 11/750 running
+> BSD4.3. The RL11 controller only has 16 words of
+> buffer memory, so you've got to make sure that other
+> devices don't hog the bus too much. In particular,
+> UDAs should have their DMA burst set to something like 1.
+> Setting it much higher causes the RL11 to get data lates
+> as its silo overflows before it gets access to the bus
+> to do DMA. However, the RLV12 seems to have a much bigger
+> silo (256 bytes?), so this should't be a problem for it. 
+> 
+> The only other things I can think of are bus grant problems
+> &c. If you're using an RQDX3 in the same machine, bear in mind
+> that it doesn't pass the grants, and so should be the last 
+> device on the bus. 
+> 
+> James
+> 
+> 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id TAA25220
+	for pups-liszt; Sun, 1 Mar 1998 19:37:03 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from tesla.df.lth.se (tesla.df.lth.se [194.47.252.144])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id TAA25215
+	for <pups at minnie.cs.adfa.oz.au>; Sun, 1 Mar 1998 19:36:57 +1100 (EST)
+Received: from lintilla2.df.lth.se (lintilla2.df.lth.se [194.47.252.38])
+	by tesla.df.lth.se (8.8.8/8.8.8) with SMTP id JAA08432;
+	Sun, 1 Mar 1998 09:36:49 +0100 (MET)
+Received: by lintilla2.df.lth.se (SMI-8.6/SMI-SVR4)
+	id JAA20351; Sun, 1 Mar 1998 09:37:59 +0100
+Date: Sun, 1 Mar 1998 09:37:58 +0100 (MET)
+From: Beastly Wolf <beast@lintilla2.df.lth.se>
+To: Tim Shoppa <shoppa at alph02.triumf.ca>
+cc: J Lothian <jlothian at holyrood.ed.AC.UK>, pups at minnie.cs.adfa.oz.au
+Subject: Re: RL02 meets BSD
+In-Reply-To: <9802281758.AA14586 at alph02.triumf.ca>
+Message-ID: <Pine.SUN.3.91.980301090940.20308C-100000 at lintilla2.df.lth.se>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+For various reasons I can not give you the hardware config of the
+first system (Okay okay! I DO not want to crawl back in behind it 
+under all the cabling and short out the house again because I did 
+something aggravating to the power outlet in the process the last time
+I was in there) but the only thing I did to that one was to add the RLV12 at 
+the bottom. The system worked before with all devices and did so afterwards 
+too except for the RLV-controller.
+
+The second system looks like this:
+  A	  B	  C	  D
+1 CPU-----CPU-----CPU-----CPU
+2 MEM-----MEM-----MEM-----MEM
+3 RLV12---RLV12---RLV12---RLV12
+4 TKQ50---TKQ50   DQNA----DQNA
+5 SI------SI------SI------SI
+GLUED BACKPLANE FROM HERE AND DOWN
+(this used to be a VAX-station II.
+Remember them and cringe!)
+
+SI is a quad ESDI controller for one or two external drives from System 
+Industries.
+On the other system I have a dual SI controller for RA81 clones (Eagle).
+There I DO have an RQDX-3 above the RLV12 but not so here.
+Grant chain on the uVAX bus looks like this:
+1AB-2AB-3AB-4AB-4CD-5CD-5AB(and so on).
+The first three slots are "granted" only in the AB pair.
+The RLV12 does work with grants only on the AB pair however.
+It works fine in my three button 9 slot 22 bit backplane (classical
+PDP11 vintage rack mount cab) and there the grant chain goes ONLY
+on the AB side stright down (BA11-N and H9273).
+So, no, I do not think we have a grant problem.
+
+However, does the RLV12 handle drive interrupt like the RL11 does?
+It could be that ULTRIX only supports the UNIBUS controller and
+not the Qbus.. And if so, is there a fix for this out there?
+And if not, how do I get hold of enough NetBSD to get a uVAX up
+enough to have the config above, being able to network and being able
+to reach both the SI controller and the RLV12?
+Come to think of it, most of the no nonsense hard hat industry type
+PDP11's I've seen (and especially the OEM-ed ones) got some sort
+of winchester emulating one or several RL02s. Often combined with some
+sort of QIC-type tape recorder with secret density.
+To get ANYTHING on those rigs, I think you HAVE to do it the dd way
+after having moved the controller to a bigger system....
+
+Amazing how things can turn...
+I used to spend a lot of time in trying to get away from the 16 bit
+operating systems into the wonderful world of 32 bit. Now I am struggling
+even harder to get back in there again. =)
+Fun is not always bigger, faster better!
+/Lars
+
+On Sat, 28 Feb 1998, Tim Shoppa wrote:
+
+> > The only other things I can think of are bus grant problems
+> > &c.
+> 
+> This certainly seems likely to me, too.  What cards are in the
+> machine, and in which slots?  What are the switches on the RLV12
+> set to?
+> 
+> > If you're using an RQDX3 in the same machine, bear in mind
+> > that it doesn't pass the grants, and so should be the last 
+> > device on the bus. 
+> 
+> I think you're thinking of the RQDX1/2 here.
+> 
+> Tim.
+> 
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id FAA26727
+	for pups-liszt; Mon, 2 Mar 1998 05:58:11 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from alph02.triumf.ca (alph02.Triumf.CA [142.90.114.18])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with SMTP id FAA26722
+	for <pups at minnie.CS.ADFA.OZ.AU>; Mon, 2 Mar 1998 05:57:59 +1100 (EST)
+Received: by alph02.triumf.ca; id AA28081; Sun, 1 Mar 1998 10:57:46 -0800
+From: Tim Shoppa <shoppa@alph02.triumf.ca>
+Message-Id: <9803011857.AA28081 at alph02.triumf.ca>
+Subject: Re: RL02 meets BSD
+To: beast at lintilla2.df.lth.se (Beastly Wolf)
+Date: Sun, 1 Mar 1998 10:57:46 -0800 (PST)
+Cc: jlothian at holyrood.ed.AC.UK, pups at minnie.cs.adfa.oz.au
+In-Reply-To: <Pine.SUN.3.91.980301090940.20308C-100000 at lintilla2.df.lth.se> from "Beastly Wolf" at Mar 1, 98 09:37:58 am
+X-Mailer: ELM [version 2.4 PL22]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+> The second system looks like this:
+>   A	  B	  C	  D
+> 1 CPU-----CPU-----CPU-----CPU
+> 2 MEM-----MEM-----MEM-----MEM
+> 3 RLV12---RLV12---RLV12---RLV12
+> 4 TKQ50---TKQ50   DQNA----DQNA
+> 5 SI------SI------SI------SI
+> GLUED BACKPLANE FROM HERE AND DOWN
+> (this used to be a VAX-station II.
+> Remember them and cringe!)
+
+Ah, the "RC" aka "restricted configuration" aka "resin-coated" backplane.
+
+The BA23 has a special CD-bus in the first three slots.  Usually it's
+not a problem to put a full-height card in the third slot, below
+the CPU and memory, but occasionally there are quad-height
+cards which actually pay some attention to stuff going on the CD
+side of the bus.  Can you try rearranging your cards so that you
+have a dual-height card (i.e. the TKQ50 or DEQNA) in slot 3 AB,
+you have the 3 CD empty, and the RLV12 in slot 4?  This involves you
+giving up either your TKQ50 or DEQNA, but I'm hoping that you can
+live without one or the other for a little while.
+
+Also, how are the jumpers/DIPswitches set on the RLV12?  It's possible
+to do some weird things by sticking the RLV12 into 16-bit or 18-bit
+mode or by having the VEC set to something used by one of your other
+cards.  If either of these is the case, regard the fact that the controller
+isn't usable as a Good Thing; having a RLV12 in 18-bit mode splatter
+data all around low memory isn't fun!
+
+Tim. (shoppa at triumf.ca)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id GAA26876
+	for pups-liszt; Mon, 2 Mar 1998 06:43:50 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id GAA26871
+	for <pups at minnie.CS.ADFA.OZ.AU>; Mon, 2 Mar 1998 06:43:45 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.8.5/8.8.5) id LAA08986;
+	Sun, 1 Mar 1998 11:25:54 -0800 (PST)
+Date: Sun, 1 Mar 1998 11:25:54 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199803011925.LAA08986 at moe.2bsd.com>
+To: shoppa at alph02.triumf.ca, sms at moe.2bsd.com
+Subject: Re: CD-ROM from SCO unlikely
+Cc: pups at minnie.cs.adfa.oz.au
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Hi -
+
+> From shoppa at alph02.triumf.ca Sat Feb 28 20:45:54 1998
+> 
+> Both a Webster ESDC (1 Megabyte cache, Hitachi DK512-12 ESDI drive) and
+> an Andromeda SCDC (2 Mbyte cache connected to many SCSI devices, including an
+
+	I tracked down an address and phone number for Andromeda Systems - they
+	are real close to me (in fact I drive by them every visit to Fry's ;-))
+
+    Andromeda Systems, Inc.
+    9000 Eton Avenue
+    Canoga Park, CA 91304
+
+    818-709-7600 (voice)
+    818-709-7407 (FAX)
+
+	No mention of a WWW site though.  I'd imagine their boards, while
+	very good, are quite expensive.  As much as I'd like a Zip drive
+	on the 11/93 I can't see spending US$1-2k for a $139 disk drive :-)
+
+> 2.  "find /usr -print > /dev/null" took 166.4 seconds on the WQESD+Hitachi
+>     and 165.0 seconds on the SCDC+ZIP.
+
+	WOW.  That is quite surprising.
+
+> Steven was expecting to see a substantial hit due to the ZIP's access time,
+
+	Quite so.  Especially on the 'find' which is almost pure 'seek' 
+	operations.
+
+	Wasn't there mention somewhere of a 200mb Zip?  I know there's the
+	2gb Jaz drive now but haven't heard anymore about a larger Zip.  On
+	the other hand there is the Syquest product line - they've a 135mb
+	"zip like" (but not compatible) drive.
+
+	Steven
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id HAA26957
+	for pups-liszt; Mon, 2 Mar 1998 07:09:53 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from alph02.triumf.ca (alph02.Triumf.CA [142.90.114.18])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with SMTP id HAA26952
+	for <pups at minnie.CS.ADFA.OZ.AU>; Mon, 2 Mar 1998 07:09:49 +1100 (EST)
+Received: by alph02.triumf.ca; id AA19319; Sun, 1 Mar 1998 12:09:46 -0800
+From: Tim Shoppa <shoppa@alph02.triumf.ca>
+Message-Id: <9803012009.AA19319 at alph02.triumf.ca>
+Subject: Re: CD-ROM from SCO unlikely
+To: pups at minnie.cs.adfa.oz.au
+Date: Sun, 1 Mar 1998 12:09:46 -0800 (PST)
+In-Reply-To: <199803011925.LAA08986 at moe.2bsd.com> from "Steven M. Schultz" at Mar 1, 98 11:25:54 am
+X-Mailer: ELM [version 2.4 PL22]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+> > Both a Webster ESDC (1 Megabyte cache, Hitachi DK512-12 ESDI drive) and
+> > an Andromeda SCDC (2 Mbyte cache connected to many SCSI devices, including an
+> 	I tracked down an address and phone number for Andromeda Systems - they
+> 	are real close to me (in fact I drive by them every visit to Fry's ;-))
+>     Andromeda Systems, Inc.
+>     9000 Eton Avenue
+>     Canoga Park, CA 91304
+>     818-709-7600 (voice)
+>     818-709-7407 (FAX)
+> 
+> 	No mention of a WWW site though.
+
+Try http://www.andromedasystems.com/
+
+>       I'd imagine their boards, while
+> 	very good, are quite expensive.  As much as I'd like a Zip drive
+> 	on the 11/93 I can't see spending US$1-2k for a $139 disk drive :-)
+
+Hook up 6 other SCSI devices to the board and you might change your mind!
+The SCDC also supports standard 34-pin 5.25" and 3.5" floppies.
+
+> > 2.  "find /usr -print > /dev/null" took 166.4 seconds on the WQESD+Hitachi
+> >     and 165.0 seconds on the SCDC+ZIP.
+> 
+> 	WOW.  That is quite surprising.
+> 
+> > Steven was expecting to see a substantial hit due to the ZIP's access time,
+> 
+> 	Quite so.  Especially on the 'find' which is almost pure 'seek' 
+> 	operations.
+
+Actually, the ZIP "in-use" LED wasn't lit during most of the 'find'.  I
+suspect the Andromeda SCDC cached most of the important inodes quite
+early on.
+
+In terms of raw bandwidth to the Q-bus, nothing I've ever seen comes
+close to the SCDC.  2 Mbytes/second may not be a whole lot by modern
+PCI bus standards, but on the Q-bus it's very impressive.
+
+> 	Wasn't there mention somewhere of a 200mb Zip?
+
+I've heard mention of it too, but AFAIK it's still vaporware.  100 Mbytes
+is, indeed, pretty tight for a 2.11BSD distribution, but it does fit.
+
+Tim. (shoppa at triumf.ca)
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id HAA27003
+	for pups-liszt; Mon, 2 Mar 1998 07:32:58 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from mail-out-0.tiac.net (mail-out-0.tiac.net [199.0.65.247])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id HAA26998
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 07:32:54 +1100 (EST)
+Received: from mail-out-4.tiac.net (mail-out-4.tiac.net [199.0.65.16])
+	by mail-out-0.tiac.net (8.8.8/8.8.8) with ESMTP id PAA17077;
+	Sun, 1 Mar 1998 15:32:27 -0500 (EST)
+	(envelope-from jimc at zach1.tiac.net)
+Received: from zach1.tiac.net (zach1.tiac.net [206.119.129.250])
+	by mail-out-4.tiac.net (8.8.7/8.8.7) with SMTP id UAA26747;
+	Sun, 1 Mar 1998 20:32:25 GMT
+	(envelope-from jimc at zach1.tiac.net)
+Message-Id: <m0y9FPI-000o79C at zach1.tiac.net>
+From: jimc@zach1.tiac.net (James E. Carpenter)
+Subject: Re: CD-ROM from SCO unlikely
+To: sms at moe.2bsd.com (Steven M. Schultz)
+Date: Sun, 1 Mar 1998 15:32:20 -0500 (EST)
+Cc: pups at minnie.cs.adfa.oz.au
+In-Reply-To: <199803011925.LAA08986 at moe.2bsd.com> from "Steven M. Schultz" at Mar 1, 98 11:25:54 am
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+> > Steven was expecting to see a substantial hit due to the ZIP's access time,
+> 
+> 	Quite so.  Especially on the 'find' which is almost pure 'seek' 
+> 	operations.
+> 
+> 	Wasn't there mention somewhere of a 200mb Zip?  I know there's the
+> 	2gb Jaz drive now but haven't heard anymore about a larger Zip.  On
+> 	the other hand there is the Syquest product line - they've a 135mb
+> 	"zip like" (but not compatible) drive.
+
+I don't know anything about larger Zip drives but Syquest makes the
+EZFlyer 230MB which is compatible with the EZFlyer 135. I got one for
+Christmas and love it. I _believe_ it's a bit faster than the Zip.
+
+The EZFlyer data sheet is at http://www.syquest.com/products/d_ezflyer.html
+in case anybody is interested.
+
+- Jim
+
+-- 
+James E. Carpenter                               E-Mail: jimc at zach1.tiac.net
+6 Munroe Drive
+Plainville, MA  02762-1108                     ICBM: 42 00' 15"N 71 20' 00"W
+PGP: 7ADE9D99  Fingerprint: 8D AF 63 EC D3 51 14 3E  F1 59 8A 68 32 63 3F 8E
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id IAA27181
+	for pups-liszt; Mon, 2 Mar 1998 08:46:55 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id IAA27176
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 08:46:51 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id IAA01813 for pups at minnie.cs.adfa.oz.au; Mon, 2 Mar 1998 08:47:07 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199803012147.IAA01813 at henry.cs.adfa.oz.au>
+Subject: PDP UNIX and CD-ROMs
+To: pups at minnie.cs.adfa.oz.au (PDP Unix Preservation)
+Date: Mon, 2 Mar 1998 08:47:07 +1100 (EST)
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+All,
+	re the question `Are CD-ROMs the best method of distributing the
+PUPS archive of PDP-11 UNIX material'? The answer is: it's a good method, for
+the following reasons:
+
+	+ you can't easily write over the CD-ROM
+	+ impervious to magnetic fields
+	+ the PUPS archive is always going to be changing, as I find and
+	  add new stuff to it.
+	+ the SCO license enforces that I get written permission before I
+	  pass anything to a third party. Taking this in a conservative
+	  fashion, this might rule out a password-protected ftp archive.
+	  However, I'll check with Dion at SCO on this.
+	+ we can only charge fees for copying and distribution, and cannot
+	  make money on the CD-ROMs
+
+Therefore, treat the archive CD-ROM like you would the FreeBSD or Linux
+distributions on CD-ROM: they will go out of date, but you can purchase
+new versions of the CD-ROM, and they should be relatively inexpensive.
+
+Ok, so CD-ROMs are not the _best_ method of distributing the archive, but
+they are a _good_ way of doing so.
+
+Ciao,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id JAA27230
+	for pups-liszt; Mon, 2 Mar 1998 09:09:37 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from allegro.lemis.com (allegro.lemis.com [192.109.197.134])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id JAA27225
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 09:09:32 +1100 (EST)
+Received: from freebie.lemis.com (freebie.lemis.com [192.109.197.137])
+	by allegro.lemis.com (8.8.7/8.8.5) with ESMTP id IAA07315;
+	Mon, 2 Mar 1998 08:39:25 +1030 (CST)
+Received: (from grog at localhost)
+          by freebie.lemis.com (8.8.8/8.8.7) id IAA07427;
+          Mon, 2 Mar 1998 08:39:25 +1030 (CST)
+          (envelope-from grog)
+Message-ID: <19980302083925.10323 at freebie.lemis.com>
+Date: Mon, 2 Mar 1998 08:39:25 +1030
+From: Greg Lehey <grog@lemis.com>
+To: wkt at cs.adfa.oz.au, PDP Unix Preservation <pups at minnie.cs.adfa.oz.au>
+Subject: Re: PDP UNIX and CD-ROMs
+References: <199803012147.IAA01813 at henry.cs.adfa.oz.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 0.89i
+In-Reply-To: <199803012147.IAA01813 at henry.cs.adfa.oz.au>; from Warren Toomey on Mon, Mar 02, 1998 at 08:47:07AM +1100
+WWW-Home-Page: http://www.lemis.com/~grog
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+On Mon,  2 March 1998 at  8:47:07 +1100, Warren Toomey wrote:
+> All,
+> 	re the question `Are CD-ROMs the best method of distributing the
+> PUPS archive of PDP-11 UNIX material'? The answer is: it's a good method, for
+> the following reasons:
+> 
+> 	+ you can't easily write over the CD-ROM
+> 	+ impervious to magnetic fields
+> 	+ the PUPS archive is always going to be changing, as I find and
+> 	  add new stuff to it.
+> 	+ the SCO license enforces that I get written permission before I
+> 	  pass anything to a third party. Taking this in a conservative
+> 	  fashion, this might rule out a password-protected ftp archive.
+> 	  However, I'll check with Dion at SCO on this.
+> 	+ we can only charge fees for copying and distribution, and cannot
+> 	  make money on the CD-ROMs
+> 
+> Therefore, treat the archive CD-ROM like you would the FreeBSD or Linux
+> distributions on CD-ROM: they will go out of date, but you can purchase
+> new versions of the CD-ROM, and they should be relatively inexpensive.
+
+I still miss the distinction between CD-ROMs and WORMs.  CD-ROMs are
+relatively expensive in small quantities, not just because of the
+setup costs, but also because of the wastage involved.  WORMs
+(writeable CD-ROMs) are probably a better choice for the anticipated
+volume.
+
+Greg
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id JAA27282
+	for pups-liszt; Mon, 2 Mar 1998 09:29:10 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id JAA27277
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 09:29:06 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id JAA01996 for pups at minnie.cs.adfa.oz.au; Mon, 2 Mar 1998 09:29:23 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199803012229.JAA01996 at henry.cs.adfa.oz.au>
+Subject: Re: PDP UNIX and CD-ROMs
+To: pups at minnie.cs.adfa.oz.au
+Date: Mon, 2 Mar 1998 09:29:23 +1100 (EST)
+In-Reply-To: <19980302083925.10323 at freebie.lemis.com> from Greg Lehey at "Mar 2, 98 08:39:25 am"
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+In article by Greg Lehey:
+> On Mon,  2 March 1998 at  8:47:07 +1100, Warren Toomey wrote:
+> > All,
+> > 	re the question `Are CD-ROMs the best method of distributing the
+> > PUPS archive of PDP-11 UNIX material'? The answer is: it's a good method,
+> > for the following reasons:
+> I still miss the distinction between CD-ROMs and WORMs.  CD-ROMs are
+> relatively expensive in small quantities, not just because of the
+> setup costs, but also because of the wastage involved.  WORMs
+> (writeable CD-ROMs) are probably a better choice for the anticipated
+> volume.
+> Greg
+
+Sorry, my fault. I use CD-ROM to mean anything which can be read in a CD-ROM
+drive. That obviously includes CD-W, which is what I really mean here.
+
+Ciao,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id JAA27317
+	for pups-liszt; Mon, 2 Mar 1998 09:38:20 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id JAA27312
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 09:38:17 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id JAA02051 for pups at minnie.cs.adfa.oz.au; Mon, 2 Mar 1998 09:38:33 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199803012238.JAA02051 at henry.cs.adfa.oz.au>
+Subject: Re: PDP UNIX and CD-ROMs
+To: pups at minnie.cs.adfa.oz.au (PDP Unix Preservation)
+Date: Mon, 2 Mar 1998 09:38:33 +1100 (EST)
+In-Reply-To: <199803012228.OAA27094 at rainbow.Corp.Sun.COM> from Chris Drake at "Mar 1, 98 02:28:21 pm"
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+In article by Chris Drake:
+> >Ok, so CD-ROMs are not the _best_ method of distributing the archive, but
+> >they are a _good_ way of doing so.
+> 
+> Sounds good to me...  Just out of curiosity, got any idea how many people are
+> on this list and/or might want a CD?  I may have a limited ability to cut
+> some at work, but not if we're talking lots.
+
+I'd say at least 100 initially, and at least 300 in the first 12 months.
+I'm trying to organise a bunch of people who can burn CDs, to keep the
+individual workload down.
+
+I'll be creating a Rock Ridge image using mkisofs from the archive here.
+People who are prepared to burn CDs can either download the image, or the
+entire archive. For the latter, I'll include a makefile to build the CD image.
+
+Oviously, people who do mirror the archive:
+
+	+ will be asked to burn CDs, and will do so,
+	+ must be covered by a license. I will need either a signed
+	  letter (on paper) describing the license, or a PGP-signed
+	  email describing the license, before I can give access to
+	  the archive.
+
+Does this sound reasonable, everyone?
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id LAA27506
+	for pups-liszt; Mon, 2 Mar 1998 11:17:32 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from allegro.lemis.com (allegro.lemis.com [192.109.197.134])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id LAA27501
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 11:17:24 +1100 (EST)
+Received: from freebie.lemis.com (freebie.lemis.com [192.109.197.137])
+	by allegro.lemis.com (8.8.7/8.8.5) with ESMTP id KAA07479;
+	Mon, 2 Mar 1998 10:47:02 +1030 (CST)
+Received: (from grog at localhost)
+          by freebie.lemis.com (8.8.8/8.8.7) id KAA07855;
+          Mon, 2 Mar 1998 10:47:01 +1030 (CST)
+          (envelope-from grog)
+Message-ID: <19980302104701.60748 at freebie.lemis.com>
+Date: Mon, 2 Mar 1998 10:47:01 +1030
+From: Greg Lehey <grog@lemis.com>
+To: wkt at cs.adfa.oz.au, PDP Unix Preservation <pups at minnie.cs.adfa.oz.au>
+Subject: Re: PDP UNIX and CD-ROMs
+References: <199803012228.OAA27094 at rainbow.Corp.Sun.COM> <199803012238.JAA02051 at henry.cs.adfa.oz.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 0.89i
+In-Reply-To: <199803012238.JAA02051 at henry.cs.adfa.oz.au>; from Warren Toomey on Mon, Mar 02, 1998 at 09:38:33AM +1100
+WWW-Home-Page: http://www.lemis.com/~grog
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+On Mon,  2 March 1998 at  9:38:33 +1100, Warren Toomey wrote:
+> In article by Chris Drake:
+>>> Ok, so CD-ROMs are not the _best_ method of distributing the archive, but
+>>> they are a _good_ way of doing so.
+>> 
+>> Sounds good to me...  Just out of curiosity, got any idea how many people are
+>> on this list and/or might want a CD?  I may have a limited ability to cut
+>> some at work, but not if we're talking lots.
+> 
+> I'd say at least 100 initially, and at least 300 in the first 12 months.
+> I'm trying to organise a bunch of people who can burn CDs, to keep the
+> individual workload down.
+> 
+> I'll be creating a Rock Ridge image using mkisofs from the archive here.
+> People who are prepared to burn CDs can either download the image, or the
+> entire archive. For the latter, I'll include a makefile to build the CD image.
+> 
+> Oviously, people who do mirror the archive:
+> 
+> 	+ will be asked to burn CDs, and will do so,
+
+As I mentioned before, I can cut tapes, but not burn CDs.  I think
+this is still a valuable service.
+
+> 	+ must be covered by a license. I will need either a signed
+> 	  letter (on paper) describing the license, or a PGP-signed
+> 	  email describing the license, before I can give access to
+> 	  the archive.
+
+Right.  Any further news about when this could happen?
+ 
+> Does this sound reasonable, everyone?
+
+Modulo my point above, yes.
+
+Greg
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id LAA27526
+	for pups-liszt; Mon, 2 Mar 1998 11:24:46 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id LAA27521
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 11:24:43 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id LAA06066 for pups at minnie.cs.adfa.oz.au; Mon, 2 Mar 1998 11:25:00 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199803020025.LAA06066 at henry.cs.adfa.oz.au>
+Subject: Re: PDP UNIX and CD-ROMs
+To: pups at minnie.cs.adfa.oz.au (PDP Unix Preservation)
+Date: Mon, 2 Mar 1998 11:25:00 +1100 (EST)
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+Greg writes:
+>> Oviously, people who do mirror the archive:
+>> will be asked to burn CDs, and will do so,
+>>
+> As I mentioned before, I can cut tapes, but not burn CDs.  I think
+> this is still a valuable service.
+
+ Apologies again, Greg. Yes cutting tapes will also be valuable,
+ esp. for people who have a PDP-11.
+
+> Right.  Any further news about when this could happen?
+
+ No, I'm waiting on feedback from Dion. He did say he had started the
+ process of making it a product, but I don't have an ETA for it at the
+ moment.
+
+ Many thanks again for volunteering!!
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) id MAA27839
+	for pups-liszt; Mon, 2 Mar 1998 12:41:04 +1100 (EST)
+X-Authentication-Warning: minnie.cs.adfa.oz.au: major set sender to owner-pups at minnie.cs.adfa.oz.au using -f
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.oz.au (8.8.5/8.8.5) with ESMTP id MAA27834
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 2 Mar 1998 12:40:59 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id MAA06698 for pups at minnie.cs.adfa.oz.au; Mon, 2 Mar 1998 12:41:16 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199803020141.MAA06698 at henry.cs.adfa.oz.au>
+Subject: Part of PUPS Archive via FTP
+To: pups at minnie.cs.adfa.oz.au (PDP Unix Preservation)
+Date: Mon, 2 Mar 1998 12:41:16 +1100 (EST)
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.oz.au
+Precedence: bulk
+
+All,
+	To show you what I'm thinking of for the CD-ROM version of the
+PUPS archive, I've put the unlicensed parts up for anonymous ftp at:
+
+	ftp://minnie.cs.adfa.oz.au/pub/PDP-11/PUPS_Archive/
+
+I've kept the directory structure intact, but you won't find any files
+that require a source license. I'd appreciate any comments. Note that
+there's a directory called Trees missing. It will contain `exploded'
+trees for v6, v7 and 2.11BSD.
+
+The Lists directory is interesting: it contains tar vtf listings of all
+tarballs in the archive, with added checksums so you can determine identical
+files in multiple tarballs.
+
+This is all rough cut at the moment, so don't treat anything as unchangeable.
+
+	Warren
+
+

@@ -1,0 +1,90 @@
+From: mascheck@in-ulm.de (Sven Mascheck)
+Date: Sun, 14 Aug 2011 15:12:18 +0200
+Subject: [TUHS] /usr/bin on V7?
+In-Reply-To: <20110813132429.GF27179@lisa.in-ulm.de>
+References: <CAGGBd_o=zbtbaJ6x+3ksRVik8EG+hnfjAr9P-4=rBYmqooVHVg@mail.gmail.com>
+	<20110813132429.GF27179@lisa.in-ulm.de>
+Message-ID: <20110814131218.GG27179@lisa.in-ulm.de>
+
+Sven Mascheck wrote:
+
+> see "Setting Up Unix" in the 7th ed man, vol2b:
+> 
+> "The system as distributed has all of the binaries in /bin.  Most of
+>  them should be moved to /usr/bin, leaving only the ones required for
+>  system maintenance (such as icheck, dcheck, cc, ed, restor, etc.)
+>  and the most heavily used in /bin.  This will speed things up a bit
+>  if you have only one disk, and also free up space on the root file
+>  system for temporary files."
+
+
+- Some are certainly required in /bin because /usr/bin
+  might be on a separate disk.  So this certainly includes
+  all important diagnostic and repair tools.
+  (And keep in mind that pwd, echo and test were not built
+   into the 7th ed Bourne shell, yet.)
+
+But which binaries "could" be moved to /usr/bin then?
+
+Out of curiosity I had a look for other (strict) criteria
+apart from that you certainly always want to have the
+diagnostic+repair tools available in case of problems.
+
+- Some commands are strictly required in /bin because of
+  hardcoded exec() paths:  getty(8) execs to /bin/login,
+  mv(1) requires /bin/cp,
+	
+  while other commands interestingly try to exec in both
+  directories, rm(1) (-r) does so with "rmdir", tar(1) with
+  "mkdir", bc(1) with "dc", and refer(1) with "sort".
+
+  find(1) requires "pwd", but uses popen().
+
+- the absolute minimum in /bin to boot is actually
+	sh
+
+  (because mount is in /etc),
+  For going multiuser you also need the hardcoded
+	login
+
+  And for getting all diagnostic messages (e.g. /etc/rc)
+  when going multiuser - with a separate /usr disk -
+  you need
+	echo, cat, rm, date
+
+- If you don't want to mess around with temporary copies of
+  binaries, you need especially for mv :)
+	cp
+
+- Searching the commands code for hardcoded paths also yields
+	newgrp, as, cc, ld, pwd, 
+ 
+
+BTW, the System III distribution had these in /bin, AFAIK,
+
+  acctcom   chmod  diff     find  ln      nm      rm     strip  touch
+  adb       chown  dirname  grep  ls      nohup   rmail  stty   true
+  ar        cmp    du       kas   mail    od      rmdir  STTY   tty
+  as        cp     echo     kasb  make    passwd  rsh    su     uname
+  basename  cpio   ed       kill  mesg    pdp11   sed    sum    vax
+  bs        crypt  env      kun   mkdir   pr      sh     sync   wc
+  cat       date   expr     kunb  mv      ps      size   tail   who
+  cc        dd     false    ld    newgrp  pwd     sleep  tee    write
+  chgrp     df     file     line  nice    red     sort   time
+
+
+I agree they knew better than me anyway.
+So I guess just the above,
+minus the SysIII-only commands,
+plus the 7thEd-only commands
+might be just right for /bin, and that's
+
+  ar   chgrp  date    echo   icheck  mkdir   ps      sh     tail
+  as   chmod  dc      ed     kill    mv      pwd     size   test
+  at   chown  dcheck  false  ld      ncheck  restor  sleep  touch
+  bc   clri   dd      file   ln      newgrp  rm      sort   true
+  cat  cmp    df      find   login   od      rmdir   stty   tty
+  cc   cp     du      grep   ls      passwd  sed     su
+
+
+

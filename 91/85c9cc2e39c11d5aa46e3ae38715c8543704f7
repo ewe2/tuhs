@@ -1,0 +1,66 @@
+From: usotsuki@buric.co (Steve Nickolas)
+Date: Sat, 6 May 2017 16:00:52 -0400 (EDT)
+Subject: [TUHS] Discuss of style and design of computer programs from a
+In-Reply-To: <20170506152053.GI12539@yeono.kjorling.se>
+References: <20170506144011.GF28787@mcvoy.com>
+ <20170506150913.57571411A@lod.com> <20170506152053.GI12539@yeono.kjorling.se>
+Message-ID: <alpine.BSF.2.02.1705061554080.4621@frieza.hoshinet.org>
+
+On Sat, 6 May 2017, Michael Kjörling wrote:
+
+> On 6 May 2017 08:09 -0700, from corey at lod.com (Corey Lindsly):
+>> Anyway, I reached one point in the assembly code that I simply could not
+>> understand. It seemed like a mistake, and I went through it again and
+>> again until I finally realized what it was doing. There was a branch/loop
+>> that jumped to the middle of a multi-byte machine instruction, so that
+>> branch had to be disassembled and stepped separately until it "synced" up
+>> with the other branch again. Maybe this is standard practice in
+>> programming (I don't know) but at the time I thought, what kind of evil
+>> genius devised this to save a few bytes of memory?
+>
+> IIRC, that _was_ a common trick at least on machines of that class. It
+> did have the potential to save a few bytes, yes (more if the
+> instructions were such that you'd get some _other, desired_, behavior
+> by jumping into the middle of one with some specific state), but it
+> also foiled lots of disassemblers: Simply disassembling a binary from
+> start to finish would yield nonsense in those locations, as you
+> experienced. It thus basically forced you to single-step those
+> instructions to figure out what was going on from the binary.
+>
+> I'm pretty sure it works on every architecture with variable-length
+> instructions and arbitrary jump capability, as long as you have
+> control over the specific machine instructions generated (such as if
+> you are programming in assembler). Of course, it _is_ also a total
+> nightmare to maintain such code.
+>
+> I would absolutely not say that doing something like that is standard
+> practice in modern programming. Even in microcontrollers, where
+> program and data memory can be scarce even today, I would argue that
+> the costs would not outweigh the benefits by a long shot.
+
+In 6502 code, it's not uncommon to do something like
+
+foo1:     lda      #$00
+           .byte    $2C       ; 3-byte BIT
+foo2:     lda      #$01
+            .
+            .
+            .
+
+to save a byte (and probably still done for the few who write in ASM). 
+The "2C" operand would cause it to disassemble as something like...
+
+1000-     LDA      #$00
+1002-     BIT      $01A9
+
+which is the route you'd go down if you called "foo1".  Apart diddling a 
+few CPU flags, and an unneeded read on $01A9, harmless.
+
+(Most 6502 programmers would probably see a strange BIT instruction as an 
+attempt to do this.)
+
+It's probably not a good idea to still do this unless you're really REALLY 
+crunched for space.
+
+-uso.
+

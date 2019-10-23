@@ -1,0 +1,37 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Mon, 22 May 2017 11:28:19 +0200
+Subject: [TUHS] Unix with TCP/IP for small PDP-11s
+Message-ID: <35238F37-6324-4D40-A6C0-7957F2E22964@planet.nl>
+
+
+I had somehow convinced myself that Ultrix-11 needed split I/D, but indeed it does not:
+
+# file unix
+unix:   (0450) pure overlay executable not stripped
+# size unix
+14784+(8192,8000,8064,8000,8064,8128,8000,7808,7936,7936,7680,7360,1344)+3524+13500 = 31808b = 076100b (111296 total text)
+
+With only 16KB of permanent kernel there will be a lot of overlay switching. I'm not entirely sure why bss could not be 1KB smaller, enabling 8KB more of permanent kernel. The loss of performance from 2 disk buffers less really outweighed less overlay switching?
+
+If I understand correctly, the network code continuously switches around segment 5 to access the right mbuf.
+
+According to the notes in the TUHS archive (http://www.tuhs.org/Archive/Distributions/DEC/Ultrix-11/Fred-Ultrix3/setup-3.1.txt), running Ultrix-11 with networking on a 11/40 class machine is borderline workable:
+
+"I have personally tested it on a 23+, 53 and 83.  I know it runs
+fine on the 73.  The smaller machines (34, 40 etc) should work
+akin to the 23, meaning using overlays and be very tight on RAM
+for the drivers.  TCP/IP is a biiiiig load for those systems!"
+
+There are two other routes to TCP/IP on a PDP11 without split I/D:
+- 3COM's TCP/IP package (initially an overlay over V7, soon after also over 2BSD); I believe the source to this is lost.
+- DCEC's adaptation of the Wingfield TCP/IP library, designed to work with V6. It is mostly a user space daemon, but requires some kernel enhancements. The Wingfield code is in the TUHS archive, but that version has a modified V6 kernel that also supports NCP networking and requires split I/D. If used with a minimally enhanced V6 kernel, it would easily fit in 64KB, without overlays.
+
+Note that these last two options have very different API's and would not be so easy to work with.
+
+Paul
+ 
+
+
+
+
+

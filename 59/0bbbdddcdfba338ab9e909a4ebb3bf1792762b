@@ -1,0 +1,47 @@
+From: chd_1@nktelco.net (C. H. Dickman)
+Date: Mon, 19 Jun 2006 17:43:33 -0400
+Subject: [pups] Major/minor device numbers and device names for MSCP
+	drives?
+In-Reply-To: <00a601c6934e$b1e90b50$0401010a@GIZMO>
+References: <00a601c6934e$b1e90b50$0401010a@GIZMO>
+Message-ID: <44971A85.8060406@nktelco.net>
+
+Robert Armstrong wrote:
+>   Probably this is documented somewhere, but I really need a pointer 
+> or a brief tutorial on the major/minor device numbers for mknod() and 
+> the device names for MSCP drives in 2.11bsd.
+This is what I remember about it all when I struggled with it a couple 
+of years ago.
+
+The 8 bit minor number has 3 parts: the upper two bits are the 
+controller (4 controllers max), the middle 3 bits are unit number (8 
+drives per controller) and the lower 3 bits are the partition (a-h).
+
+The assignment of device names is static (or nearly static). The 
+discovery code for the controllers checks them in the order listed in 
+/dev/dtab and assigns a controller number to each that is discovered and 
+in that order (the nearly static part). Note also that DEC has a 
+standard order for controller addresses too (which might be different). 
+After that, drives are accessed using the 3 bit unit number which MUST 
+correspond to the MSCP unit number (a catch follows because of this). 
+Partitions are accessed with the 3 bit partition number.
+
+The catch is that MSCP unit numbers are supposed to be global cross all 
+controllers and the microPDP-11/83 boot code assumes this. The boot code 
+can only see the first unit n that is encountered and 2.11BSD can only 
+see the drives with MSCP unit numbers less than 8.
+
+If you only have one controller there is no problem. When you add 
+multiple controllers, things get more complex because you can only boot 
+the first 8 MSCP units if you want to be able to access them from 2.11BSD.
+
+-chuck
+
+
+
+
+
+
+ 
+
+

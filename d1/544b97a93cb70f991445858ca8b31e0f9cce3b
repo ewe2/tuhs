@@ -1,0 +1,68 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 21 Sep 2017 13:46:10 -0400
+Subject: [TUHS] Happy birthday,
+ Dennis Ritchie! [ really sun vs dec/apollo --> X and NeWS ]
+Message-ID: <1506015974.14196.for-standards-violators@oclsc.org>
+
+On Tue, Sep 19, 2017, at 10:42, Larry McVoy wrote:
+> slib.c:1653 (bk-7.3): open failed: permission denied
+> 
+> which is way way way more useful than just permission denied.
+
+Random832 replied:
+
+  Well. It's less useful in one way - it doesn't say what file it was
+  trying to open. You could pass the filename *instead* of "open failed",
+  but that still omits the issue I had pointed out: what were you trying
+  to open the file for (at the very least, were you trying to read, write,
+  or exec it). Ideally the function would have a format and arguments.
+
+====
+
+Exactly.
+
+The string interpretation of errno is just another
+item of data that goes in an error message.  There is
+no fixed place it belongs, and it doesn't always
+belong there, because all that is error does not
+fail from a syscall (or library routine).
+
+I do often insert a function of the form
+
+	void errmsg(char *, ...)
+
+in my C programs.  It takes printf-like arguments.
+Normally they just get passed to vfprintf(stderr, ...),
+though sometimes there is something more esoteric,
+and often fprintf(stderr, "%s: ", progname) ends up
+in front.
+
+But errmsg never knows anything about errno.  Why
+should it?  It's supposed to send complaints to
+a standard place; it's not supposed to invent the
+complaints for itself!  If an errno is involved,
+I write something like
+	errmsg("%s: cannot open: %s", filename, strerror(errno));
+(Oh, yes, errmsg appends a newline too.  The idea
+is to avoid cluttering code with minutiae of how
+errors are reported.)
+
+I don't print the source code filename or line number
+except for `this shouldn't have happened' errors.
+For routine events like the user gave the wrong
+filename or it had the wrong permissions or his
+data are malformed, pointers to the source code are
+just unhelpful clutter, like the complicated
+%JARGON-OBSCURE-ABBREVIATION prefixes that accompanied
+every official error message in VMS.
+
+Of course, if the user's data are malformed, he
+should be told which file has the problem and
+where in the file.  But that's different from
+telling him that line 193 of some file he doesn't
+have and will probably never see contains the system
+call that reported that he typed the wrong filename.
+
+Norman Wilson
+Toronto ON
+

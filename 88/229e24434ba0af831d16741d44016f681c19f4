@@ -1,0 +1,33 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Tue, 29 May 2018 14:49:55 -0400 (EDT)
+Subject: [TUHS] Control-T (was top)
+Message-ID: <20180529184955.2FE1218C088@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall
+
+    > I have a clear recollection that UNSW's driver (or was it Basser?)  did
+    > not use interrupts .. but used the clock interrupt to empty the silos
+    > every so often. I'd check the source in the Unix Archive, but I don't
+    > remember which disk image it's in ... Can anyone confirm or deny this?
+
+I found this one:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=AUSAM/sys/dmr/dz.c
+
+which seems to be the one you're rhinking of, or close to it.
+
+It actually does use interrupts, on both sides - sort of. On the input side,
+it uses the 'silo alarm', which interrupts when the input buffer has 16
+characters in it. This has the same issue as the silo on the DH11 - if there
+are less characters than that waiting, the host never gets an interrupt. Which
+may be why it does the timer-based input check also?
+
+The output side is entirely interrupt driven; it _does_ reduce the number of
+interrupts by checking _every_ output line (on every DZ11 in the machine) to
+see if that line's ready for a character when it gets any output interrupt,
+which will definitely seriously reduce the number of output interrupts - but
+even then, if _one_ line is going flat out, that's still 1000 interrupts per
+second.
+
+	Noel
+

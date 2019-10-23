@@ -1,0 +1,347 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f78ce04b
+	for <ml@inbox.vuxu.org>;
+	Sun, 21 Apr 2019 05:53:27 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 07DF193D30; Sun, 21 Apr 2019 15:53:26 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2899993D25;
+	Sun, 21 Apr 2019 15:52:31 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="TH0gEnqY";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 820A393D23; Sun, 21 Apr 2019 15:52:27 +1000 (AEST)
+Received: from mail-vk1-f182.google.com (mail-vk1-f182.google.com
+ [209.85.221.182])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E669C93D21
+ for <tuhs@tuhs.org>; Sun, 21 Apr 2019 15:52:25 +1000 (AEST)
+Received: by mail-vk1-f182.google.com with SMTP id d15so1825806vka.8
+ for <tuhs@tuhs.org>; Sat, 20 Apr 2019 22:52:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=I1AQEsPQ5FacV9WDkNJDSrjHgaFHskMJC8rTzjG5ovk=;
+ b=TH0gEnqYKcJvon3DriBTT47Z6YvsfvK5glW3lP7C55MwZ+gPfoVLsJxBkFORURS9pr
+ YdUN2z8YYxjQAluXZb9ytgKvPewIRk8hkpNmH2BLvixaoIDr5jABZG3Z6oc5+7m0fsX6
+ 0528bvGtKydcybJe56mELnUA71BHTZ0mj1EWDzGpkuclTQmzUJZGWh4b9LMpSkN1Fndw
+ cf3G4NQ7N2M3Okh3kygfPVWYnN/Oy2XHiN4Zuy3p+XBKxkz6LwR8VUbCjtiMMJ02Y81A
+ bnIAc78CgtwOypJi66nYAcEW2KjuwdUgAqTeoqNuTp8tA5pt9WPGtfMVl8GIc/iampbd
+ bsgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=I1AQEsPQ5FacV9WDkNJDSrjHgaFHskMJC8rTzjG5ovk=;
+ b=gQ5eOjq+fBlWZUBTLVgl1CWcx5qNd1yzggbetR6yHqlSKFSbFrUZrRj6BBuYPTRJtj
+ l2qDo7paEpwHUqbUMvIcGENuetGC844h+gZwJAzGADHPDcL/v+Rk3FuZ2CwJw5cYFDMx
+ U2u11VIZtdVsHkiBBPPw7MzZpCatiLy7zdUbIb5nq96TsQPZA3AX6e17GtYDvJKMxjRq
+ 8trD4D09b/odORmQnsz7//wquyLK/8fmMhGOBr563OVBS1kGp70mNqrygGDIxheqHfIo
+ x2b/UUZ4B9/cK6RDX+Hxat512df7+vdGzrM6jotERU2rQEHs07CEsjrQnuwMebZfxswE
+ fZug==
+X-Gm-Message-State: APjAAAUsLV50xTVknNQlIxgAsisXSOk8M3RnzWNitQjlFXvESkOBVuY/
+ B+oV2lpLO98z2xF5fEUjpkyNhkvd9HwS5e3+x3lb8XQK
+X-Google-Smtp-Source: APXvYqyxWuL/qyMdiPyYHi1xL+tERZ5/4XWV4JEn8Abm+NkYoox9ZLIK6iz8s/OMfStEIRpviSntM9X4j2wGYsl9AxY=
+X-Received: by 2002:a1f:7d8e:: with SMTP id y136mr452775vkc.40.1555825944740; 
+ Sat, 20 Apr 2019 22:52:24 -0700 (PDT)
+MIME-Version: 1.0
+References: <201904202257.x3KMvRQ1011077@darkstar.fourwinds.com>
+In-Reply-To: <201904202257.x3KMvRQ1011077@darkstar.fourwinds.com>
+From: Rob Pike <robpike@gmail.com>
+Date: Sun, 21 Apr 2019 15:52:13 +1000
+Message-ID: <CAKzdPgyqfrO0=Ld7mi0rzwoqh-ScDqAGg3aL7CM_cygV8wj1xA@mail.gmail.com>
+To: Jon Steinhart <jon@fourwinds.com>
+Content-Type: multipart/alternative; boundary="000000000000c4c722058703f44c"
+Subject: Re: [TUHS] Joe Condon [ long, slightly off-topic post ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000c4c722058703f44c
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+The Unix on 516s sounds wrong to me. Perhaps it conflates GCOS remote job
+entry and Unix?
+
+But the PBX story is correct. To demonstrate how message passing was a good
+model for a switching system, in particular to make a point to the
+switching systems division of Bell Labs/AT&T, Ken and Joe bought a
+commercial PBX and swapped out its processor for a PDP-11/23 (I think), and
+programmed it up. It was just before I arrived there but I was given the
+impression it had the desired strategic influence on Indian Hill.
+
+The feature we all loved it for was that instead of ringing the phone in
+the Unix room when you got a call, it would announce your name through the
+voice synthesizer: "Phone call for Ken." "Phone call for Joe". One rapidly
+stopped even hearing the announcement if it didn't end with your name.
+
+-rob
+
+
+On Sun, Apr 21, 2019 at 8:58 AM Jon Steinhart <jon@fourwinds.com> wrote:
+
+> So as part of my attempt to remember the names of the folks with who I
+> worked
+> I just read Joe's wikipedia page which doesn't seem accurate to me.  If
+> this
+> is too off topic let me know.
+>
+> The page says that Joe "was exposed to UNIX on the Honeywell 516 machines
+> in
+> the early 1970s."  This seems wrong to me.  We did have a 516, but it ran
+> an
+> experimental virtual memory system called 516-TSS.  I lived on this syste=
+m
+> and still have some of the octal instruction opcodes burned into my
+> brain-ROM.
+> I seem to recall that the department got a PDP-11/40 that ran UNIX versio=
+n
+> 3 in
+> maybe the summer of 1972 which I used for writing up the documentation fo=
+r
+> my
+> project.
+>
+> The page also says that "Condon and Ken Thompson promoted the use of the =
+C
+> programming language for AT&T=E2=80=99s switching system control programs=
+.  Condon
+> acquired a small AT&T PBX (telephone switch) that handled about 50 phones=
+;
+> he made the necessary hardware changes and Thompson wrote the necessary
+> software
+> programs. The PBX code rewrite in C was a success and hastened the
+> adoption of
+> C for all switching system software within AT&T."  This also doesn't matc=
+h
+> my
+> recollection.
+>
+> One of the big projects in the department was what I think was called SS1
+> for
+> Slave Switch 1, which was an all-digital telephone exchange.  It replaced
+> some
+> other monstrosity whose details I can't recall except that Joe and Dave
+> Weller
+> signed the appropriate paperwork allowing me to take a good portion of it
+> home
+> when it was decommissioned giving me a huge stock of Augat wirewrap board=
+s
+> and
+> 7400-series parts.  The SS1 was originally going to use LSI-11s but the
+> stupid
+> way in which DEC implemented the DRAM refresh made that impossible.  I
+> think
+> that the final thing used a couple of PDP-10s.  As part of being
+> all-digital
+> it used the digital filter work by Jim Kaiser and Hal Alles.  I do rememb=
+er
+> going into Carl Christensen's office to ask him a question and found him
+> staring
+> at a huge C listing; it turns out that a bug in the code had caused SS1 t=
+o
+> send
+> KP pulses without their corresponding ST pulses with the result that ever=
+y
+> single
+> keypulse sender in the Berkeley Heights telephone exchange was taken off
+> line and
+> needed to be manually reset to restore long distance service.  They were
+> not happy.
+>
+> Anyway, unless there was something that happened later after I was gone,
+> I'm
+> thinking that the wikipedia page is incorrect and that this PBX was built=
+,
+> not
+> acquired.  It was, as far as I know, the first use of C to control
+> machinery.
+>
+> It's actually because of this machine that I'm trying to track down the
+> name
+> of some folks from down at the end of the hall.  I have strong memories o=
+f
+> the
+> Bell System exhibit at the '64 World's Fair, especially the booth where o=
+ne
+> could go and talk and they had bar graphs on a monitor showing the spectr=
+um
+> of your speech and could mess with it.  Many years later, while waiting f=
+or
+> some deck of cards to finish loading, I poked my head into the lab down t=
+he
+> hall to see what they were doing in there, and noticed polaroid photos of
+> that
+> exhibit featuring the guys in the lab.  Once they stopped telling stories
+> from
+> the World's Fair, they taught me a lesson about systems engineering that
+> opened
+> my eyes.  They were developing a circuit that replaced the pound of iron
+> hybrid
+> transformers that were on every telephone line with a small toroid and an
+> op-amp.
+> Their circuit would sense when the iron was getting close to saturation
+> and run
+> current through an additional winding to keep it in the linear region.
+> While
+> that circuit cost a lot more than a hybrid transformer, it paid for itsel=
+f
+> by
+> reducing the amount of concrete needed to build telephone exchanges.
+>
+> Would love to know who these guys were which is why an org chart would
+> help.
+> And maybe someone out there like Ken can help me out with the accurate
+> history.
+>
+> Jon
+>
+
+--000000000000c4c722058703f44c
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">The Unix on 516s sounds wrong to me. Perhaps it conflates =
+GCOS remote job entry and Unix?<div><br></div><div>But the PBX story is cor=
+rect. To demonstrate how message passing was a good model for a switching s=
+ystem, in particular to make a point to the switching systems division of B=
+ell Labs/AT&amp;T, Ken and Joe bought a commercial PBX and swapped out its =
+processor for a PDP-11/23 (I think), and programmed it up. It was just befo=
+re I arrived there but I was given the impression it had the desired strate=
+gic influence on Indian Hill.<div><br></div><div>The feature we all loved i=
+t for was that instead of ringing the phone in the Unix room when you got a=
+ call, it would announce your name through the voice synthesizer: &quot;Pho=
+ne call for Ken.&quot; &quot;Phone call for Joe&quot;. One rapidly stopped =
+even hearing the announcement if it didn&#39;t end with your name.</div><di=
+v><br></div><div>-rob</div><div><br></div></div></div><br><div class=3D"gma=
+il_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Sun, Apr 21, 2019 at 8:5=
+8 AM Jon Steinhart &lt;<a href=3D"mailto:jon@fourwinds.com">jon@fourwinds.c=
+om</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margi=
+n:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex=
+">So as part of my attempt to remember the names of the folks with who I wo=
+rked<br>
+I just read Joe&#39;s wikipedia page which doesn&#39;t seem accurate to me.=
+=C2=A0 If this<br>
+is too off topic let me know.<br>
+<br>
+The page says that Joe &quot;was exposed to UNIX on the Honeywell 516 machi=
+nes in<br>
+the early 1970s.&quot;=C2=A0 This seems wrong to me.=C2=A0 We did have a 51=
+6, but it ran an<br>
+experimental virtual memory system called 516-TSS.=C2=A0 I lived on this sy=
+stem<br>
+and still have some of the octal instruction opcodes burned into my brain-R=
+OM.<br>
+I seem to recall that the department got a PDP-11/40 that ran UNIX version =
+3 in<br>
+maybe the summer of 1972 which I used for writing up the documentation for =
+my<br>
+project.<br>
+<br>
+The page also says that &quot;Condon and Ken Thompson promoted the use of t=
+he C<br>
+programming language for AT&amp;T=E2=80=99s switching system control progra=
+ms.=C2=A0 Condon<br>
+acquired a small AT&amp;T PBX (telephone switch) that handled about 50 phon=
+es;<br>
+he made the necessary hardware changes and Thompson wrote the necessary sof=
+tware<br>
+programs. The PBX code rewrite in C was a success and hastened the adoption=
+ of<br>
+C for all switching system software within AT&amp;T.&quot;=C2=A0 This also =
+doesn&#39;t match my<br>
+recollection.<br>
+<br>
+One of the big projects in the department was what I think was called SS1 f=
+or<br>
+Slave Switch 1, which was an all-digital telephone exchange.=C2=A0 It repla=
+ced some<br>
+other monstrosity whose details I can&#39;t recall except that Joe and Dave=
+ Weller<br>
+signed the appropriate paperwork allowing me to take a good portion of it h=
+ome<br>
+when it was decommissioned giving me a huge stock of Augat wirewrap boards =
+and<br>
+7400-series parts.=C2=A0 The SS1 was originally going to use LSI-11s but th=
+e stupid<br>
+way in which DEC implemented the DRAM refresh made that impossible.=C2=A0 I=
+ think<br>
+that the final thing used a couple of PDP-10s.=C2=A0 As part of being all-d=
+igital<br>
+it used the digital filter work by Jim Kaiser and Hal Alles.=C2=A0 I do rem=
+ember<br>
+going into Carl Christensen&#39;s office to ask him a question and found hi=
+m staring<br>
+at a huge C listing; it turns out that a bug in the code had caused SS1 to =
+send<br>
+KP pulses without their corresponding ST pulses with the result that every =
+single<br>
+keypulse sender in the Berkeley Heights telephone exchange was taken off li=
+ne and<br>
+needed to be manually reset to restore long distance service.=C2=A0 They we=
+re not happy.<br>
+<br>
+Anyway, unless there was something that happened later after I was gone, I&=
+#39;m<br>
+thinking that the wikipedia page is incorrect and that this PBX was built, =
+not<br>
+acquired.=C2=A0 It was, as far as I know, the first use of C to control mac=
+hinery.<br>
+<br>
+It&#39;s actually because of this machine that I&#39;m trying to track down=
+ the name<br>
+of some folks from down at the end of the hall.=C2=A0 I have strong memorie=
+s of the<br>
+Bell System exhibit at the &#39;64 World&#39;s Fair, especially the booth w=
+here one<br>
+could go and talk and they had bar graphs on a monitor showing the spectrum=
+<br>
+of your speech and could mess with it.=C2=A0 Many years later, while waitin=
+g for<br>
+some deck of cards to finish loading, I poked my head into the lab down the=
+<br>
+hall to see what they were doing in there, and noticed polaroid photos of t=
+hat<br>
+exhibit featuring the guys in the lab.=C2=A0 Once they stopped telling stor=
+ies from<br>
+the World&#39;s Fair, they taught me a lesson about systems engineering tha=
+t opened<br>
+my eyes.=C2=A0 They were developing a circuit that replaced the pound of ir=
+on hybrid<br>
+transformers that were on every telephone line with a small toroid and an o=
+p-amp.<br>
+Their circuit would sense when the iron was getting close to saturation and=
+ run<br>
+current through an additional winding to keep it in the linear region.=C2=
+=A0 While<br>
+that circuit cost a lot more than a hybrid transformer, it paid for itself =
+by<br>
+reducing the amount of concrete needed to build telephone exchanges.<br>
+<br>
+Would love to know who these guys were which is why an org chart would help=
+.<br>
+And maybe someone out there like Ken can help me out with the accurate hist=
+ory.<br>
+<br>
+Jon<br>
+</blockquote></div>
+
+--000000000000c4c722058703f44c--

@@ -1,0 +1,59 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Thu, 9 Nov 2017 09:42:25 -0600
+Subject: [TUHS] redirection wildness in v7
+In-Reply-To: <CAEoi9W50vhvY6zHXS__eTCwSuXv5Z1RW4N4Ug2vLpdKf=kLTkg@mail.gmail.com>
+References: <3c417dcc-d3b4-0128-737a-7e510c6d0ffc@gmail.com>
+ <CAEoi9W50vhvY6zHXS__eTCwSuXv5Z1RW4N4Ug2vLpdKf=kLTkg@mail.gmail.com>
+Message-ID: <33834664-7f94-db6d-b012-30c355167a5f@gmail.com>
+
+
+
+On 11/09/2017 09:30 AM, Dan Cross wrote:
+> So...what's that unnamed process? To figure out what's going on, we'll
+> have to look at the source for the shell itself. In this case, the
+> answer to the mystery lies in /usr/src/cmd/sh/xec.c, in the (extremely
+> long) function `execute`. This is the heart of the shell's
+> interpreter. Basically, the string entered by the user has been parsed
+> into an in-memory data structure (essentially an abstract syntax
+> tree), and this function is responsible for interpreting that data
+> structure and invoking the entered commands. It is called recursively;
+> you'll note that the bulk of it is a switch statement on the token
+> type for the current node in the syntax tree.
+>
+> The magic here is in the case for TFIL, which sets up a pipe between
+> the left-hand side of tree and the right-hand side.
+>
+> In this case, the left-hand-side is an empty command; basically,
+> equivalent to typing return at the shell prompt. Note that that just
+> happens to be perfectly syntactically valid, so the parser doesn't
+> generate an error. We may reasonably assume that this results in a
+> left-hand child of the pipe node in the AST that is set with TFORK and
+> an empty command vector: indeed, we see this in the `term` function in
+> cmd.c.
+>
+> In the context of a pipeline, a new copy of the shell *is* forked for
+> this, and if we follow the TFORK logic, we can see that, in the
+> handling of the child, we do things like setting up pipes and I/O
+> redirection and then either execute a builtin command, or *if the
+> command is not empty* we execute the command via `execa`. This is not
+> a builtin command, but since this command is empty, we don't do
+> anything in the child other than exit.
+>
+> Thus, the empty command produces no output, despite having its input
+> redirected from a file and therefore nothing is put into the write-end
+> of the pipe and sed sees nothing on the read-end (other than EOF).
+>
+
+Dan,
+This is a great answer. I appreciate the detail and the source pointers 
+(although that code is pretty complicated). My mental model is 
+significantly enhanced, if not totally accurate, by your description. 
+I've seen some other constructs along these same lines and they make 
+more sense now - such as:
+
+ > myfile
+
+to create a file.
+
+
+

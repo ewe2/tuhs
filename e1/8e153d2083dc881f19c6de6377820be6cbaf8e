@@ -1,0 +1,90 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Tue, 03 Jan 2017 18:51:36 +0100
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <1483464540.1306689.836096801.2D7CA4E9@webmail.messagingengine.com>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <1483454024.1265981.835921849.4F752F10@webmail.messagingengine.com>
+ <586bbe88.njLSal35/ZSrGHMO%schily@schily.net>
+ <1483464540.1306689.836096801.2D7CA4E9@webmail.messagingengine.com>
+Message-ID: <586be4a8.IhycRVfXy8f03gHY%schily@schily.net>
+
+Random832 <random832 at fastmail.com> wrote:
+
+> On Tue, Jan 3, 2017, at 10:08, Joerg Schilling wrote:
+> > Random832 <random832 at fastmail.com> wrote:
+> > > However, OSX only claims compliance to Issue 6 (unistd.h _XOPEN_VERSION
+> > > 600), and the text requiring that the full 32-bit value be preserved is
+> > > new to Issue 7.
+> > 
+> > The text requiring the full 32-bit value is not new....
+>
+> Is there some other text you have in mind other than "The exit value in
+> si_status shall be equal to the full exit value (that is, the value
+> passed to _exit(), _Exit(), or exit(), or returned from main()); it
+> shall not be limited to the least significant eight bits of the value."
+> in the description of signal.h (not present in Issue 6 or SUSv2)? Or
+> maybe something from "2.13. Status Information" (whole section is new in
+> Issue 7).
+
+This has now been worded to make it obvious that masking off bits is not 
+permitted - except for the historic UNIX wait()/waitpid() interfaces.
+
+> In SUSv2, the text of exit() states "If the parent process of the
+> calling process is executing a wait(), wait3(), waitid() or waitpid(),
+> [...] it is notified of the calling process' termination and the
+> low-order eight bits (that is, bits 0377) of status are made available
+> to it." with no indication of any of these functions allowing the parent
+> process to get more bits of status. More or less the same text appears
+> in Issue 6, with some rearrangement due to waitid being part of the XSI
+> option.
+
+SUSv2 is the standard with the correct text:
+
+Here is a part of it's wait() description:
+
+WEXITSTATUS(stat_val)
+    If the value of WIFEXITED(stat_val) is non-zero, this macro evaluates to 
+the low-order 8 bits of the status argument that the child process passed to 
+_exit() or exit(), or the value the child process returned from main(). 
+
+from the signal.h description:
+
+int           si_status exit value or signal
+
+So masking is only mentioned for wait() and waitpid()
+
+> > It was required in 1996 already, but then somebody introduced a bug into
+> > the text and that was not aligned with the expected behavior.
+>
+> Oh, so there was a bug in *the text*. That would be the text of the
+> standard that OSX conforms to?
+
+In SUSv2, it did just describes the waitid() interface without mentioning that
+there is a mask. People at that time seem to believe that everybody knows that
+si_status is a full int.
+
+Note that the WEXITSTATUS() macro does not apply to waitid().
+
+Later, the wrong masking text has been added.
+
+POSIX never introduced own inventions, but rather standardizes existing 
+features. The siginfo/waitid() interface has been introduced by SVr4 in 1989 
+and platforms that correctly implement SVr4 compliance of course all return the 
+full int.
+
+Apple seem to have known that the compliance test did only check for
+
+	"more than 8 bits"
+
+by using a 16 bit exit() value in the tests...
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+

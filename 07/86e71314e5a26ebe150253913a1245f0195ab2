@@ -1,0 +1,230 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e05d4312
+	for <ml@inbox.vuxu.org>;
+	Tue, 17 Sep 2019 14:22:14 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 98A0E9C044; Wed, 18 Sep 2019 00:22:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 73CD9947D7;
+	Wed, 18 Sep 2019 00:21:52 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="YZZP26GM";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D1A3D947CC; Wed, 18 Sep 2019 00:21:49 +1000 (AEST)
+Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com
+ [209.85.221.44])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3DA35947D7
+ for <tuhs@tuhs.org>; Wed, 18 Sep 2019 00:21:48 +1000 (AEST)
+Received: by mail-wr1-f44.google.com with SMTP id o18so3328672wrv.13
+ for <tuhs@tuhs.org>; Tue, 17 Sep 2019 07:21:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=8f1VraqfIr1W3z5MX4n6HQZIO6bObNEOTXYPZfzjFT8=;
+ b=YZZP26GM1i0BFG69DMgRUGzOr0czvo5vhteT1QwwgLTk8Vfm+Dgig3ONhPdT1MeOh1
+ DS7xlQpRb4PHVS49tNSnIjvGM4RY4G1RpjLEJX3MJfqoslF8sl8fp6oj9c37ChfzQxDo
+ hCTBDhMFkHoU73+iUw95f03DgYBVjrGBLVnFg=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=8f1VraqfIr1W3z5MX4n6HQZIO6bObNEOTXYPZfzjFT8=;
+ b=nGCrjqIwgeA1HI4ou9rg/7wtrNg5OweBNPyGVz3xrI8cYyOjr8xttOsY1b81lr8gP2
+ ucGSqUL/JkcXMYdmuxq+4oAiacR9oQYJz+nK4TZZwLtzT1OEUzx9du3ILcLm6Dn6A5oa
+ f8k9ZvRJ2Oaykz+YDDYbJSyVECW4igFTpxIZT+2jI+W4WN91ZT/effA3RxkYlARGC2xb
+ nNZHbS39VN3bFd2Rme34ZzEObv9/I/1J/fl+QyguWFXevphJx7i9uJnyeSoVwGqA/sHf
+ TBMNvv69E4f3gYXzd5beRyHr5TK5/pP7T75Gyv1j6cGawqjpDEM8weu0owjPf7aZJtm7
+ nzMw==
+X-Gm-Message-State: APjAAAWGAoAn7LzhUlqK4eqVvhNSQk1ZdbkXnyv2bglE6oPoXOtxUkWE
+ pdJI072qLwyjpWIkxCxPQnSdtDUTlLE++Rp/ub/OA3FWPBx4Iw==
+X-Google-Smtp-Source: APXvYqwG5zwnZ9erC4y69YRpusfbbvTvEZxCHwjhe+nWeilO8TvTUJN7TDXP8NdnEH0WydToadgPZHig1e5ychjebAU=
+X-Received: by 2002:a05:6000:10c2:: with SMTP id
+ b2mr3373300wrx.45.1568730106742; 
+ Tue, 17 Sep 2019 07:21:46 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAC20D2Nz-ofwD41vULF2-TL8-C33heCiHvoNNbcuj6GGKhtKzQ@mail.gmail.com>
+ <20190913221345.GA16129@minnie.tuhs.org>
+ <CAC20D2OQD-NJaFsqsLVL_kqmCsSeUOKAr7dm71P4uN9N8m+AbQ@mail.gmail.com>
+ <20190914020240.GO2046@mcvoy.com> <20190914024433.GA19193@minnie.tuhs.org>
+ <2e84c4d0-5239-b223-856d-00aacf8d3028@andrewnesbit.org>
+ <201909150654.x8F6sChG021185@freefriends.org>
+ <CAC20D2PfLq=J5ei+izXb2J7dSvU6=L6-GRd0gKA2ShSNg1=qBg@mail.gmail.com>
+ <201909160552.x8G5qBYK025195@freefriends.org>
+ <CAC20D2N89jOBK+T9EPn8JKNaSOUx=yDr9t4=CcyHM+3qnB2bEg@mail.gmail.com>
+ <20190916145122.GH2046@mcvoy.com>
+ <201909170753.x8H7r8oT004491@freefriends.org>
+In-Reply-To: <201909170753.x8H7r8oT004491@freefriends.org>
+From: Clem Cole <clemc@ccc.com>
+Date: Tue, 17 Sep 2019 10:21:20 -0400
+Message-ID: <CAC20D2MZiv71YBs48bZOdXEiNw35JX36tGc_=ZmR8foNxpmJyQ@mail.gmail.com>
+To: Aharon Robbins <arnold@skeeve.com>
+Content-Type: multipart/alternative; boundary="000000000000c2de080592c07079"
+Subject: Re: [TUHS] earliest Unix roff
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000c2de080592c07079
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Fair enough.  Mei culpa from one of those that was vocal.  That said, maybe
+a trick is to stay away from texinfo/info and the man page discussion on
+this list since its a hot button that causes much trama for some with a
+more traditional UNIX view.
+
+Please don't leave, your voice is important and I generally agree with you
+and always like to hear you out.  But even if I do not agree, I still want
+to listen.  You have come to your conclusions in a different manner than
+some of us, and where each of us puts the MSB tends to color our views.
+Diversity of opinion is a good thing.
+
+Respectfully,
+Clem
+=E1=90=A7
+
+On Tue, Sep 17, 2019 at 3:53 AM <arnold@skeeve.com> wrote:
+
+> It is like clockwork.
+>
+> Whenever I say something about Texinfo *as a markup language* for use
+> in *writing books*, the discussion inevitably degenerates into a hate
+> rant against Info and RMS's (failed) attempt to replace man pages.
+> Totally missing the point too.
+>
+> This is a trend on TUHS.  The same discussions, the same rants, often
+> the same misinformation, over and over and over again.
+>
+> I start to wonder if I should continue to subscribe.
+>
+> Arnold
+>
+> Larry McVoy <lm@mcvoy.com> wrote:
+>
+> > On Mon, Sep 16, 2019 at 08:10:48AM -0400, Clem Cole wrote:
+> > > On Mon, Sep 16, 2019 at 1:52 AM <arnold@skeeve.com> wrote:
+> > >
+> > > > I use the standalone Info reader (named info) if I want to look at
+> the
+> > > > Info output.
+> > > >
+> > > Fair enough, but be careful, while I admit I have not looked in a
+> while,
+> > > info(gnu) relies on emacs keybindings and a number of very emacs'ish
+> things.
+> > > Every time I have tried to deal with it, I have unprogram my fingers
+> and
+> > > reset them to emacs.
+> > >
+> > > If it would have used more(1) [or even less(1)] then I would not be a=
+s
+> > > annoyed.
+> > > Unix had fine tools [man(1), more(1), et al] and rms and friends felt
+> the
+> > > need to replace them with ITS-like programs.
+> >
+> > I hate texinfo and friends.  I get why it is better than man, but man w=
+as
+> > good enough, more than good enough, and the GNU project took everything
+> > it could find and destroyed the man pages.
+> >
+> > If you have something like perl that needs a zillion sub pages, info
+> > makes sense.  For just a man page, info is horrible.
+>
+
+--000000000000c2de080592c07079
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><div class=3D"gmail_default">Fair enough.=C2=A0 Mei cul=
+pa from one of those that was vocal.=C2=A0 That said, maybe a trick is to s=
+tay away from texinfo/info and the man page discussion on this list since i=
+ts a hot button that causes much trama for some with a more traditional UNI=
+X view.</div><div class=3D"gmail_default"><br></div><div class=3D"gmail_def=
+ault">Please don&#39;t leave, your voice is important and I generally agree=
+ with you and always like to hear you out.=C2=A0 But even if I do not agree=
+, I still want to listen.=C2=A0 You have come to your conclusions in a diff=
+erent manner than some of us, and where each of us puts the MSB tends to co=
+lor our views.=C2=A0 Diversity of opinion=C2=A0is a good thing.</div><div c=
+lass=3D"gmail_default"><br></div><div class=3D"gmail_default">Respectfully,=
+</div><div class=3D"gmail_default">Clem=C2=A0</div></div></div><div hspace=
+=3D"streak-pt-mark" style=3D"max-height:1px"><img alt=3D"" style=3D"width:0=
+px;max-height:0px;overflow:hidden" src=3D"https://mailfoogae.appspot.com/t?=
+sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp;type=3Dzerocontent&amp;guid=3D043fab=
+10-f662-42a4-8907-a344aad460ed"><font color=3D"#ffffff" size=3D"1">=E1=90=
+=A7</font></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gm=
+ail_attr">On Tue, Sep 17, 2019 at 3:53 AM &lt;<a href=3D"mailto:arnold@skee=
+ve.com">arnold@skeeve.com</a>&gt; wrote:<br></div><blockquote class=3D"gmai=
+l_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,20=
+4,204);padding-left:1ex">It is like clockwork.<br>
+<br>
+Whenever I say something about Texinfo *as a markup language* for use<br>
+in *writing books*, the discussion inevitably degenerates into a hate<br>
+rant against Info and RMS&#39;s (failed) attempt to replace man pages.<br>
+Totally missing the point too.<br>
+<br>
+This is a trend on TUHS.=C2=A0 The same discussions, the same rants, often<=
+br>
+the same misinformation, over and over and over again.<br>
+<br>
+I start to wonder if I should continue to subscribe.<br>
+<br>
+Arnold<br>
+<br>
+Larry McVoy &lt;<a href=3D"mailto:lm@mcvoy.com" target=3D"_blank">lm@mcvoy.=
+com</a>&gt; wrote:<br>
+<br>
+&gt; On Mon, Sep 16, 2019 at 08:10:48AM -0400, Clem Cole wrote:<br>
+&gt; &gt; On Mon, Sep 16, 2019 at 1:52 AM &lt;<a href=3D"mailto:arnold@skee=
+ve.com" target=3D"_blank">arnold@skeeve.com</a>&gt; wrote:<br>
+&gt; &gt; <br>
+&gt; &gt; &gt; I use the standalone Info reader (named info) if I want to l=
+ook at the<br>
+&gt; &gt; &gt; Info output.<br>
+&gt; &gt; &gt;<br>
+&gt; &gt; Fair enough, but be careful, while I admit I have not looked in a=
+ while,<br>
+&gt; &gt; info(gnu) relies on emacs keybindings and a number of very emacs&=
+#39;ish things.<br>
+&gt; &gt; Every time I have tried to deal with it, I have unprogram my fing=
+ers and<br>
+&gt; &gt; reset them to emacs.<br>
+&gt; &gt; <br>
+&gt; &gt; If it would have used more(1) [or even less(1)] then I would not =
+be as<br>
+&gt; &gt; annoyed.<br>
+&gt; &gt; Unix had fine tools [man(1), more(1), et al] and rms and friends =
+felt the<br>
+&gt; &gt; need to replace them with ITS-like programs.<br>
+&gt;<br>
+&gt; I hate texinfo and friends.=C2=A0 I get why it is better than man, but=
+ man was<br>
+&gt; good enough, more than good enough, and the GNU project took everythin=
+g<br>
+&gt; it could find and destroyed the man pages.<br>
+&gt;<br>
+&gt; If you have something like perl that needs a zillion sub pages, info<b=
+r>
+&gt; makes sense.=C2=A0 For just a man page, info is horrible.<br>
+</blockquote></div>
+
+--000000000000c2de080592c07079--

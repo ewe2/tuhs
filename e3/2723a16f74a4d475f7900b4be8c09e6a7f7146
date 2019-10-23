@@ -1,0 +1,105 @@
+From: doug@remarque.org (Doug Merritt)
+Date: Sun, 11 May 2008 21:05:01 -0700 (PDT)
+Subject: [Unix-jun72] I recovered 100% of the s1 src code fragments
+In-Reply-To: <22897.1210513986@mini>
+Message-ID: <20080512040501.6018D5A5A9@remarque.org>
+
+Brad Parker ...brad at heeltoe.com... wrote:
+> I'm curious, how did you do it?  I took a look at it and gave up after
+> about 15 minutes.  It looked like a jigsaw puzzle where all the pieces
+> were the same shape... :-)
+
+Well, first I stared at it all and wished for some nice powerful
+tools that would do N-way approximate diffs with special AI features,
+then I started thinking about what sorts of such tools I could
+actually create and how long that would take and what sorts of
+limitations they'd have, and then I gave up on nice solutions and just
+used brute force elbow grease for quite an extended period of time. :-)
+
+Seriously, mostly it was just a matter of being very determined
+and wading into it; I consider this to be a pretty important
+historical matter. The rest of it is just details:
+
+Warren's frags were consecutive 512 byte blocks containing
+string(1) strings or something similar. The underlying file system
+had each file represented as a sequence of full 512 byte blocks
+plus a trailing partially-filled 512 byte block at the end,
+possibly scattered all over the disk, but (think reasons for
+defragmentation) only sometimes, and with the physically adjacent
+sequences of blocks interleaved with blocks on the free list.
+
+Naturally the trailing portion of the final block of a file,
+and all of the free blocks on the disk, were *not* zeroed out
+back then. Doing so was a moderately expensive operation introduced
+very, very late for most non-DOD-contract operating systems
+reluctantly when it was proven that extreme security issues
+resulted otherwise (although this was widely known in some
+quarters quite early, the cost/benefit analysis was very
+different in early days than it usually is today).
+
+Therefore, any sequence of string(1)-type blocks was reasonably
+likely to indeed include multiple blocks of a single file, in
+original order (with luck), followed possibly by one or more free list
+blocks that happened to have string(1)-contents, and/or followed
+by a final partial block beginning with a string(1)-sequence,
+but with those trailing contents being accidental left-overs
+from previous versions of various source files, which upon
+editing, left scattered free blocks with string(1)-type contents.
+
+BTW the largest appears to have been frag32, constituted of 45
+sequential 512 byte blocks of ascii chars, which turned out to
+be "ar.s" with some or all of "dc1.s" appended.
+
+(I probably should have used as starting point all of the 512-byte
+blocks of the s1 disk image, rather than the frags Warren found,
+but that didn't occur to me until I was largely done. I did generate
+a dir full of files containing those 512 byte blocks, with which I've
+done some prodding and poking, but haven't done much yet.)
+
+So -- not entirely trusting comments at starts of files, I searched for
+matches between data/code labels between the frags and the v5 sources;
+that initially helped verify when and if starting comments about
+filenames were true, and later helped figure out which files
+middle-of-file-frags came from.
+
+Diff was quite a mixed blessing, as usual for this kind of thing,
+because it gave me, in effect, lots of false positives/negatives
+due to its longest-sequence goals versus my goal of longest-sequence
+but-ignore-a-few-edits-here-and-there.
+
+Part of the confusion is that many of the disk blocks had an
+invisible termination mark (lost with the missing inode info),
+and the rest of the 512 bytes of the block were filled with,
+confusingly enough, more assembly code from one source or another.
+Sometimes the garbage at the end was a dupe of the same asm at
+the start of the block, sometimes it came from a different .s
+file.
+
+I tried to carefully check to ensure that all of the trailing garbage
+was in fact a dupe/garbage, and that none such constituted new frags
+with irreplaceable information that should be incorporated into some file.
+
+I was in general very concerned about not wasting any possibly useful
+bits, since there's a shortage of them.
+
+So there was just a huge amount of eyeballing and searching and
+cross referencing, and good old vi work for cutting off garbage
+and piecing together related frags, with repeated comparisons
+to v5 sources for sanity checking etc.
+
+I kept (imperfect) notes about my conclusions per frag; that definitely
+helped.
+
+Elbow grease + obsessive compulsive/A.D.D. hyperfocus for
+many hours over many days. :-)
+
+Based on the experience, I could probably write a diff-variant
+tuned to support this kind of work, but it would still simply
+support a human expert, not replace them.
+
+Thanks for asking.
+	Doug
+--
+Professional Wild-eyed Visionary        Member, Crusaders for a Better Tomorrow
+
+

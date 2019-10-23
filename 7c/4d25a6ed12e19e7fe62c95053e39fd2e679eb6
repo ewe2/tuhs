@@ -1,0 +1,85 @@
+From: brantley@coraid.com (Brantley Coile)
+Date: Mon, 14 Nov 2005 10:45:13 -0500
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <20051113201609.GW6574@gsmx07.alcatel.com.au>
+Message-ID: <1e2d15ad255da36efddd83024d07003e@coraid.com>
+
+this is a nice conversation.  you're observations are all correct.
+see my additional comments below.
+
+> Actually the 286 MMU is very primitive compared to the PDP-11.  One
+> crucial difference is that Unix has the implicit assumption that the
+> stack is in the data space - which is not true on the 286.  This
+> difference is fairly critical to Unix and makes it impossible to
+> accurately reproduce the traditional Unix memory protection.
+
+absolutely correct.  in fact, i've never really figured out
+what intel was thinking with the stack segment in protect mode.
+you can't use it in C, you can't even use it in a Pascal like language,
+or any other language that uses call-by-reference procedure
+parameters.
+> 
+>>so the eight, for a pdp-11/40 say, or the sixteen for the 11/70 don't
+>>really apply.  instead just give each data segment the whole 64k
+>>address space and it'll not klobber anybody else.  just itself.
+> 
+> This is fairly wasteful of RAM.  Keep in mind that V6 cannot page -
+> a process is either entirely in memory or entirely on disk.  If you
+> limit yourself to 640K RAM, you are probably restricting yourself
+> to about 6 resident processes.  And swapping means moving 64K of
+> data to/from disk.
+
+true, but your numbers are a bit off.  640k / 64k = 10 not 6.  the kernel
+will take only 2, so you should have 8.  the shared segment for the shell
+is about 32k, so maybe you're not that far of.
+
+if the objective is to have a system that is real and has the feel of what
+it was like to use a 6th Edition Unix system, this isn't a big deal.  you
+and edit, compile and run programs on it.
+> 
+> This approach also makes brk(2) a no-op.  There's nothing to prevent a
+> process using as much heap as it wants (or crashing into the stack).
+> (No SIGSEGV or SIGBUS errors).
+
+ture enough.  but that's the case if you use the 286 segmens as well.
+either that or you make the data==stack segment a little short,
+then set the stack to a fixed size near the bottom of the data segment.
+if you run off the end or grow the stack too deep, you wrap around
+and hit the limit of the segment.
+> 
+>>you're correct to imply that v6 takes up MUCH less space than other
+>>systems.  it's amazing how small you can run this.  the root in the
+>>6th edition system is only 1.4MB.  and that includes the normal
+>>binaries, libraries and the source to the kernel.  it'll run great on
+>>a floopy.
+> 
+> You will need to have a swap partition.  And if each process has a
+> 64K data segment, you'll need a comparatively large amount of swap.
+> The biggest disadvantage of a floppy will be performance - latency
+> of about 80msec, I/O of about 40KB/sec.
+
+i wouldn't bother with a swap device on the floopy version.  you'd just
+just use this version to get the disk driver working so you could
+have real swap.  swaping to modern disks is pretty fast.  i can swap
+an entire 64k segment in less than a millisecond, so it would seem
+much faster than the original.
+> 
+> Have you identified a suitable C compiler?  There aren't many open
+> source 16-bit x86 compilers, especially ones that can run in 16-bit
+> mode.  None of the ones I found generated particularly good code.
+> This may impact you ability to get the larger utilities (and maybe
+> the kernel) to fit into 64K I-space.
+
+the mit x86 stuff would be where i'd start.  i haven't looked to see
+if you need to tweak the assignment operators to avoid having
+to s/=+/+=/, but it might already be done.
+
+it's all 16 bit stuff: port of PCC, assembler and loader.
+
+
+an enjoyable discussion.  wish i had time to work on it.
+
+ bc
+
+
+

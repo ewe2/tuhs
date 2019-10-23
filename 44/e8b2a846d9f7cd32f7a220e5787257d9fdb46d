@@ -1,0 +1,81 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Sun, 7 Jul 2002 21:30:42 -0700 (PDT)
+Subject: [TUHS] Other operating systems on the PDP-11
+Message-ID: <200207080430.g684Ugi05665@moe.2bsd.com>
+
+Hi -
+
+> From: Warren Toomey <wkt at minnie.tuhs.org>
+> In article by Greg 'groggy' Lehey:
+> > The big issue is address space.  It's difficult enough shoehorning
+> > 2.11BSD onto the PDP-11.  It's well-nigh impossible to retrofit 32 bit
+> > operating systems.  But Steven M. Schulz will doubtless give you a
+
+> More specifically, the issue is data space. Using overlays, you can
+> have a process with more than 64Kbytes of instruction space on a PDP-11,
+> but the maximum data space that a process can have is 64Kbytes.
+> 
+> The kernel is in a similar situation, but with some PDP-11 models
+> there is kernel mode and supervisor mode, giving you two separate
+> 64Kbytes instruction + 64Kbytes data address spaces (and overlays
+> to increase the I space).
+> 
+> I can't see Linux fitting into 128K of data space, and GCC is definitely
+> out of the question. Besides, 2.11BSD already looks pretty close to 4BSD :-)
+
+	Well said Warren.
+
+	The D (data) space is the most severe constraint on adding any new
+	feature to 2.11BSD.  Besides, as Warren mentioned, most of 4.3BSD
+	as well as a few bits&pieces of 4.4 are already present.
+
+	A couple years ago I toyed with the idea of porting over the 4.4BSD
+	tty subsystem (it'd be real nice to have termios and 8bit clean
+	serial line handling).   The 'struct tty' almost tripled in size!  Even
+	doing major surgery and leaving out a couple less useful capabilities
+	the growth in 'struct tty' exceeded what is left available in 2.11's
+	kernel D space.
+
+	Oh, I should point out the limit for the kernel's D space is even lower
+	than the 64KB mentioned.  Of that 64KB the I/O page has to, of course,
+	be mapped in at all times or the kernel wouldn't have access to the
+	memory management registers, device registers, and so on.    Then
+	the kernel has to have access to 'struct u' (the per process context
+	area - part of the address space is also where the kernel stack is
+	kept).  So, 64 - 8 - 8 = 48.   The kernel has a total of 48KB of
+	data space to use.  
+
+	There are a few "tricks" that are played.   Some data structures are
+	allocated external to the kernel's D space.  That data is mapped in
+	as needed.   Slows things down of course since it does take a number
+	of instructions to save the current memory manangement status, change it
+	to access the external data, fetch the data, restore the mmu registers.
+	Things such as the 4.3BSD disc quota system were implemented this way.
+
+	There is at the present time an absolute maximum on the size of the
+	I (instruction/text) space of 56K + (15*8)KB or 176KB (base segment of
+	56KB and 15 overlays of 8KB each.  At present, depending on how many
+	drivers and so on are configured, about 9 or 10 overlays are used to
+	build a 2.11 kernel.   The actual limit of kernel size that can be
+	booted is a bit lower due to how the boot process functions - in order
+	to simplify the memory manangement during booting the boot code 
+	relocates to 192KB.   The sum of the kernel text plus initialized data
+	(but not the .bss segment) can not exceed 192KB or the boot code will
+	be overwritten.   Another complicating factor comes from UMR (Unibus
+	Mapping Registers) handling - if the boot code ever runs above 256KB
+	then UMR handling would have to be done by the boot code on UNIBUS
+	machines (Qbus machines of course don't have this problem since they
+	don't have UMRs to contend with).
+
+	GCC (all of the GNU stuff actually) was written with, I believe,
+	"malloc aforethought" ;)   It's outright hostile to 16 bit machines.
+
+	There might be a few bytes free to add a feature or two to 2.11BSD
+	but much more than that would mean a lot of work to come up with some
+	free D space for the data structures that would be needed.
+
+	Cheers,
+	Steven Schultz
+	sms at 2bsd.com
+
+

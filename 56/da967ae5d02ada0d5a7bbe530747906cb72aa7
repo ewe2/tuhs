@@ -1,0 +1,81 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 19 Mar 2003 09:36:58 -0800 (PST)
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <200303191736.h2JHaw302449@moe.2bsd.com>
+
+Hi -
+
+> From: "Ian King" <iking at killthewabbit.org>
+> Well, given the excellent advice I received here (especially from Steven
+> Schultz), I got the networking kernel to build after moving a few modules
+> around between overlays.  It was indeed the overage on DATA/BSS that was
+
+	Hmmm, if it was an overage on the DATA/BSS (which is hard to do unless
+	you overdeclare MAXUSERS or the number of tty devices) then
+	shuffling overlays wouldn't have made any difference since overlays
+	affect only code and not data allocation.
+
+> Now, when I respond to the boot prompt with 'ra(0,0)unix', I'm getting the
+> following:
+> 
+> <banner for the image, date, time, etc.>
+> panic: iinit
+> no fs on 5/0
+
+	That says the kernel was not able to mount the root filesystem.  The
+	earlier messages about the kernel build date, etc appear because 
+	the kernel prints those directly from internal strings  (and the
+	kernel is loaded by /boot who doesn't "mount" the root filesystem).
+
+> I'm booting from an RD54, and checking both 'ls -l /dev/ra*' and
+> /dev/MAKEDEV, it sure looks to me that the major device number for this
+> drive is 5 - am I missing anything yet?  That's what I called out as the
+
+	You're not missing anything so far ;)
+
+	Are there other devices/controllers on the system?   That should work
+	(works on my system) but I'm trying to get a handle on what might be
+	confusing the kernel.
+
+> for ra.)  Note that this is exactly the same device as I have been using all
+> along with the GENERIC kernel, so I know there's really a filesystem there.
+
+	That's the puzzling part - why the old one works but the new one
+	doesn't.   
+
+> (FWIW, I didn't define an autoboot device.)  In ufs_subr.c, I see where this
+> message is apparently generated in the getfs() function, but I can't really
+
+	mountfs() calls getfs().   mountfs() is called out of main() in
+	init_main.c
+
+	The panic "iinit" is in init_main.c after mountfs() has returned
+	NULL
+
+	The times I have seen the 'iinit' panic it's meant that the disklabel
+	was either missing _or_ that the root ('a') partition was not of
+	type FS_V71K.   I SUPPOSE it's far fetched, but possible, that the
+	old kernel predates the check for the filesystem type, thus it ignores
+	the type of partition 'a' and assumes it's a valid filesystem.  
+
+	If you have a copy of the standalone 'disklabel' program installed
+	in / you can boot that with
+
+		ra(0,0)disklabel
+
+	and examine the label that way.   Or boot the tape and load the
+	utility that way.   Using the old kernel and running disklabel
+	would work too.   If the 'type' for the 'a' partition is not 'FS_V71K'
+	that's the problem.
+
+> PS: I'm really glad I followed the advice to copy my old (GENERIC) kernel
+> image to 'oldunix' - so I can still boot!
+
+	Ah, glad to hear that the advice came in handy.   The other thing
+	that comes in useful is a bootable Zip disk (complete 2BSD system
+	fits on a Zip disk if one has a SCSI adaptor around) - came in handy
+	when I corrupted/broke 'init' ...
+
+	Steve
+
+

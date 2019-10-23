@@ -1,0 +1,74 @@
+From: dave@horsfall.org (Dave Horsfall)
+Date: Sat, 13 Sep 2014 06:02:26 +1000 (EST)
+Subject: [TUHS] Etymology of bc(1)
+In-Reply-To: <1410529036.3893715.166731793.44CF06BA@webmail.messagingengine.com>
+References: <877g19g8a7.fsf@gmail.com>
+ <7A7060B7-0229-425F-BCF4-23C3669E167C@bsdimp.com>
+ <alpine.BSF.2.00.1409120800490.63870@aneurin.horsfall.org>
+ <20140911221742.GJ23708@mercury.ccil.org>
+ <alpine.BSF.2.00.1409121055300.63870@aneurin.horsfall.org>
+ <1410529036.3893715.166731793.44CF06BA@webmail.messagingengine.com>
+Message-ID: <alpine.BSF.2.00.1409130539280.63870@aneurin.horsfall.org>
+
+On Fri, 12 Sep 2014, random832 at fastmail.us wrote:
+
+> What language does the undocumented option (assuming it is supported at 
+> all) "bc -c" generate on FreeBSD and OSX? "Standard" bc, which actually 
+> pipes to dc, generates (obviously) dc when run in this way, but GNU bc 
+> generates a completely different and as far as I know undocumented 
+> language, which is handled by the execute function (in execute.c) but as 
+> far as I know there is no way to make it accept it on standard input.
+
+According to my trusty Mac:
+
+DIFFERENCES
+    This version of bc was implemented from the POSIX P1003.2/D11 draft and
+    contains several differences and extensions relative to the  draft  and
+    traditional  implementations.  It is not implemented in the traditional
+    way using dc(1).  This version is a single  process  which  parses  and
+    runs  a  byte  code  translation  of the program.  There is an "undocu-
+    mented" option (-c) that causes the program to output the byte code  to
+    the  standard  output  instead  of  running it.  It was mainly used for
+    debugging the parser and preparing the math library.
+
+My trusty FreeBSD box says the same thing.  Well, they're both Gnu 1.06, 
+after all, and it's some sort of byte-code.  I can sort see how it works; 
+single digit integers, unless wrapped by "Knnn:" etc..
+
+> Standard bc:
+> $ echo '2+2' | bc -c
+>  2 2+ps.
+> q$
+> 
+> GNU bc:
+> $ echo '2+2' | bc -c
+> @iK2:K2:+W at r
+> @i
+> $
+
+Oops; a "1" stands for itself, but other ints are bracketed:
+
+davehorsmacbook:~ dave$ bc -c
+@ibc 1.06
+Copyright 1991-1994, 1997, 1998, 2000 Free Software Foundation, Inc.
+This is free software with ABSOLUTELY NO WARRANTY.
+For details type `warranty'. 
+1+1
+11+W at r
+@i2+2
+K2:K2:+W at r
+@i
+
+Amusing that it treats "1" and "not 1" differently.  Oh, and "0" stands 
+for itself.  One more test:
+
+00+W at r
+@i-1+1
+1n1+W at r
+
+So, that's something like "1 negate 1 add" - gasp, that's RPN!  I'd check 
+the sources if I had them (none for Mac, and I didn't bother with FBSD).
+
+-- Dave
+
+

@@ -1,0 +1,74 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Thu, 12 Jan 2017 11:39:28 +0100
+Subject: [TUHS] the guy who brought up SVr4 on Sun machines
+In-Reply-To: <20170112015823.GG12163@mcvoy.com>
+References: <79091EE2-D7F8-4BE2-9422-47C365780367@berwynlodge.com>
+ <587509e1.gGhkbfCz1YmUYkqT%schily@schily.net>
+ <CAEoi9W6VB7y+d1xM+YBJ2CfDa8qer1LW+OOKeg-oHHn2rtwJTA@mail.gmail.com>
+ <5876b86f.TZmh44N+Iwm79UKO%schily@schily.net>
+ <20170111230603.GE5891@mcvoy.com>
+ <5876c536.+BQujxabzDX0djG8%schily@schily.net>
+ <20170111235719.GG5891@mcvoy.com>
+ <5876c8b5.fCJls03bP6vdCbOj%schily@schily.net>
+ <20170112015823.GG12163@mcvoy.com>
+Message-ID: <58775ce0.RnIyGLaXimTKid2V%schily@schily.net>
+
+Larry McVoy <lm at mcvoy.com> wrote:
+
+> I really wonder where you got your information from because it's a
+> little bit wrong.
+
+Do you really believe I invented all these people? You already confirmed that 
+they exist. How do you believe, I could get the names without being in contact 
+with them?
+
+I got my information from working on Solaris and in this special case, you seem 
+to forget that you definitely made a mistake. Maybe you now like to refresh 
+your memory....
+
+From Solaris sys/vfs.h:
+
+/*
+ * Filesystem type switch table.
+ */
+
+typedef struct vfssw {
+        char            *vsw_name;      /* type name -- max len _ST_FSTYPSZ */
+        int             (*vsw_init) (int, char *);
+                                /* init routine (for non-loadable fs only) */
+        int             vsw_flag;       /* flags */
+        mntopts_t       vsw_optproto;   /* mount options table prototype */
+        uint_t          vsw_count;      /* count of references */
+        kmutex_t        vsw_lock;       /* lock to protect vsw_count */
+        vfsops_t        vsw_vfsops;     /* filesystem operations vector */
+} vfssw_t;
+
+I however have to admit that I did also a mistake as struct vfssw just 
+contains the structure vfsops_t and is not the structure I had in mind itself.
+
+But it is based on struct vfssw from SunOS-4 sys/vfs.h which looks this way:
+
+/*
+ * Filesystem type switch table
+ */
+struct vfssw {
+        char            *vsw_name;      /* type name string */
+        struct vfsops   *vsw_ops;       /* filesystem operations vector */
+};
+
+
+It seems that "porting" it to Svr4 caused a dot to be appended to the 
+comment ;-) 
+
+BTW: in 1990 with SunOS-4.0, I could already modload my "wofs" as I added a few
+nulled entries to the struct vfssw in os/vfs_conf.c, pretended that wofs was a 
+device driver and let it then install itself into one of the empty entries in
+struct vfssw.
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+

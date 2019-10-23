@@ -1,0 +1,143 @@
+From tuhs-bounces@minnie.tuhs.org Wed Aug  8 20:17:57 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIMWL_WL_MED autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d0da956d
+	for <ml@inbox.vuxu.org>;
+	Wed, 8 Aug 2018 20:17:57 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 924DEA1CF8; Thu,  9 Aug 2018 06:17:56 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2F224A19DE;
+	Thu,  9 Aug 2018 06:17:44 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b=cm1lg0R1;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 87D78A19CD; Wed,  8 Aug 2018 18:51:04 +1000 (AEST)
+Received: from mail-it0-f53.google.com (mail-it0-f53.google.com
+ [209.85.214.53])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 133CAA19CC
+ for <tuhs@tuhs.org>; Wed,  8 Aug 2018 18:51:04 +1000 (AEST)
+Received: by mail-it0-f53.google.com with SMTP id j81-v6so2534809ite.0
+ for <tuhs@tuhs.org>; Wed, 08 Aug 2018 01:51:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=RBtWrntghmTRNipGCy7rquXOQsnxkBTDGEOUSzByRqM=;
+ b=cm1lg0R1VOO7ae+14BM1qqg3/ub4624NG8goPCci9YZa9A+G3lKo3TJDB25n0y/Q3V
+ kIpVN3SM+gxkcCD4m3+FXa3bvQFV/vOd+PivLxpbvkg57b5BPfufnPhtAsUasLr6Zdki
+ C0Tn+BqO/lGHoqwyLCB+PvE04LHGn/+la/8B4jCbFbHKQNxBqfoiU/+SPpVtlvHRElRo
+ HQt2I22loh3DRDgJbryhDvgnrRh8j7xVBRE2rPsY6KmPI1U8O/3JjxhuTacDYj6sXZ8+
+ 9vQMRLuplPj1AE982dvhaXa9RLufrSUWHurvHYSaPPn+YiQz/n2oydLeVcoLuvMJjQ3H
+ U8xQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=RBtWrntghmTRNipGCy7rquXOQsnxkBTDGEOUSzByRqM=;
+ b=F/mlgkvEXwIZPUURhn4y1HQrrjvjSul9DkqvXVMnw4bQ9667EqpY0iRjF/BctwqTl/
+ b21pTzFFteUE2NQ5Xm8CYFacBr4KubqBcv/ILz/i3QzCzB86/EZTazwhKpieBZJzA0q/
+ 89lahk90i0r26QmMwHfsQ9nH3fNvvyQaslZjw7aXfzYjYrgg6F+WXqR+jMuVnoExT11/
+ BXGkQUvvVgZvqqEcxC7PCwkrzJmAbeX8ZxuhbuKFzkFzMvGJkmHY1joU21NUd7a3TXDV
+ urJ1IZPccfdwMWwUQBF05cv6FDwd6+k38+qwkHw+BtTWrxa+L8b9+IcNtqchT90NwEPJ
+ jr3Q==
+X-Gm-Message-State: AOUpUlHvm5j307aNabeIdWFHTa7weL4VrFu/CgdTYQxfQFO3KPHc4vVw
+ fhCDp7dqKYuWdEohP8sOabwi8h2i7YaIL/cnu+NOlw==
+X-Google-Smtp-Source: AA+uWPw/pjzxcIC9l/byh/Yjfw2C6jsqIBllenvrwav/wS6azH7awRBluuqV7TzfrmvYsF+SxAJ4e2DeUH9diQaBE8k=
+X-Received: by 2002:a24:4f52:: with SMTP id
+ c79-v6mr1479034itb.36.1533718263098; 
+ Wed, 08 Aug 2018 01:51:03 -0700 (PDT)
+MIME-Version: 1.0
+References: <20180808083706.GA20345@minnie.tuhs.org>
+In-Reply-To: <20180808083706.GA20345@minnie.tuhs.org>
+From: Warner Losh <imp@bsdimp.com>
+Date: Wed, 8 Aug 2018 09:50:51 +0100
+Message-ID: <CANCZdfpDXuEFKGNSagWA4bh_ncD_9sjEoZgGsk4iq8Kofqq5ng@mail.gmail.com>
+To: Warren Toomey <wkt@tuhs.org>
+Content-Type: multipart/alternative; boundary="0000000000004206590572e89cbd"
+X-Mailman-Approved-At: Thu, 09 Aug 2018 06:17:42 +1000
+Subject: Re: [TUHS] Sort of off-topic: usefulness of TUHS list and archive?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000004206590572e89cbd
+Content-Type: text/plain; charset="UTF-8"
+
+I used your site to construct historical unix sizes in s talk I have at
+BSDcan. I've also used it to check historical unix behaviour when fixing
+bugs in FreeBSD for Netflix...
+
+Warner
+
+On Wed, Aug 8, 2018, 9:38 AM Warren Toomey <wkt@tuhs.org> wrote:
+
+> All, sorry that this is tangential to TUHS. I work at TAFE Queensland,
+> which
+> is a bit like a polytechnic or a U.S college. As a teacher, I have to
+> demonstrate industry skills. I've listed my administration of the TUHS
+> server
+> over 25+ years. However, TAFE wants this to be verified by third parties:
+>
+>         "Where possible the teacher could show that industry endorses his
+>         website and any if there are any testimonials/comments/reviews
+>         available on the site, these could also be provided."
+>
+> So, if you could pop a sentence or two in reply to this e-mail about
+> the usefulness of the TUHS archive and the mailing list, that would be
+> really helpful!
+>
+> Cheers & thanks in advance, Warren
+>
+
+--0000000000004206590572e89cbd
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">I used your site to construct historical unix sizes in s =
+talk I have at BSDcan. I&#39;ve also used it to check historical unix behav=
+iour when fixing bugs in FreeBSD for Netflix...<div dir=3D"auto"><br></div>=
+<div dir=3D"auto">Warner</div></div><br><div class=3D"gmail_quote"><div dir=
+=3D"ltr">On Wed, Aug 8, 2018, 9:38 AM Warren Toomey &lt;<a href=3D"mailto:w=
+kt@tuhs.org">wkt@tuhs.org</a>&gt; wrote:<br></div><blockquote class=3D"gmai=
+l_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left=
+:1ex">All, sorry that this is tangential to TUHS. I work at TAFE Queensland=
+, which<br>
+is a bit like a polytechnic or a U.S college. As a teacher, I have to<br>
+demonstrate industry skills. I&#39;ve listed my administration of the TUHS =
+server<br>
+over 25+ years. However, TAFE wants this to be verified by third parties:<b=
+r>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 &quot;Where possible the teacher could show tha=
+t industry endorses his<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 website and any if there are any testimonials/c=
+omments/reviews<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 available on the site, these could also be prov=
+ided.&quot;<br>
+<br>
+So, if you could pop a sentence or two in reply to this e-mail about<br>
+the usefulness of the TUHS archive and the mailing list, that would be<br>
+really helpful!<br>
+<br>
+Cheers &amp; thanks in advance, Warren<br>
+</blockquote></div>
+
+--0000000000004206590572e89cbd--

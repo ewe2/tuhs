@@ -1,0 +1,169 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 395a919f
+	for <ml@inbox.vuxu.org>;
+	Sun, 10 Mar 2019 20:33:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E5C4B94BFA; Mon, 11 Mar 2019 06:33:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3967794BEA;
+	Mon, 11 Mar 2019 06:33:22 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="oAoqW5YF";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 925C494BEA; Mon, 11 Mar 2019 06:33:19 +1000 (AEST)
+Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com
+ [209.85.222.172])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 86C8F94BE9
+ for <tuhs@tuhs.org>; Mon, 11 Mar 2019 06:33:18 +1000 (AEST)
+Received: by mail-qk1-f172.google.com with SMTP id s26so1561877qkm.10
+ for <tuhs@tuhs.org>; Sun, 10 Mar 2019 13:33:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=bIPmbYRWV+fQqnQ7j63rqEOOSXwOzXcIVlDrxu6anGI=;
+ b=oAoqW5YFLmHGvQm6EsU6Gyt3Ab78r0hx++iVEp66AGe22EuZzNvVbPGIcB7mX3vTUk
+ G2DeJdHhyMbVm8W+JNAeAGGE6fJB3tWcz5WnYU1GrV9zgr+dWCfqe3HTCqbAKAiEI7sy
+ 6m52MxXXj7C4LEzTb/MEnPO/4zLVpd9W2XExV41GFJbWZxbP57gBTo3JwTzv2nNshlrk
+ tDsvZ/GanBTdeXm5g5Vjw2JsQC3Vv3KgkfdF+VuMOayHfkuhrQcvDgFILiMcAn79jnTA
+ yAcOROPm7oDcD3B3GKMGdJbPx2lyNXA4O85Fx+Hvy2LM5x68PfpOo+FP2SPvmJFnFT1B
+ ynxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=bIPmbYRWV+fQqnQ7j63rqEOOSXwOzXcIVlDrxu6anGI=;
+ b=UHzPlbYVRzg7s4xag/xib2fp2yItXQw4uhfhjSQg7OkTFtCl9hHG8ll4mRJnMiKajf
+ XMpwZJy2t1MMKiw1lLvpgSgVPEbY0+6sCeVnhSdGXoZrgUPeh7i+mmwg5F1/X0ZDS08G
+ 9rZTrODPhiA3vUbC9nZCqzP4apJZzv36JQdj/LbuPEYJf4BIuHUJsqKpT7v3xeSXDnlx
+ Zk8LfvJyhTSffTTPEzysB49MKuqEaKDRBsbZXeinTJBaswnek57BGTwdK/QmmsBiFClg
+ Tz/llqJB9jh9bkcqhr24rk1k428WOwoJfEiro/zwCDXM9UAlwikOKlSUm8+y9SHtYlfL
+ +Pdw==
+X-Gm-Message-State: APjAAAUV2QJZHR9hAtzoJl2iUwCo/dWGXCyQJ4f3Ueeaf9EB26y3/psf
+ YVlxtlxNm9M1ltPUl3yGbo4IJ3GVxRIdHGZI2mJq0pSCMzQ=
+X-Google-Smtp-Source: APXvYqw9lK9qP4hu9+n6x8GFIcKbURLhzN+aQIg3mzayy5uz1Imtd5C/ETgV5M6RTLVzcLbht4PjzONhSRHCm3hBP/M=
+X-Received: by 2002:a37:bce:: with SMTP id 197mr2086772qkl.46.1552249997508;
+ Sun, 10 Mar 2019 13:33:17 -0700 (PDT)
+MIME-Version: 1.0
+References: <201903100731.x2A7VZJF033832@ducky.net>
+ <201903100820.x2A8KjsZ029408@freefriends.org>
+ <201903101550.x2AFoaZp036647@ducky.net>
+ <201903101954.x2AJsjL7016848@freefriends.org>
+In-Reply-To: <201903101954.x2AJsjL7016848@freefriends.org>
+From: Warner Losh <imp@bsdimp.com>
+Date: Sun, 10 Mar 2019 14:33:05 -0600
+Message-ID: <CANCZdfrK64EUDSbDbNiLc=qmmFCQf=7-D853kToswMQC-v3K-A@mail.gmail.com>
+To: arnold@skeeve.com
+Content-Type: multipart/alternative; boundary="000000000000b45a6b0583c35df9"
+Subject: Re: [TUHS] a possible source for 4.1BSD tapes
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000b45a6b0583c35df9
+Content-Type: text/plain; charset="UTF-8"
+
+On Sun, Mar 10, 2019 at 1:55 PM <arnold@skeeve.com> wrote:
+
+> Mike Haertel <tuhs@ducky.net> wrote:
+>
+> > arnold@skeeve.com writes:
+> > > Isn't 4.1 on Kirk McKusick's disks?
+> >
+> > McKusick's disks look sketchy to me too:
+>
+> So can "someone" ping Kirk about this?
+>
+
+Keep in mind that BSD didn't really have releases. When you called up for a
+tape, it wasn't made from some master tape, but rolled off from a system
+that had right version on it. I know Kirk told me this once when I was
+chatting with him about tapes, RMS and other things. Thje version control
+wasn't quite as strict as things are today, so I'm not surprised there's
+some variance in images from place to place around the net. We have SCCS,
+and multiple images. I think the best we may be able to do is to do the
+this was copied from that with these changes and produce a tree of
+inheritance... IIRC, SCCS has issues with moved and removed files that
+makes it hard to reconstruct things exactly with it. I know RCS and CVS had
+these issues. The historical unix git repo has
+  remotes/origin/BSD-4-Snapshot-Development
+  remotes/origin/BSD-4_1_snap-Snapshot-Development
+  remotes/origin/BSD-4_1c_2-Snapshot-Development
+branches. Also, version numbering was kinda hazy. Kirk has a big listing in
+his house of 4.5 BSD. This is post the first 4BSD release, but not the 5BSD
+release. They had thought they'd do a 5BSD, but they had all these
+contracts with 4BSD in them, so they were basically forced to do 4.1BSD
+instead, so the "4.5BSD" thing is basically an early version of what we
+know know as 4.1BSD.... So between these two quirks, I'm not surprised
+there's not an 'untainted' version of 4.1BSD around... I'm guessing the
+tape that has the July 1981 date on it was made in early 1982 and the extra
+files with the weird dates are just an artifact of when the tape was made
+and that people had used the 'master image' system in the mean time, if for
+nothing else than logging into and running the make tape script :)
+
+Warner
+
+--000000000000b45a6b0583c35df9
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><br></div><div class=3D"=
+gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Sun, Mar 10, 2019 at =
+1:55 PM &lt;<a href=3D"mailto:arnold@skeeve.com">arnold@skeeve.com</a>&gt; =
+wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0=
+px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">Mike Haer=
+tel &lt;<a href=3D"mailto:tuhs@ducky.net" target=3D"_blank">tuhs@ducky.net<=
+/a>&gt; wrote:<br>
+<br>
+&gt; <a href=3D"mailto:arnold@skeeve.com" target=3D"_blank">arnold@skeeve.c=
+om</a> writes:<br>
+&gt; &gt; Isn&#39;t 4.1 on Kirk McKusick&#39;s disks?<br>
+&gt;<br>
+&gt; McKusick&#39;s disks look sketchy to me too:<br>
+<br>
+So can &quot;someone&quot; ping Kirk about this?<br></blockquote><div><br><=
+/div><div>Keep in mind that BSD didn&#39;t really have releases. When you c=
+alled up for a tape, it wasn&#39;t made from some master tape, but rolled o=
+ff from a system that had right version on it. I know Kirk told me this onc=
+e when I was chatting with him about tapes, RMS and other things. Thje vers=
+ion control wasn&#39;t quite as strict as things are today, so I&#39;m not =
+surprised there&#39;s some variance in images from place to place around th=
+e net. We have SCCS, and multiple images. I think the best we may be able t=
+o do is to do the this was copied from that with these changes and produce =
+a tree of inheritance... IIRC, SCCS has issues with moved and removed files=
+ that makes it hard to reconstruct things exactly with it. I know RCS and C=
+VS had these issues. The historical unix git repo has <br></div><div>=C2=A0=
+ remotes/origin/BSD-4-Snapshot-Development<br>=C2=A0 remotes/origin/BSD-4_1=
+_snap-Snapshot-Development<br>=C2=A0 remotes/origin/BSD-4_1c_2-Snapshot-Dev=
+elopment<br></div><div>branches. Also, version numbering was kinda hazy. Ki=
+rk has a big listing in his house of 4.5 BSD. This is post the first 4BSD r=
+elease, but not the 5BSD release. They had thought they&#39;d do a 5BSD, bu=
+t they had all these contracts with 4BSD in them, so they were basically fo=
+rced to do 4.1BSD instead, so the &quot;4.5BSD&quot; thing is basically an =
+early version of what we know know as 4.1BSD.... So between these two quirk=
+s, I&#39;m not surprised there&#39;s not an &#39;untainted&#39; version of =
+4.1BSD around... I&#39;m guessing the tape that has the July 1981 date on i=
+t was made in early 1982 and the extra files with the weird dates are just =
+an artifact of when the tape was made and that people had used the &#39;mas=
+ter image&#39; system in the mean time, if for nothing else than logging in=
+to and running the make tape script :)<br></div><div><br></div><div>Warner<=
+br></div></div></div></div>
+
+--000000000000b45a6b0583c35df9--

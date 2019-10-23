@@ -1,0 +1,40 @@
+From: msokolov@ivan.Harhan.ORG (Michael Sokolov)
+Date: Fri, 26 Sep 03 13:47:59 PDT
+Subject: [TUHS] Re: 4.3 BSD version in the Unix Archive
+Message-ID: <0309262047.AA07364@ivan.Harhan.ORG>
+
+Markus Weber <jmbw at nather.com> wrote:
+
+> Stand/copy from tms(0,1) to ra(0,1) fails with a 'disk unlabeled' diagnostic
+> on a cold disk image.
+
+It should print the unlabeled diagnostic, but then proceed rather than fail.  I
+just double-checked the standalone driver source, and it does provide a default
+label for RA82, as long as the MSCP controller actually returns RA82 as the MSCP
+disk ID.  Does it give you an error message about disk type (some hex humber)
+not supported?  If so, SIMH's MSCP emulation must be lacking in quality.
+
+> If only ra0 is
+> configured for simh, it takes the kernel a long time to decide that ra1,
+> ra2, and ra3 are offline. Having said that, I do not know how long this
+> takes on actual hardware.
+
+On real HW it takes no noticeable time.
+
+> the kernel (and
+> not simh) subsequently segfaults (trap type 8, code = c0000200, pc =
+> 8003fe16).
+
+Well, obviously this doesn't happen on real HW, since on real HW it works (I'm
+typing this message on a MicroVAX 3+ running 4.3BSD-Quasijarus).
+
+But I will grant the possibility that the kernel is not w/o fault either in that
+perhaps it's going south (dereferencing a garbage pointer and crashing) when the
+MSCP controller (in this case SIMH's poor emulation) is doing something it
+doesn't expect.  If this is so, it should be fixed, since even w/o emulators
+(which I refuse to support on principle) real HW can be broken and return
+garbage on reg reads, and the kernel must handle it gracefully.  I'll look into
+it.
+
+MS
+

@@ -1,0 +1,38 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Wed, 15 Nov 2017 22:55:52 -0500
+Subject: [TUHS] TUHS Digest, Vol 24, Issue 72
+In-Reply-To: <mailman.1.1510797601.603.tuhs@minnie.tuhs.org>
+References: <mailman.1.1510797601.603.tuhs@minnie.tuhs.org>
+Message-ID: <201711160355.vAG3tqdC026906@coolidge.cs.Dartmouth.EDU>
+
+> I especially liked the bit in which Tom's virus infected a multi-level secured UNIX system that Doug McIlroy and Jim Reeds were developing which they didn't spot until they turned on all their protections ... and programs started crashing all over the place.
+
+
+That's not quite right. The system was running nicely with a
+lattice-based protection system (read from below, write to above)
+working fine. Processes typocally begin at lattice bottom, but
+move to hivel levels depending on what data they see (including,
+of course any exec-ed file.) All the standard utilities, being
+usable by anyone are at lattice bottom.
+
+Cool, until you realize that highly trusted system programs
+such as sudo are at lattice bottom and are protected only by
+the old rwx bits, not by the read-write rules. So, following
+an idea of Biba's, that integrity rules are the opposite of
+secrecy rules. You don't want to forbid writing to high-integrity
+places, nor read from low-integrity places.
+
+This was done by setting the default security level away from
+the lattice bottom. High-integrity stuff was below this floor;
+high-secrecy above.
+
+The Duff story is about the day we moved the floor off bottom.
+An integrity violation during the boot sequence stopped the 
+system cold. Clearly we'd misconfigured something. But no, after
+a couple of days of fruitless search, Jim Reeds lit up, "We
+caught a virus!" We were unaware of Duff's experiment. He had
+been chagrined when it escaped from one machine, but was able
+to decontaminate all the machines in the center. Except ours,
+which was not on the automatic software distrutioin list, since
+it was running a different system.
+

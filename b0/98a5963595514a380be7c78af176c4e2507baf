@@ -1,0 +1,421 @@
+From: wkt@henry.cs.adfa.oz.au (Warren Toomey)
+Date: Thu, 26 Nov 1998 12:54:34 +1100 (EST)
+Subject: Over 100 Ancient UNIX Licenses
+Message-ID: <199811260154.MAA08304@henry.cs.adfa.oz.au>
+
+All,
+	I've just received another 5 SCO Ancient UNIX license details in the
+mail, bringing the total purchased from SCO to 101. I think that's pretty
+impressive. Just thought you'd like to know.
+
+Cheers all,
+	Warren
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id DAA22073
+	for pups-liszt; Fri, 27 Nov 1998 03:52:43 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id DAA22068
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 27 Nov 1998 03:52:29 +1100 (EST)
+	(envelope-from SHOPPA at trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Thu, 26 Nov 1998 11:50:34 -0500
+Date: Thu, 26 Nov 1998 11:50:34 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <981126115034.2a2004dc at trailing-edge.com>
+Subject: Pro/Venix and Y2K
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+The following exchange recently took place on comp.sys.dec.micro/
+vmsnet.pdp-11/alt.sys.pdp11.  In it, I made the guess that PRO Venix
+is based on 2.9BSD - does anyone know more details about its heritage?
+
+Donato B. Masaoy III wrote:
+> 
+> Came into a Pro 380 and loaded Venix as a means of tyring out Unix.
+> Noticed that at 2000 it sets itself back to 1970. Is there fix for this?
+> Should I bother?
+
+The PRO 380 Time-Of-Year clock has two modes:
+
+1.  BCD mode, where the year is stored in two decimal digits.
+2.  Binary mode, where the year is stored as at least 7 bits (more
+    likely 8 bits - it's been a couple of months since the changes
+    were implemented the fix in RT-11's PI.SYS, PIX.SYS, and
+    SETUP.SAV to make it Y2K compliant.)
+
+When in BCD mode, 31-Dec-99 rolls over into 1-Jan-00, and the
+clock keeps accurately ticking.  Venix evidently chokes on this
+and doesn't interpret "00" as "2000".
+
+As Unix is incapable of representing times internally outside
+the range 1970-2038, the obvious fix is to interpret BCD years
+in the range 70-99 as being in the 1900's, and the BCD years
+in the range 00-38 as in the 2000's.  This is, for example,
+how BSD2.11 interprets the two-digit 11/93 or 11/94 clock year.
+
+Of course, finding the sources to Pro 380 Venix to implement
+the changes may be difficult.  The PUPS archive has a version of 2.9BSD
+patches for the Pro, and if you're lucky Venix may be close
+enough that you can use the Pro-specific clock sources to patch
+your kernel binary.  In the 2.9BSD Pro patches, the clock
+code is in "/sys-dev/prostuff.c", and begins:
+
+/* These two fuctions handle the pro 300's clock
+ * This code is defunct at the end of the century.
+ * Will Unix still be here then??
+ */
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd                 Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id FAA22435
+	for pups-liszt; Fri, 27 Nov 1998 05:49:47 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mgate.nwnexus.com (mgate.nwnexus.com [206.63.63.200])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id FAA22430
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 27 Nov 1998 05:49:37 +1100 (EST)
+	(envelope-from djenner at halcyon.com)
+Received: from halcyon.com (66-a-usw.rb1.blv.nwnexus.net [206.63.251.66])
+	by mgate.nwnexus.com (8.8.8/8.8.8) with ESMTP id KAA03033;
+	Thu, 26 Nov 1998 10:48:52 -0800
+Message-ID: <365DA28D.5C541C8C at halcyon.com>
+Date: Thu, 26 Nov 1998 10:48:45 -0800
+From: "David C. Jenner" <djenner@halcyon.com>
+Reply-To: djenner at halcyon.com
+X-Mailer: Mozilla 4.5 [en] (Win98; U)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Tim Shoppa <SHOPPA at trailing-edge.com>
+CC: PUPS at MINNIE.CS.ADFA.OZ.AU
+Subject: Re: Pro/Venix and Y2K
+References: <981126115034.2a2004dc at trailing-edge.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+There probably isn't much BSD lineage in Version 1 of Venix,
+but there is some in Version 2.  Probably mostly in the form
+of the usual add-ons like VI.
+
+There's some confusion about this (at least in my mind), so any
+authoritative info would be interesting.
+
+First of all there's:
+
+"Venix/Pro" from Venturecom, which is definitely of AT&T lineage,
+probably V7/SysIII for V1 of Venix/Pro, and perhaps a bit of
+BSD stuff mixed in for V2 of Venix/Pro.  This is what you find at
+Internet archives.
+
+Then there's:
+"Pro/Venix" from DEC, which is a repackaging of Venix/Pro.  Again,
+there are Versions 1 and 2 of this.  I have V1 and docs for V2,
+but no disks for V2.
+
+I'd really like to find a copy of the distribution of DEC
+Pro/Venix V2, if it's legal (and having the Ancient Unix license
+would seem to make it OK for at least the AT&T side). 
+
+For Pro/Venix, V2, the manual entry for
+"clock(7) - time-of-day clock" is:
+
+/dev/clock refers to a time-of-day, battery-backed-up clock.  This
+device node is provided primarily for the benefit of the date com-
+mand, which will read from it given the -l flag (usually done on
+system start-up), and write to it if a new date is set.
+...
+struct clkbuf {
+	int clk_sec;	/* second (0-59) */
+	int clk_min;	/* minute (0-59) */
+	int clk_hour;	/* hour (0-23) */
+	int clk_mday;	/* day of month (1-31) */
+	int clk_mon;	/* month (0-11) */
+	int clk_year;	/* year (00-99) */
+	int clk_wday;	/* day of the week (Sunday = 0) */
+	int clk_yday;	/* day of the year (0-365) */
+	int clk_dst;	/* non-zero if daylight savings applies */
+};
+
+So, it looks bad at least from the internal representation of the
+year.  Since I don't have this version, I can't comment on exactly
+what happens.
+
+Dave
+
+Tim Shoppa wrote:
+> 
+> The following exchange recently took place on comp.sys.dec.micro/
+> vmsnet.pdp-11/alt.sys.pdp11.  In it, I made the guess that PRO Venix
+> is based on 2.9BSD - does anyone know more details about its heritage?
+> 
+> Donato B. Masaoy III wrote:
+> >
+> > Came into a Pro 380 and loaded Venix as a means of tyring out Unix.
+> > Noticed that at 2000 it sets itself back to 1970. Is there fix for this?
+> > Should I bother?
+> 
+> The PRO 380 Time-Of-Year clock has two modes:
+> 
+> 1.  BCD mode, where the year is stored in two decimal digits.
+> 2.  Binary mode, where the year is stored as at least 7 bits (more
+>     likely 8 bits - it's been a couple of months since the changes
+>     were implemented the fix in RT-11's PI.SYS, PIX.SYS, and
+>     SETUP.SAV to make it Y2K compliant.)
+> 
+> When in BCD mode, 31-Dec-99 rolls over into 1-Jan-00, and the
+> clock keeps accurately ticking.  Venix evidently chokes on this
+> and doesn't interpret "00" as "2000".
+> 
+> As Unix is incapable of representing times internally outside
+> the range 1970-2038, the obvious fix is to interpret BCD years
+> in the range 70-99 as being in the 1900's, and the BCD years
+> in the range 00-38 as in the 2000's.  This is, for example,
+> how BSD2.11 interprets the two-digit 11/93 or 11/94 clock year.
+> 
+> Of course, finding the sources to Pro 380 Venix to implement
+> the changes may be difficult.  The PUPS archive has a version of 2.9BSD
+> patches for the Pro, and if you're lucky Venix may be close
+> enough that you can use the Pro-specific clock sources to patch
+> your kernel binary.  In the 2.9BSD Pro patches, the clock
+> code is in "/sys-dev/prostuff.c", and begins:
+> 
+> /* These two fuctions handle the pro 300's clock
+>  * This code is defunct at the end of the century.
+>  * Will Unix still be here then??
+>  */
+> 
+> --
+>  Tim Shoppa                        Email: shoppa at trailing-edge.com
+>  Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+>  7328 Bradley Blvd                 Voice: 301-767-5917
+>  Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA22497
+	for pups-liszt; Fri, 27 Nov 1998 06:05:10 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from math.uwaterloo.ca (kcwellsc at math.uwaterloo.ca [129.97.140.144])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id GAA22489
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 27 Nov 1998 06:05:00 +1100 (EST)
+	(envelope-from kcwellsc at math.uwaterloo.ca)
+Received: (from kcwellsc at localhost)
+	by math.uwaterloo.ca (8.8.8/8.8.8) id OAA22036;
+	Thu, 26 Nov 1998 14:04:36 -0500 (EST)
+From: Ken Wellsch <kcwellsc@math.uwaterloo.ca>
+Message-Id: <199811261904.OAA22036 at math.uwaterloo.ca>
+Subject: Re: Pro/Venix and Y2K
+To: SHOPPA at trailing-edge.com (Tim Shoppa)
+Date: Thu, 26 Nov 1998 14:04:36 -0500 (EST)
+Cc: PUPS at MINNIE.CS.ADFA.OZ.AU
+In-Reply-To: <981126115034.2a2004dc at trailing-edge.com> from "Tim Shoppa" at Nov 26, 98 11:50:34 am
+Organization: University of Waterloo, Math Faculty Computing Facility (Alumni)
+X-Mailer: ELM [version 2.4 PL25]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi Tim,
+
+| The following exchange recently took place on comp.sys.dec.micro/
+| vmsnet.pdp-11/alt.sys.pdp11.  In it, I made the guess that PRO Venix
+| is based on 2.9BSD - does anyone know more details about its heritage?
+
+There are several folks with vastly better knowledge on this than I, but
+should they not speak up, I'll mumble on what little I know.
+
+Venix is an outgrowth of V6 UNIX I believe - from my fadding memory of
+the little I played with it, the file system is definitely V6 based (with
+the notion of "huge" files, i.e. the index pointers would switch from
+direct to indirect, while I believe V7 took a much better approach).
+
+The 2BSD branch I believe took a much later fork, V7 or later?  It also
+played a more central role than Venix I expect, contributing a goodly
+amount of later PDP-11/UNIX based things that others borrowed (e.g. Ultrix
+3 from DEC took csh and vi among other goodies).
+
+| As Unix is incapable of representing times internally outside
+| the range 1970-2038, the obvious fix is to interpret BCD years
+| in the range 70-99 as being in the 1900's, and the BCD years
+| in the range 00-38 as in the 2000's.  This is, for example,
+| how BSD2.11 interprets the two-digit 11/93 or 11/94 clock year.
+
+Gee, I didn't think there was one "UNIX" in the world 8-)  How big are
+your integers?  Do you use signed or unsigned values for the epoch since
+Jan 1 1970?  It seems hard to believe anything in the UNIX world of today
+has this limitation.
+
+I'll agree there is likely just the one "RT-11" though 8-)
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA22536
+	for pups-liszt; Fri, 27 Nov 1998 06:17:19 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id GAA22531
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 27 Nov 1998 06:17:10 +1100 (EST)
+	(envelope-from SHOPPA at trailing-edge.com)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.ADFA.OZ.AU;
+          Thu, 26 Nov 1998 14:15:17 -0500
+Date: Thu, 26 Nov 1998 14:15:17 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at MINNIE.CS.ADFA.OZ.AU
+Message-Id: <981126141517.2a2003cb at trailing-edge.com>
+Subject: Re: Pro/Venix and Y2K
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>There's some confusion about this (at least in my mind), so any
+>authoritative info would be interesting.
+
+I agree - and would love more definitive information (Or, even
+better, the sources to Pro/Venix.)  I've
+learned an amazing amount about segments of the Unix lineage
+just from the comments in the past week, but the gaps in
+my knowledge still loom large!
+
+It's entirely possible that Pro/Venix uses the Pro
+clock in BCD mode - it looked to me that the 2.9BSD version
+does it in binary mode.
+
+>struct clkbuf {
+>	int clk_sec;	/* second (0-59) */
+>	int clk_min;	/* minute (0-59) */
+>	int clk_hour;	/* hour (0-23) */
+>	int clk_mday;	/* day of month (1-31) */
+>	int clk_mon;	/* month (0-11) */
+>	int clk_year;	/* year (00-99) */
+>	int clk_wday;	/* day of the week (Sunday = 0) */
+>	int clk_yday;	/* day of the year (0-365) */
+>	int clk_dst;	/* non-zero if daylight savings applies */
+>};
+>
+>So, it looks bad at least from the internal representation of the
+>year.
+
+It depends on what you want to call "bad".  It's quite possible
+to build a Y2K compliant system out of non-Y2K compliant
+components!
+
+2.11BSD's date(1) was patched for Y2K in such a way that "00" in
+the two-digit year would be interpreted as the year 2000.  (See
+patch #327 for the details.)
+
+Would similar fixes for more historic Unices be useful to the general
+folk here?
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id GAA22638
+	for pups-liszt; Fri, 27 Nov 1998 06:50:39 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from mgate.nwnexus.com (mgate.nwnexus.com [206.63.63.200])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id GAA22633
+	for <PUPS at MINNIE.CS.ADFA.OZ.AU>; Fri, 27 Nov 1998 06:50:31 +1100 (EST)
+	(envelope-from djenner at halcyon.com)
+Received: from halcyon.com (66-a-usw.rb1.blv.nwnexus.net [206.63.251.66])
+	by mgate.nwnexus.com (8.8.8/8.8.8) with ESMTP id LAA03155;
+	Thu, 26 Nov 1998 11:49:55 -0800
+Message-ID: <365DB0DB.CD18A664 at halcyon.com>
+Date: Thu, 26 Nov 1998 11:49:47 -0800
+From: "David C. Jenner" <djenner@halcyon.com>
+Reply-To: djenner at halcyon.com
+X-Mailer: Mozilla 4.5 [en] (Win98; U)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Tim Shoppa <SHOPPA at trailing-edge.com>
+CC: PUPS at MINNIE.CS.ADFA.OZ.AU
+Subject: Re: Pro/Venix and Y2K
+References: <981126141517.2a2003cb at trailing-edge.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+It's "bad" in the sense that the evidence available (empirical,
+and sparse code) suggests that the software (and probably the
+hardware) is working with only two-digit years.
+
+You could, of course, try to remedy the Y2K problem by properly
+handling the clock.  But the evidence suggests that the
+problem may be spread over lots of code.  As you say, it would
+be nice to have the Pro/Venix code (as opposed to the Venix/Pro
+code).
+
+DEC's Pro/Venix is more flexible than Venturecom's Venix/Pro.
+You can write and link custom device drivers with the kernel
+in Pro/Venix.  There is some hope you could actually "fix"
+/dev/clock, but this probably isn't enough to solve the whole
+Y2K problem.
+
+Again, any knowledge about the whereabouts of even the binary
+distribution disks of DEC's V2 Pro/Venix would be great.
+
+Dave
+
+Tim Shoppa wrote:
+> 
+> >There's some confusion about this (at least in my mind), so any
+> >authoritative info would be interesting.
+> 
+> I agree - and would love more definitive information (Or, even
+> better, the sources to Pro/Venix.)  I've
+> learned an amazing amount about segments of the Unix lineage
+> just from the comments in the past week, but the gaps in
+> my knowledge still loom large!
+> 
+> It's entirely possible that Pro/Venix uses the Pro
+> clock in BCD mode - it looked to me that the 2.9BSD version
+> does it in binary mode.
+> 
+> >struct clkbuf {
+> >       int clk_sec;    /* second (0-59) */
+> >       int clk_min;    /* minute (0-59) */
+> >       int clk_hour;   /* hour (0-23) */
+> >       int clk_mday;   /* day of month (1-31) */
+> >       int clk_mon;    /* month (0-11) */
+> >       int clk_year;   /* year (00-99) */
+> >       int clk_wday;   /* day of the week (Sunday = 0) */
+> >       int clk_yday;   /* day of the year (0-365) */
+> >       int clk_dst;    /* non-zero if daylight savings applies */
+> >};
+> >
+> >So, it looks bad at least from the internal representation of the
+> >year.
+> 
+> It depends on what you want to call "bad".  It's quite possible
+> to build a Y2K compliant system out of non-Y2K compliant
+> components!
+> 
+> 2.11BSD's date(1) was patched for Y2K in such a way that "00" in
+> the two-digit year would be interpreted as the year 2000.  (See
+> patch #327 for the details.)
+> 
+> Would similar fixes for more historic Unices be useful to the general
+> folk here?
+> 
+> --
+>  Tim Shoppa                        Email: shoppa at trailing-edge.com
+>  Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+>  7328 Bradley Blvd                 Voice: 301-767-5917
+>  Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+

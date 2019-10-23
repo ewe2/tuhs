@@ -1,0 +1,39 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Wed, 24 May 2017 20:48:38 -0400
+Subject: [TUHS] can't protect files from deletion v5,v6, or v7
+In-Reply-To: <CADxT5N6NWDJb-JMKk+PMbY9gQb2PsQpaKKO9XFoMuPQ===_sEA@mail.gmail.com>
+References: <CADxT5N6NWDJb-JMKk+PMbY9gQb2PsQpaKKO9XFoMuPQ===_sEA@mail.gmail.com>
+Message-ID: <CAEoi9W59e5sZe2xLfTV2zT_PEuXJPdvym3R2J2qQ5H9YYWS1_g@mail.gmail.com>
+
+On Wed, May 24, 2017 at 8:23 PM, Mark Longridge <cubexyz at gmail.com> wrote:
+
+> Ok, I just did an experiment with the rm command and the results surprised
+> me.
+>
+> On Unix v5 logged in as root I created a small test file then did
+> chmod 444 on it. Unfortunately it appears that mere users can still rm
+> the file and also directories are not safe from the rmdir command
+> (even directories set to mode 444).
+>
+> This seems to be the case for v6 and v7 as well.
+>
+> To be fair rm will prompt the user with: test1: 0100444 mode
+> but the user only has to type y and hit enter and the file is toast.
+>
+> Is there no way to completely protect files from being deleted?
+
+
+Yes, these are the normal semantics, even on modern systems. If you want to
+prevent a user from removing a file, remove the user's write permission to
+the directory containing the file. Recall that a "file" in the removable
+sense is really a directory entry that points to the inode that represents
+the real file; to remove that, one must modify the directory to remove the
+directory entry. The permissions on the file itself don't matter since
+removal isn't an operation on the contents of the file; the only thing it
+does to the actual file is update the link count in the inode.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170524/30b9b65b/attachment.html>
+

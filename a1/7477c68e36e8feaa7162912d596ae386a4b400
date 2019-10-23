@@ -1,0 +1,118 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Sat, 14 Jan 2017 04:57:38 +1100
+Subject: [TUHS] 2.11BSD cross compiling update
+Message-ID: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+
+So I got a fair bit further advanced on my 2.11BSD cross compiler
+project, at the moment it can make a respectable unix tree (/bin /usr
+etc) with a unix kernel and most software in it. I unpacked the
+resulting tarball and chrooted into it on a running SIMH system and it
+worked OK, was a bit rough around the edges (missing a few necessary
+files in /usr/share and that kind of thing) but did not crash. I
+haven't tested the kernel recently but last time I tested it, it
+booted, and the checksys output is OK.
+
+I then ended up doing a fair bit of re-engineering, how this came
+about was that I had to port the timezone compiler (zic) to run on the
+Linux cross compilation host, since the goal is eventually to build a
+SIMH-bootable disk (filesystem) with everything on it. This was a bit
+involved, it crashed initially and it turned out it was doing
+localtime() on really small and large values to try to figure out the
+range of years the system could handle. On the Linux system this
+returns NULL for unreasonable time_t values which POSIX allows it to
+do. Hence the crash. It wasn't too obvious how to port this code. (But
+whatever I did, it had to produce the exact same timezone files as a
+native build).
+
+So what I ended up doing was to port a tiny subset of 2.11BSD libc to
+Linux, including its types. I copied the ctime.c module and prefixed
+everything with "cross_" so there was "cross_time_t" and so forth, and
+"#include <time.h>" became "#include <cross/time.h>", in turn this
+depends on "#include <cross/sys/types.h>" and so on. That way, the
+original logic worked unchanged.
+
+I decided to also redo the cross compilation tools (as, cc, ld, nm,
+ranlib and so on) using the same approach, since it was conceptually
+elegant. This involved making e.g. "cross_off_t" and "struct
+cross_exec" available by "#include <cross/a.out.h>", and obviously the
+scheme extends to whatever libc functions we want to use. In
+particular we use floating point, and I plan to make a "cross_atof()"
+for the C compiler's PDP-11-formatted floating-point constant
+handling, etc. (This side of things, like the cross tools, was
+working, but was not terribly elegant before).
+
+So then I got to thinking, actually this is an incredibly powerful
+approach. Instead of just going at it piecemeal, would it not be
+easier just to port the entire thing across? To give an example what I
+mean, the linker contains code like this:
+  if (nund==0)
+    printf("Undefined:\n");
+  nund++;
+  printf("%.*s\n", NNAMESIZE, sp->n_name);
+It is printing n_name from a fixed-size char array, so to save the
+cost of doing a strncpy they have used that "%.*s" syntax which tells
+printf not to go past the end of the char array. But this isn't
+supported in Linux. I keep noticing little problems like this
+(actually I switched off "-Wformat" which was possibly a bad idea). So
+with my latest plan this will actually run the 2.11BSD printf()
+instead of the Linux printf(), and the 2.11BSD stdio (fixing various
+other breakage that occured because BUFSIZ isn't 512 on the Linux
+system), and so on. What I will do is, provide a low level syscalls
+module like cross_open(), cross_read(), cross_write() and so on, which
+just redirect the request into the normal Linux system calls, while
+adjusting for the fact that size_t is 16 bits and so forth. This will
+be really great.
+
+In case it sounds like this is over-engineering, well bear in mind
+that one knotty problem I hadn't yet tackled is the standalone
+utilities, for instance the 2.11BSD tape distribution contains a
+standalone "restor" program which is essentially a subset of the
+kernel, including its device drivers, packaged with the normal
+"restor" utility into one executable that can be loaded off the tape.
+It was quite important to me that I get this ported over to Linux, so
+that I can produce filesystems, etc, at the Linux level, all ready to
+boot when I attach them to SIMH. But it was going to be hugely
+challenging, since compiling any program that includes more than the
+most basic kernel headers would have caused loads of conflicts with
+Linux's kernel headers and system calls. So the new approach
+completely fixes all that.
+
+I did some experiments the last few days with a program that I created
+called "xify". What it does is to read a C file, and to every
+identifier it finds, including macro names, C-level identifiers,
+include file names, etc, it prepends the sequence "x_". The logic is a
+bit convoluted since it has to leave keywords alone and it has to
+translate types so that "unsigned int" becomes "x_unsigned_int" which
+I can define with a typedef, and so on. Ancient C constructs like
+"register i;" were rather problematic, but I have got a satisfactory
+prototype system now.
+
+I also decided to focus on 4.3BSD rather than 2.11BSD, since by this
+stage I know the internals and the build system extremely intimately,
+and I'm aware of quite a lot of inconsistencies which will be a lot of
+work to tidy up, basically things that had been hurriedly ported from
+4.3BSD while trying not to change the corresponding 2.8~2.10BSD code
+too much. Also in the build system there are quite a few different
+ways of implementing "make depend" for example, and this annoys me, I
+did have some ambitious projects to tidy it all up but it's too
+difficult. So a fresh start is good, and I am satisfied with the
+2.11BSD project up to this moment.
+
+So what will happen next is basically once I have "-lx_c" (the "cross"
+version of the 4.3BSD C library) including the "xified" versions of
+the kernel headers, then I will try to get the 4.3BSD kernel running
+on top of Linux, it will be a bit like User-Mode Linux. It will use
+simulated network devices like libpcap, or basically just whatever
+SIMH uses, since I can easily drop in the relevant SIMH code and then
+connect it up using the 4.3BSD kernel's devtab. The standalone
+utilities like "restor" should then "just work". The cross toolchain
+should also "just work" apart from the floating point issue, since it
+was previously targeting the VAX which is little-endian, and the
+wordsize issues and the library issues are taken care of by "xifying".
+Very nice.
+
+The "xifying" stuff is in a new repository 43bsd.git at my bitbucket
+(user nick_d2).
+
+cheers, Nick
+

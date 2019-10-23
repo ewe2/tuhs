@@ -1,0 +1,57 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 17 Jul 2014 16:16:29 -0400
+Subject: [TUHS] shutdown for pre-v7 unix
+In-Reply-To: <BAACAC74-528A-4619-943E-7A1542E1CA7F@ronnatalie.com>
+References: <CADxT5N5aUTFQ3-XYPDsW3tX6qYwQs6eT89XctquK05mdo10LxA@mail.gmail.com>
+ <alpine.BSF.2.00.1407170710560.61582@aneurin.horsfall.org>
+ <CAGGBd_ocQ_NouK7upV9YE119i8N2M1dqunJ1bG4HV4N7Awf-uA@mail.gmail.com>
+ <699EC97F-61D6-4102-99E1-8752E8CBD381@bsdimp.com>
+ <CAC20D2MidfPtXAvcd8tT9Lu33H-Oy5SkFv-TSQ6GE1NKn_8wCg@mail.gmail.com>
+ <BAACAC74-528A-4619-943E-7A1542E1CA7F@ronnatalie.com>
+Message-ID: <CAC20D2McV8R0YXLah60-YeDJQCPhPZ=nkmgfxJke9fP1zNnHaw@mail.gmail.com>
+
+I think that's is a problem in that it needs to be data blocks, inodes, and
+finally superblocks to do the least damage in a crash.
+
+It was a nice piece of work on George's part at the time.   I remember the
+USENIX when he talked about it and many of us had an aha style moment.  I
+remember talking to dmr about it dinner that night and he made a comment
+about it being slightly embarrassing that nobody had looked it / paid
+attention to it before.
+
+Those were the days of UNIX vs RSX or UNIX vs VMS and remember one of the
+prime knocks that the UNIX haters would say was that the UNIX (FS) was not
+reliable.   Between Ted's fsck to replace the Xcheck() family and ghg's
+kernel changes people started to stop making that claim.  UNIX was just as
+good if not better than the "commercial" OSses.
+
+Clem
+
+The other tool that showed up around then was fsdb, but I admit I never
+really felt comfortable working with it. I did it so rarely and I always
+had the manual open.   But it was so easy to do more damage with it.
+ Fortunately, fsck usually was good enough.
+
+
+
+On Thu, Jul 17, 2014 at 2:04 PM, Ronald Natalie <ron at ronnatalie.com> wrote:
+
+> Sync works like this:
+>
+> 1.   If the update-lock is already set, just return.
+> 2.   Set the lock
+> 3.   Write any superblocks that are marked as modified
+> 4.   Wirte any inodes that are marked as needing update
+> 5.   Clear the lock.
+> 5    Write all the dirty blocks in the buffer cache (which it does at
+> spl6());
+>
+> Once it returned you should be good to go.   The only time typing multiple
+> ones helps is if there was other activity going on while you were trying to
+> do all this.
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140717/1e4e5fce/attachment.html>
+

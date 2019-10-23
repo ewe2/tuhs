@@ -1,0 +1,32 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Wed, 22 Nov 2017 00:41:27 +0100
+Subject: [TUHS] TCP/IP networking in 8th edition unix
+Message-ID: <4B74ABBE-BA03-4D4B-B8C1-B3CE9A6D83CE@planet.nl>
+
+
+I'm trying to figure out how tcp/ip networking worked in 8th edition Unix.
+
+I'm starting from dmr's paper about streams (http://cm.bell-labs.co/who/dmr/st.html), the V8 man pages (http://man.cat-v.org/unix_8th/3/) and browsing the source code (tarball here http://www.tuhs.org/Archive/Distributions/Research/Dan_Cross_v8/).
+
+In the below I use 'socket' to mean a file descriptor bound to a network connection. My current understanding is like this:
+
+- The hardware interface is exposed as a character device; for tcp/ip only ethernet is supported. Directly accessing this device reads/writes ethernet frames.
+
+- One can push an 'ip' module (only) onto an ethernet device; this module also handles ARP. Once this is done IP messages are queued to the virtual ip devices, /dev/ipXX. The device minor number XX equals the protocol number, i.e. the ip packets are demultiplexed into separate virtual devices. IP packets from multiple ethernet cards all end up on the same virtual ip devices. I'm not sure if one can still read/write to the ethernet device after pushing the ip module, but I think you can, creating a raw IP interface so to say.
+
+- On /dev/ip6 one can push a TCP module. The TCP module handles the TCP protocol and demultiplexes incoming traffic to the virtual /dev/tcpXX devices. On /dev/ip17 one can push a UDP module. The UDP module handles the UDP protocol and demultiplexes incoming traffic to the virtual /dev/udpXX devices. Not sure wether the ip6 and ip17 devices can still be read/written after pushing these disciplines.
+
+- There are 100 udp devices, /dev/updXX. To open a UPD socket, one opens an unused udp device (through linear search). This socket accepts binary commands ('struct upduser') through the read()/write() system calls. There is a command to set the local port (effectively 'bind') and a comment to also set the foreign address and port (effectively 'bind+connect'). As long as the socket is not connected actual datagrams are preceded by a command header with the address/port information (effectively 'sendto'/'recvfrom'). Once the socket is connected, it is no longer possible to send further commands, but each write/read is a datagram. For udp sockets it is not possible to specify the local address: it is chosen by the system to match with the given foreign address.
+
+- There are 100 tcp devices /dev/tcpXX. Initial connection is always over an odd numbered device. To open a TCP socket, one opens an unused tcp device (through linear search). This socket accepts binary commands ('struct tcpuser') through the read()/write() system calls. There is a command to actively connect (effectively 'connect' with optional 'bind'), and a command to passively listen (effectively 'bind'+'listen'). If the connect command is sent, one can read one more response block and then the socket becomes a regular tcp socket. If the listen command is sent, one can read multiple response blocks, one for each new client (effectively 'accept'). Those response blocks contain a device number for the new client connection, i.e. one has to subsequently open device /dev/tcpXY to talk to the client. This number is always even, i.e. locally initiated tcp connections are over odd numbered tcp devices, and remotely initiated connections are over even numbered tcp devices - not sure what the significance of this is.
+
+- The above seems to be modeled on the Datakit setup, where the network is exposed as 520 virtual devices, one for each channel, as /dev/dk/dkXXX. These channels than also seem to accept binary command blocks through the read()/write() interface, with a 'connect' type command changing the connection into a data only channel.
+
+
+Anybody on the list with 8th edition experience who can confirm that the above understanding is about correct?
+
+Paul
+
+
+
+

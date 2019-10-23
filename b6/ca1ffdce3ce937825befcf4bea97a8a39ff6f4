@@ -1,0 +1,39 @@
+From: carl.lowenstein@gmail.com (Carl Lowenstein)
+Date: Wed, 30 Apr 2008 08:08:51 -0700
+Subject: [TUHS] Query on PDP-11 assembly
+In-Reply-To: <20080430115651.GA86539@minnie.tuhs.org>
+References: <20080430115651.GA86539@minnie.tuhs.org>
+Message-ID: <5904d5730804300808p59690427rf088e841354a41ec@mail.gmail.com>
+
+On Wed, Apr 30, 2008 at 4:56 AM, Warren Toomey <wkt at tuhs.org> wrote:
+> All, I'm trying to write a PDP-11 disassembler for a.out files. I'm having
+>  trouble dealing with jsrs. Take, for example, the code here:
+>  http://minnie.tuhs.org/UnixTree/1972_stuff/s1/frag19.html
+>
+>  I can happily deal with the   jsr pc,do   type of jsr, but the ones
+>  involving r5 have me stumped, e.g.:
+>
+>         jsr     r5,questf; < nonexistent\n\0>; .even
+>
+>  It appears that data is being inserted into the executable directly
+>  after the jsr instruction. How does the rts which returns from the jsr
+>  know how much data to skip, and what is the involvement of r5 here?
+
+Standard subroutine calling sequence.
+
+The called routine must know how many parameters it is called with.
+It retrieves them by MOV (R5)+, <somewhere>.
+This advances R5 so that eventually it points to the return address,
+and the return is done as RTS R5.
+
+A more advanced calling sequence could insert the number of parameters
+as the first value after the JSR, and the called routine would then
+retrieve that number and use it to tell when it had fetched the right
+amount of data.
+
+    carl
+-- 
+    carl lowenstein         marine physical lab     u.c. san diego
+                                                 clowenstein at ucsd.edu
+
+

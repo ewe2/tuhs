@@ -1,0 +1,103 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Mon, 08 May 2017 09:21:47 -0700
+Subject: [TUHS] Discuss of style and design of computer programs from a
+In-Reply-To: <alpine.DEB.2.11.1705081424500.24591@grey.csi.cam.ac.uk>
+Message-ID: <0aab8f20d7cbcc18f830870cb361db844c229d28@webmail.yaccman.com>
+
+That's a very interesting bug, and Fiora is a genius...
+
+I too worked at Transmeta, although our recompiler was not on chip...
+
+We designed the chip originally based on Spec benchmarks.  This
+turned out to be a mistake because Windows doesn't look a bit like
+Spec.
+
+For one thing, when booting Windows, 50% of all the instructions were
+executed once only.  When we found all of these instructions and
+JITted their
+basic blocks, it ran like a turtle.  The solution was to put in an
+X86 interpreter, and only JIT when the instruction was executed 5
+times.  The resulting performance
+was more than acceptable.  But there was a problem demonstrating this
+with a number of benchmarks, namely those that
+
+	* Ran a small problem and timed it.
+	* Based on that, made a bigger problem that was scaled by #1 -- the
+slower the small problem, the smaller the big problem.
+	* Added 1 and 2 to get the score.
+
+	The small problem often ran mostly in the interpreter.  So the "big"
+problem was really pretty small.  That ran fast, but overall, #1
+dominated.
+
+	If we actually ran the big problem from the getgo, we looked pretty
+decent.
+
+	Among the interesting facts we learned:  Windows executed a billion
+instructions between detecting a reason to crash and putting up the
+blue screen...
+
+	We also ran into problems with self modifying code.  To their
+credit, Microsoft quickly fixed the things we pointed out (most in
+3rd-party drivers).
+
+	Transmeta actually had some of the most interesting technology I've
+ever worked with as a compiler writer, including a checkpoint/restart
+in hardware that let the JIT do out-of-order execution and then do it
+over serially if a fault appeared.
+Steve
+
+----- Original Message -----
+From: "Tony Finch" <dot@dotat.at>
+To:"Nemo" <cym224 at gmail.com>
+Cc:"TUHS main list" <tuhs at minnie.tuhs.org>
+Sent:Mon, 8 May 2017 14:39:36 +0100
+Subject:Re: [TUHS] Discuss of style and design of computer programs
+from a
+
+ Nemo <cym224 at gmail.com> wrote:
+ > On 6 May 2017 at 11:23, ron minnich <rminnich at gmail.com> wrote (in
+part):
+ > [...]
+ > > Lest you think things are better now, Linux uses self modifying
+code to
+ > > optimize certain critical operations, and at one talk I heard the
+speaker
+ > > say that he'd like to put more self modifying code into Linux,
+"because it's
+ > > fun". Oh boy.
+ >
+ > Fun, indeed! Even self-modifying chips are being touted -- Yikes!
+
+ You reminded me of these comments on a bug in NVidia's Tegra
+ "Project Denver" dynamic JIT firmware:
+
+ https://twitter.com/FioraAeterna/status/855445075341398017
+ >
+ > small brain: bug in your code
+ > big brain: bug in the compiler
+ > cosmic brain: bug in the cpu's on-chip recompiler
+ > https://github.com/golang/go/issues/19809#issuecomment-290804472
+
+ https://twitter.com/eqe/status/855533948931252224
+ >
+ > This happened with TransMeta back in the day, and now with Tegra. I
+ > wonder if NVidia has a update deployment strategy...
+
+ (Marginally topical relevance is that Linus Torvalds worked for
+Transmeta)
+
+ Tony.
+ -- 
+ f.anthony.n.finch <dot at dotat.at> http://dotat.at/ - I xn--zr8h
+punycode
+ Lundy, Fastnet, Irish Sea, Shannon, Rockall, Malin, South Hebrides:
+Easterly
+ or northeasterly 4 or 5, occasionally 6 at first, becoming variable 3
+at times
+ later. Slight or moderate. Fair. Good.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170508/7d5fd7ae/attachment.html>
+

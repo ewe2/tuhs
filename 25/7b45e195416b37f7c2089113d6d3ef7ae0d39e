@@ -1,0 +1,83 @@
+From: downing.nick+tuhs@gmail.com (Nick Downing)
+Date: Tue, 28 Jun 2011 10:32:58 +1000
+Subject: [TUHS] Ideas for a Unix paper I'm writing
+In-Reply-To: <20110628001140.GA23711@minnie.tuhs.org>
+References: <20110628001140.GA23711@minnie.tuhs.org>
+Message-ID: <BANLkTinJQfffbvMiq8JakmsLv1GqMUrLJQ@mail.gmail.com>
+
+I think you definitely need to say that the idea of file descriptors
+in the unix API anticipated the current style (fad?) of
+object-oriented programming by about 20 years, languages like
+Smalltalk/C++, more recently java/ruby, use opaque objects with
+polymorphism to provide services, which is exactly what unix does, an
+object hierarchy would look something like:
+- read/write capable (file descriptor) objects
+  - seek capable (storage) objects
+    - truncate capable (file) objects
+    - non truncate capable (block) objects
+  - non seek capable (stream) objects
+    - pipes
+    - sockets
+      - stream oriented sockets
+      - datagram oriented sockets
+    - terminals
+For terminals, the extension to the API over the basic read/write
+capable object is via an ioctl, whereas for sockets it is via its own
+API (connect/accept/listen/etc), but conceptually there is no reason
+why read/write/lseek/etc couldn't be ioctls as well, since the mapping
+from userspace calls (such as lseek or stty/gtty) to syscalls is up to
+the standard library.  pipe() is a java-style constructor, whereas
+socket() or open() is conceptually a static factory as it can return
+different types of objects depending on the request, the constructors
+for the corresponding objects are conceptually private constructors.
+An errno is basically a checked exception that can be thrown, each
+syscall effectively has a java style "throws ..." clause and well
+designed userland code catches or rethrows these.
+cheers, Nick
+
+On Tue, Jun 28, 2011 at 10:11 AM, Warren Toomey <wkt at tuhs.org> wrote:
+> All, IEEE Spectrum have asked me to write a paper on Unix to celebrate the
+> 40th anniversary of the release of 1st Edition in November 1971. I'm after
+> ideas & suggestions!
+>
+> I think my general thrust is that Unix is an elegant design, and the
+> design elements are still relevant today. The implementation is mostly
+> irrelevant (consider how much the code has changed from assembly -> C,
+> from the simple data structures in V7 through to current BSD), but the
+> original API is classic. Note that about 28 of the 1st Ed syscalls are
+> retained in current BSDs and Linux, and with the same syscall numbers.
+>
+> I'm having some trouble thinking of the right way to explain what is
+> an elegant design at the OS/syscall level, so any inspirations/ideas
+> would be most welcome. I might highlight a couple of syscall groups:
+> open/close/read/write, and fork/exec/exit/wait.
+>
+> If you have any references/URLs you think I should look at, please
+> pass them on to me.
+>
+> I'm also trying to chase down some quotes; my memory seems to be failing me
+> but I'm sure I've seen these somewhere:
+>
+>  - in a paper, I think by Thompson & Ritchie, where they assert that the
+>   kernel should provide no more than the most minimal services to the
+>   userland programs. I thought this was the CACM paper, but I can't spot
+>   this bit. Maybe it's in Thompson's preface to the Lions Commentary,
+>   of which my copy is elsewere at present.
+>
+>  - I'm sure I remember someome (Kernighan?) say that Ritchie encouraged
+>   them to espouse the use of processes as context switching was cheap,
+>   but later measurements showed that in fact it wasn't that cheap in
+>   the early versions of Unix.
+>
+> Anyway, if you can think of good ideas/references about the elegance of
+> Unix, especially from the design perspective, I would much appreciate them.
+>
+> Cheers,
+>        Warren
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+
+

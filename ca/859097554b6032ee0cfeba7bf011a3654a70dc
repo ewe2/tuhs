@@ -1,0 +1,76 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 4 May 2008 18:41:37 +1000
+Subject: [Unix-jun72] Yes, a mount command
+In-Reply-To: <20080504065024.GA26878@minnie.tuhs.org>
+References: <Pine.BSI.4.64.0805031915580.20114@malasada.lava.net>
+	<20080504065024.GA26878@minnie.tuhs.org>
+Message-ID: <20080504084137.GA32129@minnie.tuhs.org>
+
+I took Brad Parker's suggestion for a simple mount rk0 /usr command,
+and modified it as follows:
+
+exit  = 1.
+write = 4.
+mount = 21.
+
+        mov     $1,r0
+        sys     write; rk0+040020; 8.
+        sys     write; usr+040020; 4.
+        sys mount; rk0+040020; usr+040020
+        sys exit
+        sys exit
+
+rk0:    </dev/rk0\0>
+usr:    </usr\0>
+
+Assemble this with V7 as, to get:
+
+0000000    000407  000050  000000  000000  000074  000000  000000  000000
+0000020    012700  000001  104404  040052  000010  104404  040063  000004
+0000040    104425  040052  040063  104401  104401  062057  073145  071057
+0000060    030153  027400  071565  000162  000000  000000  000000  000002
+0000100    000000  000000  000002  000000  000000  000002  000002  000000
+0000120    000000  000000  000000  000000  000000  000000  000000  000000
+0000140    074145  072151  000000  000000  000001  000001  071167  072151
+0000160    000145  000000  000001  000004  067555  067165  000164  000000
+0000200    000001  000025  065562  000060  000000  000000  000002  000032
+0000220    071565  000162  000000  000000  000002  000043
+
+Now hand-edit the top line with a binary editor to have this:
+
+0000000    000405  000130  000000  000000  000074  000000  010000  010000
+
+This makes it an 0405 executable, and the first 2 instructions become
+mov r0,r0, i.e. a NOP.
+
+Copy the a.out into your V1 /tmp directory, and use tools/mktape.py to
+rebuild the tape. If you haven't used it before, here is what I did:
+
+        tools/mktape.py /usr/local/src/V1/bin/* /usr/local/src/V1/etc/* \
+        /usr/local/src/V1/tmp/*
+
+Now do tools/assemv7 cold to build a cold kernel, then ./simh.cfg to run it
+to make rf0.dsk.
+
+Now run tools/assemv7 with no args to get a warm kernel. Copy rf0.dsk to
+rk0.dsk so that you have 2 filesystems. Run ./simh.cfg, login as root,
+and you should see /tmp/a.out. Run /tmp/a.out; you should see /dev/rk0
+echoed on stdout. I don't know why /usr is not echoed.
+
+Now you can chdir to /usr and do ls -l in there.
+
+Annoyingly, du / only shows / and doesn't traverse into /usr. So I
+may have had it working before, but I didn't realise that du was not the
+best tool to verify the mount.
+
+Cheers,
+        Warren
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: a.out
+Type: application/octet-stream
+Size: 156 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080504/80d2673e/attachment.obj>
+

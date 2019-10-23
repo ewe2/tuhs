@@ -1,0 +1,51 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Fri, 13 Nov 2015 20:33:20 +0100
+Subject: [TUHS] user struct on SYSIII / V7
+In-Reply-To: <20151113194835.Horde.-ghfy1raSZPIb62MtEVbn0A@avocado.salatschuessel.net>
+Message-ID: <20151113203320.Horde.VokfqdGcy16czyeqhojbDVa@avocado.salatschuessel.net>
+
+
+Oliver Lehmann <lehmann at ans-netz.de> wrote:
+
+> u module
+> $segmented
+> $abs %F600
+>
+>   global
+>
+> _u array [%572 byte]
+>
+> end u
+
+By any way - is here someone on the list understanding Z8000 PLZ/ASM? ;)
+
+The problem is, that "u" must be available in the address space on this
+location for the kernel to function correctly:
+
+# define UBASE             0x3E00F600      /* kernel virtual addr of  
+user struct */
+
+And with the above ASM code, it is placed on 0x0100F600. I also tried
+of course $abs 0x3E00F600 but it makes no difference. It is always
+placed at 0x0100F600 and I have zero clue why
+
+the original object from the system:
+
+#67 nm /usr/sys/conf/u.o
+3e00f600 A _u
+01000000 s u_d
+     0000 s u_p
+
+
+my object generated from my u.s:
+
+#68 nm u.o
+0100f600 A _u
+01000000 s u_d
+     0000 s u_p
+
+Somehow I need to get the address right.... This is why I wanted to
+look up how the original SYSIII or V7 was doing it (even if the asm
+would be of course completely different).
+
+

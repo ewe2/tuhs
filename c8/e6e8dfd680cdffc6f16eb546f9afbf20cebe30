@@ -1,0 +1,65 @@
+From: MichaelDavidson@pacbell.net (Michael Davidson)
+Date: Wed, 30 Jan 2002 13:40:05 -0800
+Subject: [TUHS] Re: Porting Unix v6 to i386
+References: <Pine.LNX.4.21.0201302047470.29712-100000@Tempo.Update.UU.SE>
+Message-ID: <3C586835.DB25F59F@pacbell.net>
+
+Johnny Billquist wrote:
+> 
+> On Wednesday 30 January 2002 10:18, P.A.Osborne wrote:
+> > Having had a rummage and a chat with acolleague here at
+> > UKC - it seems that V6 will be easier than V7,  partially because
+> > of the Lions commentary - but mainly because 286 protected mode
+> > gives a very similar handling on memory management as the PDP did.
+> 
+> What a silly argument. V6 and V7 both run on the PDP-11, so the memory
+> management hardware used by them both are the same.
+> 
+> And while I'm not familiar with the 286 protected mode, I have heard
+> people before claim that it is horrendous compared to the MMU on the
+> PDP-11.
+> 
+
+Well, I tend to agree that there probably isn't really much difference
+in the difficulty of porting either V6 or V7 to an Intel x86 processor.
+
+The real deciding factor will (and should) be which version you *want*
+to port and why you want to port it in the first place.
+
+While the Intel architecture is very different from that of the PDP-11
+it is possible to set up an IA-32 processor in such a way as to give
+you an environment which is quite similar to the one in which V7
+expected to run.
+
+16 bit protected mode can effectively give you a 64k+64k split i&d
+address space for both user and kernel mode and if you enable paging
+then you can map the underlying physical memory in 4096 byte pages
+wherever you want it to be. Once it's all set up correctly, most of
+the Intel MMU architecture can be ignored and pretty much all the 
+kernel has to do is to manipulate 64 entries in a page table (16+16
+for user i+d and 16+16 for kernel i+d).
+
+Rather than hack all of the code to build with a modern C compiler
+I would look seriously at the possibility of getting either pcc or
+the original Ritchie C compiler to generate x86 code. 
+
+(This has, of course, been done before as anyone who ever used
+Xenix version 2.x on Intel machines will know - right down to
+32 bit longs with PDP-11 word ordering ...)
+
+One possibility which actually isn't as bad as it sounds is to
+treat the pdp-11 assembler output of the C compiler as an intermediate 
+language and have an additional compiler pass that effectively
+converted from pdp11 assembler to x86 assembler.
+
+A good convertor would do enough basic block analysis to be
+able to keep track of live registers and condition codes and
+would essentially recompile from pdp11 to x86 assembler.
+My guess is that with a little care it should be possible to
+keep the code expansion resulting from such a translation
+process to a minimum.
+
+Even a fairly simple minded conversion probably wouldn't be
+too bad.
+
+

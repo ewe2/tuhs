@@ -1,0 +1,56 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 12 May 2014 10:49:44 -0400 (EDT)
+Subject: [TUHS] Work I've done with a PDP-11 simulator
+Message-ID: <20140512144944.F3AB618C0D2@mercury.lcs.mit.edu>
+
+    > To boot up the root pack (I don't think I did this at any point; I've
+    > always mounted it as a subsidiary drive)
+    > ...
+    > The disk has a working RL bootstrap in block 0, it should boot OK. 
+
+So I recently had to reboot my machine, and I took the opportunity to try
+this; it worked right off, booted 'unix' OK. (I didn't try any of the other
+Unixes in the root directory.) I had only that pack mounted on DL0, nothing
+else.
+
+
+    > So, just for grins, because I was curious (after your question), I did
+    > try recompiling the C compiler, to see what I'd get.
+    > What I got were three files (c0, c1 and c2) which were _the exact same
+    > size_ (down to the byte) as the binaries on the V6 Research distro, but
+    > had a number of differences when compared with 'cmp -l'. Odd!
+    > ...
+    > I'll take a gander tomorrow and try and work it out.
+
+So, this turned out to be because I had replaced the csv.o in libc.a with a
+new one, because the standard V6 one doesn't work with long returns (which
+use R1 as well as R0, and the V6 cret bashed R1). I put the old csv.o back,
+and re-linked them, and this time c? all turned out identical.
+
+So the source in the distro really is the source for the running compiler on
+it.
+
+What was wierd was that in the new one, the routine csv is one word shorter
+(and so is csv.o). So now I don't understand what made them the same sizes!?
+The new ones should have been one word shorter!? Still poking into this...
+
+I understand most of the differences between the versions of c? with the old
+and new csv.o; in all the jumps to cret, the indirect word in the instruction
+was off by two (because cret was one word lower because csv was one word
+shorter); that, along with different contents in csv.o, created most of the
+differences.
+
+Why one word shorter? Because in csv:
+
+	tst     -(sp)	/ creates a temporary on top of the stack
+	jmp     (r0)
+
+had been replaced with:
+
+        jsr     pc,(r0)
+
+(saving one instruction, and making it one word smaller).
+
+	Noel
+
+

@@ -1,0 +1,84 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Wed, 27 Sep 2017 17:39:54 -0700
+Subject: [TUHS] RFS was: Re: UNIX of choice these days?
+In-Reply-To: <CAK7dMtCER7LZ+WmQNRNH-YwYspD6jL7W370Q67Vou0Rp+YWv=Q@mail.gmail.com>
+References: <CANuZA8QHNn=6Gg-Sm20s-0PSsS7y26c=uNbNETUX74Tx1A=DWQ@mail.gmail.com>
+ <CALMnNGgMSmqQ56r7xTRNdrDYfRiMieQ48kuZfWtSKd+yjmP2tg@mail.gmail.com>
+ <CAP6exYKxC2g06dSRiM8-0BLN08AEWyO-8a0VAcy3vP4H3-8o8A@mail.gmail.com>
+ <CAC20D2MKSzQEfmD0dnKYv-0V00TkL6f_-Dv4Gs1diOrBLS8x3Q@mail.gmail.com>
+ <b6e8b71c-ba04-bbfb-00db-c371ee62cdb8@kilonet.net>
+ <CAC20D2PYANmz2=oWCHX6h3jM5bxFBbzQZHDZXP00idyw+fwDZw@mail.gmail.com>
+ <201709270844.v8R8i2kd021180@freefriends.org>
+ <CAK7dMtBkpreyncAoc-CPsUgFeMvQpdBEynX3pmS-8Z0KXn8Y1A@mail.gmail.com>
+ <CAC20D2NU6ErExdOuT6PNucf4VhuLKwW1=AcbaOdKtV3vocrFkg@mail.gmail.com>
+ <CAK7dMtCER7LZ+WmQNRNH-YwYspD6jL7W370Q67Vou0Rp+YWv=Q@mail.gmail.com>
+Message-ID: <20170928003954.GJ28606@mcvoy.com>
+
+I'll weigh on this since my office mate at Sun was the Sun RFS guy (Howard
+Chartok, great guy, Mr swapfs, I still remember a long discussion we had
+outside of Antonio's nuthouse in Palo Alto about how to tie different
+swap files to process groups so we could do better at pagin/pageout,
+but I digress.  I should write up that discussion though, it's still
+useful today).
+
+From what I remember, RFS worked well in a homogeneous environment.  It
+passed structs in binary across the wire.
+
+NFS was based on Sun's RPC stuff that marshalled and unmarshalled the
+data.  So it worked with little ints and big ints and Intel byte order
+and everyone else's byte order.  RFS not so much.  The RPC stuff is 
+actually pretty sweet, I built something I called RPC vectors on top
+of it, Ron will remember that, but I digress again.
+
+It's important to note, when talking about NFS, that there was Sun's NFS
+and everyone else's NFS.  Sun ran their entire company on NFS.  /usr/dist
+was where all the software that was not part of SunOS lived, it was an
+NFS mounted volume (that was replicated to each subnet).  It was heavily
+used as were a lot of other things.  The automounter at Sun just worked,
+wanted to see your buddies stuff?  You just cd-ed to it and it worked.
+
+Much like mmap, NFS did not export well to other companies.  When I went
+to SGI I actually had a principle engineer (like Suns distinguished
+engineer) tell me "nobody trusts NFS, use rcp if you care about your
+data".  What.  The.  Fuck.  At Sun, NFS just worked.  All the time.
+The idea that it would not work was unthinkable and if it ever did
+not work it got fixed right away.
+
+Other companies, it was a checkbox thing, it sorta worked.  That was
+an eye opener for me.  mmap was the same way, Sun got it right and 
+other companies sort of did.
+
+
+On Wed, Sep 27, 2017 at 04:13:07PM -0700, Kevin Bowling wrote:
+> I guess alternatively, what was interesting or neat, about RFS, if
+> anything?  And what was bad?
+> 
+> On Wed, Sep 27, 2017 at 4:11 PM, Clem Cole <clemc at ccc.com> wrote:
+> >
+> >
+> > On Wed, Sep 27, 2017 at 7:01 PM, Kevin Bowling <kevin.bowling at kev009.com>
+> > wrote:
+> >>
+> >>
+> >> What were the market forces or limitations that led to NFS prevailing?
+> >
+> > Sun pretty much gave it away.   It was simple and 'good enough.'
+> >
+> > The Issue was it not a real UNIX file system and did not support full UNIX
+> > semantics.   For a lot of things (like program development) that was usually
+> > ok.  It also exposed a lot a issues in user code - things like programs that
+> > never bothered to check for errors returns (like fclose).
+> >
+> > So bad things happened for a long time in a lot of code (silent holes in
+> > your SCCS files that did get detected until months later).
+> >
+> > But to Sun and NFS's credit, it solved a problem that was there and was
+> > cheap and so folks used it.
+> >
+> > Clem
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+

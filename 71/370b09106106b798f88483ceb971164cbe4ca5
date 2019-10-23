@@ -1,0 +1,216 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 22 Mar 2018 13:10:58 -0400
+Subject: [TUHS]  Masscomp - Real Time Unix (RTU) an early UNIX based system,
+ the first commercial multiprocessor and was realtime
+Message-ID: <CAC20D2MrAJBorJcOUUX3RMmEEU+A+vwEX41z2n=XeNds0DUXYA@mail.gmail.com>
+
+On Wed, Mar 21, 2018 at 7:50 PM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> I was sys admin for a Masscomp with a 40MB disk
+
+Right an early MC-500/DP system - although I think the minimum was a 20M
+[ST-506 based] disk.
+
+On Wed, Mar 21, 2018 at 8:55 PM, Mike Markowski <mike.ab3ap at gmail.com>
+wrote:
+
+> I remember Masscomp  ...  it allowed data acquisition to not be swapped
+>> out.
+>>
+> Actually, not quite right in how it worked, but in practice you got the
+desired behavior. More in a minute.
+
+On Wed, Mar 21, 2018 at 9:00 PM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> I remember the Masscomps we had fondly.  The ones we had were 68000 based
+> and they had two of those CPUs running in lock step
+
+Not lock step ... 'executor' and 'fixor' -- actually a solution Forest
+Basket proposed at Stanford.   The two implementations that actually did
+this were the Masscomp MC-500 family and the original Apollo.
+
+
+> ... because the
+> 68K didn't do VM right.  I can't remember the details, it was something
+> like they didn't handle faults right so they ran two CPUs and when the
+> fault happened the 2nd CPU somehow got involved.
+>
+Right, it the original 68000 did not save the faulting address properly
+when it took the
+exception, so there was not enough information to roll back the from the
+fault and restart.   The microcode in the 68010 corrected this flaw.
+
+
+
+>
+> Clem, what model was that?
+
+We called the dual 68000 board the CPU board and the 68010/68000 board the
+MPU.  The difference was which chip was in the 'executor' socket and some
+small changes in some PALs on the board to allow the 68010 to actually take
+the exception.   Either way, the memory fault was processed by the
+'fixor'.   BTW: the original MC-500/DP was a dual processor system, so it
+has 4 68000 just for the 2 'cpu boards -- i.e. an executor and fixor on
+each board.  The later MC-5000 family could handle up to 16 processor
+boards depending the model (MC-5000/300 was dual, MC-5000/500 up to 4 and
+the MC-5000/700 up to 16 processor boards).
+
+Also for the record, the MC-500/DP and MC-5000/700 predate the
+multiprocessor 'Symmetry System' that Sequent would produce by a number of
+years).  The original RTU ran master/slave (Purdue VAX style) for the first
+generation (certainly through RT 2.x and maybe 3.x).   That restriction was
+removed and a fully symmetric OS was created, as we did the 700
+development.  I've forgotten which OS release brought that out.
+
+A few years later Stellix, while not in direct source development a child,
+had the same Texieria/Cole team as RTU - was always fully symmetric - i.e.
+lesson learned.
+
+
+
+> And can you provide the real version of what I was trying say?
+>
+Sure ... soon after Motorola released the 68000, Stanford's Forest Baskett
+in a paper I have sadly lost, proposed that the solution the 68000's issue
+of not saving enough information when an illegal memory exception
+occured,  was to instead of allowing the memory exception, return 'wait
+states' to the processor - thus never letting it fault.
+
+More specifically, the original microprocessor designs had a fixed time
+that the memory system needed to respond on a read or write cycle that was
+defined by the system clock.  I don't have either Motorola 68000 or MOS
+6502 processor books handy, but as a for instance IIRC on a 1 Mhz MOS 6502
+you had 100 nS for this operation.  Because EPROMs of the day could not
+respond that fast (IIRC 400ns for a read), the CPU chip designers created a
+special 'WAIT' signal that would tell the processor, to look for the data
+in on the next clock tick (and the wait signal could be repeated for each
+tick for an indefinite wait if need be).   *i.e. *in effect, when running
+from ROM a 6502 would run at .25MHz if it was doing direct fetches from
+something like an Intel 1702 ROM on every cycle.  Similarly, early dynamic
+RAM, while faster that ROM, had access issues with needing to ensure the
+refresh cycles and the access cycles aligned.  Static RAMs which were fast,
+did not have these problems and could directly interface to processor, but
+static RAMs of the day were the quite expensive chips (5-10 times) in
+comparison to DRAM cost, so small caches were built to front end the memory
+system.
+
+Hence, the HW 'wait state' feature became standard (and I think is still
+supported in todays processors), since it allows the memory system speed
+and the processor to work at differing rates.  i*.e.* the difference in
+speed could be 'biased' to each side -> processor vs memory.
+
+In his paper, Forest Basket observed that if a HW designer used the wait
+state feature, a memory system could be built that refreshed the cache
+using another processor, as long as the second processor that was 'fixing
+up' the exception ( i.e. refilled the cache with proper data) could be
+ensured it never had a memory fault.
+
+Basket's idea was exactly how both the original Apollo and Masscomp CPU
+boards were designed.  On the Masscomp CPU board, there was a 68000 that
+always ran from a static ram based cache (which we called the 'executor.'
+If it tried to access a memory location that was not yet in cache, or if it
+was a legal memory access, the memory system sent wait states until  the
+cache was refilled as you might expect.  If the location was illegal, the
+memory system also return a error exception as expected.  However, it was
+legal address but not yet in memory, the second 6800 (the 'fixor') was
+notified of desire to access that specific memory location and the fixor
+ran the paging code to put the page into the live memory.  Once the cache
+was properly set up, then the executor could be released from wait state
+and instruction allowed to complete.
+
+When Motorola released the 68010 with the internal fixes that would allow
+an faulting instruction to be restarted, Masscomp revised the CPU board
+(creating the MPU board) to install a 68010 in the executor socket and
+changed a few PALs in the memory system on the board.   If a memory address
+was discovered to be legal, but not in memory, the executor (now a 68010)
+was allowed to returned a paging exception and stack was saved
+appropriately, and the executor did a context switch to different process -
+allow the executor to do something useful while the fixor processed the
+fault.   Although we now had to add kernel code for the executor processor
+to return from restart at the fault instruction on a context switch back to
+the original process.   The original fixor code did not need to be changed,
+other than to remove need to clearing of the 'waiting flop' for that
+restarted the executor.   [RTU would detect which board was plugged into a
+specific system automatically so it was an invisible change to the end user
+- other than you got a few percent performance back if there was a lot of
+page faults in your application since the executor never wait stated].
+
+As for the way real time and analog I/O worked that Mike commented upon.
+ Yes, RTU - Real Time Unix supported features that could guarantee that I/O
+would not be lost from the DMA front end.     For those not familiar with
+the system, it was a 'federated system' with a number of subsystems: the
+primary UNIX portion that I just described and then a number of other
+specialized processors that surrounded it for specific tasks.  This
+architecture was chosen because the market we were attacking was a
+scientific laboratory and in particular real-time oriented - for instance,
+some uses were Mass General in the Cardiac ward, on board ever EWACS plane
+to collect all and retain all signals during any sortie [very interesting
+application], NASA used 75 of them in Mission Control to be the 'consoles'
+you see on TV, *etc *[ which have only recently be replaced by PCs, as some
+were still in use at least 2 years ago when I was last in Houston].
+
+So besides the 2/4 68000s in the main UNIX system, their was another
+dedicated 68000 running a graphics system on the graphics board, another
+80186 running TCP/IP, and an AM2900 bit slices processor called Data
+Acquisition and Control Processor (DA/CP) - which Mike hinted, as well as
+29000's for the FP unit and Array processor functionality.   Using ther
+DA/CP, in 1984, and MC-500 system could handle multiple 1MHz analog 16 bit
+signals - just by sampling them -> in fact, a cute demo at the Computer
+Museum in Boston just connected a TV camera to the DA/CP and without any
+special HW, it could 'read' the video signal (if you normally have a
+connection a TV camera, it usually takes a bunch of special logic to
+interface to the TV signals -- in this case it was just SW in the DA/CP).
+
+The resultant OS was RTU, were we had modified a combined 4.1BSD and System
+III 'unices' (later up dated to 4.2 and V.2] to support RT behaviors, with
+pre-emption, ASTs [which I still miss - a great idea but nicer than
+traditional UNIX signals], async I/O, *etc*.. Another interesting idea was
+the concept of 'universes' that allowed on a per user basis, to see a BSD
+view of the system or an System V view].
+
+One of the important things we did in RTU was rethink the file system
+(although only a little then).   Besides all the file types and storage
+schemes you have with UFS, Masscomp added support for an pre-allocated
+extent based files (like VMS and RSX) and then created a new file type
+called contiguous file that used it [by the time of the Stellar and
+Stellix, we just made all files extent based and got rid of the special
+file type - *i.e.* looked like UFS to the user, but under the covers was
+fully extend based].   So under RTU, once we had preallocated files that we
+knew were on contiguous blocks, we could make all sorts of speed ups and
+guarantees that traditional UNIX can not because of the randomized location
+of the disk blocks.
+
+So the feature that Mike was using, was actually less a UNIX change and did
+not actually use the preemption and other types of RT features.  We had
+added the ability for the DA/CP to write/read information directly from the
+disk without OS getting in the  way - (we called it Direct to Disk IO).
+ An RTU application created a contiguous file large enough on disk to store
+the data the DA/CP might receive - many megabytes typically - but the data
+itself was never passed thru or stored in the UNIX buffer cache *etc*.
+ The microcode of the DA/CP and the RTU disk driver could/would cooperate
+and all kernel or user processing on the UNIX side was by-passed.  Thus,
+when the real time data started to be produced by the DA/CP (say the EWACS
+started getting radio signals on one of those 16 bit analog converters) the
+digital representation of those analog signals were stored in the users
+file system independent of what RTU was doing.
+
+The same idea, by the way was why we chose to run IP/TCP on a
+co-processor.   So much of network I/O is 'unexpected,' we could
+potentially lose the ability to make real-time guarantees.   But keeping
+all the protocol work outside of UNIX,  the network I/O just operated on
+'final bits' at the rate that was right for it.   As an interesting aside,
+this worked until we switched to a Motorola 68020 at 16 Mhz or 20Mhz
+(whatever it was I've forgotten now) in the MC-5000 system.    The host
+ended up be so much faster than the 80186 in the ethernet coprocessor
+board.   We ended up offering a mode were they swapping roles and just used
+the '186 board as a very heavily buffered ethernet controller, so we could
+keep protocol processing very low priority compared to other tasks.
+However if we did that, it did mean some of the system guarantees had to be
+removed.  My recollection is that only a couple of die hard RT style
+customers, ended up continuing to use the original networking configuration.
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180322/c0229ec1/attachment-0001.html>
+

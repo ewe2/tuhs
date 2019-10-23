@@ -1,0 +1,62 @@
+From: random832@fastmail.com (Random832)
+Date: Tue, 27 Jun 2017 13:35:13 -0400
+Subject: [TUHS] What did cc -2 do?
+In-Reply-To: <20170627135406.21EAD137A42A@macaroni.inf.ed.ac.uk>
+References: <20170627135406.21EAD137A42A@macaroni.inf.ed.ac.uk>
+Message-ID: <1498584913.364854.1023002800.3B8D3CB5@webmail.messagingengine.com>
+
+On Tue, Jun 27, 2017, at 09:54, Richard Tobin wrote:
+> The "scc" man page for System V may be enlightening, as it mentions
+> similarly-named files:
+
+Hmm. It seems that the truth is a little bit more convoluted than that,
+but it was a good starting point.
+
+The equivalent functionality in V7/usr/src/cmd/standalone uses "libsa"
+(in addition to, rather than instead of, libc) and srt0.o, and was used
+with a "cc+ld-stand" script which read as follows:
+cc -c -O -DSTANDALONE ../$1.c
+ld -s -o $1 srt0.o $1.o -lsa -lc
+rm $1.o
+
+The equivalent manpage in System III mentions crt20.o instead.
+
+System III scc invokes cc with "-2x" (System V uses -Z2). So, mystery
+solved, I guess, except for why it appears in the V6 (and V5, and V2) cc
+with no trace of the needed libraries, and V7 with the libraries having
+a different structure.
+
+My guess is that the V7 library structure was a post-V6 change that
+didn't make it into USG Unix. My assumption is that it's dead code at
+that point. The v7 cc+ld-stand script doesn't seem to have been suitable
+for multi-file programs, either - no other version has this script,
+either (Ultrix and BSD seem to both have standalone systems derived from
+it, but both just have the relevant cc and ld commands in their
+makefiles)
+
+So, my theorized timeline: This began as an internal tool in V2*. USG
+Unix and V7 diverged, and V7 effectively abandoned the use of a magic
+flag and hardcoded library names in "cc" (but for some reason retained
+the actual associated functionality in "cc" itself, where it survived
+into Ultrix 3.1 and 3BSD but not 4BSD). Ultrix and BSD took V7's version
+of the functionality.
+
+*specifically, it appears in V2/cmd/cc.c which comes from s1-bits. It
+does not appear in V2/c/ncc.c which comes from last1120c.
+
+>   NAME
+>     scc - C compiler for stand-alone programs
+> 
+>   SYNOPSIS
+>     scc [ +[ lib ] ] [ option ] ... [ file ] ...
+>     
+>   DESCRIPTION
+>     Scc prepares the named files for stand-alone execution.
+>     [...]
+>     
+>   FILES
+>     /lib/crt2.o       execution start-off
+>     /usr/lib/lib2.a   stand-alone library    
+>     /usr/lib/lib2A.a  +A configuration library
+>     /usr/lib/lib2B.a  +B configuration library
+

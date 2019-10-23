@@ -1,0 +1,45 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 12 Dec 2015 00:38:03 +0000 (UTC)
+Subject: [TUHS] why is sum reporting different checksum's between v6 and
+	v7
+References: <566B6467.5060703@gmail.com>
+Message-ID: <n4fq9a$ogr$1@ger.gmane.org>
+
+On 2015-12-12, Will Senn wrote:
+> # echo "Hello, World" > hi.txt
+> # cat hi.txt
+> Hello, World
+>
+> Then on v6:
+> # sum hi.txt
+> 1106 1
+>
+> But on v7:
+> # sum hi.txt
+> 37264     1
+
+Interestingly, I can get both results on OSX:
+
+% echo "Hello, World" | cksum -o 1
+37264 1
+% echo "Hello, World" | cksum -o 2
+1106 1
+
+Or Ubuntu:
+% echo "Hello, World" | sum -r
+37264     1
+% echo "Hello, World" | sum -s
+1106 1
+
+Both of these define the one you got in v7 as a "BSD" algorithm.
+So it looks like v7's new algorithm didn't make it into USG
+Unix, rather it uses the same one as v6. (According to the OSX
+manpage, System V eventually grew a "-r" option to use the newer
+algorithm).
+
+The second number is the size in blocks, which is 512 for the
+"System V" algorithm and 1024 bytes for modern implementations
+of the "BSD" algorithm, *but* BUFSIZ (512) for v7.
+
+
+

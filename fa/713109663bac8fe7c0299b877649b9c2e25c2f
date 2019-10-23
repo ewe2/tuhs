@@ -1,0 +1,66 @@
+From: random832@fastmail.us (random832@fastmail.us)
+Date: Sun, 26 Feb 2012 20:30:45 -0500
+Subject: [TUHS] why the leading under score added to function names?
+In-Reply-To: <29D22528-0E74-4465-BA18-BF3DDE1BB674@ronnatalie.com>
+References: <201202221917.q1MJHSGw013561@freefriends.org>
+	<alpine.BSF.2.00.1202230752140.62608@aneurin.horsfall.org>
+	<20120223043021.GA72269@dereel.lemis.com>
+	<4F492C43.3020602@fastmail.us>
+	<20120225203959.GE29866@mercury.ccil.org>
+	<4F495D84.8030206@fastmail.us>
+	<29D22528-0E74-4465-BA18-BF3DDE1BB674@ronnatalie.com>
+Message-ID: <1330306245.13843.140661041668049@webmail.messagingengine.com>
+
+
+
+On Sun, Feb 26, 2012, at 08:28, Ronald Natalie wrote:
+> 
+> WinMainCRTStartup isn't the replacement for main.
+
+I never said it was. My point was that there is no "main" anywhere in a
+program that starts with WinMain, whereas John Cowan claimed that a
+"main" exists in such programs which does the things that
+WinMainCRTStartup in fact does.
+
+> main - for non-MFC console apps
+> wmain - same thing but with wchar_t arguments (SOMETHING C/C++ standards
+> hasn't ever addressed to my satisfaction).
+
+I suspect this is partly because the unix world is a multibyte world,
+and POSIX has "filenames don't have to be valid in any character set,
+they're just bytes".
+
+But Windows never had a satisfactory solution to multibyte vs wide in
+pipes, either, anyway.
+
+> WinMain - MFC main function
+
+This existed long before MFC, I suspect.
+
+> wWinMain - Ditto, with wchar_t
+> 
+> Actually the bulk of the CRT involves converting between the command line
+> argument as a string and argc/argv (something UNIX does by the OS), and
+> some gook necessary to support C++.
+
+Well, not "by the OS" per se. More like, the OS only supports passing
+argc/argv at any level, so the shell converts user-typed strings to
+argv.
+
+(A big gripe I have with the CRT is that its _spawn/_exec functions
+don't quote strings containing spaces/etc so they can be round-tripped
+by the CRT's argv initialization. And the argv code itself doesn't let
+you have "wildcards in strings without quotes, literal stars in strings
+with them", you have to choose between wildcards or not)
+
+> The  fake UNIX environment (POSIX) (read/write/seek, etc...) actually is
+> NOT initialized here, but when it is actually referenced.
+
+mainCRTstartup does in fact call _ioinit() in the version I looked at. I
+don't recall if WinMainCRTstartup does or not, it's not in front of me
+now.
+-- 
+Random832
+
+
+

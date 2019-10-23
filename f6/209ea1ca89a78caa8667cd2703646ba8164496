@@ -1,0 +1,75 @@
+From: wes.parish@paradise.net.nz (Wesley Parish)
+Date: Mon, 14 Nov 2005 22:38:31 +1300
+Subject: [TUHS] Redoing "V6on286" or porting V7...?
+In-Reply-To: <20051113201609.GW6574@gsmx07.alcatel.com.au>
+References: <787b0d920511112213q7156614cv2fe3c5d00852f45c@mail.gmail.com>
+	<e82a1c07e297628c639705226ded3f56@coraid.com>
+	<20051113201609.GW6574@gsmx07.alcatel.com.au>
+Message-ID: <200511142238.31662.wes.parish@paradise.net.nz>
+
+On Mon, 14 Nov 2005 09:16, Peter Jeremy wrote:
+> I've also looked at this in the past.  I lost interest when my
+> intended target box died (and I realised I didn't have the free time).
+>
+> On 2005-Nov-12 08:18:50 -0500, Brantley Coile <brantley at coraid.com> wrote:
+> >i may be wrong, but i don't think you want the segments.  pdp-11
+> >segments divided the address space into eight, well, segments.  each
+> >could be grow up or grow down and had a physical base and a limit.
+> >intel segments don't work that way.  the major difference is that the
+> >segment selector, instead of being the upper most three bits of the
+> >virtual address, is not even in the address space at all.
+>
+> Actually the 286 MMU is very primitive compared to the PDP-11.  One
+> crucial difference is that Unix has the implicit assumption that the
+> stack is in the data space - which is not true on the 286.  This
+> difference is fairly critical to Unix and makes it impossible to
+> accurately reproduce the traditional Unix memory protection.
+>
+> >so the eight, for a pdp-11/40 say, or the sixteen for the 11/70 don't
+> >really apply.  instead just give each data segment the whole 64k
+> >address space and it'll not klobber anybody else.  just itself.
+>
+> This is fairly wasteful of RAM.  Keep in mind that V6 cannot page -
+> a process is either entirely in memory or entirely on disk.  If you
+> limit yourself to 640K RAM, you are probably restricting yourself
+> to about 6 resident processes.  And swapping means moving 64K of
+> data to/from disk.
+>
+> This approach also makes brk(2) a no-op.  There's nothing to prevent a
+> process using as much heap as it wants (or crashing into the stack).
+> (No SIGSEGV or SIGBUS errors).
+>
+> >you're correct to imply that v6 takes up MUCH less space than other
+> >systems.  it's amazing how small you can run this.  the root in the
+> >6th edition system is only 1.4MB.  and that includes the normal
+> >binaries, libraries and the source to the kernel.  it'll run great on
+> >a floopy.
+>
+> You will need to have a swap partition.  And if each process has a
+> 64K data segment, you'll need a comparatively large amount of swap.
+> The biggest disadvantage of a floppy will be performance - latency
+> of about 80msec, I/O of about 40KB/sec.
+>
+> Have you identified a suitable C compiler?  There aren't many open
+> source 16-bit x86 compilers, especially ones that can run in 16-bit
+> mode.  None of the ones I found generated particularly good code.
+> This may impact you ability to get the larger utilities (and maybe
+> the kernel) to fit into 64K I-space.
+
+Would it be possible to use some of the DOS ones?  At least to bootstrap a 
+more true-to-Unix one?
+
+I'm thinking of the likes of bcc, available plus source at the FreeDOS web 
+archive.  Or OpenWatcom's DOS 16-bit.
+
+Wesley Parish
+
+-- 
+Clinersterton beademung, with all of love - RIP James Blish
+-----
+Mau e ki, he aha te mea nui?
+You ask, what is the most important thing?
+Maku e ki, he tangata, he tangata, he tangata.
+I reply, it is people, it is people, it is people.
+
+

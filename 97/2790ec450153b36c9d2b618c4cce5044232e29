@@ -1,0 +1,65 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Fri, 09 Dec 2016 11:25:32 +0100
+Subject: [TUHS] Moto and MMU issues -- was Unix & Memory Management
+ Units (MMU)
+In-Reply-To: <a3d8efbf-e2fc-1e0e-63c0-96f96a202f53@case.edu>
+References: <CAC20D2NV7DOaejq5_EHc52jh90HLjXeNkboSn_9wVFd_XYzYjw@mail.gmail.com>
+ <07a801d25171$8b473660$a1d5a320$@ronnatalie.com>
+ <a3d8efbf-e2fc-1e0e-63c0-96f96a202f53@case.edu>
+Message-ID: <584a869c.oO1JvvacT4DqiEYq%schily@schily.net>
+
+Chet Ramey <chet.ramey at case.edu> wrote:
+
+> On 12/8/16 11:38 AM, Ron Natalie wrote:
+> > /
+> > 
+> > The original Bourne Shell did not use malloc, but rather had a SIGSEGV handler
+> > that used to extend the "string stack" called "stak" via sbrk() whenever the
+> > code tried to access data beyond the end ot the heap./
+> > 
+> > / /
+> > 
+> > The V6 (Mashey) shell did that.   I thought they???d gotten rid of that by
+> > the time the Bourne Shell rolled around.
+
+Do you like to say that the Mashey shell also used the string stack and a 
+SIGSEV handler?
+
+Well, from a talk from Stephen Bourne I know that both the Bourne Shell and the 
+Mashey shell did start as a modified Thompson shell. I should have a look at the
+Thompson shell sources...
+
+> That was one of the changes Bourne made during the deliberations over
+> which shell would be the Unix "standard" for Bell Labs.  It was always
+> an efficiency hack, meant to address Mashey shell user concerns about
+> performance.
+
+I am not sure whether this kind of SIGSEGV based string handling helps to have 
+a good performance. Having a string stack (regardless of what the low level 
+part of the implementation looks like) definitely helps. I am using a similar
+technique in my "smake" program and it turns out that the concept of a string
+stack is helpful when you write software that needs to create many 
+intermediate string copies of unpredictable length.
+
+What I definitely know is that replacing the low level support code from 
+Stephen Bourne (stak.c) with an implementation based on the ideas from Geoff 
+Collyer did not affect the performance of the Bourne Shell.
+
+The Korn shell did introduce something similar (maybe even also from Geoff 
+Collyer with ksh88) and ksh93 is the fastest known shell implementation if it 
+is compiled the way, it is in the OpenSolaris integration of the Solaris "ON"
+code base.
+
+For today, numbers definitely look different. 30% of the total amount of CPU 
+time spend by the Bourne Shell is spend by the conversion from multy-byte 
+strings to wide strings and vice versa. BTW: "dash" is faster than bash just 
+because it does not imlement multy-byte support. If it did, it would become 
+slower than bash.
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+

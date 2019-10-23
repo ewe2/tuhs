@@ -1,0 +1,28 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 19 Mar 2017 20:08:07 +1000
+Subject: [TUHS] 4.3BSD help: getty ignoring modem status
+In-Reply-To: <20170319080640.GA7563@minnie.tuhs.org>
+References: <20170319055736.GA26709@minnie.tuhs.org>
+ <20170319080640.GA7563@minnie.tuhs.org>
+Message-ID: <20170319100807.GA15066@minnie.tuhs.org>
+
+On Sun, Mar 19, 2017 at 06:06:40PM +1000, Warren Toomey wrote:
+> Some more data points. Vanilla 32V and 3BSD do HUP the shell when the DCD
+> drops on a SimH telnet disconnect. Vanilla 4.2BSD and 4.3BSD don't!
+
+Found it. In /sys/conf/GENERIC, the dz lines have flags turned on to
+ignore DCD:
+
+device    dz0     at uba? csr 0160100 flags 0xff  vector dzrint dzxint
+
+I just turned off the flags and now a Telnet disconnect causes the
+shell to be HUP'd and killed. Phew!
+	Warren
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 819 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170319/e5ccaace/attachment.sig>
+

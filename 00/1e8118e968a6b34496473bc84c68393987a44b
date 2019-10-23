@@ -1,0 +1,48 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Thu, 10 Jul 2014 07:45:03 -0700
+Subject: [TUHS] Excise process from a pipe
+In-Reply-To: <201407101204.s6AC4hKQ026601@coolidge.cs.dartmouth.edu>
+References: <201407100249.s6A2nMh3017869@coolidge.cs.dartmouth.edu>
+ <20140710045223.GA19076@www.oztivo.net>
+ <201407101204.s6AC4hKQ026601@coolidge.cs.dartmouth.edu>
+Message-ID: <20140710144502.GA24876@mcvoy.com>
+
+I'm pretty aware of the various flavors of Unix and unless the process 
+in question is willing to help I can't see how this could work.
+
+There are system calls for passing file descriptors but you have the 
+problem that the pipe itself is a buffer of some size and you'd have
+the problem of draining it.
+
+Every utility that you put in a pipeline would have to be reworked
+to pass file descriptors around, it would be really unpleasant and
+not at all Unix like.
+
+On Thu, Jul 10, 2014 at 08:04:43AM -0400, Doug McIlroy wrote:
+> In the suggested answer, the code changes but the process survives.
+> 
+> I suspect the answer to my original question is no, but I know only a tiny
+> fraction of the cumulative API of the extended Unix family.
+> 
+> Doug
+> 
+> >> Was there ever a
+> >> flavor of Unix in which a process could excise itself
+> >> from a pipeline without breaking the pipeline?
+> >
+> > If in the middle of a pipeline, all I can think of is:
+> >
+> >       close fd 0 and fd 1
+> >       dup() read end of pipe 1 to be stdin (fd 0)
+> >       dup() write end of pipe 2 to be stdout (fd 1)
+> >       exec("/bin/cat")
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+

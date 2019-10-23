@@ -1,0 +1,73 @@
+From: claunia@claunia.com (Natalia Portillo)
+Date: Mon, 2 Aug 2010 17:00:58 +0100
+Subject: [TUHS] [TUHS & QEMU] Making progress with old DG/UX
+	virtualization. Need advice.
+In-Reply-To: <AANLkTi=--dfhcqP4tdtrSx+oN9ixhKfRK3vZ=D7TG2WD@mail.gmail.com>
+References: <AANLkTin1yeFg1Y2A-pzz+-iKBX2yfj5UoP2V9-TMMpnZ@mail.gmail.com>
+	<ED8FCB5C-7329-4F02-9622-EACCC4E84B30@claunia.com>
+	<AANLkTi=--dfhcqP4tdtrSx+oN9ixhKfRK3vZ=D7TG2WD@mail.gmail.com>
+Message-ID: <102BDE4B-6F31-4C6C-845B-28BBD24B5CF1@claunia.com>
+
+Hi,
+
+El 02/08/2010, a las 08:48, DG UX escribió:
+
+> Thanks Natalia,
+> 
+> I'll start by answering the insultive part of your answer, as my ego
+> will not let me go on if I don't:
+> 
+> I am not "begging on all the internet", I am simply seeking solutions,
+> help and advice, and making sure to update whoever is interested in
+> the progress I am doing.
+> Also, I wish to thank you for your insight and well detailed answer.
+> Finally I got an explanation as to _why_ solution A will not be as
+> good as solution B. That is what I call a winning argument, and I
+> thank you for that.
+
+That's why I sent you the message not because egos
+
+> I already have people searching for Adaptec docs and programmers for
+> the creation of the driver, err, emulated device.
+
+Great, I wish you my best and offer my repository of operating systems to test the emulated device on as much systems as possible when it is mature enough.
+
+> Take care,
+> Adam
+
+Natalia Portillo
+Claunia.com
+
+> On Mon, Aug 2, 2010 at 9:11 AM, Natalia Portillo <claunia at claunia.com> wrote:
+>> Hi,
+>> 
+>> I've read all your posts in the QEMU mailing list and the TUHS one and I'm answering to both lists in a hope my mail enlights you and any other curious.
+>> 
+>> First of all, old UNIX systems (and I put my hand on the fire for DG/UX also), use a monolithic linked at setup/later time kernel.
+>> That is, even if you get a driver (IDE, virtio, whatsoever), the configuration files, the kernel, the ramdisk, everything that lets your system boot, MUST HAVE BEEN BOOT from the AIC controller, the driver is hardcoded, no way to change it.
+>> 
+>> If you have extensive knowledge of what files a driver setup modifies on DG/UX specifically (knowledge from other UNIX, forget it, they are as different as Porsche and Ferrari motors), you can always get a new kernel with the drivers you need to make it boot and manually put them in your image.
+>> 
+>> In the case, you meet this requirements, and, you do it, you can then achieve to other problems. The DG/UX workstations are x86 machines, but nothing swears they are PC compatible machines, and they can have a different memory map for some critical device, or include critical devices never found in a PC (like an Intel Macintosh does for example). Just booting from a BIOS doesn't make the machines be the same (PowerPC Macintosh, IBM POWER workstations, Genesi Pegasos, are machines that boot OpenFirmware with heavily different configurations, devices and memory maps).
+>> 
+>> Also, you are assuming IDE is available in DG/UX just because the controller is present in the hardware. That hardware was also used for Windows NT. IDE support can be JUST FOR Windows, and the DG/UX manufacturer just decided to not include an IDE driver in the kernel (happened in AIX for PCs until last version of all, only SCSI was supported, being a hugely strange controller in PC worlds).
+>> 
+>> In the case you opt for making a driver (adding IDE, virtio, or other SCSI support) for the DG/UX need to say you need, low level knowledge of the hardware, low level knowledge of the operating system, a working machine (for sure, with the hardware available), a debug machine (almost sure also), C and maybe assembler knowledge. In a scale of 10, this puts the difficulty in 8 for most of programmers, and surely if you were one you stacked with the first option everyone gave you (see next sentence).
+>> 
+>> The easiest way, and the one that people answered you already in QEMU's mailing list (in a scale of 10 the difficulty is 6 or even 5), is creating an emulated device (that's the correct term, not "driver") for an emulator, like QEMU, Bochs, VirtualBox (forget this option for VMWare, VirtualPC or Parallels) that adds the AIC SCSI controller you exactly need.
+>> 
+>> Why is this easiest? You don't need any DG/UX working system, you don't need to know how DG/UX works, you don't need to compile a kernel, copy it to your image.
+>> 
+>> You just take the Adaptec's documentation, and start coding, making a SCSI emulated controller, and testing it with systems you can always reinstall, debug, and check, until they fully work (Windows, Linux, BSD, take your choice).
+>> 
+>> And then, you just polish it until your DG/UX boots, or finds the memory map as a mess it doesnt like.
+>> 
+>> Finally, please stop begging on all the internet, spend that time coding the driver or getting the money to pay a programmer that will do.
+>> 
+>> Sincerely yours,
+>> Natalia Portillo
+>> Claunia.com CEO
+>> QEMU's Official OS Support List maintainer
+
+
+

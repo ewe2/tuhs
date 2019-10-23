@@ -1,0 +1,61 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun,  3 Jan 2016 20:31:51 -0500 (EST)
+Subject: [TUHS] Early Unix function calls: expensive?
+Message-ID: <20160104013151.C296718C0A0@mercury.lcs.mit.edu>
+
+    > From: Warren Toomey
+
+    > I just re-found a quote about Unix processes
+    > ..
+    >  Years later we found out that function calls were still expensive
+    >  on the PDP-11
+    > ..
+    > Does anybodu have a measure of the expense of function calls under Unix
+    > on either platform?
+
+Procedure calls were not cheap on the PDP-11 with the V6/V6 C compiler (which
+admittedly was not the most efficient with small routines, since it always
+saved all three non-temporary registers, no matter whether the called routine
+used them or not).
+
+This was especially true when compared to the code produced by the compiler
+with the optimizer turned on, if the programmer was careful about allocating
+'register' variables, which was pretty good.
+
+On most PDP-11's, the speed was basically linearly related to the number of
+memory references (both instruction fetch, and data), since most -11 CPU's
+were memory-bound for most instructions. So for that compiler, a subroutine
+call had a fair amount of overhead:
+
+	inst	data
+
+call	4	1
+	2	0	if any automatic variables
+	1	1	minimum per single-word argument
+
+csv	9	5
+
+cret	9	5
+
+(In V7, someone managed to bum one cycle out of csv, taking it down to 8+5.)
+
+So assume a pair of arguments which were not register variables (i.e.
+automatics, or in structures pointed to by register variables), and some
+automatics in the called routine, and that's 4+2 for the arguments, plus 6+1,
+a subtotal of 10+3; add in csv and cret, that's 28+13 = 41 memory cycles.
+
+On a typical machine like an 11/40 or 11/23, which had roughly 1 megacycle
+memory throughput, that meant 40 usec (on a 1 MIP machine) to do a procedure
+call, purely in overhead (counting putting the args on the stack as overhead).
+
+We found that, even with the limited memory on the -11, it made sense to run
+the time/space tradeoff the other way for short things like queue
+insertion/removal, and do them as macros.
+
+A routine had to be pretty lengthy before it was worth paying the overhead, in
+order to amortize the calling cost across a fair amount of work (although of
+course, getting access to another three register variables could make the
+compiled output for the routine somewhat shorter).
+
+	Noel
+

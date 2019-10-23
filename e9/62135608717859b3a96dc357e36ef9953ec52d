@@ -1,0 +1,80 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Wed, 8 Nov 2017 09:27:39 -0700
+Subject: [TUHS] C question for the historians
+In-Reply-To: <bd0bd6ba-ef3d-768f-6ae1-89240dff165c@kilonet.net>
+References: <bd0bd6ba-ef3d-768f-6ae1-89240dff165c@kilonet.net>
+Message-ID: <CANCZdfqC5NSghfHVZ76R7bVdU2fVtCg04osueQEbVWbYMMPtOQ@mail.gmail.com>
+
+On Wed, Nov 8, 2017 at 9:17 AM, Arthur Krewat <krewat at kilonet.net> wrote:
+
+> From a mailing list I belong to, a back-and-forth is going on that I am
+> not involved in. The following sums it up nicely:
+>
+> It's really the implied equality that's the problem.  For example:
+>>
+>>     if (flags & DLADM_OPT_PERSIST) {
+>>
+>> would be better written as:
+>>
+>>     if ((flags & DLADM_OPT_PERSIST) == 0) {
+>
+>
+No it wouldn't. That would be a bug. s/==/!=/ there and you might be right.
+Except code reviews that make such 'crazy' suggestions often do more to
+introduce bugs than prevent future bugs.
+
+But even then, there's a time and place for testing against zero,
+especially in code that has complicated bit testing, where you only want to
+proceed if a subset of bits are set and others are clear. Or if you are
+mixing boolean and flags, it can be clearer.
+
+Or do the Linux-school and go with
+
+    if (!!(flags & DLADM_OPT_PERSIST)) {
+
+to really confuse things...
+
+Seriously? What do (or would) "original C" programmers think of this? To
+> me, anything non-zero is "true" so the first is perfectly acceptable.
+>
+
+Acceptable to the compiler sure. But if you use the different forms to
+convey information to the reader, then you might choose something slightly
+different.
+
+For pointers, say, you have the choice of the following forms:
+
+if (foo)
+if (!foo)
+if (foo == NULL)
+if (foo != NULL)
+if (foo == 0)
+if (foo != 0)
+
+The middle two remind the reader that foo is a pointer, while the first two
+might slightly suggest that from other context near by. The last one,
+though technically correct, suggest the original author may be confusing
+pointers and ints, even though its 100% legal C in every single properly
+implemented C compiler (even if the native representation of a null-pointer
+has bits set). It also spurs even more bogus comments that it is wrong on
+exotic architectures because someone wants to appear to be smart, but is
+actually being wrong, or reporting a situation where a compiler that
+purports to be a C compiler is actually implementing a different language
+that is only superficially similar to C.
+
+
+> The original assertion in the discussion was that the following is not
+> "right" because of the mixing of bitwise and boolean.
+>
+> if ((flags & DLADM_OPT_PERSIST) && (link_flags & DLMGMT_PERSIST)) {
+>
+>
+Wow! That's grade a crazy they are smoking. That's not a rule in C, and not
+even a widely followed 'kool-aide kult kode" practice, but there's so many
+different cults, it's hard to keep up.
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171108/9fafdce7/attachment-0001.html>
+

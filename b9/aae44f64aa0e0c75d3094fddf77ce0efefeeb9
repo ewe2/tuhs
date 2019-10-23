@@ -1,0 +1,53 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Mon, 15 May 2017 12:54:25 -0700
+Subject: [TUHS] C declarations.
+In-Reply-To: <c993682baa397327f63f0a1dd43b1be698281791@webmail.yaccman.com>
+References: <c993682baa397327f63f0a1dd43b1be698281791@webmail.yaccman.com>
+Message-ID: <27EF4DFC-5972-424F-BB22-0B2BD1593A45@bitblocks.com>
+
+Pascal was designed in 1967-69 and its report came out in 1970. It is of similar complexity (the first self compiling compiler was about 4500 lines, IIRC). It had n dimensional fixed size arrays and structures (records). Allowing any parameter of any type to be a ref param meant you didn't have to copy if you didn't want to. And there is no hidden magic, no GC. I guess it wasn't much known in the US then so not much scope for stealing ideas.... I guess the difference was that Wirth started with Algol W while Ritchie stated with B and BCPL.
+
+Unlike pascal C had the address of (&) operator so C could've only allow passing pointers to them. This would've been less "magic" and much cleaner. And from there a ref parameter is just a small step! To me your earlier comment made more sense - C was seen as a system programming language not an application programming one. For it passing strings and memory blocks was enough. Earlier I had wondered if dmr et al had a more Fortran like array model in mind and punted on it as it would complicate the language.
+
+> On May 15, 2017, at 11:47 AM, Steve Johnson <scj at yaccman.com> wrote:
+> 
+> 
+> Some interesting comments:
+> 
+>     "You all are missing the point as to what the cost of passing arrays by value or what other languages do"
+> 
+> I don't think so.  To me the issues is that the model of what it means to compute has changed since the punch-card days.  When you submitted a card deck in the early days, you had to include both the function definition and the data--the function was compiled, the data was read, and, for the most part there were no significant side effects (just a printout, and maybe some stuff on mag tape).
+> 
+> This was a model that had served mathematics well for centuries, and it was very easy to understand.  Functional programming people still like it a lot...
+> 
+> However, with the introduction of permanent file systems, a new paradigm came into being.  Now, interactions with the computer looked more like database transactions:  Load your program, change a few lines, put it back, and then call 'make'.  Trying to describe this with a purely functional model leads to absurdities like:
+> 
+>      file_system = edit( file_system, file_selector, editing_commands );
+> 
+> In fact, the editing commands can change files, create new ones, and even delete files.  There is no reasonable way to handle any realistic file systems with this model (let alone the Internet!)
+> 
+> In C's early days, we were just getting into the new world.  Call by value for arrays would have been expensive or impossible on the machine with just a few kilobytes of memory for program + data.  So we didn't do it.
+> 
+> Structures were initially handled like arrays, but the compiler chose to make a local copy when passed a structure pointer.  This copy was, at one time, in static memory, which caused some problems.  Later, it went on the stack.  It wasn't much used...
+> 
+> This changed when the Blit terminal project was in place.  It was just too attractive on a 68000 to write
+> 
+>     struct pt = {  int x;  int y }        /* when int was 16-bits */
+> 
+> and I made PCC pass small structures like this in registers, like other arguments.  I seem to remember a dramatic speedup (2X or so) from doing this...
+> 
+> 
+> "(did) Dennis / Brian/ Ken regret this design choice?
+> 
+> Not that I recall.  Of course, we all had bugs in this area.  But I think the lack of subscript range checking was a more serious problem than using pointers in the first place.  And, indeed, for a few of the pioneers, BCPL had done exactly the same thing.  
+> 
+> 
+> 
+> Steve
+> 
+> 
+> 
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170515/8e372208/attachment-0001.html>
+

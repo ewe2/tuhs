@@ -1,0 +1,277 @@
+From: a.phillip.garcia@gmail.com (A. P. Garcia)
+Date: Wed, 10 Oct 2012 10:31:43 -0500
+Subject: [TUHS] unix horror stories
+Message-ID: <CAFCBnZsUBBit82AaE+Pcf_J=D95YVPBc9iXYZk5CjbkLeUdg3Q@mail.gmail.com>
+
+i happened across this cute document in my archives...
+
+----
+
+*na    Bblisa-Announce-Owner at cs.umb.edu    Tue Dec 28 14:10:50 1993
+*to    bblisa-announce at cs.umb.edu
+*su    Some notes from December 1, 1993 meeting
+*fr    "John P. Rouillard" <rouilj at terminus.cs.umb.edu>
+*se    Bblisa-Announce-Owner at cs.umb.edu
+*da    Tue, 28 Dec 1993 12:42:01 -0500
+*mi    <199312281742.AA17997 at cs.umb.edu>
+*re    from cs.umb.edu (daemon at cs.umb.edu [158.121.104.2])
+    by argali.opal.com (8.6.4/jr2.9) with SMTP
+    id OAA27752; Tue, 28 Dec 1993 14:10:43 -0500
+*re    by cs.umb.edu id AA18007
+    (5.65c/IDA-1.4.4 for bblisa-announce-outgoing); Tue, 28 Dec 1993
+12:42:08 -0500
+*re    from terminus.cs.umb.edu by cs.umb.edu with SMTP id AA17997
+    (5.65c/IDA-1.4.4 for <bblisa-announce at cs.umb.edu>); Tue, 28 Dec 1993
+12:42:01 -0500
+*ex    Precedence: bulk
+*tx
+
+Here are the notes from the December 1, 1993 meeting. Names have been
+deleted to protect the innocent. The topic was:
+
+      UNIX Horror Stories (Actually Computer Horror Stories)
+
+and away we go.
+
+Story 1:
+A new user I knew was trying to clean out some old accounts on a system
+he was given.  As root, he changed directories to one of the old user
+directories, and then did 'rm -r *' but noticed it left a directory
+called .X11 behind.  To get rid of it, and to be sure it wouldn't fail,
+he did 'rm -rf .*'.  Sad to say he didn't realize that '.*' could and
+would expand into '..', and it would continue to do so recursively.
+I thought this was better than the 'garden variety' 'rm -rf' scenario.
+The guy though, worst case, he'd blow away the old user accounts,
+but got the entire disk instead!
+
+Needless to say, it was time for the install disketts (yes, diskettes,
+about 30 of them...).
+
+Story 2:
+SunOS 4.0 NFS server configured with IP address 192.9.200.0
+by suninstall (default - a suninstall bug) and rebooted after
+OS installation... (nice DECnet meltdown)
+
+Story 3:
+/etc/reboot - then noticing you were in the wrong window...
+
+Story 4:
+Coming in at 7:00AM Saturday to upgrade to Ultrix 2.2, then
+5 hours later having the other guy type in rm -rf - then
+realising he forgot to cd out of /etc...
+
+Story 5:
+Having a user request some files to be restored - but forgetting
+when they existed except that it was "sometime around a
+year or so ago"...
+
+Story 6:
+Would you all be interested in the time a workman disassembled the cubicle
+containing my NIS master and dropped a 1.3 gig disk several feet to the
+floor ...? (Prior to telling me he was taking it apart of course ...)
+
+Story 7:
+talking to an end-user who just called in over the phone
+
+ my root filesystem filled up, so I looked around; I found & removed vmunix
+ and boot, and that seems to have fixed things, so I typed fastboot.
+
+Story 8:
+Back in the days when UNIX V6 was new, we installed it on a PDP 11/44
+in the CS lab.  It ran fine.  We allowed students on it.  It ran fine.
+People started using it for real work, albeit tentatively.  It ran fine.
+It was a bit slow if several people were on -- what do you expect for
+a PDP11/44 -- but, it ran fine.
+
+Then occasioanlly, we started noticing that troff would go wrong and
+it would mis-format some portions of a document.  Funnily enough,
+when you re-ran the job, it ran fine.  We opened up the CAT.  Have
+you ever been inside a CAT?  These were serious phototypesetters.
+And, we could find nothing wrong with ours.  After a few days of
+frustratedly looking for problems with the CAT, and the wiring, and
+the troff config, it seemed to start working OK again, so we closed
+it all up, and forgot about the problem.
+
+About 12 weeks later, students working on simulation class assignments
+started complaining that if they came in and ran their programs during
+the day, the programs would give the wrong results.  But, if they ran
+the SAME programs in the evening, they'd be fine.  Thinking to ourselves
+that students are a real pain in the ass, we took a look.  Thing is,
+they were right.  The programs DID indeed give different results
+depending on when you ran them.  Mostly, they were OK, but occasional
+daytime runs were flaky.  Problem with the core (yes, we had core
+storage on that system)?  We swapped core boards.  No change.  We
+swapped CPU boards.  No change.  We practically swapped every board
+and the bus and built a new machine.  No change.  Of course, the
+number of failures were few -- the programs ran OK MOST of the time,
+so pinning this down was a slow process.  Eventually, the students
+all got their assignments done, and they went on to other exercises,
+and we didn't have any more problems, so we got on with our lives,
+and forgot about it.
+
+Another 12 weeks go by.  We were all happy.  Life was good.  The 11/44
+is still running fine.  Until... Aaargh!  Someone using the dc calculator
+reported errors in the results... sometimes!  And, at the same time,
+someone using troff reported mis-set pages.  We took the machine down
+to single user.  We ran all the programs.  We turned on all sorts of
+debugging and tracing.  Everything was fine.  Nothing went wrong.
+We pulled our hair out!  We went back multi-user.  Everything was
+fine.  We'd run dc.  It was fine.  We'd troff the document.  It was
+fine.  We'd go to the bar.  The users would come and find us and
+show us printouts of their dc and troffs that had gone wrong!!
+
+Aaaargh!
+
+Well, this was one of those problems.  Eventually, we made an observation.
+Dc works fine.  Troff works fine.  The simulation assignment program
+works fine.  But... run any of them at the same time...!!!!  That
+was it!  It turned out, that these three programs used the floating
+point hardware.  They were the ONLY programs that used the floating
+point hardware.  Our machine had floating point hardware; the one
+at Bell Labs did not have.  UNIX V6 was not saving the floating
+point registers on context switching.  If you were the only floating
+point program on the system, this did not matter -- you context
+switched out, and when you switched back in, your registers were
+all there as you left them.  But, if there was another floating
+point program around, your registers were corrupted!
+
+Over 8 months to diagnose the problem.  Just 2 minutes to fix it!
+
+Story 9:
+
+I received umpty-three million requests at LISA, from people
+that wanted me to e-mail them the text of NET's infamous
+"Eng_Adm Get List" T-shirt.   So here it is, even if you
+didn't want it. :-)
+
+(Eng_Adm is our systems administration mail alias)
+
+FRONT
+
+* I didn't touch a thing. * Why can`t you give me the root password? * I
+want
+more disk space, now! * It was working fine a minute ago. * I typed rm -rf,
+but I didn't really mean to. *  How come SPARC binaries won't work on my
+3/50?
+* I just turned it off and on a couple of times. * What's an alias? * It
+must
+be a hardware problem. * This will only take you a minute. * Can you restore
+/tmp/junk from February of 87? * X Windows isn't working on my VT100! * I
+didn't realize the type of coax made any difference. * How do I post an
+article to alt.sex.bondage? * I just plugged my RS-232 port into my phone
+jack. * Is the unix broken? * My bin directory is missing! * Someone
+spilled
+coffee on my keyboard. * I need to be the owner of all of the files in
+/usr/kvm. * How can I send mail to my friend on BITNET? * What makes you
+think
+it is my software? * My Mac is much easier to use. * Why is her disk quota
+bigger than mine? * What jumpers? * I can't login to my ethernet. * Don't
+you
+know where I put my source code? * I need to borrow your CD-ROM for 2
+months. *
+Where can I find all of those GIF files? * Honest, it just stopped working.
+*
+But I like the old OS a lot better. * Can you read this TK50 VMS tape onto
+my
+Sun? * I can do it... I used to be a Systems Administrator. * Can`t this be
+done after I go home? * It says, "Run fsck manually". * I need you to
+reboot
+my floppy drive. * What does RTFM mean? * How hard can it be to do a simple
+upgrade? * My system just crashed. * Now how did that file get in there? *
+But
+the vendor says this should be, "Plug and play". * This is going to cost us
+how much!? * A System Administrator doesn't do hardware. * My machine needs
+more memory. * Is my monitor suppose to smoke? * Just stay late. * It was
+fine,
+until I moved the disk drive over to there. * I can guarantee you that my
+program is flawless. * Oops... *
+
+-----------------------------------------------------------------------------
+
+BACK
+
+
+            Eng_Adm "Get List"
+
+            [X] A Clue
+
+            [X] A Life
+
+            [X] Lost
+
+
+            Remember... just send mail.
+
+
+Copyright ) 1992 Network Equipment Technologies, Inc. All rights reserved.
+
+Story 10:
+A Dec F/S rep in to service a line printer managed to trip on the power
+cord to a DEC 11/750.    An operator trying to be helpful immediately (no
+intermediate steps) plugged the power back in, faulting the system.
+Upon the F/S rep's request to hit the reset, a second operator
+hit the reset on the wrong 11/750.  All mail, printing and a
+substantial number of other services at a small but busy academic
+site to came to an abrupt mid-day halt.
+
+Story 11:
+A system administrator logged in to a fileserver from home after two
+days of vacation to find her environment not working as expected.
+Some poking around revealed that the filesystem supporting /usr/local
+had been unmounted after disk problems.     A call to the night
+operator to see if more info was available yielded the message "the
+system was down" waiting for F/S.    The systems administrator's
+manager was shocked to find her in early next morning using the "dead"
+system's console to distribute alternate /usr/local mount
+configurations to the 15 desktops that received it from the server.
+
+Back tracking of the problem revealed that the system was probably
+pronounced dead after help desk/operations staff could not login using
+a non-standard shell found in /usr/local.    No evidence could be found
+that a software support person had been consulted or that anyone other than
+users had actually looked at the physical system.    A user was
+determined as being the person responsible for removing /usr/local from
+mount configurations and bringing the system up multiuser.
+
+Story 12
+After testing a new nfs patch on a few test cases, an administrator
+began batch kernel installation and system reboots on 5 Sun Servers,
+~50 clients, ~15 diskful desktops.    One server on which the others
+had the several dependencies failed to reboot.   This server was also the
+only one with a spare client slot.  It had the only  tape drive that
+could support the SunOS install tapes for it's architecture that was
+immediately accessible to the administrator.  The system administrator
+determined the server could not be fixed in single user.  It was not
+going to be possible to borrow a tape drive off hours.  The
+administrator proceded to juggle filespace on another server to setup a
+client slot for booting over the net.
+
+About this time,  numerous nfs woes surfaced.   The administrator
+proceded to address references  to the down server.   After these
+had been addressed (including a few reboots),  the administrator
+realized that the test cases hadn't determined the nfs patch would
+cause more problems than it solved.  Life was going to be miserable
+until it was removed.  The distribution mechanisms then in use were
+partially dependent on nfs, so the patch had to be backed out manually
+on systems that had come up.     [Fortunately, the practice was to halt
+diskless clients and distribute nfs/lockd patches to /export/root on
+the servers after the servers  came up using the new patch.     None of
+the diskless clients had yet been rebooted.]
+
+Once the patches were backed out and the dead server was finally
+booted over the net, examination of the root filesystems revealed that
+a *well intentioned* person had, without informing the administrator,
+very recently resolved a root overflow problem by making the
+contents of /sbin links to /usr.
+
+                -- John
+John Rouillard
+
+Special Projects Volunteer    University of Massachusetts at Boston
+rouilj at cs.umb.edu (preferred)    Boston, MA, (617) 287-6480
+===============================================================================
+My employers don't acknowledge my existence much less my opinions.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20121010/64b128f0/attachment.html>
+

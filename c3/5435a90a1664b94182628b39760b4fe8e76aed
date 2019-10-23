@@ -1,0 +1,138 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 75ddf39b
+	for <ml@inbox.vuxu.org>;
+	Sat, 31 Aug 2019 03:38:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CE5E29C0E8; Sat, 31 Aug 2019 13:38:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 847A79C092;
+	Sat, 31 Aug 2019 13:38:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BCEBC9C092; Sat, 31 Aug 2019 13:38:36 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 6659F9C00B
+ for <tuhs@tuhs.org>; Sat, 31 Aug 2019 13:38:36 +1000 (AEST)
+Received: from mob.bitblocks.com (mob.bitblocks.com [192.168.125.11])
+ by mail.bitblocks.com (Postfix) with ESMTP id 1D53B1570CE9;
+ Fri, 30 Aug 2019 20:38:15 -0700 (PDT)
+Content-Type: text/plain;
+	charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.11\))
+From: Bakul Shah <bakul@bitblocks.com>
+In-Reply-To: <E829BD14-88B7-4469-A1A4-7849BC87CB67@ccc.com>
+Date: Fri, 30 Aug 2019 20:38:14 -0700
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <C48679EC-7E4D-489E-8EC0-092AA204965B@bitblocks.com>
+References: <1567196510.21824.for-standards-violators@oclsc.org>
+ <CAC20D2OJ=uNZ0yMwpL13TPPW_q9tJeY6559gwsDGUYVkUin+TA@mail.gmail.com>
+ <20190830215202.GA974@mcvoy.com>
+ <CAC20D2Pp5hpZraaANsXg0Sgc-sU3fJ4=_N17ogQii3=p-H4Oeg@mail.gmail.com>
+ <20190831011359.E9F491570CE9@mail.bitblocks.com>
+ <88242A0D-D08E-47EB-84DC-A7205780A417@ccc.com>
+ <E829BD14-88B7-4469-A1A4-7849BC87CB67@ccc.com>
+To: Clem cole <clemc@ccc.com>
+X-Mailer: Apple Mail (2.3445.104.11)
+Subject: Re: [TUHS] dmr streams & networking [was: Re: If not Linux,
+ then what?]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+One thing I can think of is something like this:
+IIRC 68k had 24 address bits. So with a 4K page size, you can have one =
+level
+pagetable. If the pagetable is in fast SRAM, may be 1 or 2 clock cyles =
+would
+be added. If you allow 2^N processes, you need 2^(12+N) entry page =
+table. The
+width of the table would depend on the number of 4K pages in the =
+physical
+memory. Context switch would be to simply set the 2^N bit process "base"
+register. Going beyond 2^N you'd have to swap out a process. Each =
+process can
+then grow up to 16MB. I don't think a real translation lookaside buffer =
+would
+help much.
+
+It would be interesting to see the actual details.
+
+> On Aug 30, 2019, at 7:57 PM, Clem cole <clemc@ccc.com> wrote:
+>=20
+> Btw. The issue with the 68k was Nick Tredenick=E2=80=99s original =
+Microcode did not save enough information during some of the faults.  =
+Les Crudele once told me, that it turns out he had tried to fix it but =
+there were a series of errors and some short cuts they used to fit it in =
+the store.  They gave up trying to fix it as the part was purely =
+skunkworks and they could not respin it at the time.  After it succeeded =
+and were a real project, the difference between the original and the 10 =
+was Nick redid the microcode but they had made a larger microstore - =
+otherwise basically the same Si.   =20
+>=20
+> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not =
+quite.=20
+>=20
+>> On Aug 30, 2019, at 10:46 PM, Clem cole <clemc@ccc.com> wrote:
+>>=20
+>> There was most definitely a TLB or as Dave called it =E2=80=98The =
+TB=E2=80=99 ***
+>> Remember Dave Cane (Masscomp hw lead) was part of the 780, led the =
+750 and designed the BI before he left dec.  He was a bus and memory =
+specialist=20
+>>=20
+>>=20
+>> *** west coast VS east coast training - calling it a TB vs a TLB. =20
+>>=20
+>> Sent from my PDP-7 Running UNIX V0 expect things to be almost but not =
+quite.=20
+>>=20
+>>>> On Aug 30, 2019, at 9:13 PM, Bakul Shah <bakul@bitblocks.com> =
+wrote:
+>>>>=20
+>>>> On Fri, 30 Aug 2019 20:58:13 -0400 Clem Cole <clemc@ccc.com> wrote:
+>>>>=20
+>>>> Actually not in lock step.  They were independent.  One was called =
+the
+>>>> executor and the other the fixer.  When a fault was detected the =
+executor
+>>>> was sent wait stated while the fixer handled the fault and refilled =
+the
+>>>> TLB.   Once the TLB was set to instruction was allowed to complete. =
+   Btw
+>>>> when the 68010 was released the pals on the board were changed to =
+allow the
+>>>> executor to actually take the fault and do something else while the =
+fixer
+>>>> replaced the TLB entry
+>>>=20
+>>> As I remember, the issue with 68000 was that instructions were
+>>> not restartable so in case of accessing memory that didn't
+>>> exist, you couldn't take a segfault and do anything useful.
+>>> This is why you needed a second processor to deal with an
+>>> external MMU. There would have been no TLB unless you actually
+>>> added an external TLB -- but an external CAM would've been
+>>> very expensive. May be a direct map?
+>>>=20
+>>> What we did at Fortune was to utilize a 4 entry external map:
+>>> text, data, extra and stack.  When a new function was invoked
+>>> it would do a 'probe'. If the probe caused a segfault, stack
+>>> was extended in the handler. The probe didn't have to be
+>>> restartable. So we didn't need a second 68k. This logic may
+>>> have been in the V7 port we started from.
+

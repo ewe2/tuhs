@@ -1,0 +1,47 @@
+From: wlc@jctaylor.com (William Corcoran)
+Date: Fri, 22 Dec 2017 12:42:36 +0000
+Subject: [TUHS] SYSTEM V R1 HELP
+In-Reply-To: <1513933789.1081623.1213240800.50A34AF0@webmail.messagingengine.com>
+References: <8157BC46-2833-48D5-B224-B9E488A4B8F0@jctaylor.com>
+ <CAC20D2NyL8x+YpdhWW2DkwB2HGtU=v_r-t4MQFsQYMtn=7SU6g@mail.gmail.com>
+ <95F61863-C025-469A-9577-D2F8E75A813A@jctaylor.com>
+ <77B078BE-E3CD-4AFF-93B4-20AF4C8664FD@jctaylor.com>
+ <1513911314.999748.1213050656.486E2E9E@webmail.messagingengine.com>
+ <8C7D7E48-C9E5-4F75-A76F-3E9D7F651A6F@jctaylor.com>,
+ <1513933789.1081623.1213240800.50A34AF0@webmail.messagingengine.com>
+Message-ID: <14180643-33A4-49E4-B866-C34ACB8ED773@jctaylor.com>
+
+Brilliant Random832!
+
+Very impressive!
+
+Thank you for the early Christmas present!   Your initial analysis was equally spot on when you interpreted the backtrace.
+
+This is very much appreciated!
+
+Truly,
+
+Bill Corcoran
+
+On Dec 22, 2017, at 4:09 AM, Random832 <random832 at fastmail.com<mailto:random832 at fastmail.com>> wrote:
+
+On Thu, Dec 21, 2017, at 22:47, William Corcoran wrote:
+Could the issue be with fprintf or doprnt.c?
+
+I thought STDERR was unbuffered?   Please forgive me.
+
+I've got it. The problem is with putc (actually _flsbuf), and it is precisely *because* stderr is unbuffered.
+
+#define putc(x, p)    (--(p)->_cnt >= 0 ? \
+           ((int) (*(p)->_ptr++ = (unsigned char) (x))) : \
+           _flsbuf((unsigned char) (x), (p)))
+
+Under normal circumstances for an unbuffered (or line-buffered) stream, _cnt starts as 0, and therefore every character is passed through _flsbuf.
+
+However, _cnt is still decremented (becoming -1, -2, etc) - _flsbuf should be resetting this to zero (and does in other versions, both earlier and later), but we can see in flsbuf.c it does not. So, after 32769 characters have been output it ticks from -32768 to +32767, and putc now thinks the stream is buffered.
+
+You'll want to add iop->cnt = 0 to the second if clause in _flsbuf.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171222/f0a7774d/attachment.html>
+

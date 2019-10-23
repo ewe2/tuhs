@@ -1,0 +1,472 @@
+From tuhs-bounces@minnie.tuhs.org Sat Jun 16 19:00:47 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,
+	HTML_MESSAGE,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham
+	autolearn_force=no version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 002b8f75
+	for <ml@inbox.vuxu.org>;
+	Sat, 16 Jun 2018 19:00:46 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id EA6FCA18C2; Sun, 17 Jun 2018 05:00:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BAB439EDE8;
+	Sun, 17 Jun 2018 05:00:03 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b=GvSVwurR;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C517D9EDE8; Sun, 17 Jun 2018 04:59:59 +1000 (AEST)
+Received: from mail-io0-f179.google.com (mail-io0-f179.google.com
+ [209.85.223.179])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9361C9B5D7
+ for <tuhs@tuhs.org>; Sun, 17 Jun 2018 04:59:58 +1000 (AEST)
+Received: by mail-io0-f179.google.com with SMTP id l19-v6so13537870ioj.5
+ for <tuhs@tuhs.org>; Sat, 16 Jun 2018 11:59:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+ :cc; bh=/FYHFCislvppIvt/bP0ufC+XGgtkBgAqxBegTGJa6Zc=;
+ b=GvSVwurRDk7CYEV9R8R9PO43cVi2BhMhv6Bekjke0CdECu+rOvUaz7HjXWTbZyXHbF
+ WI423EhVVMjamCTKBB65T6HhfmrBv2eQ2799FYmfcz14q/q6i7D/LEKo6zj/xXKoKR/w
+ SsY6JCGdBdsp7jPTQ6Y/XOT+SgDZswdUbcxbg=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+ :message-id:subject:to:cc;
+ bh=/FYHFCislvppIvt/bP0ufC+XGgtkBgAqxBegTGJa6Zc=;
+ b=Q2Ta9bhm3vLwTSFEPwuRPe1xoLGu/zEpIjBjzzt5EMSAIhLVj4q7wTPGWXIz8Suz4R
+ Bh2aRVDt0q3YV5CntEHbmCVUeM8JNW0lLOFoN7CHrLVRvZb0HlnMhz2jbQ+g93tCfEiN
+ Fu7QKsgcIrzvImcN/4nsqiNYodxB4VUIsIskzuni3Gge/e7TMg6uJOWtAISbRnwxTVtj
+ /s7bDw/nGk19BOuoUSz1JqcSxAwe8JlTU/UOhvae1h/1Eu08mTgB5ibSAG2Wi9afQuAx
+ OAsgbZvz/Aob1xL6aRpk6eel2r9qVH2qqirFLhPN9uZOY5JiKM8gKI1WrNd7gvwnphOL
+ iwlQ==
+X-Gm-Message-State: APt69E2xYRdTg9ePysBbxU2YIUctxIEA0YsbEKs3E/DnOH5sBgVW02RA
+ ON41pGQTE073SplheQLWgcGHgbliuiDoshw+INa0pO3w
+X-Google-Smtp-Source: ADUXVKIclM24rvUq8AIYBgOpgSdOdDV4PjqSS1Jb+1GHi7XgkcEarfPKNZ0JNbNR863tzgTSho+oZ2qW/SsKh4V6RzY=
+X-Received: by 2002:a6b:ea09:: with SMTP id
+ m9-v6mr5669979ioc.121.1529175597751; 
+ Sat, 16 Jun 2018 11:59:57 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 2002:a4f:ca8a:0:0:0:0:0 with HTTP; Sat, 16 Jun 2018 11:59:27
+ -0700 (PDT)
+In-Reply-To: <20180616133716.2302F18C0A7@mercury.lcs.mit.edu>
+References: <20180616133716.2302F18C0A7@mercury.lcs.mit.edu>
+From: Clem Cole <clemc@ccc.com>
+Date: Sat, 16 Jun 2018 14:59:27 -0400
+Message-ID: <CAC20D2PRmftgpZatQAd4+NPQSK1YEv6ZocOKoCrLsjO408ktVw@mail.gmail.com>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Content-Type: multipart/alternative; boundary="0000000000004db699056ec6f013"
+Subject: Re: [TUHS] core
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000004db699056ec6f013
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+below...
+
+On Sat, Jun 16, 2018 at 9:37 AM, Noel Chiappa <jnc@mercury.lcs.mit.edu>
+wrote:
+>
+>
+> I can't speak to the motivations of everyone who repeats these stories,
+> but my
+> professional career has been littered with examples of poor vision from
+> technical colleagues (some of whom should have known better), against
+> which I
+> (in my role as an architect, which is necessarily somewhere where
+> long-range
+> thinking is - or should be - a requirement) have struggled again and agai=
+n
+> -
+> sometimes successfully, more often, not.
+>
+=E2=80=8BAmen, although sadly many of us if not all of us have a few of the=
+se
+stories.  In fact, I'm fighting another one of these battles right now.=F0=
+=9F=A4=94
+My experience is that more often than not, it's less a failure to see what
+a successful future might bring, and often one of well '*we don't need to
+do that now/costs too much/we don't have the time*.'
+
+That said, DEC was the epitome of the old line about perfection being the
+enemy of success.    I like to say to my colleagues, pick the the things
+that are going to really matter.  Make those perfect and bet the company on
+them.  But think in terms of what matters.   As you point out, address size
+issues are killers and you need to get those right at time t0.
+
+Without saying too much, many firms like my own, think in terms of
+computation (math libraries, cpu kernels), but frankly if I can not get the
+data to/from CPU's functional units, or the data is stored in the wrong
+place, or I have much of the main memory tied up in the OS managing
+different types of user memory; it doesn't matter [HPC customers in
+particular pay for getting a job done -- they really don't care how -- just
+get it done and done fast].
+
+To me, it becomes a matter of 'value' -- our HW folks know a crappy
+computational system will doom the device, so that is what they put there
+effort into building.   My argument has often been that the messaging
+systems, memory hierarchy and house keeping are what you have to get right
+at this point.  No amount of SW will fix HW that is lacking the right
+support in those places (not that lots of computes are bad, but they are
+actually not the big issue in the HPC when yet get down to it these days).
+
+
+
+>
+> Let's start with the UNIBUS. Why does it have only 18 address lines? (I
+> have
+> this vague memory of a quote from Gordon Bell admitting that was a mistak=
+e,
+> but I don't recall exactly where I saw it.)
+
+=E2=80=8BI think it was part of the same paper where he made the observatio=
+n that
+the greatest mistake an architecture can have is too few address bits.=E2=
+=80=8B
+ My understanding is that the problem was that UNIBUS was perceived as an
+I/O bus and as I was pointing out, the folks creating it/running the team
+did not value it, so in the name of 'cost', more bits was not considered
+important.
+
+I used to know and work with the late Henk Schalke, who ran Unibus (HW)
+engineering at DEC for many years.    Henk was notoriously frugal (we might
+even say 'cheap'), so I can imagine that he did not want to spend on
+anything that he thought was wasteful.   Just like I retold the
+Amdahl/Brooks story of the 8-bit byte and Amdahl thinking Brooks was nuts;
+I don't know for sure, but I can see that without someone really arguing
+with Henk as to why 18 bits was not 'good enough.' I can imagine the
+conversation going something like:  Someone like me saying: *"Henk, 18 bits
+is not going to cut it."*   He might have replied something like:   *"Bool
+sheet *[a dutchman's way of cursing in English], *we already gave you two
+more bit than you can address* (actually he'd then probably stop mid
+sentence and translate in his head from Dutch to English - which was always
+interesting when you argued with him).
+
+Note: I'm not blaming Henk, just stating that his thinking was very much
+that way, and I suspect he was not not alone.  Only someone like Gordon and
+the time could have overruled it, and I don't think the problems were
+foreseen as Noel notes.
+
+
+
+
+>
+> And a major one from the very start of my career: the decision to remove
+> the
+> variable-length addresses from IPv3 and substitute the 32-bit addresses o=
+f
+> IPv4.
+>
+=E2=80=8BI always wondered about the back story on that one.  I do seem to =
+remember
+that there had been a proposal for variable-length addresses at one point;
+but never knew why it was not picked.   As you say, I was certainly way to
+junior to have been part of that discussion.  We just had some of the
+document from you guys and we were told to try to implement it.=E2=80=8B  M=
+y guess
+is this is an example of folks thinking, length addressing was wasteful.
+ 32-bits seemed infinite in those days and no body expected the network to
+scale to the size it is today and will grow to in the future [I do remember
+before Noel and team came up with ARP, somebody quipped that Xerox
+Ethernet's 48-bits were too big and IP's 32-bit was too small.  The
+original hack I did was since we used 3Com board and they all shared the
+upper 3 bytes of the MAC address to map the lower 24 to the IP address - we
+were not connecting to the global network so it worked.  Later we used a
+look up table, until the ARP trick was created].
+
+
+
+>
+> One place where I _did_ manage to win was in adding subnetting support to
+> hosts (in the Host Requirements WG); it was done the way I wanted, with t=
+he
+> result that when CIDR came along, even though it hadn't been forseen at t=
+he
+> time we did subnetting, it required _no_ hosts changes of any kind.
+
+=E2=80=8BAmen and thank you.=E2=80=8B
+
+
+
+
+> But
+> =E2=80=8B =E2=80=8B
+> mostly I lost. :-(
+>
+=E2=80=8BI know the feeling.  To many battles that in hindsight you think -=
+ darn if
+they had only listened.    FWIW: if you try to mess with Intel OPA2 fabric
+these days there is a back story.  A few years ago I had a quite a battle
+with the HW folks, but I won that one.   The SW cannot tell the difference
+between on-die or off-die, so the OS does not have the manage it.   Huge
+difference in OS performance and space efficiency.   But I suspect that
+there are some HW folks that spit on the floor when I come in the room.
+We'll see if I am proven to be right in the long run; but at 1M cores I
+don't want to think of the OS mess to manage two different types of memory
+for the message system.=E2=80=8B
+
+
+
+>
+> So, is poor vision common? All too common.
+
+Indeed.   But to be fair, you can also end up with being like DEC and often
+late to the market.=E2=80=8B
+
+
+M
+=E2=80=8By example is of Alpha (and 64-bits vs 32-bit).   No attempt to sup=
+port
+32-bit was really done because=E2=80=8B 64-bit was the future.  Sr folks co=
+nsidered
+32-bit mode was wasteful.  The argument was that adding it was not only
+technically not a good idea, but it would suck up engineering resources to
+implement it in both HW and SW.  Plus, we coming from the VAX so folks had
+to recompile all the code anyway (god forbid that the SW might not be
+64-bit clean mind you).  [VMS did a few hacks, but Tru64 stayed 'clean.']
+ Similarly (back to UNIX theme for this mailing list) Tru64 was a rewrite
+of OSF/1 - but hardly any OSF code was left in the DEC kernel by the time
+it shipped.  Each subsystem was rewritten/replaced to 'make it perfect'
+ [always with a good argument mind you, but never looking at the long term
+issues].    Those two choices cost 3 years in market acceptance.   By the
+time, Alphas hit the street it did not matter. I think in both cases would
+have been allowed Alpha to be better accepted if DEC had shipped earlier
+with a few hacks, but them improved Tru64 as a better version was developed
+(*i.e.* replace the memory system, the I/O system, the TTY handler, the FS
+just to name a few that got rewritten from OSF/1 because folks thought they
+were 'weak').
+
+The trick in my mind, is to identify the real technical features you can
+not fix later and get those right at the beginning.   Then place the bet on
+those features, and develop as fast as you can and do the best with them as
+you you are able given your constraints.  Then slowly over time improve the
+things that mattered less at the beginning as you have a review stream.
+ If you wait for perfection, you get something like Alpha which was a great
+architecture (particularly compared to INTEL*64) - but in the end, did not
+matter.
+
+Clem
+=E1=90=A7
+
+--0000000000004db699056ec6f013
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff">below...</font></div><div class=
+=3D"gmail_extra"><br><div class=3D"gmail_quote"><font color=3D"#ff0000">On =
+Sat, Jun 16, 2018 at 9:37 AM, Noel Chiappa <span dir=3D"ltr">&lt;<a href=3D=
+"mailto:jnc@mercury.lcs.mit.edu" target=3D"_blank">jnc@mercury.lcs.mit.edu<=
+/a>&gt;</span> wrote:</font><blockquote class=3D"gmail_quote" style=3D"marg=
+in:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><font color=3D"#=
+ff0000">
+<br>
+I can&#39;t speak to the motivations of everyone who repeats these stories,=
+ but my<br>
+professional career has been littered with examples of poor vision from<br>
+technical colleagues (some of whom should have known better), against which=
+ I<br>
+(in my role as an architect, which is necessarily somewhere where long-rang=
+e<br>
+thinking is - or should be - a requirement) have struggled again and again =
+-<br>
+sometimes successfully, more often, not.<br></font></blockquote><div><div c=
+lass=3D"gmail_default" style=3D""><font color=3D"#0000ff" style=3D""><font =
+face=3D"arial, helvetica, sans-serif">=E2=80=8BAmen, although sadly many of=
+ us if not all of us have a few of these stories.=C2=A0 In fact, I&#39;m fi=
+ghting another one of these battles right now.=F0=9F=A4=94=C2=A0 My experie=
+nce=C2=A0is that more often than not, it&#39;s less a failure to see what a=
+ successful=C2=A0future might bring, and often one of well &#39;<i>we don&#=
+39;t need to do that now/costs too much/we don&#39;t have the time</i>.&#39=
+;</font></font></div><div class=3D"gmail_default" style=3D""><font color=3D=
+"#0000ff" style=3D""><font face=3D"arial, helvetica, sans-serif"><br></font=
+></font></div><div class=3D"gmail_default" style=3D""><font color=3D"#0000f=
+f" style=3D""><font face=3D"arial, helvetica, sans-serif">That said, DEC wa=
+s the epitome of the old line about perfection being the enemy of success.=
+=C2=A0 =C2=A0 I like to say to my colleagues, pick the the things that are =
+going to really matter.=C2=A0 Make those perfect and bet the company on the=
+m.=C2=A0 But think in terms of what matters.=C2=A0 =C2=A0As you point out, =
+address size issues are killers and you need to get those right at time t0.=
+</font></font></div><div class=3D"gmail_default" style=3D""><font color=3D"=
+#0000ff" style=3D""><font face=3D"arial, helvetica, sans-serif"><br></font>=
+</font></div><div class=3D"gmail_default" style=3D""><font color=3D"#0000ff=
+" style=3D""><font face=3D"arial, helvetica, sans-serif">Without saying too=
+ much, many firms like my own, think in terms of computation (math librarie=
+s, cpu kernels), but frankly if I can not get the data to/from CPU&#39;s fu=
+nctional units, or the data is stored in the wrong place, or I have much of=
+ the main memory tied up in the OS managing different types of user memory;=
+ it doesn&#39;t matter [HPC customers in particular pay for getting a job d=
+one -- they really don&#39;t care how -- just get it done and done fast].</=
+font></font></div><div class=3D"gmail_default" style=3D""><font color=3D"#0=
+000ff" style=3D""><font face=3D"arial, helvetica, sans-serif"><br></font></=
+font></div><div class=3D"gmail_default" style=3D""><font color=3D"#0000ff" =
+style=3D""><font face=3D"arial, helvetica, sans-serif">To me, it becomes a =
+matter of &#39;value&#39; -- our HW folks know a crappy computational syste=
+m will doom the device, so that is what they put there effort into building=
+.=C2=A0 =C2=A0My argument=C2=A0has often been that the messaging systems, m=
+emory hierarchy=C2=A0and house keeping are what you have to get right at th=
+is point.=C2=A0 No amount of SW will fix HW that is lacking the right suppo=
+rt in those places (not that lots of computes are bad, but they are actuall=
+y not the big issue in the HPC when yet get down to it these days).</font><=
+/font></div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" st=
+yle=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><font=
+ color=3D"#ff0000">
+<br>Let&#39;s start with the UNIBUS. Why does it have only 18 address lines=
+? (I have<br>
+this vague memory of a quote from Gordon Bell admitting that was a mistake,=
+<br>
+but I don&#39;t recall exactly where I saw it.) </font></blockquote><div><d=
+iv class=3D"gmail_default" style=3D""><font face=3D"arial, helvetica, sans-=
+serif">=E2=80=8B</font><font color=3D"#0000ff" style=3D""><font face=3D"ari=
+al, helvetica, sans-serif">I think it was part of the same paper where he m=
+ade the observation that the greatest mistake an architecture can have is t=
+oo few address bits.=E2=80=8B=C2=A0 =C2=A0My understanding is that the prob=
+lem was that UNIBUS was perceived=C2=A0as an I/O bus and as I was pointing =
+out, the folks creating it/running the team did not value it, so in the nam=
+e of &#39;cost&#39;, more bits was not considered important.=C2=A0</font></=
+font></div><div class=3D"gmail_default" style=3D""><font color=3D"#0000ff" =
+style=3D""><font face=3D"arial, helvetica, sans-serif"><br></font></font></=
+div><div class=3D"gmail_default" style=3D""><font color=3D"#0000ff" style=
+=3D""><font face=3D"arial, helvetica, sans-serif">I used to know and work w=
+ith the late Henk Schalke, who ran Unibus (HW) engineering at DEC for many =
+years.=C2=A0 =C2=A0 Henk was notoriously=C2=A0frugal (we might even say &#3=
+9;cheap&#39;), so I can imagine that he did not want to spend on anything t=
+hat he thought was wasteful.=C2=A0 =C2=A0Just like I retold the Amdahl/Broo=
+ks story of the 8-bit byte and Amdahl thinking Brooks was nuts; I don&#39;t=
+ know for sure, but I can see that without someone really arguing with Henk=
+ as to why 18 bits was not &#39;good enough.&#39; I can imagine the convers=
+ation going something like:=C2=A0 Someone like me saying:=C2=A0<i>&quot;Hen=
+k, 18 bits is not going to cut it.&quot;</i>=C2=A0 =C2=A0He might have repl=
+ied something like:=C2=A0 =C2=A0<i>&quot;Bool sheet </i>[a dutchman&#39;s w=
+ay of cursing in English], <i>we already gave you two more bit than you can=
+ address</i> (actually he&#39;d then probably stop mid sentence and transla=
+te in his head from Dutch to English - which was always interesting when yo=
+u argued with him).</font></font></div><div class=3D"gmail_default" style=
+=3D""><font color=3D"#0000ff" style=3D""><font face=3D"arial, helvetica, sa=
+ns-serif"><br></font></font></div><div class=3D"gmail_default" style=3D""><=
+font color=3D"#0000ff" style=3D""><font face=3D"arial, helvetica, sans-seri=
+f">Note: I&#39;m not blaming Henk, just stating that his thinking was very =
+much that way, and I suspect he was not not alone.=C2=A0 Only someone like =
+Gordon and the time could have overruled it, and I don&#39;t think the prob=
+lems were foreseen as Noel notes.</font></font></div><br></div><div><br></d=
+iv><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0=
+ .8ex;border-left:1px #ccc solid;padding-left:1ex"><font color=3D"#ff0000">=
+<br>
+And a major one from the very start of my career: the decision to remove th=
+e<br>
+variable-length addresses from IPv3 and substitute the 32-bit addresses of<=
+br>
+IPv4.=C2=A0<br></font></blockquote><div><div class=3D"gmail_default" style=
+=3D""><font color=3D"#0000ff" style=3D""><font face=3D"arial, helvetica, sa=
+ns-serif">=E2=80=8BI always wondered about the back story on that one.=C2=
+=A0 I do seem to remember that there had been a proposal for variable-lengt=
+h addresses at one point; but never knew why it was not picked.=C2=A0 =C2=
+=A0As you say, I was certainly way to junior to have been part of that disc=
+ussion.=C2=A0 We just had some of the document from you guys and we were to=
+ld to try to implement it.=E2=80=8B=C2=A0 My guess is this is an example of=
+ folks thinking, length=C2=A0addressing was wasteful.=C2=A0 =C2=A032-bits s=
+eemed infinite in those days and no body expected the network to scale to t=
+he size it is today and will grow to in the future [I do remember before No=
+el and team came up with ARP, somebody quipped=C2=A0that Xerox Ethernet&#39=
+;s 48-bits were too big and IP&#39;s 32-bit was too small.=C2=A0 The origin=
+al hack I did was since we used 3Com board and they all shared the upper 3 =
+bytes of the MAC address to map the lower 24 to the IP address - we were no=
+t connecting to the global network so it worked.=C2=A0 Later we used a look=
+ up table, until the ARP trick was created].</font></font></div><br></div><=
+div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8e=
+x;border-left:1px #ccc solid;padding-left:1ex"><font color=3D"#ff0000">
+<br>One place where I _did_ manage to win was in adding subnetting support =
+to<br>
+hosts (in the Host Requirements WG); it was done the way I wanted, with the=
+<br>
+result that when CIDR came along, even though it hadn&#39;t been forseen at=
+ the<br>
+time we did subnetting, it required _no_ hosts changes of any kind.</font><=
+/blockquote><div><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff">=E2=80=8BAmen and thank you.=E2=
+=80=8B</font></div><br></div><div><br></div><div>=C2=A0</div><blockquote cl=
+ass=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;p=
+adding-left:1ex"><font color=3D"#ff0000"> But<div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif;display:inline">=E2=80=8B =
+=E2=80=8B</div>mostly I lost. :-(<br></font></blockquote><div><div class=3D=
+"gmail_default" style=3D""><font color=3D"#0000ff" style=3D""><font face=3D=
+"arial, helvetica, sans-serif">=E2=80=8BI know the feeling.=C2=A0 To many b=
+attles that in hindsight you think - darn if they had only listened.=C2=A0 =
+=C2=A0 FWIW: if you try to mess with Intel OPA2 fabric these days there is =
+a back story.=C2=A0 A few years ago I had a quite a battle with the HW folk=
+s, but I won that one.=C2=A0 =C2=A0The SW cannot tell the difference betwee=
+n on-die or off-die, so the OS does not have the manage it.=C2=A0 =C2=A0Hug=
+e difference in OS performance and space efficiency.=C2=A0 =C2=A0But I susp=
+ect=C2=A0that there are some HW folks that spit on the floor when I come in=
+ the room.=C2=A0 We&#39;ll see if I am proven to be right in the long run; =
+but at 1M cores I don&#39;t want to think of the OS mess to manage two diff=
+erent types of memory for the message system.=E2=80=8B</font></font></div><=
+br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin=
+:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><font color=3D"#ff=
+0000">
+<br>
+So, is poor vision common? All too common.</font></blockquote><div><font co=
+lor=3D"#0000ff"><div class=3D"gmail_default" style=3D"font-family:arial,hel=
+vetica,sans-serif;display:inline">Indeed.=C2=A0 =C2=A0But to be fair, you c=
+an also end up with being like DEC and often late to the market.=E2=80=8B</=
+div>=C2=A0</font></div><div><font color=3D"#0000ff"><br></font></div><div><=
+font color=3D"#0000ff">M<div class=3D"gmail_default" style=3D"display:inlin=
+e"><font face=3D"arial, helvetica, sans-serif">=E2=80=8By example is of Alp=
+ha (and 64-bits vs 32-bit).=C2=A0 =C2=A0No attempt to support 32-bit was re=
+ally done because=E2=80=8B 64-bit was the future.=C2=A0 Sr folks considered=
+ 32-bit mode was wasteful.=C2=A0 The argument was that adding it was not on=
+ly technically not a good idea, but it would suck up engineering resources=
+=C2=A0to implement it in both HW and SW.=C2=A0 Plus, we coming from the VAX=
+ so folks had to recompile all the code anyway (god forbid that the SW migh=
+t not be 64-bit clean mind you).=C2=A0 [VMS did a few hacks, but Tru64 stay=
+ed &#39;clean.&#39;]=C2=A0 =C2=A0Similarly (back to UNIX theme for this mai=
+ling list) Tru64 was a rewrite of OSF/1 - but hardly any OSF code was left =
+in the DEC kernel by the time it shipped.=C2=A0 Each subsystem was rewritte=
+n/replaced to &#39;make it perfect&#39;=C2=A0 =C2=A0[always with a good arg=
+ument mind you, but never looking at the long term issues].=C2=A0 =C2=A0 Th=
+ose two choices cost 3 years in market acceptance.=C2=A0 =C2=A0By the time,=
+ Alphas hit the street it did not matter. I think in both cases would have =
+been allowed Alpha to be better accepted if DEC had shipped earlier with a =
+few hacks, but them improved Tru64 as a better version was developed (<i>i.=
+e.</i> replace the memory system, the I/O system, the TTY handler, the FS j=
+ust to name a few that got rewritten from OSF/1 because folks thought they =
+were &#39;weak&#39;).</font></div></font></div><div><font color=3D"#0000ff"=
+><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-ser=
+if;display:inline"><br></div></font></div><div><font color=3D"#0000ff"><div=
+ class=3D"gmail_default" style=3D"display:inline"><font face=3D"arial, helv=
+etica, sans-serif">The trick in my mind, is to identify=C2=A0the real techn=
+ical features you can not fix later and get those right at the beginning.=
+=C2=A0 =C2=A0Then place the bet on those features, and develop as fast as y=
+ou can and do the best with them as you you are able given your constraints=
+.=C2=A0 Then slowly over time improve the things that mattered less at the =
+beginning as you have a review stream.=C2=A0 =C2=A0If you wait for perfecti=
+on, you get something like Alpha which was a great architecture=C2=A0(parti=
+cularly compared to INTEL*64) - but in the end, did not matter.</font></div=
+></font></div><div><font color=3D"#0000ff"><div class=3D"gmail_default" sty=
+le=3D"font-family:arial,helvetica,sans-serif;display:inline"><br></div></fo=
+nt></div><div><font color=3D"#0000ff"><div class=3D"gmail_default" style=3D=
+"font-family:arial,helvetica,sans-serif;display:inline">Clem</div></font></=
+div></div></div></div><div hspace=3D"streak-pt-mark" style=3D"max-height:1p=
+x"><img alt=3D"" style=3D"width:0px;max-height:0px;overflow:hidden" src=3D"=
+https://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp;typ=
+e=3Dzerocontent&amp;guid=3D15f4cc5a-f993-4f7d-82e4-7ed962edab0f"><font colo=
+r=3D"#ffffff" size=3D"1">=E1=90=A7</font></div>
+
+--0000000000004db699056ec6f013--

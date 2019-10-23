@@ -1,0 +1,110 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Sat, 21 Nov 2015 09:39:46 -0500
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <1448114587.9367.39.camel@papa2>
+References: <20151121140022.Horde.ZwPZMYWApn-dXiuNCkiDWDA@avocado.salatschuessel.net>
+ <1448114587.9367.39.camel@papa2>
+Message-ID: <CAC20D2OeRdxZqZt1EMa5hy+hx_iK1AqRZr+YCroQRDWh1g0egw@mail.gmail.com>
+
+Hellwig made some great tips.
+
+Two other thoughts..
+
+1.) Make sure you understand the low level interrupt mechanism and how
+interrupts are turned into real C proceedure calls and back again.   This
+is traditionally handled in the *.s file - which in the case of BSD is spit
+out by Sam's config program.   So you'll eventuall need to rewrite the
+proper stuff for your system - although as a step 1, you'll create it by
+hand.
+
+2.) A thought might be to walk before you try running.  The MIT guys took
+V6 and the Lions book and rewrote it for the x86.   They use it for their
+undergrad OS course.   They have excellent materials and have updated the
+V6 code for a modern compiler.     A year ago, I answered a Quora question
+about learning the kernel this was:
+https://www.quora.com/Which-Linux-kernel-versions-source-code-is-better-for-newbie-to-read/answer/Clem-Cole?__snids__=1310704238&__nsrc__=1&__filter__=all
+
+
+The most relevant part I have cut/pasted here:
+
+ "a modern take on a classic" - the course if being offered this fall at
+the URL:   6.828 / Fall 2014 <http://pdos.csail.mit.edu/6.828/2014/xv6.html>
+
+The latest xv6 source is available via
+        git clone git://pdos.csail.mit.edu/xv6/xv6.git
+<http://git//pdos.csail.mit.edu/xv6/xv6.git>
+
+Tools are can be found at:   6.828 / Fall 2014
+<http://pdos.csail.mit.edu/6.828/2014/tools.html>
+
+Using the MIT course or the Lion's text will teach how the kernel works and
+how a user program interacts with it.   IMO: Lion's commentary is super and
+100% of the source is there to read and ponder.  Please remember that
+generations of the best kernel hackers started with this document (although
+some of us predate it - but when I saw it I made a copy).
+
+​My point is gett​ing the V6 kernel running on your HW.  The take your
+learning from that and try a BSD kernel.   The hardest part of the ports
+will be common and the V6 kernel is going to be a lot easier to get
+working, because it small and simple.
+
+
+No you went get networking at all the cool BSD features, but if the idea to
+learn how to do it, start small scale as the MythBuster's guys always do ;-)
+
+Clem
+
+On Sat, Nov 21, 2015 at 9:03 AM, Hellwig Geisse <hellwig.geisse at mni.thm.de>
+wrote:
+
+> Hi Oliver,
+>
+> On Sa, 2015-11-21 at 14:00 +0100, Oliver Lehmann wrote:
+> > Is there a good "HOWTO" for "first things first" as implementing
+> > disklabel seems to require quite some "device work" before the
+> > first "hello world" is there - is there something else which
+> > should be could be done first and does not require so much to
+> > port (the whole disk subsystem on that machine is different
+> > from "usual" disk subsystems as it is handled via a PIO)
+>
+> I don't have an exact HOWTO for porting BSD, but we gathered
+> some experience in these things while porting NetBSD to our
+> processor ECO32.
+>
+> First and most important is a working tool-chain (which in case
+> of BSD means GCC). You should really know your tools, because
+> you will frequently dig deep into them to understand various
+> aspects of e.g. linker scripts. We totally underestimated the
+> amount of work to be done here.
+>
+> Then you must decide if you will do cross-development, or if you
+> can do it on a running BSD system. Even if so, you will have to
+> generate a file system for the target BSD system from which you
+> boot your machine. You can do that with the tools included in BSD,
+> but they are not running yet. (Btw, byte-order is an especially
+> nasty thing in this context.)
+>
+> Memory management was another area which required a fair amount
+> of work. I have no experience with 2.11 BSD, but in case of NetBSD
+> the code is divided into at least three layers to obtain a good
+> degree of re-usability for different architectures. Alas, the
+> documentation was rather poor, and the relevant book ("The Design
+> and Implementation of the 4.4 BSD Operating System" by McKusick
+> et al.) is a bit outdated.
+>
+> The project of porting BSD to a yet unsupported machine is
+> certainly feasible, and is indeed a valuable experience. But
+> don't expect to have it done in only a couple of weeks... :-)
+>
+> Good luck!
+> Hellwig
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151121/e290c0ee/attachment.html>
+

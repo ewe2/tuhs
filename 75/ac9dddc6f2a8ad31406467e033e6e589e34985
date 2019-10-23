@@ -1,0 +1,203 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Mon, 30 Apr 2018 23:41:04 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <20180430150532.4B67218C09C@mercury.lcs.mit.edu>
+References: <20180430150532.4B67218C09C@mercury.lcs.mit.edu>
+Message-ID: <91f53deb-a0b4-52a7-6b2e-20023570eddc@update.uu.se>
+
+On 2018-04-30 17:05, Noel Chiappa wrote:
+>      > From: Johnny Billquist
+> 
+>      > This is where I disagree. The problem is that the chunks in the PDP-11
+>      > do not describe things from a zero offset, while a segment do. Only
+>      > chunk 0 is describing addresses from a 0 offset. And exactly which chunk
+>      > is selected is based on the virtual address, and nothing else.
+> 
+> Well, you have something of a point, but... it depends on how you look at it.
+> If you think of a PDP-11 address as holding two concatenated fields (3 bits of
+> 'segment' and 13 bits of 'offset within segment'), not so much.
+
+Err... That would be a pretty ugly way to look at the world. Not to 
+mention that one segment silently slides over into the next one if it's 
+more than 8K. No, I think I prefer to not try to look at the world that 
+way. :-)
+
+> IIRC there are other segmented machines that do things this way - I can't
+> recall the details of any off the top of my head. (Well, there the KA10/KI10,
+> with their writeable/write-protected 'chunks', but that's a bit of a
+> degenerate case. I'm sure there is some segmented machine that works that way,
+> but I can't recall it.)
+
+The KA/KI without the Twenex pager pretty much only had two segments, 
+unless I remember wrong. It was the low segment and the high segment. 
+Well, ok, that also implied that it was based on the virtual address, 
+but these two segments were definitely treated as two separate spaces, 
+that were never concatenated.
+
+> BTW, this reminds me of another key differentiator between paging and
+> segments, which is that paging was originally _invisible_ to the user (except
+> for setting the total size of the process), whereas segmentation is explicitly
+> visible to the user.
+
+Good point.
+Well, wouldn't you say that the "chunks" on a PDP-11 are invisible to 
+the user? Unless you are the kernel of course. Or run without protection.
+
+> I think there is at least one PDP-11 OS which makes the 'chunks' visible to
+> the user - MERT (and speaking of which, I need to get back on my project of
+> trying to track down source/documentation for it).
+
+Don't know that system. But you could just argue that RT-11 also makes 
+it all visible as well. Any OS which don't give you proper protection 
+will allow you to play with all hardware, no matter how it appears.
+
+>      > Demand paging really is a separate thing from virtual memory. It's a
+>      > very bad thing to try and conflate the two.
+> 
+> Really? I always worked on the basis that the two terms were synonyms - but
+> I'm very open to the possibility that there is a use to having them have
+> distinct meanings.
+
+*Demand* paging is definitely a separate concept from virtual memory.
+
+OSes like RSX, RSTS/E, or Unix, on PDP-11s do give you virtual memory. 
+However, none of them implement demand paging. The PDP-11 can, as you 
+noted, also support demand paging, but there is little need for such an 
+advanced mechanism on that machine, for several reasons.
+
+When I first read about demand paging, it was in the context of VMS, and 
+the simplicitly, elegance, and efficiency of it really impressed me.
+
+Starting execution of an image in VMS really just meant that the OS read 
+in the executable image meta information, which gave things like what 
+memory addressed were defined. VMS created the page table, and marked 
+every page as invalid, and then it started executing in the process. The 
+first thing that would happen would of course be that you got a page 
+fault by trying to fetch the instruction at the first address of the 
+program. VMS immediately suspends execution until it have read in that 
+page from the binary, marks that page as now having a valid translation, 
+and then resumes execution. Of course, most likely you'll have a whole 
+storm of page faults almost immediately after a process starts 
+executing, but after a while, you'll be in a sort of balance where you 
+mostly run without any more page faults.
+(I would assume Unix does it the same way on modern machines.)
+
+Very different than in RSX, for example, where the OS first makes sure 
+all required virtual memory have valid translations before the process 
+is allowed to execute.
+
+> I see a definition of 'virtual memory' below, but what would you use for
+> 'paging'?
+
+"Paging" is a bit of an unclear term for me here. It might be referring 
+to the reading in of a page at a page fault, which would be a demand 
+paging situation, the paging out of individual pages as a demand paged 
+system requires pages to fulfill needs of a different process, or it 
+might mean the reading in or writing out of all pages of a process, in 
+which case it would be close to a synonym with "swapping". So, in which 
+way do you mean "paging"?
+
+> Now that I think about it, there are actually _three_ concepts: 'virtual
+> memory', as you define it; what I will call 'non-residence' - i.e. a process
+> can run without _all_ of its virtual memory being present in physical memory;
+> and 'paging' - which I would define as 'use fixed-size blocks'. (The third is
+> more of an engineering thing, rather than high-level architecture, since it
+> means you never have to 'shuffle' core, as systems that used variable-sized
+> things seem to.)
+> 
+> 'Non-residence' is actually orthogonal to 'paging'; I can imagine a paging
+> system which didn't support non-residence, and vice versa (either swapping
+> the entire virtual address space, or doing it a segment at a time if the
+> system has segments).
+
+Yeah. And non-residence, as you call it, is what demand paging is.
+Pages are brought into physical memory on demand.
+
+The definition you use for paging here is an interesting point. Not sure 
+how much of a thing it would be, but it might be a thing sometimes as 
+well. But then we get into the question I asked further down, how do you 
+then deal with when you have different sized pages on a system?
+But "paging" just meaning "fixed size pages" is certainly a distinction 
+you can make. I think I wouldn't find much use for it, but that don't 
+mean others might not, or that it wouldn't be a possible classification.
+
+>      > each process would have to be aware of all the other processes that use
+>      > memory, and make sure that no two processes try to use the same memory,
+>      > or chaos ensues.
+> 
+> There's also the System 360 approach, where processes share a single address
+> space (physical memory - no virtual memory on them!), but it uses protection
+> keys on memory 'chunks' (not sure of the correct IBM term) to ensure that one
+> process can't tromp on another's memory.
+
+Oh. There is no real connection between virtual memory and memory 
+protection. One can exist with or without the other.
+
+>      >> a memory management device for the PDP-11 which provided 'real' paging,
+>      >> the KT11-B?
+> 
+>      > have never read any technical details. Interesting read.
+> 
+> Yes, we were lucky to be able to retrieve detailed info on it! A PDP-11/20
+> sold on eBay with a fairly complete set of KT11-B documentation, and allegedly
+> a "KT11-B" as well, but alas, it turned out to 'only' be an RK11-C. Not that
+> RK11-C's aren't cool, but on the 'cool scale' they are like 3, whereas a
+> KT11-B would have been, like, 17! :-) Still, we managed to get the KT11-B
+> 'manual' (such as it is) and prints online.
+
+Really cool. Thanks for sharing.
+
+> I'd love to find out equivalent detail for the KT11-A, but I've never seen
+> anything on it. (And I've appealed before for the KS11, which an early PDP-11
+> Unix apparently used, but no joy.)
+
+Might have been just some internal early attempt that never got out of DEC?
+
+>      > But how do you then view modern architectures which have different sized
+>      > pages? Are they no longer pages then?
+> 
+> Actually, there is precedent for that. The original Multics hardware, the
+> GE-645, supported two page sizes. That was dropped in later machines (the
+> Honeywell 6000's) since it was decided that the extra complexity wasn't worth
+> it.
+> 
+> I don't have any problem with several different page sizes, _if it makes
+> engineering sense to support them_. (I assume that the rationale for their
+> re-introduction is that in the age of 64-bit machines, page tables for very
+> large 'chunks' can be very large if pages of ~1K or so are used, or something
+> like.)
+> 
+> It does make real memory allocation (one of the advantages of paging) more
+> difficult, since there would now be small and large page frames. Although I
+> suppose it wouldn't be hard to coalesce them, if there are only two sizes, and
+> one's a small power-of-2 multiple of the other - like 'fragments' in the
+> Berkeley Fast File System for BSD4.2.
+
+So, would you then say that such machines do not have pages, but have 
+segments?
+Or where do you draw the line? Is it some function of how many different 
+sized pages there can be before you would call it segments? ;-)
+
+But yes, it can make life more complex. But somewhere, this is all just 
+math, and computers are usually pretty good with that.
+
+> I have a query, though - how does a system with two page sizes know which to
+> use? On Multics (and probably on the x86), it's a per-segment attribute. But
+> on a system with a large, flat address space, how does the system know which
+> parts of it are using small pages, and which large?
+
+Beats me. I always just assumed it would be related to the virtual 
+address. Some part of the address space use small pages, some other part 
+uses large. But I have not ever cared to actually find out.
+Just as some machines had I/O spaced mapped to several addresses, so 
+that you could hit things cached or uncached, and possibly read/write 
+different sized data efficiently without lots of fiddling.
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

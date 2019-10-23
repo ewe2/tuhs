@@ -1,0 +1,60 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed, 23 Dec 2015 01:59:57 -0500 (EST)
+Subject: [TUHS] Does anybody recall how the TU10 bootstrap code actually
+	operates?
+Message-ID: <20151223065957.5ED5718C095@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > 000777  HALT
+
+That's actually "BR ."; the difference is important, since the CPU (IIRC)
+doesn't honour DMA requests when it is halted, and DMA needs to be working for
+the controller to read that first block (a secondary tape bootstrap) into
+memory.
+
+    > This seems like gobbledegook to me.
+
+:-)
+
+    > It moves the MTCMA (Magtape Current Memory Address) into R0, then it
+    > moves the MTCMA into the MTBRC (Magtape Byte Record Count)
+
+"The address of the MTCMA into", etc. Looking quickly at the programming spec
+for the TM11 controllers, it wants a negative of the byte count to transfer in
+this register; the address of the MTCMA just happens to also be a large enough
+negative number to be usable as the (negative) size of the transfer request.
+(The first record is probably shorter than that, but that doesn't matter.)
+
+Note that this code could probably also have been written:
+
+    MOV #172524, R0
+    MOV R0, at R0
+
+and been equally functional.
+
+    > then it moves 60003 into the MTC (Magtape control register), which
+    > causes a read operation with 800BPI 9 Channel density.
+
+I'm too lazy to look at the programming spec for the details, but that sounds
+right.
+
+    > Am I misinterpreting the byte codes or is this some idiosyncratic way to
+    > get the Magnetic tape to rewind or something (the TM11 has a control
+    > function to rewind, so it seems unlikely that this is the case
+
+No, it's just the shortest possible program to read the first block off the
+tape.
+
+It depends on i) the operator having manually set the tape to the right point
+(the start of the tape), so that it's the first block that gets read, and ii)
+the fact that the reset performed by hitting the 'Start' key on the CPU clears
+the TM11 registers, including the Current Memory Address register, so the
+block that's read is read into memory location zero.
+
+Hence the direction to 'once the tape has stopped moving, re-start the CPU at
+0'.
+
+	Noel
+
+

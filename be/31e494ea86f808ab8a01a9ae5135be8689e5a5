@@ -1,0 +1,110 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 85c3ba09
+	for <ml@inbox.vuxu.org>;
+	Sat, 1 Jun 2019 01:02:16 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 722BC9B879; Sat,  1 Jun 2019 11:02:15 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 790709B680;
+	Sat,  1 Jun 2019 11:01:49 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B96FA9B680; Sat,  1 Jun 2019 11:01:47 +1000 (AEST)
+X-Greylist: delayed 1887 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 01 Jun 2019 11:01:47 AEST
+Received: from nb3.reedmedia.net (nb3.reedmedia.net [71.19.148.35])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 756C09B67F
+ for <tuhs@tuhs.org>; Sat,  1 Jun 2019 11:01:47 +1000 (AEST)
+Received: from [47.185.49.132] (helo=reedmedia.net)
+ by nb3.reedmedia.net with esmtpa (Exim 4.89)
+ (envelope-from <reed@reedmedia.net>) id 1hWrud-0002lC-H8
+ for tuhs@tuhs.org; Sat, 01 Jun 2019 00:30:19 +0000
+Received: from reed@reedmedia.net by reedmedia.net with local (mailout 0.17)
+ id 11302-1559349013; Fri, 31 May 2019 19:30:13 -0500
+Date: Fri, 31 May 2019 19:30:13 -0500 (CDT)
+From: reed@reedmedia.net
+X-X-Sender: reed@t1.m.reedmedia.net
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+In-Reply-To: <975B93B6-AD7C-41B5-A14D-2DE4FEFAD3A6@kdbarto.org>
+Message-ID: <alpine.NEB.2.21.1905311913470.25930@t1.m.reedmedia.net>
+References: <975B93B6-AD7C-41B5-A14D-2DE4FEFAD3A6@kdbarto.org>
+User-Agent: Alpine 2.21 (NEB 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] Quotas - did anyone ever use them?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+(Sharing some from my book in regards to at Berkeley slowly being 
+written ... some questions below too.)
+
+% prior to March 19, 1976 \cite{unix-news-19760319}
+In addition to teaching and writing Unix Pascal, Thompson
+coded or advised on various other system modifications.
+He put in disk space quotas to prevent runaways.\cite{kenthompson1}
+% (inode.flags & 060000) == 020000
+A special file named ``.q'' would track (in its inode) the
+maximum number of blocks that may be used by files in the
+directory and its descendents and a count of the number of used blocks.
+A new ``quot'' system call was added to make directories with
+quotas.
+In addition, a modified link(2) allowed quotas to be exceeded 
+temporarily
+so a move/rename operation could work on a near full
+quota.\cite{unix-news-19760319}
+
+% NOTE: cptree source for system call use example
+
+% I cannot find this quot program 
+
+A new quot command was used to define the quotas.
+% CITE:
+Later, Kurt Shoens, a student in Thompson's
+operating systems course\cite{arnold1}, wrote a tool called pq that 
+would
+search up from your current working directory to find the nearest quota 
+file
+and display what is used, the defined maximum quota, and its percentage 
+used.
+% CITE: pq manpage and source
+Also a custom ls command identified if an entry was a quota file,
+file command could identify quota files,
+ex could warn if the ``Quota exceeded'',
+and cptree and lntree could copy quota files, 
+
+This quotas implementation was not integrated back into Unix.  So
+back to ``threatening messages of the day and personal letters.''
+Also a different quot tool was added a couple years later in the
+Seventh Edition of Unix (and also shipped with later BSDs) to
+display (but not restrict) the disk usage for each
+user.\cite{ritchie-7th-edition-setting-up}
+(A new quotas implementation was written and introduced to
+Berkeley years later. This story is in \autoref{chapter:4BSD}.)
+
+---------------
+
+At first I thought that a side-effect of quotas was that users couldn't 
+chown files to others, but wrong since already is documented that chown 
+is for super-user only in V6. Any thoughts on that?
+
+What is the unused pw_quota in v7 getpwent? Is that related at all to 
+disk quotas.
+
+
+

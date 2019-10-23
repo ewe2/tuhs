@@ -1,0 +1,40 @@
+From: jsteve@superglobalmegacorp.com (Jason Stevens)
+Date: Mon, 27 Oct 2014 18:32:52 +0800
+Subject: [TUHS] speaking of early C compilers
+Message-ID: <0F0B9BFC06289346B88512B91E55670D2F86@EXCHANGE>
+
+has anyone ever tried to compile any of the old C compilers with a 'modern'
+C compiler?
+
+I tried a few from the 80's (Microsoft/Borland) and there is a bunch of
+weird stuff where integers suddenly become structs, structures reference
+fields that aren't in that struct,   
+
+c01.c
+        register int t1;
+....
+                t1->type = UNSIGN;
+
+
+And my favorite which is closing a bunch of file handles for the heck of it,
+and redirecting stdin/out/err from within the program instead of just
+opening the file and using fread/fwrite.. 
+
+c00.c
+	if (freopen(argv[2], "w", stdout)==NULL ||
+(sbufp=fopen(argv[3],"w"))==NULL)
+
+
+How did any of this compile?  How did this stuff run without clobbering
+each-other?
+
+I don't know why but I started to look at this stuff with some half hearted
+attempt at getting Apout running on Windows.  Naturally there is no fork, so
+when a child process dies, the whole thing crashes out.  I guess I could
+simulate a fork with threads and containing all the cpu variables to a
+structure for each thread, but that sounds like a lot of work for a limited
+audience.
+
+But there really is some weird stuff in v7's c compiler.
+
+

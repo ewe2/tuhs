@@ -1,0 +1,72 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Tue, 11 Nov 2014 10:36:24 -0800
+Subject: [TUHS] Early Yacc revisited
+In-Reply-To: <CADxT5N4GwCTe2TwwDrKnCioWKAHwKBee7Vg174jX-w5=p6fLNg@mail.gmail.com>
+References: <CADxT5N4GwCTe2TwwDrKnCioWKAHwKBee7Vg174jX-w5=p6fLNg@mail.gmail.com>
+Message-ID: <e0ee2c618b2b622e51b1b0995544f651.squirrel@webmail.yaccman.com>
+
+Yes, Yacc was originally written in B.  There were two B compilers in use
+at that time--one for the early versions of Unix, and another for the
+GE/Honeywell mainframe that was the main Bell Labs computer at the time. 
+I kind of fell heir to the Honeywell B compiler when Dennis started
+working full time on Unix, and I wanted to add some things to it (notably,
+I wanted to add ^ as an exclusive OR operator).  This was pretty painful
+in the hand-crafted code in the original compiler, and got us thinking
+about how to do better.  Al Aho was familiar with Knuth's recent work on
+LR parsing, and this motivated the birth of Yacc.  Most of the early work
+on Yacc was done on the Honeywell system, since Unix was still pretty
+crude at the time.  And the early Yacc has horribly slow.  I remember one
+grammar we ran on Unix with 40 rules that took 20 minutes, and brought
+everybody else to a halt.  Most of the work on Unix Yacc was trying to
+make it much faster and to make it fit in the very small memories
+available.  I estimated at one point that Yacc had sped up by a factor of
+10,000 in the first three years of its existence.  Some of this speed up
+was nontrivial--we had to prove theorems to convince ourselves that the
+faster techniques would give the correct answers.
+
+Since Yacc turned grammars into finite state machines, the original code
+that Yacc generated consisted largely of tests of an input token followed
+by a goto to the next state.  Yes, B (and C) had a goto statement...  But
+there had been a lot written about how harmful gotos were, and Dennis had
+taken this talk seriously.  The compiler would let you use gotos, but at
+most ten of them!  That didn't allow for very complicated grammars...   So
+the code generator was rewritten to use switch statements...
+
+In many ways, the Honeywell B compiler was better than the Unix one.  B,
+like its ancestor BCPL, was really designed for a word-addressed
+architecture.  There was an assumption that to move to the next element of
+a vector of integers, you just added 1 to the address.  The Honeywell was
+a word addressed machine, but the PDP-11 was byte addressed, and B had to
+do some very strange hacks to turn machine pointers into integers and back
+to addresses...  This need to have pointers to objects of different sizes
+was one of the major motivations for moving from B to C -- type checking
+was not much of a factor at all, and in fact encountered quite a bit of
+resistance at first...
+
+The short file names supported in the early days actually discouraged the
+use of suffixes.  The use of .h for header files came later, and the early
+Yacc header files had no suffixes.  Similarly, Yacc didn't care whether
+its input was .y or not.  The explosion of these extensions really came
+later, with Make and longer file names.
+
+
+> I've been thinking more about early yacc.
+>
+> It's not mentioned explicitly but I'm wondering if early Yacc's output
+> (say in Unix version 3) was in B language since it was written in B
+> language? It seems logical but I can't back up this assertion as
+> there's no executable or source code that I can find. I assume there
+> had to be some sort of B language compiler at some point but the
+> hybrid v1/v2 unix I've looked at doesn't have it.
+>
+> And I'm still wondering what yacc was used for in the Unix v5 era.
+> There's no *.y at all, e.g. no expr and no bc. I still have some hopes
+> of modifying bc to run on Unix v5, or at least getting some simple
+> yacc program to work under the v5 version.
+>
+> Mark
+>
+
+
+
+

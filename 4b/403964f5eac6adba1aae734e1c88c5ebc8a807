@@ -1,0 +1,105 @@
+From: dave@horsfall.org (Dave Horsfall)
+Date: Tue, 29 Mar 2016 00:37:10 +1100 (EST)
+Subject: [TUHS] PDP-11/70 SPL
+In-Reply-To: <56F867BE.2080807@update.uu.se>
+References: <mailman.171.1459115387.15972.tuhs@minnie.tuhs.org>
+ <56F867BE.2080807@update.uu.se>
+Message-ID: <alpine.BSF.2.11.1603282258490.15730@aneurin.horsfall.org>
+
+On Mon, 28 Mar 2016, Johnny Billquist wrote:
+
+> > 	SPL	0
+> > 	WAIT
+> > 
+> > you don't lose by having the interrupt happen between the SPL and the 
+> > WAIT?
+> 
+> Hmm. A good point. If you depend on WAIT waking you up at an interrupt, 
+> then you need SPL to block here. But this also means that you must be at 
+> SPL 7 before any of this, otherwise you are still exposed to this 
+> problem (nothing says that the interrupt won't happen before the SPL as 
+> well).
+
+SPL 7 was only used by the clock interrupt, and levels 1-3 were never used 
+in Unix.  spl4() was slow devices, spl5() was fast devices, but I can't 
+remember how spl6() was used (blame my fading memory).
+
+In other words, spl7() was diable all interrupts, spl0() was enable all 
+interrupts, and spl4()-spl6() meant "you'd better be doing something more 
+important than what I'm doing" (per The Book).
+
+And that was the beauty; even the clock couldn't interrupt, so bye-bye all 
+scheduling...  And the HALT key, being implemented as an interrupt, 
+as well...
+
+I'm just starting to think that this "bug" was left undocumented on 
+porpoise, so perhaps someone read the engineering drawings?
+
+> In general, I would say that this is not the way I would write code, but 
+> checking in RSX and 2.11BSD I can tell that RSX do not use this pattern, 
+> and does a WAIT without any SPL, while 2.11BSD do an SPL 0 followed by 
+> WAIT. And the routine in 2.11BSD is also called at SPL 7.
+
+See above comment; perhaps they believed the handbook?  Heck, even the 
+published Unibus spec was known to be wrong, in order to keep 3rd-party 
+kit out of it (it was something subtle to do with buss timing, so 
+sometimes the card worked, and sometimes it didn't, doing wonders for 
+your reputation).
+
+> So obviously, both ways have been done, and 2.11BSD will work 
+> potentially with a slight degration if the SPL do not block interrupts. 
+> It will still work fine, as you will, at a minimum, get an interrupt at 
+> the next clock tick, which will wake it up. But it might possibly be 
+> sitting in a WAIT slightly longer than required.
+
+Slightly longer?  I think it was Lions himself who used to teach us that a 
+lost interrupt is nasty :-(
+
+> RSX in fact just loops after the WAIT. If an interrupt should cause the 
+> system to be able to do something more productive, it will not return to 
+> the idle loop. So yes, it also detects in the interrupt exit processing, 
+> that it was/is in the idle loop.
+
+Also keep in mind that the company who wrote RSX-11 also designed the 
+hardware, and thus had a vested interest.  Anyone here remember overlapped 
+seeks on the RK-11 failing under Unix, but not under RSX, so therefore it 
+must be Unix's problem?  I hammered those buggers until they supplied some 
+new diag routines that pretty much demonstrated the bug...  RSX of course 
+never used overlapped seeks on the RK-11, so MAINDEC never tested for it.
+
+This has nothing to do with how "SPL 0; WAIT" etc was implemented in Unix; 
+we are talking hardware here.
+
+> I still haven't had time to investigate properly. But at least processor 
+> and chip manuals do not say that SPL will block interrupts. But that is 
+> no guarantee that it don't in reality.
+
+Sigh; again, there are far too many witnesses that showed that it did; not 
+wishing to be offensive or anything, but did you work for DEC back then?
+
+Ah; John Dodson: are you here?  Did you try that little program on your 
+11/70?
+
+Ian Johnson, are you here, when I "accidentally" crashed your machine, and 
+after I fessed up to it, you referred to me as a vulgar term for the 
+female genitalia, then promptly hung up?
+
+I think that Kev Hill can attest to this, and I know that Kevin Dawson (I 
+think) tried it on my /40 as well; then again, his "outside" group were 
+always trying to hack into us, and my job was to keep the barbarians away 
+from the gate (which is how I got my first job at UNSW: it was better to 
+have me inside than outside...).
+
+What about you, MarioE, ChrisT, and RonDeJ?  (And UNSW actually employed 
+most of 'em.)  It's quite likely that ChrisM, GregR, and PeterI knew about 
+it as well, along with possibly anyone on the old AUUG list, where the 
+exploit was published, IIRC.
+
+Christ, but this is starting to sound like some religion or other.
+
+Yes, Warren, I need to know that should I write that history, that we 
+won't both get sued; how long is the Statute of Limitations anyway?
+
+-- 
+Dave Horsfall DTM (VK2KFU)  "Those who don't understand security will suffer."
+

@@ -1,0 +1,48 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Thu, 14 Sep 2017 09:12:31 -0600
+Subject: [TUHS] X and NeWS history (long)
+In-Reply-To: <20170914123041.B4F851525F0F@macaroni.inf.ed.ac.uk>
+References: <20170914123041.B4F851525F0F@macaroni.inf.ed.ac.uk>
+Message-ID: <CANCZdfoWCFTBKUa2KODkhnDT28C_Lxu-z-mCnH8nQZFcTTGL8A@mail.gmail.com>
+
+On Thu, Sep 14, 2017 at 6:30 AM, Richard Tobin <richard at inf.ed.ac.uk> wrote:
+
+> > I really kind of liked that toolkit, it was all key/value like so:
+> >
+> >         panel = xv_create(
+> >           frame, PANEL,
+> >             XV_WIDTH, WIDTH,
+> >           XV_HEIGHT, 30,
+> >             PANEL_LAYOUT, PANEL_HORIZONTAL,
+> >             XV_SHOW, FALSE,
+> >           NULL);
+> >
+> > So the order of the args didn't really matter, I think the first one
+> > maybe did because that was the parent but not sure, the rest could
+> > be any order you wanted.  Pretty simple.
+>
+> The first two were fixed; the prototype was
+>
+>   Xv_object xv_create (Xv_opaque owner, Xv_pkg *pkg, ...);
+>
+> The keywords (XV_WIDTH etc) contained a bitfield encoding the type and
+> cardinality of the value argument(s) so that the argument list could
+> be traversed without knowing every package's keywords.
+>
+> Using NULL as the terminating argument looks unportable.
+
+
+It turned out to be portable enough. And no worse than calloc dependencies
+in the base X11 library (which assumes that the address used when the
+integer 0 is assigned to a pointer has no bits set). The only other
+assumption was that pointers and ints were passed the same way, and that
+whatever NULL expanded to was at least as long as an int.
+
+So, yes this wouldn't work on a system whose null-pointer representation
+contained bits set, but that was already an assumption of X11...
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170914/122f19dc/attachment-0001.html>
+

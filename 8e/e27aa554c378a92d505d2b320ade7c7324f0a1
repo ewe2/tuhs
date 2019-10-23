@@ -1,0 +1,124 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 492ddecc
+	for <ml@inbox.vuxu.org>;
+	Fri, 13 Sep 2019 03:21:12 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D18409B92C; Fri, 13 Sep 2019 13:21:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E8EEE9B900;
+	Fri, 13 Sep 2019 13:20:37 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="By7wfZ2R";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C1E87947C8; Fri, 13 Sep 2019 13:20:33 +1000 (AEST)
+Received: from mail-qk1-f175.google.com (mail-qk1-f175.google.com
+ [209.85.222.175])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 251C2947B9
+ for <tuhs@tuhs.org>; Fri, 13 Sep 2019 13:20:33 +1000 (AEST)
+Received: by mail-qk1-f175.google.com with SMTP id i78so26692468qke.11
+ for <tuhs@tuhs.org>; Thu, 12 Sep 2019 20:20:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:from:date:message-id:subject:to;
+ bh=Sm+d3gbuflEwYQJ6UOGBy7MFW6LOPzagYMzHkGGdMnM=;
+ b=By7wfZ2RuHJZj+ItJZIYYXLyQYygYG0sX1ITN6NRiQJ+oIqdf0DQYBm326BAhnXE8H
+ 3ueKFsQa6wMMN5yyqwrq26o6sFk/2tDCXfGOPZs+40M0br3op5rYRqewjbWgOMazGGni
+ vcIZfW0Eimrm/1M/qRrk8EagCvkOTQ7hcsASel2IpRngffDlc2hpUfAObyyYHJGAxIYK
+ G3bh6F0Rzt99gmqh+pV88ZN/A35CuF8YJ91ZUoXiJNyMrcgYumJtCRfhnHkREozT3xDt
+ gvcMNXkPnf8XkdkVIn4I82mZofePN5A79rGFj7J7oBbjKbKRtSRjf5l5WpKBUt4rLdpo
+ Z+Uw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+ bh=Sm+d3gbuflEwYQJ6UOGBy7MFW6LOPzagYMzHkGGdMnM=;
+ b=Va8YSoik+rWrvAJSunmkxUtv2ni9Z7AwHjXTP97eKtO6uoNmHeM3muxQGYItfChHQv
+ oNe8azxd0cg/QqGX2pQkQCGibvZhOuJadmw5BkHqxYgDH+TkJWFElrcu6GTLnm6JqWdi
+ q9s0/6V48X4wqWB7hBkcpbTWzO/BzxkgwNCU+3vtAV3VA9XEJSxVJi01/lL0CRjhuhyq
+ XzMD0+sC9g1KMrsiuiCVDt0F4e57P8LZM8xrikySrksoo1if7XkZLhhIWrDdR9NU99sp
+ i/GHHM1uPHvOBwzvRRi/e+zxkDkZXre+/icauqPtqmEVd+/9xdNZsh8/nAxtu/aVcukQ
+ mTVg==
+X-Gm-Message-State: APjAAAVHhUfW1n+JNx+dcDg+j4cORmS2nsOLQuILRjU0WFH3dIpZydM+
+ Jk94DBVWZha+f5IkS8TXwUOECerlfkZNqnyGoKYhsUH/jq6TQQ==
+X-Google-Smtp-Source: APXvYqxBEeHrl9I90Y0X4oE0R9ruSHMrtUW2NeQAxHf7175IeONoUEU5J5um4JOYNG3CqVfDvc4hn9Efrwn0/oGunsQ=
+X-Received: by 2002:a05:620a:6af:: with SMTP id
+ i15mr11926656qkh.380.1568344831558; 
+ Thu, 12 Sep 2019 20:20:31 -0700 (PDT)
+MIME-Version: 1.0
+From: Warner Losh <imp@bsdimp.com>
+Date: Thu, 12 Sep 2019 21:20:20 -0600
+Message-ID: <CANCZdfrK4iFQCWOFP4MoUggpfJVmoJ0dnSg6H0cCi4dop7sVXw@mail.gmail.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Content-Type: multipart/alternative; boundary="0000000000009218e0059266bc88"
+Subject: [TUHS] My EuroBSDcon talk (preview for commentary)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000009218e0059266bc88
+Content-Type: text/plain; charset="UTF-8"
+
+OK. I've shared my slides for the talk.
+
+Some of the family trees are simplified (V7 doesn't have room for all its
+ports, for example)
+Some of it is a little cheeseball since I'm also trying to be witty and
+entertaining (we'll see how that goes).
+Please don't share them around until after my talk on the September 20th
+
+I'd like feedback on the bits I got wrong. Or left out. Or if you're in
+this and don't want to be, etc.
+
+All the slides after the Questions slide won't be presented and will likely
+be deleted.
+
+https://docs.google.com/presentation/d/177KxOif5oHARyIdZHDq-OO67_GVtMkzIAlDX-cHxgb4/edit?usp=sharing
+
+Please be kind (but if it sucks, please do tell). I've turned on commenting
+on the slides. Probably best if you comment there.
+
+I have a video of me giving this talk, but it's too rough to share...
+
+Thanks for any help you can give me.
+
+Warner
+
+--0000000000009218e0059266bc88
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">OK. I&#39;ve shared my slides for the talk.<div><br></div>=
+<div>Some of the family trees are simplified (V7 doesn&#39;t have room for =
+all its ports, for example)</div><div>Some of it is a little cheeseball sin=
+ce I&#39;m also trying to be witty and entertaining (we&#39;ll see how that=
+ goes).<br><div>Please don&#39;t share them around until after my talk on t=
+he September 20th</div></div><div><br></div><div>I&#39;d like feedback on t=
+he bits I got wrong. Or left out. Or if you&#39;re in this and don&#39;t wa=
+nt to be, etc.</div><div><br></div><div>All the slides after the Questions =
+slide won&#39;t be presented and will likely be deleted.</div><div><br></di=
+v><div><a href=3D"https://docs.google.com/presentation/d/177KxOif5oHARyIdZH=
+Dq-OO67_GVtMkzIAlDX-cHxgb4/edit?usp=3Dsharing">https://docs.google.com/pres=
+entation/d/177KxOif5oHARyIdZHDq-OO67_GVtMkzIAlDX-cHxgb4/edit?usp=3Dsharing<=
+/a><br></div><div><br></div><div>Please be kind (but if it sucks, please do=
+ tell). I&#39;ve turned on commenting on the slides. Probably best if you c=
+omment there.</div><div><br></div><div>I have a video of me giving this tal=
+k, but it&#39;s too rough to share...</div><div><br></div><div>Thanks for a=
+ny help you can give me.</div><div><br></div><div>Warner</div></div>
+
+--0000000000009218e0059266bc88--

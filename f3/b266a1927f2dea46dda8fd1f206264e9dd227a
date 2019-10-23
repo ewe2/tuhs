@@ -1,0 +1,69 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Wed, 28 Dec 2016 23:24:20 +1100
+Subject: [TUHS] merry christmas
+In-Reply-To: <20161228071422.GA30016@server.rulingia.com>
+References: <20161225031637.GF12180@mcvoy.com>
+ <CAH1jEzaAL-0cEYGzxry4FkJWEZ=+oxQbNhz6WsUoVj03qquq4w@mail.gmail.com>
+ <alpine.BSF.2.02.1612251712530.65296@frieza.hoshinet.org>
+ <20161228071422.GA30016@server.rulingia.com>
+Message-ID: <CAH1jEzZVD1Wu+=Z0vSDH-oAoK9mWVy5B6O2WNiEs0DTH5k7x3w@mail.gmail.com>
+
+I will let you know when I get it working :) It's not a current focus,
+but I will return to it someday. In the meantime, I'm putting it on
+bitbucket, so others will be able to pick it up if they wish. However,
+this also isn't my current focus, it's there, but it's not documented.
+
+The IAR compiler on the Z180 supports a memory model similar to the
+old "medium" memory model that we used to use with Microsoft or Turbo
+C on DOS machines, that is, multiple code segments with a single data
+segment. Yes, the Z180 compiled C code is larger than the PDP-11
+compiled C code, but luckily you can have multiple code segments,
+which you cannot (easily) have on the PDP-11.
+
+Unfortunately code and data segments share the same 64 kbyte logical
+address space, so what I did was to partition the address space into 4
+kbytes (always mapped, used for interrupt handlers, bank switching
+routines, IAR compiler helper routines, etc), 56 kbytes (kernel or
+current process data and stack) and 4 kbytes (currently executing
+function). The currently executing function couldn't be more than 4
+kbytes and couldn't cross a physical 4 kbyte boundary due to the
+hardware mapping granularity, but this was acceptable in practice.
+
+I got the Unix V7 clone working OK under this model and then added the
+networking, so although it was a bit of a dogs breakfast, it proves
+the concept works. My memory management left a fair bit to be desired
+(too much work to fix) however I think porting 2.11BSD would solve
+this problem since it works in the PDP-11 under split I/D, which has
+similar constraints except the 4 kbyte code constraint.
+
+My understanding is 2.11BSD is actually a cut down 4.3BSD running on
+the HAL from 2.xxBSD, I would like to audit each change from 4.3BSD to
+make sure I agree with it, so essentially my project would be porting
+4.3BSD rather than 2.11BSD. But I'd take the networking stack and
+possibly a lot more code from 2.11BSD, since it is simplified, for
+instance the networking stack does not use SYN cookies.
+
+cheers, Nick
+
+On Wed, Dec 28, 2016 at 6:14 PM, Peter Jeremy <peter at rulingia.com> wrote:
+> On 2016-Dec-25 17:21:31 -0500, Steve Nickolas <usotsuki at buric.co> wrote:
+>>On Mon, 26 Dec 2016, Nick Downing wrote:
+>>> I became frustrated with the limitations of both UZI and NOS and decided to
+>>> port 2.11BSD to the cash register as the next step, my goal was (a) make it
+>>> cross compile from Linux to PDP-11, (b) check it can build an identical
+>>> release tape through cross compilation, (c) port it to Z80 using my
+>>> existing cross compiler.
+>>
+>>A Z180 is powerful enough to run 2.11BSD? o.o;
+>
+> I suspect shoe-horning 2.11BSD onto a Z180 would be difficult - 2.11BSD
+> on a PDP-11 requires split I+D and has kernel and userland in separate
+> address spaces.  Even with that, keeping the non-overlay part of the
+> kernel in 64KB is difficult.  Equivalent Z180 code is going to be much
+> larger than PDP-11 code.
+>
+> I'd be happy to be proved wrong.
+>
+> --
+> Peter Jeremy
+

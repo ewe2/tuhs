@@ -1,0 +1,291 @@
+From: frank@wortner.com (Frank Wortner)
+Date: Wed, 4 Oct 2000 11:57:02 -0400 (EDT)
+Subject: [pups] Networking With 2.11 BSD and Begemot Emulator
+In-Reply-To: <200010041528.IAA19574@moe.2bsd.com>
+Message-ID: <Pine.NEB.4.21.0010041152430.26565-100000@panix6.panix.com>
+
+Just to let everyone know,  Stephen Schultz was right:  I needed arp table
+entries as he described.`
+
+Thanks to him and Greg Lehey for their useful replies.
+
+Frank
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA44035
+	for pups-liszt; Thu, 5 Oct 2000 08:00:59 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA44023
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 08:00:56 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id IAA61588
+	for pups at minnie.cs.adfa.edu.au; Thu, 5 Oct 2000 08:02:39 +1100 (EST)
+	(envelope-from wkt)
+Received: from mail1.panix.com (mail1.panix.com [166.84.0.212])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id FAA43020
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 05:37:32 +1100 (EST)
+	(envelope-from frank at wortner.com)
+Received: from panix3.panix.com (panix3.panix.com [166.84.0.228])
+	by mail1.panix.com (Postfix) with ESMTP id 12733487A4
+	for <pups at minnie.cs.adfa.edu.au>; Wed,  4 Oct 2000 14:37:10 -0400 (EDT)
+Received: from localhost (localhost [[UNIX: localhost]]) by panix3.panix.com (8.8.8/8.7.1/PanixN1.0) with ESMTP id OAA22748 for <pups at minnie.cs.adfa.edu.au>; Wed, 4 Oct 2000 14:37:10 -0400 (EDT)
+X-Authentication-Warning: panix3.panix.com: frank owned process doing -bs
+Date: Wed, 4 Oct 2000 14:37:09 -0400 (EDT)
+From: Frank Wortner <frank@wortner.com>
+X-Sender: frank at panix3.panix.com
+To: PDP-11 Unix Preservation Society <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] Default P11 Emulator Clock Rate
+Message-ID: <Pine.NEB.4.21.0010041418140.20682-100000 at panix3.panix.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+This is just an FYI for anyone playing with the Begemot P11 emulator ...
+
+The default clock rate on P11 is 50 Hz.  While this corresponds to AC line
+frequency in many parts of the world,  it is not correct for the
+U.S.,  where 60 Hz is the norm.  Since PDP-11 Unix was developed in the
+U.S.,  the bootable distributions probably assume a 60 Hz clock
+also.  When the software and "hardware" disagree on clock rates,  problems
+happen.
+
+My emulated 11 had difficulties keeping accurate time until I discovered
+the 50 Hz clock rate.  After I changed it to 60,  the emulator's time was
+remarkably accurate!
+
+If you want to change the default clock rate,  you can do so in the source
+(look for the symbol "clock_rate" in "main.c"),  or you can just add
+
+	set clock_rate 60
+
+into your p11conf file.  This will override the default in the emulator
+program.
+
+Have fun -- I certainly am! :-)
+
+Frank
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id IAA44015
+	for pups-liszt; Thu, 5 Oct 2000 08:00:13 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id IAA44011
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 08:00:11 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id IAA61560
+	for pups at minnie.cs.adfa.edu.au; Thu, 5 Oct 2000 08:01:55 +1100 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id CAA42100
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 02:40:33 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id IAA19559
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 08:24:07 -0700 (PDT)
+Date: Wed, 4 Oct 2000 08:24:07 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200010041524.IAA19559 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Greg Lehey <grog at lemis.com>
+> No, that wasn't me.  FreeBSD doesn't have a tap driver.  Do you mean
+> Frank?
+
+	Sure it does.  The FreeBSD 4.1.1 release notes say so  ;)
+	Before that the 'if_tap.c' module was available (for some time)
+	as a download that could be retrieved from the author's site.
+
+> > 	The missing piece I forgot earlier was on the hosting machine's
+> > 	side to publish an ARP entry for the simulated 11.
+> 
+> I'm pretty sure we weren't using arp at all.  tun is a point-to-point
+> interface.
+
+	The reason for publishing an ARP entry on the hosting system is
+	so that other systems on the LAN know how to get to the simulated
+	11 via the P11 hosting system.   If the hosting system doesn't
+	publish an ARP entry the gateway, etc won't know to send the packets
+	to the machine running P11.
+
+> > 	I'm not sure how ARP can be made to work thru the 'tun' device.
+> 
+> I don't think it can.  I think Harti used some magic there.
+
+	I know it can't - I asked him about it :)   That's when I first 
+	discovered that nothing was able to communicate with the simulated
+	11 - the 11 will not send anything unless it's able to get a 
+	response to its ARP request.   On the hosting side it would be 
+	possible perhaps to use a "interface route" but 2.11 can not do that
+	and will block waiting for an ARPREPLY.
+
+	Steven
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA44583
+	for pups-liszt; Thu, 5 Oct 2000 09:38:50 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA44579
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 09:38:48 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id JAA62065
+	for pups at minnie.cs.adfa.edu.au; Thu, 5 Oct 2000 09:40:31 +1100 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA44571
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 09:38:23 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id PAA21951
+	for pups at minnie.cs.adfa.edu.au; Wed, 4 Oct 2000 15:27:58 -0700 (PDT)
+Date: Wed, 4 Oct 2000 15:27:58 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200010042227.PAA21951 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Default P11 Emulator Clock Rate
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Frank Wortner <frank at wortner.com>
+> The default clock rate on P11 is 50 Hz.  While this corresponds to AC line
+> frequency in many parts of the world,  it is not correct for the
+> U.S.,  where 60 Hz is the norm.  Since PDP-11 Unix was developed in the
+> U.S.,  the bootable distributions probably assume a 60 Hz clock
+
+	Yes, the bootable 2.11 distribution assumes a 60Hz clock.  That is
+	easily changed though for folks that live in 50Hz areas.  Edit the
+	kernel config file and change LINEHZ to 50.  The rest of the system 
+	has been changed to ask the kernel for the clockrate so there shouldn't
+	be any compiled in assumptions outside the kernel (if I overlooked
+	any let me know and I'll fix it).
+
+> My emulated 11 had difficulties keeping accurate time until I discovered
+> the 50 Hz clock rate.  After I changed it to 60,  the emulator's time was
+> remarkably accurate!
+
+	Indeed it is accurate.   Earlier versions of P11 would lose time
+	very rapidly if the PDP-11 was "busy" - but the latest version of
+	P11 is fantastic at keeping time.  If you run 'ntpd' on the 11 the
+	time stays even closer to "real".
+
+	Steven Schultz
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA46919
+	for pups-liszt; Thu, 5 Oct 2000 18:03:16 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA46914
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 18:03:14 +1100 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id SAA63282
+	for pups at minnie.cs.adfa.edu.au; Thu, 5 Oct 2000 18:04:55 +1100 (EST)
+	(envelope-from wkt)
+Received: from wantadilla.lemis.com (root at wantadilla.lemis.com [192.109.197.80])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA45823
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 5 Oct 2000 14:03:57 +1100 (EST)
+	(envelope-from grog at wantadilla.lemis.com)
+Received: (from grog at localhost)
+	by wantadilla.lemis.com (8.11.0/8.9.3) id e9533Pt12494;
+	Thu, 5 Oct 2000 12:33:25 +0930 (CST)
+	(envelope-from grog)
+Date: Thu, 5 Oct 2000 12:33:25 +0930
+From: Greg Lehey <grog@lemis.com>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] Networking With 2.11 BSD and Begemot Emulator
+Message-ID: <20001005123324.C12234 at wantadilla.lemis.com>
+References: <200010041524.IAA19559 at moe.2bsd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 1.0i
+In-Reply-To: <200010041524.IAA19559 at moe.2bsd.com>; from sms at moe.2bsd.com on Wed, Oct 04, 2000 at 08:24:07AM -0700
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Wednesday,  4 October 2000 at  8:24:07 -0700, Steven M. Schultz wrote:
+> Hi -
+>
+>> From: Greg Lehey <grog at lemis.com>
+>> No, that wasn't me.  FreeBSD doesn't have a tap driver.  Do you mean
+>> Frank?
+>
+> 	Sure it does.  The FreeBSD 4.1.1 release notes say so  ;)
+> 	Before that the 'if_tap.c' module was available (for some time)
+> 	as a download that could be retrieved from the author's site.
+
+I stand corrected:
+
+> revision 1.1
+> date: 2000/07/20 17:01:10;  author: nsayer;  state: Exp;
+> Add the tap driver.
+> 
+> The tap driver is used to present a virtual Ethernet interface to the
+> system. Packets presented by the network stack to the interface are
+> made available to a character device in /dev. With tap and the bridge
+> code, you can make remote bridge configurations where both sides of
+> the bridge are separated by userland daemons.
+> 
+> This driver also has a special naming hack to allow it to serve a similar
+> purpose to the vmware port.
+> 
+> Submitted by:   myevmenkin at att.com, vsilyaev at mindspring.com
+
+Ah well, I still haven't used it.
+
+>>> 	The missing piece I forgot earlier was on the hosting machine's
+>>> 	side to publish an ARP entry for the simulated 11.
+>>
+>> I'm pretty sure we weren't using arp at all.  tun is a point-to-point
+>> interface.
+>
+> 	The reason for publishing an ARP entry on the hosting system is
+> 	so that other systems on the LAN know how to get to the simulated
+> 	11 via the P11 hosting system.   If the hosting system doesn't
+> 	publish an ARP entry the gateway, etc won't know to send the packets
+> 	to the machine running P11.
+
+I did that with a static route entry.
+
+>>> 	I'm not sure how ARP can be made to work thru the 'tun' device.
+>>
+>> I don't think it can.  I think Harti used some magic there.
+>
+> 	I know it can't - I asked him about it :)   That's when I first
+> 	discovered that nothing was able to communicate with the simulated
+> 	11 - the 11 will not send anything unless it's able to get a
+> 	response to its ARP request.   On the hosting side it would be
+> 	possible perhaps to use a "interface route" but 2.11 can not do that
+> 	and will block waiting for an ARPREPLY.
+
+As I say, it's not that simple.  I used it without trouble for years.
+Recently something broke, and I suspect it trashed my root file
+system, and I haven't had time to go back and fix it.  Since others
+have the rest running, it's obviously nothing fundamental.
+
+Greg
+--
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+

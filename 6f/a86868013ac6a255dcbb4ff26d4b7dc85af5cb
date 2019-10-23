@@ -1,0 +1,75 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 8 Dec 2016 11:29:14 -0500
+Subject: [TUHS] Moto and MMU issues -- was Unix & Memory Management
+	Units (MMU)
+Message-ID: <CAC20D2NV7DOaejq5_EHc52jh90HLjXeNkboSn_9wVFd_XYzYjw@mail.gmail.com>
+
+On Thu, Dec 8, 2016 at 5:39 AM, Joerg Schilling <schily at schily.net> wrote:
+
+> Back to the Bourne Shell:
+>
+> The original Bourne Shell did not use malloc, but rather had a SIGSEGV
+> handler
+> that used to extend the "string stack" called "stak" via sbrk() whenever
+> the
+> code tried to access data beyond the end ot the heap.
+>
+
+​Right although the 68K was not the first or the only system to have that
+problem - again IIRC Series/1 and maybe one of the PE systems.  You are
+correct then SunOS and >>some<< of the 68000 based system did have the
+problem you suggested.  And in fact, Masscomp (and Apollo) which used
+68000's (but used two of them so could run full VM) could survive that
+style of fault (because it never occurred).
+
+BTW: the "conceptual problem" , you mentioned while true, is being a little
+harsh.   As the one of the 68K designers (Les Crudele) said to me once,
+when they wrote the microcode, there were not thinking about instruction
+restart - so the issue was that Nick did not save enough state to do it.
+
+The model for the 68000 that they were using was the base/limit PDP-11 and
+the original PDP-10.  Also at the time, the competition was the 6800, the
+8080, Z80, 6502.   They were trying to put a PDP-11/70 on chip (without
+getting into trouble like CalData did - which Les, Nick and team were very
+aware having been DEC and CalData customers before they were at Moto].
+While we think of the 68000 family has being 32 bit, the fact is inside it
+is a 16 bit system (the barrel shifter and execution functions are 16).
+And it was a skunk works project -- the 6809 was Moto's real processor.
+It was an experiment done by a couple of rogue engineers that said - hey we
+can do better,   The fact was they made a chip that was good enough to
+actually compete with the Vax in the end, because it was fast enough AND
+they had the wisdom to define 32 bits of address space and 32 bit
+operations (again having been PDP-11 users), but as Les used to say - part
+of the thinking was that while DEC was moving to the Vax, they had hoped to
+break into the area that they 16 bits minis claimed - which they in-fact
+did.
+
+And if you think in terms of a Clay Christensen's disruption theory, the
+fact that VM did not work easily (i.e. was a "worse" technology than the
+Vax) was ok - a new breed of customer did not care.  68000 was huge
+success, despite Moto marketing ;-)
+
+To me the larger issue with the 68010 was that when Nick did add the
+restart microcode, the new '10 microcode actually dumped version dependant
+state on the external stack (in Intel terminology -different "step" '10 put
+different state on the external stack or worse, could not restart an
+instruction that had been saved from a different step processor).
+
+This screw up was a huge issue when we did replaced the "executor" with a
+68010, because it meant that all cpu boards had to be the same processor
+microcode revision. Masscomp was of course the first to make an MP, so was
+the the first firm to run into the issue (I remember debugging it - we
+could not reproduce the issue because of course tjt and my own machine's by
+chance had "MPU" boards as we called them with the same step -- it was one
+of the field service guys that realized that the customer system had a
+mixed step board -- i.e. when they replaced a single MPU in the field, the
+system stopped working).  IIRC:  Moto never fixed the '10, as that
+processor was reasonably short lived in the open market.   They did fix the
+microcode in the '20 so the state on the external stack was independent of
+stepping.
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20161208/a7a937ff/attachment.html>
+

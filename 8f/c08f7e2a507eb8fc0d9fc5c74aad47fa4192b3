@@ -1,0 +1,77 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 24 Mar 2016 11:17:18 +0100
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <mailman.1.1458784801.4499.tuhs@minnie.tuhs.org>
+References: <mailman.1.1458784801.4499.tuhs@minnie.tuhs.org>
+Message-ID: <56F3BEAE.9060903@update.uu.se>
+
+On 2016-03-24 03:00, "Ron Natalie"<ron at ronnatalie.com> wrote:
+>
+>> >Closest I've ever been murdered was when I "accidentally" filled the local
+>> >11/70 with an uninterruptible instruction sequence."
+> SPL instruction.   The PDP-11 was odd that while SPL was a "privileged"
+> instruction, rather that trapping if you did it in user mode, it just
+> "ignored" it.
+> Well, what it ignored was the actual change of the processor level.   What
+> it still implemented was the side effect was that interrupts were locked out
+> until the next instruction fetch.
+> If you filled your instruction space up with SPLs you could lock up the
+> computer so that even the HALT key didn't work (you had to do a bus RESET).
+
+Ok. Color me stupid, but I don't get it. I totally do not understand how 
+this locks anything out.
+
+It is the normal behavior of any instruction that interrupts are not 
+recognized until the next instruction fetch. This is how the microcode 
+works, and it is also pretty much the same in any processor today. 
+Except for instructions that take a long time, and which can be 
+interrupted in the middle, the context preserved, and the instruction 
+restarted and continued, instructions are normally atomic. You cannot 
+get interrupts in the middle of an instruction.
+
+Second, I cannot understand how filling the memory with SPL instructions 
+(or any other instruction) can lock out the CPU. As noted, they are 
+individual instructions. You still get a fetch between each instruction, 
+at which point, interrupts will be recognized.
+
+Now, if you instead talked about actually raising the CPU to SPL 7, then 
+I agree that no interrupts will happen. But that is because you 
+essentially disabled interrupts.
+
+The front panel still works though. It is not handled like an interrupt, 
+but it is true that it do interact with the processor states, and 
+normally if you pull HALT, it will only halt when it's going to fetch 
+the next instruction. You can, of course, also set the front panel 
+switch for single microcode instruction, at which point the CPU will 
+halt at the next microcode instruction instead, and you can single step 
+the microcode as well.
+
+The one CPU I know you can sunset is the KA10 (PDP-10). I'm sure there 
+are others, but I have never seen how this could be done on a PDP-11, so 
+I'm most curious about this, and if you can provide more details I would 
+be most interested. As I also happen to know where a PDP-11/70 is 
+standing, I intend to test this out next I get close to it.
+
+As for the KA10 (I think it was the KA10, but it might have been the 
+PDP-6), the problem is related to the indirect addressing feature. Since 
+memory is 36 bits, but addresses only 18, you have plenty of bits to 
+play with. And one of them is the indirect bit. And if you refer to a 
+memory location that also have the indirect bit set, you get another 
+memory access to get the actual content. The fun thing happens if you 
+set the indirect bit, and give your own address. This is then an 
+infinite memory reference. And the KA10 can not be broken out of that 
+lookup. The only solution is to pull the power plug.
+The CPU is essentially stuck in one state, just tightly reading memory, 
+and then repeating reading memory. Later PDP-10 models have an explicit 
+check in the microcode in this loop to be able to break out of this.
+
+Sorry for the offtopic content. :-)
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

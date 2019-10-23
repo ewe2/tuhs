@@ -1,0 +1,513 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 492c33a3
+	for <ml@inbox.vuxu.org>;
+	Mon, 15 Jul 2019 01:56:21 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1952293D52; Mon, 15 Jul 2019 11:56:20 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 36E37947D5;
+	Mon, 15 Jul 2019 11:55:38 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=outdoorexpressionslimited.onmicrosoft.com header.i=@outdoorexpressionslimited.onmicrosoft.com header.b="qzafCoKC";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1C0E2947D5; Mon, 15 Jul 2019 11:55:36 +1000 (AEST)
+Received: from APC01-HK2-obe.outbound.protection.outlook.com
+ (mail-eopbgr1300082.outbound.protection.outlook.com [40.107.130.82])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1655393D9F
+ for <tuhs@tuhs.org>; Mon, 15 Jul 2019 11:55:34 +1000 (AEST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Civ37LOG1Q6Alnx8hvb7vANPktszieB/KPTctXtaFbm+ykrWIX1NO5Pj1ul3459isSFkxGVBSLW+DdwwY/NRr3U2TcmnsTwqMenuTu7AI8c+Oqhn+p5hSwQ1wfJyv3zFGOEARzBd2a/o3DW9fD1CuDm3mVjsRJ6qtoD+kqh6WXKn7rGvAz79pf7WFxIDASKSG0neKmTN2EGeMrA39AZTE9uOvouNeq/12Ohag6mg3fTy1TooliSWzj9wT20mqQ9w+Hi6SJZr/SbUWooobt+BKD7bibTXs2mL7kt5jM8xIgpTzUiBGVbul56s0/ule9mqOE6KpPk+EexZijb3hdy8SQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com; 
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SB+oHBNHfm/r7ujK3J/KZi1IpI/DKNNiHIKD/Of/nEY=;
+ b=KphXlAKSHROXA4HIUxXOO70SDF+V7YncM936AtQhqkBsVsmJZ5VKi9+MBF8dlIT/lmugkngxX3O0dgDs1q4l0cTKM0B35QdfRHgnEabsi+OfS1LwNX9dedNVgKteF7r/WJ+j6oq49ppXZdxFWBVGSh3iRtIk4RoMp84fs2EUx93c5mWXBfO3m7gcr6PHVPymDWb61rMa78+J3P4+b+8CFJb7hNGZjL2oiZvcgK2DUhXBdgRHc2Qria5hv6cp6zo/jMHaK5cfyUSmvDUPil3gyoNw4BAh7mmgXybA/X7SF6ryf0nMqjPCQiez63oPr+ILi2RNiI2hd2yhe+Pd5FPIVg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1;spf=fail (sender ip is
+ 59.148.14.54) smtp.rcpttodomain=tuhs.org
+ smtp.mailfrom=superglobalmegacorp.com;dmarc=none action=none
+ header.from=superglobalmegacorp.com;dkim=none (message not signed);arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=outdoorexpressionslimited.onmicrosoft.com;
+ s=selector1-outdoorexpressionslimited-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SB+oHBNHfm/r7ujK3J/KZi1IpI/DKNNiHIKD/Of/nEY=;
+ b=qzafCoKCRXxvnFzo3Twk7EuvZemymNKfFZm8EGJvjSVHGOJoCJkccSfg6bu8MbdPHoaJEe/eM+0Ymd7MioHwUPQpvk4kksEfdznn8e9x+tK5TUQ2p3gI1LV/8hd6aeejQG7i3s3euHtVLt9hmNTnvriKoB1e8f+iz2YPDhsxwfI=
+Received: from PS2PR02CA0095.apcprd02.prod.outlook.com (2603:1096:300:5c::35)
+ by PS1PR0201MB2074.apcprd02.prod.outlook.com (2603:1096:803:4::11)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2073.10; Mon, 15 Jul
+ 2019 01:55:28 +0000
+Received: from PU1APC01FT006.eop-APC01.prod.protection.outlook.com
+ (2a01:111:f400:7ebd::200) by PS2PR02CA0095.outlook.office365.com
+ (2603:1096:300:5c::35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.20.2073.14 via Frontend
+ Transport; Mon, 15 Jul 2019 01:55:28 +0000
+Authentication-Results: spf=fail (sender IP is 59.148.14.54)
+ smtp.mailfrom=superglobalmegacorp.com; tuhs.org; dkim=none (message not
+ signed) header.d=none;tuhs.org; dmarc=none action=none
+ header.from=superglobalmegacorp.com;
+Received-SPF: Fail (protection.outlook.com: domain of superglobalmegacorp.com
+ does not designate 59.148.14.54 as permitted sender)
+ receiver=protection.outlook.com; client-ip=59.148.14.54;
+ helo=exchange.superglobalmegacorp.local;
+Received: from exchange.superglobalmegacorp.local (59.148.14.54) by
+ PU1APC01FT006.mail.protection.outlook.com (10.152.252.104) with Microsoft
+ SMTP Server id 15.20.2052.18 via Frontend Transport; Mon, 15 Jul 2019
+ 01:55:27 +0000
+Received: from mail.outlook.com (joes-20dollar-tunnel [10.5.11.1]) by
+ exchange.superglobalmegacorp.local with SMTP (Microsoft Exchange Internet
+ Mail Service Version 5.5.2657.72)
+ id NPGTFFTM; Mon, 15 Jul 2019 09:55:26 +0800
+Date: Mon, 15 Jul 2019 01:54:54 +0000
+From: Jason Stevens <jsteve@superglobalmegacorp.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>, Adam Thornton
+ <athornton@gmail.com>
+Message-ID: <ADFDF14544A65F35.508bcf64-a311-431b-b05c-f282b05d8dc7@mail.outlook.com>
+In-Reply-To: <CAP2nic2ZCvK7QFEOpRXhY0g=S2QCtjpgdqNjCP8CK0K-cibFGg@mail.gmail.com>
+References: <alpine.BSF.2.21.9999.1907141555310.53965@aneurin.horsfall.org>
+ <ADFDF14544A65F35.c1325e10-4843-49ad-a450-d6d7c98018a1@mail.outlook.com>
+ <84e9babd-f83c-a4b6-382f-4e6780e91dfb@gmail.com>
+ <ADFDF14544A65F35.249ed8de-50ad-4a25-ae53-1c7fee584a4d@mail.outlook.com>
+ <CAP2nic2ZCvK7QFEOpRXhY0g=S2QCtjpgdqNjCP8CK0K-cibFGg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="----=_Part_29542_1165271277.1563155694291"
+X-Mailer: Outlook for iOS and Android
+X-EOPAttributedMessage: 0
+X-Forefront-Antispam-Report: CIP:59.148.14.54; IPV:NLI; CTRY:HK; EFV:NLI;
+ SFV:NSPM;
+ SFS:(10009020)(136003)(346002)(376002)(39830400003)(396003)(2980300002)(1110001)(339900001)(54094003)(199004)(189003)(9686003)(81166006)(36906005)(16586007)(81156014)(86362001)(33964004)(76176011)(316002)(6306002)(508600001)(5660300002)(966005)(7696005)(6246003)(2906002)(30864003)(110136005)(50226002)(236005)(26005)(45080400002)(55016002)(229853002)(476003)(14444005)(356004)(336012)(305945005)(70206006)(186003)(53386004)(105606002)(11346002)(8936002)(8676002)(53546011)(53416004)(486006)(71190400001)(446003)(606006)(6666004)(85226003)(70586007)(126002)(460985005);
+ DIR:OUT; SFP:1101; SCL:1; SRVR:PS1PR0201MB2074;
+ H:exchange.superglobalmegacorp.local; FPR:; SPF:Fail; LANG:en;
+ PTR:059148014054.ctinets.com; A:1; MX:1; 
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 11e431dd-e918-426c-727f-08d708c78260
+X-Microsoft-Antispam: BCL:0; PCL:0;
+ RULEID:(2390118)(7020095)(4652040)(7021145)(8989299)(4534185)(7022145)(4603075)(4627221)(201702281549075)(8990200)(7048125)(7024125)(7027125)(7023125)(5600148)(711020)(4605104)(1401327)(2017052603328);
+ SRVR:PS1PR0201MB2074; 
+X-MS-TrafficTypeDiagnostic: PS1PR0201MB2074:
+X-MS-Exchange-PUrlCount: 3
+X-Microsoft-Antispam-PRVS: <PS1PR0201MB20742FB1E28264A82A216E73C4CF0@PS1PR0201MB2074.apcprd02.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-Forefront-PRVS: 00997889E7
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam-Message-Info: fqWFywdePKWsLYwouqUdLWevLootPIXJ99bFj8cB62hkE/z2Ok0IUiHp5XtirwLTl5XgiPuaO6GPxim3k4g+5rPZeUfRIrt1Nrxkh/bvMX+ejrr8sw0AwiO0rTjRv7x12omz5xnjVpTGzb8mBXGEEwVkZHtHFjHo/bXlClJuCBYm1G8U235ijmawNNM3zEgrMiBV8VhSBjks9N33QIr8RBvDhCCNZo6Hf7Y64TMm1cHdcXWYdsynlSoKskG5mCrmby3NnylXakU7wVH17f977yajZ/tfMdGVFhw/Dd3rbTB/ABz/o/UxG0Nyr3eNXWFqPgSn58rVtfk5eym6FjclLjA4KWMmiBUwAJyXi02IT7YrBCN6vkyLI5+AYnL160sdJ3AAjPc68SQscsFshmWJvApf82tOMWgNx3UB3a820mc=
+X-OriginatorOrg: superglobalmegacorp.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Jul 2019 01:55:27.1814 (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 11e431dd-e918-426c-727f-08d708c78260
+X-MS-Exchange-CrossTenant-Id: 870ed452-0577-4b7b-90ed-9cac080031b9
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=870ed452-0577-4b7b-90ed-9cac080031b9; Ip=[59.148.14.54];
+ Helo=[exchange.superglobalmegacorp.local]
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PS1PR0201MB2074
+Subject: Re: [TUHS] Thanks for Virtuallyfun! (was Re: Happy birthday,
+ 386BSD!)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+------=_Part_29542_1165271277.1563155694291
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+The crazy thing about say the rise and fall of Danger (NetBSD) you had BSD+=
+Mach (NeXTSTEP) striking back on the iPhone, the amazing adoption of Linux =
+on the Android front and the spectacular failure of Microsoft and their sto=
+p gap OS, Windows CE (which is without a doubt one of the biggest mistakes =
+they ever made) and how NT/OS2 / Windows NT also made it to mobile space bu=
+t was too late to the market and withdrawn.=20
+
+
+
+
+Although the race to bring computers to the masses via smartphones certainl=
+y was a big deal, but it was all the same players of the '88-93 wars.=20
+
+
+
+
+The real surprise is how a rigid Linux distribution found such wide spread =
+adoption, how NeXT finally found widespread adoption, and how NT was unable=
+ to lock in corporate middleware unlike how it did on the desktop.=20
+
+
+
+
+I've owned them all, the danger sidekick was so amazing but the lack of SDK=
+'s was embarrassing, then Microsoft bought them and effectively dismantled =
+them (anyone remember the Kin?) which really showed their lost ways.=C2=A0 =
+Once rhr iPhone had been jailbreaked being able to ssh in and out of the ph=
+one was amazing, but for me the lockdown was just too much. CE has been so =
+neglected that ie4 in 2007 was such a joke.=C2=A0 Android was a rough ride,=
+ but it was available globally with wildly varying apps but it had so much =
+buzz outside of western Europe and North America.=C2=A0 Windows phone was a=
+ dud until they finally got the NT kernel running but by then they had chan=
+ged API directions and platforms so much they alienated everyone.=C2=A0 I s=
+till love my Lumia 1020.
+
+
+
+
+Its no wonder that USL has no dog in the hunt. Just like how whatever moder=
+n sco is called repackaging FreeBSD.=20
+
+
+
+
+From: Adam Thornton
+
+
+Sent: Monday, July 15, 1:48 AM
+
+
+Subject: Re: [TUHS] Thanks for Virtuallyfun! (was Re: Happy birthday, 386BS=
+D!)
+
+
+To: The Eunuchs Hysterical Society
+
+
+
+
+
+
+Jason Stevens jsteve@superglobalmegacorp.com via=C2=A0outdoorexpressionslim=
+ited.onmicrosoft.com wrote:
+
+
+> 1988-1993 was so incredibly pivotal, much more than say 2014-2019.=C2=A0 =
+I wonder if we will ever see such a powerful window of change like that eve=
+r again.=20
+
+
+
+
+We did but no one was paying attention.=C2=A0 It was 2007-2010.=C2=A0 The i=
+Phone and Android were introduced, and the computing world went from an Int=
+el-architecture monopoly (which it had pretty much become by 2005) to an In=
+tel/ARM duopoly (because Intel and AMD focused too much on performance and =
+not enough on making a low-power implementation of the architecture; an Int=
+el-compatible chip *could* have won the mobile wars, but didn't).=C2=A0 In =
+the next couple years iPhone and Android (both on ARM) massacred all of the=
+ mobile competition.
+
+
+
+
+That also meant that the underlying OS for mobile devices became, you guess=
+ed it, Unix (or at least something that smells a lot like it).=C2=A0 Which =
+is weird, given that something designed for single-threaded composible text=
+-filtering operations is now running almost all of the world's multithreade=
+d user-facing graphical applications, but that's the vagaries of history fo=
+r you.
+
+
+
+
+Adam
+
+
+
+
+On Sun, Jul 14, 2019 at 2:08 AM Jason Stevens <jsteve@superglobalmegacorp.c=
+om> wrote:
+
+
+It's always nice to get such nice fan mail.=C2=A0=C2=A0 Ever since the earl=
+y days of SIMH and PUPS I've been a fan of the idea of being able to help o=
+thers discover and run ancient Unix.=20
+
+
+
+
+It's amazing how fast things moved when looking back at the 5 years after t=
+he wide stream adoption of the 80386, and how many things have risen and fa=
+llen in that time period, how many failed to only come back and win.=20
+
+
+
+
+1988-1993 was so incredibly pivotal, much more than say 2014-2019.=C2=A0 I =
+wonder if we will ever see such a powerful window of change like that ever =
+again.=20
+
+
+
+
+Definitely a happy birthday to 386BSD!
+
+
+
+
+
+
+From: Michael Huff
+
+
+Sent: Sunday, July 14, 4:18 PM
+
+
+Subject: [TUHS] Thanks for Virtuallyfun! (was Re:=C2=A0 Happy birthday, 386=
+BSD!)
+
+
+To: tuhs@minnie.tuhs.org
+
+
+
+
+
+
+Hi
+
+
+Personally, I'm very grateful for the amount of time you've spent not simpl=
+y finding and posting the things you do (this, cmu mach, the BSD and Unix s=
+tuff) but also the blog entries you write that spell out the steps you take=
+ to get it all running.=20
+
+
+As someone who came along much later (slackware 3.5?, freebsd 2.2-something=
+) but has a lot of interest/curiosity about what the older days were like i=
+t's very helpful and illuminating.=20
+
+
+Oh! ...and of course, Happy Birthday 386BSD!
+
+
+Regards,
+
+
+-a Virtuallyfun fan/reader
+
+
+On 7/13/2019 10:53 PM, Jason Stevens wrote:
+
+
+Getting this to build was such a tremendous effort.=C2=A0 Although last tim=
+e I revisited my 386BSD 0.0 work even under emulation it ran too fast and h=
+ad issues.=20
+
+
+
+
+But it's really a tremendous effort what Bill and Lynne had done, by pushin=
+g out not only a running version of Net/2 but a self hosting version of Net=
+/2 for the lowly and utterly common and commodity 386.
+
+
+
+
+Its a shame the BSDSS and later N2SS from CMU (ports of 4.4 / Net/2) to Mac=
+h 3.=C2=A0 But that USL vs BSDi/CSRG lawsuit cut short what should have the=
+ shot heard around the world moment.=20
+
+
+
+
+It was shockingly hard to chase down 386BSD=C2=A0 0.0 just as it was to fin=
+d NetBSD 0.8 and 0.9
+
+
+
+
+Im just sad I was in the dark about BSD at that time, all the Unix people I=
+ knew hid behind their RS/6000s and SUN workstations while me and all my pe=
+ers were all all running Linux.=20
+
+
+
+
+But there is nothing like the feeling of running make world, or building a =
+custom kernel when compared to just running a binary set.=20
+
+
+
+
+Since 0.1 is more capable, here is a download for Windows users for it read=
+y to run.=20
+
+
+
+
+https://sourceforge.net/projects/bsd42/files/4BSD%20under%20Windows/v0.4/38=
+6BSD-0.1.exe/download
+
+
+
+
+
+
+
+
+On Sun, Jul 14, 2019 at 1:57 PM +0800, "Dave Horsfall" <dave@horsfall.org> =
+wrote:
+
+
+
+
+
+386BSD was released on this day in 1992, when William and Lynne Jolitz star=
+ted the Open Source movement; well, that's what my notes say, and correctio=
+ns are welcome (I know that Gilmore likes to take credit for just about eve=
+rything). -- Dave=20
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------=_Part_29542_1165271277.1563155694291
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">The crazy thing about say the rise and fall of Danger (NetBSD) you had BSD+Mach (NeXTSTEP) striking back on the iPhone, the amazing adoption of Linux on the Android front and the spectacular failure of Microsoft and their stop gap OS, Windows CE (which is without a doubt one of the biggest mistakes they ever made) and how NT/OS2 / Windows NT also made it to mobile space but was too late to the market and withdrawn. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Although the race to bring computers to the masses via smartphones certainly was a big deal, but it was all the same players of the '88-93 wars. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">The real surprise is how a rigid Linux distribution found such wide spread adoption, how NeXT finally found widespread adoption, and how NT was unable to lock in corporate middleware unlike how it did on the desktop. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">I've owned them all, the danger sidekick was so amazing but the lack of SDK's was embarrassing, then Microsoft bought them and effectively dismantled them (anyone remember the Kin?) which really showed their lost ways.&nbsp; Once rhr iPhone had been jailbreaked being able to ssh in and out of the phone was amazing, but for me the lockdown was just too much. CE has been so neglected that ie4 in 2007 was such a joke.&nbsp; Android was a rough ride, but it was available globally with wildly varying apps but it had so much buzz outside of western Europe and North America.&nbsp; Windows phone was a dud until they finally got the NT kernel running but by then they had changed API directions and platforms so much they alienated everyone.&nbsp; I still love my Lumia 1020.<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Its no wonder that USL has no dog in the hunt. Just like how whatever modern sco is called repackaging FreeBSD. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">From: Adam Thornton<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Sent: Monday, July 15, 1:48 AM<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Subject: Re: [TUHS] Thanks for Virtuallyfun! (was Re: Happy birthday, 386BSD!)<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">To: The Eunuchs Hysterical Society<br>
+<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; "><b>Jason Stevens </b><a href="mailto:jsteve@superglobalmegacorp.com"><b>jsteve@superglobalmegacorp.com</b></a><b> </b><a href="https://support.google.com/mail/answer/1311182?hl=en"><b>via</b></a><b>&#160;</b><a href="http://outdoorexpressionslimited.onmicrosoft.com"><b>outdoorexpressionslimited.onmicrosoft.com</b></a><b> wrote:</b><br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">&gt; 1988-1993 was so incredibly pivotal, much more than say 2014-2019.&#160; I wonder if we will ever see such a powerful window of change like that ever again. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">We did but no one was paying attention.&#160; It was 2007-2010.&#160; The iPhone and Android were introduced, and the computing world went from an Intel-architecture monopoly (which it had pretty much become by 2005) to an Intel/ARM duopoly (because Intel and AMD focused too much on performance and not enough on making a low-power implementation of the architecture; an Intel-compatible chip *could* have won the mobile wars, but didn't).&#160; In the next couple years iPhone and Android (both on ARM) massacred all of the mobile competition.<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">That also meant that the underlying OS for mobile devices became, you guessed it, Unix (or at least something that smells a lot like it).&#160; Which is weird, given that something designed for single-threaded composible text-filtering operations is now running almost all of the world's multithreaded user-facing graphical applications, but that's the vagaries of history for you.<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Adam<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">On Sun, Jul 14, 2019 at 2:08 AM Jason Stevens &lt;<a href="mailto:jsteve@superglobalmegacorp.com">jsteve@superglobalmegacorp.com</a>&gt; wrote:<br>
+</div>
+<blockquote type="cite"><div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">It's always nice to get such nice fan mail.&#160;&#160; Ever since the early days of SIMH and PUPS I've been a fan of the idea of being able to help others discover and run ancient Unix. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">It's amazing how fast things moved when looking back at the 5 years after the wide stream adoption of the 80386, and how many things have risen and fallen in that time period, how many failed to only come back and win. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">1988-1993 was so incredibly pivotal, much more than say 2014-2019.&#160; I wonder if we will ever see such a powerful window of change like that ever again. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Definitely a happy birthday to 386BSD!<br>
+<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">From: Michael Huff<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Sent: Sunday, July 14, 4:18 PM<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Subject: [TUHS] Thanks for Virtuallyfun! (was Re:&#160; Happy birthday, 386BSD!)<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">To: <a href="mailto:tuhs@minnie.tuhs.org">tuhs@minnie.tuhs.org</a><br>
+<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Hi<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Personally, I'm very grateful for the amount of time you've spent not simply finding and posting the things you do (this, cmu mach, the BSD and Unix stuff) but also the blog entries you write that spell out the steps you take to get it all running. <br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">As someone who came along much later (slackware 3.5?, freebsd 2.2-something) but has a lot of interest/curiosity about what the older days were like it's very helpful and illuminating. <br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Oh! ...and of course, Happy Birthday 386BSD!<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Regards,<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">-a Virtuallyfun fan/reader<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">On 7/13/2019 10:53 PM, Jason Stevens wrote:<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Getting this to build was such a tremendous effort.&#160; Although last time I revisited my 386BSD 0.0 work even under emulation it ran too fast and had issues. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">But it's really a tremendous effort what Bill and Lynne had done, by pushing out not only a running version of Net/2 but a self hosting version of Net/2 for the lowly and utterly common and commodity 386.<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Its a shame the BSDSS and later N2SS from CMU (ports of 4.4 / Net/2) to Mach 3.&#160; But that USL vs BSDi/CSRG lawsuit cut short what should have the shot heard around the world moment. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">It was shockingly hard to chase down 386BSD&#160; 0.0 just as it was to find NetBSD 0.8 and 0.9<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Im just sad I was in the dark about BSD at that time, all the Unix people I knew hid behind their RS/6000s and SUN workstations while me and all my peers were all all running Linux. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">But there is nothing like the feeling of running make world, or building a custom kernel when compared to just running a binary set. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">Since 0.1 is more capable, here is a download for Windows users for it ready to run. <br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; "><a href="https://sourceforge.net/projects/bsd42/files/4BSD%20under%20Windows/v0.4/386BSD-0.1.exe/download">https://sourceforge.net/projects/bsd42/files/4BSD%20under%20Windows/v0.4/386BSD-0.1.exe/download</a><br>
+<br>
+<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">On Sun, Jul 14, 2019 at 1:57 PM +0800, "Dave Horsfall" &lt;<a href="mailto:dave@horsfall.org">dave@horsfall.org</a>&gt; wrote:<br>
+<br>
+</div>
+</blockquote>
+<blockquote type="cite"><blockquote type="cite"><div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; ">386BSD was released on this day in 1992, when William and Lynne Jolitz started the Open Source movement; well, that's what my notes say, and corrections are welcome (I know that Gilmore likes to take credit for just about everything). -- Dave <br>
+</div>
+</blockquote>
+</blockquote>
+<blockquote type="cite"><div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; "><br>
+</div>
+</blockquote>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; "><br>
+<br>
+<br>
+</div>
+<div dir="auto" style="direction: ltr; margin: 0; padding: 0; font-family: sans-serif; font-size: 11pt; color: black; "><span id="OutlookSignature"></span></div>
+
+------=_Part_29542_1165271277.1563155694291--

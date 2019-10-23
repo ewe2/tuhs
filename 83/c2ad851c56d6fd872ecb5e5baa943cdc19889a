@@ -1,0 +1,57 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Mon, 17 Jun 2002 20:11:15 -0700 (PDT)
+Subject: [pups] bsd2.11 kernel compile
+Message-ID: <200206180311.g5I3BF925792@moe.2bsd.com>
+
+Hi!
+
+> From: "Chuck Dickman" <chd_1 at nktelco.net>
+
+	I see you beat me to the answer ;)
+
+> During the compile 'size' outputs a list of the sizes of the
+> overlays. Look at the output. For mine....
+> 
+> > How do I figure out which overlay (or base) is the problem?
+> 
+> The base must be less than 7 8k pages or 57344(decimal) bytes.
+> Each overlay must be less than 8k bytes or 8192(decimal).
+> The network code is not overlayed, so you have 8 pages or the
+> full 64k. 
+
+	And you use "size" on the .o files to see how much each object file
+	contributes to an overlay.
+
+	With the exception of a few .o files which *must* be in the base
+	segment (and these are identified in the Makefile) anything can go
+	anywhere it will fit.  The overlay switching is extremely efficient
+	so don't worry about the 'affinity' of modules too much.
+
+	Oh, it should be mentioned that it is not legal to have an empty 
+	(0 length) overlay except at the end - i.e. you can't have overlay 3
+	be 0 bytes if overlay 4 or higher has nonzero size.
+
+> To make it work, just get the sizes below the limits. The 
+> optimal arrangement would be placing the code in such that
+> the overlay changes were minimized. So... move your system
+> disk drivers into base and change the configuration to
+> remove any hardware you don't actually have. 
+	
+	With the exception of perhaps the tty driver for the specific serial
+	devices present on the system it's not worth trying to pack things
+	"optimally".   The overhead of overlays is inhererent in the function
+	prologue and epilogue - the only extra overhead of actually switching
+	overlays is stuffing ~two words or so into the MMU registers.
+
+	DO NOT remove anything from the actual OV lines in the makefile - just
+	make sure you define/configure devices as not being present in the
+	config file (by saying you have 0 of them).  Then the .o files do
+	not take up any space and can be segregated into unused overlays
+	at the end (OV9 or 10 or so).
+
+	Good Luck!
+
+	Steven Schultz
+	sms at 2bsd.com
+
+

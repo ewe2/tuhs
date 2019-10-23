@@ -1,0 +1,209 @@
+From: sms@wlv.iipo.gtegsc.com (Steven M. Schultz)
+Date: Wed, 6 Dec 1995 19:47:48 -0800
+Subject: Undefined Inconsistency
+Message-ID: <199512070347.TAA02505@wlv.iipo.gtegsc.com>
+
+Howdy -
+
+> From: "Danny R. Brown" <sysyphus at crl.com>
+> 
+>   When I do a "reboot" the system declares that /dev/ra0f has an
+> undefined inconsistency (during fsck). It tells me to run fsck
+> manually, then aborts before starting the daemons.
+
+	What aborts?  If by 'abort' you mean that the process of the system
+	coming up ceases and you get dropped into a single user shell then
+	that's exactly what should happen.
+
+> I have dchecked, ichecked and fscked /dev/ra0f, and it seems to
+> be a happy partition.
+
+	Ok - at that point if a manual "fsck /dev/rra0f" (and you should be
+	using the raw (rra) form of the device) works, then all you need to
+	do is hit a ^D and the system will finish coming up to a multi user
+	state.
+
+	Hmmm - I think we'll need some more information before hazarding a
+	guess as to what's not working right.  The contents of /etc/fstab
+	and the current disklabel would be good starting points.
+
+> ra0f starts on an even cylinder boundary. It has one file which
+> occupies some 54% of the space on it.
+> reboot -f brings everything up normally.
+
+	Well, yes, it will - by bypassing all filesystem checks.  Usually
+	that'll work ok - but it's not something to do after a crash or
+	a power failure.
+
+> this boo-boo. Looking through the man pages did not point me in
+> any yet untried direction. I did encounter a 'bad block' on /dev/ra0d,
+
+	Hmmm - a bad block?  Shouldn't be related to anything in ra0f unless
+	you've accidentally created overlapping partitions.  If that were
+	the case though I'd expect massive and widespread corruption.
+
+	What was the error when the bad block was encountered?  If this is
+	an MSCP disk you'll need to find the MicroPDP-11 Formatter and
+	see if it will revector the bad sector for you (BSD MSCP drivers
+	can not do this - probably just as well because I've heard it's
+	fiendishly difficult and if you get it wrong you've hosed your
+	drive).
+
+	Steven Schultz
+	sms at wlv.iipo.gtegsc.com
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id PAA18811; Thu, 7 Dec 1995 15:07:46 +1059
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA12021; Thu, 7 Dec 1995 15:07:59 +1100
+From: wkt@dolphin.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9512070407.AA12021 at dolphin>
+Subject: Fsck tips
+To: oldunix at minnie.cs.adfa.oz.au
+Date: Thu, 7 Dec 1995 15:07:59 +1100 (EST)
+In-Reply-To: <199512070347.TAA02505 at wlv.iipo.gtegsc.com> from "Steven M. Schultz" at Dec 6, 95 07:47:48 pm
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+In atricle by Steven M. Schultz:
+> > I have dchecked, ichecked and fscked /dev/ra0f, and it seems to
+> > be a happy partition.
+> 
+> 	Ok - at that point if a manual "fsck /dev/rra0f" (and you should be
+> 	using the raw (rra) form of the device) works, then all you need to
+> 	do is hit a ^D and the system will finish coming up to a multi user
+> 	state.
+
+Apropos fsck'ing, always work on a raw device. Only fsck on an unmounted
+partition, or a quiescent one (no disk activity, this means single-user mode
+and sync BEFORE doing the fsck). If fsck finds an error, DONT sync the system
+before shutting down; sync will flush out anything still in the cache, possibly
+overwriting the changes fsck made to the disk.
+
+Someone had to point this out to me a few years ago, I kept doing
+sync sync sync reboot after fsck reported errors. Deary me!
+
+Cheers all,
+	Warren
+
+Received: from dolphin by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id QAA18876; Thu, 7 Dec 1995 16:00:31 +1100
+Received: by dolphin (5.x/SMI-SVR4)
+	id AA12847; Thu, 7 Dec 1995 16:00:44 +1100
+From: wkt@dolphin.cs.adfa.oz.au (Warren Toomey)
+Message-Id: <9512070500.AA12847 at dolphin>
+Subject: Fsck for v7
+To: oldunix at minnie.cs.adfa.oz.au
+Date: Thu, 7 Dec 1995 16:00:43 +1100 (EST)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+
+Hmm, while we're on the topic of fsck, the RL02 image of 7th Edition that was
+given to me by Torsten Hippe had an fsck for v7 filesystems, but no source code.
+Torsten did say that Johnny Billquist had the original tape, but Johnny says
+he's not in a position to read the tape.
+
+Anyway, does anybody have the source code to this or another v7 fsck? Any clues
+as to who wrote it etc.?
+
+Thanks,
+	Warren
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id VAA19332; Thu, 7 Dec 1995 21:43:44 +1100
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <08063-0 at oxmail.ox.ac.uk.>; Thu, 7 Dec 1995 10:33:07 +0000
+Message-Id: <m0tNdkP-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: Re: fsck tips
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Thu, 7 Dec 1995 10:40:17 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 1098
+
+
+As Warren says, you don't want to sync after an fsck run has made
+changes to the disk. Simply turn off and reboot. One gotcha Warren
+omitted was the process /etc/update, which is usually started at
+boot-time from /etc/rc. This process does a sync every 30 secs
+automatically.  Before fscking a live filesystem, kill update first!
+If fsck finds anything wrong, shutdown immediately without a sync.
+
+Of course, fscking unmounted filesystems is far safer, but not always
+possible for the root partition ...
+
+Cheers,
+
+Bob.
+
+--
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+    This message brought to you from an entirely Microsoft free system. 
+----------------------------------------------------------------------------
+
+
+
+Received: from oxmail.ox.ac.uk by minnie.cs.adfa.oz.au (8.6.8/8.3) with SMTP id WAA00752; Tue, 12 Dec 1995 22:19:51 +1059
+Received: from swift.eng.ox.ac.uk by oxmail.ox.ac.uk. with SMTP (PP) 
+          id <21208-0 at oxmail.ox.ac.uk.>; Tue, 12 Dec 1995 11:17:56 +0000
+Message-Id: <m0tPSqY-00000DC at swift.eng.ox.ac.uk>
+From: rjm@swift.eng.ox.ac.uk (Bob Manners)
+Subject: version 7
+To: oldunix at minnie.cs.adfa.oz.au (OldUnix MailingList)
+Date: Tue, 12 Dec 1995 11:26:10 +0000 (GMT)
+X-Mailer: ELM [version 2.4 PL23]
+Content-Type: text
+Content-Length: 1782
+
+
+I just thought I'd share a few more of my experiences with you in the
+hope that they may help someone out....
+
+Over the weekend, I finally succeeded in ftping Tapes/Torsten/v7.gz -
+version 7 as an RL02 image. (International ftp to the UK is terrible
+at present!).
+
+I have no RL02, so I booted the image on Bob Supnic's pdp11 emulator,
+built a kernel to support both RL and RK05 drives and set about
+transferring the vital parts of the system to an RK05 image, with the
+kernel source, games and other non-essentials going to a second
+image. The two RK05 images are pretty full! 
+
+I built kernels for the 11/40 (m40.o) and 11/34 (smch.o), to support
+just the RK05, and added a second DL-11 as previously discussed on
+this list. 
+
+Kermiting the root image to an RK05 on my 11/34 was no trouble. My
+11/34 will booth the m40.o image just fine, but the smch.o image
+caused much disk activity, but no console output. Version 7 thus can
+be persuaded to work on an 11/34a, with a single RK05. The second DL11
+is recognised and works as expected. Version 7 seems significantly
+slower than version 6, when multi-user mode is entered. 
+
+Thus, I think I'd recommend version 6 for a small system ...
+
+Cheers,
+
+Bob.
+
+
+-- 
+
+----------------------------------------------------------------------------
+Robert Manners                                  Osney Laboratory
+rjm at swift.eng.ox.ac.uk                          Dept of Engineering Science
+                                                University of Oxford
+                                                01865 288762
+Try: http://swift.eng.ox.ac.uk                  Linux - the only choice
+
+    This message brought to you from an entirely Microsoft free system. 
+----------------------------------------------------------------------------
+
+
+
+

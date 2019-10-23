@@ -1,0 +1,57 @@
+From: aap@papnet.eu (Angelo Papenhoff)
+Date: Mon, 16 Jan 2017 12:26:16 +0100
+Subject: [TUHS] Article on 'not meant to understand this'
+In-Reply-To: <alpine.DEB.2.11.1701161116110.7102@grey.csi.cam.ac.uk>
+References: <20170116014444.GA32261@minnie.tuhs.org>
+ <alpine.DEB.2.11.1701161116110.7102@grey.csi.cam.ac.uk>
+Message-ID: <20170116112616.GA40162@indra.papnet.eu>
+
+On 16/01/17, Tony Finch wrote:
+> Warren Toomey <wkt at tuhs.org> wrote:
+> 
+> > http://thenewstack.io/not-expected-understand-explainer/
+> 
+> Rob Pike observed on Twitter:
+> 
+> https://twitter.com/rob_pike/status/820777895689732096
+> 
+> > The article misses an important fact: A few years later we understood it
+> > well and could do it much simpler.
+> 
+> https://twitter.com/rob_pike/status/820777988924981254
+> 
+> > We are always learning, and that comment was as much a note to the
+> > author as to the reader. Now, stack switching is almost trivial.
+> 
+> https://twitter.com/rob_pike/status/820778110253613056
+> 
+> > A similar thing happened a generation earlier figuring out subroutine
+> > (function) calls. Whole books were written. Now it's an instruction.
+
+The author also actually missed the part that we're not supposed to
+understand. I'll just paste what I posted on hackernews:
+
+I don't think it's the context switching in general that we're not
+expected to understand, since it's pretty much the same in v7 but the
+comment is gone. Dmr actually explained the problem on his website
+(https://www.bell-labs.com/usr/dmr/www/odd.html). savu is used to save
+the current call stack, retu is used to switch to a saved call stack.
+The problem is that the function which did the savu was not necessarily
+the same as the function that does the retu, so after retu the function
+could have the call stack of a different function. As dmr explained,
+this worked with the PDP-11 compiler but not with the interdata
+compiler. In V7 the stack switching was moved into separate functions,
+save and resume. save retured 0 and resume returned 1 so that an if
+statement could be used to check if the return from save was actually
+that of resume after the stack switch (the same trick as that of fork).
+This way the code that was to be executed after a stack switch was in
+the same function and stack frame as the one that did the save (as
+opposed to swtch).
+
+Note that Lions doesn't explain this either, he assumed that the
+difficulty was with with u_rsav and u_ssav, but those are still in v7
+with the comment gone (he probably wasn't that wrong though, it really
+is confusing, but it's just not what the comment refers to)
+
+aap
+

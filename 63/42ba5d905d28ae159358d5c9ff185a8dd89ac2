@@ -1,0 +1,39 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 11 Dec 2015 20:22:57 -0500 (EST)
+Subject: [TUHS] why is sum reporting different checksum's between v6 and
+	v7
+Message-ID: <20151212012257.3740418C0AA@mercury.lcs.mit.edu>
+
+    > From: Random832
+
+    > Interestingly, the SysIII sum.c program, which I assume yields the same
+    > result for this input, appears to go through the whole input
+    > accumulating the sum of all the bytes into a long, then adds the two
+    > halves of the long at the end rather than after every byte.
+
+That's the same hack a lot of TCP/IP checksums routines used on machines with
+longer words; add the words, then fold the result in the shorter length at the
+end. The one I wrote for the 68K back in '84 did that.
+
+    > This suggests that the two programs would give different results for
+    > very large files that overflow a 32-bit value.
+
+No, I don't think so, depending on the exact detals of the implementation. As
+long as when folding the two halves together, you add any carry into the sum,
+you get the same result as doing it into a 16-bit sum. (If my memory of how
+this all works is correct - the neurons aren't what they used to be,
+especially late in the day... :-)
+
+    > Also, if this sign extends, then its behavior on "negative" (high bit
+    > set) bytes is likely to be very different from the SysIII one, which
+    > uses getc.
+
+I have this bit set that in C, 'char' is defined to be signed, and
+furthermore that when you assign a shorter int to a longer one, the sign is
+extended. So if one has a char holding '0200' octal (i.e. -128), assigning it
+to a 16-bit int should result in the latter holding '0177600' (i.e. still
+-128). So in fact I think they probably act the same.
+
+	Noel
+
+

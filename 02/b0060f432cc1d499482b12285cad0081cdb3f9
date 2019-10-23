@@ -1,0 +1,61 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 9 Nov 2015 11:31:43 +1100
+Subject: [TUHS] System III - TCP/IP
+In-Reply-To: <20151108143817.Horde.tlWgdF0OWmzmg-kXXO-AxUO@avocado.salatschuessel.net>
+References: <20151107200358.Horde.M1lYZZyTC4t0Qb8KrygKzhy@avocado.salatschuessel.net>
+ <20151107192043.GA11895@mcvoy.com>
+ <CAC20D2NnLC2H=+8ZzpXEpgUqa+qW3JuFMLeWjL_Su9OBoHWBZQ@mail.gmail.com>
+ <20151107231338.Horde.d8EIgIMMf9VYCExfovc2K_M@avocado.salatschuessel.net>
+ <20151108051028.GA32246@cowbell.employees.org>
+ <CAH1jEzbzpuwzncuEFQMHHD-pHHk_4SHre2PY5BPZNpY_HAgXCw@mail.gmail.com>
+ <20151108143817.Horde.tlWgdF0OWmzmg-kXXO-AxUO@avocado.salatschuessel.net>
+Message-ID: <CAH1jEza76_XTKXQPjjDuXS9t=bNVZCZzMAWddMcy0gRkQF9DkQ@mail.gmail.com>
+
+By the way, there's no reason you can't use your existing Zilog
+toolchain. You can just modify the makefiles that come with 2.11BSD to
+run the Zilog tools. Or another option might be to write a compiler
+driver that acts like "cc" and invokes the Zilog tools as
+subprocesses, you have the source for 2.11BSD "cc" so this shouldn't
+be too hard to do. Whatever naming convention the Zilog compiler uses,
+you could rename the object files to ".o" and the 2.11BSD build system
+would work largely unchanged. The most tricky part will be creating
+the a.out executables, which are in the simplest case a header of
+maybe 18 bytes (depends slightly on the magic number of the executable
+since there were a few different compatible versions) followed by the
+code and data segments followed by relocation records. To do this, I
+am pretty sure I created my own linker, or modified the unix linker
+(cannot remember exactly) in order to read the object files from the
+IAR Z180 assembler (and I think these were in S-record format that you
+mentioned) and create the a.out executables, I also had an extended
+a.out format for the large multi-segment executables (including the
+kernel), in which I arranged the code into 4 kbyte segments using a
+first-fit algorithm. Again I'm happy to give you whatever I have on
+this.
+Nick
+
+
+On Mon, Nov 9, 2015 at 12:38 AM, Oliver Lehmann <lehmann at ans-netz.de> wrote:
+>
+> Nick Downing <downing.nick at gmail.com> wrote:
+>
+>> I think you might get better mileage by just trying to port 2.11BSD over
+>> to
+>> your Z8001 device, since it is a self contained system, no interface
+>> hacking will be needed, just porting.
+>
+>
+> By the way - why do you think 2.11 BSD would be better to port instead of
+> the
+> original 4.3 BSD? The system has no 64KB addressing limitation. It can
+> adress
+> up to 128 64KB segments (=8MB). I mean, on a first look, it looks like
+> 2.11BSD
+> contains a lot more Assembler Code I would need to move to Z8001 ASM
+> mnemonics
+> as 4.3 does?!
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+

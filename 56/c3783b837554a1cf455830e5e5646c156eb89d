@@ -1,0 +1,56 @@
+From: dot@dotat.at (Tony Finch)
+Date: Mon, 15 May 2017 10:46:08 +0100
+Subject: [TUHS] Old Unix vulnerabilities
+In-Reply-To: <1494741150.709655.975854064.7B3C6781@webmail.messagingengine.com>
+References: <alpine.BSF.2.20.1705140929150.67621@aneurin.horsfall.org>
+ <1494741150.709655.975854064.7B3C6781@webmail.messagingengine.com>
+Message-ID: <alpine.DEB.2.11.1705151035170.2058@grey.csi.cam.ac.uk>
+
+Random832 <random832 at fastmail.com> wrote:
+> On Sat, May 13, 2017, at 19:34, Dave Horsfall wrote:
+> >
+> > A beauty in V6 (and possibly V7) was discovered by the kiddies in Elec
+> > Eng; by sending a signal with an appropriately-crafted negative value (as
+> > determined from inspecting <user.h>) you could overwrite u.u_uid with
+> > zero...  Needless to say I scrambled to fix that one on my 11/40 network!
+>
+> V7 fixes it by changing the if(sig >= NSIG) in psignal to cast it to
+> unsigned.
+
+Even without that check V7 wouldn't be vulnerable. In V6, the
+vulnerability occurs in psig() when the signal action is reset:
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/sys/ken/sig.c
+
+	rp = u.u_procp;
+	n = rp->p_sig;
+	rp->p_sig = 0;
+	if((p=u.u_signal[n]) != 0) {
+		u.u_error = 0;
+		if(n != SIGINS && n != SIGTRC)
+			u.u_signal[n] = 0;
+		/* if n < 0 this can overwrite u.u_uid */
+
+In V7, instead of a single pending signal, there is a bitmap of pending
+signals, so the corresponding code is,
+
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/sys/sys/sig.c
+
+	n = fsig(rp);
+	if (n==0)
+		return;
+	rp->p_sig &= ~(1<<(n-1));
+	if((p=u.u_signal[n]) != 0) {
+		u.u_error = 0;
+		if(n != SIGINS && n != SIGTRC)
+			u.u_signal[n] = 0;
+		/* always within the array bounds */
+
+Tony.
+-- 
+f.anthony.n.finch  <dot at dotat.at>  http://dotat.at/  -  I xn--zr8h punycode
+Viking, North Utsire, South Utsire, Northeast Forties: Variable becoming
+southeasterly 3 or 4, increasing 5 to 7, perhaps gale 8 later. Slight or
+moderate becoming moderate or rough later. Fog patches, rain later. Moderate,
+occasionally very poor.
+

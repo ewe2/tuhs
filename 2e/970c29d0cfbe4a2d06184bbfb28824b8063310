@@ -1,0 +1,75 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Wed, 08 Nov 2017 17:35:39 -0800
+Subject: [TUHS] origins of void* -- Apology!
+In-Reply-To: <CANCZdfpA1HDfvCOfU40Qx+EGdrj_r1OUb+Wgxa_Qcp-9uJekuA@mail.gmail.com>
+Message-ID: <e95ae6c51de57b8e7cc232dda68636e48f4a00fd@webmail.yaccman.com>
+
+I don't think either Dennis or I ever thought that characters should
+be signed.  It's true that PCC didn't specify it.  It's also true
+that in those days the 8th bit in a char was pretty much unused
+(except by the shell), so the issue never arose.  I believe the folks
+at Bell Labs Holmdel who did the port to the Vax were the first ones
+to come up with signed characters.  I think it was a real blot on
+C.  For example, consider:
+       struct {  ....
+              char x:1;
+       ...
+       }
+
+If characters are signed, the only legal values of x are 0 and -1 (!)
+
+Steve
+
+----- Original Message -----
+From:
+ "Warner Losh" <imp at bsdimp.com>
+
+To:
+"Nemo" <cym224 at gmail.com>
+Cc:
+"The Eunuchs Hysterical Society" <tuhs at tuhs.org>
+Sent:
+Wed, 8 Nov 2017 09:12:50 -0700
+Subject:
+Re: [TUHS] origins of void* -- Apology!
+
+On Wed, Nov 8, 2017 at 9:07 AM, Nemo <cym224 at gmail.com [1]>
+ wrote:
+On 6 November 2017 at 19:36, Ron Natalie <ron at ronnatalie.com [2]>
+wrote:
+ > It’s worse than that.   “char” is defined as neither signed
+nor unsigned.
+ > The signedness is implementation defined.    This was why we have
+the inane
+ > “signed” keyword.
+
+ What was that story about porting an early UNIX to a machine with
+ different char polarity?  I dimly recall only a few problems.
+
+Doesn't even have to be very early... There's lots of 'assume char is
+signed bugs' in even modern code. So many that ARM gave up on the idea
+that unsigned char was good (since the underlying ARM architecture
+supported it better) and their modern ABIs are all signed char. The
+other thing that EABI fixes is the crazy alignment rules that were
+out-of-step with the rest of the computer industry that broke a lot of
+networking and storage code on ARM because its rules caused structs
+that would otherwise describe the binary layout to be suddenly wrong.
+Yes, that is an implementation choice, just a poor one that was
+eventually corrected.
+
+When I was working on FreeBSD/arm only a decade ago, I'd routinely hit
+both of these issues...
+
+Warner
+
+ 
+
+Links:
+------
+[1] mailto:cym224 at gmail.com
+[2] mailto:ron at ronnatalie.com
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171108/c2c13b12/attachment.html>
+

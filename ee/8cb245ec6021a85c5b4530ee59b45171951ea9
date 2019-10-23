@@ -1,0 +1,128 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id fb1d6f0c
+	for <ml@inbox.vuxu.org>;
+	Tue, 22 Oct 2019 18:08:02 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A9D2B9BC78; Wed, 23 Oct 2019 04:08:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 223489BC4E;
+	Wed, 23 Oct 2019 04:07:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A85E29BC4C; Wed, 23 Oct 2019 04:07:28 +1000 (AEST)
+Received: from vtr.rulingia.com (vtr.rulingia.com [45.77.232.82])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DDA2993D06
+ for <tuhs@tuhs.org>; Wed, 23 Oct 2019 04:07:27 +1000 (AEST)
+Received: from server.rulingia.com (ppp239-208.static.internode.on.net
+ [59.167.239.208])
+ by vtr.rulingia.com (8.15.2/8.15.2) with ESMTPS id x9MI7Bfb018608
+ (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+ Wed, 23 Oct 2019 05:07:16 +1100 (AEDT)
+ (envelope-from peter@rulingia.com)
+X-Bogosity: Ham, spamicity=0.000000
+Received: from server.rulingia.com (localhost.rulingia.com [127.0.0.1])
+ by server.rulingia.com (8.15.2/8.15.2) with ESMTPS id x9MI75wR088290
+ (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+ Wed, 23 Oct 2019 05:07:05 +1100 (AEDT)
+ (envelope-from peter@server.rulingia.com)
+Received: (from peter@localhost)
+ by server.rulingia.com (8.15.2/8.15.2/Submit) id x9MI75xG088289;
+ Wed, 23 Oct 2019 05:07:05 +1100 (AEDT) (envelope-from peter)
+Date: Wed, 23 Oct 2019 05:07:05 +1100
+From: Peter Jeremy <peter@rulingia.com>
+To: Abhinav Rajagopalan <abhinavrajagopalan@gmail.com>
+Message-ID: <20191022180705.GD51849@server.rulingia.com>
+References: <20191021062242.GA91599@indra.papnet.eu>
+ <CANOZ5riWWibJ4OY8SnZ7q_o1VaMRFq_-1yXedq2PMXupc1ckMA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature"; boundary="DKU6Jbt7q3WqK7+M"
+Content-Disposition: inline
+In-Reply-To: <CANOZ5riWWibJ4OY8SnZ7q_o1VaMRFq_-1yXedq2PMXupc1ckMA@mail.gmail.com>
+X-PGP-Key: http://www.rulingia.com/keys/peter.pgp
+User-Agent: Mutt/1.12.1 (2019-06-15)
+Subject: Re: [TUHS] PDP-7 UNIX filesystem
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--DKU6Jbt7q3WqK7+M
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On 2019-Oct-21 16:13:54 +0530, Abhinav Rajagopalan <abhinavrajagopalan@gmai=
+l.com> wrote:
+>We should also touch upon the "cd -" as this one takes you back like a back
+>button into the directory you were last inside, whereas the cd ../.. takes
+>you up or down the hierarchy depending on the placement of the / and adding
+>placeholders i.e directory names in place of the .. (dots).
+
+There are two different mechanisms here.  "-" as a "cd" argument is a
+relatively recent shell builtin: More modern shells keep track of the
+previous working directory ($OLDPWD) and evaluate "cd -" as "cd $OLDPWD",
+which will return to the previous working directory (modulo filesystem
+changes).  Note that it's a "swap" operation, not a "back" operation:
+Repeated "cd -" invocations will swap between two directories, not keep
+going back through previous working directorie.  I'm not sure when this
+feature was introduced but don't believe it was part of ancient Unix.
+
+OTOH, "cd ../.." just passes "../.." to the kernel as a pathname and the
+kernel evaluates it using its normal pathname lookup.  Having it move
+up (towards the root of) the filesystem relies on the presence of a ".."
+directory entry being the parent directory inode.
+
+>Since you mentioned the word dd, the utility which serves me like none
+>other for my frequent rewrites of images, it too has an interesting past,
+>it seems like 'dd' was non-unixy in it's design approach, if I'm to believe
+>the lores around, which leads me to think that this might have been another
+>one of the many idiosyncratic naming conventions used back then. More on
+>the dd stuff: http://www.catb.org/jargon/html/D/dd.html
+
+As noted in the jargon file, the dd(1) syntax is deliberately reminiscent
+of the DD statement in IBM JCL.  This was presumably a joke and one of the
+BTL old-timers on the list may know more of the background.
+
+--=20
+Peter Jeremy
+
+--DKU6Jbt7q3WqK7+M
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQKTBAEBCgB9FiEE7rKYbDBnHnTmXCJ+FqWXoOSiCzQFAl2vRT5fFIAAAAAALgAo
+aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEVF
+QjI5ODZDMzA2NzFFNzRFNjVDMjI3RTE2QTU5N0EwRTRBMjBCMzQACgkQFqWXoOSi
+CzS4Gg//TrHrXP5yZhQ6qGt3uKmtLWBASjij/Si473nG5wByD9iEvUUxRLXXzNA2
+0yEgYNMyK2nniQyc/Q6z8JP4K9UmfPcp/+8atrQYfDpK+PxZDufJ3Z38G1fW6mOF
+amaoX6zLTYKrmqxXFX3z3GD0MyzXtze3XPZnWLws19Z8H7kZPQflBbm41ou/M7dk
+odLU5WK1/pVPbsZpOURkONe7Dz+5E1BaWLoKTNLVFzlnEbKn9U2xPgRBZYqpQEq1
+XOWCEjNUca3G7VLzS4k31qaujaNaUcNHEjpTQKdR8+1IuheD1StPuvdTxJU3vl0/
+y6232gW6zumLWxte6lfswEw6+Sdpdy3noDqHO/JBv4x4ayufq/Mx0ZUoCTLjoSdh
+8q+nQOPhUre8hzU9vT/OVUv2E7On+afZ508CXnyHlXigKFn8n5Raeqx0ki4inGEm
+NVObIZyt99qhkYU5oGihunqyC7qgLG5CBVouSnFgkIJPHMaugswo1s7Kx4hOrjo0
+LqbAP5/oY2GAlbKVOh72ANaPF89dTqIPYsB8ctg1RkFLLKKzetgy2f4/9XNRwBg5
+QvZFBlETg7FG3VcpwfCxI2ZJMpg61RGFajW/lv7GUqbOLVanW6706sHxlDehZLIW
+PQ4rgNemGEJNteHuiHIHd1Ox9loMmV7DoaYVn1GMSQ6oMOWX2/Q=
+=Tpl+
+-----END PGP SIGNATURE-----
+
+--DKU6Jbt7q3WqK7+M--

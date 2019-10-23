@@ -1,0 +1,440 @@
+From tuhs-bounces@minnie.tuhs.org Wed Oct 17 15:34:14 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 94e0387b
+	for <ml@inbox.vuxu.org>;
+	Wed, 17 Oct 2018 15:34:14 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 19A71A2094; Thu, 18 Oct 2018 01:34:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0D192A1A1E;
+	Thu, 18 Oct 2018 01:33:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A64ADA1A06; Thu, 18 Oct 2018 01:18:41 +1000 (AEST)
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com
+ [209.85.221.46])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6FBA5A1A03
+ for <tuhs@tuhs.org>; Thu, 18 Oct 2018 01:18:35 +1000 (AEST)
+Received: by mail-wr1-f46.google.com with SMTP id y11-v6so30119966wrd.4
+ for <tuhs@tuhs.org>; Wed, 17 Oct 2018 08:18:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=DmlyHhvZKML6vjtxGxKxKhzxVlA06Oc4S/H85hMx/P8=;
+ b=fawWa2rtK1Kjo4s+wsTIipMFkbu9bsvqOVx1Vov9k/197huWNhzUQ1pc2GzTWZwn5m
+ OKqdGp4sQVB92U9KUPsZasTuerpN5bHTSEX3CNLmL/owKunrHyDvrdjg9r1OtxKilrPi
+ Sizql6Qo8hQxUklPBIIhCrZ5dZJu/8hg5/dWA=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=DmlyHhvZKML6vjtxGxKxKhzxVlA06Oc4S/H85hMx/P8=;
+ b=LFIRC8OBgCEW5JWPHLUg/j5zah++RjIYXh2GUivFFiGNkPlJTF/K5UHIVrBrzd55yj
+ vnjfAgAfdIIhN+/W+sDqeiYjf82xIUZawcYGzn4wrEKNznRz3IQZYQy0JxAXESX79W2d
+ sLcVy5g/xsCQNVFBWSX2bcW+c+MvIp62jZWoNFGikdAk07ecy+lB1UGz5qFQ+bnbl59Y
+ UYYihrzcIgIfb/nk74ONJ1cBi6xWeQko+Q2Kf2pnJewIa866lT6MlLJv+qwxquf3Khul
+ TUD26QnNni3c9v93+M3faTSDi5LcVIcSnOAvzF7pK+UcM1z2OT+snenxpci/szYgzawL
+ 9/QA==
+X-Gm-Message-State: ABuFfogD+kRHwP0zQ7B0E+bSFvczJG9ux1+SB/CxnJj3VS/c4YQ6mLFE
+ m/jFVDVQTKdw6lTTnzR+VBwv1Bnsj+fQ/+5SWL02dg==
+X-Google-Smtp-Source: ACcGV62QLRote67ZJhumm2SyTkwNznoaW32UrMlCLY+z+bbBrxw+1fVtHS5mJNqFeNm5Zt1nNUsXWGCk5Ej+4o/E5ms=
+X-Received: by 2002:adf:e387:: with SMTP id
+ e7-v6mr24250571wrm.94.1539789513642; 
+ Wed, 17 Oct 2018 08:18:33 -0700 (PDT)
+MIME-Version: 1.0
+References: <20181015195622.GB25749@minnie.tuhs.org>
+ <CAC20D2Mj=uia_Mo_Dg1o0=J9saD06ySnLbAiMvjLAOzK+STVgA@mail.gmail.com>
+ <CAC20D2MpVF2pv3k0vtZLSg26b82hQ=SHPDJy9RKH9vp_-vF7+w@mail.gmail.com>
+ <CABH=_VS-joYBV-+goBJKQwEDYgKbVgsJDuPxCVq+94Rhk2XnNg@mail.gmail.com>
+ <4f20854e-6269-47aa-aeaf-9e2b93aa1201.maildroid@localhost>
+ <2658AACC-A451-4861-8CD8-F7E4BED8062A@comcast.net>
+ <4e0053ba-94d0-e5b3-7f1a-21c1f5b70861@e-bbes.com>
+In-Reply-To: <4e0053ba-94d0-e5b3-7f1a-21c1f5b70861@e-bbes.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Wed, 17 Oct 2018 11:18:07 -0400
+Message-ID: <CAC20D2M9E2OapnL4C4868BMDd7XcH2hfdVy3=XLRgYiDB0MV3Q@mail.gmail.com>
+To: emu@e-bbes.com
+Content-Type: multipart/alternative; boundary="000000000000fd6a2205786e2eef"
+Subject: Re: [TUHS] TK50, was: Re:  Ultrix Tape: Block Size?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: Paul Koning <paulkoning@comcast.net>,
+ The Eunuchs Hysterical Society <tuhs@tuhs.org>, cctalk@classiccmp.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000fd6a2205786e2eef
+Content-Type: text/plain; charset="UTF-8"
+
+I took most of this off line, but I'll try to close down the discussion, so
+we can get back to TUHS history.
+
+Please be careful of your wording as it is easy to get confused
+particularly if you never used the original 1/2" tape system you might not
+understand the actual terms.  The term for reading Read and Write I/O Sizes in
+a user program are different than tape block sizes (or as they were
+originally referred LRECL - Logical Record Length).
+
+As I said to Paul K, I sadly know way more about the minutia of tapes that
+I really should admit [I broke in during the 60s using 7-track tapes on the
+IBM Mainframes which really date me and I remember the 5-track tapes on one
+of the systems, but I never personally used it].
+
+
+On Wed, Oct 17, 2018 at 2:14 AM emanuel stiebler <emu@e-bbes.com> wrote:
+
+>  Longer blocks, too (2k or so) which would make any buffering issues more
+> severe.
+>
+
+
+*Your user program read/wrote with 2K or more using DMA reads or writes but
+it wrote 512 byte 'blocks.'*
+
+As Paul W pointed out correctly, the TK50 and its children in the DLT*
+family all used a fixed format 512 byte *blocks on the tape*.    This
+cannot be changed.   The tape format is handled by the tape controller
+microcode and all of the blocks on all the streamers (DLT, 1/4, 1/2", 4mm
+and 8mm) that I know about were fixed at 512 byte, although the OS could
+write multiple (N) blocks at a time to the tape controller which will will
+write as N blocks on the tape.
+
+This was different from 1/2" parallel 7 and 9-track tape which was actually
+had variable size 'blocks' in the writes and the tape format.  Since the
+terminalogy was defined (by IBM) for 5/7/9 track drives, we still use that
+terminology.
+
+The trick is that streamer** format write* (which is bit seral):
+                 <HW HDR BLK1 bit serial><512 bytes of serial data
+[blk1]><HW TLR BLK1 bit serial><HW HDR BLK2 bit serial><512 bytes of serial
+data[blk2]><HW TLR BLK2 bit serial>.....<HW HDR BLKn bit serial><512 bytes
+of serial data>[blkn]<HW TLR BLKn bit serial>
+
+The key is that there are no inter-record gaps (IRG) between the <HW TKR
+BLK x bit serial> and <<HW HDR BLK x+1 bit serial> frames when recording on
+a streamer.   BTW: they usually use a serpitine scheme - starting with the
+center of the tape and moving outwards in a circular pattern - IIRC down on
+tape end and up on tape start -- but that's fuzzy in my memory and I'm at
+work so I can not look in any of the controller books  have at home.  If
+you lose the bit stream on input (data under run), the tape controller
+backs up the tape and when it starts to write again, it goes over the last
+block trailer and start its new write at the end of it.   For instance the
+original 1/4" QIC format wrote 4 passes, then later when the recording head
+got better, it wrote 9 passes and then even more, but in the newer formats
+(and withe better media) the head was smaller.
+
+Also remember that EOT is handled different in the streamer formats from
+1/2" 7/9 track and IIRC EOT can even differ between the different streamer
+formats.
+
+If you look at 1/2" parallel 7/9-track (which is where the terms and basic
+concepts originate) 9-track has a 'inter-record gap' between the last
+block's trailer and the next block's header.  When IBM originally defined
+that 7 and 9 track formats (whch ANSI later codified), these gaps are
+defined so that the there is time to start and stop the motors (somewhere,
+I have a very old IBM document from the late 60s that describes this very
+well using IBM terms like LRECL and DASD - direct access storage device ;-)
+
+The key difference from a streamer tape is that the IBM LRECL or logicial
+record size, could (and did) vary ***.  But to try to keep the amount of
+wasted space (*i.e.* least amount of inter-record gaps), different programs
+use different 'block size' and some formats (like ANSI labeled tapes) the
+block size (LRECL) can vary within the tape itself.
+
+Also, I don't think I ever knew why, but for some reason IBM's tape
+utilites tended to like LRECL 10240 and 20480.   Since many of us UNIX
+folks came from IBM and Multics, we also used the same sizes (*i.e.* 20b or
+10240 8 bit bytes) - it was reasonably efficent (we got 150M per
+traditional 2400" 1/2 tape at 6250 BPI - you could get 1/3 more space when
+3M created a 3600" that fit in the original 1/2" reel) .
+
+Thus the on-tape format of 1/2" (which is parallel encoding and one pass
+over the tape):
+               <HW HDR1><LRECL BYTES of BLK1><HW TRL2><IRG><HW HDR2><LRECL
+BYTES of BLK2><HW TRL2><IRG>......<HW HDRn><LRECL BYTES of BLKn><HW TRn>
+<IRG><HW EOT HDR>[if the last last 'file' on the tape a second<IRG><HW EOT
+HDR>]
+Note:   LRECL BYTES of BLK1 did not have to be the same as <LRECL BYTES of
+BLK2> much less <LRECL BYTES of BLKn>
+
+Thus concept (and term) of 'tape blocks' was born.  Also note be careful
+the term 'file' has specific meaning to a tape.  DEC started to use the
+term 'save set' to disamiguated it BTW.   A tape 'file' N tape blocks,
+followed by an a EOT mark.    Thus, two adjacent tape marks actually
+delinated end of recorded data in the tape. Thus in 7/9 track formats when
+a new file is written the last <IRG><HW EOT HDR> is backed up over and data
+frame writing starts over writing the second <HW EOT HDR> after the last
+<IRG>
+
+So ...   what this all means is that from the OS side, you start a DMA on X
+blocks and then let the tape controller read or write it.  No matter the
+number of blocks you write on a streamer, it will always write it as 512
+byte blocks (similar to how a disk works when set up in 'fixed' formatting).
+
+One more thing to be careful about...  people also talk about 'ANSI tape'
+format.   This usually refered to the *SW format of the data blocks on the
+tape*.   UNIX's native tape formats were tp/stp, tar, cpio and dump. VMS
+uses the ANSI tape format as its native format under the covers (and if
+IIRC, so does RT11) for how to write and exchange data - which BTW, originally
+using those variable LRECL blocks on the tape.
+
+So the undustry first had a define a set if physical encoding for the tapes
+and these are also ANSI specs.   But you need need to define how the data
+itself is written (which byte encoding ASCII vs EBCIDIC) and how to
+understand the 'files' on the tape itself (this is usually what is being
+tape about when people talk about 'ANSI tapes.' My old housemate at UCB
+(Tom Quarles, also known as the author of SPICE3) wrote the UNIX Ansitape
+program that went out with BSD (he wrote so we could exchnage tapes with
+the DEC CAD team which used VMS).
+
+Clem
+
+* Just to confuse you more, TK50 and the DLT family actually use a 1/2"
+media in the closed tape cartridge.  But when DEC developed it (with 3M),
+there were also 3rd party 1/2" tape controllers that wrote bit serial
+(streamer) format on the traditonal 1/2" (9-track parallel) media.   For
+instance the USAF/AWACS planes used to use a traditonal 3M 1/2" tape
+>>media<<, but those tapes can only be read on a special streamer drive
+[long story - I can make a couple of HW & SW guys shutter when I just say
+the word 'Grumman' ****].
+
+**  One other thing to confuse the world is that 'streaming' was a trick
+performance trick that originated with 1/2" tape.   You will see many 1/2"
+drives from the period such as ones from Cipher and Kenndy that took a
+parallel byte stream and wrote/read them - although they obey the 1/2"
+format rules on the tape itself.
+
+***  Another thing that was undefined in the ANSI tape specs and you can
+sometimes see, but certain HW will toss cookies and not read if you try it,
+it mix encoding within a tape (i.e. write 800 BPI, 1600 BPI or even 6250
+BPI on the same tape).   This was sometimes done on things like boot tapes
+because the pre-boot system might only know about 800 BPI tapes and it
+simplified the boot process particularly in the days when you had to toggle
+in the boot (or in IBM terms -- IPL -- initial program load -- code).
+
+**** An airman on the AWAC used to spent his entire time on the flight
+keeping the 3 drives loaded - it the time it took to write one tape,
+another is being rewound and the airman put a new tape on the 3rd - making
+that all work at full speed with no data loss was 'interesting'
+
+--000000000000fd6a2205786e2eef
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><div class=3D"gmail_default">I took most of this off li=
+ne, but I&#39;ll try to close down the discussion, so we can get back to TU=
+HS history.</div><div class=3D"gmail_default"><br></div><div class=3D"gmail=
+_default">Please be careful of your wording as it is easy to get confused p=
+articularly if you never used the original 1/2&quot; tape system you might =
+not understand the actual terms.=C2=A0 The term for reading Read and Write =
+I/O Sizes <font color=3D"#0000ff">in a user program</font> are different th=
+an <font color=3D"#0000ff">tape block sizes</font> (or as they were origina=
+lly=C2=A0referred=C2=A0LRECL - Logical Record Length).</div><div class=3D"g=
+mail_default"><br></div><div class=3D"gmail_default">As I said to Paul K, I=
+ sadly know way more about the minutia of tapes that I really should admit =
+[I broke=C2=A0in during the 60s using 7-track tapes on the IBM Mainframes w=
+hich really date me and I remember the 5-track tapes on one of the systems,=
+ but I never personally used it].</div><br class=3D"m_6082872685853420393gm=
+ail-Apple-interchange-newline"></div><br><div class=3D"gmail_quote"><div di=
+r=3D"ltr">On Wed, Oct 17, 2018 at 2:14 AM emanuel stiebler &lt;<a href=3D"m=
+ailto:emu@e-bbes.com" target=3D"_blank">emu@e-bbes.com</a>&gt; wrote:<br></=
+div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-lef=
+t:1px #ccc solid;padding-left:1ex">=C2=A0Longer blocks, too (2k or so) whic=
+h would make any buffering issues more severe.<br></blockquote><div><br></d=
+iv><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,hel=
+vetica,sans-serif"><i><font color=3D"#0000ff">Your user program read/wrote =
+with 2K or more using DMA reads or writes but it wrote 512 byte &#39;blocks=
+.&#39;</font></i></div><div class=3D"gmail_default" style=3D"font-family:ar=
+ial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif">As Paul W pointed out correctly, the=
+ TK50 and its children in the DLT* family all used a fixed format 512 byte =
+<i><font color=3D"#0000ff">blocks on the tape</font></i>.=C2=A0 =C2=A0 This=
+ cannot be changed.=C2=A0 =C2=A0The tape format is handled by the tape cont=
+roller microcode and all of the blocks on all the streamers (DLT, 1/4, 1/2&=
+quot;, 4mm and 8mm) that I know about were fixed at 512 byte, although the =
+OS could write multiple (N) blocks at a time to the tape controller which w=
+ill will write as N blocks on the tape.=C2=A0=C2=A0</div><div class=3D"gmai=
+l_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Th=
+is was different from 1/2&quot; parallel 7 and 9-track tape which was actua=
+lly had variable size &#39;blocks&#39; in the writes and the tape format.=
+=C2=A0 Since the terminalogy was defined (by IBM) for 5/7/9 track drives, w=
+e still use that terminology.</div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif">The trick is that stream=
+er** format write* (which is bit seral):</div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">=C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0<font color=3D"#0000ff">&lt;HW HDR BL=
+K1 bit serial&gt;&lt;512 bytes of serial data [blk1]&gt;&lt;HW TLR BLK1=C2=
+=A0bit serial&gt;</font><font color=3D"#ff0000">&lt;HW HDR BLK2 bit serial&=
+gt;&lt;512 bytes of serial data[blk2]&gt;&lt;HW TLR BLK2 bit serial&gt;</fo=
+nt><font color=3D"#0000ff">.....</font><font color=3D"#00ff00">&lt;HW HDR B=
+LKn bit serial&gt;&lt;512 bytes of serial data&gt;[blkn]&lt;HW TLR BLKn bit=
+ serial&gt;</font></div><div class=3D"gmail_default" style=3D"font-family:a=
+rial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=3D"=
+font-family:arial,helvetica,sans-serif">The key is that there are no inter-=
+record gaps (IRG) between the &lt;HW TKR BLK x=C2=A0<span style=3D"color:rg=
+b(0,0,255)">bit serial</span>&gt; and &lt;<span style=3D"color:rgb(255,0,0)=
+">&lt;HW HDR BLK x+1 bit serial&gt; </span><font color=3D"#000000">frames=
+=C2=A0</font>when recording on a streamer.=C2=A0 =C2=A0BTW: they usually us=
+e a serpitine scheme - starting with the center of the tape and moving outw=
+ards in a circular pattern - IIRC down on tape end and up on tape start -- =
+but that&#39;s fuzzy in my memory and I&#39;m at work so I can not look in =
+any of the controller books=C2=A0 have at home.=C2=A0 If you lose the bit s=
+tream on input (data under run), the tape controller backs up the tape and =
+when it starts to write again, it goes over the last block trailer and star=
+t its new write at the end of it.=C2=A0 =C2=A0For instance the original 1/4=
+&quot; QIC format wrote 4 passes, then later when the recording head got be=
+tter, it wrote 9 passes and then even more, but in the newer formats (and w=
+ithe better media) the head was smaller.</div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gm=
+ail_default" style=3D"font-family:arial,helvetica,sans-serif">Also remember=
+ that EOT is handled different in the streamer formats from 1/2&quot; 7/9 t=
+rack and IIRC EOT can even differ between the different streamer formats.</=
+div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif">If you look at 1/2&quot; parallel 7/9-track (which is w=
+here the terms and basic concepts originate) 9-track has a &#39;inter-recor=
+d gap&#39; between the last block&#39;s trailer and the next block&#39;s he=
+ader.=C2=A0 When IBM originally defined that 7 and 9 track formats (whch AN=
+SI later codified), these gaps are defined so that the there is time to sta=
+rt and stop the motors (somewhere, I have a very old IBM document from the =
+late 60s that describes this very well using IBM terms like LRECL and DASD =
+- direct access storage device ;-)</div><div class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif">The key difference=
+ from a streamer tape is that the IBM LRECL or logicial record size, could =
+(and did) vary ***.=C2=A0 But to try to keep the amount of wasted space (<i=
+>i.e.</i> least amount of inter-record gaps), different programs use differ=
+ent &#39;block size&#39; and some formats (like ANSI labeled tapes) the blo=
+ck size (LRECL) can vary within the tape itself.</div><br class=3D"m_608287=
+2685853420393gmail-m_1349185927434728145gmail-Apple-interchange-newline"><d=
+iv class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"=
+>Also, I don&#39;t think I ever knew why, but for some reason IBM&#39;s tap=
+e utilites tended to like LRECL 10240 and 20480.=C2=A0 =C2=A0Since many of =
+us UNIX folks came from IBM and Multics, we also used the same sizes (<i>i.=
+e.</i> 20b or 10240 8 bit bytes) - it was reasonably efficent (we got 150M =
+per traditional 2400&quot; 1/2 tape at 6250 BPI - you could get 1/3 more sp=
+ace when 3M created a 3600&quot; that fit in the original 1/2&quot; reel) .=
+=C2=A0</div><div class=3D"gmail_default" style=3D"font-family:arial,helveti=
+ca,sans-serif">=C2=A0=C2=A0=C2=A0</div><div class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif">Thus the on-tape format of 1/2&=
+quot; (which is parallel encoding and one pass over the tape):</div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0<font color=3D"#0000ff"=
+>&lt;HW HDR1&gt;&lt;LRECL BYTES of BLK1&gt;&lt;HW TRL2&gt;</font><font colo=
+r=3D"#ff0000">&lt;IRG&gt;</font><font color=3D"#0000ff">&lt;HW HDR2&gt;&lt;=
+LRECL BYTES=C2=A0</font><span style=3D"color:rgb(0,0,255)">of BLK2</span><f=
+ont color=3D"#0000ff">&gt;&lt;HW TRL2&gt;</font><font color=3D"#ff0000">&lt=
+;IRG&gt;</font><font color=3D"#0000ff">......&lt;HW HDRn&gt;&lt;LRECL BYTES=
+=C2=A0</font><span style=3D"color:rgb(0,0,255)">of BLKn</span><font color=
+=3D"#0000ff">&gt;&lt;HW TRn&gt;</font><font color=3D"#ff0000">&lt;IRG&gt;</=
+font><font color=3D"#00ff00">&lt;HW EOT HDR&gt;</font>[if the last last &#3=
+9;file&#39; on the tape a second<font color=3D"#ff0000">&lt;IRG&gt;</font><=
+font color=3D"#00ff00">&lt;HW EOT HDR&gt;</font>]</div><div class=3D"gmail_=
+default" style=3D"font-family:arial,helvetica,sans-serif">Note:=C2=A0 =C2=
+=A0<span style=3D"color:rgb(0,0,255)">LRECL BYTES of BLK1 </span><font colo=
+r=3D"#000000">did not have to be the same as</font><span style=3D"color:rgb=
+(0,0,255)">=C2=A0</span><font color=3D"#0000ff">&lt;LRECL BYTES=C2=A0</font=
+><span style=3D"color:rgb(0,0,255)">of BLK2</span><font color=3D"#0000ff">&=
+gt; </font><font color=3D"#000000">much less=C2=A0</font><font color=3D"#00=
+00ff">&lt;LRECL BYTES=C2=A0</font><span style=3D"color:rgb(0,0,255)">of BLK=
+n</span><font color=3D"#0000ff">&gt;</font></div><div class=3D"gmail_defaul=
+t" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"=
+><br></font></div><div class=3D"gmail_default" style=3D"font-family:arial,h=
+elvetica,sans-serif"><font color=3D"#000000">Thus concept (and term) of &#3=
+9;tape blocks&#39; was born.=C2=A0 Also note be careful the term &#39;file&=
+#39; has specific meaning to a tape.=C2=A0 DEC started to use the term &#39=
+;save set&#39; to disamiguated it BTW.=C2=A0 =C2=A0A tape &#39;file&#39; N =
+tape blocks, followed by an a EOT mark.=C2=A0 =C2=A0 Thus, two adjacent=C2=
+=A0</font><font color=3D"#000000">tape marks actually delinated end of reco=
+rded data in the tape. Thus i</font>n 7/9 track formats when a new file is =
+written the last <font color=3D"#ff0000">&lt;IRG&gt;</font><font color=3D"#=
+0000ff">&lt;HW EOT HDR&gt;</font> is backed up over and data frame writing =
+starts over writing the second<font color=3D"#00ff00"> &lt;HW EOT HDR&gt; <=
+/font>after the last <font color=3D"#ff0000">&lt;IRG&gt;</font></div><div c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><fo=
+nt color=3D"#000000"><br></font></div><div class=3D"gmail_default" style=3D=
+"font-family:arial,helvetica,sans-serif">So ...=C2=A0 =C2=A0what this all m=
+eans is that from the OS side, you start a DMA on X blocks and then let the=
+ tape controller read or write it.=C2=A0 No matter the number of blocks you=
+ write on a streamer, it will always write it as 512 byte blocks (similar t=
+o how a disk works when set up in &#39;fixed&#39; formatting).<br></div><di=
+v class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+<br></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica=
+,sans-serif">One more thing to be careful about...=C2=A0 people also talk a=
+bout &#39;ANSI tape&#39; format.=C2=A0 =C2=A0This usually refered to the <i=
+><font color=3D"#0000ff">SW format of the data blocks on the tape</font></i=
+>.=C2=A0 =C2=A0UNIX&#39;s native tape formats were tp/stp, tar, cpio and du=
+mp.=C2=A0<span style=3D"font-size:small;background-color:rgb(255,255,255);t=
+ext-decoration-style:initial;text-decoration-color:initial;float:none;displ=
+ay:inline">VMS uses the ANSI tape format as its native format under the cov=
+ers (and if IIRC, so does RT11) <span style=3D"text-decoration-style:initia=
+l;text-decoration-color:initial;float:none;display:inline">for how to write=
+ and exchange data=C2=A0</span>- which BTW,=C2=A0</span>originally using th=
+ose variable LRECL blocks on the tape.</div><div class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmai=
+l_default" style=3D"font-family:arial,helvetica,sans-serif">So the undustry=
+ first had a define a set if physical encoding for the tapes and these are =
+also ANSI specs.=C2=A0 =C2=A0But you need need to define how the data itsel=
+f is written (which byte encoding ASCII vs EBCIDIC) and how to understand t=
+he &#39;files&#39; on the tape itself (this is usually what is being tape a=
+bout when people talk about &#39;ANSI tapes.&#39; My old housemate at UCB (=
+Tom Quarles, also known as the author of SPICE3) wrote the UNIX Ansitape pr=
+ogram that went out with BSD (he wrote so we could exchnage tapes with the =
+DEC CAD team which used VMS).</div><div class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif">Clem</div><div class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></div><=
+div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif=
+">* Just to confuse you more, TK50 and the DLT family actually use a 1/2&qu=
+ot; media in the closed tape cartridge.=C2=A0 But when DEC developed it (wi=
+th 3M), there were also 3rd party 1/2&quot; tape controllers that wrote bit=
+ serial (streamer) format on the traditonal 1/2&quot; (9-track parallel) me=
+dia.=C2=A0 =C2=A0For instance the USAF/AWACS planes used to use a traditona=
+l 3M 1/2&quot; tape &gt;&gt;media&lt;&lt;, but those tapes can only be read=
+ on a special streamer drive [long story - I can make a couple of HW &amp; =
+SW guys shutter when I just say the word &#39;Grumman&#39; ****].</div><div=
+ class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><=
+br></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif">**=C2=A0 One other thing to confuse the world is that &#39;stre=
+aming&#39; was a trick performance trick that originated with 1/2&quot; tap=
+e.=C2=A0 =C2=A0You will see many 1/2&quot; drives from the period such as o=
+nes from Cipher and Kenndy that took a parallel byte stream and wrote/read =
+them - although they obey the 1/2&quot; format rules on the tape itself.</d=
+iv><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif"><br></div><div class=3D"gmail_default" style=3D"font-family:arial,hel=
+vetica,sans-serif">***=C2=A0 Another thing that was undefined in the ANSI t=
+ape specs and you can sometimes see, but certain HW will toss cookies and n=
+ot read if you try it, it mix encoding within a tape (i.e. write 800 BPI, 1=
+600 BPI or even 6250 BPI on the same tape).=C2=A0 =C2=A0This was sometimes =
+done on things like boot tapes because the pre-boot system might only know =
+about 800 BPI tapes and it simplified the boot process particularly in the =
+days when you had to toggle in the boot (or in IBM terms -- IPL -- initial =
+program load -- code).</div><div class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif"><br></div><div class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif">**** An<span style=3D"font-size=
+:small;background-color:rgb(255,255,255);text-decoration-style:initial;text=
+-decoration-color:initial;float:none;display:inline">=C2=A0airman on the AW=
+AC used to spent his entire time on the flight keeping the 3 drives loaded =
+- it the time it took to write one tape, another is being rewound and the a=
+irman put a new tape on the 3rd - making that all work at full speed with n=
+o data loss was &#39;interesting&#39;</span></div><div class=3D"gmail_defau=
+lt" style=3D"font-family:arial,helvetica,sans-serif"><br></div></div></div>
+
+--000000000000fd6a2205786e2eef--

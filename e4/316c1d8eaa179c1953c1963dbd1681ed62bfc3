@@ -1,0 +1,49 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Mon, 15 Aug 2016 13:53:28 -0400
+Subject: [TUHS] fstat(2) on pipes?
+In-Reply-To: <20160815001140.GA16138@minnie.tuhs.org>
+References: <20160815001140.GA16138@minnie.tuhs.org>
+Message-ID: <CAC20D2PcxqfWzEsKc_Z3TKptOQFsorD2sUfKSXd2=_ccNz_fBg@mail.gmail.com>
+
+​Yet Another Example of UNIX A != UNIX B​
+
+IIRC from the /usr/group and later POSIX discussions, the only thing that
+is for sure on the stat structure with a PIPE is that it's marked as such.
+
+That said, I just grabbed my copy of the SVID (Vol 1 pages 126-127)
+
+st_size "For ordinary files, this field is the address of the end of file.
+  For pipes and FIFO's, this field is the count of the data currently in
+the file.   For block-special & char special, this field is undefined."
+
+As for st_ino and st_dev -- the SVID says the ino "uniquely identifies the
+file in a given file system," and dev uniquely identifies the file system
+that contains the file."
+
+It further states: "The pair of fields st_ino and st_dev uniquely
+identifies ordinary files."     And then later says "No other significance
+is associated with this value."
+
+
+So..... clearly returning an error is wrong.   I don't think the Linux
+scheme hurts anything....
+
+
+On Sun, Aug 14, 2016 at 8:11 PM, Warren Toomey <wkt at tuhs.org> wrote:
+
+> All, sorry this is slightly off-topic. I'm trying to
+> find out what fstat(2) returns when the file descriptor
+> is a pipe. The POSIX/Open Group documentation doesn't
+> really specify what should be returned. Does anybody have
+> any pointers?
+>
+> Thanks, Warren
+>
+> P.S. Why? xv6 has fstat() but returns an error if the
+> file descriptor isn't associated with an i-node. I'm
+> trying to work out if/how to fix it.
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160815/e8a2a75e/attachment.html>
+

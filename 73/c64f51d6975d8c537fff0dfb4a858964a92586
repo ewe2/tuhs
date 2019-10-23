@@ -1,0 +1,80 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Sat, 12 Dec 2015 20:41:48 -0500 (EST)
+Subject: [TUHS] why does tar have the tape device hard coded into it and
+ why is it mt1 instead of mt0
+Message-ID: <20151213014148.5BBF5440AE@lignose.oclsc.org>
+
+/dev/makefile on the V7 distribution tape (or at least the
+unpacked image I have that I believe to be same) says:
+
+ht:
+	/etc/mknod mt0 b 7 64
+	/etc/mknod mt1 b 7 0
+	/etc/mknod rmt0 c 15 64
+	/etc/mknod rmt1 c 15 0
+	/etc/mknod nrmt0 c 15 192
+	/etc/mknod nrmt1 c 15 128
+	chmod go+w mt0 mt1 rmt0 rmt1 nrmt0 nrmt1
+
+According to /usr/sys/dev/ht.c, the minor device
+number was used as follows:
+
+minor(dev) & 07		slave unit number
+minor(dev) & 070	controller unit number
+minor(dev) & 0100	tape density: set == 800 bpi, clear 1600
+minor(dev) & 0200	no-rewind flag
+
+It takes some digging in the source code (and the PDP-11
+Peripherals Handbook) to understand all this numerology.
+In most of the code, minor(dev) & 077 is just treated as
+a unit number (fair enough).  The use of 0200 appears only
+as a magic number in htopen; that of 0100 only as a magic
+number in htstart, and that only implied: the test is
+not minor(dev) & 0100, but
+	unit = minor(bp->b_dev) & 0177;
+	if(unit > 077)
+
+Not so bad when the whole driver is only 376 lines of code,
+but it wouldn't have hurt to make it 400 lines if that
+meant fewer magic numbers.
+
+Anyway, what all this means is that /dev/*mt0 and /dev/*mt1
+both actually meant slave 0 on TU16 controller 0, but mt0
+was 800 bpi and mt1 1600 bpi.  Hence, I would guess, tar's
+default to mt1.
+
+My first exposure to the insides of UNIX was in the High
+Energy Physics group at Caltech.  Some of our systems had
+multiple tape drives and every drive supported multiple
+densities, so we invented for ourselves a system like that
+many other sites invented, with names like /dev/rmt3h to
+mean the third tape drive at high density.  (Hence the
+USG naming scheme of /dev/rmt/3h and the like--not that
+we taught it to them, just that many places had the same
+idea.)
+
+Our world wasn't nearly as exciting as that of our neighbors,
+across the building and three floors down, in the Space
+Radiation Laboratory.  They had a huge room full of racks
+of magtapes full of data from satellites, and many locally-
+written tools for extracting the data so researchers could
+work on it.  The hardware was an 11/70 with eight tape drives,
+and at any given time at least half the the drives would be
+spinning.  One of the drives was seven-track rather than
+nine-track, because some of the satellite data had been
+written in that format.
+
+Fair disclosure: I had a vague memory that the `drive number'
+in the device name had been recycled for other purposes,
+but couldn't remember whether it was density or something
+else.  (I'm a little surprised none of the other old-timers
+here remembered that, but maybe I worked with tapes more than
+them.)  But I had to dig into the source code for the details;
+I didn't remember all that.  And I did have to climb up to the
+high shelf in my home office for a Peripherals Handbook to
+understand the magic numbers being stuffed into registers!
+
+Norman Wilson
+Toronto ON
+
+

@@ -1,0 +1,57 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 19 Mar 2003 15:52:15 -0800 (PST)
+Subject: [pups] Progress on 2.11BSD kernel
+Message-ID: <200303192352.h2JNqFX05261@moe.2bsd.com>
+
+Hi -
+
+> From: Johnny Billquist <bqt at update.uu.se>
+> Are the UMRs allocated and set up statically?
+
+	The clist and buffer cache UMRs are initialized at system boot time.
+
+> (I haven't looked inside 2BSD for a while now, and can't remember much of
+> the internals anymore.)
+
+	And I haven't been around a UNIBUS system for a long time and the
+	memory of having to deal with UMRs has faded.
+
+> How many UMRs does the system use? 8 for buffer cache, you might expect
+> one or two DH11s, that would require a few more, ethernet takes another
+> few, but it seems there shouldn't be such a shortage.
+
+	There are only 31 total - so a few allocated here, a few allocated
+	there could result in not having enough.
+
+> What did I miss?
+
+	Swapping.  The kernel has to always be able to get UMRs to be
+	able to swap out a process.   The memory is fuzzy but I think the
+	kernel reserved 7 as to be able to swap 56KB at a time of a process
+	but it could get by with less.   
+
+	One UMR is 'reserved' by the hardware to cover the "I/O Page".
+
+	The clist takes up 1 UMR for DMA terminal devices.
+
+	Ethernet of course takes a UMR or two.  At one time a couple of the
+	ethernet drivers (DEUNA) were a bit braindamaged and allocated more
+	UMRs than they needed - I fixed that though.
+
+	MSCP and TMSCP devices need UMRs to map their command and response
+	rings.   The initial MSCP driver was definitely suboptimal in that
+	regard - again, something I tended to (the problem showed up when
+	more than 1 controller was present in a system).   Those UMRs are
+	permanently allocated at boot time by the drivers when they initialize.
+
+	Tape drivers need to have UMRs (although I don't know of too many
+	folks with the old TE16 drives around on a UNIBUS system) available.
+
+	It started adding up and on a system with several types of devices
+	each of which wanted to reserve a couple UMRs the available pool for
+	dynamic use (by tapes and swapping) was sometimes too small.
+
+	Cheers,
+	Steven Schultz
+
+

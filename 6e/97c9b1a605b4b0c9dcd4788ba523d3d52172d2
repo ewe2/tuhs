@@ -1,0 +1,112 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Sun, 26 Feb 2017 17:08:39 -0800
+Subject: [TUHS] Portability (was: BSDi Imaging)
+In-Reply-To: <20170226204900.GC15516@eureka.lemis.com>
+Message-ID: <3f132e39d3cca090ac41a0766c159548121f1e54@webmail.yaccman.com>
+
+I couldn't disagree more.  Here is some background.
+
+I didn't have much experience with COBOL or Algol -- Bell Labs was a
+FORTRAN shop.  And we had a strong need to run FORTRAN programs on
+many different kinds of computers.  So the portability of FORTRAN
+programs was very important.  Barbara Ryder built a program (in
+FORTRAN!) called the PFORT verifier that verified that a FORTRAN
+program could be run on any of the six dominant machines of the day
+(this was an inspiration for Lint, by the way).  It was incredible
+what differences she found in this "portable" language when different
+implementations encountered the programs.  My favorite was a bug in
+one compiler that would cause a program that began with 50 comment
+cards to abort.  The FORTRAN program produced a title line on the
+listing (remember those?) that was printed out, and it used the first
+function name to get the title.  50 lines => new page, no title =>
+blam.   The subtle bugs caused by copy-in/copy-out argument passing
+were especially icky.
+
+So portability was much in our minds in the late sixties and early
+seventies.  As Unix began to catch on, there was a desire to move
+some utilities to other systems.  Neither B nor the original C was
+really up to the job.  Remember that machines of the day had
+different character sets, different floating point implementations,
+and different byte and word sizes, word address vs. byte addressed,
+and with different word orders.  It was a zoo.  Moving programs in
+any language was difficult, not least because the operating systems
+were so different (remember JCL?).
+
+Late in 1974, as I recall, Dennis mused "You know, I think it would be
+easier to move Unix to a new machine than to change a large
+application to run on another operating system."  I thought about
+this for a few minutes, and then offered to write a portable C
+compiler.  I had already moved B and/or C from the PDP-11 to the
+Honeywell (36-bit words, 9 bit bytes, word addressed) and the IBM/360
+(32-bits, byte addressed, but bizarre difficulties accessing memory in
+a reasonable fashion), so I had some idea what I was getting into.  
+We also persuaded the company to buy us a 32-bit minicomputer (the
+Interdata 4/32) with the goal of porting C and Unix to it.
+
+With so many different kinds of opcodes and data formats, Dennis made
+what I think was an inspired solution.   + meant "add" on whatever
+computer it was running on.   int was the natural word size.  etc.
+This had three very good properties:
+1) it kept the language simple.   In particular, it kept us from
+having to specify bit widths for everything, which would then need to
+be changed when the program was ported to avoid inefficiency.
+2) It kept the compiler simple.  This was essential on the small
+PDP-11.
+3) It turned out that with the addition of Lint, many problems that
+could result from porting could be found, without preventing the
+program from running well on the host system.
+
+So C was indisputably intended to be portable, at least in that
+sense.  And in practice it was highly portable while sacrificing
+little in performance on different systems (unlike some other
+languages).
+
+There were drawbacks -- it wasn't perfect.  Cross compiling from one
+machine to a much different one still had its challenges.  Adopting
+the target machine's byte order made networking code harder to
+write.  And machines that considered character constants to be signed
+produced a lot of irritation (and a lot of Lint messages).  But it
+wasn't from lack of trying...
+
+Steve
+
+----- Original Message -----
+From: "Greg 'groggy' Lehey" <grog@lemis.com>
+To:"Noel Chiappa" <jnc at mercury.lcs.mit.edu>
+Cc:<tuhs at minnie.tuhs.org>
+Sent:Mon, 27 Feb 2017 07:49:00 +1100
+Subject:[TUHS] Portability (was: BSDi Imaging)
+
+ On Sunday, 26 February 2017 at 7:50:50 -0500, Noel Chiappa wrote:
+ >
+ > There were in theory portable languages beforehand (e.g. PL/1), but
+ > I think it probably over-specified things - e.g. it would be
+ > impossible to port Multics to another architecture without almost
+ > completely re-writing it from scratch, the code is shot through
+with
+ > "fixed bin(18)"'s every other line...
+
+ That may be coloured by your perspective. C was never designed to be
+ portable, while much older languages like Algol and Cobol were. There
+ were quite different reasons for C's success.
+
+ To quote "The Programmer's ABC'sâ from Datamation, April 1976:
+
+ C is for Cobol
+ What a pity
+ It was designed
+ By a committee
+
+ Greg
+ --
+ Sent from my desktop computer.
+ Finger grog at lemis.com for PGP public key.
+ See complete headers for address and phone numbers.
+ This message is digitally signed. If your Microsoft mail program
+ reports problems, please read http://lemis.com/broken-MUA
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170226/a890d04c/attachment-0001.html>
+

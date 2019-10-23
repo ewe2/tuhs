@@ -1,0 +1,71 @@
+From: charles.unix.pro@gmail.com (Charles Anthony)
+Date: Tue, 3 Jan 2017 13:05:53 -0800
+Subject: [TUHS] Mac OS X is Unix
+In-Reply-To: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+References: <201701032019.v03KJ8oq028944@tahoe.cs.Dartmouth.EDU>
+Message-ID: <CANV78LQLKO03sCPVUe-EbiJonL-kgPQn1x+pm=FN3WWRZ7xLvg@mail.gmail.com>
+
+On Tue, Jan 3, 2017 at 12:19 PM, Doug McIlroy <doug at cs.dartmouth.edu> wrote:
+
+> > keeping the code I work on portable between Linux and the Mac requires
+> > more than a bit of ‘ifdef’ hell.
+>
+> Curmudgeonly comment: I bristle at the coupling of "ifdef" and "portable".
+> Ifdefs that adjust code for different systems are prima facie
+> evidence of NON-portability. I'll buy "configurable" as a descriptor
+> for such ifdef'ed code, but not "portable".
+>
+> And, while I am venting about ifdef:
+> As a matter of sytle, ifdefs are global constructs. Yet they often
+> have local effects like an if statement. Why do we almost always write
+>
+> #ifdef LINUX
+>         linux code
+> #else
+>         default unix code
+> #endif
+>
+> instead of the much cleaner
+>
+>         if(LINUX)
+>                 linux code
+>         else
+>                 default unix code
+>
+> In early days the latter would have cluttered precious memory
+> with unfreachable code, but now we have optimizing compilers
+> that will excise the useless branch just as effectively as cpp.
+>
+>
+I have seen an interesting failure for the latter construct; I was
+compiling some [unremembered] chess program for some [unremembered] UNIX
+workstation in the late '80s.
+
+The code had bit array data structures with get/set routines that optimized
+for host word size, with code something like:
+
+    if (sizeof (unsigned int) == 64)
+        {
+           // cast structure into array of 64 bit unsigned ints and use bit
+operators
+        }
+    else  // sizeof (int) == 32
+        {
+           // cast structure into array of 32 bit unsigned ints and use bit
+operators
+        }
+
+(It might of been 32/16; I don't remember, but it isn't relevant)
+
+The '64' branch had an expression containing something like  '1u << 60' in
+it.
+
+I was compiling on a 32 bit int machine; the compiler flagged the '1u <<
+60' as a fatal error due to the size of the shift -- on this compiler the
+expression evaluator was running before the dead code remover.
+
+-- Charles
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170103/00cbfab3/attachment.html>
+

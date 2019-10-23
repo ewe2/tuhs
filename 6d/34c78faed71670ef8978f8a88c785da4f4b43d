@@ -1,0 +1,37 @@
+From: jam@magic.com (James A. Markevitch)
+Date: Sat, 3 May 2008 10:35:46 -0700 (PDT)
+Subject: [Unix-jun72] Minor bug in sources e09-07
+Message-ID: <200805031735.KAA01301@mist.magic.com>
+
+> >There is a bug in the svn sources on page e09-07, near the bottom.
+> >The call to sleep should read:
+> >
+> >       jsr     r0,sleep; 0:..
+> >
+> >Note that there should be a colon, not a semi-colon after the 0.
+> >Presumably, this code was never executed, else it would have
+> >resulted in a halt.
+> 
+> thanks!
+> 
+> but what *does* that syntax do?  0:..  ?
+
+The two-instruction sequence is:
+
+	movb	tty+3(r1),0f / put clist id in sleep argument
+	jsr	r0,sleep; 0:..
+
+The "0:" on the second line is a label and it is referenced by the "0f"
+in the first line.  The first line is putting a value into the argument
+being passed to the sleep subroutine.  Self-modifying code.
+
+The ".." assembles to a 0.
+
+With the incorrect code, "0" assembled to a 0 and ".." assembled to
+a 0, so there was one extra word of zeroes, and the return from the
+sleep would have executed it (halt) instead of the "br 1b" on the
+next line.
+
+James Markevitch
+
+

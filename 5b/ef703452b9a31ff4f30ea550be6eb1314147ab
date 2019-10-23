@@ -1,0 +1,67 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Tue, 1 Jul 2008 20:35:41 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080701162102.4812f3d6@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+	<20080625122505.4e3d9803@veda.cnb.uam.es>
+	<20080626165246.9c3933eb.lehmann@ans-netz.de>
+	<20080627142430.57e0a9c4@veda.cnb.uam.es>
+	<20080629102523.0219a85c.lehmann@ans-netz.de>
+	<20080630113028.46a50360@veda.cnb.uam.es>
+	<20080630193450.b82063bb.lehmann@ans-netz.de>
+	<20080701162102.4812f3d6@veda.cnb.uam.es>
+Message-ID: <20080701203541.df06d2b1.lehmann@ans-netz.de>
+
+Jose R. Valverde wrote:
+
+> 	u.u_dirp.l = (caddr_t) ((long) (((saddr_t) (uap->linkname).l) & 0x7F00FFFF);
+
+I've added a missing ) behind .l:
+
+ 	u.u_dirp.l = (caddr_t) ((long) (((saddr_t) (uap->linkname).l)) &
+0x7F00FFFF);
+
+And I've got:
+
+"sys2.c":305: warning: struct/union or struct/union pointer required
+"sys2.c":305: operands of CAST have incompatible types
+
+> 	saddr_t aux;
+> 
+> 	aux.l = (caddr_t) uap->linkname;
+> 	u.u_dirp.l = (caddr_t) ((long) aux.l & 0x7F00FFFF);
+
+ldl	rr2,rr8(#4)
+ldl	|_stkseg+~L1|(fp),rr2
+and	r2,#32512
+ldl	_u+78,rr2
+
+> they actually had the original code
+> 
+> 	register struct a {
+> 		char	*target;
+> 		saddr_t	*linkname;
+> 	} *uap;
+> 	...
+> 	u.u_dirp.l = (caddr_t)(((long)uap->linkname.l & 0x7F00FFFF);
+
+Hm - my man page states, that link() needs a char * as 2nd parameter, but
+I've tested it:
+
+"sys2.c":305: operands of "&" have incompatible types
+"sys2.c":305: illegal combination of pointer and integer
+"sys2.c":305: syntax error
+
+I also tried 
+
+u.u_dirp.l = (caddr_t)(((long)((uap->linkname).l) & 0x7F00FFFF);
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+

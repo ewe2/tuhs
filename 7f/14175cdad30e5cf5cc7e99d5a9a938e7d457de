@@ -1,0 +1,85 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 05 Apr 2018 17:03:02 -0400
+Subject: [TUHS] long lived programs
+Message-ID: <1522962186.9871.for-standards-violators@oclsc.org>
+
+Steve Johnson:
+
+  But in this case, part of the requirement was to pass some standard
+  simulation tests (in FORTRAN, of course).  He was complaining that
+  these programs had bugs and didn't give the right answer.
+
+====
+
+This reminds me of an episode during my time at Bell Labs.
+
+The System V folks wanted to make pipes that were streams;
+our experience in Research showed that that was useful.  We'd
+done it just by making pipe(2) create a stream.  This caused
+some subtle differences in semantics (pipes became full-duplex;
+writing to a pipe put a delimiter in the stream, so that a
+corresponding read on the other end would stop at the delimiter;
+write(pipefd, "", 0) therefore generated something that would
+make read(pipeotherfd, buf, len) return 0).  We'd been running
+all our systems that way for a while, and had uncovered no
+serious problems.
+
+But the System V folks were very nervous about it anyway, and
+wrote a planning document in which they proposed to create a
+new, different system call to make stream pipes.  pipe(2) would
+make an old-fashioned pipe; spipe(2) (or whatever it was called,
+I forget the name) had to be called to get a stream.  The document
+didn't really explain the justification for this.  To us in
+Research it just sounded crazy.
+
+Someone else was going to attend a meeting with the developers,
+but at the last minute he had a conflict, so he drafted me to
+go.  Although I can be pretty blunt in writing, I try not to be
+so much so in person when dealing with people I don't know; so
+rather than asking how they could be so crazy as to add a new
+kind of pipe, I asked why they really thought it necessary.
+
+It took a little probing, but the answer turned out to be that
+their management insisted that everything pass an official
+verification suite to prove compliance with the System V,
+Consider It Standard; and said verification suite didn't just
+check that the first file descriptor returned by pipe(2) could
+be read and the second written, it insisted that the first could
+not be written and the second not read.  Full-duplex pipes didn't
+meet the standard, it was claimed.
+
+I asked what exactly is the standard?  The SVID, I was told.
+
+What does the SVID really say, I wondered?  We got a copy and
+looked up pipe(2).  According to the official standard, the
+first file descriptor must be readable and the second writeable,
+but there was no statement that it couldn't work the other way too.
+Full-duplex pipes did in fact meet the standard; it was the
+verification suite that, in an excess of zeal, didn't conform.
+
+The developers were absolutely delighted with this.  They too
+thought it was stupid to have two different kinds of pipes,
+particularly given our experience that full-duplex delimited
+pipes didn't break anything.  They were very happy to have
+Research not just yell at them for doing things differently
+from us, but help them figure out how to justify doing things
+right.
+
+I don't know just how they took this further with management,
+but as it came out in SVr4, pipe(2) returned a full-duplex
+stream.  This is still true even unto Solaris 10, where I just
+tested it.
+
+I made friends that day.  That developer group kept in touch
+with me as they did further work on pipes, the terminal driver,
+pseudo-ttys, and other things.  I didn't agree with everything
+they did, but we were able to discuss it all cordially.
+
+Sometimes the verification program just needs to be fixed.
+And sometimes the developers that seem set on doing the wrong
+thing really want help in subverting whatever is forcing that
+on them, because they really do know what the right thing is.
+
+Norman Wilson
+Toronto ON
+

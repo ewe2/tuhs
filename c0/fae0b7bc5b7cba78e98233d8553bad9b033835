@@ -1,0 +1,34 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Sun, 25 Feb 2018 15:18:59 -0800
+Subject: [TUHS] EOF on pipes?
+In-Reply-To: Your message of "Sun, 25 Feb 2018 14:25:51 -0800."
+ <alpine.BSF.2.21.1802251422190.96837@orthanc.ca>
+References: <1519519996.29346.for-standards-violators@oclsc.org>
+ <alpine.BSF.2.21.1802251422190.96837@orthanc.ca>
+Message-ID: <20180225231914.542B1156E812@mail.bitblocks.com>
+
+On Sun, 25 Feb 2018 14:25:51 -0800 Lyndon Nerenberg <lyndon at orthanc.ca> wrote:
+Lyndon Nerenberg writes:
+> > If a stream was marked as using delimeters (and pipes always
+> > were), a delimeter was inserted after every write(2).  So
+> > write(2) generated an empty message, and read(2) returned it.
+> 
+> And this lived on in the IL network protocol. I've always thought that was 
+> one of the more elegant aspects of IL, but of course it didn't have a hope 
+> in hell of surviving outside the Plan 9 ecosystem.
+
+BSD networking has had sequenced packet protocol (SPP) support
+pretty much from the beginning (probably due to early XNS
+influence).  From socket(2):
+
+     SOCK_SEQPACKET sockets employ the same system calls as SOCK_STREAM
+     sockets.  The only difference is that read(2) calls will return only the
+     amount of data requested, and any remaining in the arriving packet will
+     be discarded.
+
+Even today you can do
+
+    int fd = socket(PF_INET, SOCK_SEQPACKET, IPPROTO_SCTP);
+
+Presumably read(fd, ptr, 0) works too.
+

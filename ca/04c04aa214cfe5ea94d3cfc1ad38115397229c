@@ -1,0 +1,80 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Thu, 14 Feb 2002 08:33:42 -0800 (PST)
+Subject: [pups] screen 3.9.9 vs. 2.11BSD write() to fifo and/or select() on socket
+Message-ID: <200202141633.g1EGXgs01723@moe.2bsd.com>
+
+Hi -
+
+> From: David W Talmage <talmage at cmf.nrl.navy.mil>
+> I thought that I'd read in the FM that they do.  I see now that I was 
+> mistaken,perhaps delusional.  I see now that <sys/stat.h> contains the gospel:
+> 
+> #define S_IFIFO 0010000         /* named pipe (fifo) - Not used by 2.11BSD */
+
+	:)
+
+	Adding FIFOs to the kernel would make an interesting project though -
+	perhaps when I become inspired/motivated I'll give it a try.
+
+> Sounds like I'm in for some deep hacking if I continue with this.  Will 
+> overlays help me here?
+
+	Overlays will help if the code comes out to more than 64KB.   Alas,
+	overlays will _not_ help the dataspace requirements.   The last time
+	I looked at 'screen' I saw things like "char buf[32768];' sprinkled
+	thru the code.   So you might be in for some serious hacking to trim
+	back the sizes of arrays/buffers/etc.   It probably would also be
+	a good idea to 'string'ify the program (there are tools to assist
+	doing this - take a look at how sendmail and lint are built).
+
+> I wonder if setitimer() will fare any better.  alarm() is obsolete.
+
+	The gospel according to /usr/src/lib/libc/gen/alarm.c says:
+
+/*
+ * Backwards compatible alarm.
+ */
+#include <sys/time.h>
+#include <unistd.h>
+
+unsigned int
+alarm(secs)
+	unsigned int secs;
+{
+	struct itimerval it, oitv;
+	register struct itimerval *itp = &it;
+
+	timerclear(&itp->it_interval);
+	itp->it_value.tv_sec = secs;
+	itp->it_value.tv_usec = 0;
+	if (setitimer(ITIMER_REAL, itp, &oitv) < 0)
+		return (-1);
+	if (oitv.it_value.tv_usec)
+		oitv.it_value.tv_sec++;
+	return (oitv.it_value.tv_sec);
+}
+
+	<g>
+
+> I'll send a progress report if I decide to continue this project.  Thanks for 
+> your help, Mr. Schultz.
+
+	What I think you're seeing is the race condition that fork() has - 
+	there is no guarantee which process (parent or child) runs first.
+	The test program does the fork() and the child runs to completion
+	before the parent enters the select().  At that point the parent
+	will wait until the alarm goes off.
+
+	One thing you might try is create two separate programs.  One would
+	create the socket and wait for the other program to connect and send
+	a string.  If that works it shows that the UNIX domainsockets are
+	working as expected and that the fork() race is indeed the problem.
+	IF the client/server tests fail then there is something wrong in the
+	UNIX domain socket handling that needs to be addressed.
+
+	Good Luck!
+
+	Cheers,
+	Steven Schultz
+
+

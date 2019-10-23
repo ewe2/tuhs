@@ -1,0 +1,57 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 19 Nov 2017 08:41:09 -0500 (EST)
+Subject: [TUHS] Determining what was on a tape back in the day
+Message-ID: <20171119134109.59F3018C0F5@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > I don't quite no how to investigate this other than to pore through the
+    > pdp11/40 instruction manual.
+
+One of these:
+
+  https://www.ebay.com/itm/Digital-pdp-Programming-Card-8-Pages/142565890514
+
+is useful; it has a list of all the opcodes in numerical order; something none
+of the CPU manuals have, to my recollection. Usually there are a flock of
+these "pdp11 Programming Cards" on eBait, but I only see this one at the
+moment.
+
+If you do any amount of work with PDP-11 binary, you'll soon find yourself
+recognizing the common instructions. E.g. MOV is 01msmr (octal), where 'm' is
+a mode specifier, and s and r are source and destination register
+numbers. (That's why PDP-11 people are big on octal; the instructions are easy
+to read in octal.) More here:
+
+  http://gunkies.org/wiki/PDP-11_architecture#Operands
+
+So 0127xx is a move of an immediate operand.
+
+
+    >> You don't need to mount it on DECTape drive - it's just blocks. Mount
+    >> it as an RK05 image, or a magtape, or whatever.
+
+    > I thought disk (RK05) and tape (magtape) blocks were different...
+
+Well, you need to differentiate between DECtape and magtape - very different
+beasts.
+
+DECtape on a PDP-11 _only_ supports 256 word (i.e. 512 byte) blocks, the same
+as most disks. (Floppies are an exception when it comes to disks - sort
+of. The hardware supports 128/256 byte sectors, but the usual driver - not in
+V6 or V7 - invisibly makes them look like 512-byte blocks.)
+
+Magtapes are complicated, and I don't remember all the details of how Unix
+handles them, but the _hardware_ is prepared to write very long 'blocks', and
+there are also separate 'file marks' which the hardware can write, and notice.
+
+But a magtape written in 512-byte blocks, with no file marks, can be treated
+like a disk; that's what the V6 distribution tapes look like:
+
+  http://gunkies.org/wiki/Installing_UNIX_Sixth_Edition#Installation_tape_contents
+
+and IIRC 'tp' format magtape tapes are written the same way, hardware-wise (so
+they look just like DECtapes).
+
+     Noel
+

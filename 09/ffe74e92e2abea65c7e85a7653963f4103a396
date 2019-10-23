@@ -1,0 +1,92 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Tue, 28 Nov 2017 10:34:13 -0800
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: Your message of "Tue, 28 Nov 2017 10:56:52 -0700."
+ <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+References: <009a01d348e9$e3dce200$ab96a600$@ronnatalie.com>
+ <CAJfiPzy6S75+8Ob67Uojgw2vSuxqWvRe=mOCvSJ_bUXQ9WsmRw@mail.gmail.com>
+ <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+Message-ID: <20171128183428.A825F156E523@mail.bitblocks.com>
+
+On Tue, 28 Nov 2017 10:56:52 -0700 Warner Losh <imp at bsdimp.com> wrote:
+Warner Losh writes:
+> 
+> On Tue, Nov 28, 2017 at 9:21 AM, Nemo <cym224 at gmail.com> wrote:
+> 
+> > A late comment:  I seem to recall this boilerplate in earlier Solaris
+> > but Solaris 10 has an executable.  So I looked at the OpenSolaris
+> > source out of curiosity and found this.
+> >
+> > [CDDL stuff here]
+> > /*
+> >  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+> >  * Use is subject to license terms.
+> >  */
+> >
+> > #pragma ident   "%Z%%M% %I%     %E% SMI"
+> >
+> > #include <unistd.h>
+> >
+> > /*
+> >  * Exit with a zero value as quickly as possible.
+> >  */
+> >
+> > int
+> > main(void)
+> > {
+> >         _exit(0);
+> >         /*NOTREACHED*/
+> >         return (0);
+> > }
+> >
+> 
+> Ah, the tyranny of  static analysis tools... _exit(0) should be marked such
+> that the tools know it does not return. This means the /*NOTREACHED*/ isn't
+> needed. And since there's no real exit path out of  main, the return (0) is
+> equally bogus (because main can't return). Yet lint and other tools have
+> ushered in this insanity.
+> 
+> I'm glad to see these days that these sorts of lame false positives have
+> been eliminated...
+> 
+> Then again _exit(0) is a useless optimization. It saves three closes for
+> files that are bound to be closed at image tear down. If it really is that
+> important (absent data, my gut tells me it isn't), then this should be
+> written in assembler. FreeBSD/amd64 would be something like:
+> 
+> #include <sys/syscall.h>
+> #include <machine/asm.h>
+> 
+> ENTRY(_start)
+> xor %r10, %r10
+> mov $SYS_exit, %eax
+> syscall
+> END(_start)
+> 
+> This some small hacks to each arch's SYS.h in libc, this could even be
+> smaller and MI :). this is tiny:
+> -rwxrwxr-x  1 imp  imp  672 Nov 28 10:18 true
+>   text   data   bss   dec   hex   filename
+>     10      0     0    10   0xa   true
+> 
+> Contrast that with FreeBSD's /usr/bin/true:
+> -r-xr-xr-x  1 root  wheel  4624 Nov 20 11:56 /usr/bin/true
+>   text   data   bss    dec     hex   filename
+>   1540    481     8   2029   0x7ed   /usr/bin/true
+> 
+> which is little more than return(0), but also has a fair amount of
+> copyright and SCCS data.
+
+int main(void) { return 0; }
+
+is sufficient for true.  BTW this is pretty much what
+/usr/src/usr.bin/true/true.c does.
+
+And true can also be a file of length 0 chmoded to +x.  No
+need to optimize such things.
+
+It should really be linked staticallly but crt1.o seems to
+bring in the entire libc. I guess linking with just the things
+a program needs is a hard problem!
+
+

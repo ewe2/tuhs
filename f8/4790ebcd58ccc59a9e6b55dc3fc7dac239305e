@@ -1,0 +1,45 @@
+From: cowan@mercury.ccil.org (John Cowan)
+Date: Tue, 5 Jan 2016 15:49:40 -0500
+Subject: [TUHS] Early Unix function calls: expensive?
+In-Reply-To: <96168193-CFB6-433D-8085-4EDBDC0F564B@ronnatalie.com>
+References: <76BC99D5-A8C4-4F8B-8D7D-C621CBD18238@tfeb.org>
+ <20160104000113.GD1602@mercury.ccil.org>
+ <328D91D8-FF74-46EE-A281-5432716E6206@ieee.org>
+ <418F9945-C1BC-4EA1-85F3-981342A9BDD6@ronnatalie.com>
+ <CAC20D2Mpy3it2jc4TQ6dMRUJPmq7htmoPH1ntOS=in9P5gfo3w@mail.gmail.com>
+ <B3896F3F-2B5A-4AA4-96A7-3DCA096BA82C@ronnatalie.com>
+ <CAC20D2NdctE4cmNQxmjdVG7_eWkyyQ24X3AFBUDDVOoanteO9A@mail.gmail.com>
+ <2C046974-5E68-416F-9413-2FAD3D3D67EC@ronnatalie.com>
+ <CANCZdfptcCOLy4sLaa2nrd6hg7Ra5JBZdBTvvT9t+PJAD807DA@mail.gmail.com>
+ <96168193-CFB6-433D-8085-4EDBDC0F564B@ronnatalie.com>
+Message-ID: <20160105204940.GA22233@mercury.ccil.org>
+
+Ronald Natalie scripsit:
+
+> Ah, this brings back memories.    We had this MACRO-11 concept called
+> “threaded code” (not threads in the multiprocessing sense).
+> Essentially we had very small code fragments that were loaded into
+> a table and we’d run them to process data with very light JSR/RET
+> linkage (minimal register saves).
+
+I wrote an interpreter for a Forth-ish language in Macro-11 for RT-11.
+The core dispatch loop was just two instructions:
+
+	JSR PC, @(R5)+
+	BR .-1
+
+When entered with R5 equal to the beginning of a series of addresses of
+routines to be entered, this invoked the routines at the addresses in turn.
+If the routine was in machine language, it terminated with RTS PC
+(shorter than JMP-ing back to the dispatch loop).  If it was itself
+threaded code, it began with JSR R5,DISPATCH, which pushed R5 on the
+stack and loaded it up with the next instruction, and terminated with
+the address of an POP R5 instruction conveniently placed just before
+the dispatch loop.
+
+-- 
+John Cowan          http://www.ccil.org/~cowan        cowan at ccil.org
+You annoy me, Rattray!  You disgust me! You irritate me unspeakably!
+Thank Heaven, I am a man of equable temper, or I should scarcely be able
+to contain myself before your mocking visage.  --Stalky imitating Macrea
+

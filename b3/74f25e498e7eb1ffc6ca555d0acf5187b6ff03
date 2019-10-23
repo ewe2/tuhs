@@ -1,0 +1,63 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Wed, 9 Dec 2015 09:56:19 -0500
+Subject: [TUHS] v6tar from v7 on v6, too large?
+In-Reply-To: <56683CDF.10609@gmail.com>
+References: <20151209045357.8573718C0C5@mercury.lcs.mit.edu>
+ <56683CDF.10609@gmail.com>
+Message-ID: <CAC20D2PdNDRQ17whxxd5GEqaiG6px-NM58Q6xe4g7khzMsx+dw@mail.gmail.com>
+
+dd if=v6tar bs=128 count=1 | od
+
+check the man page on the a.out format.
+
+BTW:  I would relink v6tar to be a "407" header so it will run anywhere.
+That said, there are a number of copies of v6tar "in the wild" - my memory
+is that it's on a late 1970's, very early 1980s USENIX tape.
+
+
+
+On Wed, Dec 9, 2015 at 9:38 AM, Will Senn <will.senn at gmail.com> wrote:
+
+> On 12/8/15 10:53 PM, Noel Chiappa wrote:
+>
+>>      > From: Will Senn <will.senn at gmail.com>
+>>
+>>      > The problem is this, when I attempt to execute the v6tar binary on
+>> the
+>>      > v6 system (it works in v7) it errors out:
+>>      > v6tar
+>>      > v6tar: too large
+>>
+>> That's an error message from the shell; the exec() call on the command
+>> ('v6tar') is returning an ENOMEM error. Looking in the kernel, that comes
+>> from
+>> estabur() in main.c; there are a number of potential causes, but the most
+>> likely is that 'v6tar' is linked to be split I+D, and your V6 emulation
+>> is on
+>> a machine that doesn't have split I+D (e.g. an 11/40). If that's not it,
+>> please dump the a.out header of 'v6tar', so we can work out what's
+>> causing the
+>> ENOMEM.
+>>
+>>         Noel
+>>
+> That was it. Thanks for supplying the logic trail you followed as well! I
+> "upgraded" to a 11/70 w/2M of RAM and FPP by passing the appropriate SimH
+> commands and then I folllowed the instructions in Setting up Unix Sixth
+> Edition to use the m45.s assist and voila, v6tar works. Thank you.
+>
+> Now, when you say dump the a.out header, how do you do that?
+>
+> Thanks,
+>
+> Will
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151209/3ea32ab9/attachment.html>
+

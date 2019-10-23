@@ -1,0 +1,44 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Tue, 14 Feb 2017 11:17:08 -0500 (EST)
+Subject: [TUHS] Another odd comment in V6
+Message-ID: <20170214161708.C298A18C0A2@mercury.lcs.mit.edu>
+
+    > From: Random832
+
+    > You could return the address of the last character read, and let the
+    > user code do the math.
+
+Yes, but that's still 'design the system call to work with interrupted and
+re-started system calls'.
+
+    > If the terminal is in raw/cbreak mode, the user code must handle a
+    > "partial" read anyway, so returning five bytes is fine.
+
+As in, if a software interrupt happens after 5 characters are read in, just
+terminate the read() call and have it return 5? Yeah, I suppose that would
+work.
+
+    > If it's in canonical mode, the system call does not copy characters into
+    > the user buffer until they have pressed enter.
+
+I didn't remember that; that TTY code makes my head hurt! I've had to read it
+(to add 8-bit input and output), but I can't remember all the complicated
+details unless I'm looking at it!
+
+
+    > Maybe there's some other case other than reading from a terminal that it
+    > makes sense for, but I couldn't think of any while writing this post.
+
+As the Bawden paper points out, probably a better example is _output_ to a
+slow device, such as a console. If the thing has already printed 5 characters,
+you can't ask for them back! :-)
+
+So one can neither i) roll the system call back to make it look like it hasn't
+started yet (as one could do, with input, by stuffing the characters back into
+the input buffer with kernel ungetc()), or ii) wait for it to complete (since
+that will delay delivery of the software interrupt). One can only interrupt
+the call (and show that it didn't complete, i.e. an error), or have
+re-startability (i.e. argument modification).
+
+	Noel
+

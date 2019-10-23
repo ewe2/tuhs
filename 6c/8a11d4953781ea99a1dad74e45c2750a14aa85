@@ -1,0 +1,76 @@
+From: jkunz@unixag-kl.fh-kl.de (Jochen Kunz)
+Date: Tue, 18 Jun 2002 09:55:12 +0200
+Subject: [pups] bsd2.11 kernel compile
+In-Reply-To: <3D0E81C0.9046BF5D@bellsouth.net>; from langj@bellsouth.net on Tue, Jun 18, 2002 at 02:41:36 CEST
+References: <3D0E81C0.9046BF5D@bellsouth.net>
+Message-ID: <20020618095512.I163999@MissSophie.unixag-kl.fh-kl.de>
+
+On 2002.06.18 02:41 joseph lang wrote:
+
+> How do I figure out which overlay (or base) is the problem?
+Add this to your Makefile and you can "make" a list of the individual
+overlay sizes:
+
+sizes: sizes.awk
+	@echo -n "BASE	" ; size ${BASE} | awk -f sizes.awk
+	@echo -n "OV1	" ; size ${OV1} | awk -f sizes.awk
+	@echo -n "OV2	" ; size ${OV2} | awk -f sizes.awk
+	@echo -n "OV3	" ; size ${OV3} | awk -f sizes.awk
+	@echo -n "OV4	" ; size ${OV4} | awk -f sizes.awk
+	@echo -n "OV5	" ; size ${OV5} | awk -f sizes.awk
+	@echo -n "OV6	" ; size ${OV6} | awk -f sizes.awk
+	@echo -n "OV7	" ; size ${OV7} | awk -f sizes.awk
+	@echo -n "OV8	" ; size ${OV8} | awk -f sizes.awk
+	@echo -n "OV9	" ; size ${OV9} | awk -f sizes.awk
+
+sizeb: FRC
+	size ${BASE}
+
+size1: FRC
+	size ${OV1}
+
+size2: FRC
+	size ${OV2}
+
+size3: FRC
+	size ${OV3}
+
+size4: FRC
+	size ${OV4}
+
+size5: FRC
+	size ${OV5}
+
+size6: FRC
+	size ${OV6}
+
+size7: FRC
+	size ${OV7}
+
+size8: FRC
+	size ${OV8}
+
+size9: FRC
+	size ${OV9}
+
+
+sizes.awk: FRC
+	echo 'BEGIN {sum=0' > sizes.awk
+	echo 'sum2=0' >> sizes.awk
+	echo 'sum3=0}' >> sizes.awk
+	echo '/^[0-9]/ {sum=sum+$$1' >> sizes.awk
+	echo 'sum2=sum2+$$1+$$2' >> sizes.awk
+	echo 'sum3=sum3+$$4}' >> sizes.awk
+	echo 'END {print "text: "sum "	text+data: " sum2
+"	dec: " sum3}' >> sizes.awk
+
+-- 
+
+
+
+tschüß,
+         Jochen
+
+Homepage: http://www.unixag-kl.fh-kl.de/~jkunz/
+
+

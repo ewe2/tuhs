@@ -1,0 +1,53 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 19 Dec 2015 09:57:32 -0500
+Subject: [TUHS] ed.c on Unix v5
+References: <CADxT5N7R7OTvwSEXh0VTg0e9wx9W8tWdcQSnZUGamiAge3h7Qw@mail.gmail.com>
+ <alpine.BSF.2.11.1512191321060.54277@aneurin.horsfall.org>
+ <CADxT5N4HL7PgqGSRo_EDRD1crGSdSG5KthLR1CHXZ7w01eXs-Q@mail.gmail.com>
+Message-ID: <m2si2y4hb7.fsf@fastmail.com>
+
+Mark Longridge <cubexyz at gmail.com> writes:
+
+>>> I trimmed the source a bit, there's a function at the
+>>> end called getpid()  which is commented out.
+>
+>> If your V5 has getpid(), then it's a...  strange version...
+>
+> I went back to the original uv5swre.zip file which was what I started
+> with and had another look to be sure.
+>
+> It's not listed on tuhs under v5 but if one looks at /lib/libc.a via
+> 'ar t getpid.o' you can see the object file getpid.o
+
+Plus, you know, the syscall itself.
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V5/usr/sys/ken/sys4.c
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=V5/usr/sys/ken/sysent.c
+
+There are four (well, five with ctime) objects in libc.a with no
+matching source file in /usr/source/s4: alloc, getpid, ladd, and
+snstat.  Also, mon and qsort have assembly versions in s3 and C
+versions in s4, and ctime is in s3 despite the fact that almost
+every other libc file is in s4.
+
+jnc at mercury.lcs.mit.edu (Noel Chiappa)
+writes:
+
+>     > From: Mark Longridge <cubexyz at gmail.com>
+>
+>     > if one looks at /lib/libc.a via 'ar t getpid.o' you can see the object
+>     > file getpid.o
+>
+> Library, schlibrary! The important question is 'is it in the kernel source'?
+> (Although now that I think about it, if the library routine tries to use a
+> non-existent system call, it should return an error. It would be interested
+> to disassemble the library routine, and see what it thinks it is doing.)
+
+getpid.o consists of two instructions: sys getpid; rts pc. So it
+unconditionally returns whatever the syscall puts in r0.
+
+Non-existent syscalls map to nosys, which sets u_error to 100
+(so, in principle, it will return 100, but), which causes the
+process to be sent a signal SIGSYS.
+
+
+

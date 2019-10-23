@@ -1,0 +1,40 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Mon, 23 Apr 2018 21:49:34 -0700
+Subject: [TUHS] /dev/drum
+In-Reply-To: Your message of "Mon, 23 Apr 2018 22:32:26 -0600."
+ <e91f3dba-c563-f8f1-44a9-f7beffc08e7c@spamtrap.tnetconsulting.net>
+References: <mailman.125.1524526228.3788.tuhs@minnie.tuhs.org>
+ <9a5e49bb-f235-4b87-445b-1532d8facd2f@update.uu.se>
+ <e91f3dba-c563-f8f1-44a9-f7beffc08e7c@spamtrap.tnetconsulting.net>
+Message-ID: <20180424044941.7C703156E510@mail.bitblocks.com>
+
+On Mon, 23 Apr 2018 22:32:26 -0600 Grant Taylor via TUHS <tuhs at minnie.tuhs.org> wrote:
+> 
+> I had always assumed that the outer edge (what I thought was the end of
+> the disk) was faster than the inner edge (what I thought was the
+> beginning of the disk) because of geometry.  However, as Ronald stated,
+> hard drives were constant angular density.  Thus negating what I
+> originally thought about speed.
+
+Constant angular velocity means faster "linear" velocity for
+tracks further away from the center.  Since 1990 or so disk
+tracks are divided up in 16 or so "zones", where outer zones
+have more blocks per track.  This translates to higher
+throughput.
+
+A modern Seagate Exos SAS disk may have a range of 279MB/s
+(outermost) to 136MB/s (innermost) or 300MB/s to 210MB/s for
+faster disks (15Krpm).  Disk vendors don't seem to break this
+range out for consumer drives. But you can measure it using
+tools like diskinfo on FreeBSD. For example:
+
+# diskinfo -t /dev/ada4 # this is an 5 year old 1TB WD "Black" disk.
+/dev/ada4
+	...
+        Not_Zoned       # Zone Mode <<== this seems wrong.
+        ...
+Transfer rates:
+        outside:       102400 kbytes in   0.972176 sec =   105331 kbytes/sec
+        middle:        102400 kbytes in   1.088977 sec =    94033 kbytes/sec
+        inside:        102400 kbytes in   1.804460 sec =    56748 kbytes/sec
+

@@ -1,0 +1,37 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Thu, 27 Apr 2017 15:03:07 -0400
+Subject: [TUHS] directories going away.
+Message-ID: <012501d2bf88$e8611660$b9234320$@ronnatalie.com>
+
+The JHU version of the V6 kernel and the mount program were modified (or
+should I say buggered) so that unprivileged users could mount user packs.
+There were certain restrictions added as well:   no setuid on mounted
+volumes etc.
+
+The problem came up that people would mount them using relative paths and
+the mtab wouldn't really show who was using the disk as a result.    I
+suggested we just further bugger it by making the program chdir to '/dev'
+first.   That way you wouldn't have to put /dev/ on the drive device and
+you'd have to give an absolute path for the mount point (or at least one
+relative to /dev).    I pointed out to my coworker that there was nothing in
+/dev/ to mount on.    He started trying it.   Well the kernel issued errors
+for trying to use a special file as a mount point.   He then tried "."
+Due to a combination of bugs that worked!
+
+The only problem, is how do you unmount it?   The /dev nodes had been
+replaced by the root of directory of my user pack.    Oh well, go halt and
+reboot.
+
+There were supposed to be protections against this.   Mind you I did not
+have root access at this point (just a lowly student operator), so we
+decided to see where else we could mount.    Sure enough cd /etc/ and mount
+on "." there.   We made up our own password file.   It had one account with
+uid 0 and the name "Game Player" in the gcos field.   About this one of the
+system managers calls and tells us to halt the machine as it'd had been
+hacked.   I told him we were responsible and we'd undo what we did.
+
+I think by this time Mike Muuss came out and gave me the "mount" source and
+told me to fix it.
+
+
+

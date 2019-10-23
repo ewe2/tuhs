@@ -1,0 +1,91 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 71a5f2db
+	for <ml@inbox.vuxu.org>;
+	Sat, 12 Jan 2019 01:25:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D05689466A; Sat, 12 Jan 2019 11:25:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 135AF94666;
+	Sat, 12 Jan 2019 11:25:04 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8E2A494666; Sat, 12 Jan 2019 11:25:02 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 773FD93D29
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Jan 2019 11:25:01 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 7D56A18C073; Fri, 11 Jan 2019 20:24:39 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20190112012439.7D56A18C073@mercury.lcs.mit.edu>
+Date: Fri, 11 Jan 2019 20:24:39 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] V6 networking & alarm syscall
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Ruizendaal
+
+    > It would not seem terribly complex to add non-blocking i/o capability to
+    > V6. ...  Adding a 'capacity' field to the sgtty interface would not
+    > have been a big leap either. ...
+    > Maybe in the 1975-1980 time frame this was not felt to be 'how Unix does
+    > it'?
+
+This point interested me, so I went and had a look at how the MIT V6+/PWB
+TCP/IP did it. I looked at user TELNET, which should be pretty simple (server
+would probably be more complicated, due to PTY stuff).
+
+It's totally different - although that's in part because in the MIT system,
+TCP is in the user process, along with the application. In the user process,
+there's a common non-premptive 'tasking' package which both the TCP and TELNET
+code use. When there are no tasks ready to run, the process uses the sleep()
+system call to wait for a fixed, limited quantum (interrupts, i.e. signals,
+will usually wake it before the quantum runs out); note this comment:
+
+ / uses the system sleep call rather than the standard C library
+ / sleep (sleep (III)) because there is a critical race in the
+ / C library implementation which could result in the process
+ / pausing forever. This is a horrible bug in the UNIX process
+ / control mechanism.
+
+Quoted without comment from me!
+
+There are 3 TCP tasks - send, receive and timer. The process receives an
+'asynchronous I/O complete' signal when a packet arrives, and that wakes up
+the process, and then one of the tasks therein, to do packet processing
+(incoming data, acks, etc).
+
+There appears to be a single TELNET task, which reads from the user's
+keyboard, and sends data to the network. (It looks like processing of incoming
+data is handled in the context of one of the TCP tasks.) Its main loop starts
+with this:
+
+         ioctl (0, FIONREAD, &nch);
+                        if (nch == 0) {
+                                tk_yield ();
+                                continue;
+                        }
+                }
+                if ((c = getchar()) == EOF) {
+
+so that ioctl() must look to see if there is any data waiting in the terminal
+input buffer (I'm too lazy to go see what FIONREAD does, right at the moment).
+
+      Noel

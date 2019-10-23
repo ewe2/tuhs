@@ -1,0 +1,103 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Wed, 04 Jan 2017 19:20:55 -0800
+Subject: [TUHS] What sparked lint? [Was: Unix stories]
+In-Reply-To: <CAJfiPzz-HegJOtjo524tusOhsu5LP2MTVGWBBM=nZbhHgpOB-g@mail.gmail.com>
+Message-ID: <730228a04039dc983eaed5f78a3d817ea80e79bd@webmail.yaccman.com>
+
+OK, more history...
+
+In 1973, I spent a 9 month Sabbatical at the University of Waterloo in
+Canada.  When I left, B was the dominant language on Unix -- when I
+came back, C had taken over.  I had made a B compiler for the
+Honeywell mainframe, as much to test out Yacc as anything.  When I
+came back,  an Intern from MIT, Al Snyder, had rewritten my B
+compilers into C compilers.  He left, and I took back his code. 
+Dennis' compiler was still the touchstone on Unix, but Al's was
+working on the Honeywell and there was a lot of interest in making one
+for OS 360 and also for an internal switching machine.   Al's
+compiler for the Honeywell still had a fair number of bugs, mostly in
+the code generation phase (the code to decide what to do when the
+compiler ran out of registers went from one page to two pages to four
+pages and there were still bugs).  
+
+Also, about this time I had a fateful discussion with Dennis, in which
+he said "I think it may be easier to port Unix to a new piece of
+hardware than to port a complex application from Unix to a new OS"
+(Most OS's in those days were unique to their hardware, and written in
+assembler).  Clearly, such a plan required a portable compiler and I
+agreed to take a stab at it...    I started with the existing
+compilers and began editing them to make the similar code in the
+various compilers identical.  I started with the front end--the
+back-end work seemed to be (and was) rather harder.   The grammar
+and lexer were fairly easy to clean up, but I really didn't have a
+good way to test them...  And the type system was new and evolving.
+
+At that time, C was still fairly close to B.  For example, there were
+no function prototypes, so a common source of bugs was to change a
+function but miss some of the invocations, leading, usually, to
+crashes.  There were also no header files -- the system structures
+were printed in the manual (!).   And, 32-bit machines were
+beginning to come along and looked attractive.   I realized that I
+could kill several birds with one stone by using my nascent front end
+to parse C programs and then print out a line for every function call
+and definition with the function name, location, and argument types. 
+A bit of Unix magic took these lines and sorted them, and a small
+program then read the combined file and complained when a function was
+called or defined inconsistently.  And, as a side effect, I found and
+fixed a number of front-end bugs.
+
+We decided to purchase an Interdata 8/32, a 32-bit machine with an
+instruction set that looked like a cleaned-up IBM 360, and all of a
+sudden portability became much more important.  We had to do
+something about about all those structure definitions printed in the
+manual.  Over the summer, the concept of header files was developed,
+and Lint at one point required that system calls had to use the
+structure definitions in these header files -- a copy from the manual
+was no longer acceptable.  Also, as the compiler developed, we added
+additional portability messages and some useful things like flagging
+expressions that didn't do anything and statements that could not be
+reached.
+
+Lint continued for a long time to share the front end of the portable
+C compiler.
+
+I should mention that I was not the first person to write a program to
+criticize other programs.  Barbara Ryder at the Labs had written, in
+FORTRAN, program called PFORT that would look at FORTRAN programs and
+flag constructions that would not work on the 6 major FORTRAN
+compilers in use at the time.  There were a surprising number of
+differences between these languages, and we were able to write a
+symbolic algebra system in FORTRAN that ran on all these systems
+largely because of the effectiveness of PFORT.
+
+Finally, the name...  At the time Lint first appeared, I had two
+young children at home.  This was in the era of cloth diapers, and we
+were doing a LOT of wash.  One day, as I was cleaning out the lint
+trap in our dryer, I realized that the program I was writing was
+performing a similar function, and the name was born.  Since then, I
+have written a number of Lint-like programs -- I'm proudest of the one
+I did when working for the MathWorks.  It was integrated into the
+MATLAB editor, and could give nearly instant feedback when you typed
+in faulty code.
+
+----- Original Message -----
+From: "Nemo" <cym224@gmail.com>
+To:"Steve Johnson" <scj at yaccman.com>
+Cc:"TUHS main list" <tuhs at minnie.tuhs.org>
+Sent:Wed, 4 Jan 2017 20:30:48 -0500
+Subject:What sparked lint? [Was: Unix stories]
+
+ On 4 January 2017 at 13:51, Steve Johnson <scj at yaccman.com> wrote (in
+part):
+ > These rules provided rich fodder for Lint, when it came along,
+[...]
+
+ All this lint talk caused me to reread your Lint article but no
+ history there. Was there a specific incident that begat lint?
+
+ N.
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170104/3d48fb3c/attachment.html>
+

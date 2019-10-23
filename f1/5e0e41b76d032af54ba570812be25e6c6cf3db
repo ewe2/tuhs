@@ -1,0 +1,45 @@
+From: torek@torek.net (Chris Torek)
+Date: Sun, 09 Jul 2017 17:31:24 -0700
+Subject: [TUHS] origin of the name 'glob'
+In-Reply-To: Your message of "Sun, 09 Jul 2017 21:44:00 -0000."
+ <CAP6exYJW52j7qK=PiaCKrzEO+1jOo3uW7YGOG_4p=3RBZYBxkg@mail.gmail.com>
+Message-ID: <201707100031.v6A0VOPQ091066@elf.torek.net>
+
+>It would have been nice had RE's been the standard way to glob
+>files, but, that said, when I mention .*\.c to people instead of
+>*.c they don't much like it.
+
+Regular expressions are more powerful than glob, but much
+harder to use correctly.  People who have not had exposure
+to them get them wrong all the time.  The most common mistakes,
+in my experience, are or include:
+
+  - Forgetting to quote ".": "pat.h" accidentally matches
+    file "patch"!  This should read "pat\.h" (but see next
+    point).
+
+  - Forgetting to anchor expressions on left and/or right:
+    "x\.c" matches "x.cc".  This should read "x\.c$" (or even
+    "^x\.c$" or perhaps ".*/x\.c$").
+
+(It's also sometimes difficult to know whether your expression
+will be given the full -- in which case, relative or absolute? --
+path, or just a single pathname component.)
+
+Mercurial allows both regexp and glob matches in .hgignore files
+(and other places), while Git allows only globs.  Moreover, this
+is the *default* in Mercurial.  Both are a bit surprising since
+Git usually goes straight for the hard-to-use, fully-general case
+instead of introducing users with the easy case, while Mercurial
+is pretty good about starting off gently and only then getting you
+into the deeper complexities if required.
+
+(Mercurial used to execute regexps much faster than globs, as
+well, so Kurt Lidl was always transforming my simple glob matches
+to regexps.  We both got them wrong sometimes, although I like to
+think I got them right more often.  I *think* the performance
+issues are long since fixed, but I use Mercurial much less these
+days.)
+
+Chris
+

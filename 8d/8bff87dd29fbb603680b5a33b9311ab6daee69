@@ -1,0 +1,51 @@
+From: szigi@ik.bme.hu (SZIGETI Szabolcs)
+Date: Wed, 9 Jul 2003 09:00:25 +0200
+Subject: [TUHS] v6on286
+References: <D1A0AB08F3098B446877CCCA3BAEB14D@usagi.tsukino.pinku.zzn.com>
+Message-ID: <003201c345e7$c5e2c180$26f34298@ik.bme.hu>
+
+
+> Screen goes blank except for a block flashing cursor.  The keyboard
+> does not respond - not even the lights - indicating that the machine
+> is either in a PM loop or completely hung.
+>
+> Has anyone had better luck than me?
+>
+> Or have I had better luck than everyone else (author excluded)?
+
+
+Hi,
+
+Sorry, I don't have the soruces with me right now, so I can't be exact, but
+I'll check next week.
+
+You need to have a root disk (floppy or hdd), with /etc/init and stuff.
+
+To
+do this, first compile unix with the "built in shell". Check te Makefile for
+the #define! Also set the root device in the kernel (floppy or hdd).
+
+Make a floppy or hdd (be careful with the sector numbers, mkfs works with
+absolute sectors, so it's easy to overwrite another partition) with the dos
+based mkfs. Start the kernel with built in shell. It should create /dev/tty
+automatically, and then you can populate the rest of the /dev directory.
+
+There is a tool (sorry, I don't remenber the names, but check the source) to
+transfer files, via an ather floppy, which is a horrible kludge, first you
+write one file on it using one of the utilities, then start the kernel, and
+using one of the built in commands you write it into the filesystem. This
+has to be done one-by-one.
+
+You can exit the kernel via shift-escape (?), but do a sync before.
+Once you have the root floppy, recompile the kernel without the shell.
+
+Now about the bug: I think I broke something in the inode code (I once
+wanted to rewrite the code in ansi c, and then lost the original), so
+currently, it won't mount the root fs. With plenty of printf's in the kernel
+it's possible to debug :-).
+
+Regards,
+
+    Szabolcs
+
+

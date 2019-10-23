@@ -1,0 +1,68 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 13 Feb 2002 16:25:48 -0800 (PST)
+Subject: [pups] screen 3.9.9 vs. 2.11BSD write() to fifo and/or select() on socket
+Message-ID: <200202140025.g1E0Pmr20483@moe.2bsd.com>
+
+Hi!
+
+> From: David W Talmage <talmage at cmf.nrl.navy.mil>
+> Would someone please advise me about fifos and sockets in 2.11BSD?
+
+	Ok ;)
+
+	Don't use fifos - they don't exist (as you probably have found
+	out by now :))
+
+> I'm having 
+> trouble porting screen 3.9.9, the multiplexing terminal emulator, to 2.11BSD 
+
+	fifos and sockets are just the tip of the iceberg when it comes
+	to 'screen'.   Eons ago (when screen was a fairly new program) I made
+	an attempt at porting it and ran into the address space problems - seems
+	that screen wants to use lots of large buffers, has lots of strings
+	(all the help, etc) and so on. 
+
+> because of them.  I'm running Mr. Schultz's 2.11BSD with all patches up to 
+> #442 on Mr. Brandt's p11 emulator version 2.9.  FWIW, I have INET in my kernel
+> but I've ifconfig-ed only lo0.
+
+	Thanks for the "ownership" label but I think of it more as being
+	a 'steward' and coordinator than anything else
+
+	p11 2.9?   Wow, I've an old patched/hacked 2.5 because I can't seem
+	to find p11's home now - begemot.org doesn't mention anything about
+	"p11".
+
+> The fifo test portion of the configure script fails when writing to the fifo.  
+> The write() returns -1 and sets errno == 79, "Inappropriate file type or 
+
+	Right, FIFOs don't exist.  One of those things I never could find
+	the need or time for ;)
+
+> format".  This happens when I run the test as root, as I must in order to use 
+> mknod() to create the fifo.  See fifotest.c, below.
+
+	If 2.11's mknod can create fifos that is _news_ to me.   I don't recall
+	seeing (or adding) that capability.
+
+> screen can use sockets instead of fifos.  That portion of the configure script
+> fails as well.  It fails in that it does not return from the select() on the 
+> socket until the alarm goes off.  See socketstest.c, below.
+
+	Now that is very strange.   Unix domain sockets do work (syslogd
+	uses them for example) so I'm at a loss to explain why the test
+	program isn't working.
+
+	One thing I did do is after running "./a.out&" was do an immediate
+	'ps'.   That should see 2 a.out processes due to the 'fork()' call.
+	I only say one.  This tells me that the alarm was started (obviously
+	since alarm(5) is the first thing executed) but the child process
+	raced thru and exited before the parent got to the select() call.
+
+	With the child exited the select() will block until interrupted by
+	the alarm() call.
+
+	Steven Schultz
+	sms at 2bsd.com
+
+

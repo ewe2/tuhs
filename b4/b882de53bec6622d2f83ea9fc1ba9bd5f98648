@@ -1,0 +1,61 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Thu, 14 Aug 2014 00:34:18 -0400 (EDT)
+Subject: [TUHS] Unix taste
+Message-ID: <20140814043418.394291DE382@lignose.oclsc.org>
+
+Doug McIlroy:
+
+  The single-token rule meant that, if you wanted to supply an
+  option to wc in the pipeline
+          ls > wc >
+  you couldn't write
+          ls > wc -l >
+  as one would expect, but instead had to write
+          ls > "wc -l" >
+  Yet a quoted "wc -l" as a bare command or (I suspect) as the
+  first command in a pipeline would lead to "command not found".
+  What a mess!
+
+======
+
+Then as now, a quoted "wc -l" would be taken by the shell
+to be a single world, so
+
+	"wc -l" file
+
+would be a request to find a file named "wc -l" (without
+the quotes but with the embedded blank) somewhere in the
+search path, and execute it with argv[0] = "wc -l" and
+argv[1] = "file".  But the shell's parser bound only the
+word following > or < to the operator, so the command had
+to be quoted (if it had arguments) to make it a single word.
+
+So in the old syntax, if you needed to quote an argument
+of a command that was part of a pipeline but not at the
+head, you'd have to embed quotes within quotes; e.g.
+
+	ls > "grep '[0-9]'" >
+
+Decidedly a quick hack, just like the original implementation
+of fork(2) (which was, approximately, swap the current process
+out, but keep the in-core copy, and give one of the two a new
+process ID and process-table entry).  Though unlike the original
+fork, the original pipeline syntax was rough enough to be
+worth fixing early on.
+
+As a side note, when I was writing my earlier message, I was
+going to construct an example using wc -l, until I checked the
+manual and discovered that when pipelines were invented wc
+didn't yet take options.  I also thought about an example
+using grep, except grep hadn't appeared yet either.  Pipelines
+(especially once they were attractive and convenient to use)
+made a bigger difference than we remember in how commands
+worked and which commands were useful.
+
+And of course Doug gets at least as much credit as Ken for
+changing our lives with all that.
+
+Norman Wilson
+Toronto ON
+
+

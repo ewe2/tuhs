@@ -1,0 +1,54 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 24 Apr 2017 21:34:03 -0400 (EDT)
+Subject: [TUHS] There is turmoil in Linux-land - When did rm first avoid
+	going upwards?
+Message-ID: <20170425013403.694CE18C0C3@mercury.lcs.mit.edu>
+
+    > From: Kurt H Maier
+
+    > /etc/glob, which appears to report no-match if the first character is .
+
+So I couldn't be bothered to work out how 'glob' worked exactly, so I just did
+an experiment: I created a hacked version of 'rm' that had the directory
+handling call to glob call 'echo' instead of 'rm'; it also printed 'tried'
+instead of the actual unlink call, and printed 'cd' when it changed
+directories.
+
+I then set up two subsidiary directors, foo and .bar, with one containing
+'.foo0 foo1' and the other '.bar0 bar1'.
+
+Saying 'xrm -r -f .*' produced this:
+
+  cd: .
+  -r -f foo xrm xrm.c
+  cd: ..
+  -r -f foo xrm xrm.c
+  cd: .bar
+  -r -f bar1 
+
+(This system has /tmp on a mounted file system, which is why the 'cd ..' was a
+NOP. And a very good thing, too; at one point the phone rang, and it
+distracted me, and I automatically typed 'rm', not 'xrm'... see below for what
+happened. No biggie, there were only my test files there.  The output lines
+are "-r -f foo xrm xrm.c" because that's what 'glob' passed to 'echo'.)
+
+Saying 'xrm -r -f *' produced this:
+
+  cd: foo
+  -r -f foo1
+  xrm: tried
+  xrm.c: tried     
+
+So apparently 'glob', when presented with '*' , ignores entries starting with
+'.', but '.*' does not.
+
+
+When I stupidly typed 'rm -r -f .*', it did more or les what I originally
+thought it would: deleted all the files in all the directories (but only on
+the /tmp device, because .. linked to the itself in /tmp, so it didn't escape
+from that volume); leaving all the directories, but empty, except for the
+files .foo0 and .bar0. So files and inferior directories with names starting
+with '.' would have escaped, but nothing else.
+
+	Noel
+

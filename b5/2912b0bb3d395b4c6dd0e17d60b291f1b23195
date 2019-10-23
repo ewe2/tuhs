@@ -1,0 +1,68 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Tue, 06 Jan 2015 18:33:44 +0100
+Subject: [TUHS] termcap vs terminfo
+In-Reply-To: <CAEoi9W7Ke_AV8PjQ=i0kLK3PFUuXQBsFnR3a4A2hjqNTr88tJw@mail.gmail.com>
+References: <mailman.143.1420561935.3354.tuhs@minnie.tuhs.org>
+ <54AC127A.5050508@update.uu.se>
+ <CAEoi9W7Ke_AV8PjQ=i0kLK3PFUuXQBsFnR3a4A2hjqNTr88tJw@mail.gmail.com>
+Message-ID: <54AC1C78.6090007@update.uu.se>
+
+On 2015-01-06 17:56, Dan Cross wrote:
+> On Tue, Jan 6, 2015 at 11:51 AM, Johnny Billquist <bqt at update.uu.se
+> <mailto:bqt at update.uu.se>> wrote:
+>
+>     On 2015-01-06 17:32, Mary Ann Horton<mah at mhorton.net
+>     <mailto:mah at mhorton.net>> wrote:
+>
+>         Even with TERMCAP in the environment, there's still that quadratic
+>         algorithm every time vi starts up.
+>
+>
+>     I must be stupid or something. What quadratic algorithm?
+>     vi gets the "correct" terminal database entry directly from the
+>     environment. Admittedly, getting any variable out of the environment
+>     means a linear search of the environment, but that's about it.
+>
+>     What am I missing? And once you have that, any operation still means
+>     either searching through the terminal definition for the right
+>     function, which in itself is also linear, unless you hash that up in
+>     your program. But I fail to see where the quadratic behavior comes in.
+>
+>
+> I believe that Mary Ann is referring to repeatedly looking up
+> (presumably different) elements in the entry.  Assuming that e.g. `vi`
+> looks up O(n) elements, where $n$ is the number of elements, doing a
+> linear scan for each, you'd end up with quadratic behavior.
+
+Assuming that you'd look up all the elements of the termcap entry at 
+startup, and did each one from scratch, yes.
+
+> Hashing, or storing in some kind of balanced-tree like structure or
+> something, would of course help but would also necessitate doing a copy
+> and would entail some additional memory inefficiency.
+
+Hashing would indeed cause some extra memory, but not necessarily any 
+copying.
+But that would beg the question, why is vi doing a repeated scan of the 
+terminal entry at startup, if not to find all the capabilities and store 
+this somewhere? And if doing a look for all of them, why not scan the 
+string from start to finish and store the information as it is found? At 
+which point we move from quadratic to linear time.
+
+But now we're getting into the innards of vi, which I never looked at 
+anyway, and I guess is less relevant in this thread anyway.
+
+The short of it (from what I got out of it) is that the move from 
+termcap to terminfo was mostly motivated by attribute name changing away 
+from fixed 2 character names.
+
+A secondary motivation would be performance, but I don't really buy that 
+one. Since we only moved to terminfo on systems with plenty of memory, 
+performance of termcap could easily be on par anyway.
+
+Thanks for the insights.
+
+	Johnny
+
+
+

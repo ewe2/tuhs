@@ -1,0 +1,68 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 26 Apr 2018 00:37:09 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <mailman.137.1524667148.3788.tuhs@minnie.tuhs.org>
+References: <mailman.137.1524667148.3788.tuhs@minnie.tuhs.org>
+Message-ID: <0224de12-ef13-adfc-1e1f-c50e349510d4@update.uu.se>
+
+On 2018-04-25 16:39, arnold at skeeve.com wrote:
+
+> Tim Bradshaw<tfb at tfeb.org>  wrote:
+> 
+>> Do systems with huge pages page in the move-them-to-disk sense I wonder?
+>> I assume they don't in practice because it would be insane but I wonder
+>> if the VM system is in theory even willing to try.
+> Why not? If there's enough backing store availble?
+> 
+> Note that many systems demand page-in the code section straight out of the
+> executable, so if some of those pages aren't needed, they can just
+> be released.  And said pages can be shared among all processes running
+> the same executable, for further savings.
+
+Right.
+
+>> Something I never completely understood in the paging vs swapping
+>> thing was that I think that systems which could page (well, 4.xBSD in
+>> particular) would*also*  swap if pushed.  I think the reason for that was
+>> that, if you were really short of memory, swapping freed up the process
+>> structure and also the page tables &c for the process, which would still
+>> be needed even if all its pages had been evicted.  Is that right?
+> It depends upon the system. Some had pageable page tables, which is
+> pretty hairy. Others didn't. I don't remember what 4BSD did on the
+> Vax, but I suspect that the page tables and enough info to find everything
+> on swap stayed in kernel memory.  (Where's Chris Torek when you need
+> him?:-)
+
+The pages tables describing the users memory space are themselves 
+located in virtual memory on the VAX, so they can be paged out without 
+problem. If you refer to an entry in the user page table, and that page 
+itself is paged out, you'll get a page fault for the system page table, 
+so you'll need to page in that page of the system.
+But I seem to remember 4BSD (as well as NetBSD) keep all of the kernel 
+in physical memory all the time, and don't page the kernel parts, 
+including process page tables.
+
+> But yes, swapping was generally used to free up large amounts of memory
+> if under heavy load.
+
+Paging would free up the same amount of memory, if we talk about the 
+memory used by the process itself. However, there are various meta data 
+in the kernel itself that is needed for a process, which will remain in 
+memory even if no pages are in memory. Swapping will also move 
+non-essential kernel structures out to disk for the process, in addition 
+to the pages. Thus, there is a difference between swapping and paging.
+The whole process context for example. Which includes both the page 
+tables as well as the kernel mode stack for the process, processor 
+registers, and possibly also open file contexts, and probably some other 
+things I'm forgetting now.
+Very little needs to be kept in memory for a process if you are not 
+interested in resuming it on short notice.
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

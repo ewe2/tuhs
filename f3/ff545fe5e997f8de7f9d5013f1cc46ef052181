@@ -1,0 +1,31 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 11 Sep 2014 23:15:55 -0400 (EDT)
+Subject: [TUHS] Etymology of bc(1)
+Message-ID: <20140912031555.02B3318C0A3@mercury.lcs.mit.edu>
+
+    > From: Mark Longridge <cubexyz at gmail.com>
+
+    > I have a version of Unix v6 that has a file called /usr/doc/bc that
+    > describes bc at length
+
+Oh, right, I missed that. I'm a source kind of person... :-)
+
+Speaking of using a pipe to an existing command, I originally mis-read the
+code to think there was only _one_ process involved, and that it was buffering
+its output into the pipe before doing the exec() itself - something like this:
+
+        pipe(p);
+	write_stuff(p[1]);
+        close(0);
+        dup(p[0]);
+        close(p[0]);
+        close(p[1]);
+        execl("/bin/other", "other", arg, 0);
+	
+Which is kind of a hack, but... it does avoid using a second process, although
+the amount of data that can be passed is limited. (IIRC, a pipe will hold at
+most 8 blocks, at least on V6.) Did this hack ever get used in anything?
+
+	Noel
+
+

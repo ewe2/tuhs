@@ -1,0 +1,491 @@
+From: Fred.van.Kempen@microwalt.nl (Fred N. van Kempen)
+Date: Tue, 27 Mar 2001 12:17:35 +0200
+Subject: [pups] RE: Vtserver & 2.11 standalone progs
+Message-ID: <6F63E31101C6D41196490008C7B2BFC3020A80@mwnt4.microwalt.nl>
+
+Robert and Warren,
+
+Robert asks:
+> Is Ultrix installable from Vtserver yet? It appears to be the only other
+> version of unix that will work with MSCP disk drives, and maybe I'd have
+> better luck with it than 2.11BSD. If you have any Ultrix utilities
+> semi-running I'd be glad to test them for you!
+
+and Warren replies:
+> Robert, Fred van Kempen has been bashing his head on Ultrix with VT, but
+> has been making progress over the past few days. I'll cc this e-mail to
+> him and he can tell you the story :)
+The status is as follows.  Feel free to relay onto the various newsgoups
+and lists; I obviously lack the time to :)
+
+- VTserver runs on my VAX (Ultrix-32 V4.4 and V4.5)
+- Client code is now in Ultrix-11 V3.1
+
+I can get VTserver to upload the primary boot loader to the PDP-11 (I test
+with two.. a MicroPDP-11/23 and a MicroPDP-11/53) and that in turn makes
+the box load the Boot: program.
+
+When that is loaded, I can go two ways:
+
+- type "install" and Boot: will load the RAM disk from the server, and
+  switch to that.  Works.
+
+- manually load and run programs.  Works.
+
+The problem here, is, that Ultrix uses a very complicated memory setup,
+which forces some MMU fiddling into all the drivers.  Warren's driver was
+done for BSD and V7, which do not have this "problem".
+
+I am now adding this MMU support to the driver, and that's the end of it..
+all other parts work fine.
+
+Here is a test run log.  Falafel is the VAX 3100.  My VTserver program
+uploads the boot code to the (Micro-)PDP-11 if the "-o" option is given.
+
+{falafel:~/ULT} $ vt -o
+Virtual tape server, $Revision: 2.3 $ 
+stty cs8 -parenb 9600 clocal crtscts
+Opening port /dev/tty01 ....  open
+Sending PDP-11 Boot Code to uODT
+........................................................................
+[Enterring TERMINAL/SERVER mode. Escape with <ESC><ESC>]
+
+VTS: Opened boot
+ 
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbb
+bbbbb
+Sizing Memory...  
+
+To list options, type help then press <RETURN>
+
+23Boot: vt(0,0)scat
+
+VTS: Opened scat
+VTS: Opened syscall
+File: vt(0,0)contents
+
+VTS: Opened contents
+File 1:
+        2 copies of magtape boots
+File 5:
+        This file (contents)
+File 6:
+        The program mkfs (make a ULTRIX-11 file system)
+File 7:
+        The program restor (restore a dump onto a file system)
+File 8:
+        The program dskinit (disk format and verify)
+Filre 9:
+        The program bads (scan disk for brams for memory disk (file system
+image
+)
+File 14:
+        rcmds: optional software loaded into ROOT (TAR image)
+File 15:
+|
+V
+File 31:
+        ucmds: optional software loaded into /USR (TAR images)
+File 32:
+        sysgen: optional sorftware for re-loading sysgen (TAR image)
+File 33:
+        The ULTRIX-11 root file system in dump/restor format
+File 34:
+        The ULTRIX-11 /usr file system in dump/restor format
+Exit called
+
+
+23Boot: 
+------------------------------------
+
+The other commands work similarly.  I only need to revamp the MMU stuff,
+and then I'm done and we can boot/install Ultrix-11 from VT !
+
+--fred
+
+
+**********************************************************************
+This email and any files transmitted with it are confidential and
+intended solely for the use of the individual or entity to whom they
+are addressed. If you have received this email in error please notify
+the system manager.
+
+This footnote also confirms that this email message has been swept by
+MIMEsweeper for the presence of computer viruses.
+
+www.mimesweeper.com
+**********************************************************************
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA86317
+	for pups-liszt; Wed, 28 Mar 2001 09:58:18 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA86313
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 28 Mar 2001 09:58:16 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) id f2RNphe63854
+	for pups at minnie.cs.adfa.edu.au; Wed, 28 Mar 2001 09:51:43 +1000 (EST)
+	(envelope-from wkt)
+Received: from csadfa.cs.adfa.edu.au (csadfa.cs.adfa.edu.au [131.236.21.6])
+	by henry.cs.adfa.edu.au (8.11.2/8.9.3) with ESMTP id f2RLPR963436
+	for <wkt at henry.cs.adfa.edu.au>; Wed, 28 Mar 2001 07:25:27 +1000 (EST)
+	(envelope-from Fred.van.Kempen at microwalt.nl)
+Received: from mwnt5.microwalt.nl (mwnt5.microwalt.nl [195.86.89.38])
+	by csadfa.cs.adfa.edu.au (8.9.0/8.9.0) with ESMTP id HAA18994
+	for <wkt at cs.adfa.edu.au>; Wed, 28 Mar 2001 07:25:33 +1000 (EST)
+Received: from mwnt4.microwalt.nl (unverified) by mwnt5.microwalt.nl
+	(Content Technologies SMTPRS 4.1.5) with ESMTP id <T0a005f26528ed034b1 at mwnt5.microwalt.nl>;
+	Tue, 27 Mar 2001 23:22:07 +0100
+Received: by mwnt4.microwalt.nl with Internet Mail Service (5.5.2650.21)
+	id <HLMQJ18F>; Tue, 27 Mar 2001 23:18:44 +0200
+Message-ID: <6F63E31101C6D41196490008C7B2BFC3020A86 at mwnt4.microwalt.nl>
+From: "Fred N. van Kempen" <Fred.van.Kempen@microwalt.nl>
+To: "'wkt at cs.adfa.edu.au'" <wkt at cs.adfa.edu.au>,
+        Robert Collet
+  <bob.collet at worldnet.att.net>,
+        "'stock at sba.nl'" <stock at sba.nl>,
+        "'kees.stravers at iae.nl'" <kees.stravers at iae.nl>
+Cc: "'linuxee at aol.com'" <linuxee at aol.com>
+Subject: [pups] RE: Vtserver & 2.11 standalone progs
+Date: Tue, 27 Mar 2001 23:18:40 +0200
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.2650.21)
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Guys,
+
+> Robert, Fred van Kempen has been bashing his head on Ultrix with VT, but
+> has been making progress over the past few days. I'll cc this e-mail to
+> him and he can tell you the story :)
+As of today, it is WORKING !
+I just finished a (slooooow :) system load onto a MicroPDP-11/23.  Works
+like a charm.. just takes a while.  Here is a log:
+
+{falafel:~/ULT} $ vt -o
+Virtual tape server, $Revision: 2.3 $ 
+stty cs8 -parenb 9600 clocal crtscts
+Opening port /dev/tty01 ....  open
+Sending PDP-11 Boot Code to uODT
+........................................................................
+[Enterring TERMINAL/SERVER mode. Escape with <ESC><ESC>]
+
+VTS: Opened sas/boot
+ 
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbb
+bbbbbb
+Sizing Memory...  
+
+To list options, type help then press <RETURN>
+
+23Boot: install
+
+Copying auto-install programs to memory disk...
+
+VTS: Opened data/saprog.dsk
+ 
+rrrRrRRRRRRRRRRrrRRRRRRRrRrRrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+rrr
+rrrrrrrrrrrrrrrrrrRrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+rrrr
+rrrrrrrrrrRrrrrrrrrrrrrrrrrrrrrrrrRrrrrrrr
+100K sent
+rrrrrrrrrrrrrrrrRrrrrrrrrrrrrrrrrrrrrrRrRrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+rrrr
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrRrrrrrrrrr
+rrrr
+rrrrrrRrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+200K sent
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrRrrrrrrrRrrrrrrr
+rrrr
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
+       ****** ULTRIX-11 System Disk Load you need to answer some questions
+about
+your system's configuration. Enter your answer, using only lowercase
+characters, then press <RETURN>. If you need help answering any of
+the questions, enter a ? then press <RETURN>.
+
+
+Press <RETURN> to continue:
+
+
+                  ****** WARNING *ks must be converted to the new
+1K block file system.
+
+Proceed with the installation <y or n> ? y
+
+Target processor is an 11/23 <y or n> ? y
+
+CURRENT CPU = 11/23, TARGET CPU = 11/23
+
+System disk type <? for help> ? y\yrd51
+
+
+                ****** CAUTION ******
+
+You must scan MSCP disks for bad blocks, type ?<RETURN> for help!
+
+Scan system disk(s) for bad blocks <y or n> ? y
+
+****** SCANNING SYSTEM DISK(s) FOR BAD BLOCKS ******
+
+
+ULTRIX-11 MSCP Disk Initialization Program
+
+Disk type < ra60 ra80 ra81 rx33 rx50 rd31 rd32 rd51 rd52 rd53 rd54 rc25 >:
+rd51
+
+Unit number < 0-3 >: 0
+
+Starting block number < 0 >: 0
+
+Number of blocks to check < 21600 >: 
+
+READING...
+
+
+21600 blocks checked
+0 bad blocks found
+0 bad blocks replaced
+
+Exit called
+
+****** BAD BLOCK SCAN COMPLETE ******
+
+
+****** MAKING EMPTY (ROOT) FILE SYSTEM ******
+
+File system size: 3730
+Disk type: rd51
+Processor type: 23
+File system name: root
+Volume name: sd_rd0
+File system: rd(0,0)
+isize = 2384
+m/n = 1 72
+Exit called
+
+****** EMPTY FILE SYSTEM COMPLETED ******
+
+
+****** RESTORING (ROOT) ONTO SYSTEM DISK ******
+
+Input: vt(0,0)root
+
+VTS: Opened data/root.dmp
+ Disk: rd(0,0)
+
+rRrRrRrRrRrRrrrRrrrrrrrRrRrRrRrrrrrrrrrRrrrRrrrRrrrRrRrRrRrRrRrRrRrRrRrRrRrR
+rRrR
+rRrRrRrRrRrrrRrRrRrRrrrRrrrrrrrrrRrrrRrrrrrrrrrRrrrrrrrrrrrrrrrrrrrRrRrRrrrr
+rrrr
+rRrRrRrrrrrrrrrRrrrrrrrrrrrrrrrRrrrrrrrrr
+100K sent
+[... deleted ...]
+3600K sent
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+rrrr
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrRrrrrrrrrrRrrrrrrrrrrrrrrrRrRrrrrrrrrrRrrrrrrrrr
+rrrr
+rrRrrrrrrrrrRrRrrrrrrrrrRrrrrrrrrrrrrrREnd of dump media
+
+****** FILE SYSTEM RESTORE COMPLETE ******
+
+
+****** CHECKING (ROOT) FILE SYSTEM ******
+
+File: rd(0,0)
+Salvage free list <y or n> ? n
+rd(0,0):
+files 305 (r=280,d=17,b=1,c=7,p=0,l=0)
+used 3389 (i=182,ii=0,iii=0,d=3207)
+free 190
+missing 0
+
+****** FILE SYSTEM CHECK COMPLETE ******
+
+
+****** MAKING EMPTY (USR) FILE SYSTEM ******
+
+File system size: 5934
+Disk type: rd51
+Processor type: 23
+File system name: /usr
+Volume name: sd_rd0
+File system: rd(0,9700)
+isize = 3792
+m/n = 1 72
+Exit called
+
+****** EMPTY FILE SYSTEM COMPLETED ******
+
+
+****** RESTORING (USR) ONTO SYSTEM DISK ******
+
+Input: vt(0,0)usr
+
+VTS: Opened data/usr.dmp
+ Disk: rd(0,9700)
+
+rRrRrRrRrRrRrRrRrrrRrRrrrRrRrRrRrRrRrRrRrRrrrRrRrRrRrRrRrRrRrRrrrRrRrRrRrRrR
+rRrR
+rRrRrrrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrRrR
+rRrR
+rrrRrrrRrRrRrRrRrrrRrRrRrrrRrRrRrRrRrRrRr
+100K sent
+[... deleted ...]
+5400K sent
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrRrRrRrrrrrrrRrrrrrrrRrRrrrrrrrrrRrrrrrrrrrrr
+RrRr
+RrRrrrrrRrrrRrRrRrREnd of dump media
+
+****** FILE SYSTEM RESTORE COMPLETE ******
+
+
+****** CHECKING (USR) FILE SYSTEM ******
+
+File: rd(0,9700)
+Salvage free list <y or n> ? n
+rd(0,9700):
+files 619 (r=570,d=49,b=0,c=0,p=0,l=0)
+used 4824 (i=228,ii=1,iii=0,d=4594)
+free 872
+missing 0
+
+****** FILE SYSTEM CHECK COMPLETE ******
+
+
+****** COPYING BOOT TO SYSTEM DISK BLOCK ZERO ******
+
+
+****** BLOCK ZERO BOOT LOADED ******
+
+
+****** BOOTING ULTRIX-11 SYSTEM TO SINGLE-USER MODE ******
+
+Sizing Memory...  
+
+23Boot: rd(0,0)unix    (CTRL/C will abort auto-boot)
+
+rd(0,0)unix:
+14784+17024+8192+8000+8064+8000+8064+8128+8000+7808+7936+7936+7680+
+7360+1344
+eráóe ½ äelete  ëill ½  U  iîtr ½  Ã Û
+[Back to host.]
+
+That's where the parity stuff bites us (see the dicussion regarding
+2.11BSD :) but I'll fix that later.. its a make-up change, trivial.
+
+Let's continue with Kermit:
+
+{falafel:~/ULT} $ kermit
+Connecting to /dev/tty01, speed 9600.
+The escape character is ^\ (ASCII 28).
+Type the escape character followed by C to get back,
+or followed by ? to see other options.
+
+
+This program performs operating system setup functions during
+installation and normal system operation. Setup operates in one
+of three possible modes (phases), depending on the current state
+of the system. The three modes are:
+
+ Phase 1: Initial setup -- prepares system for first sysgen.
+ Phase 2: Final setup -- completes the system setup.
+ Phase 3: Change setup -- handles system setup changes.
+
+The program will ask several setup questions. Enter your answer
+to each question, using lowercase characters, then press <RETURN>.
+
+The questions include helpful hints enclosed in angle brackets < >
+and/or parenthesis ( ). If you need additional help answering any
+question, enter a ? or the word help then press <RETURN>.
+
+You can correct typing mistakes by pressing the <DELETE> key to
+erase a single character or <CTRL/U> to erase the entire line.
+You can interrupt the setup program by typing <CTRL/C>. This
+allows you to abort the setup process or restart it.
+
+Press <RETURN> to continue: 
+
+Is the console terminal a CRT (video terminal) <y or n> ? y
+
+PLEASE CONFIRM: console is a VIDEO terminal <y or n> ? y
+
+****** READING SETUP DATA FROM setup.info FILE ******
+
+(vt(0,0)boot) - bad load device!
+
+
+The initial setup program cannot obtain the information it needs
+to complete the installation from the setup.info file. The sdload
+program writes this information into the setup.info file after
+loading the software onto the system disk. For some unknown reason
+the setup program cannot access the information.
+
+You can supply the missing information or abort the installation.
+If you continue, the program will prompt you for the following:
+
+    o  Setup phase number
+
+    o  System disk type
+
+    o  Target processor type
+
+    o  Software load device type
+
+
+Continue the installation <y or n> ? n
+
+
+****** INITIAL SETUP ABORTED ******
+
+You have the following options:
+
+    o  Restart the installation procedure at the beginning.
+
+    o  Execute the following steps to retry the initial setup:
+
+           Halt the processor.
+           Execute the hardware bootstrap for the system disk.
+           The setup program should restart automatically, if
+           it does not, execute: cd /.setup; setup.
+
+    o  Contact the Telephone Support Center or your local DIGITAL
+       software services office for assistance.
+
+
+# 
+------------------------------------------------------------------------
+
+and that's where it currently ends.
+
+I did already upgrade the root file system dump (hey.. I knew it was
+working once it started load that one.. :) so the kernel is already up
+to spec.  I also have updated versions of /etc/rdate and /bin/date on
+it, so we can install using this era, and not go back to the early 70s :)
+
+Problems to be fixed:
+
+- icky parity stuff in VTserver (terminal mode) .. there are more problems
+  with it.  I think the receive buffer can overflow if we are in the main
+  server_loop() routine... causing us to loose characters on input.
+
+- no kernel support for the VT device, so, past the initial load, we're
+  still fucked, so to speak.  In other words.. Warren, sweetie.. should
+  we change our priorities and do the kernel driver first, and THEN redo
+  the protocol as discussed last night?
+
+Cheers,
+	Fred (**yawn** - 109 straight hours of coding :)
+
+
+

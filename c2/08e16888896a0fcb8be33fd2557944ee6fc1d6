@@ -1,0 +1,40 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Tue, 28 Nov 2017 23:25:24 +0000
+Subject: [TUHS] /bin/true (was basic tools / Universal Unix)
+In-Reply-To: <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+References: <009a01d348e9$e3dce200$ab96a600$@ronnatalie.com>
+ <CAJfiPzy6S75+8Ob67Uojgw2vSuxqWvRe=mOCvSJ_bUXQ9WsmRw@mail.gmail.com>
+ <CANCZdfqwK1WT8FLJsJs6Eu9TqxABJzx4Nm7niHo3yxFtUk7+0A@mail.gmail.com>
+Message-ID: <20171128232525.01EA721518@orac.inputplus.co.uk>
+
+Hi Werner,
+
+> >  * Exit with a zero value as quickly as possible.
+> ...
+> >         _exit(0);
+...
+> Then again _exit(0) is a useless optimization. It saves three closes
+> for files that are bound to be closed at image tear down.
+
+It also avoids checking the atexit(3) list, yet here on Linux x86_64
+with glibc 2.26-6, `_exit(0)' is more instructions to execute than
+`return 0', as measured with `perf stat -e instructions ./exit'.
+
+`return 0' can just do
+
+    xor    %eax, %eax
+    retq   
+
+whereas _exit makes room on the stack before the JSR, and that's through
+the dynamic-linking table, `PLT'.
+
+    sub    $0x8, %rsp
+    xor    %edi, %edi
+    callq  530 <_exit at plt>
+
+Even with `-static' linking, `return 0' wins on instruction count.
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+

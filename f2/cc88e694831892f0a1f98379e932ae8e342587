@@ -1,0 +1,119 @@
+From: downing.nick@gmail.com (Nick Downing)
+Date: Mon, 30 Jan 2017 14:33:12 +1100
+Subject: [TUHS] Early Internet work (Was: History of select(2))
+In-Reply-To: <20170130025003.1CAEA18C0BA@mercury.lcs.mit.edu>
+References: <20170130025003.1CAEA18C0BA@mercury.lcs.mit.edu>
+Message-ID: <CAH1jEzYMLO==yP9xpDUmsessy4odqkrXOp5yX6kiB3zrvKRhtQ@mail.gmail.com>
+
+Thanks a lot for the valuable info about C compilers everyone. I was
+aware of BDS C and also Hitech C and Small C. I briefly picked up cc65
+(6502 port of Small C which has an ANSI frontend and a macroassembler
+and other improvements) and started trying to port it back to Z80, but
+I didn't get too far. I found quite a few things there that I didn't
+like, so I put aside the project. I hadn't been aware that BDS C had
+such a following, I thought of it as a closed source commercial
+offering of no value to me. I'm happy to see it's now open source!!
+Note that I actually own copies of Manx Aztec C and IAR C which are
+both pretty good commercial C compilers for Z80 and Z180 respectively,
+however being closed source they are of no value to my projects, which
+I hope to eventually release as open source.
+
+A funny story arises actually in regards to IAR C and its
+dongle-protection. I was working for an overseas customer who bought
+the IAR C package for me to use, I think they bought 3 copies, one for
+my manager, one for my colleague and one for me. I went to visit the
+customer for some weeks and we did a lot of work together. When I got
+home I had to attend to various things that couldn't be put off any
+longer, like family matters, cleaning the house and so on. For a few
+weeks I strung my manager along saying "yes I have implemented this,
+yes I have done that, blah blah"... knowing it would be easy to catch
+up when I had a chance to sit down and work. When that time came, I
+was embarrassed to discover that I had left my dongle over there at
+the customer's premises... what was I going to say?? Haha.
+
+So, Visual Studio to the rescue, it was relatively easy to trace into
+the executable and find out where the dongle checks were occurring. I
+don't think they had even stripped the executable, which made things a
+bit easier, although the dongle stuff was obviously a 3rd party
+library since it did have some protection against being traced and so
+on. Anyway, it took me about half to one day to circumvent this, and I
+was very happy that I had done so, because the dongle check took quite
+a while (between .1s and .3s if my memory is reliable) and it was
+doing this hundreds of times during a full build. I don't know why it
+was so slow, possibly because it was polling a licence server even
+though I didn't have a licence server. So my builds were much faster,
+and of course I didn't have the hassle of dongle protection anymore.
+
+But getting back to the point, I'm fairly keen to standardize on a
+PCC-based compiler. There are a number of reasons for this.
+(1) Since I have in mind targetting multiple platforms such as PDP-11,
+VAX, Z180, 8086, 80286, possibly 68K, it seems a natural choice.
+(2) I like the fact that lint uses a PCC front-end, if all my
+compilers use a PCC front-end then all code is interpreted in the SAME
+dialect.
+(3) I have a heavy focus in my project on source-to-source
+transformations, presently these are a bit ad-hoc (using scripts or C
+programs based on getchar() / putchar() type stuff), and I want to
+upgrade them to a PCC front-end, a transformation, and a C-target PCC
+backend.
+(4) I have the option of upgrading to the ANSI-compliant PCC compiler
+and the latest backend stuff which has a register allocator, these
+features are not things which I would want to spend time on, but I
+feel that people who download my eventual release packages might.
+(5) The ANSI-compliant PCC compiler has a selection of backends, such
+as 8086 and 80286 backends I believe, so might save me time.
+
+Having said all that, I have been very careful to preserve
+compatibility with all reasonable dialects of C. To make this work, I
+do not use any features that are only available in ANSI C (except if
+there is a traditional C alternative, such as ## versus /**/, which I
+can check for using a macro like __STDC__), but I make sure all code
+is valid ANSI C or traditional C, using the __P(()) macro and such
+like. So there would be no real reason I cannot use BDS C as-is in my
+project. Note I'm going to standardize on the asxxxx assemblers, and
+indeed one of my next projects will be to make the PCC VAX-targeted
+compiler output asxxxx rather than its own assembler code. I can do
+the same for BDS C. That way, it will generate (via the assembler) the
+correct *.o and relocation entries, and I can use the 4.3BSD standard
+ld. For the time being, I ported 4.3BSD "as" as a VAX cross-assembler,
+just to establish a baseline, but I will be changing to asxxxx when I
+can.
+
+cheers, Nick
+
+
+
+
+
+
+
+On Mon, Jan 30, 2017 at 1:50 PM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+>     > From: Paul Ruizendaal
+>
+>     > Great! I'd love to take a look at all that.
+>
+> OK, it'll all be appearing once we have a chance to get organized (it's all
+> mixed in with personal files).
+>
+>     > That is very interesting. It may be related to the V6 with NCP from
+>     > UoI/DTI.
+>
+> I think it _is_ the V6 from UoI/DTI. The source has Gary (?) Grossman's and
+> Steve Holmgren's name on it, and the headers say they date from 1074-75.
+>
+>     > The printout does not have the kernel modifications with it, so it would
+>     > be great if your archive does include that.
+>
+> The archive does include the complete kernel, but i) the changes aren't listed
+> in any way (I forsee a lot of 'diffs', unless you just take the entire
+> kernel), ii) there's a file called 'history' which contains a long list of
+> general changes/improvements of the kernel not really related to TCP/IP, by a
+> long list of people, dated from the middle of '78 to the middle of '79. So it
+> looks like he started with a considerably modified system.
+>
+> The only client code I see is User Telnet. (The MIT code has User and
+> Server Telnet and FTP, as well as SMTP, but it uses a wholly different
+> TCP interface.)
+>
+>     Noel
+

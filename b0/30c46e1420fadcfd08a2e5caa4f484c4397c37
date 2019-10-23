@@ -1,0 +1,72 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 7 Apr 2017 15:36:24 -0700
+Subject: [TUHS] Non-US Unix Activities
+In-Reply-To: <1e89d5607378028b7e5c493f8389e51327587033@webmail.yaccman.com>
+References: <CAAFR5pbo0qbEpymF=oZj-ccXxK6gc8X1R73EKuWUFqb-+n86cw@mail.gmail.com>
+ <1e89d5607378028b7e5c493f8389e51327587033@webmail.yaccman.com>
+Message-ID: <20170407223624.GI14089@mcvoy.com>
+
+On Fri, Apr 07, 2017 at 03:08:48PM -0700, Steve Johnson wrote:
+> One lesson learned that I've never forgotten is how smooth it is to
+> evolve a language using the following process:
+> 
+> 	* Announce that the change is coming and explain why
+> 	* Change the compiler to accept both the old and new syntax
+> 	* Produce a simple warning message when the old syntax was used, but
+> make it still work
+> 	* Produce a more complicated, verbose message, but still make it work
+> 	* Produce a message that says "After date xxxx, the old stuff won't
+> work any more"
+> 	* On the date, change the warning to fatal, but keep recognizing the
+> old syntax and emit "Error: You used the old xxx, change to the new
+> one"
+> 	* Eventually, stop recognizing the old syntax and remove the message.
+> 
+> 	Dennis was a master at this strategy, so things like the otherwise
+> painful evolution of changing =+ to += went well.
+
+That's interesting that that sort of thing dates back (at least) to the 
+Labs.  
+
+We did a distributed source management system which has
+
+	- a file format (I can think of 3 different major versions)
+	- a network protocol (also had major revisions)
+	- various per repository features
+
+All that started back in 1998 and we were extremely good about backwards
+compatibility.
+
+That said, we eventually had too many things to be compat with and we
+took the approach of supporting 
+
+	- our original ascii file format which was SCCS compat plus extensions
+	- our original (once stable) network protocol
+and
+	- our latest and greatest stuff
+
+Every version of the software supports a 
+
+	bk clone --downgrade repo repo.old
+
+which gets you back to the old ascii format, and then there is a
+
+	bk clone --upgrade repo.old repo
+
+which gets you to the latest and greatest.
+
+What did this buy us?  We only had two targets, the original (not moving)
+formats and the latest and greatest.  If you had some halfway repo you 
+could use the old release to clone it down to the old format and the new
+release to clone it forward to the latest and greatest.
+
+It worked really, really well.  
+
+Sort of off topic but thought I'd share, I wish someone had told me this
+picture when we started, especially the feature bit idea (which was that
+if a repo uses some optional feature you stuck that on disk.  If all 
+versions of the software know to read in the feature bits, see if they
+know all of them, if not, spit out "This repo uses feature XYZ which is
+not understood by this version of BitKeeper".  We called them bits, they
+were actually strings, but internally they were bits).
+

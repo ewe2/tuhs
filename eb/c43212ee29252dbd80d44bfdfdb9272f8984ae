@@ -1,0 +1,65 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Thu, 25 Jan 2018 19:20:25 +0100
+Subject: [TUHS] LSX swapping
+Message-ID: <B17A9337-A82A-4CFD-87AD-8EF7D647231F@planet.nl>
+
+
+>>> LSX has a maximum of three processes that are swapped in and out in a
+>>> stack-like fashion. Only one process is ever in core.
+> 
+> I'm having a hard time working out how this works. If process A is swapped
+> out, and then B, B has to be swapped in before A can be? But only one process
+> is ever in core at a time? To get A in, B has to be moved out? But then B
+> would be the last one out, and would have to come in before A?
+> 
+> Anyway, I don't understand why the OS could/would care which order processes
+> we swapped in - unless it's something like the 'onion skin' memory allocation
+> algorithm of CTSS (which also had only a single process resident at a time,
+> IIRC), where, when a small process had to be swapped in, and a large one was
+> already in, it only swapped out enough of the large one to make room for the
+> small one. The process could recurse, hence the name.
+
+The LSI-11 had 40KB of core. The lower 16KB held the LSX kernel, the upper 24K was
+for the active process.
+
+LSX has 3 process slots and 2 swap slots (on floppy!). Optionally, LSX could
+be built with an additional background process ("BGOPTION"), but this does
+not work very well. Process numbers and swap slots have a 1:1 relationship.
+
+There is a global variable, cpid, with the process number of the current
+process, initially zero. Upon boot, LSX will load a shell as process 0.
+(There is no swapper process and no init in LSX).
+
+The original LSI-11 kernel code is here:
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=LSX/sys
+I can refer to source lines in the repository for my TI990 port of it:
+https://1587660.websites.xs4all.nl/cgi-bin/9995/artifact/b6ec9496e23efe8c
+
+When a process forks, it writes the current core image out to the
+corresponding swap slot (this swaps out the parent) and the core image
+is repurposed as the new process (i.e. cpid is incremented and the
+proc table filled in):
+https://1587660.websites.xs4all.nl/cgi-bin/9995/artifact/3617ec3245c40a69?ln=156,159
+
+The child now runs and the parent remains suspended until the child completes.
+Yes, this implies no pipes. The shell is modified to emulate pipes with files.
+
+When the child completes, it stores its u area / exit code in its swap slot
+(as it is running, the swap slot must be empty. Process 3 has a small swap slot
+just for this). Next LSX decreases cpid and the parent process is reloaded from
+its swap slot:
+https://1587660.websites.xs4all.nl/cgi-bin/9995/artifact/b9c07dfc5add9fc5?ln=239,247
+
+The actual swapping happens here:
+https://1587660.websites.xs4all.nl/cgi-bin/9995/artifact/b6ec9496e23efe8c?ln=335,368
+The original PDP11 source has code to compress the empty space between _end and the
+stack pointer, which I did not get to work properly.
+
+LSX works well enough to run the standard V6 binaries unmodified. Some need to be
+tweaked (e.g. table space in cpp) and the shell needed the pipe change. It can run
+the V6 c compiler, but not with a wild card argument: that requires 4 stacked processes
+(sh, glob, cc and cpp/c0/..) and LSX allows only 3.
+
+Hope the above makes it a bit more clear.
+
+

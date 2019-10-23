@@ -1,0 +1,79 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Wed, 25 Apr 2018 10:38:36 -0400
+Subject: [TUHS] /dev/drum
+In-Reply-To: <m2po2n75b6.fsf@thuvia.hamartun.priv.no>
+References: <8225C5DB-27BD-464E-930A-522C30C20EBD@tfeb.org>
+ <25A1FED0-4F8B-408F-B27B-5728C649D8BE@collantes.us>
+ <CAEoi9W7YJZ3Tbb7fvoBtZMG6gb+H7FBDDS2w3BfQ_P+MrwTWmQ@mail.gmail.com>
+ <7wfu3nuqeb.fsf@junk.nocrew.org>
+ <CAC20D2O54yWV5PMX8dpYe4=L7SoUz01rny4rY6hOEZ_tWtAi8w@mail.gmail.com>
+ <3A18DFEC-42B7-4234-9DD1-367733270D50@tfeb.org>
+ <0abe01d3db28$b6573660$2305a320$@ronnatalie.com>
+ <CAC20D2PEzAayjfaQN+-kQS=H7npcEZ_OKXL1ffPxak5b2ENv4Q@mail.gmail.com>
+ <0af301d3db31$35978800$a0c69800$@ronnatalie.com>
+ <m2po2n75b6.fsf@thuvia.hamartun.priv.no>
+Message-ID: <CAC20D2MHL2-Q+Dv5xEVULc2hzfeb4TVwL8oGP4E3JgYUZ9UN=Q@mail.gmail.com>
+
+On Wed, Apr 25, 2018 at 10:02 AM, Tom Ivar Helbekkmo via TUHS <
+tuhs at minnie.tuhs.org> wrote:
+
+> Ron Natalie <ron at ronnatalie.com> writes:
+>
+> > RK05’s were 4872 blocks.  Don’t know why that number has stuck with
+> > me, too many invocations of mkfs I guess.  Oddly, DEC software for
+> > some reason never used the last 72 blocks.
+>
+> I guess that's because they implemented DEC Standard 144, known as
+> bad144 in BSD Unix.  It's a system of remapping bad sectors to spares at
+> the end of the disk.  I had fun implementing that for the wd (ST506)
+> disk driver in NetBSD, once upon a time...
+
+​Right - back in the day, certainly for RK05's we would purchase 'perfect'
+media, because the original Unix implementations did not handled bad
+blocks.   You had to be careful, but you could purchase perfect RP06 disk
+packs from one or two vendors.  That got harder to do as the disks got
+larger *i.e*. the RMxx series.
+
+A disk pack pack typically shipped with either a physical piece of paper or
+a sticker attached to them with the HD/CLY bit offset and/or if
+pre-formatted HD/CLY/SEC of an bad spots (int he old days disks used
+different formats depending on the controller and different sector sizes,
+meta data etc, so the bad spots were listed a bit position per ring).
+
+A typical thing that a number of us did if we did not have a perfect pack
+was, after we did the Unix mkfs, manually create a file in either root, or
+lost+found called bad_blocks, and then using fsdb or the like, assign the
+blocks that file.
+
+The problem was the concept of 'grown' bad spots.   I'll stay away from the
+argument if they were possible or not (long story), but if in practice a
+pack ended up with a block that was causing issues after it was deployed
+(which did happen in practice).   You needed to assign the bad block to the
+bad_block file manual.
+
+BAD144 was a scheme DEC had to reserve a few blocks and then map out any
+bad sectors.   The problem of course, was that it screwed up all the
+prediction SW in the OS, as system would ask for block/cyl/sec - X/Y/Z and
+it could force a head seek to the of the drive to get one of those reserved
+blocks in the end of the disk.   The advantage of the DEC scheme was the
+during formatting the known bad sectors would become 'invisible' and of
+course if the pack 'grew' and error the driver could add it to the list and
+replace the block on the fly (assuming there were available blocks in the
+reserved table).
+
+An interesting story on BAD144 - a good example of the original ideas of
+Open Source.  It was actually the DEC 'Telephone Industries Group" in
+Merrimack, NH (*a.k.a.* TIG) that had Armando, Fred Canter *et. al.* that
+wrote the original support for DEC Standard 144; to help support the AT&T
+customers, pre Ultrix (remember for a long time AT&T was DEC'S largest
+customer).  Once written, that code was also given to CRSG and released
+into the wild via the UCB stream (and of course would become part of Ultrix
+when DEC finally 'supported' UNIX officially).
+
+I've long ago forgotten, but aps might remember, I think is Fred that did
+the original work.
+ᐧ
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180425/75b40b16/attachment-0001.html>
+

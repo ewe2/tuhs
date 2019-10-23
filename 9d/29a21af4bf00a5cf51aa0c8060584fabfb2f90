@@ -1,0 +1,88 @@
+From: jrvalverde@cnb.uam.es (=?ISO-8859-15?Q?Jos=E9?= R. Valverde)
+Date: Wed, 11 Aug 2004 13:15:33 +0200
+Subject: [TUHS] simh+Quasijarus success
+In-Reply-To: <Pine.LNX.4.44.0408111416510.6443-100000@cl.drevlanka.ru>
+References: <Pine.LNX.4.44.0408111416510.6443-100000@cl.drevlanka.ru>
+Message-ID: <20040811131533.2d8de811.jrvalverde@cnb.uam.es>
+
+On Wed, 11 Aug 2004 14:26:51 +0400 (MSD)
+Sergey Lapin <slapin at drevlanka.ru> wrote:
+ething interesting: I want to implement possibility to 
+> allow outgoing connections from emulated VAX. As I understand, 4.3BSD  
+> supports SLIP protocol. And I can get SLIP working through emulated serial 
+>
+Again, you don't need to. Just configure IP as usual using an emulated
+Ethernet card. E.g. add to the SIMH configuration:
+
+set xq mac=01-02-03-04-05-06
+at xq0 eth0
+
+Then boot as usual. When the system comes up, it will recognize an ethernet
+card that you can configure as you want. E.g. on boot a message
+
+qe0: delqa, hardware address 01:02:03:04:05:06
+
+will appear in the system log, and you can use a /etc/netstart script like
+the one that follows to configure the net:
+
+- ------------------------- 8< cut here 8< -----------------------
+#!/bin/sh -
+#
+#       @(#)netstart    1.1 (Berkeley) 1/10/99
+
+routedflags=-q
+rwhod=NO
+
+# myname is my symbolic name
+# my-netmask is specified in /etc/networks
+#
+#hostname=myname.my.domain
+hostname=quasijarus.drevlanka.ru# should be the actual internet name of the emulated machine
+mynetmask=81.211.111.250	# should be an actual valid IP address
+mygateway=81.211.111.1		# should be the real IP of the gateway you use
+
+hostname $hostname
+
+ifconfig imp0 inet $hostname
+ifconfig de0 inet $hostname netmask $mynetmask
+ifconfig qe0 inet $hostname netmask $mynetmask
+ifconfig lo0  inet localhost
+route add $hostname localhost 0
+hostid $hostname
+route add default $mygateway 0
+- ------------------------- 8< cut here 8< -----------------------
+
+That should do the trick: now if you have a valid spare IP address to assign
+the emulated machine, and use it above, your emulated system will behave like
+any other Internet host.
+
+Oh, and of course you will want to have a valid /etc/resolv.conf file so
+users in the emulated host can resolve names,like e.g.
+
+domain drevlanka.ru
+nameserver 195.161.9.196
+nameserver 81.211.111.254
+
+See the manual and FAQ for SIMH for more details on what's going on and other
+possible alternatives.
+
+The same goes for 2.11BSD, which takes half the amount of space that 4.3BSD
+does, and ultrix-3.1 which takes even less yet. E.g. from my setups here:
+
+# du -sk 2.11bsd 4.4bsd ultrix-3.1
+325328  2.11bsd
+608952  4.3bsd
+20524   ultrix-3.1
+
+Which is to say, may be you will be better off using Ultrix-3.1, which BTW
+also includes vi, more and much more... In this case just edit the /etc/rc
+file to set the appropriate parameters to ifconfig and default route.
+
+				j
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+

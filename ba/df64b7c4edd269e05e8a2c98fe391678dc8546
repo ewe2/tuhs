@@ -1,0 +1,215 @@
+From: msokolov@baryon.trailing-edge.com (Michael Sokolov)
+Date: Fri, 27 Aug 99 10:11:49 EDT
+Subject: 4.3-QJ0 installation problem (was: no subject)
+Message-ID: <9908271411.AA04026@baryon.trailing-edge.com>
+
+(I'm Cc'ing this to the PUPS list because the original message was, but this
+ discussion belongs on the Quasijarus list. Please don't Cc follow-ups to PUPS,
+ instead everyone who is interested in this discussion please send:
+
+ subscribe quasijarus
+
+ to Majordomo at minnie.cs.adfa.edu.au)
+
+Wilko Bulte <wilko at yedi.iaf.nl> wrote:
+
+> I've been trying to get 4.3BSD to run on my newly acquired MicroVAXII.
+> I followed the Ultrix route described in the docs in the pups tree.
+>
+> I get as far as:
+>
+> [...]
+>
+> 4.3 BSD Quasijarus UNIX #0: Fri Dec 25 14:22:17 EST 1998
+>     msokolov at polygon:/usr/src/sys/GENERIC
+>
+> [...]
+>
+> ra0 at uda0 slave 0: MICROP  , size = 1303998 sectors
+
+OK, good, I see you've labeled your system disk.
+
+> ra1 at uda0 slave 1trap type 6, code = 2, pc = 80031b1c
+> panic: Arithmetic fault
+
+OK, trap 6 code 2 is integer divide by zero on the VAX. My obvious guess is
+that the disk has a garbage label on it and when the kernel tries to interpret
+it, it divides by zero and blows up. A garbage label is something worse than no
+label at all, because the label structure has a magic at the beginning, and
+trust me, the kernel does check it and it does not blow up with a divide by
+zero when block 0 is all zeros.
+
+Wilko, what exactly do you have in the label block of disk 1? If you've been
+following my installation instructions to the letter, that disk would be your
+Ultrix disk. My installation instructions call for labeling the BSD disk, but
+not the Ultrix disk. In fact, putting a BSD label on an Ultrix bootable disk
+would render it unbootable, as Ultrix has boot code where BSD has the label.
+This means that normally when someone follows my Ultrix-based installation
+procedure, BSD will simply view the Ultrix disk as unlabeled and make it one
+big partition a. You obviously have something else in there.
+
+> Exactly the same thing happens when I use 4.3reno instead of the Quasijarus
+> kit.
+
+Well, this at least means that this is not yet another one of my own bugs, so
+that's the good news. :-) But sure, the kernel could do with a few more label
+sanity checks so that it prints a nice error message instead of blowing up.
+I'll look into it.
+
+--
+Michael Sokolov
+Special Agent
+International Free Computing Task Force
+
+Harhan Computer Operation Facility
+
+ARPA Internet SMTP mail: msokolov at baryon.trailing-edge.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id NAA47798
+	for pups-liszt; Sat, 28 Aug 1999 13:58:50 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA47794
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 28 Aug 1999 13:58:44 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.1) id NAA06231
+	for pups at minnie.cs.adfa.edu.au; Sat, 28 Aug 1999 13:58:44 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <199908280358.NAA06231 at henry.cs.adfa.edu.au>
+Subject: dmr's comments on releasing old code
+To: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Date: Sat, 28 Aug 1999 13:58:44 +1000 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+	Dennis Ritchie just emailed me with a URL about Dan Bricklin's
+efforts to release his original VisiCalc:
+
+	http://www.bricklin.com/history/vcpostingreactions.htm
+
+The URL contains a link to an email from Dennis about his attempts to
+get the older UNIX source code, and the primeval C compilers, released:
+
+	http://www.bricklin.com/history/dmrletter.htm
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA47821
+	for pups-liszt; Sat, 28 Aug 1999 14:03:48 +1000 (EST)
+Received: from gull.prod.itd.earthlink.net (gull.prod.itd.earthlink.net [207.217.121.85])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA47817
+	for <pups at minnie.cs.adfa.oz.au>; Sat, 28 Aug 1999 14:03:41 +1000 (EST)
+Received: from gort (1Cust102.tnt2.covina.ca.da.uu.net [208.254.25.102])
+	by gull.prod.itd.earthlink.net (8.9.3/8.9.3) with SMTP id VAA13229
+	for <pups at minnie.cs.adfa.oz.au>; Fri, 27 Aug 1999 21:03:30 -0700 (PDT)
+Date: Fri, 27 Aug 1999 21:03:30 -0700 (PDT)
+Message-Id: <199908280403.VAA13229 at gull.prod.itd.earthlink.net>
+X-Sender: mjcrehan at earthlink.net
+X-Mailer: Windows Eudora Light Version 1.5.2
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+To: pups at minnie.cs.adfa.oz.au
+From: Martin Crehan <mjcrehan@earthlink.net>
+Subject: Dennis Ritchie letter on releasing early Unix
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I ran across an interesting account from Dennis Ritchie on the process he
+went through to get us the SCO liscense for Ancient Unix:
+http://www.bricklin.com/history/dmrletter.htm
+
+Martin Crehan
+9 PM PDT, August 27, 1999
+mjcrehan at earthlink.net
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id VAA49114
+	for pups-liszt; Sat, 28 Aug 1999 21:08:36 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id VAA49110
+	for <pups at minnie.cs.adfa.edu.au>; Sat, 28 Aug 1999 21:08:29 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.1) id VAA07821
+	for pups at minnie.cs.adfa.edu.au; Sat, 28 Aug 1999 21:08:29 +1000 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <199908281108.VAA07821 at henry.cs.adfa.edu.au>
+Subject: Primeval C compilers
+To: pups at minnie.cs.adfa.edu.au (Unix Heritage Society)
+Date: Sat, 28 Aug 1999 21:08:29 +1000 (EST)
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi all,
+	I also asked Dennis if we could put his two old `primeval' C
+compilers into the archive. He said:
+
+	I don't have a problem with copying the compilers, more or
+	less as a mirror.   I wonder if anyone will try to revive them?
+
+I've had a go at reviving them today, using V5 cc and tools. It's a
+real PITA I can assure you. I've got the last1120c compiler compiled,
+but I can't get it to compile itself. As soon as it sees line 16 in c00.c
+
+	 i = namsiz;
+
+it complains that the LHS isn't an Lvalue.
+
+I think I'll stop now, my brain is hurting too much :-)
+
+Ciao,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id CAA50367
+	for pups-liszt; Sun, 29 Aug 1999 02:46:23 +1000 (EST)
+Received: from baryon.trailing-edge.com (baryon.trailing-edge.com [63.73.218.145])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with SMTP id CAA50363
+	for <pups at minnie.cs.adfa.edu.au>; Sun, 29 Aug 1999 02:46:14 +1000 (EST)
+Received: by baryon.trailing-edge.com (5.60/1.35)
+	id AA00896; Sat, 28 Aug 99 12:46:53 EDT
+Date: Sat, 28 Aug 99 12:46:53 EDT
+From: msokolov@baryon.trailing-edge.com (Michael Sokolov)
+Message-Id: <9908281646.AA00896 at baryon.trailing-edge.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: Primeval C compilers
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Warren Toomey <wkt at henry.cs.adfa.edu.au> wrote:
+
+> Hi all,
+> I also asked Dennis if we could put his two old `primeval' C
+> compilers into the archive. He said:
+>
+> > I don't have a problem with copying the compilers, more or
+> > less as a mirror.   I wonder if anyone will try to revive them?
+
+So are they now on minnie or not? If they are, then where? I just looked and
+couldn't find them.
+
+--
+Michael Sokolov
+Special Agent
+International Free Computing Task Force
+
+Harhan Computer Operation Facility
+
+ARPA Internet SMTP mail: msokolov at baryon.trailing-edge.com
+
+

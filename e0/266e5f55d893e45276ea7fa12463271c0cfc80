@@ -1,0 +1,39 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Wed, 16 Jul 2014 17:46:32 -0400 (EDT)
+Subject: [TUHS] the sin of buffering [offshoot of excise process from a
+	pipeline]
+Message-ID: <20140716214632.6F3DB18C0A2@mercury.lcs.mit.edu>
+
+    > From: Doug McIlroy <doug at cs.dartmouth.edu>
+
+    > Process A spawns process B, which reads stdin with buffering. B gets
+    > all it deserves from stdin and exits. What's left in the buffer,
+    > intehded for A, is lost. 
+
+Ah. Got it.
+
+The problem is not with buffering as a generic approach, the problem is that
+you're trying to use a buffering package intended for simple,
+straight-forward situations in one which doesn't fall into that category! :-)
+
+Clearly, either B has to i) be able to put back data which was not for it
+('ungets' as a system call), or ii) not read the data that's not for it - but
+that may be incompatible with the concept of buffering the input (depending
+on the syntax, and thus the ability to predict the approaching of the data B
+wants, the only way to avoid the need for ungetc() might be to read a byte at
+a time).
+
+If B and its upstream (U) are written together, that could be another way to
+deal with it: if U knows where B's syntatical boundaries are, it can give it
+advance warning, and B could then use a non-trivial buffering package to do
+the right thing. E.g. if U emits 'records' with a header giving the record
+length X, B could tell its buffering package 'don't read ahead more than X
+bytes until I tell you to go ahead with the next record'.
+
+Of course, that's not a general solution; it only works with prepared U's.
+Really, the only general, efficient way to deal with that situation that I can
+see is to add 'ungets' to the operating system...
+
+	Noel
+
+

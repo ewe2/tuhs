@@ -1,0 +1,68 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Wed, 3 Jan 2018 16:51:03 -0800
+Subject: [TUHS] OT: critical Intel design flaw
+In-Reply-To: <20180103234025.GA23371@thunk.org>
+References: <20180103134358.3F16818C098@mercury.lcs.mit.edu>
+ <CAC20D2NEvx_3R_HjzO6r3h6OaAcrpkmWuTRNX7-ApoEz8+KxTg@mail.gmail.com>
+ <C30F8795-EBB0-4734-8550-0BE2B77F07F0@bitblocks.com>
+ <CAC20D2NUfSHt36bSy4HL5A9ZXOL3QSP26ZT4bKxYcmHb0YLx5w@mail.gmail.com>
+ <20180103234025.GA23371@thunk.org>
+Message-ID: <20180104005103.GF1534@mcvoy.com>
+
+On Wed, Jan 03, 2018 at 06:40:25PM -0500, Theodore Ts'o wrote:
+> On Wed, Jan 03, 2018 at 01:27:19PM -0500, Clem Cole wrote:
+> > > This slowdown (which is not much -- L4 shows it is about 5% or so)
+> > >
+> > ???I agree.   We came to the same conclusion in the early/mid 1990's  with
+> > Mach and Chorus.   In fact, the UI 'requirements for modern OS' document
+> > (which is part of why AT&T got behind Chorus for the never completed
+> > SVR5/R6 stuff - I'll see if I can find a copy) was based on that work.
+> > 
+> > The OS weenies at the time felt that the cost was low enough and hardware
+> > cheap enough that of course kernels would be the way to go.
+> 
+> It's possible to keep the slowdown at 5%, but how much extra
+> engineering work does it take to get the performance gap down to that
+> level?  And during that time while the micro kernel team is playing
+> catchup, if the OS with the monolithic kernel adds new features to the
+> OS, how much additional time does it take to add those features to the
+> OS?  (Regardless of whether the features are implemented in userspace,
+> or in the kernel, or some combination of the two.)
+
+To add to Ted's points.  I was good friends with one of the core guys
+on the QNX team a long time ago (he died early in 1998 of brain cancer.
+Yuck).  The QNX micro kernel really was micro, the kernel fit entirely in
+a 4K instruction cache on x86 (thanks CISC).  It did very, very little.
+It took a lot of thinking and discipline to figure out what the kernel
+should do and what should be delegated.  There was constant pressure to
+put more stuff in the kernel.
+
+My buddy told me that there were only 4 people who were allowed to touch
+the actual kernel code.  And they all both backed each other up and
+second guessed each other in code reviews.  They counted instructions
+and cache misses each time they changed stuff.
+
+As a result, the QNX kernel of the late 1980's and 1990's was super
+super fast.  I ran as much as 10 users logged in to a 80286 running
+QNX doing text editing and compiles and it actually worked.  I'd 
+argue that it worked better than Unix would have worked on that 
+miserable processor.
+
+QNX made it work.  I think they slowed down when they put full posix in
+but they made it work.
+
+The problem is that most people / companies are not that disciplined.
+Oh, we need this for $CUSTOMER and this for $BENCHMARK and this for
+$STANDARD and the easiest way to get it is to shove it into the kernel.
+
+I'd argue that microkernels are indeed the best answer but only if you
+have the best programmers.  Which nobody does even though everyone claims
+they do.
+
+Monolithic kernels are far more amenable to less than awesome people
+messing with them.  Sad but true, I'd love a microkernel world but I
+fear we are too stupid to get it.  Something, something, something,
+this is why we can't have nice things.
+
+--lm
+

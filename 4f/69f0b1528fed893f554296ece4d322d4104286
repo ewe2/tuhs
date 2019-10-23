@@ -1,0 +1,56 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Fri, 25 Mar 2016 00:06:35 +0100
+Subject: [TUHS] Early non-Unix filesystems?
+In-Reply-To: <20160324225049.GA54792@server.rulingia.com>
+References: <mailman.1.1458784801.4499.tuhs@minnie.tuhs.org>
+ <56F3BEAE.9060903@update.uu.se> <20160324225049.GA54792@server.rulingia.com>
+Message-ID: <56F472FB.7020204@update.uu.se>
+
+On 2016-03-24 23:50, Peter Jeremy wrote:
+> On 2016-Mar-24 11:17:18 +0100, Johnny Billquist <bqt at update.uu.se> wrote:
+>> It is the normal behavior of any instruction that interrupts are not
+>> recognized until the next instruction fetch. This is how the microcode
+>> works, and it is also pretty much the same in any processor today.
+> ...
+>> individual instructions. You still get a fetch between each instruction,
+>> at which point, interrupts will be recognized.
+>
+> Some instructions inhibit the "check for interrupts at the end of this
+> instruction" check.  I'm most familiar with the 8080 EI instruction,
+> which enabled interrupts after the following instruction (so things like
+> EI;HLT didn't have a window).  It seems the PDP-11 SPL behaves the same.
+
+I don't think it should on the PDP-11, and the documentation do not 
+mention any such thing.
+There is a good reason the 8080 (and Z80, and others) have this 
+property. The RETI instruction on these machines do not enable 
+itnerrupts themselves, so just as you note, you need to both enable 
+interrupts and return from interrupt atomically, or else you get into a 
+mess.
+
+The PDP-11 RETI instruction changes the processor priority as a part of 
+the instruction. You do not use SPL (whatever) before a RETI.
+Thus, it do not make sense that SPL on a PDP-11 would have this 
+property. If if indeed do disable recognizing interrupts after an SPL, 
+it sounds more like a bug. I guess I'll go and read the microcode so see 
+if that mentions any of this, since I'm sortof into reading it anyway as 
+I was trying to debug a problem on an 11/70 only a couple of months ago...
+
+I'll try and remember to report back when I know something more.
+
+>> memory access to get the actual content. The fun thing happens if you
+>> set the indirect bit, and give your own address. This is then an
+>> infinite memory reference. And the KA10 can not be broken out of that
+>> lookup. The only solution is to pull the power plug.
+>
+> I can't think of any modern architectures that still support this sort
+> of indefinite indirection but I know the ITT 3200 (custom CPU for
+> controlling telephone exchanges) could do this.  In it's case, a normal
+> front-panel reset would recover.
+
+Yeah. The fact that the microcode didn't even recognize any signals from 
+the front panel while in this loop was bad, they realized... :-)
+
+	Johnny
+
+

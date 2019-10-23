@@ -1,0 +1,108 @@
+From tuhs-bounces@minnie.tuhs.org Thu Aug 23 23:21:30 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d28d56c4
+	for <ml@inbox.vuxu.org>;
+	Thu, 23 Aug 2018 23:21:30 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4794DA1A8A; Fri, 24 Aug 2018 09:21:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 65A40A1A1A;
+	Fri, 24 Aug 2018 09:21:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E43E9A1A1A; Fri, 24 Aug 2018 09:21:07 +1000 (AEST)
+X-Greylist: delayed 441 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Fri, 24 Aug 2018 09:21:07 AEST
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6B591A1A19
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Aug 2018 09:21:07 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 078201604A; Fri, 24 Aug 2018 01:13:45 +0200 (CEST)
+Date: Fri, 24 Aug 2018 01:14:13 +0200
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: <ron@ronnatalie.com>
+Message-ID: <20180823231413.QeahD%steffen@sdaoden.eu>
+In-Reply-To: <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+Mail-Followup-To: <ron@ronnatalie.com>,
+ "'Bakul Shah'" <bakul@bitblocks.com>, "'TUHS'" <tuhs@minnie.tuhs.org>
+User-Agent: s-nail v14.9.11-22-g31cca803
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: 'TUHS' <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+ron@ronnatalie.com wrote in <151301d43b2f$07881ed0$16985c70$@ronnatalie.com=
+>:
+  ...
+ |This union was right in the middle of the buf struct:
+ |
+ | union {
+ |     caddr_t b_addr;          /* low order core address */
+ |     int      *b_words;               /* words for clearing */
+ |     struct filsys *b_filsys; /* superblocks */
+ |     struct dinode *b_dino;   /* ilist */
+ |     daddr_t *b_daddr;                /* indirect block */
+ |} b_un;
+ |There were a number of other places that did the same thing.   It's
+ |OFFICIALLY now in undefined behavior by the standard (though of course th=
+at
+ |didn't exist in the BSD days) ,
+ |to store in one element of the union and retrieve it via another.   This =
+is
+ |one of the reasons why.
+
+Luckily "type punning" is possible.  Ach, what do i know;
+nonetheless, i think it is a terrible direction that C goes to,
+now you often need memcpy() to local storage instead of a simple
+assignment (with a cast) in order to avoid undefined behaviour
+that allows compilers to do bad things.  On a NetBSD list there
+was a link to such a story not too long ago, the resulting
+C standard compliant code was ridiculous, the last string of fun
+has been screwed out of C.  Unfortunately i have not saved the
+message, but Christos Zoulas has been the author.
+
+Regarding "type punning" the standard C 2011 says (6.5.2.3)
+
+  If the member used to read the contents of a union object is not
+  the same as the member last used to store a value in the object,
+  the appropriate part of the object representation of the value
+  is reinterpreted as an object representation in the new type as
+  described in 6.2.6 (a process sometimes called =E2=80=98=E2=80=98type
+  punning=E2=80=99=E2=80=99). This might be a trap representation.
+
+This has not changed in C 2018 (though i have only version 2017
+ballot).  So as long as the type sizes are identical anything
+should be fine.  Just as you say.
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

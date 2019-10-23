@@ -1,0 +1,367 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 138824f9
+	for <ml@inbox.vuxu.org>;
+	Fri, 4 Jan 2019 02:35:31 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4D95CA1F38; Fri,  4 Jan 2019 12:35:30 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0040AA1C5C;
+	Fri,  4 Jan 2019 12:34:46 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=donhopkins-com.20150623.gappssmtp.com header.i=@donhopkins-com.20150623.gappssmtp.com header.b="TtRrVAqV";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 89DC0A1C5C; Fri,  4 Jan 2019 12:34:43 +1000 (AEST)
+Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com
+ [209.85.208.46])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D5858A1C50
+ for <tuhs@minnie.tuhs.org>; Fri,  4 Jan 2019 12:34:41 +1000 (AEST)
+Received: by mail-ed1-f46.google.com with SMTP id h15so30618912edb.4
+ for <tuhs@minnie.tuhs.org>; Thu, 03 Jan 2019 18:34:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=donhopkins-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:subject:from:in-reply-to:date:cc
+ :content-transfer-encoding:message-id:references:to;
+ bh=CwVXq/kXOBEh9YRX9itoyj99XkRahc8o4RTKhWqawl8=;
+ b=TtRrVAqV06/cEuv8yLZG0P1pCgADYgoiY5f6eRLPDKaCV818QAsyKawPkex7+OSyTC
+ eZsDwDZpejlUnpnJBeJNIw6hXV7kGRHQI8A5AqjFvv/E24QItEQnlcxPe8CyTgpDX/vQ
+ qbdZnNmPKyChKmM2V2wPzjLkq/2JAIQMfSwOPY9IptuKRHDsbrrSPJCdVQ6oXKY4jVrw
+ XOeQ5MVvMjU+BbmyzWbO8VOWtNeHr0JQxGuUuh0UNBzsM1pSRBJdUrnFeqIF3qndhF7g
+ NdtDxA1wI8cd1m2IPUPxK8LZtrDaGaUXt+r1g3HvdBk1CjzWob4vLYRs/9X+X6dmC4Jk
+ cGYA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
+ :content-transfer-encoding:message-id:references:to;
+ bh=CwVXq/kXOBEh9YRX9itoyj99XkRahc8o4RTKhWqawl8=;
+ b=FcZ2qD+pWzt962yQr6trok1sZW7hhffueTWTZAgfwUcILjY976IH1+GP06u9ppaFar
+ 1eD0LWLRTJT8P2ns7KHHV7ypdYRDrB6ZwRL88EA8F3GEwcOHqaFlY+ncbukTsiOK6PRx
+ uQXKR1/0G4/5T50eeFIBW4jMPzKnbv347Lb7G4ipBPeglPCuoVcUY+W861PLTJJdtF5N
+ 82OVk27lZ7UMUTfRUvDa04Fhx2ON2tpaREaY1m805S25nk2Zr9A1SLPg0I7pPqJAQvdn
+ 4cCpAZMeQlv9Bop+2ZHzc4PQuDzZrQpgVj0+IyfUpWzN4lSjixtjhKo7xs+WMT/A4Ii7
+ w/BQ==
+X-Gm-Message-State: AA+aEWbnQtUL0BQPSCGLLHs3Y32FWNyqmRSmW9Zt6ekn6bC7Prlt/tRI
+ HND5XaYMsPNFYxQb8No4dX4SeRERiiE=
+X-Google-Smtp-Source: AFSGD/UJkmNPlm6mq9UR3M58wBPD1raU9o9Qh794Hkmut30X7TTde0Qouyp0Mxw+8VxqKE3owbnQUQ==
+X-Received: by 2002:a17:906:b1b:: with SMTP id
+ u27-v6mr37214564ejg.67.1546569279669; 
+ Thu, 03 Jan 2019 18:34:39 -0800 (PST)
+Received: from [192.168.0.52] (i36138.upc-i.chello.nl. [62.195.36.138])
+ by smtp.gmail.com with ESMTPSA id n18-v6sm10127568ejy.17.2019.01.03.18.34.38
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Thu, 03 Jan 2019 18:34:39 -0800 (PST)
+Content-Type: text/plain;
+	charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 12.0 \(3445.100.39\))
+From: Don Hopkins <don@donhopkins.com>
+In-Reply-To: <mailman.0.1546567202.30849.tuhs@minnie.tuhs.org>
+Date: Fri, 4 Jan 2019 03:34:38 +0100
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <1C76403B-6684-4AA5-BEFF-FDFE19A08229@donhopkins.com>
+References: <mailman.0.1546567202.30849.tuhs@minnie.tuhs.org>
+To: tuhs@minnie.tuhs.org
+X-Mailer: Apple Mail (2.3445.100.39)
+Subject: [TUHS] NSA MILNET IMP 57 & Explosive Bolts
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: Don Hopkins <don@donhopkins.com>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+(I originally posted this to hacker news, but I=E2=80=99ll repost it =
+here too.)
+
+
+
+At the University of Maryland, our network access was through the NSA's =
+"secret" MILNET IMP 57 at Fort Mead. It was pretty obvious that UMD got =
+their network access via NSA, because mimsy.umd.edu had a similar "*.57" =
+IP address as dockmaster, tycho and coins.
+
+https://emaillab.jp/dns/hosts/
+
+    HOST : 26.0.0.57 : TYCHO : PDP-11/70 : UNIX : =
+TCP/TELNET,TCP/SMTP,TCP/FTP :
+    HOST : 26.0.0.57 : DOCKMASTER.NCSC.MIL,DOCKMASTER.DCA.MIL, =
+DOCKMASTER.ARPA : HONEYWELL-DPS-8/70 : MULTICS : =
+TCP/TELNET,TCP/FTP,TCP/SMTP,TCP/ECHO,TCP/DISCARD,ICMP :
+    HOST : 26.1.0.57 : COINS-GATEWAY,COINS : PLURIBUS : PLI ::
+    HOST : 26.2.0.57, 128.8.0.8 : MARYLAND,MIMSY,UMD-CSD,UMD8,UMCP-CS : =
+VAX-11/780 : UNIX : =
+TCP/TELNET,TCP/FTP,TCP/SMTP,UDP,TCP/ECHO,TCP/FINGER,ICMP :
+
+https://multicians.org/site-dockmaster.html
+
+Whenever the network went down (which was often), we had to call up a =
+machine room at Fort Mead and ask them to please press the reset button =
+on the box labeled "IMP 57". Sometimes the helpful person who answered =
+the phone had no idea which box I meant, so I had describe to him which =
+box to reset over the phone. ("Nope, that didn't work. Try the other =
+one!" ;) They were even generous enough to issue us (CS department =
+systems staff and undergrad students) our own MILNET TACACS card.
+
+On mimsy, you could get a list of NSA employees by typing "grep contact =
+/etc/passwd", because each of their courtesy accounts had "network =
+contact" in the gecos field.
+
+Before they rolled out TACACS cards, anyone could dial up an IMP and log =
+in without a password, and connect to any host they wanted to, without =
+even having to murder anyone like on TV:
+
+https://www.youtube.com/watch?v=3DhVth6T3gMa0
+
+
+
+I found this handy how-to tutorial guide for "Talking to the Milnet NOC" =
+and resetting the LH/DH, which was useful for guiding the NSA employee =
+on the other end of the phone through fixing their end of the problem. =
+What it doesn't mention is that the key box with the chase key was =
+extremely easy to pick with a paperclip.
+
+Who would answer the Milnet NOC's 24-hour phone was hit or miss: Some =
+were more helpful and knowledgeable than others, others were quite =
+uptight.
+
+Once I told the guy who answered, "Hi, this is the University of =
+Maryland. Our connection to the NSA IMP seems to be down." He barked =
+back: "You can't say that on the telephone! Are you calling on a blue =
+phone?" (I can't remember the exact color, except that it wasn't red: =
+that I would have remembered). I said, "You can't say NSA??! This is a =
+green phone, but there's a black phone in the other room that I could =
+call you back on, but then I couldn't see the hardware." And he said =
+"No, I mean a voice secure line!" I replied, "You do know that this is a =
+university, don't you? We only have black and green phones.=E2=80=9D
+
+    Date: Thu, 11 Sep 86 13:53:45 EDT
+    From: Steve D. Miller <steve@brillig.umd.edu>
+    To: staff@mimsy.umd.edu
+    Subject: Talking to the Milnet NOC
+
+       This message is intended to be a brief tutorial/compendium of
+    information you probably want to know if you need to see about
+    getting the LH/DH thingy (and us) talking to the world.
+
+       First, you need the following numbers:
+        (1)  Our IMP number (57),
+        (2)  Mimsy's milnet host address (26.2.0.57),
+        (3)  The circuit number for our link to the NSA
+            (DSEP07500-057)
+        (4)  The NOC number itself (692-5726).
+
+       Second, you need to know something about the hardware.  There
+    are three pieces of hardware that make up our side of the link:
+    the LH/DH itself, the ECU, and the modem.  The LH/DH and the
+    ECU are the things in the vax lab by brillig; the ECU is the
+    thing on top (with the switches), and the LH/DH is the thing
+    on the bottom.  The normal state is to have the four red LEDs
+    on the ECU on and the Host Master Ready, HRY, Imp Master Ready,
+    and IRY lights on at the LH/DH.  If these lights are not on,
+    something is wrong.  If mimsy is down, then we'll only have some
+    of the lights on, but that should fix itself when mimsy comes up.
+    Some interesting buttons or switches on the ECU are:
+        reset - resets something or another
+        stop - stops something or another
+        start - restarts something or another
+        local loopback -- two switches and two leds; you may need
+            to throw one or the other of these if the NOC asks
+            you to.  These loopback switches should be distinguished
+            from those on the modem itself.
+        remote loopback -- like local loopback, but does something else.
+
+       The modem is in the phone room beside the terminal room (rm.
+    4322, if memory serves).  It can be opened with the chase key from
+    the key box...but if someone official and outside of staff asks
+    you that, you probably shouldn't admit to it.  It has a switch on
+    it, too; it seems that switch normally rests in the middle, and
+    there's a "LL" setting to the left which I assume puts the modem in
+    local loopback mode.
+
+       Now that you have some idea of where things are, call the NOC.
+    Identify yourself as from the University of Maryland, and say that
+    we're not talking to the outside world.  They will probably ask for
+    our Milnet address or the number of the IMP we're connected to,
+    and will then poke about and see what's happening.  They will ask
+    you to do various things; ask if you're not sure what they mean,
+    but the background info above should help in puzzling it out.
+
+       Hopefully, this will make it easier to find people to fix
+    our net problems in the future; it's still hard to do 'cause
+    we have so little info (no hardware manual, for example),
+    but this should give us a fighting chance.
+
+        -Steve
+
+
+
+There were rumored to be "explosive bolts" on the ARPA/MILNET gateways =
+(whether they were metaphorical or not, I don't know).
+
+Here's something interesting that Milo Medin wrote about dual homed =
+sites like NSA and NASA, that were on both the ARPANET and MILNET:
+
+    To: fair@ucbarpa.berkeley.edu (Erik E. Fair)
+    Cc: Hackers_Guild@ucbvax.berkeley.edu, =
+ucdavis!ccohesh@ucbvax.berkeley.edu
+    Subject: Re: a question of definition
+    Date: Thu, 29 Jan 87 15:33:35 PST
+    From: Milo S. Medin (NASA ARC Code ED) <medin@orion.arpa>
+
+    Right, the core has many gateways on it now, maybe 20-30.  All the =
+LSI's will
+    be stubbed off the core however, and only buttergates will be left =
+after
+    the mailbridges and EGP peers are all converted.  Actually, I think =
+DARPA is
+    paying for it all...
+
+    Ames is *not* getting a mailbridge.  You are right of course, that =
+we could
+    use 2 gateways, not just 1 (actually, there will be a prime and =
+backup anyways),
+    and then push routing info appropriately.  But that's anything but =
+simple.
+    Firstly, the hosts have to know which gateway to send a packet to a =
+given
+    network, and thus have to pick between the 2.  That's a bad idea.
+    It also means that I have to pass all EGP learned info around on the
+    local cable, and if I do that, then I can't have routing info from
+    the local cable pass out via EGP.  At least not without violating
+    the current EGP spec.   Think about it.  It'd be really simple to
+    create a loop that way.  Thus, in order to maximize the use of both
+    PSN's, you really need one gateway wired to both PSN's, and just
+    have it advertise a default route inside.  Or use a reasonble IGP,
+    of which RIP (aka /etc/routed stuff) is not.  I'm hoping to get
+    an RFC out of BBN at this IETF meeting which may go a long way in
+    reducing the use of RIP as an IGP.
+
+    BTW, NSA is an example of a site on both MILNET and ARPANET but =
+without
+    a mailbridge...
+
+    There is no restriction that a network can only be on ARPANET or =
+MILNET.
+    That goes against the Internet model of doing things.  Our local
+    NASA gatewayed nets will be advertised on both sides.  The =
+restriction
+    on BARRNet is that the constituent elements of BARRNet do not all
+    have access to MILNET.  NSF has an understanding with DARPA and
+    DCA that NSFnet'd sites can use ARPANET.  That does not extend to
+    the MILNET.  Thus, Davis can use UCB's or Stanford's, our even =
+NASA's
+    ARPANET gateways, with the approval of the site of course, but
+    not MILNET, even though NASA has MILNET coverage.  Thus we are =
+required
+    to restrict BARRNet routing through our MILNET PSN.  If we were =
+willing
+    to sponsor UCB's MILNET access, for some requirement which NASA
+    had to implement, then we would turn that on.  But BARRNet itself =
+will
+    but cutoff to MILNET (and probably ARPANET too) at Ames, but not
+    cut off to other NASA centers or sites that NASA connects.  There is
+    no technical reason that prevents this, in fact, we have to take
+    special measures to prevent it.  But those are the rules.  Anyways,
+    mailbridge performance should improve after the conversion, so
+    UCB should be in better shape.  And you'll certainly be able to
+    talk to us via BARRNnet...  I have noticed recently that MILNET<->
+    ARPANET performance has been particularly poor...  Sigh.
+
+    The DCA folks feel that in case of an emergency they may be
+    forced to use an unsecure network to pass certain info around.  The
+    DDN brochure mentions SIOP related data for example.  Who knows,
+    if the balloon goes up, the launch order might pass through Evans
+    Hall on its way out to SAC...  :-)
+
+
+                        Milo
+
+
+
+I dug up an "explosive bolts" reference -- fortunately that brilliant =
+plan didn't get far.
+
+(Milo Medin knows this stuff first hand: =
+https://innovation.defense.gov/Media/Biographies/Bio-Display/Article/13958=
+55/milo-medin/ )
+
+    To: fair@ucbarpa.berkeley.edu (Erik E. Fair)
+    Cc: ucdavis!ccohesh@ucbvax.berkeley.edu, =
+Hackers_Guild@ucbvax.berkeley.edu
+    Subject: Re: a question of definition
+    Date: Thu, 29 Jan 87 12:29:36 PST
+    From: Milo S. Medin (NASA ARC Code ED) <medin@orion.arpa>
+
+    Actually its:
+
+    SCINET -- Secret Compartmented Information Net  (if you don't know =
+what
+    compartmented means, you don't need to ask)
+    DODIIS -- DoD Intelligence Information Net
+
+    The other stuff I think is right, at least without me looking things
+    up.  I probably shouldn't have brought this subject of the secure =
+part
+    of the DDN up.  People like being low key about such things...
+
+    Erik, all the BBN gateways on MILNET and ARPANET currently comprise
+    the core, not just mailbridges.  Some are used as site gateways, =
+others
+    as EGP neighbors, etc...  And just because you are dual homed =
+doesn't mean
+    you get a mailbridge.  And the IETF doesn't deal with low level =
+stuff
+    like that; DCA does all that.  In fact, the reason we are getting an
+    ARPANET PSN is because when DCA came out to do a site survey, they
+    liked our site so much they asked if they could put one here!  It's
+    amazing how many sites have tried to get ARPANET PSN's the right
+    way and have had to wait much longer than us...  BTW, since we are
+    dual homed (probably a gateway with 2 1822 interfaces in it), we
+    are taking steps to be sure that people on ARPANET or MILNET can't
+    use our gateway to bypass the mailbridges.  The code will be hacked
+    to drop all packets that aren't going to a locally reachable =
+network.
+    BARRNet, even though its locally reachable, will be excluded
+    from this however, since the current procedural limitations call for
+    not allowing any BARRNet traffic to flow out of BARRNet to MILNET
+    and the reverse.  NASA traffic of course can traffic through =
+BARRNet,
+    and even use ARPANET that way (though that's not a big deal when
+    we get our own ARPANET PSN).  That's because only NASA is authorized
+    to directly connect to MILNET, not UCB or Stanford, etc...
+
+    DCA must have the ability to partition the ARPANET and MILNET in
+    case of an "emergency", and having non-DCA controlled paths between
+    the nets prevents that.  There was talk some time ago about putting
+    explosive bolts in the mailbridges that would be triggered by
+    destruct packets...  That idea didn't get far though...
+
+    The DDN only includes MILNET,ARPANET,SCINET,etc...  Not the attached
+    networks.  If it did, you'd need to file a TSR to add a PC to your
+    local cable.  A TSR is a monstrous piece of paperwork that needs to
+    be done anytime anything is changed on the DDN...  Rick knows all
+    about them don't you Rick?
+
+    The whole network game is filled with acronyms!  I gave up trying
+    to write documents with full explainations in terms long ago...
+    I have yet to see a short and concise (and correct) way of =
+describing
+    DDN X.25 Standard Service for example...  That's probably one of the
+    harder things about getting into networking these days.  We won't
+    even talk about Etherbunnies and Martians and other Millspeak...
+
+                        Milo '1822' Medin
+

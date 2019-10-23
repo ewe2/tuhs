@@ -1,0 +1,75 @@
+From: w.f.j.mueller@retro11.de (Walter F.J. Mueller)
+Date: Wed, 7 Jun 2017 22:14:07 +0200
+Subject: [TUHS] 211bsd: kernel panic after a 'here document' in tcsh
+Message-ID: <86b6acb7-93ec-0dbd-b5a1-bd566e8c3cef@retro11.de>
+
+Hi,
+
+a few remarks on the feedback on the kernel panic after a 'here document' in tcsh.
+
+To Michael Kjörling question:
+ > I'm curious whether the same thing happens if you try that in some
+ > other shell? (Not sure how widely here documents were supported back
+ > then, but I'm asking anyway.)
+And Johnny Billquist remark
+ > Not sure if any of the other shells have this.
+
+'here documents' are available and work fine in sh and csh.
+And are in fact used, examples
+
+   /usr/adm/daily     (a /bin/sh script)
+     su uucp << EOF
+           /etc/uucp/clean.daily
+     EOF
+
+   /usr/crash/why     (a /bin/csh script)
+     adb -k {unix,core}.$1 << 'EOF'
+     version/sn"Backtrace:"n
+     $c
+     'EOF'
+
+To Michael Kjörling remark
+ > The PC value in the panic report ("pc 161324") strikes me as high
+and Johnny Billquist remark
+ > This is in kernel mode, and that is in the I/O page.
+
+211bsd uses split I/D space and uses all 64 kB I space for code.
+The top 8 kB are in fact  the overlay area, and the crash happened
+in overlay 4 (as indicated by ov 4). With a simple
+
+   nm /unix | sort | grep " 4"
+
+one gets
+
+   161254 t ~psignal 4
+   162302 t ~issignal 4
+
+so the crash is just 050 bytes after the entry point of psignal. So the
+PC address is fine and not the problem. For psignal look at
+
+   http://www.retro11.de/ouxr/211bsd/usr/src/sys/sys/kern_sig.c.html#s:_psignal
+
+the crash must be one of the first lines. psignal is an internal kernel
+function, called from
+
+   http://www.retro11.de/ouxr/211bsd/usr/src/sys/sys/kern_sig.c.html#xref:s:_psignal
+
+and has nothing to do with the libc function psignal
+
+   http://www.retro11.de/ouxr/211bsd/usr/man/cat3/psignal.0.html
+   http://www.retro11.de/ouxr/211bsd/usr/src/lib/libc/gen/psignal.c.html
+
+To Johnny Billquist remark
+ > Could you (Walter) try the latest version of 2.11BSD and see if you
+ > still get that crash?
+
+very interesting that you see a core dump of tcsh rather a kernel panic.
+
+Whatever tcsh does, it should not lead to a kernel panic, and if it does,
+it is primarily a bug of the kernel. It looks like there are two issues,
+one in tcsh, and one in the kernel. I've a hunch were this might come from,
+but that will take a weekend or two to check on.
+
+
+		With best regards,  Walter
+

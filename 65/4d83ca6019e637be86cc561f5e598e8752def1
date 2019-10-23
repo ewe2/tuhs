@@ -1,0 +1,71 @@
+From: clemc@ccc.com (Clem cole)
+Date: Sun, 19 Nov 2017 09:55:19 -0500
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <20171119134109.59F3018C0F5@mercury.lcs.mit.edu>
+References: <20171119134109.59F3018C0F5@mercury.lcs.mit.edu>
+Message-ID: <EC9F5ECB-D02A-435B-8AB6-93F484908F99@ccc.com>
+
+Noel is correct. DECtape (aka linctape) was a block oriented technology.  Traditional 1/2” mag tape which had 5, 7 or 9 tracks is a stream oriented technology.   
+
+DECtape was used liked disk in the late 60s.  It was comparably cheap and very reliable.  The joke was you could unroll it and run over it with a car and then roll it back up and it would still work.  
+
+Magtape was traditional back up scheme.  Cost per bit was low and good for archiving.  But you could only add to the end of a tape.  You can do funny things like change recording techniques between files (not recommended as it can confuse many tape controllers but is technically allowed and was done). 
+
+Because of the variable nature of things the OS needs a way to support these behaviors.  Unix makes it pretty easy by letting the user do it all in user space and passing info to the driver.  Other OSs do a lot of work when ‘mounting’ a tape.  But either way simh needs to support these type of functions.  Hence the idea of the virtual tape format that includes meta data to describe things like the size of each block written.  A ‘file mark’ can be read/written (which is special) besides data blocks    
+
+Sent from my PDP-7 Running UNIX V0 expect things to be almost but not quite. 
+
+On Nov 19, 2017, at 8:41 AM, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+
+>> From: Will Senn
+> 
+>> I don't quite no how to investigate this other than to pore through the
+>> pdp11/40 instruction manual.
+> 
+> One of these:
+> 
+>  https://www.ebay.com/itm/Digital-pdp-Programming-Card-8-Pages/142565890514
+> 
+> is useful; it has a list of all the opcodes in numerical order; something none
+> of the CPU manuals have, to my recollection. Usually there are a flock of
+> these "pdp11 Programming Cards" on eBait, but I only see this one at the
+> moment.
+> 
+> If you do any amount of work with PDP-11 binary, you'll soon find yourself
+> recognizing the common instructions. E.g. MOV is 01msmr (octal), where 'm' is
+> a mode specifier, and s and r are source and destination register
+> numbers. (That's why PDP-11 people are big on octal; the instructions are easy
+> to read in octal.) More here:
+> 
+>  http://gunkies.org/wiki/PDP-11_architecture#Operands
+> 
+> So 0127xx is a move of an immediate operand.
+> 
+> 
+>>> You don't need to mount it on DECTape drive - it's just blocks. Mount
+>>> it as an RK05 image, or a magtape, or whatever.
+> 
+>> I thought disk (RK05) and tape (magtape) blocks were different...
+> 
+> Well, you need to differentiate between DECtape and magtape - very different
+> beasts.
+> 
+> DECtape on a PDP-11 _only_ supports 256 word (i.e. 512 byte) blocks, the same
+> as most disks. (Floppies are an exception when it comes to disks - sort
+> of. The hardware supports 128/256 byte sectors, but the usual driver - not in
+> V6 or V7 - invisibly makes them look like 512-byte blocks.)
+> 
+> Magtapes are complicated, and I don't remember all the details of how Unix
+> handles them, but the _hardware_ is prepared to write very long 'blocks', and
+> there are also separate 'file marks' which the hardware can write, and notice.
+> 
+> But a magtape written in 512-byte blocks, with no file marks, can be treated
+> like a disk; that's what the V6 distribution tapes look like:
+> 
+>  http://gunkies.org/wiki/Installing_UNIX_Sixth_Edition#Installation_tape_contents
+> 
+> and IIRC 'tp' format magtape tapes are written the same way, hardware-wise (so
+> they look just like DECtapes).
+> 
+>     Noel
+

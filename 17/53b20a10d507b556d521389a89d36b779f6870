@@ -1,0 +1,129 @@
+From: scj@yaccman.com (Steve Johnson)
+Date: Mon, 18 Sep 2017 09:46:29 -0700
+Subject: [TUHS] PDP-10 UNIX?
+In-Reply-To: <2962b49c-83ae-44a1-c07e-f46cde74a41d@kilonet.net>
+Message-ID: <5c2fe0d9c8cc5b6b90c7646d2fad5a3cb459d996@webmail.yaccman.com>
+
+When we decided to port Unix to 32-bits, there were a number of
+candidates we looked at, including the IBM-360, the DEC-20, and the
+Interdata.   The Vax was barely there at the time, and we also felt
+a bit of pressure to use a non-Dec machine because some manufacturers
+were muttering about a too-close association of ATT & Dec that was
+incompatible with our status as a regulated monopoly.  It was also
+clear that being able to buy compatible Unix machines from several
+different manufacturers would ultimately drive the prices down and be
+good for ATT.
+
+Dennis hated the channel I/O on the 360, and I hated the little
+pinhole glimpses of memory that could only be seen by loading a
+register--that really clashed with the "one flat memory" model in C. 
+For the DEC-20, the word size was indeed a problem.  We had built a C
+compiler for the 36-bit Honeywell machine, and it was quite happy to
+have 9-bit bytes (in fact, their OS supported this).  But at the
+time, tape drives were the major way large data got into and out of a
+machine, and they all liked 8-bit bytes.  And there were issues in
+both C and Unix if the byte size didn't evenly divide the word size
+(think malloc, unions, sizeof, etc.).  So the 20 was out.
+
+The Interdata was a good compromise.  The machine had been used in a
+lot of flight simulators, etc., so it had a track record.  It was
+similar to an IBM-360, but had an address mode for addressing memory
+directly with no base registers.  And we bought the machine with
+writable microcode, which we had some ideas of playing with.
+
+As it turned out, the biggest problems in porting were taking
+little-endian code and data and putting it on a big-endian machine,
+dealing with the consequences of having more registers, and the effect
+of this on process switching and debugging (stack traces, etc.).  The
+pre-V7 system calls liked to return -1 when there was an error -- V7
+wanted to see nulls.  This turned out to be a critical problem -- if
+an old-style call with -1 got returned and taken to be a pointer, the
+Interdata generated a double fault--trying to read a word with an
+odd-byte address, and memory out of bounds.  Sadly, these faults came
+in several subtics apart, and the result was that the address of the
+fault got trashed, leaving the machine to resume at location 0 with no
+hint about how it got there.
+
+For this and other reasons, Ken and Dennis invented the header file
+concept -- previously, the structs that described data structures like
+inodes were printed in the manual, and copied out by hand when they
+were used.  By this point, Lint was a going concern, and I hacked a
+version of Lint that insisted that when a structure was declared more
+than once, the declarations must come from the same physical
+location.  This was a big help in rooting out hidden obsolete
+structure definitions and forcing the use of header files.
+
+The port ended up being fairly successful.  The connection with
+Interdata less so.  At one point there was a meeting attended by me,
+Dennis, Ken, and several managers.  We went to Interdata and met in a
+building that used to be a bank -- the meeting room was in the old
+vault.  We told Interdata what we had done, and  gave them some
+information about the growth of Interest in Unix.  We then said that
+the machine needed some fixes before we could deploy a general-purpose
+system on it -- the -1 botch was the biggie, because we could not have
+a broken user program turn the machine into a stone.  Interdata
+listened politely.  Several days later they said 'not interested".
+
+One thing I noticed over the years is that there are very few people
+who, having done one Unix port, were willing to do another.  I
+certainly wasn't interested.  After the first time, there is little
+to learn, and the tedium of debugging a compiler and OS on a bare
+machine, when the documentation of the machine was hastily written and
+often incomplete, was frustrating almost beyond describing.  So it
+was another group in Bell Labs that jumped on the Vax and made an
+effective and lasting 32-bit port.
+
+Steve
+
+----- Original Message -----
+From: "Arthur Krewat" <krewat@kilonet.net>
+To:<tuhs at minnie.tuhs.org>
+Cc:
+Sent:Mon, 18 Sep 2017 11:30:19 -0400
+Subject:Re: [TUHS] PDP-10 UNIX?
+
+ On 9/17/2017 10:34 PM, Johnny Billquist wrote:
+ > On 2017-09-17 18:33, Arthur Krewat <krewat at kilonet.net> wrote:
+ >
+ >> Was there ever a UNIX or even the thought of porting one to a
+PDP-10?
+ >
+ > Definitely a thought. An attempt was started on NetBSD for the
+PDP-10, 
+ > and it sortof got halfway of getting into single-user, but I'm not 
+ > sure if the person who worked on it just got distracted, or if he
+hit 
+ > problems that were really hard to solve. I certainly know the
+person, 
+ > and can find out more if people really are interested.
+ >
+ I for one would be VERY interested. It would be an interesting
+exercise 
+ to try it out on a SIMH emulator.
+ >> 8-bit bytes would have been a wasteful exercise, but you never
+know.
+ >> (losing 4 bits of every 36-bit word)
+ >
+ > Uh... Why 8 bit bytes? That way lies madness. There exists a really
+
+ > good C compiler for TOPS-20 - KCC. It uses 9 bits per byte. Works
+like 
+ > a charm, except when some people write portable code that is not so
+
+ > portable. ;-)
+ >
+ > KCC was written by KLH, unless I remember wrong. Same guy who also 
+ > wrote the KLH-10 emulator.
+ 9 bits would work - and still, waste 4 bits of the 36-bit word ...
+any 
+ code carried over from elsewhere would never use the 9th bit unless
+you 
+ know of stuff that does?
+
+ And yup, I remember KLH, not personally, but as the KLH-10 author :)
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170918/fb60ed1f/attachment-0001.html>
+

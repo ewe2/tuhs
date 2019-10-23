@@ -1,0 +1,65 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 22 Feb 2015 15:19:45 -0500 (EST)
+Subject: [TUHS] v5 and v6 kernel is mode 777
+Message-ID: <20150222201945.874CC18C0E9@mercury.lcs.mit.edu>
+
+    > From: Dave Horsfall <dave at horsfall.org>
+
+    >> Once UNIX has booted, it has no use for 'unix' (or whatever file it
+    >> booted from)
+
+    > Didn't "ps" try and read its symbol table?
+
+Sorry, meant 'UNIX the monolithic kernel'; yes, ps and siblings (e.g. iostat)
+need to get the running system's symbol table.
+
+
+    > I had fun days when I booted, say, "/unix.new", and "ps" wouldn't
+    > sodding work...
+
+Know that feeling! I added the following to one of the kernel data files:
+
+    char *endsys &end;
+
+and then in programs which grab the system's symbol table, I have an nlist()
+entry:
+
+  "_endsys",
+
+with the follwing code:
+
+  /* Check that the namelist applies to the current system.
+   */
+
+  checknms(symfile)
+  char	*symfile;
+
+  {	char	*chkloc, *chkval;
+
+	if (nl[0].type == 0)
+		cerror("No namelist\n");
+
+	chkloc = nl[ENDSYS].value;
+	chkval = rdloc(chkloc);
+
+	if (chkval != nl[END].value) {
+		cerror("Symbol table in %s doesn't match running system\n",
+		       symfile);
+		}
+  }
+
+on the theory that pretty much any change at all is going to result in a
+change in the system's size (and thus the address of 'end').
+
+Although in a split I/D system, this may not be true (you could change the
+code, and have the data+BSS remain the same size); I should probably check
+the location of 'etext' as well...
+
+Anyway, a rebuilt system may result in the address of 'endsys' changing, and
+thus the rdloc() won't return the contents of the running system's 'endsys',
+but the chances of an essentially-random fetch being the same as the value of
+'end' in /unix are pretty slim, I would say...
+
+	Noel
+
+

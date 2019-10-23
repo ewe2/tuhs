@@ -1,0 +1,45 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Thu, 24 Jan 2013 07:52:34 -0700
+Subject: [TUHS] History of strncpy
+In-Reply-To: <1AFADE66-7F72-4776-8738-EC27748DAF33@ronnatalie.com>
+References: <1301231756.AA27240@ivan.Harhan.ORG>
+ <B8FAD0BB-8796-4A0F-B441-0688405736E9@ronnatalie.com>
+ <20130123214651.GF22559@mercury.ccil.org>
+ <20130124060205.GQ24498@bitmover.com>
+ <1AFADE66-7F72-4776-8738-EC27748DAF33@ronnatalie.com>
+Message-ID: <EC8F3C9A-F979-4B6E-911A-12947F061FD2@bsdimp.com>
+
+
+On Jan 24, 2013, at 7:42 AM, Ronald Natalie wrote:
+
+> 
+> On Jan 24, 2013, at 1:02 AM, Larry McVo
+>> As a SPARC guy (in the past), I think it may have had something to do 
+>> about alignment.
+>> 
+>> That said, I hate the fread/fwrite interfaces.  We're fixing them in 
+>> our stdio.  freadn(f, buf, n).
+>> 
+> Amen.    For practical matters, there is no way given the rest of the library that an implementation can do
+> anything other than multiply the two middle args together.    The stream still needs to be a byte stream
+> and passing things as void* sort of divorces any clue as to what alignment or other portability requirements
+> are (and I've worked on C on some rather odd word sized machines like 36 and 60 as well as machines
+> that encode the word size in the pointer... believe me there were TONS of bugs in 4BSD with regard to that
+> one where they would stuff a char* into a union and retrieve it with a int* thwarting any possible conversion
+> (as we put in place when you casted one pointer to other).
+
+Historically the only implementation I know that didn't just multiply the two args together was on VAX/VMS's VAXC. The underlying filesystem had a notion of a file of records, so you'd get very different result from n * size, 1 and n, size. The former would produce one record that was n * size, while the latter would produce n records, each of which was size in length. As with all things on that compiler, this was only sometimes, and it greatly depended on how the file was created... Mostly a royal pain, except in some very rare instances where it was what you wanted to happen.
+
+Warner
+
+> It's not true that FILE went at the end, except in vararg'd functions.   It goes at the beginning of ftell (which
+> mimics the UNIX  tell call).    As with Larry, I'd much perferred they mimic'd most of the UNIX calls when
+> possible.   They were reasonably thought out.
+> 
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+
+

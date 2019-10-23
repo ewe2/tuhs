@@ -1,0 +1,89 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Thu, 08 Dec 2016 11:39:50 +0100
+Subject: [TUHS] Unix & Memory Management Units (MMU)
+In-Reply-To: <CANcLFn6CfiVHEcyNWOB7KXKVf6nk4MGB_M1kM4OfLx=0rm+D3w@mail.gmail.com>
+References: <20161207201203.9E2BF18C07B@mercury.lcs.mit.edu>
+ <CANcLFn6CfiVHEcyNWOB7KXKVf6nk4MGB_M1kM4OfLx=0rm+D3w@mail.gmail.com>
+Message-ID: <58493876.1W9NvDfq/mBC2kze%schily@schily.net>
+
+Earl Baugh <earl.baugh at gmail.com> wrote:
+
+> I can at least shed some light on at least when the Sun boxes supported it
+> (which may or may not help narrow down the date)
+> The initial Sun 1/100 multibus machines did not support virtual memory.   I
+> have one of the last (if not the last) original multibus boards
+> from Sun with the original PROMs...  and it was supported up to Sun OS 0.7.
+>    This OS was based off UniSoft UNIX v7.     The 0.7 version was released
+> in 1982.
+> In order to support virtual memory systems, there was a board upgrade
+> required.   Anyone who wanted to go to SunOS 1.0 had to get this board
+> upgrade (which from what I know, was a board swap... not sure if money
+> traded hands as well... and is one core reason the original boards are
+> rare).   The release of Sun OS 1.0 was in November 1983.
+
+The oldest Sun I had was a multibus machine with a mc68010.....This was in 
+January 1985. These machines still had a keyboard that was connected to the 
+frame buffer to play with the row/col readout lines. See:
+
+/usr/include/sys/kbd.h:#define     KB_KLUNK        0x00            /* Micro Switch 103SD32-2 */
+
+which is still in the recent sources ;-)
+
+The problem you describe is not related to virtual memory, but to demanded page 
+loading as an enhancement to the old swapping method. This demanded page 
+loading did not work at all with the 68000 and even the Bourne Shell triggered 
+a bug from this deficit - see below.
+
+BTW: The name of the OS was not SunOS these days. AFAIR, the first time it was 
+called "SunOS" was christmas 1985 (the 0-series of first boards with mc68020 
+have been built December 24 1985) and the OS was called SunOS-3.0. I never 
+understood how Sun managed to get these boards delivered through the customs 
+to Berlin in December 27 or 30. At that time, I was working for the first 
+large Sun customer H.Berthold AG and we received these boards.
+
+Before SunOS-3.0, it was called similar to "BSD-4.2 UNIX Sun version foo".
+
+I am not sure what you mean with this NULL ptr dereferences. AFAIR, on SunOS I 
+never could dereference a NULL pointer but in SVr3 nearly all commands used an 
+option parser that caused a NULL pointer dereference. On SunOS they dumped 
+core if you tried to compile and run then.
+
+The printf() on SunOS however printed "(null)" for printf("%s", NULL);
+
+SVr4 used a SunOS kernel and thus did not allow to dereference NULL pointers.
+The user space commands have been from SVr3 and _most_ of them had been fixed 
+to avoid NULL pointer dereferences.
+
+Today, Solaris comes with a libragy 0 at 0 that maps a page of nulls to address 0.
+Call "LD_PRELOAD=0@= command" in case you have one of these nasty programs 
+developed on Linux that use to dump core on Solaris ;-)
+
+Back to the Bourne Shell:
+
+The original Bourne Shell did not use malloc, but rather had a SIGSEGV handler 
+that used to extend the "string stack" called "stak" via sbrk() whenever the 
+code tried to access data beyond the end ot the heap.
+
+This method was great, but did not work with the mc68000, as the 68000 had a 
+conceptional bug in the micro code. It could not restart code like:
+
+	*to++ = *from++;
+
+correctly after the return from an exception handler trap.
+
+What Sun did at that time was to add tests to the code to avoid that SIGSEGV 
+hits. This code is still in recent Bourne Shell versions.
+
+I did however discover a missed place in the code last year while running a 
+fuzzer on the code. Note that the "stak" module has been replaced 2012 with 
+code based on a rewrite from Geoff Collyer. See:
+
+	http://schilytools.sourceforge.net/bosh.html
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+

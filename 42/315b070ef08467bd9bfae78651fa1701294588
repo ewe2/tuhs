@@ -1,0 +1,82 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 14 Jul 2014 11:12:00 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140714151200.5CBE918C0C2@mercury.lcs.mit.edu>
+
+    > From: Doug McIlroy <doug at cs.dartmouth.edu>
+
+    > The spec below isn't hard: just hook two buffer chains together and
+    > twiddle a couple of file desciptors.
+
+How amusing! I was about to send a message with almost the exact same
+description - it even had the exact same syntax for the splice() call! A
+couple of points from my thoughts which were not covered in your message:
+
+
+In thinking about how to implement it, I was thinking that if there was any
+buffered data in an output pipe, that the process doing the splice() would
+wait (inside the splice() system call) on all the buffered data being read by
+the down-stream process.
+
+The main point of this is for the case where the up-stream is the head of the
+chain (i.e. it's reading from a file), where one more or less has to wait,
+because one will want to set the down-streams' file descriptor to point to
+the file - but one can't really do that until all the buffered data was
+consumed (else it will be lost - one can't exactly put it into the file :-).
+
+As a side-benefit, if one adopted that line, one wouldn't have to deal with
+the case (in the middle of the chain) of a pipe-pipe splice with buffered
+data in both pipes (where one would have to copy the data across); instead
+one could just use the exact same code for both cases, and in that case the
+wait would be until the down-stream pipe can simply be discarded.
+
+One thing I couldn't decide is what to do if the upstream is a pipe with
+buffered data, and the downstream is a file - does one discard the buffered
+data, write it to the file, abort the system call so the calling process can
+deal with the buffered data, or what? Perhaps there could be a flag argument
+to control the behaviour in such cases.
+
+
+Speaking of which, I'm not sure I quite grokked this:
+
+    > If file descriptor fd0 is associated with a pipe and fd1 is not, then
+    > fd1 is updated to reflect the effect of buffered data for fd0, and the
+    > pipe's other descriptor is replaced with a duplicate of fd1.
+
+But what happens to the data? Is it written to the file? (That's the
+implication, but it's not stated directly.)
+
+    > The same statement holds when "fd0" is exchanged with "fd1" and "write"
+    > is exchanged with "read".
+
+Ditto - what happens to the data? One can't simply stuff it into the input
+file? I think the 'wait in the system call until it drains' approach is
+better.
+
+
+Also, it seemed to me that the right thing to do was to bash the entry in the
+system-wide file table (i.e. not the specific pointers in the u area). That
+would automatically pick up any children.
+
+Finally, there are 'potential' security issues (I say 'potential' because I'm
+not sure they're really problems). For instance, suppose that an end process
+(i.e. reading/writing a file) has access to that file (e.g. because it
+executed a SUID program), but its neighbour process does not. If the end
+process wants to go away, should the neighbour process be allowed access to
+the file? A 'simple' implementation would do so (since IIRC file permissions
+are only checked at open time, not read/write time).
+
+
+I don't pretend that this is a complete list of issues - just what I managed
+to think up while considering the new call.
+
+
+    > For stdio, of course, one would need fsplice(3), which must flush the
+    > in-process buffers--penance for stdio's original sin of said buffering.
+
+Err, why is buffering data in the process a sin? (Or was this just a
+humourous aside?)
+
+	Noel
+
+

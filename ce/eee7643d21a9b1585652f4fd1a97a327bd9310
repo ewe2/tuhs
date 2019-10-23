@@ -1,0 +1,51 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Fri, 1 Dec 2017 13:33:46 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171201172603.GO3924@mcvoy.com>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+ <20171201172603.GO3924@mcvoy.com>
+Message-ID: <BADECBD9-D2B4-4788-8308-87EBF93D555A@bitblocks.com>
+
+On Dec 1, 2017, at 9:26 AM, Larry McVoy <lm at mcvoy.com> wrote:
+> 
+> On Fri, Dec 01, 2017 at 09:33:49AM -0700, Warner Losh wrote:
+>>> Or what you do is kill the process, tear down all of the pages except those
+>>> that are locked for I/O, leave those in the process and wait for the I/O to
+>>> get done.  That might be simpler.
+>> 
+>> Perhaps. Even that may have issues with cleanup because you may also need
+>> other pages to complete the I/O processing since I think that things like
+>> aio allocate a tiny bit of memory associated with the requesting process
+>> and need that memory to finish the I/O. It's certainly not a requirement
+>> that all I/O initiated by userland have no extra state stored in the
+>> process' address space associated with it. Since the unwinding happens at a
+>> layer higher than the disk driver, who knows what those guys do, eh?
+> 
+> Yeah, it's not an easy fix but the problem we are having right now is that
+> the system is thrashing.  Why the OOM code isn't fixing it I don't know.
+> It just feels busted.
+
+So OOM code kills a (random) process in hopes of freeing up
+some pages but if this process is stuck in diskIO, nothing
+can be freed and everything grinds to a halt. Is this right?
+
+If so, one work around is to kill a process that is *not*
+sleeping at an uninterruptable priority :-)/2 This is
+separate from any policy of how to choose a victim.
+
+If the queue of dirty pages is growing longer and longer
+as the page washer can't keep up, this is analogous to
+the bufferbloat problem in networking. You have to test
+if this is what is going on. If so, may be you can figure
+out how to keep the queues short.
+
+But before any fixes, I would strongly suggest instrumenting
+the code to understand what is going on and then instrument
+the code further to test out various hypotheses. Once a clear
+mental model is in place, the fix will be obvious!
+
+

@@ -1,0 +1,81 @@
+From: Fred.van.Kempen@microwalt.nl (Fred N. van Kempen)
+Date: Thu, 15 Aug 2002 14:22:48 +0200
+Subject: [pups] Vtserver, BSD2.11 and brain_fatigue
+In-Reply-To: <IJECIIPFALOPEJDGENLAIEAHDDAA.kevin@ps8.co.uk>
+Message-ID: <000101c24456$791969a0$c401a8c0@WKSFred>
+
+That's the nasty part of the whole thing.
+
+VTserver support is ONLY present in the SAS part of the BSD and Ultrix
+systems I patched.  So, once you're out of the SAS part (read: once you
+have your machine booting into Unix by itself), you no longer have a 
+link to the VT services.
+
+Two solutions to that:
+
+1.  Use the VTclient program to basically do the same the SAS stuff
+    does, but from within the Unix system.  I have added VTclient to
+    the base dist (root fs) of Ultrix-11, and that worked.  Ultrix,
+    by the way, also installs the /usr file system in the SAS phase,
+    so that's not a problem to begin with.  For BSD, we could do the
+    same: have an /sbin/vtc and use that to extract the usr fs from
+    the VT server using a commandline such as:
+
+		(cd /; umask 0; /sbin/vtc -F 5 | tar xfvp -)
+
+    which extracts tape file #5 (thats the usr fs, if memory serves me
+    right) on the VTserver, and runs it through "tar" to extract and 
+    install it.  This REQUIRES the console line to be in 8N1 mode,
+    obviously, and this is not always the case !!!!
+
+2.  While still in the SAS phase, create a disk, partition or volume,
+    and copy the usr fs onto that in raw (tar{.Z}) mode.  Once the
+    Unix system boots by itself, mount the extra volume, and unpack
+    the tar fs to its proper location.
+
+Icky, huh? :)
+
+--f
+
+
+> -----Original Message-----
+> From: pups-admin at minnie.tuhs.org [mailto:pups-admin at minnie.tuhs.org]On
+> Behalf Of Kevin Murrell
+> Sent: Thursday, August 15, 2002 1:17 PM
+> To: Pups Mailing List
+> Subject: [pups] Vtserver, BSD2.11 and brain_fatigue
+> 
+> 
+> Hi all
+> 
+> Firstly, I have done this before, but due to 
+> age/stress/tiredness/whatever,
+> I can't remember what I did!
+> 
+> I am using Warren's/Fred's vtserver program to install 
+> BSD2.11 on an 11/53.
+> 
+> I have installed the root.dump file (and all the steps 
+> beforehand) and now
+> my '53 boots into 2.11.  So far so good!
+> 
+> I now need to restore the usr file systems - all the stuff in 
+> file6/7/8.tar
+> 
+> How do I do this still using Vtserver.
+> 
+> Someone remind me please!
+> 
+> Regards
+> 
+> 
+> Kevin Murrell
+> 
+> _______________________________________________
+> PUPS mailing list
+> PUPS at minnie.tuhs.org
+> http://minnie.tuhs.org/mailman/listinfo/pups
+> 
+
+
+

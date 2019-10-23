@@ -1,0 +1,76 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Mon, 25 Sep 2017 09:30:48 -0600
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <20170925151827.GP28606@mcvoy.com>
+References: <1506341239.18395.for-standards-violators@oclsc.org>
+ <CAC20D2MKMVozxARuwYQ2WgwWYJhfSdyU2t7YP1X5sf5PaTNseA@mail.gmail.com>
+ <20170925151827.GP28606@mcvoy.com>
+Message-ID: <CANCZdfoOz5uG=MG2CZaVArJMawum9-ASJwiw9eMxyx7imZYOkg@mail.gmail.com>
+
+On Mon, Sep 25, 2017 at 9:18 AM, Larry McVoy <lm at mcvoy.com> wrote:
+
+> On Mon, Sep 25, 2017 at 10:16:11AM -0400, Clem Cole wrote:
+> > So what I'm asking us to try to do, is not just look at the technology
+> in a
+> > vacuum.   Why was it not interesting to /proc for BSD.   Clearly, Linux
+> > added it (differently than Eighth Edition of course and the 4.4
+> > implementation was much more like V8 that Linux would settle).   People
+> did
+> > do the work to use it.
+>
+> Linux's /proc was hugely different than the AT&T /proc, in a good way in
+> my opinion.  It's sort of Tcl like :-), everything is a string.  So you
+> can look at the files with cat.  I think plan 9 went this way as well.
+>
+
+I both love and hate this setup...
+
+
+> And the Linux /proc did and does so much more than AT&T /proc.
+
+
+Which is the other issue with the inherited 4.4 /proc
+
+[...]
+
+> > So why did *BSD not bring those versions of the utilities back?
+> >
+> > My >>guess<< while they had added some things (like /proc) it was
+> different
+> > again and we got into the BSD != Linux stuff - which has been the UNIX
+> war
+> > all over again.
+>
+> Yeah, I don't see the two being compat.  They could overlap but when you
+> get
+> into specific tuning variables they won't match.
+>
+
+There was very little overlap. And much of what was exported in linux as
+/proc/blah was available as a syctl which mean the pressure to expand /proc
+was lessened. There's pros and cons to sysctl (which is basically a second
+name space for data from/about the kernel), but it was the path taken.
+Filesystems can go too far (cf the fiasco of the efivar filesystem where
+you could brick your box with an rm -rf, oops), and they can also be taken
+not far enough. There's good reasons to avoid filesystems that are
+intrusive into every part of the system (sysctl has a more restricted
+context to execute in which can be more helpful than trying to cope with
+vnodes and such in every driver). There's also bad reasons to avoid
+filesystems as well (say because your VFS abstraction layer is complicated
+and difficult to use)...
+
+I suspect that no /proc in BSD is simple, there wasn't anyone who wanted to
+> put in the time to evolve it and maintain it.
+>
+
+That's it in a one line summary. I posted a few more details as well, but
+that's basically it. When the time came, nobody cared enough to even
+object... Certainly nobody cared enough to understand the complex
+interactions with other subsystems as they evolved to keep it up to snuff,
+let alone innovate with new things to keep it interesting.
+
+Warner
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170925/881ab619/attachment-0001.html>
+

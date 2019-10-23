@@ -1,0 +1,102 @@
+From: rminnich@gmail.com (ron minnich)
+Date: Wed, 07 Feb 2018 16:59:10 +0000
+Subject: [TUHS] Device special files
+In-Reply-To: <CAJfiPzwGuzuqMiUs36yuXaMDTUaUmm8AEDmXR+cjh+XNzK_kfw@mail.gmail.com>
+References: <CAP6exYLTp1bOBAaewKuv0VGTAckvR86bjROUic10u64rd3u+DA@mail.gmail.com>
+ <1517946499.3717582.1261737872.3DC598F2@webmail.messagingengine.com>
+ <20180207012556.GL30690@eureka.lemis.com>
+ <alpine.BSF.2.21.1802071239090.50080@aneurin.horsfall.org>
+ <CAEoi9W4YORBdVT1OgGobNqtjhGexT05uSqTOGL22q1D0pvpTsw@mail.gmail.com>
+ <ec74c580-34f7-794b-815c-d3a5949a7f5a@kilonet.net>
+ <CAJfiPzwGuzuqMiUs36yuXaMDTUaUmm8AEDmXR+cjh+XNzK_kfw@mail.gmail.com>
+Message-ID: <CAP6exYJY24OnzQKU_T-DOQWnVHPr+pkfwtL7Q2WBdEdUd6zRhg@mail.gmail.com>
+
+Well, those are surprising responses for me anyway I guess.
+
+Here's the thing about special files. They have an integer 'x' attached to
+them which basically means "this file represents an index into an internal
+kernel struct'.
+
+Now if you are comfortable with the idea that a file, with a number
+attached to its metadata, said number representing an index into an array
+of structs, which has to work for all time and all kernels: then we're just
+comfortable with different things. 'nuf said.
+
+moving right along, when did /dev first appear?
+
+On Wed, Feb 7, 2018 at 8:40 AM Nemo <cym224 at gmail.com> wrote:
+
+> [top-post righted]
+> > On 2/6/2018 9:06 PM, Dan Cross wrote:
+> >
+> > On Tue, Feb 6, 2018 at 8:48 PM, Dave Horsfall <dave at horsfall.org> wrote:
+> >>
+> >> On Wed, 7 Feb 2018, Greg 'groggy' Lehey wrote:
+> >>>>
+> >>>> V3 and earlier still *called* them special files, but it seems they
+> were
+> >>>> essentially just magic inode numbers (there was no physical file on
+> disk,
+> >>>> just any directory entry with the given inode would be the special
+> file).
+> >>>
+> >>> Isn't that still the case?
+> >>
+> >> Wasn't that "devfs" (which Penguin/OS calls "udev")?  I've never grokked
+> >> that concept.
+> >
+> > No. devfs was (is?) a pseudo-filesystem where only special files
+> > corresponding to the devices enumerated by the kernel during
+> > autoconfiguration are present. The contents are synthesized at boot time
+> and
+> > the filesystem is mounted at some canonical location (like /dev), but is
+> > otherwise ephemeral. This is in contrast to the older /dev, which is
+> usually
+> > just a directory on the root filesystem, wherein one created a number of
+> > device files that may (or may not) correspond to an actual hardware
+> device
+> > in the system (remember the old dance of, "cd /dev && ./MAKEDEV foo" when
+> > you added a "foo" onto your system?). The inodes and directory entries
+> for
+> > those files actually exist in the disk-resident filesystem structures
+> > (though of course data blocks aren't allocated to those files and the
+> inode
+> > doesn't refer to any data blocks).
+> [...]
+> >         - Dan C.
+> >
+> >
+> On 7 February 2018 at 11:24, Arthur Krewat <krewat at kilonet.net> wrote:
+> > medusa# mount | egrep '^/dev'
+> > /devices on /devices read/write/setuid/devices/rstchown/dev=9640000 on
+> Fri
+> > Jan 19 16:33:07 2018
+> [...]
+> > SunOS medusa 5.11 11.3 i86pc i386 i86pc
+>
+> Further more (5.10 sun4u):
+>
+> File Systems                                           devfs(7FS)
+>
+> NAME
+>      devfs - Devices file system
+>
+> DESCRIPTION
+>      The devfs filesystem manages a name  space  of  all  devices
+>      under  the Solaris operating environment and is mounted dur-
+>      ing boot on the /devices name space.
+>
+>      The /devices name space is dynamic and reflects the  current
+>      state  of  accessible  devices  under  the Solaris operating
+>      environment. The names of all attached device instances  are
+>      present under /devices.
+>
+>      The content under /devices is under the exclusive control of
+>      the devfs filesystem and cannot be changed.
+>
+> N.
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180207/bcc9f30d/attachment.html>
+

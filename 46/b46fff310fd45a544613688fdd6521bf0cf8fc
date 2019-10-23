@@ -1,0 +1,49 @@
+From: cdl@mpl.ucsd.edu (Carl Lowenstein)
+Date: Wed, 19 Mar 2003 10:58:37 -0800 (PST)
+Subject: [pups] 2.11BSD "make unix" aborts Error 141
+Message-ID: <200303191858.h2JIwb726378@opihi.ucsd.edu>
+
+> From: "Steven M. Schultz" <sms at 2BSD.COM>
+> To: pups at minnie.tuhs.org
+> Subject: Re: [pups] 2.11BSD "make unix" aborts Error 141
+> List-Archive: <http://minnie.tuhs.org/pipermail/pups/>
+> Date: Wed, 19 Mar 2003 09:46:51 -0800 (PST)
+> 
+> Hi -
+> 
+> > From: David Evans <dfevans at bbcr.uwaterloo.ca>
+> >   Ugh.
+> > 
+> >   Am I naive to suggest a rewrite of as?  :)
+> 
+> 	Just a little bit <g>
+> 
+> 	It's a thought that used to occur to me fairly often a long time 
+> 	ago.  I cured myself of it though after I did the rewrite into
+> 	its current form (if you think it's bad now you should have seen it
+> 	before ;)).
+> 
+> 	The biggest problem are the SDI (Span Dependent Instructions).  The
+> 	PDP-11 has 'jmp' (non conditional but no range limit) and 'br' (many
+> 	flavors of conditional branches but with a +/- 128 byte range).  
+> 	The compiler generates pseudo instructions like 'jeq' and leaves it
+> 	up to the assembler to figure out if a branch will reach or if a
+> 	branch around a jump is needed.   That's a PITA to handle and is
+> 	I believe the cause of much ugliness in the assembler.
+
+That, of course, is a _neat feature_ of AS.  On the other hand, how
+much code bloat would result if AS always emitted (bne;jmp) pairs for
+'jeq', etc.  Maybe only generate (bne;jmp) for forward 'jeq' where the
+span is not yet known.  I am sure there are pathological instabilities
+in this kind of code generation, where expanding one branch/jump
+instruction makes another one go out of span range.
+
+Answer:  3:1 for each unnecessary pair.  But I have no idea of the
+statistics for real code.
+
+    carl
+-- 
+    carl lowenstein         marine physical lab     u.c. san diego
+                                                 clowenst at ucsd.edu
+
+

@@ -1,0 +1,47 @@
+From: paul.winalski@gmail.com (Paul Winalski)
+Date: Mon, 20 Nov 2017 14:44:03 -0500
+Subject: [TUHS] UNIX on S/370
+In-Reply-To: <CAC20D2NYq5o2WY1JsXAzXdC4s9U0QT8Y5k3j6HzHEJon7GazaA@mail.gmail.com>
+References: <CAJfiPzxnwNdAHLRV4+QUF-k-ib4tuFj5BLy-r-jL9W7zHHziQw@mail.gmail.com>
+ <201711200350.vAK3omwQ013495@freefriends.org>
+ <CAC20D2Mtp1+fPP5W8TP8HRiu7EKJGfWPVADDRwydVwv2UEXheQ@mail.gmail.com>
+ <CAP6exYK_4TOPsi3DLK4jaR4aB0Ms9L3sm7Fa9NPCexVmT=FoZQ@mail.gmail.com>
+ <CAC20D2NYq5o2WY1JsXAzXdC4s9U0QT8Y5k3j6HzHEJon7GazaA@mail.gmail.com>
+Message-ID: <CABH=_VQ=gDZ7RHzN8jTRy8A0FH9JwxFq92tvYawA+aZwbsFHvQ@mail.gmail.com>
+
+On 11/20/17, Clem Cole <clemc at ccc.com> wrote:
+> On Mon, Nov 20, 2017 at 11:03 AM, ron minnich <rminnich at gmail.com> wrote:
+>
+> IMO: The issue was less understanding how channels worked, as much as the
+> biasing between the UNIX I/O model *vs.* the mainframe I/O model.   360 and
+> CDC boxes for that matter, were a coprocessor that was programmed for the
+> I/O.   Figuring out how to splice that into the UNIX world efficiently was
+> not always easy.
+
+The PDP-11 and VAX used memory-mapped I/O.  Devices presented
+themselves to the CPU as special areas of main memory.  Instead of
+retrieving or storing data, these memory locations performed device
+operations when you read or wrote to them.
+
+System/360/370 had a radically different I/O model.  I/O devices and
+their control units were connected to specialized coprocessors called
+I/O channels.  Devices were addressed via a number with three hex
+digits, the first of which was the channel number.  The CPU had an
+instruction called start I/O (SIO) that took as parameters a device
+address and the address of a series of channel command words (CCWs)
+that indicated to the channel the I/O operation to perform and its
+parameters (such as the address of the I/O buffer in main memory).
+The CPU was notified of I/O termination by three interrupts:
+channel-end (the I/O channel reached the end of its channel program),
+control-unit-end (the I/O control unit completed a command), and
+device-end (the I/O device completed a command).
+
+CCW programs were capable of primitive conditional branching and
+looping.  It was possible to set up a channel program to perform
+sequential multi-buffered reading or writing, using the device-end
+interrupts to determine when each buffer was free for reuse.  If no
+I/O errors occurred, it was possible to read or write a whole tape
+file with a single SIO instruction.
+
+-Paul W.
+

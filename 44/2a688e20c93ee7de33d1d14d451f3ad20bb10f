@@ -1,0 +1,77 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 27 May 2017 09:52:59 -0400 (EDT)
+Subject: [TUHS] Early Unix Spider network
+Message-ID: <20170527135259.2EB4418C0A1@mercury.lcs.mit.edu>
+
+    > From: Paul Ruizendaal
+
+    >>> The report I have is: "SPIDER-a data communication experiment"
+    >>> ...
+    >>> I think it can be public now, but doing some checks.
+
+OK, that would be great to have online. I _think_ the hardcopy I have
+(somewhere! :-) is that report, but my memory should not be trusted.
+
+The people working on TCP/IP did know of the Spider work (like they knew of
+the Cambridge ring work), but it didn't really have any impact; it was a
+totally different direction than the one we were going in.
+
+
+    >>> it turns out that the TIU driver was in Warren's repo all along:
+
+V4?! Wow. I'd have never guessed it went that far back.
+
+
+    >>> The code calls snstat()
+
+    >> The object code for snstat() is in libc.a in the dmr's V5 image.
+    >> Reconstructed, the source code is here:
+    >> ...
+    >> In short, snstat() is a modified stty call
+
+Yes, I looked and found the original source, appended below.
+
+
+    >>> Could that be the tiu sys call (#45) in the sysent.c table for V4-V6?
+
+I wonder if we'll ever be able to find a copy of the kernel code for that
+tiu() system call. And I wonder what it did?
+
+
+    > [1] Oldest alarm() code I can find is in PWB1
+    > ...
+    > Either alarm existed in V5 and V6 .. or is was added after V6 was
+    > released, perhaps soon after. In the latter case the 'nfs' code that we
+    > have must be later than 1974
+
+Remember, that source came from the MIT system, which is a modified PWB1.
+So it's not surprising it's using PWB1 system calls.
+
+	Noel
+
+
+--------
+
+/ C interface to spider status call
+
+.globl  _snstat
+.globl  cerror
+
+_snstat:
+        mov     r5,-(sp)
+        mov     sp,r5
+        mov     4(r5),r0
+        mov     6(r5),0f
+        mov     8(r5),0f+2
+        sys     stty; 0f
+        bec     1f
+        jmp     cerror
+1:
+        clr     r0
+        mov     (sp)+,r5
+        rts     pc
+
+.data
+0:      .=.+6
+
+

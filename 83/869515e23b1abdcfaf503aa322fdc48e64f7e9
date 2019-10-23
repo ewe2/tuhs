@@ -1,0 +1,42 @@
+From: dot@dotat.at (Tony Finch)
+Date: Thu, 24 Mar 2016 14:24:22 +0000
+Subject: [TUHS] self-reproducing programs
+In-Reply-To: <C562F46A-6AFC-44BE-A482-1C559A9EBF7B@kdbarto.org>
+References: <mailman.144.1458776817.15972.tuhs@minnie.tuhs.org>
+ <C562F46A-6AFC-44BE-A482-1C559A9EBF7B@kdbarto.org>
+Message-ID: <alpine.LSU.2.00.1603241405180.11434@hermes-2.csi.cam.ac.uk>
+
+Not quite a fork bomb...
+
+I was deploying some new software on a production server. (There wasn't a
+good place to test it.) I somehow screwed up the restart logic so it
+continuously restarted itself. The process forked, the parent exited, and
+the child looped to restart again. There was only ever one instance of the
+program running, but its pid changed hundreds of times per second.
+
+Since it had daemonized, I couldn't use process groups to kill it.
+
+Since it was running as root, I couldn't use `kill -TERM -1` to kill just
+one user's processes.
+
+Since it was a production server, I reslly didn't want to reboot.
+
+I tried picking a pid somewhat larger than the program's rapidly
+increasing pid, and ran a script: while !kill $pid; do :; done
+
+No dice, it just blew straight past.
+
+I wrote a C program to kill that one pid even faster. Still no luck.
+
+In the end I managed to kill it by running about 5 or 10 concurrent copies
+of my C program on a set of adjacent pids.
+
+Only fallout was a few FTP server connection failures...
+
+Tony.
+-- 
+f.anthony.n.finch  <dot at dotat.at>  http://dotat.at/  -  I xn--zr8h punycode
+Lundy, Fastnet, Irish Sea: Southwest 5 to 7, veering northwest, then backing
+southwest later, 4 or 5. Moderate or rough, becoming slight in Irish Sea. Rain
+for a time. Good, becoming moderate or poor for a time.
+

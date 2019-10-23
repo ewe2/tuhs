@@ -1,0 +1,155 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 284252bd
+	for <ml@inbox.vuxu.org>;
+	Tue, 17 Sep 2019 18:33:08 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7F73D9B9CE; Wed, 18 Sep 2019 04:33:07 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 370619480D;
+	Wed, 18 Sep 2019 04:32:50 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="g2+HSv4k";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2973D9480D; Wed, 18 Sep 2019 04:32:48 +1000 (AEST)
+Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com
+ [209.85.222.172])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2C3AE94797
+ for <tuhs@tuhs.org>; Wed, 18 Sep 2019 04:32:47 +1000 (AEST)
+Received: by mail-qk1-f172.google.com with SMTP id s18so5127490qkj.3
+ for <tuhs@tuhs.org>; Tue, 17 Sep 2019 11:32:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=vU3cPMYGQ7FKbtPeXf4n+qt46cnzHhdKzTB1vhXqhOQ=;
+ b=g2+HSv4kvCyiTATfQRyC3ZKF55Q7UXAOf/ymtvRxC532Vrd4iTAPyCo6HGMlBfxyBH
+ zGem03+bPa7YjPEAza5ds8hzLqZd/yfBiaZcCB2s0+YZ96P74LLgSWi0g2zGfikz5fWv
+ zHN29JyWKlmIR1STMru0s/fdR6yJLW0MyigJ3hj5D8cRUKR8lumyjQtZQbXOg8YY26mx
+ m6xPKD5n6XORiHRg6KdP14qrQbe0KlLcfV7h26Jtfy9o8oHwBK/tnKw1XAvD0G40Onpp
+ hCB/xTPIefezQl8qUfYEy6ISQnt9BojaNc+8r8IvVncLm2+BJs29lDi7T9T9SLiVJzEE
+ j9pA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=vU3cPMYGQ7FKbtPeXf4n+qt46cnzHhdKzTB1vhXqhOQ=;
+ b=g0hQHJKHIFV3UtzZIk8tZpoy07WWZX+ZCzjKQkXu65xOkgOCkoh6sydvbYNNHz47wj
+ 2zvVTrNwbjvgCMFPyiad3B1CLEV8/n7+3r4STUm/b7UN64uGT4q/9wry7EI0CMJld/fg
+ ODEM6ynRO0smrIsIfvDADWVQ4EWyYFNkq32Ci0b2TPliltfvBpb/hRIRCA1cByg7oXFM
+ 8XT/SZlS8WdrlqlFgbSJBY0x6+ZIu2kAJ3Ki88ZHaOOhvqGAsaXlRgL67GXRh9tapYxp
+ IRSCpEMihgLfbw7ky/ZYC3dv8wDW6M5BP9a9XiEO50a2LD8Qc4I9YHI1soM2796reinf
+ QdvQ==
+X-Gm-Message-State: APjAAAXjno3k4Wag+7yHvrY2/IRI3ANN23zXap874eRnhAL2/BgHXtaq
+ jtxieD3nwS9ImuxoO0M3H0ujvRWx7BNpWoaT/32/nB869Vw=
+X-Google-Smtp-Source: APXvYqwY4vAyHZPUliiE86X1ZRApLadDM4Y4kLeftkH9oVc60kjIVrG5qKfEt1PLHwI0EF3QPrzmF3KR5PkaCA7KgRI=
+X-Received: by 2002:a37:7bc7:: with SMTP id w190mr5538295qkc.215.1568745166241; 
+ Tue, 17 Sep 2019 11:32:46 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAC20D2Nz-ofwD41vULF2-TL8-C33heCiHvoNNbcuj6GGKhtKzQ@mail.gmail.com>
+ <20190913221345.GA16129@minnie.tuhs.org>
+ <CAC20D2OQD-NJaFsqsLVL_kqmCsSeUOKAr7dm71P4uN9N8m+AbQ@mail.gmail.com>
+ <20190914020240.GO2046@mcvoy.com> <20190914024433.GA19193@minnie.tuhs.org>
+ <2e84c4d0-5239-b223-856d-00aacf8d3028@andrewnesbit.org>
+ <201909150654.x8F6sChG021185@freefriends.org>
+ <CAC20D2PfLq=J5ei+izXb2J7dSvU6=L6-GRd0gKA2ShSNg1=qBg@mail.gmail.com>
+ <201909160552.x8G5qBYK025195@freefriends.org>
+ <CAC20D2N89jOBK+T9EPn8JKNaSOUx=yDr9t4=CcyHM+3qnB2bEg@mail.gmail.com>
+ <20190916145122.GH2046@mcvoy.com>
+ <201909170753.x8H7r8oT004491@freefriends.org>
+ <CAFNqd5XKQu_gLy7BEYMeRY0QkoPXv64Y-1Od-TbbU-RTyHoSUA@mail.gmail.com>
+ <201909171815.x8HIFfKS022066@freefriends.org>
+In-Reply-To: <201909171815.x8HIFfKS022066@freefriends.org>
+From: Warner Losh <imp@bsdimp.com>
+Date: Tue, 17 Sep 2019 12:32:34 -0600
+Message-ID: <CANCZdfq5CEzDUwbkisMLJP1eHws1EiqF8xj+ZaAeMoewaAqWfw@mail.gmail.com>
+To: Arnold Robbins <arnold@skeeve.com>
+Content-Type: multipart/alternative; boundary="0000000000006093420592c3f21b"
+Subject: Re: [TUHS] earliest Unix roff
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000006093420592c3f21b
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Sep 17, 2019 at 12:16 PM <arnold@skeeve.com> wrote:
+
+> Hi.
+>
+> Christopher Browne <cbbrowne@gmail.com> wrote:
+> > I had the other reaction to this...
+> >
+> > I have been managing my web presence via DocBook SGML for a goodly long
+> > time.  It is, as mentioned upthread, pretty wordy what with all the
+> verbose
+> > tagging.
+> >
+> > It would be worth something to be able to edit it in TeXinfo form, with
+> the
+> > lesser amount of tagging required.  (And I'd kinda like to get off of
+> > DocBook/SGML one of these days as the toolset is clearly mouldering away
+> > pretty badly.)
+>
+> Looks like pandoc will go from DocBook to Texinfo.
+>
+> Me, I'd probably write a giant awk script to do the grunt work. :-)
+>
+
+FreeBSD likely is moving out DocBook stuff to markdown. Docbook is too hard
+to find people to work on :(
+
+Warner
+
+--0000000000006093420592c3f21b
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Tue, Sep 17, 2019 at 12:16 PM &lt;=
+<a href=3D"mailto:arnold@skeeve.com">arnold@skeeve.com</a>&gt; wrote:<br></=
+div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bor=
+der-left:1px solid rgb(204,204,204);padding-left:1ex">Hi.<br>
+<br>
+Christopher Browne &lt;<a href=3D"mailto:cbbrowne@gmail.com" target=3D"_bla=
+nk">cbbrowne@gmail.com</a>&gt; wrote:<br>
+&gt; I had the other reaction to this...<br>
+&gt;<br>
+&gt; I have been managing my web presence via DocBook SGML for a goodly lon=
+g<br>
+&gt; time.=C2=A0 It is, as mentioned upthread, pretty wordy what with all t=
+he verbose<br>
+&gt; tagging.<br>
+&gt;<br>
+&gt; It would be worth something to be able to edit it in TeXinfo form, wit=
+h the<br>
+&gt; lesser amount of tagging required.=C2=A0 (And I&#39;d kinda like to ge=
+t off of<br>
+&gt; DocBook/SGML one of these days as the toolset is clearly mouldering aw=
+ay<br>
+&gt; pretty badly.)<br>
+<br>
+Looks like pandoc will go from DocBook to Texinfo.<br>
+<br>
+Me, I&#39;d probably write a giant awk script to do the grunt work. :-)<br>=
+</blockquote><div><br></div><div>FreeBSD likely is moving out DocBook stuff=
+ to markdown. Docbook is too hard to find people to work on :(</div><div><b=
+r></div><div>Warner=C2=A0</div></div></div>
+
+--0000000000006093420592c3f21b--

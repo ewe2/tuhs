@@ -1,0 +1,273 @@
+From: msokolov@meson.jpsystems.com (Michael Sokolov)
+Date: Wed, 1 Sep 99 20:15:23 -0500
+Subject: KDA50 woes
+Message-ID: <9909020115.AA00610@meson.jpsystems.com>
+
+Hi,
+
+I wonder, does anyone here know anything about the KDA50? I've solved my RA72
+problem (as it turns out, if there is no control panel connected, the drive
+assumes normal operation, i.e., spin up, go on-line, enable port A, no write
+protect, and the unit number between 0 and 7 is set by the switches on the
+right side of the drive), but now I have a different problem: I can't get UNIX
+(4.3BSD-Quasijarus of course) to recognize the KDA50, although it worked fine
+on my Webster ESDI controller back in Ohio, and others have also reported
+successfully booting it on different controllers. By inserting a few debugging
+printouts in the uda driver, I have determined that it fails the udaprobe(). I
+know very little about UDA50/KDA50 registers, so I may be wrong, but it looks
+to me that the code is trying to do the following. It diddles the controller
+registers to make it start the initialization. Then apparently it expects the
+controller to interrupt and set some status bits in some register. However,
+because of Q-bus's odd interrupt protocol and the need to determine the IPL of
+the controller, the procedure is done non-trivially. First it does an spl6(),
+disabling all interrupts except BR7 (which these controllers apparently don't
+use). Then it does the register diddling and testing with these interrupts
+disabled. It allows the CPU to field the interrupt only when the register bits
+indicate that the operation has been performed and the interrupt has been
+posted. Apparently the assumption is that the controller will post the
+interrupt and then set the right bits in the right registers without waiting
+for the CPU to field the interrupt. Also apparently the KDA50 is different and
+doesn't set those bits until the interrupt is fielded, breaking this code.
+
+So my questions to the folks are: First, is my understanding of the situation
+correct? Second, what can be done about it? I guess as a temporary solution I
+can remove this problematic IPL autodetection code and hard-code the IPL of my
+KDA50, but what is it? Is the IPL set with switches on the KDA50 or how? And
+what do the KDA50 switches do in the first place? Does anyone know? TIA.
+
+--
+Michael Sokolov
+Special Agent
+International Free Computing Task Force
+
+ARPA Internet SMTP mail: msokolov at meson.jpsystems.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA00399
+	for pups-liszt; Thu, 2 Sep 1999 15:09:20 +1000 (EST)
+Received: from knecht.sendmail.org (knecht.sendmail.org [209.31.233.160])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA00395
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 2 Sep 1999 15:09:13 +1000 (EST)
+Received: from flamingo.McKusick.COM (root at flamingo.mckusick.com [209.31.233.178])
+	by knecht.sendmail.org (8.9.3/8.9.3) with ESMTP id RAA20755;
+	Wed, 1 Sep 1999 17:54:11 -0700 (PDT)
+Received: from flamingo.McKusick.COM (mckusick at localhost.concentric.net [127.0.0.1])
+	by flamingo.McKusick.COM (8.9.3/8.9.0) with ESMTP id QAA29309;
+	Wed, 1 Sep 1999 16:44:35 -0700 (PDT)
+Message-Id: <199909012344.QAA29309 at flamingo.McKusick.COM>
+To: wkt at cs.adfa.edu.au
+Subject: Re: V7M 
+cc: pups at minnie.cs.adfa.edu.au
+In-reply-to: Your message of "Mon, 09 Aug 1999 09:41:23 +1000."
+             <199908082341.JAA83043 at henry.cs.adfa.edu.au> 
+Date: Wed, 01 Sep 1999 16:44:29 -0700
+From: Kirk McKusick <mckusick@flamingo.McKusick.COM>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+My recollection is that V7M stood for V7-mini. It was a
+striped down version of V7 that was designed to run on
+the very low-end PDP-11's (like the 11/20).
+
+	Kirk McKusick
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA00533
+	for pups-liszt; Thu, 2 Sep 1999 15:27:01 +1000 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA00528
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 2 Sep 1999 15:26:54 +1000 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id WAA04996
+	for pups at minnie.cs.adfa.edu.au; Wed, 1 Sep 1999 22:25:35 -0700 (PDT)
+Date: Wed, 1 Sep 1999 22:25:35 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199909020525.WAA04996 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: V7M
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: Kirk McKusick <mckusick at flamingo.McKusick.COM>
+> 
+> My recollection is that V7M stood for V7-mini. It was a
+> striped down version of V7 that was designed to run on
+> the very low-end PDP-11's (like the 11/20).
+
+	Hmmm, interesting.   My memories dredge up the 'M' as meaning
+	"Modified".   Don't recall it ever being touted as 11/20 capable
+	56kb, no MMU would be a wee bit too mini I'd think - was there ever
+	a V7 that could run without an MMU?  If there was I've completely
+	forgotten about it.
+
+	Steven Schultz
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id PAA00770
+	for pups-liszt; Thu, 2 Sep 1999 15:59:45 +1000 (EST)
+Received: from psychwarp.psych.usyd.edu.au (psychwarp.psych.usyd.edu.au [129.78.83.26])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id PAA00765
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 2 Sep 1999 15:59:32 +1000 (EST)
+Received: (from johnh at localhost)
+	by psychwarp.psych.usyd.edu.au (8.9.1a/8.9.1) id PAA08258
+	for pups at minnie.cs.adfa.edu.au; Thu, 2 Sep 1999 15:59:31 +1000 (EST)
+Date: Thu, 2 Sep 1999 15:59:31 +1000 (EST)
+From: johnh@psych.usyd.edu.au
+Message-Id: <199909020559.PAA08258 at psychwarp.psych.usyd.edu.au>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: V7M
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+V7M was the DEC distribution of V7 (pre Ultrix days). Fred Canter did
+most of the work, along with Jerry Brenner and Armando Stettner. It
+supported non ID space machines, and some of the newer DEC hardware.
+My manual lists it as working with :-
+
+CPUS:-	11/23, 34, 44, 45/50/55, 60 and 70
+Disks:-	RL02, RK06, RK07, RM02/3, RP04/5
+Tapes:-	TU10, TE10, TU16, TE16, TS11
+
+There was a strip down of V6 called Miniunix that would run on machines
+without memory management, such at the 11/20, 05, 10 and 35/40 (without MMU
+option). It required a full 56Kb machine, used the first 28Kb for the kernel
+and swapped the last 28Kb for each process. Pipes worked by using a temporary
+inode to store the data and swapping the processes. It was realllllllll slow.
+
+The was also a similar version for 11/03's. I remember that there was an early
+bug in that updates would always rewrite open inodes (last access time had
+changed). You could physically wear out a floppy disk, since it was forever 
+rewriting the sector with the inode for the console terminal.
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id QAA00853
+	for pups-liszt; Thu, 2 Sep 1999 16:07:04 +1000 (EST)
+Received: from mpl.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id QAA00845
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 2 Sep 1999 16:06:56 +1000 (EST)
+Received: (from cdl at localhost)
+	by mpl.ucsd.edu (8.8.8+Sun/8.8.8) id XAA06196
+	for pups at minnie.cs.adfa.edu.au; Wed, 1 Sep 1999 23:06:50 -0700 (PDT)
+Date: Wed, 1 Sep 1999 23:06:50 -0700 (PDT)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <199909020606.XAA06196 at mpl.ucsd.edu>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: V7M
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> Subject: Re: V7M 
+> cc: pups at minnie.cs.adfa.edu.au
+> Date: Wed, 01 Sep 1999 16:44:29 -0700
+> From: Kirk McKusick <mckusick at flamingo.mckusick.com>
+> 
+> My recollection is that V7M stood for V7-mini. It was a
+> striped down version of V7 that was designed to run on
+> the very low-end PDP-11's (like the 11/20).
+
+Well, actually the M was for Modified.  Particularly modified to work
+with some more DEC peripherals.
+
+What ran on 11/20's was Mini-Unix, which was a stripped-down 6th
+Edition.  By the way I'm not sure that the PUPS archive has a Mini-Unix
+tape.  I have one, although it has not been read since the days when I
+had an 11/20.
+
+    carl
+
+        carl lowenstein         marine physical lab     u.c. san diego
+        {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+                                                  clowenstein at ucsd.edu
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id QAA00913
+	for pups-liszt; Thu, 2 Sep 1999 16:11:58 +1000 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id QAA00907
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 2 Sep 1999 16:11:51 +1000 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.2/8.9.3) id QAA00770;
+	Thu, 2 Sep 1999 16:09:16 +1000 (EST)
+From: Warren Toomey <wkt@cs.adfa.edu.au>
+Message-Id: <199909020609.QAA00770 at henry.cs.adfa.edu.au>
+Subject: Re: V7M
+In-Reply-To: <199909020606.XAA06196 at mpl.ucsd.edu> from Carl Lowenstein at "Sep 1, 1999 11: 6:50 pm"
+To: cdl at mpl.ucsd.edu (Carl Lowenstein)
+Date: Thu, 2 Sep 1999 16:09:16 +1000 (EST)
+Cc: pups at minnie.cs.adfa.edu.au
+Reply-To: wkt at cs.adfa.edu.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Carl Lowenstein:
+> Well, actually the M was for Modified.  Particularly modified to work
+> with some more DEC peripherals.
+> 
+> What ran on 11/20's was Mini-Unix, which was a stripped-down 6th
+> Edition.  By the way I'm not sure that the PUPS archive has a Mini-Unix
+> tape.  I have one, although it has not been read since the days when I
+> had an 11/20.
+>     carl
+
+Yep, it's in Distributions/usdl/Mini-Unix. It's not in the research/
+dir because it was not done in the labs, but elsewhere.
+
+Cheers,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id SAA00659
+	for pups-liszt; Thu, 2 Sep 1999 18:07:17 +1000 (EST)
+Received: from zed.ludd.luth.se (zed.ludd.luth.se [130.240.16.33])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id SAA00643;
+	Thu, 2 Sep 1999 18:05:30 +1000 (EST)
+Received: from father.ludd.luth.se (ragge at father.ludd.luth.se [130.240.16.18])
+	by zed.ludd.luth.se (8.8.5/8.8.5) with ESMTP id KAA22337;
+	Thu, 2 Sep 1999 10:05:25 +0200
+From: Anders Magnusson <ragge@ludd.luth.se>
+Received: (ragge at localhost) by father.ludd.luth.se (8.6.11/8.6.11) id KAA11504; Thu, 2 Sep 1999 10:05:24 +0200
+Message-Id: <199909020805.KAA11504 at father.ludd.luth.se>
+Subject: Re: KDA50 woes
+To: quasijarus at minnie.cs.adfa.edu.au
+Date: Thu, 2 Sep 1999 10:05:23 +0200 (MET DST)
+Cc: pups at minnie.cs.adfa.edu.au, quasijarus at minnie.cs.adfa.edu.au
+In-Reply-To: <9909020115.AA00610 at meson.jpsystems.com> from Michael Sokolov at "Sep 1, 99 08:15:23 pm"
+X-Mailer: ELM [version 2.4ME+ PL15 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> Hi,
+> 
+> I wonder, does anyone here know anything about the KDA50? I've solved my RA72
+>
+Well, something I think... :-)
+
+[...]
+> 
+> So my questions to the folks are: First, is my understanding of the situation
+> correct? Second, what can be done about it? I guess as a temporary solution I
+> can remove this problematic IPL autodetection code and hard-code the IPL of my
+> KDA50, but what is it? Is the IPL set with switches on the KDA50 or how? And
+> what do the KDA50 switches do in the first place? Does anyone know? TIA.
+> 
+The IPL autodetect code has seemed to me as unneccessary. You know that
+the KDA50 will always interrupt at spl5, so you can hard-code it in
+the interrupt driver and nuke the autodetect code. The same with the 
+other drivers that can be on Qbus:
+
+	if (uh->uh_type == QBA)
+		spl5();
+
+-- Ragge
+
+

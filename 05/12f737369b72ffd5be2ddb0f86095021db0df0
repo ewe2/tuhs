@@ -1,0 +1,97 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ca4894ef
+	for <ml@inbox.vuxu.org>;
+	Wed, 12 Dec 2018 10:38:16 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6DAEBA2112; Wed, 12 Dec 2018 20:38:14 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6505CA20EF;
+	Wed, 12 Dec 2018 20:37:43 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2912AA20EF; Wed, 12 Dec 2018 20:37:40 +1000 (AEST)
+X-Greylist: delayed 459 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Wed, 12 Dec 2018 20:37:39 AEST
+Received: from lb2-smtp-cloud9.xs4all.net (lb2-smtp-cloud9.xs4all.net
+ [194.109.24.26])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 660E4A1F25
+ for <tuhs@minnie.tuhs.org>; Wed, 12 Dec 2018 20:37:39 +1000 (AEST)
+Received: from [192.168.1.111] ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPSA
+ id X1m9gZ7rFMlDTX1mAgJJfp; Wed, 12 Dec 2018 11:29:58 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.1 \(3445.101.1\))
+Message-Id: <0432D5D3-2835-4288-AA4A-57AF3311F4F3@planet.nl>
+Date: Wed, 12 Dec 2018 11:29:56 +0100
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3445.101.1)
+X-CMAE-Envelope: MS4wfFMbyzQjJUKc32wZYmOc0+WTiD3B53+mMcAU7QPK9xm21aO34dt3SiB/hsm7vXJmjH1pSHYDq12dLpfgmLxGTZr8DscoACd26fuNtfNPrNa2sD9ZtZGN
+ sJKGdoXQazWz5sXeOzj3y8GvH3yNK/6yH8Ipp+oHWA1g0CK5ZBdUBhAr
+Subject: [TUHS]  2.9bsd with networking on 18-bit possible?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+> I'm sure it's been attempted before, but would anyone be up to the
+> challenge of trying to get that going with networking on an
+> 18-bit-address-space pdp11?
+
+By coincidence I=E2=80=99m in the middle of a project to make V6 run =
+with the Gurwitz TCP stack on a TI990 clone (which is pretty similar to =
+a PDP11). It runs without separate I/D as two processes in about 100KB.
+
+The Gurwitz TCP stack was the reference implementation for the VAX that =
+BBN did in 1981. It is in the THUS archive:
+https://minnie.tuhs.org//cgi-bin/utree.pl?file=3DBBN-Vax-TCP
+
+As documented in IEN168, the actual TCP processing happens in a separate =
+kernel process, much like process 0 (swapper) in Unix itself. It turns =
+out that the network process shares no data (other than the u struct) =
+with the kernel proper and can be run in a separate address space. Just =
+a few =E2=80=99thunks=E2=80=99 are needed: open/read/write/close from =
+the kernel to the TCP stack and sleep/wakeup in the other direction.
+
+A V6 Unix kernel runs in 48KB with buffers, the TCP stack with buffers =
+needs about the same; both must remain resident - i.e. it ties up about =
+100KB of the 256KB core on a 18-bit machine. I suppose when using =
+separate I/D it can run without thunks: the code size is about 25KB for =
+both a minimal V6 kernel and the TCP stack, the rest is data.
+
+In my setup, network connectivity is via a SLIP interface. The Gurwitz =
+code also has an Ethernet driver (note ARP was not invented yet), but =
+I=E2=80=99m not using that. I=E2=80=99m happy to report that this 1981 =
+tcp/ip code can still talk to current OSX and Linux machines.=20
+
+Just yesterday I got the setup working and I can run minimalist telnet =
+connections etc. Alas it is not quite stable yet, it tends to crash =
+after 5-10 minutes of use.
+
+The BBN reference implementation includes FTP and Telnet servers and =
+clients which I think will still interoperate with current versions. As =
+a final remark note that this BBN code uses an API that is almost =
+unchanged from the API as used on NCP Unix. As compared to sockets this =
+means that a listening connection is not a rendez-vous, but blocks until =
+a connection is made (and then becomes an active connection, i.e. stops =
+listening), and that there is no =E2=80=9Cselect=E2=80=9D type =
+functionality.
+
+

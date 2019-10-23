@@ -1,0 +1,47 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Tue, 13 Feb 2018 23:27:42 -0800
+Subject: [TUHS] pdp-11 assembly as a hll?
+In-Reply-To: Your message of "Tue, 13 Feb 2018 22:12:50 -0700."
+ <CANCZdfo8VuodXcYL5TcybAn7f0npH056DCoXuTkwbwuj-9seBA@mail.gmail.com>
+References: <CANCZdfrR2WYcS2Etyx_Z-nH-E=8_caUwPPce7TZ65CbRCSY4TA@mail.gmail.com>
+ <alpine.BSF.2.21.1802141410550.5573@aneurin.horsfall.org>
+ <CANCZdfo8VuodXcYL5TcybAn7f0npH056DCoXuTkwbwuj-9seBA@mail.gmail.com>
+Message-ID: <20180214072757.7A391156E811@mail.bitblocks.com>
+
+On Tue, 13 Feb 2018 22:12:50 -0700 Warner Losh <imp at bsdimp.com> wrote:
+> 
+> On Tue, Feb 13, 2018 at 8:18 PM, Dave Horsfall <dave at horsfall.org> wrote:
+> 
+> > On Tue, 13 Feb 2018, Warner Losh wrote:
+> >
+> > I don't suppose anybody has written a pdp-11 assembler to C translator...
+> >> My google fu is insufficient for the day.
+> >>
+> >
+> > I'd like to see it handle "JSR PC,@(SP)+"...  Are you reverse-engineering
+> > something, writing a PDP-11 simulator, or what?
+> 
+> 
+> I was wondering what it would take to convert the v6/v7 basic program into
+> something that can be run today.
+> 
+> http://www.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/s1/bas.s
+> or
+> http://www.tuhs.org/cgi-bin/utree.pl?file=V7/usr/src/cmd/bas/bas.s
+> 
+> Its 2128 lines. It doesn't have that fun instruction in it :)
+
+May be it just needs a perl script to generate C code?
+
+Example:
+2:				label(lab0);
+	cmp	r0,(r3)		cmp(r0,deref(r3));
+	beq	2f		beq(lab1);
+	tst	(r3)	  =>	tst(deref(r3));
+	beq	2f		beq(lab1);
+	add	$6,r3		add(6,r3);
+	br	2b		br(lab0);
+2:				label(lab1);
+
+C calls are to macros or inline functions.
+

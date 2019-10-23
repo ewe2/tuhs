@@ -1,0 +1,56 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sat, 23 Jan 2016 12:18:51 -0500 (EST)
+Subject: [TUHS] v6 debugging
+Message-ID: <20160123171851.F423518C0D3@mercury.lcs.mit.edu>
+
+    > From: Will Senn
+
+    > How did folks debug assembly routines in Unix v6, back in the day?
+
+There are three different questions here, although you may not realize it:
+
+ - How did folks debug assembly routines in user programs in Unix v6
+ - How did folks debug assembly routines in the kernel in Unix v6
+ - How did folks debug assembly routines in PDP-11 standalone code created
+   with Unix v6
+
+I did all three, and I used different methods for each.
+
+For user code, there was no source-level debugger, so debugging C programs
+and debugging code written in assembler were the same thing. I used 'adb'
+(which is, stricly speaking, slightly post-V6 - our system at MIT was
+actually sort of an early PWB clone), but V6 itself provides 'db' (and also,
+IIRC, 'cdb'); all three are very similar.
+
+For standalone code (in my case, a packet switch that ran on PDP-11's), I
+used a version of DDT that was linked in with the rest of the code. The
+original version was one in MACRO-11 which I inherited from Jim Mathis at
+SRI, but I eventually re-wrote it in portable C, and it was used on the 68K,
+uVax and 29K.
+
+For kernel assembler code... I can't remember what I did! Although I wrote a
+fair amount of it (I modified m45.s very extensively, to work with the Able
+ENABLE card), so I must have done _something_, but I have no idea what. In
+theory I could have linked DDT in with the kernel, but I don't think I ever
+did so?
+
+Recently I was debugging some kernel code (the splice() system call we were
+discussing here), and I debugged it using... printf()'s! It was written in C,
+but I don't really differentiate between debugging C code, and assembler.
+
+
+    > 2. No map file created by ld.
+
+LD normally includes a symbol table in the output file, which 'nm' can dump.
+
+    > 3. No debugger that I can find.
+
+See above.
+
+    > My workarounds include using OD to view the generated machine code
+
+Use db/cdb/adb if you want to look at compiled code. Also, for 'cc', use the
+-S flag.
+
+	Noel
+

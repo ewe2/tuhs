@@ -1,0 +1,176 @@
+From tuhs-bounces@minnie.tuhs.org Wed Aug 29 10:28:19 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.9 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4fca4a34
+	for <ml@inbox.vuxu.org>;
+	Wed, 29 Aug 2018 10:28:18 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CAFF9A1B15; Wed, 29 Aug 2018 20:28:17 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CFF44A1A1F;
+	Wed, 29 Aug 2018 20:28:07 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gravier-org.20150623.gappssmtp.com header.i=@gravier-org.20150623.gappssmtp.com header.b=ToyddH+R;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 11867A1A1F; Wed, 29 Aug 2018 20:28:06 +1000 (AEST)
+Received: from mail-it0-f46.google.com (mail-it0-f46.google.com
+ [209.85.214.46])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 77081A1A1D
+ for <tuhs@tuhs.org>; Wed, 29 Aug 2018 20:28:05 +1000 (AEST)
+Received: by mail-it0-f46.google.com with SMTP id h23-v6so6548855ita.5
+ for <tuhs@tuhs.org>; Wed, 29 Aug 2018 03:28:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=gravier-org.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=H+Rqo47V9xllyqvBDJHZ7Sonz3pJt8d2aNawRndP/j0=;
+ b=ToyddH+RCUN+hWGiGHlxlkGM/EIlFz2uxJzWM/Xgioj7IoolMHz3mRjqixQOqPMkex
+ WXq/WDgNZlWZjNazFhNpf2eTGnh/7EMvr3t91AJJ7WBH09SBQOLqzPoivXiLtlS7k4c3
+ Ls0sgfwKTjgqHtgXCeCiTytPi5PUwvlC1/r7Fxal04TaboKhKMC4FL3PIvVgl4gxFhhf
+ Ktx+7YkiXAqUo8iQsEs9xl2dSl1uPbiybC54yzK/lc/vJy6AO0qBJwQUhbvfafAQz0oM
+ ESGCJRxivnMM2hSN4J0mpJx5+/6S8/RaIdYKBBfST7pfwlDyRglshhqcFPbj4Rty9lsn
+ GKEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=H+Rqo47V9xllyqvBDJHZ7Sonz3pJt8d2aNawRndP/j0=;
+ b=KVB+7Esa9ima/n869ID8H+WSQ0uHgWbJiGxMKov7F/fwyRBbvZqILtGJy3KiEWxtAm
+ eblf7rpCDhEccb854Oesmv1PKiP6zgjvLPP5tThMMWVZ7OxBO7bUWXSQj9wTwm3CQVsZ
+ LCIVmV/SSdVMRKHlXNcuvd0O3ib4/jW+BJQptzbx8vkPw0pny1ogptDslX0VaqjoEb6G
+ 3QCptSKrjBfk9R374ZEX0mkfsyRUReSjCTYmwUaDDPs3ZBvDf8iJHY5fjOpOKtUeTU5N
+ aTnPn8R2gdtRd5k+5Rt/GiBJNdVLiSID0IZcAvSVQQKCqM+zAJwxmBosTvJmDL9zKaLS
+ TZSA==
+X-Gm-Message-State: APzg51DEsTDD6c4Je+jPqjv7WPvktb3XCPNYlthkBD8kBrTcrN/cSgHB
+ fpOL0jkc7+XUBWfyKkC6WB28NGsZLU1RJiciVeWOpQ==
+X-Google-Smtp-Source: ANB0VdYlK2vvif9UV09NqX89c6UUReMGObA/Uq9kRBPKUwmByjyFRZ1L++uiVEcwj+nYgnrdcqh8hN1/nTU9qxtyWko=
+X-Received: by 2002:a24:a346:: with SMTP id
+ p67-v6mr4675826ite.26.1535538484436; 
+ Wed, 29 Aug 2018 03:28:04 -0700 (PDT)
+MIME-Version: 1.0
+References: <CABq8+zf41d-E-D=Ru4PbM_9B+aawHfEPQ-_Xe0SRefg6xLwY3w@mail.gmail.com>
+ <CAEdTPBdibM0bfDeNgGiy0A-GiCJkCOxmFJ9z8jV+ZFQi+L4kQA@mail.gmail.com>
+ <CABasXZVTQcPsLwifEx2R7ZpcDX4ApTgwPiCTdk9yjDex8UbrnA@mail.gmail.com>
+In-Reply-To: <CABasXZVTQcPsLwifEx2R7ZpcDX4ApTgwPiCTdk9yjDex8UbrnA@mail.gmail.com>
+From: Gilles Gravier <gilles@gravier.org>
+Date: Wed, 29 Aug 2018 12:27:53 +0200
+Message-ID: <CABq8+ze=WZUEDGWbTudTrR_qWHOchMRpuH5c-T=A1CwnzCDevQ@mail.gmail.com>
+To: Rares Aioanei <schaiba@gmail.com>
+Content-Type: multipart/alternative; boundary="000000000000e771d80574906931"
+Subject: Re: [TUHS] Running 4.3 BSD on x86 hardware? Suggestions?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000e771d80574906931
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Works from my cell phone and my PC. Maybe temporarily slashdotted? =F0=9F=
+=98=8E
+
+Gilles
+
+On Wed 29 Aug 2018, 12:22 Rares Aioanei, <schaiba@gmail.com> wrote:
+
+> Hey,
+>
+> Link doesn't seem to work, I get "Connection reset". Can anyone else
+> confirm?
+> On Tue, Aug 28, 2018 at 6:15 PM Henry Bent <henry.r.bent@gmail.com> wrote=
+:
+> >
+> > On Tue, 28 Aug 2018 at 10:54, Gilles Gravier <gilles@gravier.org> wrote=
+:
+> >>
+> >> Hi!
+> >>
+> >> If I wanted to run 4.3BSD on an x86 box (VirtualBox? QEMM? other
+> emu?)... anybody has suggestions? Where can I find media for 4.3BSD (if a=
+ny
+> are legitimately accessible)?
+> >>
+> >> Or on a Raspberry Pi? :)
+> >>
+> >> Thanks!
+> >>
+> >> Gilles
+> >>
+> >>
+> >
+> > There are full instructions using SIMH here:
+> http://gunkies.org/wiki/Installing_4.3_BSD_on_SIMH
+> >
+> > -Henry
+> >
+>
+>
+> --
+> Rares Aioanei
+>
+
+--000000000000e771d80574906931
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">Works from my cell phone and my PC. Maybe temporarily sla=
+shdotted? =F0=9F=98=8E<div dir=3D"auto"><br></div><div dir=3D"auto">Gilles<=
+/div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr">On Wed 29 Aug 20=
+18, 12:22 Rares Aioanei, &lt;<a href=3D"mailto:schaiba@gmail.com">schaiba@g=
+mail.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D=
+"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">Hey,<br>
+<br>
+Link doesn&#39;t seem to work, I get &quot;Connection reset&quot;. Can anyo=
+ne else confirm?<br>
+On Tue, Aug 28, 2018 at 6:15 PM Henry Bent &lt;<a href=3D"mailto:henry.r.be=
+nt@gmail.com" target=3D"_blank" rel=3D"noreferrer">henry.r.bent@gmail.com</=
+a>&gt; wrote:<br>
+&gt;<br>
+&gt; On Tue, 28 Aug 2018 at 10:54, Gilles Gravier &lt;<a href=3D"mailto:gil=
+les@gravier.org" target=3D"_blank" rel=3D"noreferrer">gilles@gravier.org</a=
+>&gt; wrote:<br>
+&gt;&gt;<br>
+&gt;&gt; Hi!<br>
+&gt;&gt;<br>
+&gt;&gt; If I wanted to run 4.3BSD on an x86 box (VirtualBox? QEMM? other e=
+mu?)... anybody has suggestions? Where can I find media for 4.3BSD (if any =
+are legitimately accessible)?<br>
+&gt;&gt;<br>
+&gt;&gt; Or on a Raspberry Pi? :)<br>
+&gt;&gt;<br>
+&gt;&gt; Thanks!<br>
+&gt;&gt;<br>
+&gt;&gt; Gilles<br>
+&gt;&gt;<br>
+&gt;&gt;<br>
+&gt;<br>
+&gt; There are full instructions using SIMH here: <a href=3D"http://gunkies=
+.org/wiki/Installing_4.3_BSD_on_SIMH" rel=3D"noreferrer noreferrer" target=
+=3D"_blank">http://gunkies.org/wiki/Installing_4.3_BSD_on_SIMH</a><br>
+&gt;<br>
+&gt; -Henry<br>
+&gt;<br>
+<br>
+<br>
+-- <br>
+Rares Aioanei<br>
+</blockquote></div>
+
+--000000000000e771d80574906931--

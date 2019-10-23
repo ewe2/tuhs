@@ -1,0 +1,34 @@
+From: lyndon@orthanc.ca (Lyndon Nerenberg)
+Date: Sat, 12 Dec 2015 19:04:17 -0800
+Subject: [TUHS] why does tar have the tape device hard coded into it and
+	why is it mt1 instead of mt0
+In-Reply-To: <20151213014148.5BBF5440AE@lignose.oclsc.org>
+References: <20151213014148.5BBF5440AE@lignose.oclsc.org>
+Message-ID: <0FC2A9FB-6078-48E3-8B4D-79F607A9B775@orthanc.ca>
+
+
+On Dec 12, 2015, at 5:41 PM, Norman Wilson <norman at oclsc.org> wrote:
+
+> Anyway, what all this means is that /dev/*mt0 and /dev/*mt1
+> both actually meant slave 0 on TU16 controller 0, but mt0
+> was 800 bpi and mt1 1600 bpi.  Hence, I would guess, tar's
+> default to mt1.
+
+At Athabasca University we had an SI9000 (if I remember the model number correctly) tape drive (vacuum column, no less!) hanging off the 785.  This was a triple-density 800/1600/6250 drive, and I forget what the controller was we had it connected to.  Installing new versions of Ultrix was always fun, because the I/O register that set the density didn't agree with what Ultrix expected the device to do.  We always had to do a little dance on the console to interrupt the installer, manually poke the correct value into a register on the tape controller to set the proper drive density, then continue the installer.  That was my first experience with having to directly frob the hardware on big iron.
+
+Come to think of it, the first program I ever wrote that poked into a live running kernel was something I hacked together to work around a bug in the CTIX QIC tape driver.  If you had a process with the tape device open while the tape was rewinding (deliberately or implicitly) and sent it an interrupt, the process would hang forever.  This got annoying enough that I wrote a little hack that would go in and clear the busy bit in the device table entry, which was enough to let the holding process return from the system call it was stuck in.
+
+Tape drives were magical beasts.  Mostly from the dark side ...
+
+--lyndon
+
+(Don't get me started about trying to get enough I/O throughput out of a 3B2 to make the 9track stream :-P)
+
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 801 bytes
+Desc: Message signed with OpenPGP using GPGMail
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151212/c0e4f3fa/attachment.sig>
+

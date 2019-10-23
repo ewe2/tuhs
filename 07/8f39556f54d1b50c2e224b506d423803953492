@@ -1,0 +1,38 @@
+From: dfawcus+lists-tuhs@employees.org (Derek Fawcus)
+Date: Tue, 3 Jan 2017 16:09:26 +0000
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <586bbe88.njLSal35/ZSrGHMO%schily@schily.net>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <1483454024.1265981.835921849.4F752F10@webmail.messagingengine.com>
+ <586bbe88.njLSal35/ZSrGHMO%schily@schily.net>
+Message-ID: <20170103160926.GA83502@cowbell.employees.org>
+
+On Tue, Jan 03, 2017 at 04:08:56pm +0100, Joerg Schilling wrote:
+> 
+> I should write a test program that retrieved the waitid() results from the the 
+> SIGCHLD handler and see whether that is OK as well.
+> 
+> Here is the new code:
+
+FWIW, on 10.10.5 [1] this gives essentially the same result as the prior program,
+the signal handler seeing the same sign extended 24 bit value:
+
+$ ./posix2
+received SIGCHLD (20), si_pid: 2281 si_status: -6946094 si_code: 1
+SIGCHLD: si_status in struct siginfo should be 1234567890 (0x499602d2) but is -6946094 (0xff9602d2)
+ret: 0 si_pid: 2281 si_status: -6946094 si_code: 1
+si_status in struct siginfo should be 1234567890 (0x499602d2) but is -6946094 (0xff9602d2)
+
+Mind,  one should probably assign the handler to sa.sa_sigaction, as someone
+could implement the struct w/o both fields in a union.
+
+As I recall,  there are also other bugs in OSX to do with poll() handling,
+so that would be another area where the conformance tests fall short.
+
+DF
+
+[1] Darwin Old-MBA.local 14.5.0 Darwin Kernel Version 14.5.0: Sun Sep 25 22:07:15 PDT 2016; root:xnu-2782.50.9~1/RELEASE_X86_64 x86_64
+

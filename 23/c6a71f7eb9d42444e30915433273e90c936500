@@ -1,0 +1,77 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Wed, 30 Dec 2015 01:29:51 -0600
+Subject: [TUHS] v6 RK05 bootloader question
+In-Reply-To: <685C2CB4-B23B-4A9C-833D-EE27B37B7ECF@mailbox.org>
+References: <1451248336.14973.for-standards-violators@oclsc.org>
+ <F20F2025-0234-4FC9-B953-24D85349606B@gmail.com>
+ <685C2CB4-B23B-4A9C-833D-EE27B37B7ECF@mailbox.org>
+Message-ID: <568387EF.6010407@gmail.com>
+
+
+
+On 12/30/15 1:14 AM, Wolfgang Helbig wrote:
+> What went wrong with simh? It worked fine with examples that I entered. Find working “simh”-Programs at
+> 	http://wwwlehre.dhbw-stuttgart.de/~helbig/os/pdp11/progs/
+>
+> They might help to narrow in the problem.
+>
+> Greetings,
+> Wolfgang
+Wolfgang,
+
+Nothing is wrong with SimH's handling of the machine code programs that 
+I know of. It is when you try to modify the device registers directly 
+using deposit to effect the boot loading that the simulator doesn't 
+operate as would a real PDP-11. For example, Norman Wilson's example:
+
+1.  Halt/Enable to Halt
+2.  System reset (also sends a reset to the UNIBUS)
+3.  Load address 777404
+4.  Deposit 5.
+(watch lights blink for a second or so)
+5.  Load address 0
+6.  Halt/Enable to Enable
+7.  Continue
+
+This doesn't work in SimH. I asked Mark Pizzolato about why, and he suggested the following:
+
+The reason is that on real hardware, when an I/O activity
+is initiated via some register probing, the device will then perform the commanded
+activity in parallel to the simulator's execution of instructions.  A device driver will
+either wait for an interrupt to know when to proceed or it will read some device
+status register periodically or in a tight loop to determine completion.  With hand
+entered boot code, the goal is to minimize typing of boot code and since
+operations will complete (from a human perspective) as soon as the user is done
+typing, instructions which wait for I/O completion are not provided as  part of the
+hand typed boot code.
+
+Simh devices don't actually operate in parallel with the CPU.  The concept of
+parallel operation is simulated by the devices performing their activities in
+between the execution of simulated instructions.  The simh framework has
+the ability to allow a device simulation to schedule its activation in between
+some future number of instructions executed.  This allows programs in the
+simulated system to see that some time has elapsed from when a device
+operation is initiated to when it completes.  A hand entered bootstrap program
+without any loops to wait for completion status generally won't execute
+enough instructions to allow the desired operation to actually complete
+
+Which makes sense, but doesn't sound like a brick wall. Yes, the console 
+method leverages side effects, granted, but the console method worked on 
+a real PDP, just not on the simulator. It will with some 
+modifications... To be honest, I really liked the idea of making 
+Norman's method work in SimH because it's fun and feels historic, and if 
+I can provide other similar examples along with some supporting text, 
+the modification can probably be made. Then I can write another blog 
+entry for posterity that's a little more fun and a little less 
+technical, well that depends on the reader's perspective, but certainly 
+light on technical details :).
+
+Thanks,
+
+Will
+
+
+
+
+
+

@@ -1,0 +1,426 @@
+From: rdonkin@bigfoot.com (Richard Donkin)
+Date: Wed, 31 Jan 2001 22:28:44 +0000
+Subject: [pups] 2.11BSD networking on simulator
+Message-ID: <3A78919C.3D604E23@bigfoot.com>
+
+I'm running 2.11BSD on the Supnik simulator, and wondering how to get it
+networked.  
+This sim seems to only support serial lines, so maybe I have to move
+over to the 
+Begemot simulator - in which case, is it best to use FreeBSD or Linux as
+the host
+for the sim?  I'm more familiar with Linux but I have FreeBSD running
+now - the question
+is what's easier to set up for networking.
+
+Does anyone have a working Begemot sim setup with networking, used with
+2.11BSD?  If so,
+could you post your config files?  The Begemot sim seems a lot more
+complex to set up
+than Supnik.
+
+Cheers,
+
+Richard
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id JAA32905
+	for pups-liszt; Thu, 1 Feb 2001 09:44:03 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from amersham.mail.uk.easynet.net (amersham.mail.uk.easynet.net [195.40.1.45])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id JAA32901
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 09:43:59 +1100 (EST)
+	(envelope-from rdonkin at bigfoot.com)
+Received: from bigfoot.com (dsl-212-135-223-35.dsl.easynet.co.uk [212.135.223.35])
+	by amersham.mail.uk.easynet.net (Postfix) with ESMTP id 372D317941
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 31 Jan 2001 22:42:24 +0000 (GMT)
+Message-ID: <3A7894BA.370723F0 at bigfoot.com>
+Date: Wed, 31 Jan 2001 22:42:02 +0000
+From: Richard Donkin <rdonkin@bigfoot.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; Linux 2.2.14-15mdk i586)
+X-Accept-Language: en, fr
+MIME-Version: 1.0
+To: PUPS List <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] File exchange with Supnik sim
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+I've tried the suggestions for getting files in and out of the Supnik
+sim,
+in particular using rl0 mapped to x.tar, and 'tar cvf /dev/rrl0a
+/etc/hosts'.
+However, tar complains: 'tar: tape write error: Read-only file system'.
+
+The disklabel for rl0 looks like:
+
+# /dev/rrl0a:
+type: old DEC
+disk: 
+label: 
+flags:
+bytes/sector: 512
+sectors/track: 20
+tracks/cylinder: 2
+sectors/cylinder: 40
+cylinders: 0
+rpm: 0
+interleave: 0
+trackskew: 0
+cylinderskew: 0
+headswitch: 0           # milliseconds
+track-to-track seek: 0  # milliseconds
+drivedata: 0 
+
+1 partitions:
+#        size   offset    fstype   [fsize bsize]
+  a:    10240        0   2.11BSD     1024  1024         # (Cyl.    0 -
+255)
+cylinders/unit 0
+Warning, revolutions/minute 0
+boot block size 0
+super block size 0
+partition a: extends past end of unit 0 10240 0
+
+Presumably I need to create a valid disklabel, but it would be good to
+have some advice on what a valid one
+would look like.
+
+I've also tried the same sort of thing with 'tar cvbBf 20 /dev/rmt0
+/etc/hosts', and 
+something like a tar file is produced - however, GNU tar on Linux and
+FreeBSD 4.2 tar can't
+read this, saying 'this doesn't look like a tar file'.  Is there some
+trick to getting this
+to work, and am I better off using rl0 or rmt0? 
+
+Richard
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA33243
+	for pups-liszt; Thu, 1 Feb 2001 10:16:28 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from wantadilla.lemis.com (postfix at wantadilla.lemis.com [192.109.197.80])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA33239
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 10:16:24 +1100 (EST)
+	(envelope-from grog at lemis.com)
+Received: by wantadilla.lemis.com (Postfix, from userid 1004)
+	id 172826AC9E; Thu,  1 Feb 2001 09:44:49 +1030 (CST)
+Date: Thu, 1 Feb 2001 09:44:49 +1030
+From: Greg Lehey <grog@lemis.com>
+To: Richard Donkin <rdonkin at bigfoot.com>
+Cc: PUPS List <pups at minnie.cs.adfa.edu.au>
+Subject: [pups] Re: 2.11BSD networking on simulator
+Message-ID: <20010201094448.D70596 at wantadilla.lemis.com>
+References: <3A78919C.3D604E23 at bigfoot.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.2.5i
+In-Reply-To: <3A78919C.3D604E23 at bigfoot.com>; from rdonkin at bigfoot.com on Wed, Jan 31, 2001 at 10:28:44PM +0000
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-418-838-708
+WWW-Home-Page: http://www.lemis.com/~grog
+X-PGP-Fingerprint: 6B 7B C3 8C 61 CD 54 AF  13 24 52 F8 6D A4 95 EF
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+[Format recovered--see http://www.lemis.com/email/email-format.html]
+
+Your message contained alternate long and short lines
+
+On Wednesday, 31 January 2001 at 22:28:44 +0000, Richard Donkin wrote:
+> I'm running 2.11BSD on the Supnik simulator, and wondering how to
+> get it networked.  This sim seems to only support serial lines, so
+> maybe I have to move over to the Begemot simulator - in which case,
+> is it best to use FreeBSD or Linux as the host for the sim?  I'm
+> more familiar with Linux but I have FreeBSD running now - the
+> question is what's easier to set up for networking.
+
+The Begemot emulator was written on BSD, so you'll probably find it
+easier to use under FreeBSD.
+
+> Does anyone have a working Begemot sim setup with networking, used
+> with 2.11BSD?  If so, could you post your config files?  The Begemot
+> sim seems a lot more complex to set up than Supnik.
+
+*sigh* I used to, and it worked well.  A number of changes in FreeBSD
+have rendered the emulator non-functional, and I haven't had time to
+find out what's wrong.  I'll take a look and see if I can see anything
+obvious, but it might take me a while.
+
+Greg
+--
+When replying to this message, please take care not to mutilate the
+original text.  
+For more information, see http://www.lemis.com/email.html
+Finger grog at lemis.com for PGP public key
+See complete headers for address and phone numbers
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id KAA33329
+	for pups-liszt; Thu, 1 Feb 2001 10:31:29 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from moe.2bsd.com (MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id KAA33322
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 10:31:25 +1100 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.10.1/8.10.1) id f0VNHsd17441
+	for pups at minnie.cs.adfa.edu.au; Wed, 31 Jan 2001 15:17:54 -0800 (PST)
+Date: Wed, 31 Jan 2001 15:17:54 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200101312317.f0VNHsd17441 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] 2.11BSD networking on simulator
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Hi -
+
+> From: Richard Donkin <rdonkin at bigfoot.com>
+> I'm running 2.11BSD on the Supnik simulator, and wondering how to get it
+> networked.  
+
+	It can not be done except perhaps with a SL/IP link.  The Supnik 
+	simulator does not have an emulated ethernet device.
+
+> Begemot simulator - in which case, is it best to use FreeBSD or Linux as
+> the host
+
+	I use BSD/OS myself, but FreeBSD works very nicely also.  I've not
+	tried it with linux.
+
+> Does anyone have a working Begemot sim setup with networking, used with
+> 2.11BSD?  If so,
+
+	Quite a few folks have it running.   
+
+> could you post your config files?  The Begemot sim seems a lot more
+> complex to set up than Supnik.
+	
+	Yes, it is quite a bit more complex (cryptic) to set up.
+
+	Here's what I use to run P11 with.  If you strip out all of the
+	macro preprocessing stuff the config file is much more readable and
+	not nearly as cryptic as before.
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+------------------
+set clock_rate 60
+
+ctrl rk 017777400 0220 5 4000
+end
+
+ctrl rl 017774400 0160 4 4000
+end
+
+ctrl rp 017776700 0254 5 4000
+dev 0 ./2.11BSD  1999
+dev 1 ./junk  1999
+end
+
+ctrl kl
+dev 017777560  060  064 4 tty_net  -7 -t 10000
+dev 017776500 0300 0304 4 tty_net  -7 -t 10001
+end
+
+ctrl mr 017777520 ./rp.boot
+end
+
+ctrl lp 017777514 0200 4
+end
+
+ctrl tm 017772520 0224 5
+# dev 0 /tmp/foo
+end
+
+ctrl qna 017774440 5 0x08:0x00:0x2b:0x07:0x82:0x6c 0xf8:0x7a qna.rom
+dev epp_tun tun0 0x08:0x00:0x2b:0x07:0x82:0x6c 0x08:0x00:0x2b:0x07:0x82:0x00
+end
+
+# The toy clock.
+#
+ctrl toy 017777526
+end
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id MAA33890
+	for pups-liszt; Thu, 1 Feb 2001 12:39:12 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from arundel.fortyfour.org (138bus2.tampabay.rr.com [24.94.138.2])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id MAA33886
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 12:39:07 +1100 (EST)
+	(envelope-from kwellsch at tampabay.rr.com)
+Received: from tampabay.rr.com (localhost [127.0.0.1])
+	by arundel.fortyfour.org (8.11.0/8.11.0) with ESMTP id f111bTR01279;
+	Wed, 31 Jan 2001 20:37:29 -0500 (EST)
+Message-ID: <3A78BDD9.995B3F42 at tampabay.rr.com>
+Date: Wed, 31 Jan 2001 20:37:29 -0500
+From: Ken Wellsch <kwellsch@tampabay.rr.com>
+X-Mailer: Mozilla 4.76 [en] (X11; U; NetBSD 1.5.1_ALPHA i386)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: Carl Lowenstein <cdl at mpl.ucsd.edu>
+CC: pups at minnie.cs.adfa.edu.au
+Subject: Re: [pups] A bootable disk image for a PDP-11/34?
+References: <200101302330.PAA29420 at chiton.ucsd.edu>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Carl Lowenstein wrote:
+> 
+> > From wkt at henry.cs.adfa.edu.au Tue Jan 30 14:16 PST 2001
+> >
+> > Yes, but it doesn't boot on an 11/34 :(
+> > That's the problem.
+> 
+> Why, said he wonderingly.  Is the 11/34 one of those machines that does
+> not have a directly addressable PSW at 177776 so it must be done with
+> MPTS and MFPS instructions?  Thats all I can think of immediately.
+>
+>	...
+
+When I looked last night at the machine assist (mch.s) for Ultrix-11/3.1
+source, all I could easily find was consistent with this, contained in
+the V6 start document:
+
+    The main difference between an 11/40 and an 11/45 (or 11/70)
+    system is that in the former instruction restart after a
+    segmentation violation caused by overflowing a user stack
+    must be handled by software, while in the latter machines
+    there is hardware help.
+
+which in more detail means, if I understand right, there is no SSR2
+register in the MMU so the kernel code needs to disassemble the
+instruction to backup over it for restarting as per above.
+
+The Ultrix mch.s file has code that does this (quite a lot) and I
+noticed a few cases that checked it the cputype is 34.
+
+Cheers,
+
+-- Ken
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id UAA35763
+	for pups-liszt; Thu, 1 Feb 2001 20:11:50 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from igas2.postoffice.co.uk (firewall-user at igas2-2.igas.postoffice.co.uk [194.152.87.163])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id UAA35759
+	for <pups at minnie.cs.adfa.edu.au>; Thu, 1 Feb 2001 20:11:45 +1100 (EST)
+	(envelope-from robin.birch at postoffice.co.uk)
+From: robin.birch@postoffice.co.uk
+Received: by igas2.postoffice.co.uk; id JAA11993; Thu, 1 Feb 2001 09:09:47 GMT
+Received: from unknown(10.5.4.17) by igas2.postoffice.co.uk via smap (V5.0)
+	id xma011854; Thu, 1 Feb 01 09:09:36 GMT
+Received: with SMTP id JAA29940; Thu, 1 Feb 2001 09:09:35 GMT
+Received: by postoffice.co.uk(Lotus SMTP MTA v4.6.6  (890.1 7-16-1999))  id 002569E6.00324CD1 ; Thu, 1 Feb 2001 09:09:24 +0000
+X-Lotus-FromDomain: POSTOFFICE
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.edu.au
+Message-ID: <002569E6.00324BF2.00 at postoffice.co.uk>
+Date: Thu, 1 Feb 2001 08:59:30 +0000
+Subject: Re: [pups] 2.11BSD networking on simulator
+Mime-Version: 1.0
+Content-type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+
+I have the begemot simulator running very effectively on Linux, although I have
+not used the emulated ethernet connection.  If anyone knows how to set this up
+on linux then I would welcome some help.
+
+I must say that although p11 takes quite a bit of setting up it is well worth
+the trouble.
+
+Regards
+
+Robin
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id EAA38448
+	for pups-liszt; Fri, 2 Feb 2001 04:37:00 +1100 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from chiton.ucsd.edu (chiton.ucsd.edu [192.135.238.128])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id EAA38444
+	for <pups at minnie.cs.adfa.edu.au>; Fri, 2 Feb 2001 04:36:55 +1100 (EST)
+	(envelope-from cdl at mpl.ucsd.edu)
+Received: (from cdl at localhost)
+	by chiton.ucsd.edu (8.9.3/8.9.3) id JAA05794;
+	Thu, 1 Feb 2001 09:35:13 -0800 (PST)
+Date: Thu, 1 Feb 2001 09:35:13 -0800 (PST)
+From: Carl Lowenstein <cdl@mpl.ucsd.edu>
+Message-Id: <200102011735.JAA05794 at chiton.ucsd.edu>
+To: iking at microsoft.com
+Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+Cc: pups at minnie.cs.adfa.edu.au
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From iking at microsoft.com Tue Jan 30 15:27 PST 2001
+> From: Ian King <iking at microsoft.com>
+> To: "'Ken Wellsch'" <kwellsch at tampabay.rr.com>,
+>         Carl Lowenstein
+> 	 <cdl at mpl.ucsd.edu>
+> Cc: pups at minnie.cs.adfa.edu.au
+> Subject: RE: [pups] A bootable disk image for a PDP-11/34?
+> Date: Tue, 30 Jan 2001 14:38:15 -0800
+> 
+> Ken, I tried using that image and gunzip told me there was a crc error; it
+> wouldn't unzip it.  (I downloaded it three times, just in case there was a
+> transmission error -- twice by ftp, once by http.)  I've also tried the
+> "Dennis" images, which are supposedly straight RK05 images; E11 won't boot
+> 'em.  One issue on which I'm not clear: where is the boot address?  Stuff at
+> loc 0 doesn't look like boot instructions.  
+> 
+> If I could get an image to run in an emulator (as I mentioned, I'm running
+> E11 from DBit), I'd write some cheesy little loader to bring it down the
+> serial line (I already have it sketched out); but until I can at least get
+> one to boot in the emulator, I'm reluctant to spend the hours (at 9600 baud)
+> to spray it onto a disk.  <sigh>  
+
+Well, as some response to this challenge "get an image to run in an emulator",
+I visited Bob Supnik's Computer History Simulation Project web page
+
+	<www.tiac.net/users/mps/retro/>
+
+and followed the links to the sources for SIMH v2.5a and to the Unix V6
+disk images.
+
+I read the documentation file "simh_doc.txt", and compiled the
+simulator.  Then I read "simh_swre.txt", unpacked the V6 images, ran
+the simulator and attached the three RK05 images to it, and booted
+RK0.  All according to the instructions.
+
+I got the bootstrap prompt "@" to which I typed "unix" and it came up
+with a "login:" prompt, to which I could log in as root, and do things.
+
+It's not quite the same V6 image that I remember from the olden days of
+loading onto an 11/40 from magtape.  The login prompt seems not to be
+";login:" as we still see on the Usenix magazine.  dmr's account seems
+to have vanished but ken's is still there.  And that's how I spent a
+few hours last night.
+
+In case it matters, the underlying hardware/software platform is an AMD
+K6-3 running Mandrake 7.1 Linux.
+
+    carl
+
+        carl lowenstein         marine physical lab     u.c. san diego
+        {decvax|ucbvax} !ucsd!mpl!cdl                 cdl at mpl.ucsd.edu
+                                                  clowenstein at ucsd.edu
+
+

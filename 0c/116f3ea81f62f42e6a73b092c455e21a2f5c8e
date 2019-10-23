@@ -1,0 +1,78 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id d16b54a5
+	for <ml@inbox.vuxu.org>;
+	Tue, 6 Aug 2019 08:36:23 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9DDB49BA0E; Tue,  6 Aug 2019 18:36:21 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6A23294BBB;
+	Tue,  6 Aug 2019 18:35:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A834F94BBB; Tue,  6 Aug 2019 18:35:25 +1000 (AEST)
+X-Greylist: delayed 400 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 06 Aug 2019 18:35:24 AEST
+Received: from waffle.shalott.net (waffle.shalott.net [209.151.236.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CD1389491E
+ for <tuhs@tuhs.org>; Tue,  6 Aug 2019 18:35:24 +1000 (AEST)
+Received: (qmail 17240 invoked by uid 2034); 6 Aug 2019 08:28:43 -0000
+Received: from localhost (sendmail-bs@127.0.0.1)
+ by localhost with SMTP; 6 Aug 2019 08:28:43 -0000
+Date: Tue, 6 Aug 2019 01:28:43 -0700 (PDT)
+From: jason-tuhs@shalott.net
+X-X-Sender: jason@waffle.shalott.net
+To: tuhs@tuhs.org
+In-Reply-To: <1564954057.6926.for-standards-violators@oclsc.org>
+Message-ID: <alpine.LRH.2.21.1908060104130.2617@waffle.shalott.net>
+References: <1564954057.6926.for-standards-violators@oclsc.org>
+User-Agent: Alpine 2.21 (LRH 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII; format=flowed
+Subject: Re: [TUHS] Set-uid shell scripts
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+> A related problem is the inherent race condition:
+> If you do
+> 	ln -s /bin/setuidscript .
+> 	./setuidscript
+> ./setuidscript is opened twice: once when the kernel
+> reads it and finds #! as magic number and execs the
+> interpreter, a second time when the interpreter opens
+> ./setuidscript.  If you meanwhile run something that
+> swoops in in the background and replaces ./setuidscript
+> with malicious instructions for the interpreter, you
+> win.
+
+This was always described to me as the canonical reason why setuid 
+interpreted scripts were a security hole, irrespective of any specifics 
+in the shell or other interpreter.
+
+However, there's a workaround: use fdescfs.  fdescfs allows the kernel to 
+open the script, and then pass the fdescfs path for the (already open) 
+descriptor to the interpreter as the command to run.
+
+According to https://www.in-ulm.de/~mascheck/various/shebang/#setuid, this 
+is supported by many systems, including Solaris, several BSDs, and OSX 
+(with a sysctl).
+
+
+  -Jason
+

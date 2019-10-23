@@ -1,0 +1,40 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Sun, 20 Sep 2015 08:39:33 -0400 (EDT)
+Subject: [TUHS] Synchronous vs Asynchronous IO in Unix
+Message-ID: <20150920123933.8869D18C0EB@mercury.lcs.mit.edu>
+
+    > From: Peter Jeremy <peter at rulingia.com>
+
+    > Why were the original read(2) and write(2) system calls written to
+    > offer synchronous I/O only?
+
+A very interesting question (to me, particularly, see below). I don't think
+any of the Unix papers answer this question?
+
+    > It's relatively easy to create synchronous I/O functions given
+    > asynchronous I/O primitives but it's impossible to do the opposite.
+
+Indeed, and I've seen operating systems (e.g. a real-time PDP-11 OS I worked
+with a lot called MOS) that did that.
+
+I actually did add asynchronous I/O to V6 UNIX, for use with very early
+Internet networking software being done at MIT (in a user process). Actually,
+it wasn't just asynchronous, it was _raw_ asynchronous I/O! (The networking
+device was DMA, and the s/w did DMA directly into the user process' memory.)
+The code also allowed more than one outstanding I/O request, too. (So the
+input could be re-enabled on the device ASAP, without having to wake up a
+process, have it run, do a new read call, etc.)
+
+We didn't redo the whole Unix I/O system, to support/use asyn I/O throughout,
+though; I just kind of warted it onto the side. (IIRC, it notified the user
+process via a signal that the I/O had completed; the user software then had
+to do an sgtty() call to get the transfer status, size, etc.)
+
+
+Anyway, back to the original topic: I don't want to speculate (although I
+could :-); perhaps someone who was around 'back then' can offer some insight?
+If not, time for speculation! :-)
+
+	Noel
+
+

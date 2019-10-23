@@ -1,0 +1,77 @@
+From: nao@tom-yam.or.jp (nao)
+Date: Sun, 23 Nov 2003 09:56:45 +0900 (JST)
+Subject: [pups] UC08 and Ultrix-3.1
+Message-ID: <200311230056.hAN0ujUJ053894@miffy.tom-yam.or.jp>
+
+Hi, all.
+
+I finally discarded my RD54 haunted by frustrating retries and burnt
+my yen on an Emulex UC08 board. I installed it to my PDP-11/53 and
+attached an old DDS2 drive and a 230MB MO drive. Now 2.11BSD runs as
+smooth as silk.
+
+Next I tried to install Ultrix-3.1, but I entered an unexpected
+weirdness. After entering setup phase 1, the initial setup aborted
+saying that it failed to access files under /usr.
+
+Some lengthy investigation revealed that UC08's emulation confuses
+Ultrix. The MO drive pretends an RD54 and the installer is quite
+confident of it. Once the kernel is in service, it checks the
+controller board and identifies it as a KDA50, which is connected to
+RAxx drives. Now the kernel treat the MO disk as a RAxx. Since RD54
+and RAxx have different partition layout, kernel failes to find /usr
+filesystem and the installation process fails.
+
+To avoid this gap, I put a 540MB drive (bigger than an RA81, which is
+about 469MB) and configured it to behave as an RA81. The installation
+process now goes. After carefully studying src/sys/conf/dksizes.c, I
+also used a 230MB MO disk as an undersized RA81 and it seems to work
+well.
+
+
+I also tried SIMH. This time an emulated RD54 worked well, but a tape
+drive suddenly stopped during installation. I traced TMSCP protocol
+log and found a bug in the tape driver of Ultrix standalone installer,
+which hitted hidden incompatibility of SIMH. Here is an ad hoc patch
+for SIMH:
+
+--- simh.orig/PDP11/pdp11_tq.c	Mon May 19 20:24:04 2003
++++ simh/PDP11/pdp11_tq.c	Thu Nov 20 18:32:43 2003
+@@ -260,7 +260,7 @@
+ 	CMF_SEQ|CMF_RW|MD_CDL|MD_CSE|MD_REV|		/* compare */
+ 		MD_SCH|MD_SEC|MD_SER,
+ 	CMF_SEQ|CMF_RW|MD_CDL|MD_CSE|MD_REV|MD_CMP|	/* read */
+-		MD_SCH|MD_SEC|MD_SER,
++		MD_SCH|MD_SEC|MD_SER|MD_RWD,
+ 	CMF_SEQ|CMF_RW|CMF_WR|MD_CDL|MD_CSE|MD_IMM|	/* write */
+ 		MD_CMP|MD_ERW|MD_SEC|MD_SER,
+ 	0,						/* 35 */
+
+But of course you want to fix Ultrix, don't you? Another patch is
+here, but it is untested:
+
+--- src/sys/sas/tk.c-	Sun Jan 24 06:24:58 1988
++++ src/sys/sas/tk.c	Fri Nov 21 22:14:15 2003
+@@ -247,6 +247,7 @@
+ 		op = M_O_READ;
+ 	else
+ 		op = M_O_WRITE;
++	tk.tk_cmd[0].m_modifier = 0;
+ 	if((mp = tkcmd(op)) == 0) {
+ 		printf("\n%s magtape error: ", tk_dct);
+ 		printf("endcode=%o flags=%o status=%o\n",
+@@ -324,6 +325,7 @@
+ 		sizeof(struct tmscp) - sizeof(struct tmscp_header);
+ 		tk.tk_cmd[0].m_header.tk_vcid = 1;
+ 		tk.tk_cmd[0].m_cntflgs = 0;
++		tk.tk_cmd[0].m_modifier = 0;
+ 		/* need to set the density if TU81 */
+ 		if (tkcmd(M_O_STCON) == 0) {
+ 			printf("\n%s STCON FAILED: can't init controller", tk_dct);
+
+Ultrix seems unnecessarily square and not an OS of my type, but a
+fairly good testbed for emulated software and hardware :-)
+
+Naoki Hamada
+nao at tom-yam.or.jp
+

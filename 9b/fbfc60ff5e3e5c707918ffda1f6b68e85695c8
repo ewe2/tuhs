@@ -1,0 +1,103 @@
+From tuhs-bounces@minnie.tuhs.org Fri Aug 24 18:15:09 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e6cca62e
+	for <ml@inbox.vuxu.org>;
+	Fri, 24 Aug 2018 18:15:09 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6E58DA1A97; Sat, 25 Aug 2018 04:15:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id AEEC1A1A1B;
+	Sat, 25 Aug 2018 04:14:54 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 61C0BA1A1B; Sat, 25 Aug 2018 04:14:52 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BF3EDA1A1A
+ for <tuhs@minnie.tuhs.org>; Sat, 25 Aug 2018 04:14:51 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 3769B1604A; Fri, 24 Aug 2018 20:14:50 +0200 (CEST)
+Date: Fri, 24 Aug 2018 20:15:22 +0200
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: "'TUHS'" <tuhs@minnie.tuhs.org>
+Message-ID: <20180824181522.2nrUS%steffen@sdaoden.eu>
+In-Reply-To: <1f6201d43bb7$3b9ebde0$b2dc39a0$@ronnatalie.com>
+References: <10c401d43aef$8be34870$a3a9d950$@ronnatalie.com>
+ <ACE5F352-8FCF-4C3C-B60B-7CD1C6094939@bitblocks.com>
+ <151301d43b2f$07881ed0$16985c70$@ronnatalie.com>
+ <20180823231413.QeahD%steffen@sdaoden.eu>
+ <20180824141348.1NLUE%steffen@sdaoden.eu>
+ <1f6201d43bb7$3b9ebde0$b2dc39a0$@ronnatalie.com>
+Mail-Followup-To: "'TUHS'" <tuhs@minnie.tuhs.org>
+User-Agent: s-nail v14.9.11-22-g31cca803
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] C++ / Kernel
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+ron@ronnatalie.com wrote in <1f6201d43bb7$3b9ebde0$b2dc39a0$@ronnatalie.com>:
+ |That's a different issue (as I alluded to in my post).   Alignment on
+ |machines is a different problem.   Type "punning" isn't the problem, the
+ |compiler is propely converting one
+ |pointer type to another but the operand is not correctly aligned.   
+
+The story told here is more about how the peculiarities of
+a standard text and compiler developers come together to something
+very unfortunate.
+
+ |In the case I'm referring to, the Univac and the HEP encode partial word
+ |sizes in the pointer.    If you take the literal bits from one pointer to
+ |another (as if you stored it in a union),
+ |then you end up referring to the wrong sized operand in the subsequent
+ |operation.    Had you converted it to void* or explicitly forced a
+
+Ah, i am sorry.  Indeed i misunderstood that.
+
+ |conversion wih the cast, the compiler 
+ |would have taken care of converting the pointer for you.
+
+Though even more unfortunate i am, since this union trick is often
+the only way to be able to do proper a.k.a. allowed type
+conversion, where the standard text forbids something quick and
+easy, casting of or to function pointers in C++ comes to mind
+spontaneously.  (The linked story also tries to go via (char*) to
+a desired type, but the compiler seems to be too neat.  And even
+if this is a bug, of course...)
+
+ |It's very odd when you find the machine storing the WRONG SIZE operand from
+ |the pointer type in use.
+ |As I said, it wasn't hard to fix (just grep for all the afflicted unions),
+ |but it took a bit of long kernel debug sessions to figure out what was
+ |happening.
+ |
+ |> -----Original Message-----
+ |> From: Steffen Nurpmeso <steffen@sdaoden.eu>
+ |> I have found the link in the history of my browser, the story was
+ |> 
+ |>   http://pzemtsov.github.io/2016/11/06/bug-story-alignment-on-x86.html
+ --End of <1f6201d43bb7$3b9ebde0$b2dc39a0$@ronnatalie.com>
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

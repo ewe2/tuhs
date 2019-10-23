@@ -1,0 +1,88 @@
+From tuhs-bounces@minnie.tuhs.org Fri Jul 20 10:05:11 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 74f4a912
+	for <ml@inbox.vuxu.org>;
+	Fri, 20 Jul 2018 10:05:10 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C8F44A184D; Fri, 20 Jul 2018 20:05:09 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id AC0939ED1B;
+	Fri, 20 Jul 2018 20:04:40 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 755EC9ED1B; Fri, 20 Jul 2018 20:04:38 +1000 (AEST)
+Received: from lb3-smtp-cloud9.xs4all.net (lb3-smtp-cloud9.xs4all.net
+ [194.109.24.30])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 17D919E99F
+ for <tuhs@minnie.tuhs.org>; Fri, 20 Jul 2018 20:04:36 +1000 (AEST)
+Received: from [192.168.1.106] ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPA
+ id gSH4fKeS3EJtcgSH5f7cg2; Fri, 20 Jul 2018 12:04:35 +0200
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 11.4 \(3445.8.2\))
+Message-Id: <8ECDA62D-1B54-4391-A226-D3E9ABEE4C07@planet.nl>
+Date: Fri, 20 Jul 2018 12:04:34 +0200
+To: tuhs@minnie.tuhs.org
+X-Mailer: Apple Mail (2.3445.8.2)
+X-CMAE-Envelope: MS4wfDVmJAUjsFJOWAriPStnbw69EwGb81a8yJ55vFFM6Vq4/ec65iZ/mZX6uM8p3ZWqxzTRGR7z0DE3j3Fs6bDR1/U2xjMkS5RhkpNWjl7lTWBRo2eIyd+F
+ 7m76CoEKo443TsGx6f1iBX2mqju3RqsFZrRtxY/Y3ZI9cITdKFaxZC2U
+Subject: Re: [TUHS] Looking for final C compiler by Dennis Ritchie
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> Thank you for the info - I will certainly look at the USENIX tapes.
+>=20
+> I will try to port the C compiler to amd64 - while preserving as much =
+of
+> the original code as I can. But not sure if this is even feasible.
+>=20
+> Thanks and Regards
+> Dibyendu
+
+If that is your goal, you might want to start with the version included =
+with 2.11BSD. It is essentially the same as the version from V7, but =
+with 15 more years of bug fixes. I used that source to port V6 Unix to =
+the TI990 architecture back in 2014/2015 and the good thing about it is =
+that it still compiles with a modern gcc.
+
+For your project, I think you would be able to use the first pass =
+=E2=80=98c0=E2=80=99 almost unchanged. The second pass =E2=80=98c1=E2=80=99=
+ would need major restructuring. It mainly builds a tree for each =
+expression and then performs various transformations, many of which are =
+PDP11 specific (but also portable ones, like handling of constant =
+expressions). It then covers the tree with code fragments selected from =
+a library. This library (=E2=80=98optable') would need a full rewrite as =
+well. The last pass =E2=80=98c2=E2=80=99 is the optimiser and is also =
+highly PDP11 specific. It reads the assembler output of =E2=80=98c1=E2=80=99=
+ function by function, building an instruction list. It then performs =
+some portable optimisations (eliminating unnecessary jumps, etc.) and =
+also more PDP11 specific optimisations (the most complex being removing =
+redundant register loads - the concept of which would be reusable).
+
+There are about 12,000 lines of code and as a rough guess I would say =
+that some 40% needs rewriting. A new code fragment library would =
+probably be some 2 to 3 thousand lines.
+
+I recall reading about a project to revive the Ritchie C compiler one or =
+two years ago, but a quick web search came up dry. Anybody else remember =
+reading that?
+

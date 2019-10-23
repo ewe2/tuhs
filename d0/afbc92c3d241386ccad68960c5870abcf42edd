@@ -1,0 +1,32 @@
+From: ralph@inputplus.co.uk (Ralph Corderoy)
+Date: Sat, 16 Dec 2017 17:11:32 +0000
+Subject: [TUHS] Date madness
+In-Reply-To: <1513440719.1943285.1207178784.050ABA15@webmail.messagingengine.com>
+References: <201712161050.vBGAojbd027976@coolidge.cs.Dartmouth.EDU>
+ <1513440719.1943285.1207178784.050ABA15@webmail.messagingengine.com>
+Message-ID: <20171216171132.4D5ED21CB8@orac.inputplus.co.uk>
+
+Hi Randy,
+
+> One way the kernel could tell old from new inodes is by reserving the
+> high bit of one of the current 32-bit fields
+
+When Doug mentioned the high bit being an escape I assumed something
+like, using eight bits for ease,
+
+    00-7f  existing positive meaning
+    80-df  new meaning as if unsigned
+    e0-ff  existing negative meaning
+
+    existing  80 81...df e0...fe ff 00 01...7f
+    new                  e0...fe ff 00 01...7f 80 81..df
+
+This would extend the positive range beyond 2038, but keep a small range
+of negatives for their existing pre-1970 meaning.  This is storage
+representation.  Calculations can be done in a wider int, with
+intermediate values simply being signed, as before.
+
+-- 
+Cheers, Ralph.
+https://plus.google.com/+RalphCorderoy
+

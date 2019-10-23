@@ -1,0 +1,391 @@
+From tuhs-bounces@minnie.tuhs.org Thu Jun 28 20:46:55 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,T_DKIM_INVALID autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 1677d91b
+	for <ml@inbox.vuxu.org>;
+	Thu, 28 Jun 2018 20:46:55 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 493DFA1B0B; Fri, 29 Jun 2018 06:46:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 22F9CA1B0A;
+	Fri, 29 Jun 2018 06:46:35 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=serissa.com header.i=@serissa.com header.b=VxPi4pc6;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.b=dZvct5kW;
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B9A48A1B0A; Fri, 29 Jun 2018 06:46:33 +1000 (AEST)
+X-Greylist: delayed 515 seconds by postgrey-1.35 at minnie.tuhs.org;
+ Fri, 29 Jun 2018 06:46:31 AEST
+Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com
+ [66.111.4.25]) by minnie.tuhs.org (Postfix) with ESMTPS id 9A2E1A1815
+ for <tuhs@minnie.tuhs.org>; Fri, 29 Jun 2018 06:46:31 +1000 (AEST)
+Received: from compute7.internal (compute7.nyi.internal [10.202.2.47])
+ by mailout.nyi.internal (Postfix) with ESMTP id B6F3E21BF7;
+ Thu, 28 Jun 2018 16:37:55 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+ by compute7.internal (MEProxy); Thu, 28 Jun 2018 16:37:55 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=serissa.com; h=
+ cc:content-type:date:from:in-reply-to:message-id:mime-version
+ :references:subject:to:x-me-sender:x-me-sender:x-sasl-enc; s=
+ fm3; bh=FKJWDshBXnl97htQx4qaBEQ0nd1p8s/JcNN+gdfMfi8=; b=VxPi4pc6
+ sTvEcXxM+vtbo8qdSq5Iv0KDByDRxlvNxFoFZV50wqd1S+TPC4/G9v+UzyOqlO/+
+ vnLXQFl0Tvy6606ECaM0657vIYbArW9j6P39eika6ig+6uKhSSVlUFkj4kk6OOHd
+ BS9RpenY2Ltt/DPGqWU5KqasaXBY7Ept3mIqG0pz3IG3BEIp5aEYH7vIb/JNmclf
+ CaZQKr4+j0aUVVaAd7kShyvLjwKuySlc+mdWZCb8gtiaMqeZsLf3hDKl5Wfch+ml
+ 0AryDluQvZLQ/3it8Rz2abqqdwAcDsaPWvpuM7Mgg+SfVXWUpucMOLKBzkkdKdp5
+ DaIEpAYjGzZqmw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+ messagingengine.com; h=cc:content-type:date:from:in-reply-to
+ :message-id:mime-version:references:subject:to:x-me-sender
+ :x-me-sender:x-sasl-enc; s=fm3; bh=FKJWDshBXnl97htQx4qaBEQ0nd1p8
+ s/JcNN+gdfMfi8=; b=dZvct5kWRMcj35TvK2aQ4OXOqVkkeugwCdGqeB5IZhtFn
+ yPcTlZUcS5StXlYxpwlsBbp+K1Fn8yHtGyN/LwRQ9mMjI/qSTVzEe20FOgyQyTg2
+ 5Ds7WDo2r6hN+RyFVoSNTzwnaP+hRJC5p6HIh/0L8qsMUpLwrM++/khMt73i4GO3
+ cArvjRMrlZZGz7TpMACibCxKqupLuEfut96xaRsED3pfYCGAjAqVRd0tx2sgvVNa
+ iRyOxr/ksVq3XG8nISHzE8P5/Tybbw5tosklOAJWDBwyPYcHFjNvlmwGBfkg/VtT
+ FrMzq2+i6iWm5SL7byV2kFWrs36iSJndOOOQFzP0Q==
+X-ME-Proxy: <xmx:I0c1W3p89KFpKjwAp3G_yTvHLk4x-ZwQ3aZNSx5VBANz00F665mu_Q>
+ <xmx:I0c1Wx2Sr10ymxOE9A2LOXlAMuA2KUZdQBZ0IkjAeBAewhwq79XlRw>
+ <xmx:I0c1W2CNnaHoU5LZ5GwV5AdwzFaCWobtNPav7w6GYISA0pxKIX99XA>
+ <xmx:I0c1W5fvX9vM9ITUHlTKiGfHmkaIhkCSn2nEi2WzJF6FWUErE4eSCg>
+ <xmx:I0c1W7iY5gd4z9vosZ-avimsB9e1oYlCiGN52cvGsBxYxk6meNewdg>
+ <xmx:I0c1W3u33U7BvqM6eEQfeGNOrmIdCxGNbIYb_7XqUdwLfR5ljOrHPA>
+X-ME-Sender: <xms:I0c1W0W3vcEnDUPXcYxyPrXMwYLh2FzdvKb0dFKOydK8r5rGGqUdQA>
+Received: from [172.20.1.45] (65-123-201-146.dia.static.qwest.net
+ [65.123.201.146])
+ by mail.messagingengine.com (Postfix) with ESMTPA id 19E6310268;
+ Thu, 28 Jun 2018 16:37:55 -0400 (EDT)
+From: Lawrence Stewart <stewart@serissa.com>
+Message-Id: <0B27CA75-F9AC-4DAE-95D9-858155980B12@serissa.com>
+Content-Type: multipart/alternative;
+ boundary="Apple-Mail=_A2C6D066-E280-4354-8517-24DCB678C5B0"
+Mime-Version: 1.0 (Mac OS X Mail 11.4 \(3445.8.2\))
+Date: Thu, 28 Jun 2018 16:37:53 -0400
+In-Reply-To: <CAC20D2NMPscxBpHif4YY8Uwnj8gd_9x997iU1AYHaWHPaR4cqA@mail.gmail.com>
+To: Clem Cole <clemc@ccc.com>
+References: <af780f9fb5c14e37f12ce5c2a4e40376669c730f@webmail.yaccman.com>
+ <81277CC3-3C4A-49B8-8720-CFAD22BB28F8@bitblocks.com>
+ <20180628141538.GB663@thunk.org> <20180628144017.GB21688@mcvoy.com>
+ <CAC20D2NMPscxBpHif4YY8Uwnj8gd_9x997iU1AYHaWHPaR4cqA@mail.gmail.com>
+X-Mailer: Apple Mail (2.3445.8.2)
+Subject: Re: [TUHS] PDP-11 legacy, C, and modern architectures
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--Apple-Mail=_A2C6D066-E280-4354-8517-24DCB678C5B0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+Thanks for the promotion to CTO Clem!  I was merely the software =
+architect at Sicortex.
+
+The SC systems had 6-core MIPS-64 cpus at 700 MHz, two channel DDR-2, =
+and a really fast interconnect.  (Seriously fast for its day 800 ns PUT, =
+1.6 uS GET, north of 2 GB/sec end-to-end, this was in 2008.)  The =
+achilles heel was low memory bandwidth due to a core limitation of a =
+single outstanding miss.  The new chip would have fixed that (and about =
+8x performance) but we ran out of money in 2009, which was not a good =
+time to look for more.
+
+We had delighted customers who appreciated the reliabiity and the =
+network.  For latency limited codes we did extremely well (GUPS) and =
+still did well on the rest from a flops/watt perspective.  However, lots =
+of commercial prospects didn=E2=80=99t have codes that needed the =
+network and did need single stream performance.  We talked to Urs Holtze =
+at Google and he was very clear - they needed fast single threads.  The =
+low power was very nice, =E2=80=A6 but we were welcome to try and =
+parallelize their benchmarks.
+
+Which brings me back to the original issue - does C constrain our =
+architectural thinking?=20
+
+I=E2=80=99ve spent a fair amount of time recently digging into Nyx, =
+which is an adaptive mesh refinement cosmological hydrodynamics code.  =
+The framework is in C++ because the inheritance stuff makes it =
+straightforward to adapt the AMR machinery to different problems.  This =
+isn=E2=80=99t the kind of horrible C++ that you can=E2=80=99t tell what =
+is going to happen, but pretty close to C style in which you can =
+visualize what the compiler will do.  The =E2=80=9Csolvers=E2=80=9D tend =
+to be Fortran modules, because, I think, Fortran is just sensible about =
+multidimensional arrays and indexing in a way you have to use weird =
+macros to replicate in C.  It isn=E2=80=99t I think that C or C++ =
+compilers cannot generate good code - it is about the syntax for arrays.
+
+For anyone interested in architectural arm wrestling, memory IS the main =
+issue.  It is worth reading the papers on BLIS, an analytical model for =
+writing Basic Linear Algebra libraries.  Once you figure out the flops =
+per byte, you are nearly done - the rest is complicated but =
+straightforward code tuning.  Matrix multiply has O(n^3) computation for =
+O(n^2) memory and that immediately says you can get close to 100% of the =
+ALUs running if you have a clue about blocking in the caches.  This is =
+just as easy or hard to do in C as in Fortran.  The kernels tend to wind =
+up in asm(=E2=80=9C=E2=80=9D) no matter what you wish for just in order =
+to get the prefetch instructions placed just so.  As far as I can tell, =
+compilers still do not have very good models for cache hierarchies =
+although there isn=E2=80=99t really any reason why they shouldn=E2=80=99t.=
+  Similarly, if your code is mainly doing inner products, you are doomed =
+to run at memory speeds rather than ALU speeds.  Multithreading usually =
+doesn=E2=80=99t help, because often other cores are farther away than =
+main memory.
+
+My summary of the language question comes down to: if you knew what code =
+would run fast, you could code it in C.  Thinking that a new language =
+will explain how to make it run fast is just wishful thinking.  It just =
+pushes the problem onto the compiler writers, and they don=E2=80=99t =
+know how to code it to run fast either.  The only argument I like for =
+new languages is that at least they might be able to let you describe =
+the problem in a way that others will recognize.  I=E2=80=99m sure =
+everyone here has has the sad experience of trying to figure out what is =
+the idea behind a chunk of code.  Comments are usually useless.  I wind =
+up trying to match the physics papers with the math against the code and =
+it makes my brain hurt.  It sure would be nice if there were a series of =
+representations between math and hardware transitioning from why to what =
+to how.  I think that is was Steele was trying to do with Fortress.
+
+I do think the current environment is the best for architectural =
+innovation since the =E2=80=9890s.  We have The Machine, we have Dover =
+Micro trying to add security, we have Microsoft=E2=80=99s EDGE stuff, =
+and the multiway battle between Intel/AMD/ARM and the GPU guys and the =
+FPGA guys.  It is a lot more interesting than 2005! =20
+
+> On 2018, Jun 28, at 11:37 AM, Clem Cole <clemc@ccc.com> wrote:
+>=20
+>=20
+>=20
+> On Thu, Jun 28, 2018 at 10:40 AM, Larry McVoy <lm@mcvoy.com =
+<mailto:lm@mcvoy.com>> wrote:
+> Yep.  Lots of cpus are nice when doing a parallel make but there is=20
+> always some task that just uses one cpu.  And then you want the =
+fastest
+> one you can get.  Lots of wimpy cpus is just, um, wimpy.
+>=20
+> =E2=80=8BLarry Stewart would be better to reply as SiCortec's CTO - =
+but that was the basic logic behind their system -- lots of cheap MIPS =
+chips. Truth is they made a pretty neat system and it scaled pretty =
+well.   My observation is that they, like most of the attempts I have =
+been a part, in the end architecture does not matter nearly as much as =
+economics.
+>=20
+> In my career I have build 4 or 5 specially architecture systems.  You =
+can basically live through one or two generations using some technology =
+argument and 'win'.   But in the end, people buy computers to do a job =
+and the really don't give a s*t about how the job gets done, as long as =
+it get done cheaply.=E2=80=8B   Whoever wins the economic war has the =
+'winning' architecture.   Look x66/Intel*64 would never win awards as a =
+'Computer Science Architecture'  or in SW side; Fortran vs. Algol =
+etc...; Windows beat UNIX Workstations for the same reasons... as well =
+know.
+>=20
+> Hey, I used to race sailboats ...  there is a term called a 'sea =
+lawyer' - where you are screaming you have been fouled but you drowning =
+as your boating is sinking.   I keep thinking about it here.   You can =
+scream all you want about goodness or badness of architecture or =
+language, but in the end, users really don't care.   They buy computers =
+to do a job.   You really can not forget that is the purpose.
+>=20
+> As Larry says: Lots of wimpy cpus is just wimpy.    Hey, Intel, nVidia =
+and AMD's job is sell expensive hot rocks.   They are going to do what =
+they can to make those rocks useful for people.  They want to help =
+people get there jobs done -- period. That is what they do.   Amtel and =
+RPi folks take the 'jelly bean' approach - which is one of selling =
+enough it make it worth it for the chip manufacture and if the simple =
+machine can do the customer job, very cool.  In those cases simple is =
+good (hey the PDP-11 is pretty complex compared to say the 6502).
+>=20
+> So, I think the author of the paper trashing as too high level C =
+misses the point, and arguing about architecture is silly.  In the end =
+it is about what it costs to get the job done.   People will use what it =
+is the most economically for them.
+>=20
+> Clem
+>=20
+
+
+--Apple-Mail=_A2C6D066-E280-4354-8517-24DCB678C5B0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D"">Thanks for the promotion to CTO Clem! &nbsp;I was merely the =
+software architect at Sicortex.<div class=3D""><br class=3D""></div><div =
+class=3D"">The SC systems had 6-core MIPS-64 cpus at 700 MHz, two =
+channel DDR-2, and a really fast interconnect. &nbsp;(Seriously fast for =
+its day 800 ns PUT, 1.6 uS GET, north of 2 GB/sec end-to-end, this was =
+in 2008.) &nbsp;The achilles heel was low memory bandwidth due to a core =
+limitation of a single outstanding miss. &nbsp;The new chip would have =
+fixed that (and about 8x performance) but we ran out of money in 2009, =
+which was not a good time to look for more.</div><div class=3D""><br =
+class=3D""></div><div class=3D"">We had delighted customers who =
+appreciated the reliabiity and the network. &nbsp;For latency limited =
+codes we did extremely well (GUPS) and still did well on the rest from a =
+flops/watt perspective. &nbsp;However, lots of commercial prospects =
+didn=E2=80=99t have codes that needed the network and did need single =
+stream performance. &nbsp;We talked to Urs Holtze at Google and he was =
+very clear - they needed fast single threads. &nbsp;The low power was =
+very nice, =E2=80=A6 but we were welcome to try and parallelize their =
+benchmarks.</div><div class=3D""><br class=3D""></div><div =
+class=3D"">Which brings me back to the original issue - does C constrain =
+our architectural thinking?&nbsp;</div><div class=3D""><br =
+class=3D""></div><div class=3D"">I=E2=80=99ve spent a fair amount of =
+time recently digging into Nyx, which is an adaptive mesh refinement =
+cosmological hydrodynamics code. &nbsp;The framework is in C++ because =
+the inheritance stuff makes it straightforward to adapt the AMR =
+machinery to different problems. &nbsp;This isn=E2=80=99t the kind of =
+horrible C++ that you can=E2=80=99t tell what is going to happen, but =
+pretty close to C style in which you can visualize what the compiler =
+will do. &nbsp;The =E2=80=9Csolvers=E2=80=9D tend to be Fortran modules, =
+because, I think, Fortran is just sensible about multidimensional arrays =
+and indexing in a way you have to use weird macros to replicate in C. =
+&nbsp;It isn=E2=80=99t I think that C or C++ compilers cannot generate =
+good code - it is about the syntax for arrays.</div><div class=3D""><br =
+class=3D""></div><div class=3D"">For anyone interested in architectural =
+arm wrestling, memory IS the main issue. &nbsp;It is worth reading the =
+papers on BLIS, an analytical model for writing Basic Linear Algebra =
+libraries. &nbsp;Once you figure out the flops per byte, you are nearly =
+done - the rest is complicated but straightforward code tuning. =
+&nbsp;Matrix multiply has O(n^3) computation for O(n^2) memory and that =
+immediately says you can get close to 100% of the ALUs running if you =
+have a clue about blocking in the caches. &nbsp;This is just as easy or =
+hard to do in C as in Fortran. &nbsp;The kernels tend to wind up in =
+asm(=E2=80=9C=E2=80=9D) no matter what you wish for just in order to get =
+the prefetch instructions placed just so. &nbsp;As far as I can tell, =
+compilers still do not have very good models for cache hierarchies =
+although there isn=E2=80=99t really any reason why they shouldn=E2=80=99t.=
+ &nbsp;Similarly, if your code is mainly doing inner products, you are =
+doomed to run at memory speeds rather than ALU speeds. =
+&nbsp;Multithreading usually doesn=E2=80=99t help, because often other =
+cores are farther away than main memory.</div><div class=3D""><br =
+class=3D""></div><div class=3D"">My summary of the language question =
+comes down to: if you knew what code would run fast, you could code it =
+in C. &nbsp;Thinking that a new language will explain how to make it run =
+fast is just wishful thinking. &nbsp;It just pushes the problem onto the =
+compiler writers, and they don=E2=80=99t know how to code it to run fast =
+either. &nbsp;The only argument I like for new languages is that at =
+least they might be able to let you describe the problem in a way that =
+others will recognize. &nbsp;I=E2=80=99m sure everyone here has has the =
+sad experience of trying to figure out what is the idea behind a chunk =
+of code. &nbsp;Comments are usually useless. &nbsp;I wind up trying to =
+match the physics papers with the math against the code and it makes my =
+brain hurt. &nbsp;It sure would be nice if there were a series of =
+representations between math and hardware transitioning from why to what =
+to how. &nbsp;I think that is was Steele was trying to do with =
+Fortress.</div><div class=3D""><br class=3D""></div><div class=3D"">I do =
+think the current environment is the best for architectural innovation =
+since the =E2=80=9890s. &nbsp;We have The Machine, we have Dover Micro =
+trying to add security, we have Microsoft=E2=80=99s EDGE stuff, and the =
+multiway battle between Intel/AMD/ARM and the GPU guys and the FPGA =
+guys. &nbsp;It is a lot more interesting than 2005! &nbsp;<br =
+class=3D""><div><br class=3D""><blockquote type=3D"cite" class=3D""><div =
+class=3D"">On 2018, Jun 28, at 11:37 AM, Clem Cole &lt;<a =
+href=3D"mailto:clemc@ccc.com" class=3D"">clemc@ccc.com</a>&gt; =
+wrote:</div><br class=3D"Apple-interchange-newline"><div class=3D""><div =
+dir=3D"ltr" class=3D""><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br class=3D""></div><div=
+ class=3D"gmail_extra"><br class=3D""><div class=3D"gmail_quote">On Thu, =
+Jun 28, 2018 at 10:40 AM, Larry McVoy <span dir=3D"ltr" class=3D"">&lt;<a =
+href=3D"mailto:lm@mcvoy.com" target=3D"_blank" =
+class=3D"">lm@mcvoy.com</a>&gt;</span> wrote:<br class=3D""><blockquote =
+class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc =
+solid;padding-left:1ex">Yep.&nbsp; Lots of cpus are nice when doing a =
+parallel make but there is <br class=3D"">
+always some task that just uses one cpu.&nbsp; And then you want the =
+fastest<br class=3D"">
+one you can get.&nbsp; Lots of wimpy cpus is just, um, wimpy.<br =
+class=3D""></blockquote><div class=3D""><br class=3D""></div><div =
+class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">=E2=80=8BLarry Stewart =
+would be better to reply as SiCortec's CTO - but that was the basic =
+logic behind their system -- lots of cheap MIPS chips. Truth is they =
+made a pretty neat system and it scaled pretty well.&nbsp; &nbsp;My =
+observation is that they, like most of the attempts I have been a part, =
+<i class=3D"">in the end architecture does not matter nearly as much as =
+economics</i>.</div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br class=3D""></div><div=
+ class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">In my career I have =
+build 4 or 5 specially architecture systems.&nbsp; You can basically =
+live through one or two generations using some technology argument and =
+'win'.&nbsp; &nbsp;But in the end, people buy computers to do a job and =
+the really don't give a s*t about how the job gets done, as long as it =
+get done cheaply.=E2=80=8B&nbsp; &nbsp;Whoever wins the economic war has =
+the 'winning' architecture.&nbsp; &nbsp;Look x66/Intel*64 would never =
+win awards as a 'Computer Science Architecture'&nbsp; or in SW side; =
+Fortran <i class=3D"">vs</i>. Algol <i class=3D"">etc</i>...; Windows =
+beat UNIX Workstations for the same reasons... as well know.</div><div =
+class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br class=3D""></div><div=
+ class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">Hey, I used to race =
+sailboats ...&nbsp; there is a term called a 'sea lawyer' - where you =
+are screaming you have been fouled but you drowning as your boating is =
+sinking.&nbsp; &nbsp;I keep thinking about it here.&nbsp; &nbsp;You can =
+scream all you want about goodness or badness of architecture or =
+language, but in the end, users really don't care.&nbsp; &nbsp;They buy =
+computers to do a job.&nbsp; &nbsp;You really can not forget that is the =
+purpose.</div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><br class=3D""></div><div=
+ class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif">As Larry =
+says:&nbsp;<span =
+style=3D"font-family:arial,sans-serif;font-size:small;background-color:rgb=
+(255,255,255);text-decoration-style:initial;text-decoration-color:initial;=
+float:none;display:inline" class=3D"">Lots of wimpy cpus is just =
+wimpy.&nbsp; &nbsp; Hey, Intel, nVidia and AMD's job is sell expensive =
+hot rocks.&nbsp; &nbsp;They are going to do what they can to make those =
+rocks useful for people.&nbsp; They want to help people get there jobs =
+done -- period. That is what they do.&nbsp; &nbsp;Amtel and RPi folks =
+take the 'jelly bean' approach - which is one of selling enough it make =
+it worth it for the chip manufacture and if the simple machine can do =
+the customer job, very cool.&nbsp; In those cases simple is good (hey =
+the PDP-11 is pretty complex compared to say the 6502).</span></div><div =
+class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><span =
+style=3D"font-family:arial,sans-serif;font-size:small;background-color:rgb=
+(255,255,255);text-decoration-style:initial;text-decoration-color:initial;=
+float:none;display:inline" class=3D""><br class=3D""></span></div><div =
+class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><span =
+style=3D"font-family:arial,sans-serif;font-size:small;background-color:rgb=
+(255,255,255);text-decoration-style:initial;text-decoration-color:initial;=
+float:none;display:inline" class=3D"">So, I think the author of the =
+paper trashing as too high level C misses the point, and arguing about =
+architecture is silly.&nbsp; In the end it is about what it costs to get =
+the job done.&nbsp; &nbsp;People will use what it is the most =
+economically for them.</span></div><div class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><span =
+style=3D"font-family:arial,sans-serif;font-size:small;background-color:rgb=
+(255,255,255);text-decoration-style:initial;text-decoration-color:initial;=
+float:none;display:inline" class=3D""><br class=3D""></span></div><div =
+class=3D"gmail_default" =
+style=3D"font-family:arial,helvetica,sans-serif"><span =
+style=3D"font-family:arial,sans-serif;font-size:small;background-color:rgb=
+(255,255,255);text-decoration-style:initial;text-decoration-color:initial;=
+float:none;display:inline" class=3D"">Clem</span></div></div><br =
+class=3D""></div></div>
+</div></blockquote></div><br class=3D""></div></body></html>=
+
+--Apple-Mail=_A2C6D066-E280-4354-8517-24DCB678C5B0--

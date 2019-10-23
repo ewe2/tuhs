@@ -1,0 +1,58 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Mon, 28 Mar 2016 09:43:28 -0400 (EDT)
+Subject: [TUHS] PDP-11/70 SPL
+Message-ID: <20160328134328.EB0AA18C0B6@mercury.lcs.mit.edu>
+
+    > From: Johnny Billquist
+
+    > this also means that you must be at SPL 7 before any of this
+
+Yes, I assumed that (since it wouldn't make sense otherwise :-).
+
+    > In general, I would say that this is not the way I would write code, but
+    > ... 2.11BSD do an SPL 0 followed by WAIT.
+
+Right; even if one does something like have every interrupt set a flag (which
+is cleared while interrupts are disabled), and check that after lowering the
+priority, but before doing the WAIT, there's _still_ a window between that
+check, and the WAIT (although I guess it's less likely to be hit, since the
+interrupt request would have to be posted _in that window_, not be hanging
+around waiting to be serviced).
+
+The only way (that I can work out) to atomically lower the priority and wait
+is to do an RTI with the PC on the stack pointing to the WAIT instruction, but
+I'm not sure even that is guaranteed to work.
+
+I guess it all depends on the CPU implementation: does it check for pending
+interrupts before each instruction, or only at the end of each instuction, or
+what? If before, and there's an interrupt pending, it will go off before the
+WAIT is executed. Although I suppose if it's at the end, it would do the check
+at the end of the RTI, and do the interrupt then.
+
+And whether it's at the end, or the beginning, WAIT itself must be special
+cased, to check for pending interrupts during the execution (which can take an
+indeterminate amount of time).
+
+    > 2.11BSD will work potentially with a slight degration if the SPL do not
+    > block interrupts.  It will still work fine, as you will, at a minimum,
+    > get an interrupt at the next clock tick, which will wake it up. But it
+    > might possibly be sitting in a WAIT slightly longer than required.
+
+Yes, exactly.
+
+    > RSX in fact just loops after the WAIT. If an interrupt should cause the
+    > system to be able to do something more productive, it will not return to
+    > the idle loop. So yes, it also detects in the interrupt exit processing,
+    > that it was/is in the idle loop.
+
+Does it detect if it was _before_ the WAIT instruction? I would assume it does,
+but I don't know anything sbout RSX.
+
+    > But at least processor and chip manuals do not say that SPL will block
+    > interrupts.
+
+Yes, I looked too, in a variety of places (PDP-11 Architecture, including in
+the 'model differences' table, 11/73 Tech Manual, etc). Crickets...
+
+    Noel
+

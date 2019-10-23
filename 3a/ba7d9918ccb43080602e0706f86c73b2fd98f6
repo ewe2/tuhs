@@ -1,0 +1,93 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Wed, 4 Jun 2008 17:11:16 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080604135729.4c50e178@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+Message-ID: <20080604171116.1b2775f9.lehmann@ans-netz.de>
+
+Jose R. Valverde wrote:
+
+> Dear Oliver
+> 
+> 	Astounding work!
+
+Thanks :)
+
+While I'm puzzeling the html document together with my open questions
+(not so much questions but not so easy - at least for me - i guess) to
+present them here (yeah, fear! ;) just some answers...
+
+> 
+> What reference source are you using for the reconstruction process?
+> I bet you are having a look at the source code for Plexis sys3 in the 
+> TUHS archives, and comparing with the stock sysIII from SCO, right?
+
+I have Plexis sources and used plain SYSIII sources - yes. Sometimes
+I also used V7 sources because it pointed out through the recovery
+process that sometimes the V7 source matched more the implementation
+in WEGA than the SYSIII implementation was.
+
+
+> FWIW from the source trees from SCO and Plexis, the code layout was
+> arranged by CPU. I'd bet the WEGA authors had access so SysIII sources,
+> and if they'd gone through the pains to get it, then they might as
+> well got both -or perhaps Plexis, which should have been more easy
+> to get- to use as their codebase. So a comparison of both source 
+> trees should yield useful insights from the differences between PDP11,
+> VAX and Z8000.
+
+The biggest problem here is the memory segmentation. Plexis has - as far
+as I understand the code - no segmentation/non-segmentation support. It
+only supports one memory segment like the other SYSIII implementation did
+(please correct me if I'm wrong - I'm far away from being a professional
+here).
+ZEUS introduced a flag in the user structure specifying if the user runs
+a programm in the segmented or non-segmented mode which was based on what
+C-compiler was used (or what ASM, PLZ/ASM, PLZ/SYS directive was set.). In
+the segmented mode all 128 memory segments where used, in the non
+segmented mode only one of those 128 segments (as far as I can remember
+it was always segment 63) was used.
+
+In plexis I didn't saw such logic. This creates problems when it comes to
+memory access in the Kernel or such things like file execution where the
+special s.out header has differences for segmented or non-segmented
+programs.
+
+the WEGA-Developer themself (I had contact to their kernel developer) just
+took ZEUS and wrote "some" machine-specific kernel parts new. They never
+had access to the ZEUS sources. Later after WEGA was in place they got
+access to original V7 sources and modified/added stuff in WEGA. All
+sources the WEGA guys used is available to me because I got access to the
+Development floppies (containing also firmware sources and so on... ;))
+It can be clearly determined which objects are still original ZEUS objects
+and which where rewritten by the WEGA guys:
+
+a) the libraries LIB1 and LIB2 are storing the file modification times
+of the included objects. The original ZEUS objects are all dated in '83
+or '84, all WEGA implementations are dated later beginning with '86 for
+some ASM-based objects and '88 and '89 for C-based objects.
+b) the original ZEUS libraries are all containing the SCCS ident string
+like
+char sys4wstr[] = "@[$]sys4.c		Rev : 4.2 	09/26/83 22:15:02";
+whereas the WEGA-sources are not containing such "whatstring".
+
+
+> It is also possible that the system was compiled with a 
+> different (may  be earlier) version of the compiler that was later shipped. 
+
+This might be the case - but I just don't hope so..
+
+> BTW, there are other Z8000 UNIX floating around. Maybe one of them will
+> shed some extra light.
+
+I'm much interested about hearing more about this. I only knew ZEUS, even
+Plexis came quite late to my ears.
+
+  Greetings, Oliver
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+

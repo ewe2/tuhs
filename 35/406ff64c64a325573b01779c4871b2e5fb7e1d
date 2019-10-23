@@ -1,0 +1,57 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 12 Dec 2015 00:26:55 +0000 (UTC)
+Subject: [TUHS] why does tar have the tape device hard coded into it and
+ why is it mt1 instead of mt0
+References: <566B4DD0.6070700@gmail.com>
+ <CAC20D2Mw1DyJq0v-YOZOe2CaG=Kx0=6TWBth+bNz1n29myL58Q@mail.gmail.com>
+ <566B5397.1060100@gmail.com> <20151211231355.GH30075@mercury.ccil.org>
+Message-ID: <n4fpkf$f6v$1@ger.gmane.org>
+
+On 2015-12-11, John Cowan <cowan at mercury.ccil.org> wrote:
+> Will Senn scripsit:
+>
+>> Thanks, that'll teach me to read the man pages more carefully even
+>> when the command is familiar in its modern form. 
+>
+> Note that if -f is not given, modern tars still default to the tape
+> drive, /dev/st0 on Linux or /dev/sa0 on *BSD.
+
+That depends on the tar. A lot these days default to stdin (or
+stdout as appropriate to the operation). Many don't even support
+the "drive number" option. OSX knows nothing of the options, and
+Ubuntu's GNU tar says:
+
+tar: Options '-[0-7][lmh]' not supported by *this* tar
+
+GNU tar has the capability, but it's apparently not a very
+well-used feature, since the ./configure script it ships with
+has a bug in a sed command meant to convert e.g. "/dev/st0" to
+"/dev/st" [prefix for 0-7 to be appended to].
+
+Star switched in 1982, according to the author. And in any case
+even when POSIX did define tar, it only said the default was
+"system-dependent".
+
+The only one I could find that keeps this alive is bsdtar
+(libarchive) which apparently will even use something called
+\\.\tape0 if compiled for Windows. But it doesn't actually
+support the 0-7 options.
+
+Well, that and OpenSolaris tar. Which apparently gets devices
+_and_ blocking factors corresponding to arguments 0-7 from
+/etc/default/tar:
+
+> archive0=/dev/rmt/0		20	0
+> archive1=/dev/rmt/0n		20	0
+> archive2=/dev/rmt/1		20	0
+> archive3=/dev/rmt/1n		20	0
+> archive4=/dev/rmt/0		126	0
+> archive5=/dev/rmt/0n		126	0
+> archive6=/dev/rmt/1		126	0
+> archive7=/dev/rmt/1n		126	0
+
+(The third argument is a size parameter; you're supposed to use
+it if you define one of the devices to be a floppy drive.)
+
+
+

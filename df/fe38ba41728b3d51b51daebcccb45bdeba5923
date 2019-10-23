@@ -1,0 +1,35 @@
+From: random832@fastmail.com (Random832)
+Date: Thu, 08 Feb 2018 13:59:49 -0500
+Subject: [TUHS] Device special files
+In-Reply-To: <01b001d3a065$d3ee30a0$7bca91e0$@ronnatalie.com>
+References: <CAP6exYLTp1bOBAaewKuv0VGTAckvR86bjROUic10u64rd3u+DA@mail.gmail.com>
+ <1517946499.3717582.1261737872.3DC598F2@webmail.messagingengine.com>
+ <20180207012556.GL30690@eureka.lemis.com>
+ <alpine.BSF.2.21.1802071239090.50080@aneurin.horsfall.org>
+ <20180207021405.CF19B156E812@mail.bitblocks.com>
+ <alpine.BSF.2.21.1802071628390.50080@aneurin.horsfall.org>
+ <20180207183607.E3NiH%steffen@sdaoden.eu>
+ <20180207190759.7sjrf6ta4m7sct3d@matica.foolinux.mooo.com>
+ <CAC20D2MLBnHq0nQnrec+-tLuCOhMXQdLNZvwfEd79nPnSxsQ9g@mail.gmail.com>
+ <01b001d3a065$d3ee30a0$7bca91e0$@ronnatalie.com>
+Message-ID: <1518116389.3085544.1264358560.45B003A3@webmail.messagingengine.com>
+
+On Wed, Feb 7, 2018, at 17:48, Ron Natalie wrote:
+> Amusingly, we still found bugs.    I was griping that people would mount 
+> on just any directory on the system, the mtab wouldn’t show the absolute 
+> path.    I suggested we chdir to / early on or better yet, cd to /dev.  
+> That way I wouldn’t have to type /dev/ on to the device name.     I say 
+> the user would have to give an absolute path anyhow since there’s 
+> nothing on /dev to mount on.    Well my roommate immediately tries to 
+> prove me wrong.   He tries passing various devnodes and regular files 
+> that happen to sit in /dev.   Then he gets the great idea of mounting 
+> on /dev/.     It works, but now we have no way to unmount it.   We had 
+> to reboot the machine.    I quickly modified mount to require an EMPTY 
+> directory owned by the user to be required for mounting.
+
+Would a mknod (in the new /dev or anywhere else) to "recreate" the device file have worked? Requiring an empty directory seems a bit overkill vs simply requiring an absolute path (perhaps one that does not begin with /dev) or having the mount command calculate the absolute path.
+
+(I'm mildly surprised that if this was in the era where . and .. were simply hardlinks created by mkdir(1), mounting on /dev/. didn't simply literally mount on /dev/. leaving /dev alone, which would have been an interesting state but wouldn't have prevented unmounting)
+
+Why is it that umount(2) took the device special file name rather than the mount point directory name, anyway? This seems to have been fixed in NFSv2, 4.3BSD-Uwisc, and Linux, but why was it like that in the first place? It *seems* like in the V6 era code the system could have just as well checked m_inodp for a match to the directory as m_dev for the device.
+

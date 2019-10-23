@@ -1,0 +1,26 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 28 Sep 2017 08:53:54 -0400 (EDT)
+Subject: [TUHS] RFS was: Re: UNIX of choice these days?
+Message-ID: <20170928125354.CE4E318C088@mercury.lcs.mit.edu>
+
+    > From: Theodore Ts'o
+
+    > when a file was truncated and then rewritten, and "truncate this file"
+    > packet got reordered and got received after the "here's the new 4k of
+    > contents of the file", Hilar[i]ty Enused.
+
+This sounds _exactly_ like a bad bug found in the RVD protocol (Remote Virtual
+Disk - a simple block device emulator). Disks kept suffering bit rot (damage
+to the inodes, IIRC). After much suffering, and pain trying to debug it (lots
+of disk writes, how do you figure out the one that's the problem), it was
+finally found (IIRC, it wasn't something thinking about it, they actually
+caught it). Turned out (I'm pretty sure my memory of the bug is correct), if
+you had two writes of the same block in quick sucession, and the second was
+lost, if the first one's ack was delayed Just Enough...
+
+They had an unused 'hint' (I think) field in the protocol, and so they
+recycled that to be a sequence number, so they could tell ack's apart.
+
+      Noel
+
+

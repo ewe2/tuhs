@@ -1,0 +1,127 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 90b2621d
+	for <ml@inbox.vuxu.org>;
+	Mon, 29 Apr 2019 22:33:07 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7956E9B638; Tue, 30 Apr 2019 08:33:05 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 50C1B948F1;
+	Tue, 30 Apr 2019 08:32:29 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 36057948F1; Tue, 30 Apr 2019 08:32:27 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 8AC61948F0
+ for <tuhs@minnie.tuhs.org>; Tue, 30 Apr 2019 08:32:26 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id 303F9156E40C
+ for <tuhs@minnie.tuhs.org>; Mon, 29 Apr 2019 15:32:19 -0700 (PDT)
+To: tuhs@minnie.tuhs.org
+In-reply-to: Your message of "Mon, 29 Apr 2019 18:05:12 -0000."
+ <20190429180512.q2jrlsyhvb7cx4ev@h-174-65.A328.priv.bahnhof.se>
+References: <20190428165452.9BB414422F@lignose.oclsc.org>
+ <97e93751-6e2f-a120-2159-0fb0246ad683@gmail.com>
+ <D239CD94-F1BA-47B0-9E16-4F67C09C5CEA@bitblocks.com>
+ <20190429180512.q2jrlsyhvb7cx4ev@h-174-65.A328.priv.bahnhof.se>
+Comments: In-reply-to Michael =?utf-8?B?S2rDtnJsaW5n?= <michael@kjorling.se>
+ message dated "Mon, 29 Apr 2019 18:05:12 -0000."
+From: Bakul Shah <bakul@bitblocks.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <30609.1556577138.1@bitblocks.com>
+Content-Transfer-Encoding: quoted-printable
+Date: Mon, 29 Apr 2019 15:32:19 -0700
+Message-Id: <20190429223226.303F9156E40C@mail.bitblocks.com>
+Subject: Re: [TUHS] A question about ls(1)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, 29 Apr 2019 18:05:12 -0000 Michael =3D?utf-8?B?S2rDtnJsaW5n?=3D <m=
+ichael@kjorling.se> wrote:
+Michael Kj?rling writes:
+> On 28 Apr 2019 13:00 -0700, from bakul@bitblocks.com (Bakul Shah):
+> > IMHO separate files are fine but it would've been nice to
+> > a) have a place other than $HOME to store these files and
+>
+> XDG already does that. At least Norman already mentioned ~/.config in
+> this thread.
+>
+> https://www.freedesktop.org/wiki/Software/xdg-user-dirs/
+>
+> Not sure how common that is on non-Linux systems, but it seems pretty
+> common on modern Linux distributions.
+
+I meant to suggest that a unix wide convention, with an API to
+access config data from programs, may still be of some use.
+This should contain user specific configuration in a few lines.
+
+mh for example has a single per user config file: .mh_profile.
+It allows you to specify your local maildir's path (defaulting
+to ~/Mail). All mail messages and additional state/data is then
+stored under ~/Mail or its subdirectories.
+
+So something like "path: foo" can be used store application
+specific stuff that doesn't fit in the minimal config model.
+The goal would be to cover the majority of programs and
+provide some guidelines for more complex applications.
+
+> My workstation Debian system has a staggering 3467 files in that
+> directory, spread around 444 directories (75 directories directly
+> under ~/.config). Plus another 142 dot-directories and 66 dotfiles in
+> ~/. Now, ~/.config typically uses multiple files per application, and
+> at a glance there's some stuff there that could definitely go, but I
+> still shudder to think of having all of those directly under ~/, so
+> it's clearly doing _some_ good in that regard.
+
+I suspect most of these files contain some state and cached
+application data or content as opposed to configuration.  Try
+the following from your home dir:
+
+du -a .??*|cat -n|grep -v / |\
+awk 'BEGIN{x=3D1;} {print $1-x, $3; x=3D$1;}'|sort -nr|head
+
+This prints out top 10 of total files/dirs under each
+top-level dot directory. You can try similar from .config. For
+me, most in the top 10 are programs I haven't used in years!
+
+>
+> And that's to not even begin to talk about all the stuff you'll find
+> in /etc on a modern Linux system.
+>
+> > b) a standardized plain text format
+>
+> I'm not sure about that; different applications have very different
+> needs, and trying to shoehorn one into another would be ugly; quite
+> possibly even more ugly than just having different formats.
+
+Not shoehorn in everything but support a core set. =
+
+
+> trying to write mail sorting recipies (think procmail) in a file with
+> the same format as that of one holding word processor settings or an
+> image metadata store.
+
+By "one place" I meant something like a ~/etc or ~/rc or
+~/config directory but not a single file. A separate config
+file for each program (and library) that needs it.
+
+Ideally I'd separate config, state, content and cache. I find
+<program>/{config,state,<content>,cache} to be more modular
+than {config,state,<content>,cache}/<program> -- what Apple
+forces on Macs. Ex: ~/Library/Preferences/org.tug.TexWorks.plist

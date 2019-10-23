@@ -1,0 +1,55 @@
+From: jacob.ritorto@gmail.com (Jacob Ritorto)
+Date: Wed, 11 Feb 2015 10:47:05 -0500
+Subject: [TUHS] 2.9 kernel compile
+Message-ID: <CAHYQbfCrwikSJeuWuqRPi4B4kNKyJV6Jtwdb0srcG7UY4YvwKA@mail.gmail.com>
+
+Hi,
+  Since my Fuji160 drive is rather head-crashed, I've replaced it with an
+M2333k, which is a smaller SMD rig with more sectors than the 160.
+Unfortunately, after many dip switch settings and config changes, I have to
+conclude that the sc21 just doesn't work with this new disk.
+
+  I've plugged in my SC41 controller that speaks MSCP and supports the
+M2333k correctly.  So now it's a matter of getting a unix small enough to
+run on the 11/34 that can also speak MSCP.  Enter Jonathan Engdahl's
+2.9bsd-MSCP.
+
+  I managed to restor a root dump from his distribution and am able to
+occasionally boot it on my 11/34, but it crashes very soon after booting
+and I don't understand why. I think it's something to do with the fact that
+he compiled it to run on an 11/23. Maybe it lacks unibus support. Maybe
+something to do with clock differences. Not sure. But I was thinking that I
+could make it work by recompiling the kernel with 11/34 support.
+
+I fired 2.9MSCP up in simh emulating an 11/23 and it works fine. Just to
+corroborate my hardware experience of it on the '34, I switch the cpu
+emulation to 11/34 and got a mostly identical crash sequence as with my
+real hardware.
+
+  So I switched the emulation back to '23, rebooted and edited the assym.s
+file found in Jonathan's /usr/src/sys/RA directory. I changed
+PDP11 = 23.
+to
+PDP11 = 34.
+
+as well as
+
+UNIBUS_MAP = 0
+to
+UNIBUS_MAP = 1
+
+and recompiled with 'make unix,' then copied the resultant unix to /unix.
+
+I switched simh back to emulating an 11/34 and rebooted. It crashes
+randomly just as it did before the kernel recompile.
+
+Any idea what I'm missing here? My hope was to simply move this
+freshly-compiled 11/34-friendly kernel onto my real 11/34 and have a
+working hardware system.
+
+thx
+jake
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20150211/1758f162/attachment.html>
+

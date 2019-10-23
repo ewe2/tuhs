@@ -1,0 +1,74 @@
+From: brad@heeltoe.com (Brad Parker)
+Date: Fri, 02 May 2008 06:24:44 -0400
+Subject: [Unix-jun72] more corrections
+In-Reply-To: <Pine.BSI.4.64.0805011927100.20114@malasada.lava.net> 
+References: <29658.1209658194@mini>
+	<Pine.BSI.4.64.0805011927100.20114@malasada.lava.net>
+Message-ID: <11428.1209723884@mini>
+
+
+Tim Newsham wrote:
+>
+>How can I get the modified simh? 
+
+Here's a diff against v36 and a tar of my working directory:
+
+http://www.unlambda.com/download/pdp11/unix-jun72/KE.diff
+http://www.unlambda.com/download/pdp11/unix-jun72/simhv36-1-ke.tar.gz
+
+>Also what configuration are you using?  I have this so far:
+>
+>   set tc enabled
+>   att tc tape.dt
+>   set rk3 enabled
+>   att rk3 rk0.dsk
+>   set rf enabled
+>   att rf rf0.dsk
+>   set cpu 11/20
+>   set cpu 32K
+
+I'm using this:
+
+set cpu 11/20
+set hk disabled
+set rha disabled
+set tm disabled
+set rx disabled
+set rl disabled
+set tq disabled
+set rk3 enabled
+att rk3 rk3.dsk
+set tc enabled
+set rf enabled
+set ke enabled
+set cpu 32K
+load loadfile
+d pc 400
+set cpu history=1000
+attach rf rf0.dsk
+
+I forgot to include my a.out->loadfile conversion program.  I'll check it
+in to svn.
+
+>Have you gotten far enough that it writes out the full primitive
+>root on rf0 so that you can reboot and get init going?
+
+No - it writes a bunch of blocks to rf0 but no directories.
+
+The 'zero i list' appears to work, and the code to init i-node 41-47 runs
+but nothing gets written.  Or if it does the wrong thing gets written.  not
+sure why.
+
+To debug I sprinkle "halt"'s in the code and then do "show cpu history"
+to see what happened.
+
+As a sanity check I also do 'e 0-40' and 'e 400-440' to make sure
+location 34 (iot vector) is filled in and the code at 400 is correct (it
+loads the sp with 60000).
+
+I might turn on some RF debug to see exactly what gets written when.
+
+-brad
+
+
+

@@ -1,0 +1,100 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ad803924
+	for <ml@inbox.vuxu.org>;
+	Tue, 17 Sep 2019 01:26:17 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D8E409C00C; Tue, 17 Sep 2019 11:26:15 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8DFD6947A2;
+	Tue, 17 Sep 2019 11:26:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B39D8947A2; Tue, 17 Sep 2019 11:26:00 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 66E459479A
+ for <tuhs@tuhs.org>; Tue, 17 Sep 2019 11:26:00 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id 392E51570CE9;
+ Mon, 16 Sep 2019 18:25:39 -0700 (PDT)
+To: Doug McIlroy <doug@cs.dartmouth.edu>
+In-reply-to: Your message of "Mon, 16 Sep 2019 20:20:32 -0400."
+ <201909170020.x8H0KWC6037690@tahoe.cs.Dartmouth.EDU>
+References: <201909170020.x8H0KWC6037690@tahoe.cs.Dartmouth.EDU>
+Comments: In-reply-to Doug McIlroy <doug@cs.dartmouth.edu>
+ message dated "Mon, 16 Sep 2019 20:20:32 -0400."
+From: Bakul Shah <bakul@bitblocks.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <49677.1568683539.1@bitblocks.com>
+Date: Mon, 16 Sep 2019 18:25:39 -0700
+Message-Id: <20190917012546.392E51570CE9@mail.bitblocks.com>
+Subject: Re: [TUHS] block operations in editors, was My EuroBSDcon talk
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, 16 Sep 2019 20:20:32 -0400 Doug McIlroy <doug@cs.dartmouth.edu> wrote:
+Doug McIlroy writes:
+> > The "block copy in an editor" thing is something which has intrigued
+> > me for years. poor old ed/ex/vi just couldn't do it, and for the life
+> > of me, I could not understand why this was "deprecated" by the people
+> > writing that family of editors.
+>
+> One might trace it to the founding tenet that a file is a stream of bytes,
+> reinforced by the absence of multidemensional arrays in C. But it goes
+> deeper than that.
+>
+> Ed imposes a structure, making a (finite) file into an array, aka list,
+> of lines. It's easy to define block moves and copies in a list. But
+> what are the semantics of a block move, wherein one treats the list
+> as a ragged-right 2D array? What gets pushed aside? In what direction?
+> How does a block move into column that not all destination rows
+> reach? How do you cope when the bottom gets ragged? How about the
+> top? Can one move blocks of tab-separated fields?
+>
+> I think everyone has rued the lack of block operations at one time
+> or another. But implementing them in any degree of generality is a
+> stumbling block. What should the semantics be?
+
+The Rand editor e handled all this reasonably well.
+
+A file was treated as a virtual quarter plane, with 0,0 as
+the start of the file (you could move a cursor anywhere
+including a non-existant line or column.  Extra blanks or
+lines were added only if you actually typed something there).
+
+In the command line (like vi's exmode) for many commands you
+can specify an area of operation which can be n lines, n
+paragraphs or a rectangle, starting at the cursor position. Or
+you can select a rectangular area with the "mark" command. If
+you move the cursor straight down, N lines would be chosen.
+To pick nx1 rectangle, you move cursor right one place after
+marking.
+
+open would open up a blank area,  pushing text left as
+necessary.  close would close up an area, pushing text right
+if necessary. erase would blank out an area (erase text but
+leave text outside alone). run command replaced the contents
+with the output of a shell command. feed was like run except
+it kept the original and inserted new data at the cursor.
+
+Tabs were not separators but stood for specific columns.  By
+default every 8 columns but you could change them to whatever.
+picking a rectangle handled them appropriately.  IIRC.  You
+stored non standard tab positions in a separate file.

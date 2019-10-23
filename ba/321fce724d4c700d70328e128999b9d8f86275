@@ -1,0 +1,36 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Tue, 14 Feb 2017 09:46:36 +0100
+Subject: [TUHS] Another odd comment in V6
+Message-ID: <378063CD-9B94-4AE3-B4BB-F41D2F6BFBF6@planet.nl>
+
+
+There's an odd comment in V6, in tty.c, just above ttread():
+
+/*
+ * Called from device's read routine after it has
+ * calculated the tty-structure given as argument.
+ * The pc is backed up for the duration of this call.
+ * In case of a caught interrupt, an RTI will re-execute.
+ */
+
+That comment is strange, because it does not describe what the code does. The comment isn't there in V5 or V7.
+
+I wonder if there is a link to the famous Gabriel paper about "worse is better" (http://dreamsongs.com/RiseOfWorseIsBetter.html). In arguing its points, the paper includes this story:
+
+---
+Two famous people, one from MIT and another from Berkeley (but working on Unix) once met to discuss operating system issues. The person from MIT was knowledgeable about ITS (the MIT AI Lab operating system) and had been reading the Unix sources. He was interested in how Unix solved the PC loser-ing problem. The PC loser-ing problem occurs when a user program invokes a system routine to perform a lengthy operation that might have significant state, such as IO buffers. If an interrupt occurs during the operation, the state of the user program must be saved. Because the invocation of the system routine is usually a single instruction, the PC of the user program does not adequately capture the state of the process. The system routine must either back out or press forward. The right thing is to back out and restore the user program PC to the instruction that invoked the system routine so that resumption of the user program after the interrupt, for example, re-enters the system routine. It is called PC loser-ing because the PC is being coerced into loser mode, where loser is the affectionate name for user at MIT.
+
+The MIT guy did not see any code that handled this case and asked the New Jersey guy how the problem was handled. The New Jersey guy said that the Unix folks were aware of the problem, but the solution was for the system routine to always finish, but sometimes an error code would be returned that signaled that the system routine had failed to complete its action. A correct user program, then, had to check the error code to determine whether to simply try the system routine again. The MIT guy did not like this solution because it was not the right thing.
+
+The New Jersey guy said that the Unix solution was right because the design philosophy of Unix was simplicity and that the right thing was too complex. Besides, programmers could easily insert this extra test and loop. The MIT guy pointed out that the implementation was simple but the interface to the functionality was complex. The New Jersey guy said that the right tradeoff has been selected in Unix -- namely, implementation simplicity was more important than interface simplicity.
+---
+
+Actually, research Unix does save the complete state of a process and could back up the PC. The reason that it doesn't work is in the syscall API design, using registers to pass values etc. If all values were passed on the stack it would work. As to whether it is the right thing to be stuck in a read() call waiting for terminal input after a signal was received...
+
+I always thought that this story was entirely fictional, but now I wonder. The Unix guru referred to could be Ken Thompson (note how he is first referred to as "from Berkeley but working on Unix" and then as "the New Jersey guy").
+
+Who can tell me more about this? Any of the old hands?
+
+Paul
+
+

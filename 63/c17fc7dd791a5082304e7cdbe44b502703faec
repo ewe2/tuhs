@@ -1,0 +1,421 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.3 required=5.0 tests=DKIM_ADSP_CUSTOM_MED,
+	DKIM_INVALID,DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f7174735
+	for <ml@inbox.vuxu.org>;
+	Wed, 28 Aug 2019 03:26:26 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9F8A99BC42; Wed, 28 Aug 2019 13:26:25 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 816859BC35;
+	Wed, 28 Aug 2019 13:26:07 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="kQfNaRFA";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CB2009BC35; Wed, 28 Aug 2019 13:26:05 +1000 (AEST)
+Received: from mail-vs1-f43.google.com (mail-vs1-f43.google.com
+ [209.85.217.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1B9D99BBFD
+ for <tuhs@minnie.tuhs.org>; Wed, 28 Aug 2019 13:26:05 +1000 (AEST)
+Received: by mail-vs1-f43.google.com with SMTP id b187so893810vsc.9
+ for <tuhs@minnie.tuhs.org>; Tue, 27 Aug 2019 20:26:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=EWEMNND4Xwn9R3nzTIwjeZTina4s0Q0X+8k9WUgAWmU=;
+ b=kQfNaRFAVnXFLC7qY3bZNqP7i0ojEhX8Wwqe2sbrZJRBJETU/jHDxnh5WEfnTGMJFz
+ CqkjcJLVXdTbT9XZc6bI/wHMCEx/5aYtFD+sEegP/05kVvNGOA0GHz//7HvEuc2jnxNG
+ SKPgml+dhFO3D0vpgHs0lxnI12Q9+82PSQfF8jV8euCuVJe+M1yQWq6X+uNHSaDebLBL
+ A/I+DG5LKYuttvmOT8FQrVbSoiXe/gFvKRfVmCumc+ae8qzYGvmqJ9tG5cSmYYZvWNue
+ VyIl8M0rQ0AuhSS90YLpZlDqu2ZVSpaqXXLOFHlTIt+Z2/VM3vrIFngcR0Jd9LJz+MCc
+ 9U0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=EWEMNND4Xwn9R3nzTIwjeZTina4s0Q0X+8k9WUgAWmU=;
+ b=lilWsmr4SyI75u/NMEZoK4qJruPtKUfyOYRatukDIsjOYYgcq/6penrjE5WoG/9gxp
+ H4sHNPR1mjUYL9WKqSgaGgPxo8a1U06b4i1tFVpjIMnyoEj8/XcTa8jWdh9jqU0skyIJ
+ YoYkpErpGhXNFkN5oFA1++R8Ia+wwvC3zJYiiSw4Euy5H5U34Q3diJ8wJs8bJ0T8OybQ
+ p3JOaREAwzGHAbR0AfJVM0FrgvM61dzdHEZIVvhqy6edG+G+Cw+uQsgsBwQraJ59VkyW
+ bFFX93QhL/hWbiAZs6vwiESNxWCEqRpTfCewLSyF2NVpdbjp7yLxKxl92sOhrxzctxpf
+ IJNw==
+X-Gm-Message-State: APjAAAVHOG7Wy3iPEpH9eN7N2PwHr8nghP8c1o72YRz3vKutu1Zghtf7
+ b3y9p66qsS3BMeTkCeVlKoWil/e9b8SgOCS7qYXJyZw/
+X-Google-Smtp-Source: APXvYqxYmht3e6HoRPlC3H7UWUtzNeYaXjcGbedomzOX1vnvWsfvb0D5ZFR04hlstqepr+gM25V6USy8n90G3e5mPKQ=
+X-Received: by 2002:a67:f2d1:: with SMTP id a17mr1184886vsn.46.1566962764147; 
+ Tue, 27 Aug 2019 20:26:04 -0700 (PDT)
+MIME-Version: 1.0
+References: <b9f6633e-36f6-d802-c315-1f1528486270@kilonet.net>
+ <20190827003013.GS13570@mcvoy.com>
+ <312b39a1-2944-100f-55e0-fc65b504d43d@kilonet.net>
+ <CAEoi9W6upO4LdvV0AVLy8f1je6oSZeuz4bbP4yuux-Xe6UUEBA@mail.gmail.com>
+ <20190827024511.GU13570@mcvoy.com>
+ <faaebe25-e5e5-0f6e-6eda-fc2fc6a0dc95@kilonet.net>
+ <20190827145556.GD13570@mcvoy.com>
+ <CAKr6gn2V_T_EnYaz3OYassHSpLecoKTkqZe+By8A9kQQ=7jnMA@mail.gmail.com>
+ <20190827224002.GB15511@mcvoy.com>
+ <CAKr6gn2EwxJH+5R75QuxgHBtF7BFFdc7Qfx=3HPvHi71i2fLdA@mail.gmail.com>
+ <20190827225955.GC15511@mcvoy.com>
+ <CAKzdPgwWOGQbFEGSS0W-DC5A3muGSHc83V48OX3YJodxJV2wOQ@mail.gmail.com>
+In-Reply-To: <CAKzdPgwWOGQbFEGSS0W-DC5A3muGSHc83V48OX3YJodxJV2wOQ@mail.gmail.com>
+From: Rob Pike <robpike@gmail.com>
+Date: Wed, 28 Aug 2019 13:25:52 +1000
+Message-ID: <CAKzdPgyN2_SpTR=ziRxQrcXjpMcpULFxVAECLMoPCt=5t6t4yQ@mail.gmail.com>
+To: Larry McVoy <lm@mcvoy.com>
+Content-Type: multipart/alternative; boundary="000000000000eeefea059124f2bb"
+Subject: Re: [TUHS] [SPAM] Re: If not Linux, then what?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000eeefea059124f2bb
+Content-Type: text/plain; charset="UTF-8"
+
+There are many things to dislike about sockets, but one of them -
+irrelevant now, perhaps, but hugely troublesome at the time - was the way
+they embedded the specific and peculiar behavior of Ethernet, such as
+accepting a connection before you know if it's authorized - into the
+networking interface. No other networking hardware worked like Ethernet at
+either the electrical or the software level, and yet here we are.
+
+I grump, I grump.
+
+-rob
+
+On Wed, Aug 28, 2019 at 1:22 PM Rob Pike <robpike@gmail.com> wrote:
+
+> I find it hard to believe what you remember Dennis saying. The point of
+> dmr's streams was to support networking research in the lab and avoid the
+> myriad bugs of the mpx interface by stepping around them completely.
+>
+> Perhaps it's out of context.
+>
+> -rob
+>
+>
+> On Wed, Aug 28, 2019 at 9:00 AM Larry McVoy <lm@mcvoy.com> wrote:
+>
+>> streams were OK but Dennis himself told me he didn't intend them for
+>> networking.  They were a simple mechanism for pushing line disciplines
+>> onto tty drivers.
+>>
+>> I can't remember exactly what he said, this was back in ~1988 or so
+>> and I was talking to him about the STREAMS stuff.  He wasn't very
+>> happy with it and I'm pretty sure he said something like streams
+>> weren't design to mux multiple sources or network connections.
+>> I think he sort of grudgingly gave credit that they made it work
+>> but he seemed to think that it was twisting streams more than they
+>> should be twisted.
+>>
+>> On Wed, Aug 28, 2019 at 08:46:35AM +1000, George Michaelson wrote:
+>> > oh maybe I meant "streams" not "STREAMS" I always got confused if the
+>> > original ritchie spec was upper or lower case. Charles Forsyth coded
+>> > it into the York Uni Vaxen, worked fine. I left shortly after to do
+>> > stuff at UCL, it only came back into my life when at UQ in Australia
+>> > we got an ICL "certified" SYSV host and along side dead technology
+>> > like RFS up it popped (I think ICL had coded an OSI stack we were
+>> > testing)
+>> >
+>> > -G
+>> >
+>> > On Wed, Aug 28, 2019 at 8:40 AM Larry McVoy <lm@mcvoy.com> wrote:
+>> > >
+>> > > Wait, are you arguing for STREAMS over sockets?  Dear god, please no.
+>> > > Have you ever used STREAMS (not Ritchies streams, those were OK)?
+>> > > I have.  I ported Lachman's STREAMS based TCP/IP stack twice, once
+>> > > to a long since defunct super computer called the ETA-10 and then
+>> > > to SCO Unix.  I've got way more STREAMS experience than most people
+>> > > and I can tell you that sockets are WAY WAY better.  I get the "it
+>> > > should have just been file I/O" except that I don't.  I tried to
+>> > > write a library that let you open up /net/tcp/$host:$port and do
+>> > > I/O like it was a file descriptor.  That works for a lot of stuff
+>> > > but I ran into problems quickly.  A networking connection is not
+>> > > a file handle.  You can make some stuff work but I couldn't figure
+>> > > out how to do all of it.   You end up having to do ioctls to handle
+>> > > the stuff that doesn't fit well into the file system name space.
+>> > > I think plan 9 did this sort of thing, maybe Rob can prove me wrong
+>> > > or remember where it didn't match.
+>> > >
+>> > > I do know that STREAMS came back to Solaris, some VP inked a shitty
+>> > > deal with Lachman and bought the rights to the stack.  It was slow
+>> > > as molasses in the winter and customers absolutely hated it.  Sun
+>> > > got Mentat to redo it for perf but customers still hated it, they
+>> > > understood sockets, everyone else had sockets, they wanted sockets
+>> > > and they got them.  Sun put them back and nobody ever asked about
+>> > > STREAMS again.
+>> > >
+>> > > On Wed, Aug 28, 2019 at 08:30:01AM +1000, George Michaelson wrote:
+>> > > > BSD, but with the original STREAMS semantics, not sockets.
+>> > > >
+>> > > > DARPA did us no favours accepting sockets in place of simple file
+>> I/O
+>> > > > semantics for networks.
+>> > > >
+>> > > > Newcastle connection put the namespace into
+>> > > > /.../remote-part/path/to/thing which I felt was also good.
+>> > > >
+>> > > > So for me, 7 -> BSD -> got worse for some values of worse
+>> > > >
+>> > > > On Wed, Aug 28, 2019 at 12:56 AM Larry McVoy <lm@mcvoy.com> wrote:
+>> > > > >
+>> > > > > On Mon, Aug 26, 2019 at 11:14:45PM -0400, Arthur Krewat wrote:
+>> > > > > > On 8/26/2019 10:45 PM, Larry McVoy wrote:
+>> > > > > > >  Which was that the page cache is
+>> > > > > > >*the*  cache.  There is nothing else.
+>> > > > > > Yeah, I re-read what you wrote a few times after I replied, and
+>> realized
+>> > > > > > what you meant ... eventually ;)
+>> > > > >
+>> > > > > I might be making too big of a deal about it.  mmap semantics
+>> mattered
+>> > > > > a lot when SMPs first showed up and main memory was small.  It
+>> meant
+>> > > > > that you could have multiple CPUs seeing and working on the same
+>> chunk
+>> > > > > of data at the same time.
+>> > > > >
+>> > > > > It's very similar to way that IOMMUs are exposed to user space
+>> these
+>> > > > > days, enabling virtual machines direct access to the I/O devices.
+>> > > > >
+>> > > > > ZFS breaks that model, the data is all in the ARC and if you mmap
+>> > > > > it they have to bcopy the data out of the ARC, into the page cache
+>> > > > > and now they have a consistency problem, you could modify stuff
+>> > > > > via mmap or write and they have to manage that.
+>> > > > >
+>> > > > > That consistency problem is the main reason that Sun almost
+>> completely
+>> > > > > killed the buffer cache (it still was used for inodes and
+>> directories
+>> > > > > but that was it).  That consistency problem is a pain in the rear,
+>> > > > > all sorts of race conditions and it tended to bit rot.
+>> > > > >
+>> > > > > Jeff and Bill are smart people so I suspect they got it right but
+>> I'm
+>> > > > > still stunned that they took such an architecturally bad approach.
+>> > > > > And even more stunned that the oversight people approved it.
+>> There
+>> > > > > is zero chance that the Sun I worked at would have allowed that.
+>> > > > >
+>> > > > > --lm
+>> > >
+>> > > --
+>> > > ---
+>> > > Larry McVoy                  lm at mcvoy.com
+>> http://www.mcvoy.com/lm
+>>
+>> --
+>> ---
+>> Larry McVoy                  lm at mcvoy.com
+>> http://www.mcvoy.com/lm
+>>
+>
+
+--000000000000eeefea059124f2bb
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">There are many things to dislike about sockets, but one of=
+ them - irrelevant now, perhaps, but hugely troublesome at the time - was t=
+he way they embedded the specific and peculiar behavior of Ethernet, such a=
+s accepting a connection before you know if it&#39;s authorized - into the =
+networking interface. No other networking hardware worked like Ethernet at =
+either the electrical or the software level, and yet here we are.<div><br><=
+/div><div>I grump, I grump.<br><div><br></div><div>-rob</div></div></div><b=
+r><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Wed, =
+Aug 28, 2019 at 1:22 PM Rob Pike &lt;<a href=3D"mailto:robpike@gmail.com">r=
+obpike@gmail.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" =
+style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);pa=
+dding-left:1ex"><div dir=3D"ltr">I find it hard to believe what you remembe=
+r Dennis saying. The point of dmr&#39;s streams was to support networking r=
+esearch in the lab and avoid the myriad bugs of the mpx interface by steppi=
+ng around them completely.<div><br></div><div>Perhaps it&#39;s out of conte=
+xt.<br><div><div><br></div><div>-rob</div><div><br></div></div></div></div>=
+<br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Wed=
+, Aug 28, 2019 at 9:00 AM Larry McVoy &lt;<a href=3D"mailto:lm@mcvoy.com" t=
+arget=3D"_blank">lm@mcvoy.com</a>&gt; wrote:<br></div><blockquote class=3D"=
+gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(20=
+4,204,204);padding-left:1ex">streams were OK but Dennis himself told me he =
+didn&#39;t intend them for <br>
+networking.=C2=A0 They were a simple mechanism for pushing line disciplines=
+<br>
+onto tty drivers.<br>
+<br>
+I can&#39;t remember exactly what he said, this was back in ~1988 or so<br>
+and I was talking to him about the STREAMS stuff.=C2=A0 He wasn&#39;t very<=
+br>
+happy with it and I&#39;m pretty sure he said something like streams<br>
+weren&#39;t design to mux multiple sources or network connections.<br>
+I think he sort of grudgingly gave credit that they made it work<br>
+but he seemed to think that it was twisting streams more than they<br>
+should be twisted.<br>
+<br>
+On Wed, Aug 28, 2019 at 08:46:35AM +1000, George Michaelson wrote:<br>
+&gt; oh maybe I meant &quot;streams&quot; not &quot;STREAMS&quot; I always =
+got confused if the<br>
+&gt; original ritchie spec was upper or lower case. Charles Forsyth coded<b=
+r>
+&gt; it into the York Uni Vaxen, worked fine. I left shortly after to do<br=
+>
+&gt; stuff at UCL, it only came back into my life when at UQ in Australia<b=
+r>
+&gt; we got an ICL &quot;certified&quot; SYSV host and along side dead tech=
+nology<br>
+&gt; like RFS up it popped (I think ICL had coded an OSI stack we were<br>
+&gt; testing)<br>
+&gt; <br>
+&gt; -G<br>
+&gt; <br>
+&gt; On Wed, Aug 28, 2019 at 8:40 AM Larry McVoy &lt;<a href=3D"mailto:lm@m=
+cvoy.com" target=3D"_blank">lm@mcvoy.com</a>&gt; wrote:<br>
+&gt; &gt;<br>
+&gt; &gt; Wait, are you arguing for STREAMS over sockets?=C2=A0 Dear god, p=
+lease no.<br>
+&gt; &gt; Have you ever used STREAMS (not Ritchies streams, those were OK)?=
+<br>
+&gt; &gt; I have.=C2=A0 I ported Lachman&#39;s STREAMS based TCP/IP stack t=
+wice, once<br>
+&gt; &gt; to a long since defunct super computer called the ETA-10 and then=
+<br>
+&gt; &gt; to SCO Unix.=C2=A0 I&#39;ve got way more STREAMS experience than =
+most people<br>
+&gt; &gt; and I can tell you that sockets are WAY WAY better.=C2=A0 I get t=
+he &quot;it<br>
+&gt; &gt; should have just been file I/O&quot; except that I don&#39;t.=C2=
+=A0 I tried to<br>
+&gt; &gt; write a library that let you open up /net/tcp/$host:$port and do<=
+br>
+&gt; &gt; I/O like it was a file descriptor.=C2=A0 That works for a lot of =
+stuff<br>
+&gt; &gt; but I ran into problems quickly.=C2=A0 A networking connection is=
+ not<br>
+&gt; &gt; a file handle.=C2=A0 You can make some stuff work but I couldn&#3=
+9;t figure<br>
+&gt; &gt; out how to do all of it.=C2=A0 =C2=A0You end up having to do ioct=
+ls to handle<br>
+&gt; &gt; the stuff that doesn&#39;t fit well into the file system name spa=
+ce.<br>
+&gt; &gt; I think plan 9 did this sort of thing, maybe Rob can prove me wro=
+ng<br>
+&gt; &gt; or remember where it didn&#39;t match.<br>
+&gt; &gt;<br>
+&gt; &gt; I do know that STREAMS came back to Solaris, some VP inked a shit=
+ty<br>
+&gt; &gt; deal with Lachman and bought the rights to the stack.=C2=A0 It wa=
+s slow<br>
+&gt; &gt; as molasses in the winter and customers absolutely hated it.=C2=
+=A0 Sun<br>
+&gt; &gt; got Mentat to redo it for perf but customers still hated it, they=
+<br>
+&gt; &gt; understood sockets, everyone else had sockets, they wanted socket=
+s<br>
+&gt; &gt; and they got them.=C2=A0 Sun put them back and nobody ever asked =
+about<br>
+&gt; &gt; STREAMS again.<br>
+&gt; &gt;<br>
+&gt; &gt; On Wed, Aug 28, 2019 at 08:30:01AM +1000, George Michaelson wrote=
+:<br>
+&gt; &gt; &gt; BSD, but with the original STREAMS semantics, not sockets.<b=
+r>
+&gt; &gt; &gt;<br>
+&gt; &gt; &gt; DARPA did us no favours accepting sockets in place of simple=
+ file I/O<br>
+&gt; &gt; &gt; semantics for networks.<br>
+&gt; &gt; &gt;<br>
+&gt; &gt; &gt; Newcastle connection put the namespace into<br>
+&gt; &gt; &gt; /.../remote-part/path/to/thing which I felt was also good.<b=
+r>
+&gt; &gt; &gt;<br>
+&gt; &gt; &gt; So for me, 7 -&gt; BSD -&gt; got worse for some values of wo=
+rse<br>
+&gt; &gt; &gt;<br>
+&gt; &gt; &gt; On Wed, Aug 28, 2019 at 12:56 AM Larry McVoy &lt;<a href=3D"=
+mailto:lm@mcvoy.com" target=3D"_blank">lm@mcvoy.com</a>&gt; wrote:<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; On Mon, Aug 26, 2019 at 11:14:45PM -0400, Arthur Krewat=
+ wrote:<br>
+&gt; &gt; &gt; &gt; &gt; On 8/26/2019 10:45 PM, Larry McVoy wrote:<br>
+&gt; &gt; &gt; &gt; &gt; &gt;=C2=A0 Which was that the page cache is<br>
+&gt; &gt; &gt; &gt; &gt; &gt;*the*=C2=A0 cache.=C2=A0 There is nothing else=
+.<br>
+&gt; &gt; &gt; &gt; &gt; Yeah, I re-read what you wrote a few times after I=
+ replied, and realized<br>
+&gt; &gt; &gt; &gt; &gt; what you meant ... eventually ;)<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; I might be making too big of a deal about it.=C2=A0 mma=
+p semantics mattered<br>
+&gt; &gt; &gt; &gt; a lot when SMPs first showed up and main memory was sma=
+ll.=C2=A0 It meant<br>
+&gt; &gt; &gt; &gt; that you could have multiple CPUs seeing and working on=
+ the same chunk<br>
+&gt; &gt; &gt; &gt; of data at the same time.<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; It&#39;s very similar to way that IOMMUs are exposed to=
+ user space these<br>
+&gt; &gt; &gt; &gt; days, enabling virtual machines direct access to the I/=
+O devices.<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; ZFS breaks that model, the data is all in the ARC and i=
+f you mmap<br>
+&gt; &gt; &gt; &gt; it they have to bcopy the data out of the ARC, into the=
+ page cache<br>
+&gt; &gt; &gt; &gt; and now they have a consistency problem, you could modi=
+fy stuff<br>
+&gt; &gt; &gt; &gt; via mmap or write and they have to manage that.<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; That consistency problem is the main reason that Sun al=
+most completely<br>
+&gt; &gt; &gt; &gt; killed the buffer cache (it still was used for inodes a=
+nd directories<br>
+&gt; &gt; &gt; &gt; but that was it).=C2=A0 That consistency problem is a p=
+ain in the rear,<br>
+&gt; &gt; &gt; &gt; all sorts of race conditions and it tended to bit rot.<=
+br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; Jeff and Bill are smart people so I suspect they got it=
+ right but I&#39;m<br>
+&gt; &gt; &gt; &gt; still stunned that they took such an architecturally ba=
+d approach.<br>
+&gt; &gt; &gt; &gt; And even more stunned that the oversight people approve=
+d it.=C2=A0 There<br>
+&gt; &gt; &gt; &gt; is zero chance that the Sun I worked at would have allo=
+wed that.<br>
+&gt; &gt; &gt; &gt;<br>
+&gt; &gt; &gt; &gt; --lm<br>
+&gt; &gt;<br>
+&gt; &gt; --<br>
+&gt; &gt; ---<br>
+&gt; &gt; Larry McVoy=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 lm at <a href=3D"http://mcvoy.com" rel=3D"noreferrer" target=3D"=
+_blank">mcvoy.com</a>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0<a hre=
+f=3D"http://www.mcvoy.com/lm" rel=3D"noreferrer" target=3D"_blank">http://w=
+ww.mcvoy.com/lm</a><br>
+<br>
+-- <br>
+---<br>
+Larry McVoy=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 l=
+m at <a href=3D"http://mcvoy.com" rel=3D"noreferrer" target=3D"_blank">mcvo=
+y.com</a>=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0<a href=3D"http://=
+www.mcvoy.com/lm" rel=3D"noreferrer" target=3D"_blank">http://www.mcvoy.com=
+/lm</a> <br>
+</blockquote></div>
+</blockquote></div>
+
+--000000000000eeefea059124f2bb--

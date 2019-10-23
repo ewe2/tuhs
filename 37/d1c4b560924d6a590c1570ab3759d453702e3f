@@ -1,0 +1,68 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 26 Apr 2018 00:24:34 +0200
+Subject: [TUHS] /dev/drum
+In-Reply-To: <mailman.137.1524667148.3788.tuhs@minnie.tuhs.org>
+References: <mailman.137.1524667148.3788.tuhs@minnie.tuhs.org>
+Message-ID: <55000939-330c-85fe-7b07-5711b3578ecb@update.uu.se>
+
+On 2018-04-25 16:39, Tom Ivar Helbekkmo<tih at hamartun.priv.no> wrote:
+> 
+> Ron Natalie<ron at ronnatalie.com>  writes:
+> 
+>> RK05’s were 4872 blocks.  Don’t know why that number has stuck with
+>> me, too many invocations of mkfs I guess.  Oddly, DEC software for
+>> some reason never used the last 72 blocks.
+> I guess that's because they implemented DEC Standard 144, known as
+> bad144 in BSD Unix.  It's a system of remapping bad sectors to spares at
+> the end of the disk.  I had fun implementing that for the wd (ST506)
+> disk driver in NetBSD, once upon a time...
+
+Uh... DEC STD 144 does not have anything to do with remapping bad blocks 
+to replacement good blocks. DEC STD 144 describes how a media stores 
+known bad blocks on a disk, so that file system initialization can then 
+take whatever action needed to that these blocks are not used by 
+anything. In RSX (and VMS), they will be included in a file called 
+BADBLK.SYS, and thus be perceived as "used".
+
+bad144 in NetBSD will keep the a table in memory for such disks, and 
+"skip" blocks listed in the list as bad, meaning all other blocks gets 
+shifted. So it sortof do a remapping to good blocks by extending the 
+used blocks, and does not allocate anything at the end of the disk per 
+se. However, that is a Unix specific solution. OS/8 had a similar 
+solution for RL01 and RL02 drives, but not RK05 (as RK05 disks don't 
+follow DEC STD 144.)
+
+I don't know exactly why DEC left the last three tracks unused. Might 
+have been for diagnostic tools to have a scratch area to play with. 
+Might have been that those tracks were found to be less reliable. Or 
+maybe something completely different. But it was not for bad block 
+replacement, as DEC didn't even do that on RK05 (or more or less in 
+general at all before MSCP. MSCP, by the way, does not use DEC STD 144.)
+
+Something Unix and other implementations usually miss with DEC STD 144 
+is that there are actually two tables with bad blocks defined by the 
+standard. There is the manufacturer defined bad blocks, which all 
+software seems to know and deal with, and there are the user defined bad 
+blocks, which are supposed to be where all bad blocks that develop after 
+manufacture are supposed to be placed. Lots of software does not deal 
+with this second list. In addition, you also have the pack serial number 
+and some stuff defined by DEC STD 144, which is also recorded on the 
+last track, where the bad block lists also are stored.
+
+Note that this information is supposed to be on the last track, meaning 
+you cannot use the scheme Unix uses to remap bad blocks, unless you keep 
+some blocks before the last track unallocated.
+
+The ultimate irony was when I discovered that bad144 under NetBSD was 
+only built for x86 machine, and not being built for VAX, which is the 
+only architecture supported which actually have real disks which follow 
+the DEC STD 144. But that was corrected about 20 years ago now (time flies).
+
+   Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

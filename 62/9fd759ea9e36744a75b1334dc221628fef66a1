@@ -1,0 +1,125 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8e6f7bdf
+	for <ml@inbox.vuxu.org>;
+	Fri, 31 May 2019 00:28:47 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B92639B849; Fri, 31 May 2019 10:28:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6B2FF9B680;
+	Fri, 31 May 2019 10:28:12 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 328E29B680; Fri, 31 May 2019 10:28:10 +1000 (AEST)
+X-Greylist: delayed 426 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Fri, 31 May 2019 10:28:09 AEST
+Received: from ipo2.cc.utah.edu (ipo2.cc.utah.edu [155.97.144.12])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B23179B67F
+ for <tuhs@minnie.tuhs.org>; Fri, 31 May 2019 10:28:09 +1000 (AEST)
+X-IronPort-AV: E=Sophos;i="5.60,533,1549954800"; d="scan'208";a="343366425"
+Received: from mail.math.utah.edu ([155.101.98.135])
+ by ipo2smtp.cc.utah.edu with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384;
+ 30 May 2019 18:21:03 -0600
+Received: from gamma.math.utah.edu (gamma.math.utah.edu [155.101.96.20])
+ by mail.math.utah.edu (8.14.8/8.14.8) with ESMTP id x4V0L2f1025419;
+ Thu, 30 May 2019 18:21:02 -0600 (MDT)
+Received: from gamma.math.utah.edu (localhost [127.0.0.1])
+ by gamma.math.utah.edu (8.15.1/8.15.1) with ESMTP id x4V0L2ur016725;
+ Thu, 30 May 2019 18:21:02 -0600
+Received: (from beebe@localhost)
+ by gamma.math.utah.edu (8.15.1/8.15.1/Submit) id x4V0L2ED016724;
+ Thu, 30 May 2019 18:21:02 -0600
+Date: Thu, 30 May 2019 18:21:02 -0600
+From: "Nelson H. F. Beebe" <beebe@math.utah.edu>
+To: tuhs@minnie.tuhs.org
+X-US-Mail: "Department of Mathematics, 110 LCB, University of Utah, 155 S
+ 1400 E RM 233, Salt Lake City, UT 84112-0090, USA"
+X-Telephone: +1 801 581 5254
+X-FAX: +1 801 581 4148
+X-URL: http://www.math.utah.edu/~beebe
+Message-ID: <CMM.0.95.0.1559262062.beebe@gamma.math.utah.edu>
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.3.8
+ (mail.math.utah.edu [155.101.98.135]); Thu, 30 May 2019 18:21:03 -0600 (MDT)
+Subject: Re: [TUHS] Quotas - did anyone ever use them?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Several list members report having used, or suffered under, filesystem
+quotas.
+
+At the University Utah, in the College of Science, and later, the
+Department of Mathematics, we have always had an opposing view:
+
+	Disk quotas are magic meaningless numbers imposed by some bozo
+	ignorant system administrator in order to prevent users from
+	getting their work done.
+
+Thus, in my 41 years of systems management at Utah, we have not had a
+SINGLE SYSTEM with user disk quotas enabled.
+
+We have run PDP-11s with RT-11, RSX, and RSTS, PDP-10s with TOPS-20,
+VAXes with VMS and BSD Unix, an Ardent Titan, a Stardent, a Cray
+EL/94, and hundreds of Unix workstations from Apple, DEC, Dell, HP,
+IBM, NeXT, SGI, and Sun with numerous CPU families (Alpha, Arm, MC68K,
+SPARC, MIPS, NS 88000, PowerPC, x86, x86_64, and maybe others that I
+forget at the moment).
+
+For the last 15+ years, our central fileservers have run ZFS on
+Solaris 10 (SPARC, then on Intel x86_64), and for the last 17 months,
+on GNU/Linux CentOS 7.
+
+Each ZFS dataset gets its space from a large shared pool of disks, and
+each dataset has a quota: thus, space CAN fill up in a given dataset,
+so that some users might experience a disk-full situation.  In
+practice, that rarely happens, because a cron job runs every 20
+minutes, looking for datasets that are nearly full, and giving them a
+few extra GB if needed.  Affected users in a average of 10 minutes or
+so will no longer see disk-full problems.  If we see serious imbalance
+in the sizes of previously similar-sized datasets, we manually move
+directory trees between datasets to achieve a reasonable balance, and
+reset the dataset quotas.
+
+We make nightly ZFS snapshots (hourly for user home directories), and
+send the nightlies to an off-campus server in a large datacenter, and
+we write nightly filesystem backs to a tape robot. The tape technology
+generations have evolved through 9-track, QIC, 4mm DAT, 8mm DAT, DLT,
+LTO-4, LTO-6, and perhaps soon, LTO-8.
+
+Our main fileserver talks through a live SAN FibreChannel mirror to
+independent storage arrays in two different buildings.
+
+Thus, we always have two live copies of all data, and third far-away
+live copy that is no more than 24 hours old.
+
+Yes, we do see runaway output files from time to time, and an
+occasional student (among currently more than 17,000 accounts) who
+uses an unreasonable amount of space.  In such cases, we deal with the
+job, or user, involved, and get space freed up; other users remain
+largely remain unaware of the temporary space crisis.
+
+The result of our no-quotas policy is that few of our users have ever
+seen a disk-full condition; they just get on with their work, as they,
+and we, expect them to do.
+
+-------------------------------------------------------------------------------
+- Nelson H. F. Beebe                    Tel: +1 801 581 5254                  -
+- University of Utah                    FAX: +1 801 581 4148                  -
+- Department of Mathematics, 110 LCB    Internet e-mail: beebe@math.utah.edu  -
+- 155 S 1400 E RM 233                       beebe@acm.org  beebe@computer.org -
+- Salt Lake City, UT 84112-0090, USA    URL: http://www.math.utah.edu/~beebe/ -
+-------------------------------------------------------------------------------

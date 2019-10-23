@@ -1,0 +1,75 @@
+From: carl.lowenstein@gmail.com (Carl Lowenstein)
+Date: Tue, 30 Aug 2005 09:18:57 -0700
+Subject: [TUHS] can someone help about the pdp11/34 boot ? :(
+In-Reply-To: <20050830145935.GA3659@freaknet.org>
+References: <20050830145935.GA3659@freaknet.org>
+Message-ID: <5904d573050830091843d54d30@mail.gmail.com>
+
+On 8/30/05, asbesto <asbesto at freaknet.org> wrote:
+> 
+> 
+> Hi,
+> 
+> is anyone here that can help us booting the pdp11/34 ? :
+> 
+> the boot loader hangs at 001012. can someone help understand
+> why?
+> 
+> we haven't any bus error, and we have no prompt at serial
+> terminal pressing "ctrl-boot"
+> 
+> this is the boot code, found in "E-10 Loading Software Bootstrap":
+> 
+> location contents pseudo-source code
+> 001000 012701 mov #174400, r1
+> 001002 174400
+> 001004 012761 mov #13, 4(r1)
+> 001006 000013
+> 001010 000004
+> 001012 012711 mov #4, @r1
+> 001014 000004
+> 001016 105711 tstb @r1
+> 001020 100376 bpl .-2
+> 001022 005061 clr 2(r1)
+> 001024 000002
+> 001026 005061 clr 4(r1)
+> 001030 000004
+> 001032 012761 mov #-400, 6(r1)
+> 001034 177400
+> 001036 000006
+> 001040 012711 mov #14, @r1
+> 001042 000014
+> 001044 105711 tstb @r1
+> 001046 100376 bpl .-2
+> 001050 005007 clr pc
+> 
+> starting it, the display show "1012", i think this mean that
+> he stop at address 001012. why?
+
+
+The display shows the next address to be executed. When the processor halts, 
+what are the
+actual contents of locations 1000-1010? Are they what you keyed in, or has 
+this memory been
+over-written? 
+
+This looks like code for a RL01/RL02.
+Is the bus address of its control registers the normal 174400 - 177406?
+
+If you replace the last instruction CLR PC (5007) with HLT (0000) does the 
+processor
+get there? This should happen regardless of what is read from the disk, 
+because the
+code from the disk is not executed.
+
+You can find a lot of small key-in test programs at
+< http://www.dunnington.u-net.com/public/ODT/SourceCode/ >
+
+carl
+-- 
+carl lowenstein marine physical lab u.c. san diego
+clowenst at ucsd.edu
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20050830/bae1052e/attachment.html>
+

@@ -1,0 +1,64 @@
+From: random832@fastmail.com (Random832)
+Date: Sat, 14 Jan 2017 00:40:32 -0500
+Subject: [TUHS] 2.11BSD cross compiling update
+In-Reply-To: <CAH1jEzbvu3tpc573pAq-JpRn3LJNqBn=Yu+q=iCQDFfS974C4A@mail.gmail.com>
+References: <CAH1jEzYgZ_EN0c5LimnYxDtBO9rFHHM60Q5zDbbuCzBkw2zWfA@mail.gmail.com>
+ <1484337208.3105634.847053496.3432DDEC@webmail.messagingengine.com>
+ <CAH1jEzYcBatLzcU1VYRmNVaMde4xt2C5FrqszOLn4P+cbXjiXQ@mail.gmail.com>
+ <CAH1jEzZv3+ZE7JGm5UJbrkMpGi_zqBHMWTMiQCbMoQBbW=_=yA@mail.gmail.com>
+ <CAH1jEzaYbjA=kJQs7pscqiP-xAWa7Q0d9yHhCu9=Gm_FyXYQWg@mail.gmail.com>
+ <CAH1jEzY63qWLgoJERrSaD19T8L2wKRXVN97_cAN-wHqf54a9Rw@mail.gmail.com>
+ <CAH1jEzbAxghDUV+zdf5MA4+JR9jiNN3Xci3JsAmeT+7p4XO_xQ@mail.gmail.com>
+ <CAH1jEzZtXfEnHTfKtCzq2AOWCgxiWbAjq1C+puOi=dXSbyGHvQ@mail.gmail.com>
+ <CAH1jEzbqRX=+XLVov+cXU2FWarun2gm8i6nxRRUJSEy0D=PF-Q@mail.gmail.com>
+ <CAH1jEzYzt+5ANeGM5nBZY0uHFnFsLt-QyPSLnazCVbxzjfEQ8A@mail.gmail.com>
+ <CAH1jEzbjFqie_KwAw5Qa3b__17hdqbLnHw2KPQEffTokvXS4Fw@mail.gmail.com>
+ <CAH1jEzZ1t=A3JBCne1Qi9VhOviOZJQzw0Qq+G52PBDAbg3+jPQ@mail.gmail.com>
+ <CAH1jEzbvu3tpc573pAq-JpRn3LJNqBn=Yu+q=iCQDFfS974C4A@mail.gmail.com>
+Message-ID: <1484372432.4116122.847401256.51690057@webmail.messagingengine.com>
+
+On Fri, Jan 13, 2017, at 23:41, Nick Downing wrote:
+> I see, no I had not realized that code is still in use, I would have
+> thought it had been replaced by a whole lot of POSIX bloat.
+
+POSIX doesn't even have the timezone files - it 'allows' for
+implementation-defined timezones, but POSIX itself basically only
+defines the System V TZ variable with a few extra bits to specify a
+single set of daylight saving rules, e.g. "EST5EDT,M3.2.0,M11.1.0".
+
+ Admittedly
+> the
+> 2.11BSD ctime/asctime/localtime/timezone stuff is simplistic and doesn't
+> address complicated cases but it's good enough.
+
+What's in 2.11BSD  (and 4.3BSD) is essentially the 1987 mod.sources
+version of Arthur David Olson's timezone code, compare e.g.
+https://github.com/eggert/tz/blob/c07b3825e1ae6e9d077a1d97088b853a79237a01/localtime.c
+to
+http://minnie.tuhs.org/cgi-bin/utree.pl?file=2.11BSD/src/lib/libc/gen/ctime.c
+- it's basically the same except for a few ifdefs and the presence of
+asctime in the same file. The code has obviously evolved a lot since
+then, but the binary zone file format is the same (except for some
+backwards-compatible additions).
+
+The code in 2.9BSD and 4.1BSD is much more simplistic, hardcoding US
+daylight saving rules rather than looking up the applicable offset for a
+timestamp from a table. What's interesting is that 4.2BSD's is arguably
+"smarter" in some ways than either, calculating daylight savings based
+on rules at runtime whereas today that is the province of zic. This used
+the timezone structure of gettimeofday.
+
+> However I have to resist the temptation to improve or update stuff in
+> 2.11BSD, I went down that path many times (with the Makefiles project for
+> instance) and because everything is interdependent you always introduce
+> more problems and get deeper and deeper enmeshed. In order to stay in
+> control I only fix essentials and apply a rule of minimal change, period.
+> This applies until I have a baseline that builds exactly the same binary
+> system image as the native build. Then I might proactively improve parts
+> of
+> the system but I will not do it reactively if you follow.
+
+I guess I was considering my suggestion to be a "zic cross-compiler" -
+which runs on the host system and is therefore not part of 2.11BSD
+itself.
+

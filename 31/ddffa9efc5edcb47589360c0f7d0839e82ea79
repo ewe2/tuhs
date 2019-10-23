@@ -1,0 +1,36 @@
+From: reed@reedmedia.net (Jeremy C. Reed)
+Date: Fri, 9 Apr 2010 00:35:38 -0500 (CDT)
+Subject: [pups] extract old archive format?
+In-Reply-To: <337550.74945.qm@web82407.mail.mud.yahoo.com>
+References: <337550.74945.qm@web82407.mail.mud.yahoo.com>
+Message-ID: <alpine.NEB.2.01.1004090033570.13963@t1.m.reedmedia.net>
+
+On Thu, 8 Apr 2010, Michael Davidson wrote:
+
+> Your modern compiler is almost certainly inserting two bytes of padding
+> after ar_name[]
+> so that the int32_t ar_date is aligned on a 4 byte boundary - that shifts
+> everything else
+> down by 2 bytes and means that ar_size lines up with the last 2 bytes of the
+> size in
+> the header which, as luck would have it, is the low order 16 bits of the
+> size as it would
+> have been stored in a 32 bit long.
+> 
+> Something like this should work on a modern little endian processor"
+> 
+> struct {
+>         char    ar_name[14];
+>         int16_t ar_date_16_31;
+>         int16_t ar_date_00_15;
+>         char    ar_uid;
+>         char    ar_gid;
+>         uint16_t        ar_mode;
+>         uint16_t        ar_size_16_31;
+>         uint16_t        ar_size_00_15;
+> } ar_buf;
+
+Thank you! That works for me! I can now get correct sizes, names, and 
+data. I will clean up my little ar extractor over the next few days and 
+share it.
+

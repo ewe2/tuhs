@@ -1,0 +1,68 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Wed, 31 Dec 2014 15:14:00 -0500
+Subject: [TUHS] I swear! I rtfm'ed
+In-Reply-To: <CAHYQbfBF5ro-SCebomP0MOnC9ngSXmX59S6wsC=tZEcMdhzT_A@mail.gmail.com>
+References: <CAHYQbfBF5ro-SCebomP0MOnC9ngSXmX59S6wsC=tZEcMdhzT_A@mail.gmail.com>
+Message-ID: <CAC20D2MfLEhHhkfrH1E8QKo1__nALTWfFBtrhEXoX60NzC05TA@mail.gmail.com>
+
+Jake - you have lots of help from others and using curses(3) is definitely
+the right way to program.
+
+But to answer your specific question about printf(string), according to
+Chapter 3 (Programmer's Info) of my old VT-100 user's guide, I think what
+is you are doing wrong is that "\033c" is not the ANSI clear to end of
+screen command.
+
+When I saw your message on my iPhone last night, the cache said - wait that
+can't be correct.   But I could not remember why.   So I had to wait until
+I got back home today to look in my basement.
+
+As I suspected, it's not an ANSI sequence.  So are you running in VT-100
+(ANSI) mode or VT52 mode?  I ask because it is close to the VT52 cursor
+right command which is actually:  "\033C"  but I do not remember is case
+mattered.
+
+In VT52 mode you need to send the terminal:  "\033H\033J" to clear the
+screen.
+
+In ANSI mode, it becomes:  "\033[1;1\033[0J"
+
+A few things to remember:
+1.) Clear takes the current cursor position and clears from there to end of
+X (where X depends on mode, and type of clear).  So you need to move the
+cursor to home position (aka 1,1).
+
+2.) VT-100's did not implement the full ANSI spec like Ann Arbor, Heathkit,
+Wyse etc.  So there are a number of things that those terminals did
+better.  A really good reason to you curses(3) because all the knowledge is
+keep in the termcap and as a programmer you don't need to worry about it.
+
+3.) I saw sites were VT52 mode was sometimes preferred because it was good
+enough for most editing, and needed fewer chars to do manipulation.  On
+slow serial lines, this sometimes was helpful.  That said, give me an AAA
+any day.  Like others, I still miss that terminal. :-)
+
+Clem
+
+On Tue, Dec 30, 2014 at 5:56 PM, Jacob Ritorto <jacob.ritorto at gmail.com>
+wrote:
+
+> , but I can't see how you're supposed to clear the screen on a vt100 in
+> 2.9BSD.  I guess printf'ing ("\033c") would do the trick, but I assumed
+> there was a more proper way; something that leverages the vt100 termcap
+> entry and does the right thing.  Anyone?
+>
+> thx
+> jake
+>
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20141231/75ed2bb9/attachment.html>
+

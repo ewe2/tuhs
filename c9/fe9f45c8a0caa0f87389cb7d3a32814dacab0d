@@ -1,0 +1,103 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Wed, 21 May 2008 14:32:24 +1000
+Subject: [TUHS] Early UNIX file permission oddity
+Message-ID: <20080521043224.GA32712@minnie.tuhs.org>
+
+I was just browsing through the 1974 UNIX CACM paper, the one that first
+publicly described the design and functionality of UNIX. I came across
+some sentences which describe the file permissions, and they sounded quite odd:
+
+  When a file is created, it is marked with the user ID of its owner.
+  Also given for new files is a set of seven protection bits.
+  Six of these specify independently read, write, and execute permission
+  for the owner of the file and for all other users. [The seventh bit
+  is the set-user-id bit. ]
+
+This seems to indicate that there are "rwx" bits for owner, "rwx" bits for other,
+and no "rwx" bits for group. I've never seen a UNIX system with 6 file
+permission bits, so I thought I would poke around to see what I could find. It
+turns out that none of the source code or document artifacts that we have
+describe a UNIX system with just 6 "rwxrwx" bits: there are either "rw" user,
+"rw" other and a separate execute bit, or the modern 9 "rwxrwxrwx" permission
+bits.
+
+1st Edition UNIX (Nov 1971) has these permission bits for an i-node:
+
+#define I_SETUID        0000040		set-user-id
+#define I_EXEC          0000020		a single execute bit
+#define I_UREAD         0000010
+#define I_UWRITE        0000004		read/write for user
+#define I_OREAD         0000002
+#define I_OWRITE        0000001		read/write for other
+
+3rd Edition UNIX (Feb 1973) has these permission bits for an i-node:
+
+000040  set user ID on execution
+000020  executable
+000010  read, owner
+000004  write, owner
+000002  read, non-owner
+000001  write, non-owner		i.e same as for 1st Edition
+
+By the time we get to the Nsys kernel (Aug 1973, just before 4th Edition UNIX),
+the system has the concept of groups and the setgid() & getgid() system calls.
+The inode.h header file defines these permission bits:
+
+#define ISUID   04000
+#define ISGID   02000
+#define IREAD   0400
+#define IWRITE  0200
+#define IEXEC   0100
+
+This is a bit unclear, but the code for the access() kernel function implies
+that there are read/write/execute bits for user, group and other. Here is the
+code for access() with my comments:
+
+/* Determine if the current user can access a file with the given mode */
+access(ip, mode)
+int *ip;
+{
+        register *rip;
+
+        if(u.u_uid == 0)		/* root can access all files */
+                return(0);
+        rip = ip;
+        if(u.u_uid != rip->i_uid) {	/* not owner, shift mode 3 bits, lose */
+                mode =>> 3;		/* user bits, replace with group bits */
+                if(u.u_gid != rip->i_gid) /* not group, shift 3 again, lose */
+                        mode =>> 3;	/* group bits, replace with other bits */
+        }
+        if((rip->i_mode&mode) != 0)	/* If mode mask and file's mode leave */
+                return(0);		/* some bits enabled, allow access */
+        u.u_error = EACCES;
+        return(1);
+}
+
+And when we get to the 4th Edition (Nov 1973), the filesystem manual gives
+these permissions:
+
+000400  read (owner)
+000200  write (owner)
+000100  execute (owner)
+000070  read, write, execute (group)
+000007  read, write, execute (others)
+
+So, editions up to the 3rd Edition had "rwrw" + "x"; the Nsys kernel and
+onwards had "rwxrwxrwx" permission bits.
+
+The only possibility that I can see is, as 3rd Edition was being rewritten
+from assembly into C, the filesystem went through a stage where there
+"rwx" execute bits for user, and "rxw" execute bits for other as the CACM
+paper described, but groups had not been introduced yet. Then, the idea of
+groups was added: the i-node structure had the i_gid field added, and the
+access() function was extended with the lines:
+
+		if(u.u_gid != rip->i_gid) /* not group, shift 3 again, lose */
+                        mode =>> 3;     /* group bits, replace with other bits */
+
+I'll have to ask Dennis is this sounds plausible.
+
+Cheers,
+	Warren
+
+

@@ -1,0 +1,169 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Thu, 5 Jun 2014 11:07:44 -0400
+Subject: [TUHS] Gnu/Stallman (was Bugs in V6 'dcheck')
+In-Reply-To: <20140605073112.GD10373@attic.nerdnet.nl>
+References: <201406020209.s5229Q5o006174@stowe.cs.dartmouth.edu>
+ <CAC20D2M3KuBcVGgD6rE-u0JLuQQ=J374DFiqK4kBgOdh3xcSwQ@mail.gmail.com>
+ <FBA977D9-C128-4321-8671-2799EAF06715@ronnatalie.com>
+ <20140602142446.GM18282@mercury.ccil.org>
+ <20140605073112.GD10373@attic.nerdnet.nl>
+Message-ID: <CAC20D2MrY2zCcDcFm=kOmSR3H98evRQdEei3zxkqjEVfoNO57Q@mail.gmail.com>
+
+On Thu, Jun 5, 2014 at 3:31 AM, Arno Griffioen ‪<arno.griffioen at ieee.org>
+wrote:
+
+The original 68000 (and 8-bit data bus 68008) did already have the full 32
+
+bit instruction and data support of the complete family,
+
+
+But the original 68000 was actually a 16 bit internal architecture -- is
+was made with a 16 bit barrel shifter and any 32 bit op took two ticks.
+ Yes, they (fortunately) did define the 32 bit data types and many of the
+32 bit operations.   There was an argument at the time was it a 16 bit or
+32 bit chip and between people implementing compilers - should a C "int" be
+16 bits or 32.
+
+
+
+Since I had hacked the Ritchie PDP-11 compiler for mine, I used 16 bits,
+while the MIT guys used 32 (I think they were hacking on Steve's if my
+memory is correct).   The advantage of the later was int == ptr and that
+the time V6 and V7 was definitely pointer "dirty" the worst example being
+the Bourne shell and how break(2) was implemented.   The advantage of the
+former was it was the natural size of the chip internals and so it made it
+easier for me to generate "optimal" (well let's just say "better") code
+plus that's what's Dennis's compiler "knew."
+
+
+
+Jeff Mogul ended up at Stanford around that time.  He and I had a long
+argument about it when we first met.   We each we sure the other was wrong
+- :-0   Years later when we became colleagues we reminded of the old
+argument, I think we agreed that other was "right."   It was a tough choice
+and there were good arguments on both sides.
+
+
+
+BTW:  I once asked Les about it during our Stellar time.  He said they
+thought of it as a 16 bit chip - a PDP-11 like system without running into
+the problem that Cal Data did with "cloning" the 11.  Les and team has been
+using PDP-11's before they joined Moto. But the reality is that UNIX code
+really wanted int==ptr for a long time [as well as:  ptr = 0; *ptr == 0].
+ That really was not forced to be fixed until Alpha came on the scene and
+people cleaned up there code.
+
+
+
+
+
+
+
+
+
+but for MMU use it
+​ ​
+lacked one critical feature in the fact that it did not push enough
+page-fault
+
+information on the stack to re-start an instruction in case of an
+(externally
+​ ​
+signalled) page-fault.
+
+
+True that the original 68000 lacked the instruction restart ability, but
+the MMU could be made to not need restart.
+
+
+
+
+
+So even if you interfaced external MMU logic then a basic 68000 was still in
+​ ​
+trouble when a page fault occurred as it could not 'start over' the
+​ ​
+faulted instruction.
+
+
+As I said this is not completely true - you just never stopped the
+instruction.  The fact is that a 68000 could do VM, but it took a bit of
+work a external logic.   Forest Basket wrote a paper on how to do it and it
+was actually what both Apollo and Masscomp implemented in this first
+products.
+
+
+
+The trick was that the 68000 "CPU" could not complete the instruction when
+the fault occurred (or as you mentioned - the reason was that bad things
+happened was because the microcode did not correctly save the internal
+instruction state).   So the "executor" 68000 CPU was sent  wait states by
+the MMU -- in effect forcing it to have a very slow memory read.   While it
+was waiting for the memory to fill, the fault had to be handled by
+something else.  In Masscomp's case (and I believe Apollo also) the "fixer"
+was another second 68000 that ran in kernel code that handled the fault and
+refilled the MMU's TLB (or if you we schooled by Digital - the "TB").
+
+
+
+At the time Dave Cane and Jeff ??? ( the logic designer sat Masscomp -
+Jeff's last name now escapes me) had been from the 11/34 and VAX projects
+previously.  They were horrified to have to use a second processor just for
+memory refills, and spent weeks trying to find a way out but eventually
+relented to what the SW guys where telling them.
+
+
+
+As I said, when the '010 came out, Masscomp retrofitted the CPU card to
+allow the fault to occur and not wait state the CPU.  The RTU kernel
+detected the actual chip being used, and when it was running on a ' 010,
+would immediately do a task switch on the executor and run some other code,
+while the fixer handled the fault. I've forgotten now, but my memory is
+that the fixer always ran out of the cache.
+
+
+
+BTW: the '010 originally still had VM issues that did not get fixed until
+the '020.  The way Moto handled the fault was to dump the state of the
+internal microcode to the CPU stack, and when the instruction was
+restarted, was to suck the state back into the processor.   The problem was
+that as that Moto was updating the microcode in manufacturing not thinking
+it was an issues for customers a processor with the step logic stepping
+might have different microcode - which was not a problem for 99% of their
+customers.
+
+
+
+
+
+However, Masscomp actually made the first dual processor UNIX box - the
+MC-500/DP which was released about 12 months after the MC-500  (they
+predated Sequent by about 2-3 years).   A couple of months after we started
+shipping the DP, we started to see a strange failure in the field.  The
+issues was that a fault would occur on one CPU and the kernel would try to
+restart to the instruction on a different processor, and unless both CPU
+boards had executor chips from the same manufacturing lot - you had to
+restart in the same physical chip that took the fault.   Because the
+original RTU DP system was modeled on the Goble Vax, were kernel mode was
+on one processor at a time and the original DP had a NUMA memory system
+(the 5000 was SMP with UMA memory).   Thus usually, processes tended to get
+started on one processor and not migrate to the other, but under they could
+migrate.   All the test systems in engineering had matched processors - no
+problem.   But when field service started to swap boards, around at
+customer sites, bad things started to happen.
+
+
+
+We had quite the panic figuring out what it was and then forced field
+service to ensure all CPU cards were matched -- what a pain in the tuckus.
+  With the 5000 when we went full SMP, we screamed at Moto and got them to
+clean up their act so that what was dumped on the stack could be restarted
+on any '020 regardless of stepping/microcode etc.
+
+
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20140605/d296f057/attachment.html>
+

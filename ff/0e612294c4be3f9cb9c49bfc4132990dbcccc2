@@ -1,0 +1,115 @@
+From: steve@sk2.org (Stephen Kitt)
+Date: Sun, 7 May 2017 09:42:27 +0200
+Subject: [TUHS] Discuss of style and design of computer programs from a
+In-Reply-To: <20170506214519.GN12539@yeono.kjorling.se>
+References: <20170506144011.GF28787@mcvoy.com>
+ <20170506150913.57571411A@lod.com>
+ <20170506152053.GI12539@yeono.kjorling.se>
+ <alpine.BSF.2.02.1705061554080.4621@frieza.hoshinet.org>
+ <20170506214519.GN12539@yeono.kjorling.se>
+Message-ID: <20170507094227.4af8e074@heffalump.sk2.org>
+
+On Sat, 6 May 2017 21:45:19 +0000, Michael Kjörling <michael at kjorling.se>
+wrote:
+> On 6 May 2017 16:00 -0400, from usotsuki at buric.co (Steve Nickolas):
+> > In 6502 code, it's not uncommon to do something like
+> > 
+> > foo1:     lda      #$00
+> >           .byte    $2C       ; 3-byte BIT
+> > foo2:     lda      #$01
+> >            .
+> >            .
+> >            .
+> > 
+> > to save a byte (and probably still done for the few who write in
+> > ASM). The "2C" operand would cause it to disassemble as something
+> > like...
+> > 
+> > 1000-     LDA      #$00
+> > 1002-     BIT      $01A9
+> > 
+> > which is the route you'd go down if you called "foo1".  Apart
+> > diddling a few CPU flags, and an unneeded read on $01A9, harmless.  
+> 
+> You could do something quite similar on the 8086, which I am somewhat
+> more familiar with.
+[...]
+
+One possible equivalent 16-bit x86 is
+
+	foo1:	mov al, 0
+		db 035h		; XOR AX, imm16
+	foo2:	mov al, 1
+
+which implements a branchless fall-through. (But you’d probably just use
+SALC...)
+
+> Or, something slightly more "useful"
+> 
+>         jmp short $+3
+>         int 0 ; hex: cd 00
+>         db 0
+>         jz somewhere
+> 
+> which, again IIRC, would clear the accumulator (AX) register because
+> 0000 hex is XOR AX,AX,
+
+According to my disassembler 0000 is "add byte ptr [bx+si], al"; "xor ax, ax"
+is either 31c0 or 33c0.
+
+> which as a side effect sets the zero flag
+> because the result is zero, and then executes a conditional jump if
+> the zero flag is set (which it will be). In other words, it _executes_
+> as
+> 
+>         jmp short l1
+>         db 0cdh ; dummy byte
+>     l1: xor ax,ax ; hex: 00 00
+>         jz somewhere
+> 
+> but a naiive decompiler will see the CDh byte after the jump and take
+> that as the first byte of the two-byte interrupt instruction. I don't
+> know what 00 followed by the first byte of the JZ instruction would
+> be, but probably a register/register XOR with a register store. Make
+> it a far jump and you have a few extra bytes to play with, to befuddle
+> anyone trying to figure out just what on Earth your code is really
+> doing.
+
+My memories of disassembling x86 code in the early 90s at least is that,
+because of all this, disassemblers were pretty good at restarting streams
+from jump destinations, so it never really was an issue. You need to get
+creative with single-stepping mode and self-decrypting code to really annoy
+people trying to understand your code ;-).
+
+> The above, of course, is really just scratching the surface. With how
+> many variable-length instructions the x86 has, with careful selection
+> of opcodes and possibly use of undocumented but functionally valid
+> combinations, I wouldn't be the least bit surprised if it's
+> technically possible to write a 8086 program that does one thing when
+> started normally, and something utterly different but still useful
+> when started at an offset that results in execution beginning in the
+> middle of an instruction. Bonus points if the first thing that program
+> does is jump into itself _at that offset_. Now, the _work involved in
+> doing so_, never mind maintaining it...
+
+I have seen some short sections of code which do this. The x86 ISA is so rich
+that you can make it adapt to many different constraints — one I rather liked
+is assembling code which is valid ASCII (amaze your friends by typing in
+a .COM using COPY CON!). There’s a C compiler which does that on GitHub
+somewhere.
+
+> Of course, I wouldn't do anything like the above in any real-world
+> code base meant to run on modern systems unless obfuscation really
+> _was_ a design goal. Honest. If I was tasked to write something that
+> really needed to do something non-trivial in 16 KiB RAM on an original
+> IBM 5150 PC or clone? I'd probably spend quite a bit of time in front
+> of the whiteboard and with reference manuals before writing even one
+> line of code...
+
+Yes, and combine that with assemblers which output all possible encodings of
+a given instruction!
+
+Regards,
+
+Stephen
+

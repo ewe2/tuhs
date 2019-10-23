@@ -1,0 +1,123 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Wed, 25 Jun 2008 11:40:40 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080623181101.e862a3a2.lehmann@ans-netz.de>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+Message-ID: <20080625114040.54124362@veda.cnb.uam.es>
+
+Oliver:
+
+Right, it seems that I mistransliterated the code in a hurry or confusion. 
+
+I notice that on prf.c *adx is a pointer to be assigned to s, whereas in
+sys2.c uap->linkname is the pointer itself thas is assigned to u.u_dirp.l
+So my initial transliteration was wrong as I was assigning *uap->linkname
+instead of uap->linkname.
+
+Reviewing the assembler you submitted I notice it looks almost like what you
+wanted but for @rr2 instead of rr2 so it might have been the extra * I
+wrongly added in front of the parenthesized & expression and the erroneously
+placed parenthesis (which I also got wrong) the reason for not getting what 
+you wanted.
+
+If on prf.c you have in printf
+	register unsigned int *adx;
+	char *s;
+
+	adx = &x1;
+...
+	s = (char *) * adx;
+and was recoded on WEGA in printfv
+	register unsigned *adx;
+	register char *s;
+
+	adx = x1;
+...
+	s = (char *)(*(long *)adx & 0x7F00FFFF);
+
+then maybe the right code on sys.c would be a change from
+	caddr_t u.u_dirp;		/* char *, from param.h user.h */
+        register struct a {
+                char    *target;
+                char    *linkname;
+        } *uap;
+...
+	u.u_dirp.l = (caddr_t) uap->linkname;
+to
+	caddr_t u.u_dirp.l;		/* char *, from param.h user.h */ 
+	register struct a {
+                char    *target;
+                char    *linkname;
+        } *uap;
+...
+	u.u_dirp.l = (caddr_t) ) ((long *) uap->linkname & 0x7F00FFFF);
+
+Note also the difference in parenthesis usage with what you said you had
+tried on http://pofo.de/P8000/problems.php
+	u.u_dirp.l = (caddr_t)(((long)uap->linkname) & 0x7F00FFFF);
+
+I fear that I was too tired when I wrote my previous posting and made two
+many mistakes.
+
+Anyway, the first step should be to check what prf.c generates as assembler 
+at these & lines when compiled. If it matches the sample code you mention you
+have in other places then it means the same device was used to generate it
+(which I would guess is the case) and then it should be a matter of thinking
+clearly of what is being assigned. I do believe the surviving trace in prf.c
+is the key to understanding the problem assembly code.
+
+				j
+
+On Mon, 23 Jun 2008 18:11:01 +0200 Oliver Lehmann <lehmann at ans-netz.de>
+wrote:
+> Hi Jose,
+> 
+> Jose R. Valverde wrote:
+> 
+> > 
+> > 	u.u_dirp.l = (caddr_t) (*((long *)(uap->linkname &0x7F00FFFF)))
+> > 
+> 
+> leads to:
+> 
+> "sys2.c":305: operands of "&" have incompatible types 
+> Error in file sys2.c: Error.  No assembly.
+> 
+> 
+> I've changed it to:
+> 	u.u_dirp.l = (caddr_t) (*((long *)((long)uap->linkname &0x7F00FFFF)));
+> 
+> and this produces:
+> 
+>         ldl     rr2,rr8(#4)
+>         and     r2,#32512
+>         ldl     rr4, at rr2
+>         ldl     _u+78,rr4
+> 
+> not exactly the wanted code :(
+> 
+> Greetings, Oliver
+> 
+> -- 
+>  Oliver Lehmann
+>   http://www.pofo.de/
+>   http://wishlist.ans-netz.de/
+
+
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valverde
+
+	De nada sirve la Inteligencia Artificial cuando falta la Natural
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080625/f57ad71e/attachment.sig>
+

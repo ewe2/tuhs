@@ -1,0 +1,126 @@
+From: crossd@gmail.com (Dan Cross)
+Date: Fri, 24 Mar 2017 11:22:42 -0400
+Subject: [TUHS] Were all of you.. Hippies?
+In-Reply-To: <CAH_OBicw_78_tf_qAKmEo4o7X=XQHq6Spx=_Kqv64bqHVX8Rdw@mail.gmail.com>
+References: <20170320214858.TIJoR%steffen@sdaoden.eu>
+ <alpine.BSF.2.20.1703210907060.42626@aneurin.horsfall.org>
+ <009301d2a1c9$cb604c70$6220e550$@ronnatalie.com>
+ <CAP6exY+DHdf2BZYy=40wLjYabtkeKOtbp3aWMkwdaDmLFYhR2A@mail.gmail.com>
+ <20170321202839.GG21805@naleco.com>
+ <alpine.NEB.2.20.1703231512420.1796@neener.bl.org>
+ <CAP6exYJTHnR2FGL+quJ48R_x9Dg2nXN9dnx7QM8vAJMMSSp39w@mail.gmail.com>
+ <20170324001832.GA13511@naleco.com> <20170324002754.GW23802@mcvoy.com>
+ <CAH_OBidKK3F7dqG-BmVWuGeRaL0Y0wbYV8ChzrJXx1keDGazUw@mail.gmail.com>
+ <20170324073748.GA39889@wopr>
+ <CAH_OBicw_78_tf_qAKmEo4o7X=XQHq6Spx=_Kqv64bqHVX8Rdw@mail.gmail.com>
+Message-ID: <CAEoi9W5NsSE8KR-78XpPsOxzHt7N3pD37v2o43yzTGs8mt1T0g@mail.gmail.com>
+
+On Fri, Mar 24, 2017 at 4:06 AM, shawn wilson <ag4ve.us at gmail.com> wrote:
+
+> I actually have strong opinions about this (read: disagreements). Your
+> shell shouldn't know about connect() - I guess allowing writing to
+> /dev/eth0 would work for me. But in bash, IIRC that damn ghost file
+> thing is like half of the files in source and it helps nothing. Maybe
+> if the point was to allow some remote shell (like X does) I could see
+> it (but than I'd scream about the security implications about
+> something like that). And I'll say again - why? You want a socket -
+> nc, ncat, socat - pick one - don't abuse your shell.
+>
+
+You're right; your shell should not know about connect(). But the argument
+isn't that it should; the argument is that connect() itself is superfluous.
+
+Perhaps a way to focus the discussion would be to explain how networking
+works in the Plan 9 world (which is where at least Ron is coming
+from...unless he corrects me).
+
+In Unix everything is a file, but the limitations of that model become
+apparent pretty quickly:
+-For things that require some sort of control plane, one ends up with
+ioctl() or something like it.
+-Traditionally Unix required that these files exist in the directory
+structure resident on the disk filesystem, hence major/minor device numbers
+and file types.
+-Sockets didn't fit exactly into that model so they got a whole slew of
+special-purpose system calls.
+-That seemed to open the flood gates to a number of other, similar
+special-purpose interfaces (POSIX termios? To be fair, these [and sockets!]
+were predated by s/gtty etc).
+
+All of these are non-orthogonal: they cannot be easily combined or reused.
+Little binary data structures shared between the kernel and the rest of the
+world, accessed by special system calls and interpreted by arcane
+user-space programs, are the order of the day; one had better hope that the
+structure definitions are synchronized between building the kernel and the
+tools or hilarity ensues. Since it's all binary, one has to deal with byte
+ordering issues and type widths and so forth if one wants to share these
+things over a network. The interface between the kernel and userspace is
+very wide.
+
+However, this has been "normal" since at least the 1980s so no one really
+thinks twice about it.
+
+By contrast in Plan 9, everything is sort of a small *filesystem* and there
+exist (unprivileged) primitives for mapping these filesystems into a
+process's view of the file namespace and manipulating them into various
+configurations. Often, these files are synthesized on demand by a device
+driver or user-space process; there is no disk-resident copy of the names.
+For networking, there is no /dev/eth0 file, but there are /net/ether0 and
+/net/tcp *directories*.
+
+If I want, say, to make a TCP connection I open a file (/net/tcp/clone) and
+read from it. These operations cause a new directory representing that
+connection to spring into existence; that directory contains two files:
+/net/tcp/$n$/ctl and /net/tcp/$n$/data (actually, the file descriptor
+returned by opening /net/tcp/clone corresponds to /net/tcp/$n$/ctl, but
+that's a detail). I write a string describing the port and address I wish
+to connect to into the ctl file and attempt to open the data file; when
+that returns successfully, I have an established connection and I
+read/write the corresponding file descriptor to exchange data with the
+remote system. I can further control the connection via writes of special
+messages into the ctl file. Of course, the details of connection
+establishment are abstracted away into a convenient library interface so I
+don't really think about it for work-a-day programming, but I can also do
+this little dance with e.g. cat and echo, so I can do the same from the
+shell if I like. Why bother with nc, netcat, socat, etc when just plain cat
+will do?
+
+Since all of the details of actually manipulating network connections and
+so forth are hidden behind this nice filesystem-based interface, neither
+the shell nor the tools have to know or care that they're dealing with a
+network. The control plane is handled via this `ctl` thing, which is far
+superior to ioctl() in that the messages accepted by the ctl file are text,
+not little binary integers and pointers. Since everything is text based, I
+can share these filesystems over a network and manipulate them from remote
+machines (e.g., I can import the TCP/IP stack from another machine and use
+it to make connections: all with no programming whatsoever). The kernel
+interface is elegant, simple, relatively narrow and highly orthogonal.
+
+Of course, it has its downsides: sometimes it certainly DOES feel like the
+"if all you have is a hammer..." thing and one finds tiny parsers for the
+DSLs implemented by various ctl files and things all over the place and for
+connectionless protocols like UDP one has to (wait for it...) prepend or
+parse a binary header at the beginning of the data when writing/reading a
+packet. For UDP this is simple enough, but clearly it shows a general
+weakness in the model. It's also hard to do scatter/gather I/O. Because
+things are based on open/read|write/close, lots of things are stateful that
+don't have to be on e.g. Unix. Plan 9 relies heavily on convention (e.g.,
+all the tools expect the network to be mounted at /net, but there's no one
+with a golden hammer standing over you forcing you to put it there. You
+could mount it on /foobar if you wanted...but then nothing would work); the
+implementation is buggy and many would argue quirky; it's slow; most
+importantly, it's incompatible with the rest of the world and requires you
+to dump your old toolset and adopt the Plan 9 Way to be productive. Like
+Lisp, it's great for stretching your mind but perhaps not so much for
+solving real-life problems. However, I often feel that when one tries to
+explain it to folks who haven't seen it, the explanations fall flat because
+folks look at them with too many of their preconceptions based on how Unix
+and Linux work. It's a very different model and a lot of folks with
+experience on the research systems would argue that it is philosophically
+more Unix-like than Unix (including Linux) these days.
+
+        - Dan C.
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170324/2876d9fd/attachment-0001.html>
+

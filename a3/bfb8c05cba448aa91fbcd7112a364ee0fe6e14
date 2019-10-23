@@ -1,0 +1,540 @@
+From: djenner@halcyon.com (David C. Jenner)
+Date: Mon, 07 Dec 1998 12:12:20 -0800
+Subject: 9-track tape interfaces
+References: <981207144228.2f0000e2@trailing-edge.com>
+Message-ID: <366C36A4.7921683A@halcyon.com>
+
+Tim Shoppa wrote:
+> 
+> A lot, so I snipped it out!
+>
+
+As long as this thread is red hot, how about these questions:
+
+I have an M4 Data 9914 tape drive with Pertec and SCSI interfaces.
+It will do 800, 1600, 6250.  I want to set up and run 2.11BSD on a
+Q-Bus system.
+
+1) I'd rather not spend a lot to get a SCSI interface.  I now have
+   Emulex TC02 and Dilog DQ130 Q-Bus controllers.  Is there
+   any way these controllers are going to enable 6250 BPI?
+
+2) Is there another Q-Bus, Pertec controller that will do 6250?
+
+3) If I had a Q-Bus SCSI controller, would it enable 6250?
+
+4) (Already asked in thread) Supposing I get the hardware to work
+   at 6250, will 2.11BSD handle it?
+
+Thanks,
+Dave
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id HAA15025
+	for pups-liszt; Tue, 8 Dec 1998 07:27:55 +1100 (EST)
+Received: from timaxp.trailing-edge.com (trailing-edge.wdn.com [198.232.144.27])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id HAA15020
+	for <PUPS at MINNIE.CS.adfa.edu.AU>; Tue, 8 Dec 1998 07:27:28 +1100 (EST)
+Received: by timaxp.trailing-edge.com for PUPS at MINNIE.CS.adfa.edu.AU;
+          Mon, 7 Dec 1998 15:27:09 -0500
+Date: Mon, 7 Dec 1998 15:27:09 -0500
+From: Tim Shoppa <SHOPPA@trailing-edge.com>
+To: PUPS at minnie.cs.adfa.edu.au
+Message-Id: <981207152709.2f0000e2 at trailing-edge.com>
+Subject: Re: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+>1) I'd rather not spend a lot to get a SCSI interface.  I now have
+>   Emulex TC02 and Dilog DQ130 Q-Bus controllers.  Is there
+>   any way these controllers are going to enable 6250 BPI?
+
+Sure - I use them at 6250 BPI all the time.  The controller
+doesn't have to know what density the data is at - the formatter
+takes care of that.  If you absoultely insist on the computer
+being able to switch the drive between 1600 and 6250 BPI modes,
+you won't be able to achieve this with a TC02 or DQ130 under 2.11BSD,
+but this is purely a frill as you can always select the mode from
+the drive's front panel.
+
+One thing you do have to worry about is data rate.  Pertec
+formatted interfaces on "fast" buffered modern drives may want to suck
+or spew data at rates that are often too fast for a lowly TC02 or
+DQ130's capability to push data over the Q-bus.  Most modern Pertec-
+formatted drives will let you throttle the rate to something reasonable.
+And some more modern Q-bus controllers - like the Dilog DQ152 - have
+internal buffers for handling such cases without having to throttle
+the drive itself.
+
+>4) (Already asked in thread) Supposing I get the hardware to work
+>   at 6250, will 2.11BSD handle it?
+
+Absolutely.  I use a Fuji 2444 and a Storagetek 2925 with a TC02
+and 2.11BSD all the time in 6250 BPI mode.  I had to throttle the
+data rates on both, but that's not such a big deal.
+
+On the other hand, my Storagetek 2920, which is pretty much a 2925
+without the cache option, doesn't let me throttle the data rate
+at 6250 mode because there is no effective buffer.  These don't
+work with my TC02 on a Q-bus machine, but they do work with a TC13
+on a Unibus 11/44 or with a DQ152 on a Q-bus -11.
+
+Also keep in mind that some third-party controllers don't interact
+well with the fast polling that the most recent Q-bus CPU's can
+do.  For example, my TC02 won't work at all with
+a loaned Mentec M100 (roughly comparable with a 11/93) that I have.  
+I've never had this problem with 11/83's and slower CPU's.
+
+-- 
+ Tim Shoppa                        Email: shoppa at trailing-edge.com
+ Trailing Edge Technology          WWW:   http://www.trailing-edge.com/
+ 7328 Bradley Blvd		   Voice: 301-767-5917
+ Bethesda, MD, USA 20817           Fax:   301-767-5927
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id JAA15470
+	for pups-liszt; Tue, 8 Dec 1998 09:40:18 +1100 (EST)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id JAA15465
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 09:40:09 +1100 (EST)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.0/8.9.0) id OAA07800;
+	Mon, 7 Dec 1998 14:33:57 -0800 (PST)
+Date: Mon, 7 Dec 1998 14:33:57 -0800 (PST)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <199812072233.OAA07800 at moe.2bsd.com>
+To: PUPS at minnie.cs.adfa.edu.au, SHOPPA at trailing-edge.com
+Subject: Re: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Tim -
+
+	Howdy.
+
+> I'm pretty sure that 2.11BSD properly handles TU81 density select
+> in its TMSCP driver.  (Steve, can you confirm this?  I know you've
+> made some effort to get write caching to work with TU81's over the years!)
+
+	Indeed it does.  However TMSCP only defines 800,1600 and 6250 so
+	on the quad density drive I have the 3200 setting must be selected
+	manually on the front panel of the tape drive.
+
+	Also the 'enable cache' works fine and makes a dramatic difference
+	on a TU81+ attached to an 11/44.  The 'cache enabled' setting is
+	sticky across open/close cycles so that you set it once manually
+	when the first reel is loaded.  This was done to avoid having to
+	modify dump/restore/tar/etc
+
+> In any event, remote density selection/reporting is largely a
+> frill, as any drive/controller combination that I ever used let you
+> explicitly select it with a physical button or a switch and displayed
+> the current selection in some useful way on the drive.
+
+	Quite so.  Eons ago the one Cipher drive supported 800/1600 operation
+	but the controller (TM11 clone) did not - you just made sure to
+	select the density on the front panel when loading the tape
+
+	Steve
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id OAA16643
+	for pups-liszt; Tue, 8 Dec 1998 14:49:04 +1100 (EST)
+Received: from swag.sw.oz.au (firewall-user at gw.softway.com.au [203.31.96.1])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id OAA16638
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 14:48:47 +1100 (EST)
+Received: from swarm.sw.oz.au (swarm.sw.oz.au [192.41.203.66])
+	by swag.sw.oz.au (8.8.8+Sun/8.8.8) with ESMTP id OAA12733
+	for <@smtp.sw.oz.au:PUPS at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 14:48:41 +1100 (EST)
+Received: (from peterc at localhost) by swarm.sw.oz.au (980427.SGI.8.8.8/970903.SGI.AUTOCF) id OAA50560; Tue, 8 Dec 1998 14:48:27 +1100 (ADST)
+From: Peter Chubb <peterc@softway.com.au>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Message-ID: <13932.41355.645423.303757 at swarm.sw.oz.au>
+Date: Tue, 8 Dec 1998 14:48:27 +1100 (ADST)
+To: PUPS at minnie.cs.adfa.edu.au
+Subject: John Lions
+Comments: Hyperbole mail buttons accepted, v04.023.
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+
+     Associate Professor John Lions, who  was instrumental in UNIX's
+     acceptance in Australia, and in its popularity (through his two
+     books) world wide, died last Saturday morning, after long
+     illness.
+
+Peter C
+
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id OAA16671
+	for pups-liszt; Tue, 8 Dec 1998 14:52:06 +1100 (EST)
+Received: from henry.cs.adfa.oz.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id OAA16665
+	for <PUPS at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 14:51:59 +1100 (EST)
+Received: (from wkt at localhost) by henry.cs.adfa.oz.au (8.7.5/8.7.3) id OAA09118; Tue, 8 Dec 1998 14:54:59 +1100 (EST)
+From: Warren Toomey <wkt@henry.cs.adfa.oz.au>
+Message-Id: <199812080354.OAA09118 at henry.cs.adfa.oz.au>
+Subject: Re: John Lions
+To: peterc at softway.com.au (Peter Chubb)
+Date: Tue, 8 Dec 1998 14:54:59 +1100 (EST)
+Cc: PUPS at minnie.cs.adfa.edu.au
+In-Reply-To: <13932.41355.645423.303757 at swarm.sw.oz.au> from Peter Chubb at "Dec 8, 98 02:48:27 pm"
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL22 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In article by Peter Chubb:
+>      Associate Professor John Lions, who  was instrumental in UNIX's
+>      acceptance in Australia, and in its popularity (through his two
+>      books) world wide, died last Saturday morning, after long
+>      illness.
+
+Gee, that's very bad news.
+
+Thanks for the email, Peter.
+
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id SAA17323
+	for pups-liszt; Tue, 8 Dec 1998 18:20:42 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id SAA17317
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 18:20:24 +1100 (EST)
+Received: from dosdev (pm6-41.dial.qual.net [205.212.2.41])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id MAA16509
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 12:19:42 +0500
+Message-Id: <199812080719.MAA16509 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 8 Dec 1998   07:19:34 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+   Dear Tim,
+   
+   You write:
+> Hmm - you said it has a 40-pin connector.
+   
+   Yes. A straight flat ribbon cable connects it to the bulkhead, which has
+a female 37-lead D-sub connector on the outside.
+   
+> Any obvious buffers (or banks of buffers) near the external connector?
+   
+   I have just spent a couple of hours tracing the etches on this board,
+and here is what I have found out. One side of the 40-pin connector is all
+ground (well, that's pretty obvious). On other side we have the following.
+4 pins are permanently connected to pull-up resistors, and one pin is
+permanently connected to a pull-down resistor. The other 15 pins are
+connected through jumpers so that the user can connect or disconnect them
+on an individual basis. Some of these go to different outputs of a 74S241
+(dual 4-bit 3-state buffer), some go to a 7437 (unfamiliar with this IC),
+and some go to a missing IC.
+   
+   Both halves of the 74S241 are permanently enabled. All 8 outputs of this
+half are connected to different pins on the connector. 7 of them are
+connected in the obvious way, but one is also connected to a pull-up
+resistor (purpose non-understood, since the 3-state buffer is always
+enabled). The jumpers for all 8 are ON. Then there are 3 pins that go to
+the 7437. Although 3 pins of the connector are used for this, 4 pins of the
+7437 are used. Two of the connector pins go through simple jumpers, and
+both are OFF. The third pin is connected to two different 7437 pins through
+different jumpers. One of them is ON and the other is OFF. Finally, there
+are 4 pins that connect to a missing IC. The jumpers for all 4 are OFF.
+   
+   Now, does this tell you anything? :-)
+   
+> What are the date codes on the chips?
+   
+   The most recent dates are mid-1988.
+   
+> [Explanation of the mess with host-side density control]
+   
+   OK, from now on I'll only use the front panel switch for density
+selection. :-)
+   
+> other times they're used to put the drive into streaming
+> vs non-streaming mode, other times it's used to change the speed on
+> a streaming drive.
+   
+   Hmm, this is another big gap in my knowledge. What does streaming vs.
+non-streaming mean?
+   
+> The QT13 will support either IDEN-style density select or CDC-style
+> density select [...]
+   
+   How does it determine which one to use? Is there a switch on the board?
+   
+> Yep, the RC25 also used the LESI bus.  (LESI="Low End Storage
+> Interconnect".)
+   
+   Hmm, so then KLESI can do disk MSCP as well as TMSCP, right? Can it do
+both simultaneously or only one at a time?
+   
+> They all look similar, and have similar mechanics, but the 81's
+> electronics can do 6250 BPI, something an 80's can't.
+   
+   But they are all different CDC Keystones, right? This means that my
+Keystone may or may not support 6250 BPI, right? How can I tell?
+   
+> No, the Keystone and the Kennedy 9300 are not the same beast.  The
+> Keystone is a cute little streaming tape drive, while the 9300 is
+> a humongous [...]
+   
+   "Cute little"?!?! I mean, I'm still amazed how I was able to get it
+inside my apartment without knocking a couple walls down first! It's
+certainly huge compared to the REALLY cute little Cipher we had at CWRU. (I
+really miss that Cipher, BTW. Not only is it much smaller, according to
+what I have been able to glean from the docs, it's much easier to load
+tapes into than the Keystone. But then of course if this Keystone does 6250
+BPI I will be much more than happy with it.)
+   
+   But hey, if the Keystone is a cute little baby, poor CSRG fellows! I
+think Kennedy 9300 was their primary machine, and I can just imagine what
+it is like if the Keystone is "cute little". Does the 9300 do 6250 BPI?
+   
+> [...] vacuum-column 125IPS machine.
+   
+   Yet another gap in my knowledge. I remember seeing the term "vacuum
+columns" in the BSD documentation and having no idea what are they. Could
+you enlighten me?
+   
+> (I'm sure someone will
+> now chime in about the days when Univac UniServo drives ruled the
+> earth...)
+   
+   Just out of curiosity, what are they?
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id TAA17591
+	for pups-liszt; Tue, 8 Dec 1998 19:52:37 +1100 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id TAA17586
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 19:52:29 +1100 (EST)
+Received: (qmail 17458 invoked from network); 8 Dec 1998 08:00:32 -0000
+Received: from brane.geac.com.au (202.6.67.115)
+  by caveman.geac.com.au with SMTP; 8 Dec 1998 08:00:32 -0000
+Received: from fgh.geac.com.au by brane.geac.com.au with smtp\n	(Smail3.1.29.1 #3) id m0znIp4-0003mgC; Tue, 8 Dec 98 19:48 AEDT
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au (SMI-8.X/SVR4) with ESMTP id TAA14339; Tue, 8 Dec 1998 19:49:40 +1100
+Date: Tue, 8 Dec 1998 19:49:40 +1100 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+To: Michael Sokolov <msokolov at harrier.Uznet.NET>
+cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: 9-track tape interfaces
+In-Reply-To: <199812080719.MAA16509 at harrier.Uznet.NET>
+Message-ID: <Pine.GSO.4.03.9812081928170.14240-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On 8 Dec 1998, Michael Sokolov wrote:
+
+> on an individual basis. Some of these go to different outputs of a 74S241
+> (dual 4-bit 3-state buffer), some go to a 7437 (unfamiliar with this IC),
+
+From my TTL Data Book: Quadruple 2-input positive-NAND buffer (Y=AB bar).
+Outputs are 3, 6, 8, 11.  Corresponding inputs are 1/2, 4/5, 9/10, 12/13.
+Vcc is 14, GND is 7.
+
+>    Hmm, this is another big gap in my knowledge. What does streaming vs.
+> non-streaming mean?
+
+Streaming means that data can be supplied to the tape (or read from) fast
+enough to keep it moving, as opposed stop/start (or more likely, stop
+backspace start).  Requires double-buffering somewhere.
+
+>    Yet another gap in my knowledge. I remember seeing the term "vacuum
+> columns" in the BSD documentation and having no idea what are they. Could
+> you enlighten me?
+
+ROTFL :-)  Look at an old Sci-Fi movie some time, in particular the
+obligatory IBM tape drives spinning back and forth.  The vacuum columns
+were buffers; columns into which bits of the tape were sucked so as to
+keep the tape moving past the heads at constant velocity (not sure how
+good the clock recovery was in those days) whilst the reels did their
+thing.  The column has various pairs of pressure sensors, between which
+the tape was kept for that particular mode; if it crept past one hole,
+it upset the pressure differential, and the pumps came into play...
+
+Remember, folks; this real-time stuff was *before* micro-chips!  I still
+remember looking at the old Cipher (I have the magic codes somewhere, that
+allowed it to load with the door open etc) aghast that it had no vacuum
+columns, but swing-arms instead...
+
+> > (I'm sure someone will
+> > now chime in about the days when Univac UniServo drives ruled the
+> > earth...)
+>    
+>    Just out of curiosity, what are they?
+
+Big BIG tape drives - real Sci-Fi material :-)
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id UAA17635
+	for pups-liszt; Tue, 8 Dec 1998 20:06:48 +1100 (EST)
+Received: from allegro.lemis.com (allegro.lemis.com [192.109.197.134])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id UAA17630
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 20:06:39 +1100 (EST)
+Received: from freebie.lemis.com (freebie.lemis.com [192.109.197.137])
+	by allegro.lemis.com (8.9.1/8.9.0) with ESMTP id TAA02406;
+	Tue, 8 Dec 1998 19:36:35 +1030 (CST)
+Received: (from grog at localhost)
+	by freebie.lemis.com (8.9.1/8.9.0) id TAA29044;
+	Tue, 8 Dec 1998 19:36:34 +1030 (CST)
+Message-ID: <19981208193634.A29025 at freebie.lemis.com>
+Date: Tue, 8 Dec 1998 19:36:34 +1030
+From: Greg Lehey <grog@lemis.com>
+To: Dave Horsfall <dave at fgh.geac.com.au>,
+        Michael Sokolov <msokolov at harrier.Uznet.NET>
+Cc: pups at minnie.cs.adfa.edu.au
+Subject: Re: 9-track tape interfaces
+References: <199812080719.MAA16509 at harrier.Uznet.NET> <Pine.GSO.4.03.9812081928170.14240-100000 at fgh>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+X-Mailer: Mutt 0.91.1i
+In-Reply-To: <Pine.GSO.4.03.9812081928170.14240-100000 at fgh>; from Dave Horsfall on Tue, Dec 08, 1998 at 07:49:40PM +1100
+WWW-Home-Page: http://www.lemis.com/~grog
+Organization: LEMIS, PO Box 460, Echunga SA 5153, Australia
+Phone: +61-8-8388-8286
+Fax: +61-8-8388-8725
+Mobile: +61-41-739-7062
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tuesday,  8 December 1998 at 19:49:40 +1100, Dave Horsfall wrote:
+> On 8 Dec 1998, Michael Sokolov wrote:
+>>> (I'm sure someone will now chime in about the days when Univac
+>>> UniServo drives ruled the earth...)
+>>
+>>    Just out of curiosity, what are they?
+>
+> Big BIG tape drives - real Sci-Fi material :-)
+
+UniServo was UNIVAC's name for all its tape drives, at least as long
+as I was involved with them.  They were all vacuum column jobs, but
+some were definitely ``cheap'' ones, such as the UniServo 6 and 12,
+which were intended for smaller machines.  IIRC the latest ``big''
+ones were the UniServo 16 and 20, at least when I was still involved
+with UNIVAC.
+
+Greg
+--
+See complete headers for address, home page and phone numbers
+finger grog at lemis.com for PGP public key
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA18425
+	for pups-liszt; Wed, 9 Dec 1998 01:02:41 +1100 (EST)
+Received: from caveman.geac.com.au (caveman.geac.com.au [203.30.73.2])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id BAA18420
+	for <PUPS at minnie.cs.adfa.edu.au>; Wed, 9 Dec 1998 01:02:33 +1100 (EST)
+Received: (qmail 18804 invoked from network); 8 Dec 1998 13:10:39 -0000
+Received: from brane.geac.com.au (202.6.67.115)
+  by caveman.geac.com.au with SMTP; 8 Dec 1998 13:10:39 -0000
+Received: from fgh.geac.com.au by brane.geac.com.au with smtp\n	(Smail3.1.29.1 #3) id m0znNf8-0003mmC; Wed, 9 Dec 98 00:58 AEDT
+Received: from localhost (dave at localhost) 
+    by fgh.geac.com.au (SMI-8.X/SVR4) with ESMTP id AAA28663
+    for <PUPS at minnie.cs.adfa.edu.au>; Wed, 9 Dec 1998 00:59:54 +1100
+Date: Wed, 9 Dec 1998 00:59:53 +1100 (EST)
+From: Dave Horsfall <dave@fgh.geac.com.au>
+X-Sender: dave at fgh
+cc: PUPS at minnie.cs.adfa.edu.au
+Subject: Re: John Lions
+In-Reply-To: <Pine.GSO.4.03.9812081523440.10402-100000 at fgh>
+Message-ID: <Pine.GSO.4.03.9812090031300.14240-100000 at fgh>
+X-No-Archive: Yes
+X-Witty-Saying: "Tesseract - Enter at own risk"
+X-Disclaimer: "Me, speak for us?"
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Tue, 8 Dec 1998, Dave Horsfall wrote:
+
+> Thanks for letting us know.  Damn...
+
+Sic transit gloria mundi.
+
+Damn.
+
+John, why did you have to die?  You taught me everything that I knew.
+
+Shit.
+
+-- 
+Dave Horsfall VK2KFU  dave at geac.com.au  Ph: +61 2 9978-7493 Fx: +61 2 9978-7422
+Geac Computers P/L (FGH Division) 2/57 Christie St, St Leonards 2065, Australia
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA18465
+	for pups-liszt; Wed, 9 Dec 1998 01:13:54 +1100 (EST)
+Received: from harrier.Uznet.NET (harrier.ml.org [193.220.92.194])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id BAA18460
+	for <pups at minnie.cs.adfa.edu.au>; Wed, 9 Dec 1998 01:13:41 +1100 (EST)
+Received: from dosdev (pm10-206.dial.qual.net [205.212.2.206])
+	by harrier.Uznet.NET (8.8.8/8.8.8) with SMTP id TAA16834
+	for <pups at minnie.cs.adfa.edu.au>; Tue, 8 Dec 1998 19:13:22 +0500
+Message-Id: <199812081413.TAA16834 at harrier.Uznet.NET>
+From: Michael Sokolov <msokolov@harrier.Uznet.NET>
+Date: 8 Dec 1998   14:13:08 GMT
+To: pups at minnie.cs.adfa.edu.au
+Subject: Re: 9-track tape interfaces
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+   Dave Horsfall <dave at fgh.geac.com.au> wrote:
+> From my TTL Data Book: Quadruple 2-input positive-NAND buffer (Y=AB bar).
+> Outputs are 3, 6, 8, 11.  Corresponding inputs are 1/2, 4/5, 9/10, 12/13.
+> Vcc is 14, GND is 7.
+   
+   Looks trivial, except that the author of the digital design textbook I'm
+using has chosen to omit it. :-) Anyway, I have looked at the board again,
+and all pins that go to the connector are outputs. This means that at least
+in this form, with the U10 chip omitted, there are NO inputs on that
+connector, only outputs.
+   
+   That missing chip could very well have to do with inputs, though. Hmm,
+there are 4 lines going to that missing chip, and that sounds like the
+number of input lines in some flavor of Centronics. On the output side, 8
+pins go to the 74S241 and 3 pins go to the 7437, again suggesting 8-bit
+output and some control signals.
+   
+   All this sounds very much like Centronics or some similar interface.
+Figuring out what the host interface is and what do those myriads of
+switches and jumpers mean would be harder, though.
+   
+   Sincerely,
+   Michael Sokolov
+   Cellular phone: 216-217-2579
+   ARPA Internet SMTP mail: msokolov at harrier.Uznet.NET
+
+
+

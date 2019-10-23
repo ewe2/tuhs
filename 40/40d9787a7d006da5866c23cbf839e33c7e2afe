@@ -1,0 +1,85 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Mon, 7 Jul 2008 16:45:20 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080707113251.10b945ca@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+	<20080623161801.19a53c3e@veda.cnb.uam.es>
+	<20080623181101.e862a3a2.lehmann@ans-netz.de>
+	<20080625122505.4e3d9803@veda.cnb.uam.es>
+	<20080626165246.9c3933eb.lehmann@ans-netz.de>
+	<20080627142430.57e0a9c4@veda.cnb.uam.es>
+	<20080629102523.0219a85c.lehmann@ans-netz.de>
+	<20080630113028.46a50360@veda.cnb.uam.es>
+	<20080630193450.b82063bb.lehmann@ans-netz.de>
+	<20080701162102.4812f3d6@veda.cnb.uam.es>
+	<20080701203541.df06d2b1.lehmann@ans-netz.de>
+	<20080703121207.516f319a@veda.cnb.uam.es>
+	<20080706181419.0d360d7a.lehmann@ans-netz.de>
+	<20080707113251.10b945ca@veda.cnb.uam.es>
+Message-ID: <20080707164520.a89082b6.lehmann@ans-netz.de>
+
+Jose R. Valverde wrote:
+
+> Then, all I can think of is the other approach I mentioned: that the 
+> original authors first wrote prf.c, had a look at the assembly generated
+> and then tweaked the assembly code generated from sys*.c by hand and
+> reproduced some similar patterns.
+
+prf.c has another author than the source files I've got the problem with.
+prf.c was "developed" by the guys at EAW who created WEGA. Developed means
+here, they disassembled the ZEUS objects and created C files out of the
+ASM listing like I do. Probably they didn't figured out the "ldl rr4,rr2"
+part of the original ZEUS object (which was probably there) too and they
+decided that how it is done now has the same effect.
+So - you can say all sources which contain german text are created based
+on ZEUS disassembled objects so they are not "original" ZEUS. all the
+source files containing a "whatstring" from the version control system
+are files created by me by disassembling the original ZEUS objects.
+
+One interesting thing for example can be found in the WEGA-debug.c:
+
+	callr	_gethex
+	and	r2,#16128
+	ldl	rr4,rr2
+	and	r4,#32512
+	ldl	|_stkseg+~L1+8|(fp),rr4
+
+is the ASM code from the original object
+
+What they've tryed at EAW when writing the debug.c file was:
+
+#define UMASK	0x3f00ffffL
+#define KMASK	0x7f00ffffL
+[...]
+kadr = (unsigned int *)((long)(gethex() & UMASK) & KMASK);
+
+But this gets compiled into:
+
+	callr	_gethex
+	and	r2,#16128
+	ldl	|_stkseg+~L1+8|(fp),rr2
+
+which is the same because - when the AND with 16128 happend, an AND with
+any higher value won't change the register - so the optimizer probably
+decided to remove the and with 32512 - which is not removed in the
+original object....
+
+> Well, if I can find some time to install SystemIII for VAX on SIMH, may
+> be I will be able to reproduce this, but I seriously doubt it as they
+> are different architectures.
+
+A friend of mine is working on a P8000 emulator - 8Bit is kinda done,
+16bit part is "in progress" - no idea how long it will take him to
+complete it since I have no circuit plans of the 16Bit part - only the
+original (good documented) Firmware Sources.
+
+When it is done and it can be released officially you can all enjoy the
+feeling on working with a P8000! ;)
+
+-- 
+ Oliver Lehmann
+  http://www.pofo.de/
+  http://wishlist.ans-netz.de/
+
+

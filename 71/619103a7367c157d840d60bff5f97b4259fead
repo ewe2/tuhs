@@ -1,0 +1,78 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Sat, 17 Feb 2018 17:01:58 -0800
+Subject: [TUHS] Do Interface specifications such POSIX or the LSB Still
+ Matter
+In-Reply-To: <CAC20D2Mxu1zYnm97KsKC50rStrH_VZUO88vzd-7f4gRD3VNKyg@mail.gmail.com>
+References: <CAC20D2PqfaQcHLZ9QCrRxAXM7rYeFBO1nLb2cwoj=sNvu=mYRw@mail.gmail.com>
+ <781FBCD1-A2D9-4F6A-A0CF-452C243900E8@pobox.com>
+ <CAC20D2Otjay-dMfMRBHTmBEVgRUKCN+2nKHayWwtdFb2RO7CDQ@mail.gmail.com>
+ <20180216154516.GB14249@mcvoy.com>
+ <CAC20D2Mxu1zYnm97KsKC50rStrH_VZUO88vzd-7f4gRD3VNKyg@mail.gmail.com>
+Message-ID: <20180218010158.GE17873@mcvoy.com>
+
+On Fri, Feb 16, 2018 at 01:36:14PM -0500, Clem Cole wrote:
+> On Fri, Feb 16, 2018 at 10:45 AM, Larry McVoy <lm at mcvoy.com> wrote:
+> > Meh, not really.  Until Git ate our market, we supported everything you
+> > might imagine.  Windows, MacOS, Linux-{x86,x86_64,sparc,ppc,itanium,mips},
+> > AIX, IRIX, HP-UX, Solaris.
+> >
+> > Source base of 2.6 million lines of code and docs.
+> >
+> ???Did you have messaging (Co-Arrays, MPI or SHMEM) mixed in?  I'm guess
+> not., but your system is (was) extensive so I'm asking....
+
+Nope.  We did our own protocol over TCP and HTTP.
+
+> >  We limited our stuff to very basic stuff
+> >
+> ???Yup -- very wise.   Simple library to insulate you from OS.
+> Did you shipped statically bound or use *.so's
+
+We could build static, we had a "make crank-static", but we rarely did
+that, it was only for some oddball targets.  99.9999% of the time it
+was dynamic and it was not a problem because I was so careful about
+what we used in libc (as I said before, it was only in the last 5 years
+that I trusted that realloc() actually worked).
+
+> Also how much are you dependant on OS databases (password & credential
+> libraries and other things  stored in /etc, /usr/lib or /var)????
+> ???This is were even within Linux, life can get messy pretty fast.???
+
+We really didn't use much, we were not parsing that stuff for the most
+part.  There were some things we did, for example, we have a fstype()
+function that called disktype().  It tried to find the mount point,
+looking through
+
+	/etc/mtab
+	/etc/mnttab
+	/var/log/mount.today
+
+and it figured out if it was NFS or not.  If it was not NFS then it 
+called disktype which tried to figure out if it was SSD or not by 
+pawing through stuff like /sys/block/%s/queue/rotational
+
+All of that was so we could auto-optimize parallelism, NFS wants 8 way,
+SSD wants all the CPUS, rotating disk wants just one or you thrash the
+arm.
+
+> > Netflix does a lot in AWS.  And they care about performance.  But they
+> > code around the variance that you get from containers, I could see that
+> > as an issue for the old school fortran people.
+> >
+> ???Good .. you get it.???
+
+Maybe.
+
+> > I'm sort of struggling to see what problem it is you want to solve.
+> >
+> ???Without revealing the ISV, I know very well know HPC ISV that used to have
+> a >>Linux<< only test matrix of over 140 perminations before they could
+> release and they only supported RH and SuSE.   But between different
+> manufacturers, distributed file systems, interconnect, messaging stacks,
+> compilers *et al???*
+> 
+> *??? *it got messy very fast.???
+
+I really don't see why.  I can see why if they are using every library
+known to man, but if you want portable you don't do that.
+

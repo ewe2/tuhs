@@ -1,0 +1,40 @@
+From: ron@ronnatalie.com (Ron Natalie)
+Date: Thu, 25 Jan 2018 14:36:15 -0500
+Subject: [TUHS] V6 UNIX main() oddness
+In-Reply-To: <20180125184259.8B62518C0B0@mercury.lcs.mit.edu>
+References: <20180125184259.8B62518C0B0@mercury.lcs.mit.edu>
+Message-ID: <033501d39613$c3f86fa0$4be94ee0$@ronnatalie.com>
+
+I don't see any reason why you can't make that optimization at that point.
+Nothing is going to come in and suddenly invalidate the inode between those
+two lines.
+I suspect it was an example of cut/paste-it is from some other part of the
+kernel.
+
+-----Original Message-----
+From: TUHS [mailto:tuhs-bounces@minnie.tuhs.org] On Behalf Of Noel Chiappa
+Sent: Thursday, January 25, 2018 1:43 PM
+To: tuhs at minnie.tuhs.org
+Cc: jnc at mercury.lcs.mit.edu
+Subject: [TUHS] V6 UNIX main() oddness
+
+So, while bringing up V6 on a hardware PDP-11/23 with an RK11 emulator using
+an SD card for storage which Dave Bridgham and I are doing, I found this
+piece of code in main() on V6 Unix:
+
+	rootdir = iget(rootdev, ROOTINO);
+	rootdir->i_flag =& ~ILOCK;
+	u.u_cdir = iget(rootdev, ROOTINO);
+	u.u_cdir->i_flag =& ~ILOCK;
+
+I don't get why two separate calls to iget(), with the same arguments; why
+not replace the second pair of lines with:
+
+	u.u_cdir = rootdir;
+	rootdir->i_count++;
+
+What am I missing?
+
+	Noel
+
+

@@ -1,0 +1,77 @@
+From: pnr@planet.nl (Paul Ruizendaal)
+Date: Mon, 16 Jan 2017 01:13:00 +0100
+Subject: [TUHS] Early Internet work (Was: History of select(2))
+In-Reply-To: <20170114164102.GA31665@yeono.kjorling.se>
+References: <20170109023502.GA8507@minnie.tuhs.org>
+ <D2542D54-09B2-42B5-9589-289B243A97CD@planet.nl>
+ <CAC20D2PttOOr6kVLFxf7G-ZD+_jQWV6B8C3F=bCEY=g4Ufot1Q@mail.gmail.com>
+ <7C71C8C7-AE29-4B64-894A-4913585B8763@planet.nl>
+ <20170114164102.GA31665@yeono.kjorling.se>
+Message-ID: <D7832B28-535A-412C-BC4E-6E1E6265589C@planet.nl>
+
+
+On 14 Jan 2017, at 17:41 , Michael Kjörling wrote:
+
+> On 13 Jan 2017 10:13 +0100, from pnr at planet.nl (Paul Ruizendaal):
+>> over on the internet history mailing list.
+> 
+> Interesting. Care to give me a pointer toward it?
+
+
+That mailing list is here:
+http://mailman.postel.org/mailman/listinfo/internet-history
+
+
+On 14 Jan 2017, at 23:02 , Johnny Billquist wrote:
+
+> IMPs did not talk IP, just for the record.
+Yes, this is true of course. The software of the IMP was resurrected from printouts some time ago:
+http://walden-family.com/impcode/
+
+> The problem is that all the RFCs are available, and they are later than this. The ARPAnet existed in 1979, but it was not using TCP/IP. If you look at the early drafts of TCP/IP, from around 1980-1981, you will also see that there are significant differences compared to the TCP/IP we know today. There was no ICMP, for example. Error handling and passing around looked different.
+
+Once again: yes. When exactly was the TCP/IP specification completed? That is an issue where reasonable people can hold different opinions. What software first implemented this on Unix? Here too reasonable people can hold different opinions. Below my take on this, based on my current understanding (and I keep repeating that I'm learning new things about this stuff almost every day and please advise if I'm missing things).
+
+Development of TCP/IP
+
+The specification that became TCP/IP apparently finds its roots in 1974, and it is gradually developed over the next years with several trial implementations. By March 1977 we get to TCP2 and more trials.  Next it would seem that there was a flurry of activity from January to August 1978, resulting in specifications for TCP4 (IEN54 and IEN55). Then, up to March more implementations follow, as documented in IEN98. With those implementations tested, also for interoperability, more changes to the protocol and implementations follow and I guess by April 1981 (RFC777) we reach a point where things are specified to a level where implementations would interoperate with today's implementations. This is not where it stops, 'modern' congestion control only goes back to the late 80's (see for instance Craig Partridge http://www.netarch2009.net/slides/Netarch09_Craig_Partridge.pdf, it is an interesting read).
+
+Early Unix code bases
+
+(1) The Mathis/Haverty stack
+
+In 1977 Jim Mathis at SRI writes a "TCP2.5" stack in PDP11 assembler, running on the MOS operating system (for the LSI11). In 1978 Haverty is assigned to take this stack and make it run on V6 Unix. He builds a kernel with ports, await and capac to achieve this. It is a mixed success (see http://mailman.postel.org/pipermail/internet-history/2016-October/004073.html), but he maintains it through 1978 and 1979 as a skunkworks project and the code eventually supports TCP4 (as defined in IEN54/55). The source has survived in Jack Haverty's basement as a printout, but it is not online. As far as I know know, this the first TCP/IP on Unix (a tie with the Wingfield implementation, and only if one accepts IEN54/55 as 'TCP/IP').
+
+(2) The Grossman (DTI) stack
+
+IEN98 mentions a TCP3 stack done for Network Unix (by then called ENFE/INFE) in 1978 by DTI / Gary Grossman. I don't currently have information about that implementation. As at March 1979 it did not appear to support TCP4.
+
+(3) The Wingfield/Cain stack
+
+In 1978 BBN / Michael Wingfield, was commissioned by DCEC / Ed Cain to write a TCP4 tack in C for Unix V6. As it stood in March 1979 this code supported IEN54/55 with the AUTODIN II security extensions that heralded back to 1975. It is a partial implementation: it does not support IP fragmentation and it has a simplistic approach to incoming out-of-order packets (drop everything until the right one arrives). However, it worked and kept being maintained by Ed Cain, who by October 1981 has added support for ICMP and GGN (https://www.rfc-editor.org/rfc/museum/tcp-ip-digest/tcp-ip-digest.v1n1.1). He is still supporting it as late as 1985 (https://www.rfc-editor.org/rfc/museum/tcp-ip-implementations.txt.1)
+
+As far as I know know, only the March 1979 code survives. I'm currently retyping it, about halfway through. I'm not sure what compiler it was written for: it uses longs, but apparently this is still somewhat broken (with comments in the source amounting to 'this WTF necessary to work around compiler bugs'); at the same time it also uses old-style assignments ('=+' instead of '+='). Could this be "typesetter C"? The code feels like it might be based on earlier work, for instance the BBN BCPL implementation for TENEX a few years earlier, but that is pure speculation. It could also be that Wingfield was new to C and bringing habits from other languages with him. Once all done, I'll ask Michael about it.
+
+I'm on thin ice here, but my current guess would be that the 5,000 line code base would need some 500 lines of new code to make it interoperable with today's implementations. From the above I would support the moniker "first TCP/IP in C on Unix" as claimed by UCLA, either for the March 1979 version if one takes the view that '90% modern' is good enough, or for the October 1981 version if support for RFC777 is the benchmark. In the latter view it beats the Gurwitz stack by about a month or two. However, it is not a full implementation of the specifications.
+
+(4) The Gurwitz stack
+
+Last in the list of candidates is the Rob Gurwitz stack for BSD4.1 (see IEN168), started in January 1981. It is a full implementation of the protocols that looks like it was done from scratch (as confirmed by Gurwitz and Haverty) and consolidates the earlier learnings. In my opinion, it is the first implementation where the source code has a distinct 'early unix smell' (please excuse the phrase), arguably more so that the later Joy code. The first iterations of the code don't support (the as yet non-existent) RFC777. By November 1981 there is a beta distribution tape that does, and this code looks to interoperate with modern TCP/IP implementations as-is. If the benchmark is a full implementation interoperating with today's code, the first TCP/IP on Unix would I think be the Gurwitz stack. Possibly it is the first TCP/IP in that definition on any OS.
+
+Note that this is also where TCP/IP and Network Unix join back up [but this view might change as I learn more about the Grossman / DTI version]: the Gurwitz code uses an API closely based on that of UoI's Network Unix and the provided user land programs (Telnet, FTP, MTP, etc.) appear ports from that code base (or perhaps from a BBN development of the UoI work).
+
+===
+
+In any case, I think it is fair to say that TCP/IP as we know it today did not drop from the sky in 1981. There was a vast amount of prior work done in the second half of the 70's on a variety of hardware and operating systems, experience that all feeded into the well known RFC's.
+
+One thing that I'm unclear about is why all this Arpanet work was not filtering more into the versions of Unix done at Bell Labs. The folks involved were certainly aware of each other and the work that was going on. With universities the cost of 'always on' long distance lines may have been too great, but within Bell Labs that would have been less of an issue and there is a clear link with the core business of the Bell System.
+
+Would anybody have some background on that?
+
+Paul
+
+
+
+
+
+

@@ -1,0 +1,81 @@
+From: don@DonHopkins.com (Don Hopkins)
+Date: Thu, 9 Nov 2017 16:41:30 +0100
+Subject: [TUHS] margins and indenting, and arbitrary c rules
+In-Reply-To: <20171109150936.F3A1718C0BC@mercury.lcs.mit.edu>
+References: <20171109150936.F3A1718C0BC@mercury.lcs.mit.edu>
+Message-ID: <7509A5DE-DD9F-4F70-A957-3272DAC0D71B@gmail.com>
+
+
+> On 9 Nov 2017, at 16:09, Noel Chiappa <jnc at mercury.lcs.mit.edu> wrote:
+> 
+> where xxx is a 'return', or a 'break', or a 'continue'. That way, you can
+> empty your brain once you hit that, and start with a clean slate.
+
+Absolutely — you nailed it! Not only do guard clauses reduce indentation, but they also let you clear your mind and forget about as much as possible before running into the complex stuff you will need all of your short term memory to understand, and which is then more likely to fit on the screen. 
+
+https://stackoverflow.com/questions/268132/invert-if-statement-to-reduce-nesting/8493256#8493256 <https://stackoverflow.com/questions/268132/invert-if-statement-to-reduce-nesting/8493256#8493256>
+
+Nested if statements have more “join” points where control flow merges back together at the end instead of bailing out early, and the deeper and deeper nesting breaks up visual patterns that would otherwise be apparent and wastes lots of space (on the page and in your head). 
+
+“Guard clauses” with multiple returns can also make it easier to visually emphasize the symmetries and patterns in the code. 
+
+I try to take every opportunity to break my code and expressions up across multiple lines to emphasize repetition, patterns and variations, and I always use parens to explicitly state which groupings I mean instead of depending on the reader to be a good enough programmer who has memorized all the precedence rules to infer what I mean and hope I didn’t slip up and make a mistake — I’m looking at YOU && and || !!!. (I’d fire any programmer who mixed && and || without parens just to show off what a hot-shot they were for remembering they have different precedence and trying to save a few bytes of disk space at the expense of readability.)
+
+For example, instead of:
+
+float length = sqrt(x * x + y * y + z * z);
+
+I go:
+
+float length =
+    sqrt(
+        (x * x) +
+        (y * y) +
+        (z * z));
+
+To me, that’s like getting a “triple word score” and a “double word score" in scrabble, when I can arrange the code into pleasing patterns that explicitly shows the repetition and progression of two factors by three dimensions, and arranges the x's, y's and z's and *’s and +’s into three nice neat rows and columns reflecting the structure of the expression. 
+
+The easier it is for your eyes to scan up and down the code to verify it’s right and detect errors, the better, and the following example shows how guard clauses can do that:
+
+See how much easier it is to spot the bug:
+
+float length = sqrt(x * x + x * y + z * z);
+
+float length =
+    sqrt(
+        (x * x) +
+        (x * y) +
+        (z * z));
+
+http://wiki.c2.com/?GuardClause <http://wiki.c2.com/?GuardClause>
+
+Here is a sample of code using guard clauses ...
+  public Foo merge (Foo a, Foo b) {
+    if (a == null) return b;
+    if (b == null) return a;
+    // complicated merge code goes here.
+  }
+Some style guides would have us write this with a single return as follows ...
+  public Foo merge (Foo a, Foo b) {
+    Foo result;
+    if (a != null) {
+      if (b != null) {
+        // complicated merge code goes here.
+      } else {
+        result = a;
+      }
+    } else {
+      result = b;
+    }
+    return result;
+  }
+
+This second form has the advantage that the usual case, the merge, is dealt with first. It also has a single exit as the last line of the routine which can be handy with some refactorings. It has the disadvantage of separating the exceptional conditions from their corresponding results which, in this case, makes it harder to see the symmetry of the conditions. It also buries the usual, and complicated, case inside a couple of layers of braces, which may make it harder to read.
+
+The guards are similar to assertions in that both protect the subsequent code from special cases. Guards differ from assertions in that they make a tangible contribution to the logic of the method and thus cannot be safely omitted as part of an optimization. I borrowed the term guard from EwDijkstra <http://wiki.c2.com/?EwDijkstra> when naming this pattern. The first form above hints at the elegance of his guarded commands though Dijkstra manages to save the single exit property in his code as well. -- WardCunningham <http://wiki.c2.com/?WardCunningham>
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171109/bfc8998d/attachment.html>
+

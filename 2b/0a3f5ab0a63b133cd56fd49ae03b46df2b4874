@@ -1,0 +1,41 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 1 Dec 2017 15:09:34 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <20171201230302.0DC351FA41@orac.inputplus.co.uk>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+ <20171201161810.GM3924@mcvoy.com>
+ <CANCZdfpYWbLdkx4fNURFnLM5VGt+qDcnnMyHQ+M4iwAziS2a9A@mail.gmail.com>
+ <20171201172603.GO3924@mcvoy.com>
+ <BADECBD9-D2B4-4788-8308-87EBF93D555A@bitblocks.com>
+ <20171201223859.GX3924@mcvoy.com>
+ <20171201230302.0DC351FA41@orac.inputplus.co.uk>
+Message-ID: <20171201230934.GA24335@mcvoy.com>
+
+On Fri, Dec 01, 2017 at 11:03:02PM +0000, Ralph Corderoy wrote:
+> Hi Larry,
+> 
+> > > So OOM code kills a (random) process in hopes of freeing up some
+> > > pages but if this process is stuck in diskIO, nothing can be freed
+> > > and everything grinds to a halt.
+> >
+> > Yep, exactly.
+> 
+> Is that because the pages have been dirty for so long they've reached
+> the VM-writeback timeout even though there's no pressure to use them for
+> something else?  Or has that been lengthened because you don't fear
+> power loss wiping volatile RAM?
+
+I'm tinkering with the pageout daemon so I'm trying to apply memory
+pressure.  I have 10 25GB processes (25GB malloced) and the processes just
+walk the memory over and over.  This is on a 256GB main memory machine
+(2 socket haswell, 28 cpus, 28 1TB SSDs, on loan from Netflix).
+
+It's the old "10 pounds of shit in a 5 pound bag" problem, same old stuff,
+just a bigger bag.
+
+The problem is that OOM can't kill the processes that are the problem,
+they are stuck in disk wait.  That's why I started asking why can't you
+kill a process that's in the middle of I/O.
+

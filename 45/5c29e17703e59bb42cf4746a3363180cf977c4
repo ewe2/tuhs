@@ -1,0 +1,127 @@
+From tuhs-bounces@minnie.tuhs.org Thu Jun 28 04:13:30 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.1 (2015-04-28) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.1
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id faadb8ca
+	for <ml@inbox.vuxu.org>;
+	Thu, 28 Jun 2018 04:13:30 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id F2AF7A1834; Thu, 28 Jun 2018 14:13:28 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 393B1A1816;
+	Thu, 28 Jun 2018 14:13:03 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AD711A1816; Thu, 28 Jun 2018 14:13:00 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id 10DBC9EDF1
+ for <tuhs@minnie.tuhs.org>; Thu, 28 Jun 2018 14:13:00 +1000 (AEST)
+Received: from mob.bitblocks.com (mob.bitblocks.com [192.168.125.11])
+ by mail.bitblocks.com (Postfix) with ESMTP id 8E098156E517;
+ Wed, 27 Jun 2018 21:12:38 -0700 (PDT)
+Content-Type: text/plain;
+	charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 11.4 \(3445.8.2\))
+From: Bakul Shah <bakul@bitblocks.com>
+In-Reply-To: <af780f9fb5c14e37f12ce5c2a4e40376669c730f@webmail.yaccman.com>
+Date: Wed, 27 Jun 2018 21:12:37 -0700
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <81277CC3-3C4A-49B8-8720-CFAD22BB28F8@bitblocks.com>
+References: <af780f9fb5c14e37f12ce5c2a4e40376669c730f@webmail.yaccman.com>
+To: Steve Johnson <scj@yaccman.com>
+X-Mailer: Apple Mail (2.3445.8.2)
+Subject: Re: [TUHS] PDP-11 legacy, C, and modern architectures
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Jun 27, 2018, at 9:00 AM, Steve Johnson <scj@yaccman.com> wrote:
+>=20
+> I agree that C is a bad language for parallelism, and, like it or not, =
+that's what today's hardware is giving us -- not speed, but many =
+independent processors.  But I'd argue that its problem isn't that it is =
+not low-level, but that it is not high-level enough.  A language like =
+MATLAB, whose basic data object is an N-diemsional tensor, can make =
+impressive use of parallel hardware.
+>=20
+> Consider matrix multiplication.   Multiplying two NxN arrays to get =
+another NxN array is a classic data-parallel problem -- each value in =
+the result matrix is completely independent of every other one -- in =
+theory, we could dedicate a processor to each output element, and would =
+not need any cache coherency or locking mechanism -- just let them go at =
+it -- the trickiest part is deciding you are finished.
+>=20
+> The reason we know we are data parallel is not because of any feature =
+of the language -- it's because of the mathematical structure of the =
+problem.  While it's easy to write a matrix multiply function in C (as =
+it is in most languages), just the fact that the arguments are pointers =
+is enough to make data parallelism invisible from within the function.  =
+You can bolt on additional features that, in effect, tell the compiler =
+it should treat the inputs as independent and non-overlapping, but this =
+is just the tip of the iceberg -- real parallel problems see this in =
+spaces. =20
+>=20
+> The other hardware factor that comes into play is that hardware, =
+especially memories, have physical limits in what they can do.  So the =
+"ideal" matrix multiply with a processor for each output element would =
+suffer because many of the processors would be trying to read the same =
+memory at the same time.  Some would be bound to fail, requiring the =
+ability to stack requests and restart them, as well as pause the =
+processor until the data was available.   (note that, in this and many =
+other cases, we don't need cache coherency because the input data is not =
+changing while we are using it).  The obvious way around this is to =
+divide the memory in to many small memories that are close to the =
+processors, so memory access is not the bottleneck.
+>=20
+> And this is where C (and Python) fall shortest.  The idea that there =
+is one memory space of semi-infinite size, and all pointers point into =
+it and all variables live in it almost forces attempts at parallelism to =
+be expensive and performance-killing.  And yet, because of C's limited, =
+"low-level" approach to data, we are stuck.  Being able to declare that =
+something is a tensor that will be unchanging when used, can be =
+distributed across many small memories to prevent data bottlenecks when =
+reading and writing, and changed only in limited and controlled ways is =
+the key to unlocking serious performance.
+>=20
+> Steve
+>=20
+> PS: for some further thoughts, see =
+https://wavecomp.ai/blog/auto-hardware-and-ai
+
+Very well put. The whole concept of address-spaces is rather
+low level.
+
+There is in fact a close parallel to this model that is in=20
+current use. Cloud computing is essentially a collection of
+"micro-services", orchestrated to provide some higher level
+service. External to some micro-service X, all other services
+care about is how to reach X and what comm. protocol to use to
+talk to it but not about any details of how it is implemented.
+Here concerns are more about reliability, uptime, restarts,
+updates, monitoring, load balancing, error handling, DoS,
+security, access-control, latency, network address space &
+traffic management, dynamic scaling, etc. A subset of these
+concerns would apply to parallel computers as well.
+
+Current cloud computing solutions to these problems are quite
+messy, complex and heavyweight. There is a lot of scope here
+for simplification....=20
+
+
+
+
+

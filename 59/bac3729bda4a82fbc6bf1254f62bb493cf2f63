@@ -1,0 +1,23 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Fri, 1 Dec 2017 08:18:10 -0800
+Subject: [TUHS] signals and blocked in I/O
+In-Reply-To: <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+References: <20171201154448.GL3924@mcvoy.com>
+ <CAEoi9W5mFaQjuGAqSQZSusuyj2uyUX4PvsKVq8bOuM5219E1tQ@mail.gmail.com>
+ <CAC20D2NcnW1YHdd5+3Y8yQqghGeLMvy8urDV7R5GevcLpizLew@mail.gmail.com>
+Message-ID: <20171201161810.GM3924@mcvoy.com>
+
+On Fri, Dec 01, 2017 at 11:11:56AM -0500, Clem Cole wrote:
+> It's hard because if I/O (like DMA) is in progress, what are the proper
+> semantics to exit/roll back?   When do you stop the transfer and what
+> happens.   When doing direct to/from disk (like a in a real-time system),
+> this can get tricky.
+
+So at first blush, what it seems like is you need a barrier to starting more
+DMA's.  You take the signal, the signal changes state to say to the I/O
+system "finish what you are doing but then no more".
+
+Or what you do is kill the process, tear down all of the pages except those
+that are locked for I/O, leave those in the process and wait for the I/O to
+get done.  That might be simpler.
+

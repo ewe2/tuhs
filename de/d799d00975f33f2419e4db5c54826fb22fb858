@@ -1,0 +1,95 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 5dee5146
+	for <ml@inbox.vuxu.org>;
+	Tue, 11 Dec 2018 16:16:50 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B4E6CA1F70; Wed, 12 Dec 2018 02:16:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DA8B5A1F0B;
+	Wed, 12 Dec 2018 02:16:33 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 572FEA1F0B; Wed, 12 Dec 2018 02:16:32 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DF3ACA1F06
+ for <tuhs@minnie.tuhs.org>; Wed, 12 Dec 2018 02:16:31 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 0053818C089; Tue, 11 Dec 2018 11:16:30 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20181211161631.0053818C089@mercury.lcs.mit.edu>
+Date: Tue, 11 Dec 2018 11:16:30 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] 2.9bsd with networking on 18-bit possible?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Clem Cole <clemc@ccc.com>
+
+    > This is why I suggested that if you really want telnet and ftp to the
+    > PDP-11, you might be better off moving the networking stack out of the
+    > kernel
+
+Really, the answer is that I need to get off my @ss and put the MIT V6+ system
+up (I have all the files, just need to get a round tuit).
+
+
+It has TCP/IP, but is it not all crammed into the kernel. And unlike the early
+BBN V6, it doesn't do TCP as a single process to which all the other
+client/server processes talk via IPC.
+
+Instead, the only thing in the kernel is inbound demuxing, and minimal outbound
+processing. (IIRC, outbound packets are copied into kernel buffers; an earlier
+version of the networking interface driver actually did do inbound and outbound
+DMA directly from buffers in the user's process, but only one process could use
+the network interface at a time.)
+
+The TCP code was a library that was built into the user process which did the
+server/client applications. (The servers which supported login, like FTP,
+needed to run as root, like the ordinary login, setuid'ing to the entered
+user-id.) I don't remember if we supported server Telnet, but I think we
+did. So we must have added PTY's of some sort, I'll have to check.
+
+Since the TCP was in the user process, we actually had a couple of different
+ones, depending on the application. Dave Clark had done a quick-n-dirty TCP on
+the Alto (in BCPL) which was only good for things like user Telnet, not for
+applications that sent a lot of data. We ported that one for the first TCP; we
+later did a 'high-speed bulk data' TCP, used for FTP, etc. I don't remember
+which one SMTP used.
+
+The whole thing worked _really_ well. Alas, I don't think anyone else picked
+up on it.
+
+
+The kernel code is not that large, it should even run on a /40, without
+overlays (although the number of disk buffers would probably get hit).  And
+since the TCP is in user processes, it could all get swapped out, so it would
+run OK on machines without that much physical memory.
+
+The issue is going to be that it will need a new network interface driver,
+since I think the only driver ever done for it was for Pronet. And now we get
+back to the 'what interfaces are available' question. Doing a DEC driver would
+allow use of DEQNA's and DELQA's on QBUS machines, which would be optimal,
+since they are common. And people could bring up Unix with TCP/IP on -11/23's.
+
+But we'd have to add ARP (which I would do as a process, with only the
+IP->Ether address mapping table stored in the kernel). I wrote a really nice
+ARP for the C Gateway that could easily be used for that.
+
+      Noel

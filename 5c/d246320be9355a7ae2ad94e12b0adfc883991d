@@ -1,0 +1,63 @@
+From: will.senn@gmail.com (Will Senn)
+Date: Mon, 20 Nov 2017 11:37:34 -0600
+Subject: [TUHS] Determining what was on a tape back in the day
+In-Reply-To: <20171120160148.EED1818C091@mercury.lcs.mit.edu>
+References: <20171120160148.EED1818C091@mercury.lcs.mit.edu>
+Message-ID: <fb0ad671-8b65-cd37-bb4c-6fceab8568d0@gmail.com>
+
+On 11/20/17 10:01 AM, Noel Chiappa wrote:
+>      > The 0th block does seem to contain some PDP-11 binary - a bootstrap of
+>      > some sort. I'll look in more detail in a bit.
+>
+> OK, I had a quick look, and it seems to be a modified version of mboot.s:
+>
+>    http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/mdec/mboot.s
+>
+> I had a look through the rest of the likely files in 'mdec', and I didn't find
+> a better match. I'm too lazy busy to do a complete dis-assembly, and work out
+> exactly how it's different, though..
+>
+>
+> A few observations:
+>
+>    000:    000407 000606 000000 000000 000000 000000 000000 000001
+>
+> An a.out header, with the 0407 'magic' here performing its original intended
+> function - to branch past the header.
+>
+>    314:	105737 177560 002375
+>
+> Some console I/O stuff - this two instruction loop waits for the input
+> ready bit to be set.
+>
+>    326:	042700 177600 020027 000101 103405 020027 000132 101002
+>
+> More character processing - the first instruction clears the high bits of R0,
+> and the next two sets of two instructions compare the contents with two
+> characters (0101 and 0132), and branch.
+>
+>    444:    000207 005000 021027 000407 001004 016020
+>    460:    000020 020006 103774 012746 137000 005007
+>
+> This seems like the code that checks to see if the thing is an a.out file
+> (note the 'cmp *r0, $0407'), but the code is different from that code in
+> mboot.s; in that, the instruction before the 'clr r0' (at 0446 here) is a
+> 'jsr', whereas in this it's an 'rts pc'. And the code after the 'cmp r0, sp'
+> and branch is different too. I love the '05007' - not very often you see
+> _that_ instruction!
+>
+>    502:    012700 177350 012701 177342 012711 000003 105711
+>
+> Clearly the code at 'taper:' (TC11 version).
+>
+> 	Noel
+
+Thanks for the insight into how to look into this. I'm off to refreshing 
+my pdp-11 assembly language skills...
+
+Will
+
+-- 
+GPG Fingerprint: 68F4 B3BD 1730 555A 4462  7D45 3EAA 5B6D A982 BAAF
+
+

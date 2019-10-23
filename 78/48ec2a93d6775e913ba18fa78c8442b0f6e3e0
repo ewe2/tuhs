@@ -1,0 +1,95 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a40e4c99
+	for <ml@inbox.vuxu.org>;
+	Tue, 27 Aug 2019 02:45:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 15C809BB75; Tue, 27 Aug 2019 12:45:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5B1F39BB67;
+	Tue, 27 Aug 2019 12:45:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 18DAF9BB67; Tue, 27 Aug 2019 12:45:12 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B30329B684
+ for <tuhs@minnie.tuhs.org>; Tue, 27 Aug 2019 12:45:11 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 42B7335E0A8; Mon, 26 Aug 2019 19:45:11 -0700 (PDT)
+Date: Mon, 26 Aug 2019 19:45:11 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Dan Cross <crossd@gmail.com>
+Message-ID: <20190827024511.GU13570@mcvoy.com>
+References: <13c5c36e-c84d-e020-d09e-51c8c502dc6d@kilonet.net>
+ <CANCZdfqEs2RQ3YO_6PxfMtipD5PXm2wdztdkHRFLZfsO2DhaEA@mail.gmail.com>
+ <75a32043-4830-ba04-ee0f-023c5f5ade3f@gmail.com>
+ <b9f6633e-36f6-d802-c315-1f1528486270@kilonet.net>
+ <20190827003013.GS13570@mcvoy.com>
+ <312b39a1-2944-100f-55e0-fc65b504d43d@kilonet.net>
+ <CAEoi9W6upO4LdvV0AVLy8f1je6oSZeuz4bbP4yuux-Xe6UUEBA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAEoi9W6upO4LdvV0AVLy8f1je6oSZeuz4bbP4yuux-Xe6UUEBA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] If not Linux, then what?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Aug 26, 2019 at 09:26:27PM -0400, Dan Cross wrote:
+> On Mon, Aug 26, 2019, 9:00 PM Arthur Krewat wrote:
+> >[snip]
+> 
+> >
+> > As for what mmap() doesn't do right, I started using memory mapped files
+> > back in the early 80s on VMS on a VAX-11/780 when I and a colleague were
+> > converting a database from TOPS-10 to VMS. Perhaps I am misunderstanding
+> > your dislike for mmap() but please, enlighten me. It was my
+> > understanding at the time that it was akin to swapping/virtual-memory
+> > using an MMU. The difference was that instead of using the main paging
+> > area, the kernel would use an actual file.  Why would mmap() be a bad
+> > thing, when it's hooked into the kernel, and possibly hardware, at such
+> > a low point?
+> 
+> 
+> I don't mean to put words in Larry's mouth, but I think he meant that ZFS
+> bypasses the OS page cache, so that file IO and mmap use a different
+> buffering scheme that is not mutually consistent. 
+
+Dan is right.  At Sun, when Joe Moran did the 4.x VM system, he put into
+place the vision that Bill Joy had.  Which was that the page cache is 
+*the* cache.  There is nothing else.  We spent a bunch of time killing
+the buffer cache because you couldn't mmap the buffer cache, you could
+mmap the page cache.
+
+It's hard to describe how right that was but it was right.  You could
+have as many processes as you wanted mmap-ing the same data and there
+was a single version of the data.
+
+What ZFS did was manage the data on their own.  So if you mmap-ed a ZFS
+file it had to bcopy the data into the page cache and now it is right
+back to two copies of the data and you have to manage consistency.
+
+I would have been fine if all page sized blocks were in the page cache
+and ZFS managed the less than page sized blocks.  But they punted on
+the page cache entirely.
+
+My mind is blown that that was allowed to ship.  The Sun I worked at,
+if I had proposed that design, I would have been kicked out of the
+kernel group.

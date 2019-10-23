@@ -1,0 +1,87 @@
+From: lm@mcvoy.com (Larry McVoy)
+Date: Sun, 24 Sep 2017 07:06:17 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <CAP6exYKxC2g06dSRiM8-0BLN08AEWyO-8a0VAcy3vP4H3-8o8A@mail.gmail.com>
+References: <c38ba7b5-e867-93a3-14a2-c61c90bb49b5@kilonet.net>
+ <alpine.BSF.2.21.1709201036150.89458@aneurin.horsfall.org>
+ <20170923091704.GD10152@darioniedermann.it>
+ <CANuZA8QHNn=6Gg-Sm20s-0PSsS7y26c=uNbNETUX74Tx1A=DWQ@mail.gmail.com>
+ <CALMnNGgMSmqQ56r7xTRNdrDYfRiMieQ48kuZfWtSKd+yjmP2tg@mail.gmail.com>
+ <CAP6exYKxC2g06dSRiM8-0BLN08AEWyO-8a0VAcy3vP4H3-8o8A@mail.gmail.com>
+Message-ID: <20170924140617.GG28606@mcvoy.com>
+
++1 on what Ron said.  I don't get the rationale for going back to ptrace.
+Anyone know what it is?  Is there a perf issue?
+
+On Sun, Sep 24, 2017 at 02:02:54PM +0000, ron minnich wrote:
+> ptrace replaces procfs? Wow, that's a disappointing turn of events. It's
+> also against the flow of thought in the Unix community I knew in 1980. If
+> somebody has any of the old ca-1980 BSD manuals, you should find a BUGS
+> section on ptrace advocating a move to a file-system-like interface. I
+> always assumed ken wrote that little note when he was visiting UCB --
+> anybody know?
+> 
+> Plan 9 implements process debug via /proc, and several debuggers use that
+> interface -- including, in harvey, gdbstub so we can remote gdb processes.
+> I also implemented an strace-like command by extending /proc/pid/ctl with a
+> few extra commands. In so doing, I made it possible to write strace with a
+> shell script, which was kind of fun.
+> 
+> I always felt the /proc/pid/ctl model in Plan 9 implemented what we hoped
+> to see implemented in Unix to replace ptrace. ptrace, even the new ones,
+> are clunky in the best times.
+> 
+> The file system model is powerful. The strace based on /proc was a few
+> dozen lines.
+> 
+> 
+> 
+> On Sun, Sep 24, 2017 at 6:47 AM Andy Kosela <akosela at andykosela.com> wrote:
+> 
+> >
+> >
+> > On Saturday, September 23, 2017, Steve Mynott <steve.mynott at gmail.com>
+> > wrote:
+> >
+> >> On 23 September 2017 at 10:17, Dario Niedermann
+> >> <dario at darioniedermann.it> wrote:
+> >> > Il 20/09/2017 alle 02:39, Dave Horsfall ha scritto:
+> >> >
+> >> >> Definitely FreeBSD, because it's solid, has thousands of ports,
+> >> >> and well, is BSD...
+> >> >
+> >> > I have been a user in the past, but I just can't forgive FreeBSD for
+> >> > abandoning the proc filesystem  :-(
+> >>
+> >> procfs still exists in FreeBSD and can be added to fstab but isn't
+> >> mounted by default after an install.
+> >>
+> >> Generally the BSDs (and OS X) don't seem to actively maintain procfs
+> >> and it has been remove from OpenBSD.
+> >>
+> >> --
+> >> 4096R/EA75174B Steve Mynott <steve.mynott at gmail.com>
+> >>
+> >>
+> > This is not true.  Procfs has been deprecated in FreeBSD since at
+> > least 2012.
+> >
+> >   https://svnweb.freebsd.org/base/head/sys/fs/procfs/procfs.c?view=log
+> >
+> > And replacement for procfs is not sysctl, but rather ptrace(2).
+> >
+> >   https://lists.freebsd.org/pipermail/freebsd-fs/2011-February/010765.html
+> >
+> > I am one of those that also did not like that.  There is some magical
+> > simplicity in the way procfs is implemented -- it spells real UNIX to me.
+> >
+> > --Andy
+> >
+> >
+> >
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+

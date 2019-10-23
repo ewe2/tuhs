@@ -1,0 +1,64 @@
+From: arnold@skeeve.com (Aharon Robbins)
+Date: Sun, 25 May 2003 16:08:02 +0300
+Subject: [TUHS] V7 ls -s option
+Message-ID: <200305251308.h4PD82YW011475@localhost.localdomain>
+
+> From: Dennis Ritchie <dmr at plan9.bell-labs.com>
+> To: tuhs at minnie.tuhs.org
+> Subject: [TUHS] (no subject)
+> Date: Fri, 23 May 2003 00:10:30 -0400
+>
+>  > The V7 ls(1) man page says that the -s option, which prints total
+>  >blocks, includes any indirect blocks.
+>
+>  >However, the V7 struct stat didn't have the st_blocks member in the
+>  > struct stat, and the code in ls.c uses
+>
+>  > 	long
+>  >	nblock(size)
+>  >	long size;
+>  >	{
+>  >		return((size+511)>>9);
+>  >	}
+>
+>  >So, is this just a case of the man page being mistaken?
+>
+> Yes, it looks like a manual bug. Retrieving
+> the true number of indirect blocks isn't possible
+> from the 7th edition stat.  I'm not sure when (or by
+> whom) the st_blocks member was added.
+
+Thanks for confirming this.  In fact, the V7 calculation is only
+an approximation in another sense; a file with large holes could
+generate too large a result.
+
+System III doesn't have st_nblocks either.
+
+>  > While I'm at it, the V7 ls -a option only adds . and .. to the
+>  > list; apparently all other dot files were printed by default.
+>  > When did ls change such that -a applied to all dot files?
+>
+> UCB or USL did this (I'm sure which first).
+> Both tended to use more . files.
+>
+> 	Dennis
+
+As already pointed out, earlier Research code only checked the
+first character for being '.'; I later looked at the V6 ls.c.
+
+The System III ls.c is essentially the V7 one, but with comments
+added, and -l printing both owner and group, with -g and -o to
+turn off group or owner from -l.  Also, support for FIFOs.
+
+The nblock() calculation is considerably more complicated, and
+would seem to actually get the number of indirect blocks. At
+first glance, it looks though like a file with holes would
+still confuse it.
+
+Nothing like engaging in Software Archeology... :-)
+
+Thanks,
+
+Arnold
+
+

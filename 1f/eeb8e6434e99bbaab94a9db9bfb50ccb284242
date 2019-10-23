@@ -1,0 +1,103 @@
+From: s.norris@auckland.ac.nz (Stuart Norris)
+Date: Mon, 6 May 2002 15:59:43 +1200
+Subject: [TUHS] Re: ancient unix filesystems
+In-Reply-To: <200205060206.g4626vm71633@minnie.tuhs.org>
+Message-ID: <Pine.SGI.4.20.0205061551310.132659-100000@esu51>
+
+On Mon, 6 May 2002 tuhs-request at minnie.tuhs.org wrote:
+
+> From: Warren Toomey <wkt at minnie.tuhs.org>
+> 
+> Sven, you might want to look at this:
+> http://minnie.tuhs.org/cgi-bin/pups.cgi?article=2170
+> 
+>   From: Stuart Norris <norris at euler.mech.eng.usyd.edu.au>
+> 
+>  I have hacked together a version of a Unix 5th (and 6th) 
+>  Edition filesystem for Linux. It is read only, and was written for 
+>  Linux 2.0 on an x86 and so will require a little work to install on
+>  other systems and newer kernels, but it is fun to be able to mount 
+>  old disk images.
+
+The source code is sitting on
+
+	http://www.esc.auckland.ac.nz/People/Staff/Norris/src/u5e-0.2.tar.gz
+
+and the INTRO file contains a description of the filesystem. I don't think
+it works with current Linux kernels (I havn't touched it for a long while),
+so it might be easiest to start afresh using the minix filesystem module
+as a start.
+
+Briefly, the filesystem is like
+
+--
+
+* Block size:	512
+
+* General layout:
+  Block 0			boot block
+  Block 1			super block
+  Blocks 2 -> isize-1		inodes
+  Blocks isize -> fsize-1	data blocks
+
+* Byte ordering of "short" (16 bit entities) is little endian 0 1
+
+* Byte ordering of "long" (32 bit entities) is PDP-11 2 3 0 1
+
+* Inode on disk: "short"
+	0	means non-existent
+	1	root dir
+
+* Maximum number of hard links to a file:	256
+
+* Super-block location: bytes 512-1023
+
+* Super-block layout:
+	unsigned short  s_isize;     /* size in blocks of I list */
+	unsigned short  s_fsize;     /* size in blocks of entire volume */
+	unsigned short  s_nfree;     /* number of in core free blocks (0-100) */
+	unsigned short  s_free[100]; /* in core free blocks */
+	unsigned short  s_ninode;    /* number of in core I nodes (0-100) */
+	unsigned short  s_inode[100];/* in core free I nodes */
+	char            s_flock;     /* lock during free list manipulation */
+	char            s_ilock;     /* lock during I list manipulation */
+	char            s_fmod;      /* super block modified flag */
+	char            s_ronly;     /* mounted read-only flag */
+	unsigned long   s_time;      /* current date of last update */
+
+* Inode layout:
+	unsigned short i_mode;    /* access permissions */
+	unsigned char  i_nlink;   /* number of links to file */
+	unsigned char  i_uid;     /* owner */
+	unsigned char  i_gid;     /* group */
+	unsigned char  i_size0;   /* size of file */
+	unsigned short i_size1;
+	unsigned short i_addr[8];/* address of blocks */
+	unsigned long  i_atime;  /* time of last access */
+	unsigned long  i_mtime;  /* time of last modification */
+
+* Regular file data blocks are organized as
+	if (010000 bit set)
+		the file is large:
+		i_addr[] contains indirect blocks
+	else
+		the file is small:
+
+* Inode size 32, 16 inodes per block
+
+* Directory entry on disk
+	unsigned short inode;
+	char name[14];
+
+* Dir entry size 16, 32 dir entries per block
+
+* There are no symbolic links
+
+
+--
+Stuart Norris                                          s.norris at auckland.ac.nz
+Bioengineering Institute, University of Auckland    hm: +(64 9) 307 0006
+http://www.esc.auckland.ac.nz/People/Staff/Norris   wk: +(64 9) 373 7599 x3055
+
+
+

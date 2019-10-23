@@ -1,0 +1,52 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Wed, 22 Nov 2017 20:05:23 -0500
+Subject: [TUHS] Spell - was tmac: Move macro diagnostics away from
+	`quotes'
+Message-ID: <201711230105.vAN15NI6026629@coolidge.cs.Dartmouth.EDU>
+
+Repeat, slightly modified, of a previous post that got
+shunted to the attachment heap.
+
+>   I am curious if anyone on the list remembers much
+> about the development of the first spell checkers in Unix?
+
+Yes, intimately. They had no relationship to the PDP 10.
+
+The first one was a fantastic tour de force by Bob Morris,
+called "typo". Aside from the file "eign" of the very most common
+English words, it had no vocabulary. Instead it evaluated the
+likelihood that any particular word came from a source with the
+same letter-trigram frequencies as the document as a whole. The
+words were then printed in increasing order of likelihood. Typos
+tended to come early in the list.
+
+Typo, introduced in v3, was very popular until Steve Johnson wrote
+"spell", a remarkably short shell script that (efficiently) looks
+up a document's words in the wordlist of Webster's Collegiate
+Dictionary, which we had on line. The only "real" coding he did
+was to write a simple affix-stripping program to make it possible
+to look up plurals, past tenses, etc. If memory serves, Steve's
+program is described in Kernighan and Pike. It appeared in v5.
+
+Steve's program was good, but the dictionary isn't an ideal source
+for real text, which abounds in proper names and terms of art.
+It also has a lot of rare words that don't pull their weight in
+a spell checker, and some attractive nuisances, especially obscure
+short words from Scots, botany, etc, which are more likely to
+arise in everyday text as typos than by intent. Given the basic
+success of Steve's program, I undertook to make a more useful
+spelling list, along with more vigorous affix stripping (and a
+stop list to avert associated traps, e.g. "presenation" =
+pre+senate+ion"). That has been described in Bentley's "Programming
+Pearls" and in http://www.cs.dartmouth.edu/~doug/spell.pdf.
+
+Morris's program and mine labored under space constraints, so
+have some pretty ingenious coding tricks. In fact Morris has
+a patent on the way he counted frequencies of the 26^3 trigrams
+in 26^3 bytes, even though the counts could exceed 255. I did
+some heroic (and probabilistic) encoding to squeeze a 30,000
+word dictionary into a 64K data space, without severely 
+affecting lookup time.
+
+Doug
+

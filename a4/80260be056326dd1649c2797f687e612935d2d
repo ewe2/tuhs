@@ -1,0 +1,273 @@
+From: greg@ciswired.com (Gregory R. Travis)
+Date: Sun, 13 Aug 2000 16:22:13 -0500 (EST)
+Subject: [pups] Needed 2.11BSD 9-track boot tapes
+Message-ID: <Pine.LNX.4.10.10008131617460.30443-100000@weasel.ciswired.com>
+
+What I have:
+
+	11/83, QBUS, 2MB, DH11, running RT-11 5.04 plus TSX
+		- Kermit is installed on the machine
+	2x CDC 384MB SMD disks attached to Emulex Controller emulating MSCP
+	1 DigiData 800/1600 BPI 9-track drive attached to TM-11 emulating
+	controller
+
+What I need:
+
+	Way to get 2.11BSD onto one of the CDC drives (preferably not
+	to one with RT-11).
+
+How I can do that:
+	1.  Kermit transfer of 2.11BSD images to RT-11
+		q1.  Is there a way to then transfer from RT-11 to one
+		of the CDC disks?
+		q2.  Is there a way to then transfer from RT-11 to tape
+		images on the DigiData?
+
+	2.  A kind soul sends me a set of 9-track 2.11BSD tapes with
+	boot images.
+
+	3.  Other?
+
+Any takers?
+
+Thanks!
+
+greg
+
+Gregory Travis
+Cornerstone Information Systems ATS
+greg at ciswired.com
+812 330 4361 ext. 18
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id LAA56396
+	for pups-liszt; Mon, 14 Aug 2000 11:34:57 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA56392
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 14 Aug 2000 11:34:55 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id LAA22875
+	for pups at minnie.cs.adfa.edu.au; Mon, 14 Aug 2000 11:35:27 +1000 (EST)
+	(envelope-from wkt)
+Received: from moe.2bsd.com (0 at MOE.2BSD.COM [206.139.202.200])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id LAA56383
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 14 Aug 2000 11:33:39 +1000 (EST)
+	(envelope-from sms at moe.2bsd.com)
+Received: (from sms at localhost)
+	by moe.2bsd.com (8.9.3/8.9.3) id SAA18988
+	for pups at minnie.cs.adfa.oz.au; Sun, 13 Aug 2000 18:30:40 -0700 (PDT)
+Date: Sun, 13 Aug 2000 18:30:40 -0700 (PDT)
+From: "Steven M. Schultz" <sms@moe.2bsd.com>
+Message-Id: <200008140130.SAA18988 at moe.2bsd.com>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: [pups] Needed 2.11BSD 9-track boot tapes
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> From: "Gregory R. Travis" <greg at ciswired.com>
+> What I have:
+> 
+> 	11/83, QBUS, 2MB, DH11, running RT-11 5.04 plus TSX
+> 		- Kermit is installed on the machine
+> 	2x CDC 384MB SMD disks attached to Emulex Controller emulating MSCP
+> 	1 DigiData 800/1600 BPI 9-track drive attached to TM-11 emulating
+> 	controller
+
+	It wouldn't happen to be an Emulex UC07 or UC08 would it?   If so
+	there are a couple possibilities that open up.
+
+> How I can do that:
+> 	1.  Kermit transfer of 2.11BSD images to RT-11
+
+	Slow but sure - the sum total of data to move is close to 80mb
+
+> 		q1.  Is there a way to then transfer from RT-11 to one
+> 		of the CDC disks?
+
+	I don't think RT-11 understands the 2.11BSD filesystem so I don't think
+	this approach can be made to work.
+
+> 		q2.  Is there a way to then transfer from RT-11 to tape
+> 		images on the DigiData?
+
+	This can be made to work but it depends on having a program that can
+	transfer the the files "bytes as bytes" (no record format 
+	interpretation, etc) _and_ handle multiple blocking factors on the
+	first tape.
+
+	If you have the PDP-11 volume of the archives you should see in the
+	PDP-11/Distributions/ucb/2.11BSD directory two files called 'maketape.c'
+	and 'maketape.data'.  It's a small program and if a counterpart to
+	that could be created for RT-11 you'd be all set to go.
+
+	The layout of the first tape normally is:
+
+		mtboot+mtboot+boot  (512 byte blocking factor)
+		<tapemark>
+		disklabel  (1024 byte blocking factor)
+		<tapemark>
+		mkfs       (1024 byte blocking factor)
+		<tapemark>
+		restor     (1024 byte blocking factor)
+		<tapemark>
+		icheck     (1024 byte blocking factor)
+		<tapemark>
+		root.dump  (10240 byte blocking factor)
+		<tapemark>
+		file6.tar  (10240 byte blocking factor)
+		<tapemark>
+		file7.tar  (10240 byte blocking factor)
+		<tapemark>
+		<tapemark>
+
+	The 2nd tape contains file8.tar blocked at 10240 bytes.
+
+	The "boot" tape really only need to have the first few files, up to
+	and including 'root.dump'.   Those are enough to boot the tape,
+	run the standalone utilties to label the disk, create the filesystem
+	and restor the root filesystem.   The tar archives can be (with
+	suitable interpolation of the installation instructions) be placed
+	on individual tapes.  This may be necessary because file7.tar may or
+	may not fit any longer on the first tape.
+	
+	Why three blocking factors?   Well, partly historical and partly
+	hardware reasons.   The first "file" contains the 'bootblock' and that
+	needs to be 512 bytes since that's all the hardware will read.   The
+	standalone i/o system uses 1024 byte blocks so the next few files
+	use 1k records.  After the standalone utilities are done and the
+	system is loaded 'tar' can use its default 20 sector (10kb) record
+	size.
+
+> 	2.  A kind soul sends me a set of 9-track 2.11BSD tapes with
+> 	boot images.
+
+	My tape drive may or may not work - it's been ages since it was
+	last powered up and I fear the rubber parts may have disintegrated
+	(or the capacitors dried out, etc).
+
+> 	3.  Other?
+
+	If you could find a TK70+TQK70 drive+controller that would be awesome.
+	They're pretty cheap (less than $100 I believe - I didn't pay much
+	for mine).   Or even a TK50 drive (almost free) attached to a TQK70
+	would be fine. The TQK70 is a vastly better controller than the TQK50
+	because the former has a buffer cache that makes a huge difference
+	is how often the tape stops moving.
+
+	If the Emulex controller you have is SCSI based (UC07 or 08) then
+	someone could stage and make available a 2.11BSD Zip disk image 
+	with all the stuff needed to boot and run the installation proceedure
+	(I've a Zip disk attached to my UC08 - works great).
+	Alternatively a 2.11 formatted CDROM could be created and a CDrom
+	drive (that knew about 512 byte blocks instead of 2048 byte blocks)
+	could be used.
+
+	Good Luck!
+
+	Steven Schultz
+	sms at moe.2bsd.com
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) id OAA57080
+	for pups-liszt; Mon, 14 Aug 2000 14:12:09 +1000 (EST)
+	(envelope-from owner-pups at minnie.cs.adfa.edu.au)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.edu.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id OAA57076
+	for <pups at minnie.cs.adfa.edu.au>; Mon, 14 Aug 2000 14:12:07 +1000 (EST)
+	(envelope-from wkt at henry.cs.adfa.edu.au)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.3/8.9.3) id OAA25335
+	for pups at minnie.cs.adfa.edu.au; Mon, 14 Aug 2000 14:12:38 +1000 (EST)
+	(envelope-from wkt)
+Received: from goby.ciswired.com (IDENT:root at goby.ciswired.com [206.97.67.65])
+	by minnie.cs.adfa.edu.au (8.9.3/8.9.3) with ESMTP id NAA56900
+	for <pups at minnie.cs.adfa.oz.au>; Mon, 14 Aug 2000 13:21:38 +1000 (EST)
+	(envelope-from greg at ciswired.com)
+Received: from weasel.ciswired.com (root at weasel.ciswired.com [206.97.67.73])
+	by goby.ciswired.com (8.8.7/8.8.7) with ESMTP id WAA25189;
+	Sun, 13 Aug 2000 22:17:57 -0500
+Received: from localhost (greg at localhost)
+	by weasel.ciswired.com (8.9.3/8.9.3) with ESMTP id WAA30939;
+	Sun, 13 Aug 2000 22:25:30 -0500
+X-Authentication-Warning: weasel.ciswired.com: greg owned process doing -bs
+Date: Sun, 13 Aug 2000 22:25:30 -0500 (EST)
+From: "Gregory R. Travis" <greg@ciswired.com>
+To: "Steven M. Schultz" <sms at moe.2bsd.com>
+cc: pups at minnie.cs.adfa.oz.au
+Subject: Re: [pups] Needed 2.11BSD 9-track boot tapes
+In-Reply-To: <200008140130.SAA18988 at moe.2bsd.com>
+Message-ID: <Pine.LNX.4.10.10008132221010.30812-100000 at weasel.ciswired.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+On Sun, 13 Aug 2000, Steven M. Schultz wrote:
+
+> > From: "Gregory R. Travis" <greg at ciswired.com>
+> > What I have:
+> > 
+> > 	11/83, QBUS, 2MB, DH11, running RT-11 5.04 plus TSX
+> > 		- Kermit is installed on the machine
+> > 	2x CDC 384MB SMD disks attached to Emulex Controller emulating MSCP
+> > 	1 DigiData 800/1600 BPI 9-track drive attached to TM-11 emulating
+> > 	controller
+> 
+> 	It wouldn't happen to be an Emulex UC07 or UC08 would it?   If so
+> 	there are a couple possibilities that open up.
+
+No, it's a DigiData board.  Single QBUS board.  Two 40-pin connectors.
+
+> 
+> > How I can do that:
+> > 	1.  Kermit transfer of 2.11BSD images to RT-11
+> 
+> 	Slow but sure - the sum total of data to move is close to 80mb
+
+I've already been waiting a few weeks :-)
+
+> 	This can be made to work but it depends on having a program that can
+> 	transfer the the files "bytes as bytes" (no record format 
+> 	interpretation, etc) _and_ handle multiple blocking factors on the
+> 	first tape.
+> 
+> 	If you have the PDP-11 volume of the archives you should see in the
+> 	PDP-11/Distributions/ucb/2.11BSD directory two files called 'maketape.c'
+> 	and 'maketape.data'.  It's a small program and if a counterpart to
+> 	that could be created for RT-11 you'd be all set to go.
+
+Yeah, it's the RT-11 part that I don't know.  It's a little hard to believe
+that in 20+ years no-one has come up with an RT-11 program to build
+UNIX distribution tapes!  :-)   (again)
+
+> > 	2.  A kind soul sends me a set of 9-track 2.11BSD tapes with
+> > 	boot images.
+> 
+> 	My tape drive may or may not work - it's been ages since it was
+> 	last powered up and I fear the rubber parts may have disintegrated
+> 	(or the capacitors dried out, etc).
+
+The Windex and electrical tape are on me.  Did I mention that I would
+happiliy provide 9-track boot service in the future?  That is.
+once I can get a system running!
+
+> 	If the Emulex controller you have is SCSI based (UC07 or 08) then
+> 	someone could stage and make available a 2.11BSD Zip disk image 
+> 	with all the stuff needed to boot and run the installation proceedure
+> 	(I've a Zip disk attached to my UC08 - works great).
+> 	Alternatively a 2.11 formatted CDROM could be created and a CDrom
+> 	drive (that knew about 512 byte blocks instead of 2048 byte blocks)
+> 	could be used.
+
+Not SCSI, SMD/MSCP/Pertec formatted unfortunately
+
+greg
+
+Gregory Travis
+Cornerstone Information Systems ATS
+greg at ciswired.com
+812 330 4361 ext. 18
+
+

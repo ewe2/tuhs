@@ -1,0 +1,93 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Wed, 30 May 2018 10:39:57 -0400
+Subject: [TUHS] Serial Interfaces (was ^T and Top)
+Message-ID: <CAC20D2OsjGoMAm6b0kq4Rqbp0=fiKFb78KzjM1DOaRbDKPE9Jg@mail.gmail.com>
+
+On Tue, May 29, 2018 at 9:10 PM, Dave Horsfall <dave at horsfall.org> wrote:
+
+> On Wed, 30 May 2018, Johnny Billquist wrote:
+>
+> Uh? Say what? What does XON/XOFF flow control have to do with 8bit data?
+>>
+>
+> Err, how do you send data that happen to be XON/OFF?  By futzing around
+> with DLE (which I've never seen used)?
+
+
+Right - you have to escape things and it is a real mess.  I have seen some
+of the SI/SO/DLE stuff in mechanical systems like ticker tape.  I never saw
+a real 8-bit interface try to do it and succeed -- its messy and suspect
+when data overruns occurs all hell break loose.  By the time of 8 bits and
+speed of 9.6K protocol's like UUCP, or IP over serial did not even bother.
+I suspect in the old 5-bit baudot code times, it was more popular to get a
+larger character set, but the speeds were much slower (and the UART not yet
+invented by Gordon Bell).​
+
+By the time of the PDP-11, hardware flow was the norm in many (most)
+interfaces.  I never understood why DEC got ^S/^Q happy.   You can really
+see the issues with it on my PiDP-8, running DOS/8 because the flow is done
+by the OS and its much to late to be able to react.   So you get screens
+full of data before the ^S is proceeded.
+
+Once Gordon creates the UART, Western Digital licensed it and made it into
+a chip which most folks used.   DEC started to use the WD chipset in PDP-8
+serial interfaces - it always struck me as strange that HW flow was not
+used more.  The KL11/DL11 supported the wires, although the SW had to do
+the work.    As I said, MacNamara supported it in the DH11, if I recall (I
+don't have the prints in any more), he put an AND gate in the interrupt
+bit, so the OS does not get an transfer complete interrupt unless the "I'm
+ready" signal is available from the other side.
+
+When I lectured data com to folks years ago, I liked to express the ECMA
+serial interface in this manner:
+
+There are 6 signal wires and one reference (signal) ground:
+
+   1. Data XMT (output)
+   2. Data RCV (input)
+   3. I'm Alive (output)
+   4. He's Alive (input)
+   5. I'm Ready (output)
+   6. He's Ready (input)
+
+Everything else is either extra protocol to solve some other problem, or is
+for signal quality (*i.e. *shielding, line balancing etc.).  The names of
+which signals match to which actual pins on the ECMA interface can be a
+little different depending on the manufacturer of the 'Data Communicating
+Equipment (DCE - *a.k.a.* the modem) and the Data Terminating Equipment
+(DTE - *a.k.a.* the host).
+
+BTW: ECMA and the WE did specify both signal names and the connectors to
+use and I think the European Telco's did also (but I only ever saw a German
+spec and it was in German which I do not read).   DCE's are supposed to be
+sockets (female and originally DB25)s and DTE's were suppose to plugs
+(male).   If you actually follow the spec properly, you never have issues.
+The problem was the a number terminal manufactures used the wrong sex
+connector, as a lot of them never read the specs [the most famous being the
+Lear Siegler ADM3 which was socketed like a DCE but pinned as a DTE -
+probably was it was cheap and thus became very popular).
+
+Also to confuse things where it got all weird was how the DCE's handled
+answering the phone.  And it was because of the answering that we got all
+the messy stuff like Ring, Data Set/Terminal Ready/Carrier and the like.
+The different DCE manufacturers in different countries had different answer
+protocols, than the original Bell system.  IIRC the original WE103 needed
+help from host.  Support for Auto-answer was a later feature of the WE212.
+
+The different protocols are all laid in well in another late 60s/early 70s
+data com book from an UMass Prof, who's name I now forget (his book is
+white with black letters called 'Data Communications' , as opposed to
+MacNamaras dark blue DEC Press book 'Principles of Data Communications').
+
+So ... coming back to Unix for this list...   AT&T owned Western Electric
+(WE) who was the largest US manufacturer of DCE's [see 1949 law suit/the
+consent decree et al].  In fact at Bell Labs, a lot people using UNIX did
+not have 'hardwired terminals' - they had a modem connection.    So, Unix
+as a system and tends to have support for DTE/DCE in the manner WE intended
+it to be as a result.   It's not surprising that see it in the solutions
+that are there.
+ᐧ
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20180530/ddd78c79/attachment.html>
+

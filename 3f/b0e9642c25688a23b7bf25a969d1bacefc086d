@@ -1,0 +1,54 @@
+From: random832@fastmail.com (Random832)
+Date: Fri, 12 May 2017 19:52:49 -0400
+Subject: [TUHS] The evolution of Unix facilities and architecture
+In-Reply-To: <alpine.BSF.2.20.1705130937330.67621@aneurin.horsfall.org>
+References: <20170512233012.7B9DB18C099@mercury.lcs.mit.edu>
+ <alpine.BSF.2.20.1705130937330.67621@aneurin.horsfall.org>
+Message-ID: <1494633169.1599957.975050752.2FB9B2DA@webmail.messagingengine.com>
+
+On Fri, May 12, 2017, at 19:38, Dave Horsfall wrote:
+> On Fri, 12 May 2017, Noel Chiappa wrote:
+> 
+> > So when we got back from dinner, I looked at the source to our system to see
+> > if I was right, and.... it had already been fixed! Here's the code:
+> > 
+> > 	if (xp->x_count!=1 || xp->x_iptr->i_mode&ISVTX)
+> > 		goto error;
+> 
+> Err, isn't that the sticky bit, not the setuid bit?
+
+The sticky bit makes it keep the image in memory when there are no
+processes using it. I assume x_count is determining whether there are
+processes using it. So, taken together, these checks are "is there or
+might there be in the future a process, other than the one being
+debugged, using this exact copy of the image rather than loading it from
+the disk".
+
+The next line is "xp->x_iptr->i_flag &= ~ITEXT", which I assume prevents
+the image from being reused for other processes started while this one
+is running.
+
+I am looking at 7th edition in the UnixTree site, the whole fix is:
+
+		/*
+		 * If text, must assure exclusive use
+		 */
+		if (xp = u.u_procp->p_textp) {
+			if (xp->x_count!=1 || xp->x_iptr->i_mode&ISVTX)
+				goto error;
+			xp->x_iptr->i_flag &= ~ITEXT;
+		}
+
+The equivalent section to the one this appears in in 6th edition doesn't
+have the fix, and the comment claims, doesn't work at all:
+
+	/* write user I (for now, always an error) */
+	case 4:
+		if (suiword(ipc.ip_addr, 0) < 0)
+			goto error;
+		suiword(ipc.ip_addr, ipc.ip_data);
+		break;
+
+This is clearly PDP-11 specific, maybe a similar bug reappeared with
+demand-paged virtual memory. 
+

@@ -1,0 +1,32 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Sat, 16 Dec 2017 05:50:45 -0500
+Subject: [TUHS] Date madness
+Message-ID: <201712161050.vBGAojbd027976@coolidge.cs.Dartmouth.EDU>
+
+>>>  Flipping it to unsigned int was the quickest way out to kick the can until Sun Feb 6 06:28:15 2106.  If you have source it’s incredibly trivial to change, and nothing changes size wise.
+>>
+>> Easy, but perhaps unwise. The sign bit is a potential escape hatch for
+>> times, just as it is for characters in UTF-8.
+> 
+> I'm not sure what you're suggesting - UTF-8 works because it's a
+variable length encoding - a variable length timestamp might be
+interesting as an academic exercise, but there's no way for time() to
+specify how much space is needed, or be informed of how much space is
+allocated
+
+Like UTF-8, a variable-length time would be something normal
+programs aren't supposed to see--it would be a format for
+external media (i.e. file systems). Times in inodes would be
+variable-length. Times returned by stat() and time() would
+be full length. Only the kernel needs to know the encoding.
+
+One may note that inodes already use a variable-length
+encoding for the list of physical block addresses, so there 
+is nothing radical here.
+
+I admit, though, that if the kernel can tell "old" from "new"
+inodes, then they could have different time encodings rather
+than one variable-length encoding.
+
+Doug
+

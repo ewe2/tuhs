@@ -1,0 +1,55 @@
+From: norman@oclsc.org (Norman Wilson)
+Date: Mon, 25 Sep 2017 08:07:16 -0400
+Subject: [TUHS] UNIX of choice these days?
+Message-ID: <1506341239.18395.for-standards-violators@oclsc.org>
+
+Larry McVoy:
+> +1 on what Ron said.  I don't get the rationale for going back to ptrace.
+> Anyone know what it is?  Is there a perf issue?
+
+Kurt H Maier:
+
+  The usual rationale presented is that someone can exhaust the fd table
+  and then you can't get anything done.  Instead of fixing that problem,
+  the popular approach is to add more syscalls, like with getrandom(2).
+
+====
+
+Funny that that rationale isn't extended to its logical
+conclusion: get rid of open and creat.  Then nobody needs
+to worry about running out of file descriptors ever!
+
+I too am saddened to see such a retrograde step, but perhaps
+I'm biased.  When I arrived in 1127, the kernel had /proc but
+still had ptrace as well.  Why?  Because no one was brave enough
+to wade into sdb and adb.
+
+After a couple of years, I felt brave enough, so I did it.
+Once the revised sdb and adb had propagated to all our systems,
+I removed the syscall.  I celebrated by physically removing
+ptrace(2) from the Eighth Edition manual in the UNIX room: the
+manual entry comprised two facing pages, which I glued together.
+
+I can sympathize with FreeBSD excuse someone cited elsewhere,
+that nobody used the code so it should go--I'm always in favour
+of improving programs by chopping sutff out--but I think the
+decision here was backwards.  The proper answer would have been
+to teach ps et al to use /proc, not to invent a new complex of
+system calls.
+
+I dislike how Linux has tossed information about processes and
+other system-related data into the same namespace (and now that
+there is /sys as well as /proc, I wonder whether it's time to
+divorce them, or even to move /proc into /sys/proc), but the
+general direction of moving things into the file system makes
+sense.  I have some qualms about adding more and more code to
+the kernel that just does string processing (making the kernel
+bigger and more complicated, and widening the attack surface
+for bad guys), though; maybe most of that stuff belongs not in
+the OS proper but in a user-mode program that reads /dev/mem
+and presents as a file system.
+
+Norman Wilson
+Toronto ON
+
+

@@ -1,0 +1,79 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Sat, 12 Dec 2015 15:13:33 -0500
+Subject: [TUHS] why does tar have the tape device hard coded into it and
+ why is it mt1 instead of mt0
+In-Reply-To: <566C6D60.40205@mhorton.net>
+References: <201512120209.tBC2930f007838@coolidge.cs.Dartmouth.EDU>
+ <566C6D60.40205@mhorton.net>
+Message-ID: <CAC20D2PexoEe=zuCYZm9Xi_ttLbATzm0XUiaCuY2migPd0FgBw@mail.gmail.com>
+
+Interesting  memories ... IIRC: workstations were really what caused /dev/*mt*
+to stop being a standard name, so not screwing it down and using the -f
+option made sense. But for a long time, since it was less typing on the 11s
+and Vaxen, I would do:
+           tar cvb0 20 mumble...
+However, once we moved to the world of networking, the -f option became
+important to me.
+*i.e. *   tar cvf - mumble | rmt hosts ...
+
+Also, the DEC drives had better buffering.  Large buffers became really
+important with streaming versions of 9-track and of course for the later
+QIC tapes.  So blocking became even more important and I quit doing that
+function with tar itself and started to pipe tar through dd to do the
+blocking to get really large blocks (like 256K or 1M).   Also, tools
+appeared like "double dd" (aka ddd(1)) program that originally used a two
+processes and pipe to coordinates the writes so that we could stream a
+Cipher drive on a 10Mhz 68K (Masscomp box).
+
+[Note to Will - you might to google for the original ddd or talk to me
+offline, I bet I have it somewhere.  Its an interesting program to analyze
+if you really want to get some insight on what you could do with UNIX even
+on a "slow" computer by today's standards and without a lot of today's
+fancy API's].
+
+
+tjt rewrote dump(1) on RTU to use AST's and may have hacked dd too (I've
+lost that version I fear).  In the mid, 80's I rewrote ddd to use threads
+once kernel support for threading became available and I still use that
+version today when I mess with tapes (which I do less and less, but have
+been known to do when trying to recover old tapes).
+
+Clem
+
+On Sat, Dec 12, 2015 at 1:54 PM, Mary Ann Horton <mah at mhorton.net> wrote:
+
+> Yeah, I just can't imagine using tar with the f option.  Even back in the
+> day when I was writing 9 track magtapes with tar, it would be something like
+>     tar cvfb /dev/rmt0 10 .
+> to get tape blocks bigger than 512 bytes.  But we never had dectapes and I
+> think they did their own blocking.
+>
+>     Mary Ann
+>
+>
+> On 12/11/2015 06:09 PM, Doug McIlroy wrote:
+>
+>> I have no memory of why Ken used mt1 not mt0.   Doug may know.
+>>>
+>> I don't know either. Come to think of it, I can't remember ever
+>> using tar without option -f. Direct machine-to-machine trasfer,
+>> e.g. by uucp, took a lot of business away from magtape soon
+>> after tar was introduced. Incidentally, I think tar was written
+>> by Chuck Haley or Greg Chesson, not Ken.
+>>
+>> Doug
+>> _______________________________________________
+>> TUHS mailing list
+>> TUHS at minnie.tuhs.org
+>> http://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs
+>>
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> http://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20151212/8d2eebff/attachment.html>
+

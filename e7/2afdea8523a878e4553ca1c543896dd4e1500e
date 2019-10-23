@@ -1,0 +1,70 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Sat, 30 Sep 2017 14:56:29 -0700
+Subject: [TUHS] UNIX of choice these days?
+In-Reply-To: <CAK7dMtAwcZB0UTMTaiYghLnuHqtyDf9kXPL3=YoVoHsvXoxFVQ@mail.gmail.com>
+References: <1506784652.28254.for-standards-violators@oclsc.org>
+ <CAK7dMtAwcZB0UTMTaiYghLnuHqtyDf9kXPL3=YoVoHsvXoxFVQ@mail.gmail.com>
+Message-ID: <7E337D3A-984E-444B-BE8F-7AFCBE7F50DF@bitblocks.com>
+
+
+On Sep 30, 2017, at 1:29 PM, Kevin Bowling <kevin.bowling at kev009.com> wrote:
+
+> I seem to recall proc is loosely deprecated in Linux anyway in favor
+> of sysfs.  GregKH mentioned people misuse both, for instance making
+> them output pretty histograms instead of simple text values, that
+> defeat the fundamental design tenants of these interfaces -- which is
+> to try and maintain a stable API.
+
+> One thing I think Linux did pretty well is the whole object
+> orientation in C thing with kobject, and that nets you automatic sysfs
+> directories and nodes for pretty much everything.
+
+The Linux /sys fs is truly bizarre. On a RaspberryPi running Linux 4.4.21+:
+
+$ find /sys | wc		# total entries
+11448
+$ find /sys -type l | wc	# count of symlinks
+1077
+$ find /sys -type f | wc 	# count of "regular" files
+8931
+
+I am not sure exposing most everything via a namespace in this
+manner is such a good idea (or at least in "good taste" :-)
+Interfaces should be lean.
+
+Similarly the /proc fs is quite strange. Why does it have any
+non process subdirectory?
+
+$ echo /proc/[0-9]* | wc -w 	# count of processes
+142
+$ echo /proc/[^0-9]* | wc -w 	# count of non-process directories
+58
+
+Compare:
+
+Linux (raspberryPi + X windows):
+$ echo /proc/[0-9]* |wc -w	# how many processes
+142
+$ find /proc/[0-9]* | wc -l	# how many proc related files+dirs
+66153
+
+FreeBSD (10.3 amd64+zfs+4 lightweight jails):
+$ echo /proc/[0-9]* | wc -w	# how many processes
+123
+$ find /proc/[0-9]* | wc -l	# how many proc related files+dirs
+1075
+
+Plan9 (mostly quiescent):
+$ echo /proc/[0-9]* | wc -w
+64
+$ du -a /proc/[0-9]* | wc -l
+1235
+
+Anyone feeling sad about /proc in FreeBSD should consider
+the alternative!
+
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170930/93f5f777/attachment.html>
+

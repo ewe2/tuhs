@@ -1,0 +1,84 @@
+From: doug@cs.dartmouth.edu (Doug McIlroy)
+Date: Sun, 31 Jan 2016 12:01:02 -0500
+Subject: [TUHS] Short history of 'grep'
+Message-ID: <201601311701.u0VH12It027916@coolidge.cs.Dartmouth.EDU>
+
+> I'm still trying to get my around about how a program such as "egrep"
+> which handles complex patterns can be faster than one that doesn't
+
+> Is there a simple explanation, involving small words?
+
+First, the big-word explanation. Grep is implemented as a nondeterministic
+finite automaton, egrep as a deterministic finite automaton. Theory folk 
+abbreviate these terms to "NFA" and "DFA", but these are probably not
+what you had in mind as "small words".
+
+The way grep works is to keep a record of possible partial parsings
+as it scans the subject text; it doesn't know which (if any) will
+ultimately be the right one, hence "nondeterministic". For example, 
+suppose grep seeks pattern '^a.*bbbc' in text 'a.*bbbbbbc'. When
+it has read past 3 b's, the possible partial parses are 'a.*', 'a.*b',
+'a.*bb' and 'a.*bbb'. If it then reads another b, it splits the
+first partial parse into 'a.*' and 'a.*b', updates the next two
+to 'a.*bb' and 'a.*bbb', and kills off the fourth. If instead it
+reads a c, recognition is successful; if anything else, all partials 
+are killed and recognition fails.
+
+Egrep, by preprocessing the expression, produces separate code for
+each of several possible states: "no b's", "1 b", 2 b's" and "3 bs".
+When it's in state "1 b", for example, it switches on the next 
+character into "2 b's" or fails, depending on whether the 
+character is b or not--very fast. Grep, on the other hand, has to  
+update all the live parses.
+
+So if egrep is so fast, why do we have grep? One reason is that
+grep only needs to keep a list of possible progress points
+in the expression. This list can't be longer than the expression.
+In egrep, though, each state is a subset of progress points.
+The number of possible subsets is exponential in the length
+of the expression, so the recognition machine that egrep constructs
+before attempting the parse can explode--perhaps overflowing
+memory, or perhaps taking so long in construction that grep
+can finish its slow parse before egrep even begins its fast parse.
+
+To revert to the words of theory folks, grep takes time O(m*n) and
+space O(m) worst case, while egrep takes time and space O(2^m+n).
+(2^m is an overestimate, but you get the idea.)
+
+That's the short story. In real life egrep overcomes the exponential
+by lazily constructing the machine--not generating a state until it
+is encountered in the parse, so no more than n states get constructed.
+It's a complex program, though, for the already fancy preprocessing 
+must be interleaved with the parsing.
+
+Egrep is a tour de force of classical computer science, and pays
+off big on scanning big files. Still, there's a lot to say for 
+the simple elegance of grep (and the theoretical simplicity
+of nondeterministic automata). On small jobs it can often win.
+And it is guaranteed to work in O(m) memory, while egrep may need
+O(n). 
+
+-------------------------------------------------
+
+Ken Thompson invented the grep algorithm and published it in CACM.
+A pointy-headed reviewer for Computing Reviews scoffed: why would
+anybody want to use the method when a DFA could do the recognition
+in time O(n)? Of course the reviewer overlooked the potentially
+exponential costs of constructing a DFA.
+
+Some years later Al Aho wrote the more complicated egrep in the 
+expectation that bad exponential cases wouldn't happen in everyday life. 
+But one did. This job took 30 seconds' preprocessing to prepare
+for a fraction of a second's parsing. Chagrined, Al conceived
+the lazy-evaluation trick to overcome the exponential and
+achieved O(n) run time, albeit with a big linear constant.
+
+In regard to the "short history of grep", I have always thought
+my request that Ken liberate regular expressions from ed caused
+him to write grep. I asked him one afternoon, but I can't remember
+whether I asked in person or by email. Anyway, next morning I
+got an email message directing me to grep. If Ken took it
+from his hip pocket, I was unaware. I'll have to ask him.
+
+Doug
+

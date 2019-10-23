@@ -1,0 +1,130 @@
+From: schily@schily.net (Joerg Schilling)
+Date: Tue, 03 Jan 2017 16:08:56 +0100
+Subject: [TUHS] MacOS X is Unix (tm)
+In-Reply-To: <1483454024.1265981.835921849.4F752F10@webmail.messagingengine.com>
+References: <mailman.31.1483203495.3779.tuhs@minnie.tuhs.org>
+ <52C99F50-E24A-4BBF-A129-180A1271B4E3@kdbarto.org>
+ <586a3a23.udW0nRrOopzHoQbP%schily@schily.net>
+ <8168FD75-9C3E-47C1-9BA8-EADAD7D33C38@kdbarto.org>
+ <1483454024.1265981.835921849.4F752F10@webmail.messagingengine.com>
+Message-ID: <586bbe88.njLSal35/ZSrGHMO%schily@schily.net>
+
+Random832 <random832 at fastmail.com> wrote:
+
+> On Tue, Jan 3, 2017, at 09:06, David wrote:
+> > MacOS passes this except for the si_status test. MacOS uses a signed int
+> > there. I???m not sure what the standard says.
+>
+> The problem isn't the fact that it's signed, it's the fact that it's
+> only a 24-bit value (i.e. the high 8 bits are replaced with
+> sign-extension of bit 23). Look at the hex - expected 0x499602d2 vs
+> actual 0xff9602d2
+>
+> However, OSX only claims compliance to Issue 6 (unistd.h _XOPEN_VERSION
+> 600), and the text requiring that the full 32-bit value be preserved is
+> new to Issue 7.
+
+The text requiring the full 32-bit value is not new....
+
+It was required in 1996 already, but then somebody introduced a bug into the 
+text and that was not aligned with the expected behavior.
+
+BTW: the 24 bits are a result of coding a new wait interface into the historic 
+ABI by using the top 16 bits in the wait() argument value.
+
+I should write a test program that retrieved the waitid() results from the the 
+SIGCHLD handler and see whether that is OK as well.
+
+Here is the new code:
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdio.h>
+/*
+ * Non-standard compliant platforms may need
+ * #include <signal.h> or something similar
+ * in addition to the include files above.
+ */
+
+extern	void	handler(int sig, siginfo_t *sip, void *context);
+extern	void	dosig(void);
+
+pid_t		cpid;
+
+int
+main()
+{
+	siginfo_t	si;
+	pid_t		pid;
+	int		ret;
+
+	dosig();
+	if ((pid = fork()) < 0)
+		exit(1);
+	cpid = pid;
+	if (pid == 0) {
+		_exit(1234567890);
+	}
+	ret = waitid(P_PID, pid, &si, WEXITED);
+	printf("ret: %d si_pid: %ld si_status: %d si_code: %d\n",
+		ret,
+		(long) si.si_pid, si.si_status, si.si_code);
+	if (pid != si.si_pid)
+		printf("si_pid in struct siginfo should be %ld but is %ld\n",
+			(long) pid, (long) si.si_pid);
+	if (si.si_status != 1234567890)
+		printf("si_status in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			1234567890, 1234567890, si.si_status, si.si_status);
+	if (si.si_code != CLD_EXITED)
+		printf("si_code in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			CLD_EXITED,  CLD_EXITED, si.si_code, si.si_code);
+	if (CLD_EXITED != 1)
+		printf("CLD_EXITED is %d on this platform\n", CLD_EXITED);
+	return (0);
+}
+
+/*
+ * Include it here to allow to verify that #include <sys/wait.h>
+ * makes siginfo_t available
+ */
+#include <signal.h>
+
+void
+handler(int sig, siginfo_t *sip, void *context)
+{
+	printf("received SIGCHLD (%d), si_pid: %ld si_status: %d si_code: %d\n",
+		sig, (long) sip->si_pid, sip->si_status, sip->si_code);
+
+	if (sip->si_pid != cpid)
+		printf("SIGCHLD: si_pid in struct siginfo should be %ld but is %ld\n",
+			(long) cpid, (long) sip->si_pid);
+
+	if (sip->si_status != 1234567890)
+		printf("SIGCHLD: si_status in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			1234567890, 1234567890, sip->si_status, sip->si_status);
+
+	if (sip->si_code != CLD_EXITED)
+		printf("SIGCHLD: si_code in struct siginfo should be %d (0x%x) but is %d (0x%x)\n",
+			CLD_EXITED,  CLD_EXITED, sip->si_code, sip->si_code);
+}
+
+void
+dosig()
+{
+	struct sigaction sa;
+
+	sa.sa_handler = handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART|SA_SIGINFO;
+
+	sigaction(SIGCHLD, &sa, NULL);
+}
+
+Jörg
+
+-- 
+ EMail:joerg at schily.net                  (home) Jörg Schilling D-13353 Berlin
+       joerg.schilling at fokus.fraunhofer.de (work) Blog: http://schily.blogspot.com/
+ URL:  http://cdrecord.org/private/ http://sourceforge.net/projects/schilytools/files/
+

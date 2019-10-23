@@ -1,0 +1,81 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Fri, 29 Jul 2016 09:55:45 -0400
+Subject: [TUHS] environments/universes (was: Unix v6 problem with /tmp)
+In-Reply-To: <20160728231639.GA299581@lisa.in-ulm.de>
+References: <CADxT5N6Vxxw9GivitVF1LjzAHP6ac3dvHF4gCs83TNzup3OEUA@mail.gmail.com>
+ <57991A21.5030404@gmail.com>
+ <CAC20D2NymVJ=fxcwBUk3ObU_iwc+FieOXLpnt-d=PJwJuzdAeg@mail.gmail.com>
+ <20160728231639.GA299581@lisa.in-ulm.de>
+Message-ID: <CAC20D2P-Hj50Gqqkpe-Y0kp3VTr7KYJQ3KuSkfzh8=B6CerFpw@mail.gmail.com>
+
+​below​
+
+On Thu, Jul 28, 2016 at 7:16 PM, Sven Mascheck <mascheck at in-ulm.de> wrote:
+
+> On Wed, Jul 27, 2016 at 04:57:47PM -0400, Clem Cole wrote:
+> > I created Conditionally Dependant Symlinks (CDSL) which I think only
+> showed
+> > up in Masscomp's RTU, Stellix and Tru64.   The were not only late
+> binding,
+> > but added the concept of a user settable context.   Very handy when
+> trying
+> > to create a "single system image" from multiple system.
+>
+> How did you implement it?
+>
+
+​Details are little fuzzy on some of the corner cases.  If I thought about
+it, I bet they all come back.   But basically bit crumbs in the u_area
+containing the "context" and then only trick was parsing the string in
+nami/lookup, so you could have N actions depending on the value of the
+context.     i.e.   path with embedded context string and grabbed another
+special character (which if I recall we used the @ to deliminate followed
+by a null then context1-> replacement1<null>context2->replacement2<null>
+.... contextN->nth replacement<null>   which was originally linearly
+searched since the original use (universes) had a small number of contexts.
+
+
+When realized how useful they were @ LCC, and started to add support for
+clusters and the node name became one of the contexts, we had to get a bit
+smarter.   Tru64 and the unreleased HP-UX implementation did some hashing
+and cleanup.  I've forgotten if that was done before or after the Intel
+Paragon implementation.
+
+BSD symlink semantics was then left alone, although I think I remember I
+hacked the set/read code to handle the special char -- again IIR for set to
+translate foo at bar to be foo@@bar and read the opposite.
+
+Obviously you have a new failure of of the context did not match and an
+open question of how to set/get the different contexts which varied.   For
+universes
+(which
+​like Pyramid and others, Masscomp ​
+RTU also
+​provided
+), my recollection
+​ was
+a new command hacked into the shells
+​ and we had a general set/get variable services that predates the system
+variable stuff of the BSDs and later Unix (that was modeled on VMS given
+the Masscomp folks were sometimes ex-VMS kernel developers).
+
+​
+For the original work at LCC (which is what went into HP-UX and the Paragon
+IIRC) , we had a new system service
+​ for contexts and I've forgotten how that worked; but it was different
+from the Masscomp or later BSD style scheme​
+.
+
+As for m​
+y memory of Tru64
+​ (which only used CDSL's for handling node dependant info)​;
+ the node name was set independently
+​ using yet another scheme (which I've now forgotten), but
+was already in the u_area
+​ so we could just look aside.​
+
+Clem
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20160729/cfa7cab0/attachment.html>
+

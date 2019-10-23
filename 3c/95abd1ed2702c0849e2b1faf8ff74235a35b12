@@ -1,0 +1,245 @@
+From: wkt@henry.cs.adfa.edu.au (Warren Toomey)
+Date: Wed, 20 Jan 1999 09:47:23 +1100 (EST)
+Subject: Intruiging bits in the nsys kernel
+In-Reply-To: <199901191633.KAA22239@fudge.uchicago.edu> from Eric Fischer at "Jan 19, 1999 10:33:43 am"
+Message-ID: <199901192247.JAA05453@henry.cs.adfa.edu.au>
+
+In article by Eric Fischer:
+> Congratulations on getting the nsys kernel running!  I have
+> a couple of random comments on what you posted to the list:
+> 
+> > Syscalls in `nsys' but not in V5:
+> > ---------------------------------
+> >         1, &quit,                       /* 26 = quit */
+> >         1, &intr,                       /* 27 = intr */
+> >         1, &cemt,                       /* 29 = cemt */
+> >         1, &ilgins,                     /* 33 = ilgins */
+> >         1, &fpe,                        /* 40 = fpe */
+> > 
+> >                 These deliver signals QUIT, INTR, EMT, INS or FPE
+> >                 to the pid in arg0. Any user can send these signals.
+> 
+> I think this is backwards -- these system calls don't deliver
+> signals, they trap them.  That is, they're the predecessors
+> of signal(), not kill().
+
+Eric is quite correct, and I realised this after reading some comments
+on the V2 kernel. The nsys kernel also has a sig() system call which
+allows a process to trap an arbitrary signal. This is why the syscalls
+above were removed: there was a more general system call available.
+ 
+> 
+> > Syscalls in V5 but not in `nsys':
+> > ---------------------------------
+> >         0, &getpid,                     /* 20 = getpid */
+> >         1, &smdate,                     /* 30 = smdate */
+> >         0, &nice,                       /* 34 = nice */
+> >         0, &pipe,                       /* 42 = pipe */		!!!
+> >         4, &profil,                     /* 44 = prof */
+> 
+> This part seems really weird.  Since it has fpe() but not nice() and
+> pipe(), that would have to mean it's somewhere intermediate between
+> v2 and v3, at least if the details in Doug McIlroy's "Research Unix
+> Reader" are all accurate.  And I *really* don't understand why there
+> would be space reserved in the system call table for nice and pipe
+> but no implementations of the functions.
+> 
+> The other weird part is that McIlroy says that smdate() was in v1
+> through v3 but disappeared after that.  I don't have the v5 kernel
+> source at hand right now, so I can't check up on that, but it's
+> strange that smdate should be missing here if this is an early v3.
+> 
+> Actually, on further inspection this must be a *late* v3, since it
+> has mknod(), getgid(), and setgid(), which aren't supposed to have
+> shown up until v4.  (No signal(), though, so it's not quite v4.)
+> That's still very odd that pipes would be left out, unless this
+> version was crunched to run in an especially small memory or something.
+> 
+> And yet, v3 was supposed to have been released in February, 1973, and
+> this is earlier than that, so what are any v4 features doing there at
+> all?  This just gets stranger and stranger...
+> eric
+
+I've had some chat with Dennis about this kernel, and how it fitted into
+development. The summary is: Ken tried to rewrite the assembly version of
+the kernel in B (or NB) in 1972, but gave up because structures didn't
+exist. Once B -> NB -> C and got structures, they tried again. Apparently,
+the `new' kernel (aka nsys) was developed in parallel with the `old' 
+assembly kernel during early to mid-1973. Then, Dennis says:
+
+	I'm pretty sure that we didn't adopt [the C version of the kernel]
+	as the standard "production" system until about September 1973.
+	It is very likely that the real "sys" was still in assembler.
+	Pipes were probably added first to [the sys] version, given the
+	evidence in "nsys."
+
+Dennis also says:
+
+	During 1972, Ken finally puts pipes into Unix at McIlroy's urging.
+
+which would explain why there is a reserved syscall in `nsys', but no
+code as yet.
+
+I can't explain the existence of the mknod(), getgid(), and setgid()
+system calls. Norman and Bob Keys, I think one/both of you have got the
+old manuals, can you look through them and find out when these syscalls
+appeared?
+
+Cheers all,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id OAA12788
+	for pups-liszt; Wed, 20 Jan 1999 14:45:43 +1100 (EST)
+Received: from henry.cs.adfa.edu.au (henry.cs.adfa.oz.au [131.236.21.158])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id OAA12783
+	for <pups at minnie.cs.adfa.oz.au>; Wed, 20 Jan 1999 14:45:35 +1100 (EST)
+Received: (from wkt at localhost)
+	by henry.cs.adfa.edu.au (8.9.1/8.9.1) id OAA06481
+	for pups at minnie.cs.adfa.oz.au; Wed, 20 Jan 1999 14:46:41 +1100 (EST)
+	(envelope-from wkt)
+From: Warren Toomey <wkt@henry.cs.adfa.edu.au>
+Message-Id: <199901200346.OAA06481 at henry.cs.adfa.edu.au>
+Subject: Old pic of ken and dmr
+To: pups at minnie.cs.adfa.oz.au (Unix Heritage Society)
+Date: Wed, 20 Jan 1999 14:46:41 +1100 (EST)
+Reply-To: wkt at cs.adfa.oz.au
+X-Mailer: ELM [version 2.4ME+ PL43 (25)]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+All,
+	Patrick Regan, from Bell Labs, has sent in a 2M jpg of
+Ken and Dennis at the console of a PDP-11/20, around 1970. It's at:
+
+http://minnie.cs.adfa.edu.au/PUPS/Images/ken-and-den.jpg
+
+Ciao,
+	Warren
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id CAA14984
+	for pups-liszt; Thu, 21 Jan 1999 02:45:02 +1100 (EST)
+Received: from nose.cita.utoronto.ca (nose.cita.utoronto.ca [128.100.76.157])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with SMTP id CAA14976
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 21 Jan 1999 02:44:42 +1100 (EST)
+From: norman@nose.cita.utoronto.ca
+Message-Id: <199901201544.CAA14976 at minnie.cs.adfa.edu.au>
+Subject: Intruiging bits in the nsys kernel
+To: pups at minnie.cs.adfa.oz.au
+Date: Wed, 20 Jan 1999 10:43:58 -0500
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+Some answers to Warren's queries:
+
+mknod(II) first shows up in the Fourth Edition; the manual entry is dated
+8/5/73.  (That having been typed in the US, presumably it means 5 Aug 1973.)
+getgid(II) shows in the same manual, but with an older date: 3/15/72.
+This is also the edition in which the documentation for stat(II) first
+admits a group ID as well as a user ID.
+
+Both my hazy memory (made worse by lack of sleep right now) and the clues
+in the manual suggest that 3e/4e was the period when the system was rewritten
+in C; e.g. 4e is the first to show C interfaces in section II, complete with
+structs as well as pure byte-offset descriptions for objects like that filled
+in by stat, though the structs are nameless, presumably because there were no
+standard header files yet.  Evidently the file system upheaval occurred in
+the same period.
+
+Reading the description of the 3e file system, I see it has been too long since
+I've read it.  A summary:
+	Blocks 0 and 1 are the super-block, consisting of
+		size of free-storage bitmap
+		the map itself
+		size of free-i-node map
+		the map itself
+	Block 2 begins the i-list; data blocks follow.
+	I-nodes 1-40 are reserved for special (device) files,
+	and don't appear in the map.  I-node 41 is the root.
+	I-nodes have flags, a link count, a userid, a 16-bit
+	size, creation and modification times, and eight block
+	pointers.  Flag bits inclode `allocated', `large file'
+	(the pointers are to indirect blocks), read and write
+	permissions for user and other, set-userid, a single
+	`executable' flag, a `directory' flag (if clear, regular
+	file).
+
+	BUGS
+	Two blocks are not enough to handle the i- and free-
+	storage maps for an RP02 disk pack, which contains
+	around 10 million words.
+
+The 4e file system is more or less that in the more-familiar V6 system:
+	Block 0 reserved for boot block
+	Block 1 is the super-block: file-system and i-list sizes,
+	caches of free block and i-node numbers.  The free-block
+	list is now the familiar chain of blocks list free block
+	numbers; the free-inode list is abolished because the
+	i-nodes all have `allocated' flags anyway.
+	Block 2 begins the i-list.  I-node 1 is the root.
+	I-nodes differ from 3e in having a group ID,a 24-bit
+	size, access time instead of creation time; the `directory'
+	flag becomes a two-bit `file type' flag; group permissions
+	appear, there are three separate `executable' flags, and
+	set-group-ID appears.
+
+	No BUGS yet, perhaps because the code was new.
+
+Notice how history repeats: 4e replaced the free-block bitmap with
+a list, which made it simpler to cope with huge file systems but
+harder to allocate blocks in a simpler order; sundry replacement
+file systems in the early 1980s (Berkeley FFS, Weinberger's cheap
+hacks in V8) restored the bitmap, because it's easier to pick a good
+block when you can see all the blocks available, and because by then
+computers had enough memory and disks were big enough that a large
+bitmap wasn't a burden.
+
+An anecdote may be (barely) relevant here.  I remember once in the
+late 1980s having a chat with Lee McMahon about group IDs, and how
+they didn't seem to have done quite what people wanted (hence the
+multiple-groups-per-process stuff in most current systems, and the
+special semantics for the set-group-id flag on directories, and
+various other features that have seemed to me never to quite hit
+the mark).  Lee told me that when Ken first put group IDs into the
+system, he asked Ken what they were for.  Ken allegedly shrugged
+and said `I dunno.'
+
+Norman Wilson
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id DAA15137
+	for pups-liszt; Thu, 21 Jan 1999 03:49:52 +1100 (EST)
+Received: from carp.gbr.epa.gov (carp.gbr.epa.gov [204.46.159.110])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id DAA15131
+	for <pups at minnie.cs.adfa.oz.au>; Thu, 21 Jan 1999 03:49:37 +1100 (EST)
+Received: (from mjenkins at localhost)
+	by carp.gbr.epa.gov (8.8.8/8.8.8) id KAA08238;
+	Wed, 20 Jan 1999 10:49:27 -0600 (CST)
+	(envelope-from mjenkins)
+Date: Wed, 20 Jan 1999 10:49:27 -0600 (CST)
+From: Mike Jenkins <mjenkins@carp.gbr.epa.gov>
+Message-Id: <199901201649.KAA08238 at carp.gbr.epa.gov>
+To: pups at minnie.cs.adfa.oz.au
+Subject: Re: Old pic of ken and dmr
+Cc: wkt at cs.adfa.oz.au
+In-Reply-To: <199901200346.OAA06481 at henry.cs.adfa.edu.au>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+> http://minnie.cs.adfa.edu.au/PUPS/Images/ken-and-den.jpg
+
+There is a smaller (26K) gif version on the following page:
+
+	 http://www.lucent.com/museum/1969unix.html
+
+The URL for the gif is:
+
+	 http://www.lucent.com/museum/images/1950/1969rt.gif
+
+Mike
+
+

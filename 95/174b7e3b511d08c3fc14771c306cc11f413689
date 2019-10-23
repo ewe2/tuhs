@@ -1,0 +1,160 @@
+From: imp@bsdimp.com (M. Warner Losh)
+Date: Wed, 25 Aug 2010 08:29:37 -0600 (MDT)
+Subject: [TUHS] DG/UX user/admin around?
+In-Reply-To: <AANLkTi=VKwYCAW-+qE0=ijRQk5O0ci1abjWwT326GRXU@mail.gmail.com>
+References: <AANLkTinsdZd7xqWDfdbO89Vb_MMcBFGUU+f2uTp2dGvY@mail.gmail.com>
+	<B395BC57-D5C5-44F1-9CA9-62E58BF4DF1C@claunia.com>
+	<AANLkTi=VKwYCAW-+qE0=ijRQk5O0ci1abjWwT326GRXU@mail.gmail.com>
+Message-ID: <20100825.082937.1151864885528850825.imp@bsdimp.com>
+
+In message: <AANLkTi=VKwYCAW-+qE0=ijRQk5O0ci1abjWwT326GRXU at mail.gmail.com>
+            DG UX <dgunix at gmail.com> writes:
+: Yeah, tried that, even with -vvv. Got :
+:
+: 01:09.0 SCSI storage controller: Adaptec AHA-2940U/UW/D / AIC-7881U
+:         Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV+ VGASnoop-
+: ParErr- Stepping- SERR+ FastB2B-
+:         Status: Cap- 66MHz- UDF- FastB2B+ ParErr- DEVSEL=medium
+: >TAbort- <TAbort- <MAbort- >SERR- <PERR-
+:         Latency: 64 (2000ns min, 2000ns max), Cache Line Size: 64 bytes
+:         Interrupt: pin A routed to IRQ 16
+:         Region 0: I/O ports at ec00 [disabled] [size=256]
+:         Region 1: Memory at ff8ff000 (32-bit, non-prefetchable) [size=4K]
+:         Expansion ROM at 30000000 [disabled] [size=64K]
+: 
+: That means that is bus 01, device 09, and function 0. Correct? That means that
+: dev(ctrl(pci[pci_num]),slot[,func_num[,ctrl_id]])[,dev_id[,LUN]])    ==
+: sd(apsc(pci(0),3,0,7),9,0) ?
+
+bus is going to be 1 here.  slot == device since it makes little sense
+to mix scsi and pci IDs in that part of the string to me and
+bus:dev:func is fairly standard notation (with variation in
+punctionation) and dev_id would be 1, since that's the SCSI ID (where
+it does make sense to use scsi IDs).
+
+: I think that ctrl_id is my Adaptec adapter (7, according to Adaptec
+: mgmt) and dev_id is my SCSI HDD = 1 according to jumper setting and
+: Adaptet mgmt).
+
+I don't think that ctrl_id is 7.  Your SCSI ID for the controller on
+the scsi bus is 7, but the SCSI ID for all controllers is 7.  If you
+had a dual channel scsi card, you'd have to distinguish channel A from
+channel B, and that's usually going to be encoded 0/1 or 1/2 (more
+typically the former, but I don't know DGUX specifically).
+
+So wouldn't that be sd(apsc(pci1),9,0,0),1,0) or more simply
+sd(apsc(pci1),9),1)?  Hmmm, the above expression has too few ) so I'm
+thinking based on the original boot command, it should be either
+sd(apsc(pci(1),9,0,0),1,0) or more simply sd(apsc(pci(1),9),1)
+
+Maybe this will be helpful.  But that's just a shot in the dark.
+There also appears to be a PCI bridge in the new system that isn't in
+the old system, since the card is on pci bus 1 and the boot loader is
+looking for it on pci bus 0.  This likely isn't a huge deal since the
+BIOS of that vintage PC will initialize the bridge correctly.
+
+Warner
+
+: Also dmidecode shows PCI3 as the only one that is 'in use'.
+: 
+: Handle 0x0903, DMI type 9, 13 bytes
+: System Slot Information
+:         Designation: PCI3
+:         Type: 32-bit PCI
+:         Current Usage: In Use
+:         Length: Long
+:         ID: 3
+:         Characteristics:
+:                 5.0 V is provided
+:                 3.3 V is provided
+:                 PME signal is supported
+: 
+: 
+: 
+: Thanks
+: 
+: 
+: 
+: On Tue, Aug 24, 2010 at 6:34 PM, Natalia Portillo <claunia at claunia.com> wrote:
+: > Use lspci -v on the Linux LiveCD to be sure that bus, slot, function and controller number are correct.
+: >
+: > El 24/08/2010, a las 15:44, DG UX escribió:
+: >
+: >> I've tried 3 things:
+: >>
+: >> 1. Board shows "PCI3"
+: >> 2. Linux LiveCD says PCI slot 3
+: >> 3. I've tried a million combinations, just for the heck of it. None worked.
+: >>
+: >> And also, as I said, in case there is only 1 adapter it should
+: >> automatically default and I cant shorthand it, as -
+: >> sd(apsc(pci(),3),0)root
+: >> Of course that as for the controller ID it is 7 - as shown by the
+: >> Adaptec management tool and the device ID is 1 (or 0), depending on
+: >> where I put it's jumper and also shown by mgmt tool at boot.
+: >>
+: >> Got any other ideas of how to verify bus/slot?
+: >>
+: >>
+: >> On Tue, Aug 24, 2010 at 4:01 AM, Natalia Portillo <claunia at claunia.com> wrote:
+: >>> Hi,
+: >>>
+: >>> Just a question.
+: >>>
+: >>> How did you checked the PCI bus and slot numbers?
+: >>> Counting physically on the motherboard?
+: >>>
+: >>> If this is the case you're doing it wrong.
+: >>>
+: >>> The chipset could have various buses and slot numbers and so what appears physically to be slot 0 can easily be bus 2 slot 6.
+: >>>
+: >>> El 11/08/2010, a las 15:14, DG UX escribió:
+: >>>
+: >>>> Sorry to bother you all with my questions over this ancient machine
+: >>>> and my failing trials with it..
+: >>>> Trying to get a DGUX system (Intel based) to work, as is, on a 'regular' x86 PC.
+: >>>>
+: >>>> Just a couple of things :
+: >>>>
+: >>>> 1. I did find out that that DG machine is looking for an Adaptec PCI
+: >>>> SCSI Controller, and so I got an AHA-2940UW PCI card, installed it in
+: >>>> an old PC, got a matching 9GB HDD and booted it up from my image I've
+: >>>> 'DD'ed from the original DG machine.
+: >>>> Boot prompt came up and said it's trying to load
+: >>>> sd(apsc(pci(0),d,0,7),1,0)root:/dgux -3
+: >>>> it didn't, no error msg, just gave me back a "Boot command:" prompt.
+: >>>> Bootpath of the original machine is sd(apsc(pci(0),d,0,7),1,0)root:/dgux -3.
+: >>>> The disk drive parameters are correct, according to the docs, its -
+: >>>> dev(ctrl(pci[pci_num]),slot[,func_num[,ctrl_id]])[,dev_id[,LUN]]).
+: >>>> I've checked the PCI slot in which I installed the card, it's 3, and
+: >>>> so I've tried '3' instead of 'd' in the command above, just got the
+: >>>> boot prompt back again.
+: >>>> Also tried - sd(apsc(pci(),3),0)root:/dgux -3  which should also work
+: >>>> according to the docs (all other params are default).
+: >>>> Tried to play with it and tried tons of combinations, just for the
+: >>>> heck of it, still nothing. If I do type in some nonsense it does give
+: >>>> me an error msg : "Error: No device specifications found in the boot
+: >>>> command. Invalid boot command line".
+: >>>> According to the docs, once I get the correct syntax, the system should load up.
+: >>>> Anyone got any advice about that?
+: >>>>
+: >>>> 2.   Anyone here a/was a DG/UX user/admin? you guys are very hard to find :)
+: >>>>
+: >>>> Thanks,
+: >>>> D'
+: >>>> _______________________________________________
+: >>>> TUHS mailing list
+: >>>> TUHS at minnie.tuhs.org
+: >>>> https://minnie.tuhs.org/mailman/listinfo/tuhs
+: >>>
+: >>>
+: >
+: >
+: _______________________________________________
+: TUHS mailing list
+: TUHS at minnie.tuhs.org
+: https://minnie.tuhs.org/mailman/listinfo/tuhs
+: 
+: 
+
+

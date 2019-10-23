@@ -1,0 +1,91 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Sun, 18 May 2008 23:26:06 +1000
+Subject: [TUHS] Later UNIX syscalls
+Message-ID: <20080518132606.GA83541@minnie.tuhs.org>
+
+While I'm investigating the legacy of the UNIX syscalls, I might as well
+go into the later versions.
+
+2nd Edition UNIX kept all the syscalls of 1st Edition, and added these:
+
+34  hog		lower process priority, becomes nice()
+35  sleep	sleep()
+36  sync	sync()
+37  kill	kill()
+38  getcsw	reads console switches: this goes away in 7th Edition
+
+3rd Edition UNIX kept all the syscalls of 2nd Edition, and added these:
+
+39  boot	reboot the system, becomes reboot()
+40  fpe		catch floting point errors, becomes signal(SIGFPE, ...)
+41  dup		dup()
+42  pipe	pipe()
+43  times	get process time details, becomes getrusage()
+
+Note pipe() appears in the 3rd Edition, which was still in assembly.
+4th Edition UNIX is the first kernel written in C. We start to see changes:
+
+14 mknod	was mkdir(), now can make directories and device files
+34 nice		was hog()
+20 tell		goes away, as seek() does the same job
+44 profil	profil()
+45 tiu		interface to Spider digital switching network: goes away
+46 setgid	setgid()
+47 getgid	getgid()
+48 signal	signal()
+
+It's interesting to note that signal() appears, but the existing signal-like
+syscalls do not disappear just yet, although tell() does go away. It's also
+to note that seek() has the usual 0=SEEK_SET, 1=SEEK_CUR, 2=SEEK_END, but
+there are also 3, 4, 5 which mean the same except that offsets are multiplied
+by 512 bytes. This is to do long seeks on block devices. Earlier UNIX kernels
+automatically multiplied offsets on block devices by 512, but now the task
+of doing this has been shifted to the process.
+
+In 5th Edition, we see some more changes:
+
+20  getpid	getpid(), fills the slot vacated by tell()
+26  quit	goes away to be replaced with signal(SIGQUIT, ...)
+27  intr	goes away to be replaced with signal(SIGINT, ...)
+29  cemt	goes away to be replaced with signal(SIGEMT, ...)
+33  ilgins	goes away to be replaced with signal(SIGILL, ...)
+39  boot	goes away
+40  fpe 	goes away to be replaced with signal(SIGFPE, ...)
+45  tiu		goes away
+
+6th Edition has few changes over 5th Edition:
+
+26  ptrace	ptrace(), fills the slot vacated by quit()
+30  smdate	becomes inoperative
+
+7th Edition has some significant changes over 6th Edition:
+
+27  alarm	alarm(), fills the slot vacated by intr()
+29  pause	pause(), fills the slot vacated by cemt()
+30  utime	utime(), replaces the missing smdate()
+33  access	access(), fills the slot vacated by ilgins()
+35  ftime       get date and time, later becomes gettimeofday()
+38  getcsw	goes away
+39  setpgrp	setpgrp(), but not yet implemented, i.e. reserved slot
+
+49  unused
+50  unused
+51  sysacct	turn accounting off/on
+52  sysphys	set user physical addresses
+53  syslock	lock user in core
+54  ioctl	ioctl()
+55  unused
+56  mpxchan	create mpx communications channel
+57  unused
+58  unused
+59  exece	execve(), note that existing syscall 11 exec() has no envp[]
+60  umask	umask()
+61  chroot	chroot()
+
+Note that 35 sleep() is now gone, as its functionality can be simulated with
+27 alarm().
+
+Cheers,
+	Warren
+
+

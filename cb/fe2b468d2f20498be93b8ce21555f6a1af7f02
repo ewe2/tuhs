@@ -1,0 +1,49 @@
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Date: Thu, 17 Jul 2014 11:42:05 -0400 (EDT)
+Subject: [TUHS] Excise process from a pipe
+Message-ID: <20140717154205.5061418C0D2@mercury.lcs.mit.edu>
+
+    > the downstream process is in the middle of a read call (waiting for
+    > more data to be put in the pipe), and it has already computed a pointer
+    > to the pipe's inode, and it's looping waiting for that inode to have
+    > data.
+    > So now I have to regroup and figure out how to deal with that. My most
+    > likely approach is to copy the inode data across
+
+So I've had a good look at the pipe code, and it turns out that the simple
+hack won't work, for two reasons.
+
+First, the pipe on the _other_ side of the middle process is _also_ probably
+in the middle of a write call, and so you can't snarf its inode out from
+underneath it. (This whole problem reminds me of 'musical chairs' - I just
+want the music to stop so everything will go quiet so I can move things
+around! :-)
+
+Second, if the process that wants to close down and do a splice is either the
+start or end process, its neighbour is going to go from having a pipe to
+having a plain file - and the pipe code knows the inode for a pipe has two
+users, etc.
+
+So I think it would be necessary to make non-trivial adjustments to the pipe
+and file reading/writing code to make this work; either i) some sort of flag
+bit to say 'you've been spliced, take appropriate action' which the pipe code
+would have to check on being woken up, and then back out to let the main file
+reading/writing code take another crack at it, or ii) perhaps some sort of
+non-local goto to forcefully back out the call to readp()/writep(), back to
+the start of the read/write sequence.
+
+(Simply terminating the read/write call will not work, I think, because that
+will often, AFAICT, return with 0 bytes transferred, which will look like an
+EOF, etc; so the I/O will have to be restarted.)
+
+
+I'm not sure I want to do the work to make this actually work - it's not
+clear if anyone is really that interested? And it's not something that I'm
+interested in having for my own use.
+
+Anyway, none of this is in any way a problem with the fundamental service
+model - it's purely kernel implementation issues.
+
+	Noel
+
+

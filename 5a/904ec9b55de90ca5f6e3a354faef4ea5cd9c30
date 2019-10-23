@@ -1,0 +1,92 @@
+From: jmbw@nather.com (Markus Weber)
+Date: Fri, 26 Sep 2003 15:24:27 -0500
+Subject: [TUHS] Re: 4.3 BSD version in the Unix Archive
+In-Reply-To: <0309261835.AA07237@ivan.Harhan.ORG>
+Message-ID: <PMEAIMBALAHKECEIMJFGAEMCMCAA.jmbw@nather.com>
+
+Stand/copy from tms(0,1) to ra(0,1) fails with a 'disk unlabeled' diagnostic
+on a cold disk image. It turns out that NetBSD's disklabel(8) will create a
+template disk image file that makes stand/copy happy, although I haven't
+verified that the label is all that it should be.
+
+The boot of the miniroot's GENERIC kernel does indeed fail. If only ra0 is
+configured for simh, it takes the kernel a long time to decide that ra1,
+ra2, and ra3 are offline. Having said that, I do not know how long this
+takes on actual hardware. This part can be speeded up by supplying empty
+image files for the remaing three disks, but in either case the kernel (and
+not simh) subsequently segfaults (trap type 8, code = c0000200, pc =
+8003fe16).
+
+I haven't yet investigated what this diagnostic signifies. There are two
+likely scenarios, the kernel either crashes late in the ra driver
+initialization or while probing for the next device in line. At this point
+I'm not prepared to argue whether this is primarily an emulation error or a
+kernel bug.
+
+Owing to the lack of Vax hardware or at least a compatible environment, you
+have me at a disadvantage. Which function does pc = 8003fe16 correspond to?
+
+Markus
+
+-----Original Message-----
+From: Michael Sokolov [mailto:msokolov@ivan.Harhan.ORG]
+Sent: Friday, September 26, 2003 1:36 PM
+To: jmbw at nather.com; tuhs at tuhs.org
+Subject: RE: [TUHS] Re: 4.3 BSD version in the Unix Archive
+
+
+Markus Weber <jmbw at nather.com> wrote:
+
+> Clearly, stand boots. I'm hopeful that 4.3-Quasijarus0a will indeed run on
+> simh.
+
+Just be warned that I have heard from others that the kernel won't boot on
+SIMH
+due to sucky emulation.
+
+> For some follow-up questions... Standalone format supports hp and up
+disks,
+> but simh only emulates RL and RQ controllers - which means that the Ultrix
+> utilities to label a cold disk must be ported or recreated to the simh
+host
+> platform. Of course, it may well be that applying a hex editor to the disk
+> image will suffice.
+
+Arghh, why don't people just f-ing get it!  Standalone format is what is
+known
+as low-level format in the PeeCee world (magnetic level stuff, certainly not
+needed on an emulator), and it has absolutely nothing to do with disk
+labeling.
+4.3BSD-Quasijarus0[a] does not have standalone disklabel, but RA82 is known
+to
+the compiled-in tables and thus will work unlabeled.  Also Ultrix' disk
+labels
+are not useful for 4.3BSD-Tahoe/Quasijarus, since the labels are stored in a
+different place in a different format.  (Berkeley and DEC developed pack
+labels
+independently.  BSD stores them in the boot block, Ultrix stores them in the
+root fs superblock, which has the disadvantage of requiring you to create
+some
+dummy root fs before you can write a label, even if you want a root fs of
+different size.)
+
+> Am I correct that Quasijarus supports RA82 disks (using the ra type) and
+the
+> TK50 tape (as a tms)?
+
+Yes.
+
+MS
+
+
+---
+Incoming mail is certified Virus Free.
+Checked by AVG anti-virus system (http://www.grisoft.com).
+Version: 6.0.520 / Virus Database: 318 - Release Date: 9/18/2003
+
+---
+Outgoing mail is certified Virus Free.
+Checked by AVG anti-virus system (http://www.grisoft.com).
+Version: 6.0.520 / Virus Database: 318 - Release Date: 9/18/2003
+
+

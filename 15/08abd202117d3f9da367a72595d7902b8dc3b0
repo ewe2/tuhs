@@ -1,0 +1,78 @@
+From: jmbw@nather.com (Markus Weber)
+Date: Wed, 1 Oct 2003 10:33:15 -0500
+Subject: [TUHS] Re: 4.3 BSD version in the Unix Archive
+In-Reply-To: <0309262047.AA07364@ivan.Harhan.ORG>
+Message-ID: <PMEAIMBALAHKECEIMJFGAEOFMCAA.jmbw@nather.com>
+
+I found out a bit more.
+
+For any non-OpenVMS OS I tried on simh/vax (read: different flavors of BSD),
+disk initialization is a common problem area. NetBSD glitches on mounting
+the installation CD/disk, Quasijarus has a hard time deciding which disks
+are online and which are not, and finally OpenBSD installs without problem,
+but fails when mounting the root filesystem when it boots off ra0a. I can
+however boot off the install-time kernel on the floppy disk and access the
+partitions on ra0 just fine.
+
+It became apparent that OpenBSD's in-core disk label defaulted to data
+matching the c partition where the a partition should have been. After more
+digging, it seemed that ra_putonline was called, but rx_putonline must have
+failed somehow. To add insult to injury, after adding a few printf
+statements to rx_putonline the OpenBSD sort-of-GENERIC kernel now boots.
+
+Here's the relevant block of code:
+
+rx_putonline(rx)
+        struct rx_softc *rx;
+{
+        struct  mscp *mp;
+        struct  mscp_softc *mi = (struct mscp_softc *)rx->ra_dev.dv_parent;
+        volatile int i;
+
+printf("entered rx_putonline\n");
+        rx->ra_state = DK_CLOSED;
+        mp = mscp_getcp(mi, MSCP_WAIT);
+        mp->mscp_opcode = M_OP_ONLINE;
+        mp->mscp_unit = rx->ra_hwunit;
+        mp->mscp_cmdref = 1;
+        *mp->mscp_addr |= MSCP_OWN | MSCP_INT;
+
+        /* Poll away */
+        i = bus_space_read_2(mi->mi_iot, mi->mi_iph, 0);
+        if (tsleep(&rx->ra_dev.dv_unit, PRIBIO, "rxonline", 100*100))
+                rx->ra_state = DK_CLOSED;
+printf("rx->ra_state = %d\n",rx->ra_state);
+        if (rx->ra_state == DK_CLOSED)
+                return MSCP_FAILED;
+printf("rx_putonline returns DONE\n");
+        return MSCP_DONE;
+}
+
+My guess is that the very first printf upsets the emulation timing just
+enough to make things work. I'd have to read more code and RQDX3
+documentation to take this further, but maybe this is enough to go on to
+make it obvious to somebody else why Quasijarus on simh exhibits these
+awfully long disk probe timeouts. I hope that once this problem has been
+narrowed down a bit more, a fix to simh/vax will make all BSDs happy.
+
+-----Original Message-----
+From: Michael Sokolov [mailto:msokolov@ivan.Harhan.ORG]
+Sent: Friday, September 26, 2003 3:48 PM
+To: jmbw at nather.com; tuhs at tuhs.org
+Subject: RE: [TUHS] Re: 4.3 BSD version in the Unix Archive
+
+
+[...] If so, SIMH's MSCP emulation must be lacking in quality.
+
+[...]But I will grant the possibility that the kernel is not w/o fault
+either in that
+perhaps it's going south (dereferencing a garbage pointer and crashing) when
+the
+MSCP controller (in this case SIMH's poor emulation) is doing something it
+doesn't expect.
+---
+Outgoing mail is certified Virus Free.
+Checked by AVG anti-virus system (http://www.grisoft.com).
+Version: 6.0.520 / Virus Database: 318 - Release Date: 9/18/2003
+
+

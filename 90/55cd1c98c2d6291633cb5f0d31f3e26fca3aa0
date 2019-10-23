@@ -1,0 +1,110 @@
+From: lehmann@ans-netz.de (Oliver Lehmann)
+Date: Mon, 23 Nov 2015 09:05:08 +0100
+Subject: [TUHS] Porting 2.11 BSD
+In-Reply-To: <CAH1jEzYW9DBrSE0A=NnREq8qyq6vOQ6nWN6d-dwEa3mp1r20Gw@mail.gmail.com>
+References: <20151121140022.Horde.ZwPZMYWApn-dXiuNCkiDWDA@avocado.salatschuessel.net>
+ <1448151215.3670388.446383649.14D3C39D@webmail.messagingengine.com>
+ <56510C98.2000301@gmail.com>
+ <20151122023630.Horde.YgAxkfni4xS7fRdlcpIUGSp@avocado.salatschuessel.net>
+ <565124E1.8050001@gmail.com>
+ <CAH1jEzYW9DBrSE0A=NnREq8qyq6vOQ6nWN6d-dwEa3mp1r20Gw@mail.gmail.com>
+Message-ID: <20151123090509.Horde.anntqPoOVbgXR9r5HlrgBxs@avocado.salatschuessel.net>
+
+Hi Nick,
+
+first - thank you very much the time you spent writing!
+
+Thing is - yes - there is a P8000 emulator but it has some bugs which may
+render the assembler not to produce code and so on. I feel better to use
+the original hardware and my SYSIII to compile the stuff I need.
+
+Using a harddisk image made by simh is a great idea. Porting disklabel,
+mkfs and so on first would be a huge task before it works. But with the
+way you proposed I would see much earlier "something" running on the
+system.
+
+Getting data from and to the current SYSIII is not an issue as I have kermit
+on it and can transfer files via serial without any problem.
+
+Getting a filesystem to the "BSD disk" for the system should also be easy
+as I already build a WDC-Controller emulation hardware which uses a SD-Card
+or an IDE harddrive as datastorage but behaves 100% compatible to the P8000
+like the original Controller.
+Using an SDCard makes it kinda easy to just dd the filesystem to/from it.
+
+The current SYSIII Firmware, Boot and Kernel sources are as good as 100%
+available which I guess would it make it a lot easier to port it to boot
+from a BSD Filesystem.
+
+The current boot process on the SYSIII is "rather simple". The firmware has
+some basic functionality to boot from the harddisk. It just loads block 0
+of disk 1 with a length of 200 byte into Address %8000 and executes whatever
+is on that address after it was loaded
+
+https://github.com/OlliL/P8000/blob/master/firmware/MON16/p.boot.s
+(See line 609-636 - sorry for the german comments)
+
+I definitly do not want to change the firmware in any way as I want to make
+a "drop in replacement" to the current SYSIII - so no firmware modifications.
+I wonder this would mean to not use disklabels for example. I guess disklabels
+are stored in block 0 which would make it incompatible with the current
+boot0 loading which is expected to be in block 0 - right?
+
+
+Then there is currently the boot0 loader which is currently on block 0 of
+the harddisk which is now executed.
+
+This one is also implemented in ASM and is now able to understand the
+filesystem. It is configured by default to open again block 0, reads a
+defined inode and searches for the secondary bootloader "boot".
+
+https://github.com/OlliL/P8000/blob/master/WEGA/src/cmd/BOOT0/boot0.md.s
+(See line 128 - 277)
+
+The secondary bootloader is implemented in C and is the first program, able
+to execute segmented code like the kernel:
+
+https://github.com/OlliL/P8000/blob/master/WEGA/src/uts/conf/boot.c
+
+
+I guess, I have to port the primary bootloader first to be able to understand
+UFS/FFS as it is probably different than the current SYSIII-FS and the primary
+bootloader needs to "understand" it to look for the secondary bootloader.
+I plan to "reuse" the current primary bootloader and just change the
+filesystem code. I guess this should be enough.
+
+The secondary bootloader is hopefully also implemented in C in 2.11  
+BSD (didn't
+looked it up yet) So I can modify it to understand Zilogs s.out format instead
+of BSDs a.out format.
+This is vital as the whole toolchain needs to be taken over to BSD as there is
+just no other toolchain available compiling, assembling and linking  
+Z8001 code.
+I also have important binaries with no source code which need to be able to
+run in BSD as well as they did in SYSIII (Z80-RIO-Emulator, CP/M-Emulator,
+Cross-Assemblers for Z8, Z80). So making BSD able to understand the s.out
+format of SYSIII is vital as I'm only able to compile code in s.out format
+the first place.
+
+So to summarize it... The first thing would be:
+
+0. get simh up and running
+1. get a 2.11-BSD filesystem onto a (new) SD-Card
+2. modify the primary bootloader to read the UFS-filesystem
+3. write a secondary bootloader which only does "hello world"
+4. place the secondary bootloader onto that filesystem
+5. boot it
+6. fix it until it works
+7. create a /unix kernel which does a "hello world"
+8. modify the secondary bootloader until it is able to load
+    the kernel.
+
+What do you think?
+
+- Is a current FreeBSD still able to read/write 2.11 BSD disks?
+- I wonder how much difference the SYSIII-FS and UFS has regarding to the
+   primary bootloader (boot0.md.s lines 128-158 searches for "boot").
+
+Regards, Oliver
+
+

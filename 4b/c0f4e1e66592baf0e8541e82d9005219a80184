@@ -1,0 +1,73 @@
+From: jrvalverde@cnb.csic.es (Jose R. Valverde)
+Date: Mon, 23 Jun 2008 16:18:01 +0200
+Subject: [TUHS] Introduction
+In-Reply-To: <20080605171758.64c80f06@veda.cnb.uam.es>
+References: <20080604135729.4c50e178@veda.cnb.uam.es>
+	<20080605171758.64c80f06@veda.cnb.uam.es>
+Message-ID: <20080623161801.19a53c3e@veda.cnb.uam.es>
+
+> The (right now) remaining question is here:
+> 
+> 	http://pofo.de/P8000/problems.php
+
+
+My guess on this:
+
+> I've some functions where the asm code looks as follows:
+> 
+> 0530 3582  0004     584         ldl     rr2,rr8(#4)
+> 0534 9424                       ldl     rr4,rr2
+> 0536 0704  7f00     585         and     r4,#32512
+> 04d2 5d04  8000*    586         ldl     _u+78,rr4
+> 04d6 004e*
+> 
+> This means, an unsigned long value stored in rr8 at position 4 gets loaded into rr2, then into rr4 and then ANDed with 7F00FFFF (r4 are the first 2 bytes of rr4). After the operation is done, the result gets loaded into the address the external reference _u is stored + 78 bytes. The C code I tried to produce out of this information is:
+
+May be there is an additional cast being done. On prf.c you have a
+similar AND:
+
+                s=(char *)(*(long *)adx & 0x7F00FFFF);
+
+As you can see there is a double indirection. My guess is that the
+AND is done to clear some segmentation information, say to ensure the
+datsegment of the program, possibly as a
+security measure against a user process providing a pointer crafted
+to point to an invalid address. The raw -unsafe- code would have
+looked like
+		s = (char *) *adx;
+
+So, the address pointed to by adx, which is a char * is first cast 
+into long *, then ANDed to clear those bits, then assigned. That would
+mean that char* would then be restricted in this system to fit within
+that 0x7F00FFFF mask. If that is so, then the original code in sys2.c 
+for link()
+
+		u.u_dirp.l = (caddr_t) ((long) uap->linkname);
+
+was recoded to ensure that the (void) int* it got from uap was cleaned
+before actual use:
+
+	u.u_dirp.l = (caddr_t) (*((long *)(uap->linkname &0x7F00FFFF)))
+
+uap->linkname is a re-interpretation (as per the struct cast) of the
+data stored in u.u_ap, but u.u_ap is an (int*), a generic pointer that
+might point to anything (a char* as expected or anything else). Then,
+this would explain why you see other register usage in other similar
+situations like in rdwr() after assignment of uap->cbuf (another char*)
+
+Could you try that or some such? It would be used then whenever a
+char * is to be retrieved through a generic int (void) pointer.
+
+					j
+-- 
+	These opinions are mine and only mine. Hey man, I saw them first!
+
+			    José R. Valiigencia Artificial cuando falta la Natural
+-------------- next part --------------
+A non-text attachment was scrubbed...
+Name: signature.asc
+Type: application/pgp-signature
+Size: 189 bytes
+Desc: not available
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20080623/eb15d5f3/attachment.sig>
+

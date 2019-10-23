@@ -1,0 +1,62 @@
+From tuhs-bounces@minnie.tuhs.org Wed Oct 31 16:49:36 2018
+Return-Path: tuhs-bounces@minnie.tuhs.org
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 0410067b
+	for <ml@inbox.vuxu.org>;
+	Wed, 31 Oct 2018 16:49:36 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 808A4A230D; Thu,  1 Nov 2018 02:49:35 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 454A5A215A;
+	Thu,  1 Nov 2018 02:49:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2B265A215A; Thu,  1 Nov 2018 01:39:39 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9E34BA2152
+ for <tuhs@tuhs.org>; Thu,  1 Nov 2018 01:39:38 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 767D318C0BF; Wed, 31 Oct 2018 11:39:37 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20181031153937.767D318C0BF@mercury.lcs.mit.edu>
+Date: Wed, 31 Oct 2018 11:39:37 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Archaic yacc C grammar
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Steve Johnson
+
+    > references that were checked using the pointer type of the structure
+    > pointer. My code was a nightmare, and some of the old Unix code was at
+    > least a bad dream.
+
+I had a 'fun' experience with this when I went to do the pipe splice() system
+call (after the discussion here). I elected to do it in V6, which I i) had
+running, and ii) know like the back of my hand.
+
+Alas! V6 uses 'int *' everywhere for pointers to structures. It also, in the
+pipe code, uses constructs like '(p+1)' to provide wait channels. When I wrote
+the new code, I naturally declared my pointers as 'struct inode *ip', or
+whatever. However, when I went to do 'sleep(ip+1)', the wrong thing happened!
+And since V6 C didn't have coercions, I couldn't win that way. IIRC, I finally
+resorted to declaring an 'int *xip', and doing an 'xip = ip' before finally
+doing my 'sleep(xip+1)'. Gack!
+
+	  Noel

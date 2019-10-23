@@ -1,0 +1,109 @@
+From: drsalists@gmail.com (Dan Stromberg)
+Date: Wed, 3 Aug 2011 21:51:58 -0700
+Subject: [TUHS] /usr/bin on V7?
+In-Reply-To: <1312428286.54715.YahooMailClassic@web82402.mail.mud.yahoo.com>
+References: <CAGGBd_o=zbtbaJ6x+3ksRVik8EG+hnfjAr9P-4=rBYmqooVHVg@mail.gmail.com>
+	<1312428286.54715.YahooMailClassic@web82402.mail.mud.yahoo.com>
+Message-ID: <CAGGBd_q0T_7n5n2p_XoFBBHkfu3prXnL6jS6ymp_v0jY+vmjYg@mail.gmail.com>
+
+On Wed, Aug 3, 2011 at 8:24 PM, Michael Davidson <m_d at pacbell.net> wrote:
+
+> You probably don't have /usr/bin because you haven't mounted /usr yet.
+>
+
+That's a good hypothesis, especially given the info I presented, but I do
+have -some- things under /usr, and if I manually rerun sh -x /etc/rc in
+multiuser, I get an error about /usr already being mounted.
+
+
+> On V7 as best I can remember. /usr was always a mounted filesystem.
+>
+> So, somewhere in your V7 image there should be a disk image for /usr that
+> can be hooked up to an appropriate device under SIMH and then mounted.
+
+
+
+> Actually, it might already be there if your disk image is the entire device
+> and not just the root filesystem - if you can figure out what your root
+> device is then I would expect /usr to be on the same major device number but
+> with aminor device # of 2 (root being 0 and swap being 1).
+>
+
+I'm thinking /usr is /dev/rp3, because my /etc/rc looks like:
+
+# cat /etc/rc
+PATH=/bin:/usr/bin
+echo "Restricted rights: Use, duplication, or disclosure
+is subject to restrictions stated in your contract with
+Western Electric Company, Inc." >/dev/console
+rm /etc/mtab
+cat /dev/null >/etc/utmp
+/etc/mount /dev/rp3 /usr
+rm -f /usr/spool/lpd/lock
+: /etc/accton /usr/adm/acct
+rm -f /usr/tmp/*
+rm -f /tmp/*
+/etc/update
+date >/dev/console
+/etc/cron
+
+
+
+> Actually if you just take the system multi-user it might even do it for
+> you.
+
+
+This does seem to at least try to mount /usr for me - hitting ctrl-d at the
+initial singleuser #, that is.
+
+Interestingly though, it seems that the number of directories in /usr is the
+same on first boot into single user, as after /etc/rc has run as part of
+entering multiuser, so perhaps my root filesystem has things in /usr that
+would normally be obscured by a /usr mount.  Also, /etc/mtab seems untouched
+(in fact, it's nonexistent) after entering multiuser, and the output of
+/etc/mount continues to be nothing.
+
+touch /t does create a file named t in the root directory, so it's not
+something about the root filesystem being readonly.
+
+I'm puzzled.  And yet, I'm enjoying it. :)
+
+Any suggestions?
+
+
+> --- On *Wed, 8/3/11, Dan Stromberg <drsalists at gmail.com>* wrote:
+>
+>
+> From: Dan Stromberg <drsalists at gmail.com>
+> Subject: [TUHS] /usr/bin on V7?
+> To: tuhs at minnie.tuhs.org
+> Date: Wednesday, August 3, 2011, 7:53 PM
+>
+>
+>
+> When I boot V7 in SIMH (pdp11), I get a root shell and a root filesystem,
+> but...  I see that /usr/bin is on root's default PATH, but I have no
+> /usr/bin directory.  Is there some way I could get a /usr/bin with
+> additional executables, to get the full flavor of V7?
+>
+> By way of introduction, I first started with *ix on an AT&T 3Bmumble, and
+> started really getting into it with SunOS 4.1.1.  I've recently become
+> interested in trying a large number of different *ix's - I guess it was the
+> ease with which VirtualBox allowed many of those, and then seeing Nordier's
+> V7 port to x86 got me curious about trying some really old versions - he
+> mentioned that there was a pdp11 emulator available...
+>
+>
+>
+> -----Inline Attachment Follows-----
+>
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org <http://mc/compose?to=TUHS at minnie.tuhs.org>
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+>
+>
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20110803/fb70dffe/attachment.html>
+

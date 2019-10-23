@@ -1,0 +1,88 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Wed, 4 Jan 2017 16:13:58 -0700
+Subject: [TUHS] Leap Second
+In-Reply-To: <20170104133202.VIWUz5j-a%steffen@sdaoden.eu>
+References: <alpine.BSF.2.20.1612291058070.43538@aneurin.horsfall.org>
+ <20161229002105.GB94858@server.rulingia.com>
+ <0d5eeef9-3dbb-0ddd-1b22-51fecee735d8@gmail.com>
+ <alpine.DEB.2.11.1701031503360.14104@grey.csi.cam.ac.uk>
+ <586bc353.tOFm/S0IGecYYlh6%schily@schily.net>
+ <20170104133202.VIWUz5j-a%steffen@sdaoden.eu>
+Message-ID: <CANCZdfquez7jy22sHHufQJuALLY7R-CNB61D+GQpt_s7vHFANA@mail.gmail.com>
+
+On Wed, Jan 4, 2017 at 6:32 AM, Steffen Nurpmeso <steffen at sdaoden.eu> wrote:
+> schily at schily.net (Joerg Schilling) wrote:
+>  |Tony Finch <dot at dotat.at> wrote:
+>  |> sds <stephen.strowes at gmail.com> wrote:
+>  |>> Important question: did anybody have an "exciting" new year because \
+>  |>> of a leap
+>  |>> second bug?
+>  |>
+>  |> I've been collecting failure reports on the LEAPSECS list
+>  |
+>  |https://blog.cloudflare.com/how-and-why-the-leap-second-affected-cloudflare\
+>  |-dns/
+>  |
+>  |"go" seems to have a related bug.
+>  |
+>  |BTW: The POSIX standard intentionally does not include leap seconds \
+>  |in the UNIX
+>  |time interface as it seems that this would cause more problems than \
+>  |it claims
+>  |to fix.
+>
+> I think it is a problem, or better a gap, a void, with the current
+> standard that software has no option to become informed of the
+> event of a leap second for one, but further more that CLOCK_TAI is
+> not available.
+
+And even if it was, nobody would use it. It's not used in legacy code,
+and the subtle differences between the different CLOCK_xxx aren't well
+enough documented enough for programmers to get it right. And even if
+it were, the issue is a lot more subtle than that. If you use
+CLOCK_TAI, then if the system has the proper TAI offset to UTC,
+calling things like timegm will produce a time that's 40s different
+than the current UTC time if you aren't also running the proper
+"right" timezone files, and people will think your code is buggy. But
+if you get a UTC time, then you have an ambiguous encoding of the leap
+second (though CLOCK_UTC, where implemented, tries to cope with that
+by having a denormalized ts_nsec field). It's a big can of warms since
+most programmers expect time to be a uniform radix, and UTC transforms
+time of day into a non-uniform radix on an unpredictable timetable.
+
+But that's starting to get far afield for the historical unix group...
+
+> I think it would make things easier if software
+> which wants just that can get it, e.g., for periodic timer events
+> etc.
+
+CLOCK_MONOTONIC already exists for these things, and programmers still
+screw it up :(
+
+> This is surely not a healing given that most timestamps etc.
+> are based on UTC, but i think the severity of the problems could
+> possibly be lowered.  Especially now that multi-hour smears seem
+> to become used by big companies it seems to be important to have
+> a correct clock available.  This is in fact something i don't
+> really understand, at _that_ level that is to say.  If, e.g.,
+> Google and Bloomberg both would have stated instead that they
+> slew the leap second, then only a single second would have been
+> affected, instead of multiple hours.
+
+You can't just slew the one second. It introduces too large of a
+frequency error in the time base. ntpd will view it as a large error
+and freak out. Programs that want to sleep for 100ms will wind up
+sleeping for 200ms instead, which could be a big problem. With the
+slew over several hours, programs wind up sleeping for 100.01ms
+instead, which is down in the noise of the error you get from a sleep.
+Google is trading a small phase error and frequency error against the
+real UTC timestamp to maintain a well-defined monotonically increasing
+time series with no repeating seconds as its method of coping with
+POSIX's deliberate decision to not define what happens over a leap
+second, provide no encoding for a leap second and generally specifies
+an interface in which it is nearly impossible to get the leap second
+pedantically correct. Makes one question whether leap seconds are a
+good idea or not, but that's a political discussion for another group.
+
+Warner
+

@@ -1,0 +1,60 @@
+From: corey@lod.com (Corey Lindsly)
+Date: Wed, 20 Sep 2017 11:51:22 -0700 (PDT)
+Subject: [TUHS] Who is running their own mail server and what do you run?
+In-Reply-To: <20170920162502.GN25650@mcvoy.com>
+Message-ID: <20170920185122.EB54D410F@lod.com>
+
+
+> 
+> I tried running my own server on mcvoy.com but eventually gave up, the
+> spam filtering was a non-ending task.
+> 
+> If someone has a plug and chug setup for MX I'd love to try it.
+> 
+> Thanks,
+> 
+> --lm
+> 
+
+We provide email service for a few hundred (mostly legacy) customers. The 
+essential elements of the system are:
+
+Linux (HA pair)
+Postfix
+SpamAssassin
+ClamAV
+RBLs (Spamhaus)
+MySQL database
+Maia Mailguard
+
+I spend maybe five minutes a week maintaining the system. The most 
+important part is Maia Mailguard. Incoming email is scored by SpamAssassin 
+(higher = more likely to be spam). Above some threshold, which can be 
+tuned up or down by the user, the mail is tossed into their spam 
+quarantine. The user is able to browse this quarantine. False positives 
+can be freed-up and delivered as usual and the sender is whitelisted. 
+True positives are confirmed and contribute to training the filter. After 
+a little while the system gets pretty good at automatically 
+distinguishing between spam and ham.
+
+The important point of this system is that it puts the user in control. 
+Too much spam? Turn the spam threshold setting down a little lower. Too 
+many false positives? Turn that knob a bit higher. Expecting an important 
+email? Whitelist the sender or check your spam quarantine. As a mail 
+admin, my goal is to give the users the tools to manage their own email 
+effectively according to their requirements. I don't want my phone 
+ringing every time some user wants to complain that he gets too much spam.
+
+The system has been a success. Complaints from the users have dropped to 
+nearly zero. I spend very little time thinking about or dealing with the 
+mail system. Stats follow.
+
+
+As of: 2017-09-20 11:38:53 PDT 
+
+Efficiency 99.35% False Positive 0.50% False Negative 0.15%
+Sensitivity 99.84% PPV 99.45% Specificity 94.00% NPV 98.16%
+
+
+--corey
+

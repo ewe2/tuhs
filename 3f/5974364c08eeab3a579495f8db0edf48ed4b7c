@@ -1,0 +1,104 @@
+From: reed@reedmedia.net (Jeremy C. Reed)
+Date: Wed, 21 Mar 2018 21:25:10 -0500 (CDT)
+Subject: [TUHS] syslog (was Re:  daemons are not to be exorcised)
+In-Reply-To: <20180322002246.GK9739@mcvoy.com>
+References: <CAFCBnZsS8Si6YGD4w_3W_znf3J5nVZGThkHVuQm5nD+FFm0DOg@mail.gmail.com>
+ <94366db0-293b-214a-23a3-c7c895e4d30b@spamtrap.tnetconsulting.net>
+ <alpine.BSF.2.02.1803200023360.43136@frieza.hoshinet.org>
+ <98451f10-9b1b-049b-61ed-fd73586572fd@spamtrap.tnetconsulting.net>
+ <20180321023125.GC6850@thunk.org>
+ <76E7D09E-023B-4A29-ACCD-AF9ED425EE5F@xs4all.nl>
+ <e38e9935-8633-2cee-8cae-c5e8be180966@spamtrap.tnetconsulting.net>
+ <20180322002246.GK9739@mcvoy.com>
+Message-ID: <alpine.NEB.2.20.1803212017420.25928@t1.m.reedmedia.net>
+
+On Wed, 21 Mar 2018, Larry McVoy wrote:
+
+> On Wed, Mar 21, 2018 at 06:18:37PM -0600, Grant Taylor via TUHS wrote:
+> > On 03/21/2018 03:16 AM, Jaap Akkerhuis wrote:
+> > >I've been told that syslog was came in existence as a debugging aid for
+> > >sendmai.
+> > 
+> > I can't prove to the contrary.  But that does seem a little extreme to me.
+> 
+> For what it is worth, the syslog/sendmail connection rings a tiny bell for
+> me, I can't prove it either, but I feel like there was some connection.
+> Is Eric on the list?
+
+Allman's logging was somewhat in 4BSD (4.0).
+
+#               -DLOG -- include log information.  This is probably
+#                       only useful on systems that include the logger.
+
+delivermail was build with that flag.
+But it used log.h which was not shipped in the version I have.
+Some of the code has ifdef LOG and some doesn't.
+
+2.79BSD (from McKusick's disk) which is later has logmsg(3) manual and 
+its corresponding syslog(8) daemon manual (both Feb 5 1981).
+
+I cannot find those files online so here they are:
+http://reedmedia.net/~reed/tmp-oicyi3t6984y/logmsg.3.txt
+Notice that it says "12/31/79"
+
+http://reedmedia.net/~reed/tmp-oicyi3t6984y/syslog.8.txt
+
+But no code there for logmsg, initlog, nor syslog.
+
+(Note that uucp's logent.c has a syslog() but that is different.)
+
+McKusick said that syslog was first in 4.1c and official in 4.2.
+In both places shipped with sendmail code.
+He said it was one of the first applications to use sockets.
+
+4.1c.1 version says "reads datagrams from an IPC port
+(currently port 2222, for no good reason)"
+It uses the /etc/syslog.conf file.
+
+Allman's 4.1c.1 code says:
+**      This program implements a system log, implemented as the
+**      "/dev/log" mpx file on a pre-4.2bsd system or a port on
+**      a post-4.2bsd system.
+
+I think this code is not in the dspinellis/unix-history-repo
+(if you find it, please teach me how to find it).
+
+The 4.1c code entirely changed api naming and some usage from
+
+       initlog("delivermail", 0, LOG_INDEP);
+
+to
+
+        openlog("sendmail", LOG_PID);
+
+(even though comments in syslog.h and syslog.c still mentioned initlog)
+
+and from:
+
+logmsg(LOG_INFO, "%s->%s: %ld: %s", From.q_paddr, To, MsgSize, statmsg);
+
+to like:
+
+syslog(LOG_INFO, "%s: message-id=%s", e->e_id, p);
+
+even though syslog.c there defined logmsg() use and  not syslog()
+
+I may have overlooked but don't see any use of the code outside of 
+sendmail in 4.1c. The logger.c  (without manpage) utility was included 
+in the sendmail source.
+
+4.2 shipped two version of syslog(3) source code that no longer had 
+logmsg() api. (One in libc and one with sendmail.)
+
+4.2 could started it with rc.local. While I didn't see other use of it, 
+a syslog.3 showed another example use:
+
+openlog("serverftp", LOG_PID);
+
+4.3 finally had lots of use (including in contrib): comsat, courier, 
+various mh daemons, nntpd, savecore, shutdown, lpd, telnetd, r services, 
+inetd, named, and much more. Even the date tool:
+
+        syslog(LOG_NOTICE, "set by %s", username);
+
+

@@ -1,0 +1,35 @@
+From: newsham@lava.net (Tim Newsham)
+Date: Sun, 11 May 2008 10:56:19 -1000 (HST)
+Subject: [Unix-jun72] sh.s
+Message-ID: <Pine.BSI.4.64.0805111050460.20114@malasada.lava.net>
+
+I did a comparison of s2's /bin/sh and the sh.s we have (notes in
+the notes file about this).  There were a few changes, but they were
+pretty similar.  I added a patch in the patches directory that reflects
+the changes and I verified that if you build with the patch you get
+an identical binary (modulo the padding bytes that the assembler
+fills in for ".." and ".even").  It's currently marked as an optional
+patch and the sh.s build isn't being installed over /bin/sh in the
+rf0.dsk image.
+
+I think the sh.s listing itself might be defective in two ways:
+
+    - There's an rts missing at the end of the "error" function
+    - It doesn't check for the "*" character when looking for globbing.
+
+The 1e man page does list "*" as one of the globbing characters,
+so its likely that these three instructions (1 rts, 2 for comparison)
+somehow got dropped from the commented jun72 listing.  I'm torn between
+adding them to the original "pages" sources as obvious mistakes or
+just leaving it out and using a patch to fix it.  Right now we don't
+have a patch that adds just these two fixes.  I guess if we did that and
+made it a mandatory patch, we could use the sh we build from sh.s as
+/bin/sh in the images.
+
+I look forward to seeing what shell sources we might get from the s1
+fragments recovery.
+
+Tim Newsham
+http://www.thenewsh.com/~newsham/
+
+

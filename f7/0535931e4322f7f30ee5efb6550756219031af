@@ -1,0 +1,80 @@
+From: jsteve@superglobalmegacorp.com (jsteve@superglobalmegacorp.com)
+Date: Sat, 11 Mar 2017 13:29:26 +0800
+Subject: [TUHS] Help request: uucp, mail on 4.2BSD
+In-Reply-To: <c3bae53f-5085-6a73-fe7e-b5ceaa162ed3@kilonet.net>
+References: <20170307070941.GA2012@minnie.tuhs.org>
+ <58c07fb8.F7Cd/seulkX9W1t/%schily@schily.net>
+ <e6953ec7-306d-56af-e9bd-ad1b860f95f9@kilonet.net>
+ <1489015105.2992185.905166496.635E712B@webmail.messagingengine.com>
+ <d254ebe7-b92d-b71b-d1d6-74caf402b310@kilonet.net>
+ <3C4A1369-67FE-48C8-82B5-369DCB300AA3@gewt.net>
+ <c3bae53f-5085-6a73-fe7e-b5ceaa162ed3@kilonet.net>
+Message-ID: <da9332b0-d98f-41d0-833b-0e0edfb8bdd5@SG2APC01FT058.eop-APC01.prod.protection.outlook.com>
+
+VMWare can do the standard ‘ide’/WD-1003 type interface, you either have to edit the VMX/master VMDK, or set the right ‘OS’ type during install.  Try MS-DOS or ‘Legacy OS/2’.
+
+From my old notes:
+
+First, edit the .vmdk file.  You are looking for the line:
+ddb.adapterType = “buslogic”
+And you change the buslogic to ide like this:
+# Extent description
+RW 16777216 VMFS “UnixWare 7.1.1-flat.vmdk”
+# The Disk Data Base
+#DDB
+ddb.adapterType = “ide”
+ddb.geometry.cylinders = “1044”
+ddb.geometry.heads = “255”
+ddb.geometry.sectors = “63”
+ddb.longContentID = “8f535bb60df8d73a86c24853fffffff
+The next thing is to alter the vmx file.  By default the hard disk will be on scsi0 and you’ll see something like this:
+scsi0.present = “TRUE”
+scsi0:0.deviceType = “scsi-hardDisk”
+scsi0:0.fileName = “UnixWare 7.1.1.vmdk”
+scsi0:0.present = “TRUE”
+And what we do is rename the scsi0:0 to ide0:0
+ide0:0.present = “TRUE”
+ide0:0.deviceType = “disk”
+ide0:0.fileName = “UnixWare 7.1.1.vmdk”
+scsi0:0.present = “TRUE”
+And you should be good to go.  The other (much easier) alternative is to try to use the legacy OS/2 profile as it’ll install an IDE disk by default.
+
+
+
+Sent from Mail for Windows 10
+
+From: Arthur Krewat
+Sent: Thursday, 9 March 2017 10:52 PM
+To: Cory Smelosky
+Cc: tuhs at minnie.tuhs.org
+Subject: Re: [TUHS] Help request: uucp, mail on 4.2BSD
+
+If I could get the Consensys running that I used to have that would be 
+great, it would be "authentic" to me at least.
+
+However, it relies on either an Adaptec 1540 SCSI controller, or the 
+standard ISA WD MFM/RLL controller (and maybe ESDI), which my VMware 
+environments can't support. I'm reluctant to go into running yet another 
+emulator anywhere on my home office network, so it might be Unixware 2.1 
+which I managed to get running in VMware.
+
+
+
+On 3/8/2017 7:22 PM, Cory Smelosky wrote:
+> Which SVR4.2?
+>
+> Sent from my iPhone
+>
+>> On Mar 8, 2017, at 15:39, Arthur Krewat <krewat at kilonet.net> wrote:
+>>
+>> I've still got my Worldblazer, and a Trailblazer that I found in a storage closet at a defense contractor I was consulting for back in the mid 90's.
+>>
+>> I'm seriously thinking of getting my SVR4.2 system back up and running and seeing if I can get Taylor UUCP to function again.
+>>
+>> Of course, I didn't make the UUCP maps until the early 90's... but still :)
+>>
+
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20170311/e402233f/attachment.html>
+

@@ -1,0 +1,240 @@
+From: jp@spektr.ludvika.se (Jorgen Pehrson)
+Date: Wed, 23 Dec 1998 23:11:01 +0100 (CET)
+Subject: PDP11/83 qbus layout.
+Message-ID: <Pine.NEB.4.05.9812232234500.23424-100000@spektr.ludvika.se>
+
+
+(Sorry for the rather lenghty post)
+
+Hi,
+I'd just try to boot my newly aquired PDP11/83 and was planning to install
+2.11BSD. But I've run into one (small?) problem. If I just try to boot
+from DU0: it says: 
+
+Trying DU0
+
+Error 20 
+Controller Error
+
+And if I boot the install tape from the TK70 drive and run disklabel,
+all accesses to the RD53 drive just times out. So I was going to remove
+all unwanted QBus boards from the boxes. And that's what I was going to
+ask...
+
+Is there something special I have to think about, like there's some slots
+that can't be used, some boards must be in a specific slot and so on?
+
+This is the current layout (which is exactly as it was when it was taken
+offline, or so I think)
+
+11/83 (173QA-B3, I think this is a normal BA23 enclosure):
+(As seen from the back) Also contains one TK70 drive.
+    
+ ____________________________________________
+|Dataram 40903 revG     |        Empty slot  | (2mb ram)
+---------------------------------------------
+|                    M8637-EH                | (2mb ram)
+---------------------------------------------
+|                    M8190-AE                | (83 CPU)
+---------------------------------------------
+|     M7559             |         M7504      | (TK70, DEQNA)
+---------------------------------------------
+|     M8020             |        Empty slot  | (console?)
+---------------------------------------------
+|                    M7957                   | (DZV11)
+---------------------------------------------
+|                    m3104                   | (DHV11)
+---------------------------------------------
+|     M9404            |          Empty slot | (1st Qbus conn)
+---------------------------------------------
+
+Expansion box (173QA-B3)
+(From the back) Also contains one RD53 and one dual floppy.
+
+_____________________________________________
+|M9405-YA               |        Empty slot  | (2nd qbus conn)
+---------------------------------------------
+|                     m3104                  | (DHV11)
+---------------------------------------------
+|     m9047             |        m9047       | (grant cont x2)
+---------------------------------------------
+|     m7555             |        Empty slot  | (RQDX3)
+---------------------------------------------
+|     m7512             |        Empty slot  | (RQDX1E)
+---------------------------------------------
+
+Plus one external disk box with two RD53 drive. (This system only uses one
+drive though.)
+
+Now, what I obviously want to keep is:
+the two RAM boards, the CPU, the console board, tk70 controller, deqna,
+rqdx3.
+
+What I want to loose:
+the rest of the serial boards, the rqdx1e board and the floppy drive.
+
+What do I have to do to make this work? I would preferrably want to fit
+all those boards in the main CPU enclosure box. Do I have to re-assign any
+addresses (or vectors, or what the correct PDP-speak is). Are there any
+slots in the enclosure that are a no-no for the dual-sized boards?
+
+Thanks for any input!!
+
+
+Jorgen Pehrson                  HP 9000/380 (NetBSD/hp300 1.3)
+jp at spektr.ludvika.se            DECstation 5000/200 (NetBSD/pmax 1.3)
+http://spektr.ludvika.se/museum PDP11/83 (2.11BSD) VAX2000 (NetBSD/vax)
+
+
+Received: (from major at localhost)
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) id BAA28023
+	for pups-liszt; Fri, 25 Dec 1998 01:16:27 +1100 (EST)
+Received: from post.mail.demon.net (finch-post-10.mail.demon.net [194.217.242.38])
+	by minnie.cs.adfa.edu.au (8.9.1/8.9.1) with ESMTP id BAA28018
+	for <pups at minnie.cs.adfa.oz.au>; Fri, 25 Dec 1998 01:16:17 +1100 (EST)
+Received: from [158.152.152.109] (helo=falstaf.demon.co.uk)
+	by post.mail.demon.net with smtp (Exim 2.10 #2)
+	id 0ztBYh-0002Ra-00; Thu, 24 Dec 1998 14:16:11 +0000
+Message-ID: <sB9s7CAjtkg2EwEL at falstaf.demon.co.uk>
+Date: Thu, 24 Dec 1998 14:10:43 +0000
+To: Jorgen Pehrson <jp at spektr.ludvika.se>
+Cc: PDP11 UNIX Preservation Society <pups at minnie.cs.adfa.oz.au>
+From: Robin Birch <robin@falstaf.demon.co.uk>
+Subject: Re: PDP11/83 qbus layout.
+In-Reply-To: <Pine.NEB.4.05.9812232234500.23424-100000 at spektr.ludvika.se>
+MIME-Version: 1.0
+X-Mailer: Turnpike (32) Version 3.05 <YSkKJATYm0AxAbv6xUlJqScVOx>
+Sender: owner-pups at minnie.cs.adfa.edu.au
+Precedence: bulk
+
+In message <Pine.NEB.4.05.9812232234500.23424-100000 at spektr.ludvika.se>,
+Jorgen Pehrson <jp at spektr.ludvika.se> writes
+>
+>(Sorry for the rather lenghty post)
+>
+Don't worry about that.
+>Hi,
+>I'd just try to boot my newly aquired PDP11/83 and was planning to install
+>2.11BSD. But I've run into one (small?) problem. If I just try to boot
+>from DU0: it says: 
+>
+>Trying DU0
+>
+>Error 20 
+>Controller Error
+>
+>And if I boot the install tape from the TK70 drive and run disklabel,
+>all accesses to the RD53 drive just times out. So I was going to remove
+>all unwanted QBus boards from the boxes. And that's what I was going to
+>ask...
+>
+A good plan
+>
+>Is there something special I have to think about, like there's some slots
+>that can't be used, some boards must be in a specific slot and so on?
+>
+There are rules about where boards can go which is an off shoot of the
+BG lines and so on.
+>This is the current layout (which is exactly as it was when it was taken
+>offline, or so I think)
+>
+>11/83 (173QA-B3, I think this is a normal BA23 enclosure):
+>(As seen from the back) Also contains one TK70 drive.
+>    
+> ____________________________________________
+>|Dataram 40903 revG     |        Empty slot  | (2mb ram)
+>---------------------------------------------
+>|                    M8637-EH                | (2mb ram)
+>---------------------------------------------
+>|                    M8190-AE                | (83 CPU)
+>---------------------------------------------
+>|     M7559             |         M7504      | (TK70, DEQNA)
+>---------------------------------------------
+>|     M8020             |        Empty slot  | (console?)
+>---------------------------------------------
+>|                    M7957                   | (DZV11)
+>---------------------------------------------
+>|                    m3104                   | (DHV11)
+>---------------------------------------------
+>|     M9404            |          Empty slot | (1st Qbus conn)
+>---------------------------------------------
+>
+>Expansion box (173QA-B3)
+>(From the back) Also contains one RD53 and one dual floppy.
+>
+>_____________________________________________
+>|M9405-YA               |        Empty slot  | (2nd qbus conn)
+>---------------------------------------------
+>|                     m3104                  | (DHV11)
+>---------------------------------------------
+>|     m9047             |        m9047       | (grant cont x2)
+>---------------------------------------------
+>|     m7555             |        Empty slot  | (RQDX3)
+>---------------------------------------------
+>|     m7512             |        Empty slot  | (RQDX1E)
+>---------------------------------------------
+>
+>Plus one external disk box with two RD53 drive. (This system only uses one
+>drive though.)
+>
+>Now, what I obviously want to keep is:
+>the two RAM boards, the CPU, the console board, tk70 controller, deqna,
+>rqdx3.
+>
+What you are calling the console board probably isn't, or if it is then
+you want to use the one from the CPU card rather than the M8020 (DPV11 I
+think?).
+
+>What I want to loose:
+>the rest of the serial boards, the rqdx1e board and the floppy drive.
+>
+
+What I suggest is this.  Keep the CPU and the mem, the TK controller and
+tape, the deqna, the RQDX3 and a serial card (You never know when a
+spare serial port is going to be useful - printers, simple comms to a
+PC, spare terminal etc etc etc).
+
+A possible layout would be:
+
+|Dataram 40903 revG     |        Empty slot  | (2mb ram)
+---------------------------------------------
+|                    M8637-EH                | (2mb ram)
+---------------------------------------------
+|                    M8190-AE                | (83 CPU)
+---------------------------------------------
+|     M7559             |         M7504      | (TK70, DEQNA)
+---------------------------------------------
+|                    M7957/M3104             | (DZV11) or (DHV11)
+---------------------------------------------
+|    M7555              |        Empty slot  |
+----------------------------------------------
+|     Empty slot        |       Empty slot   | 
+---------------------------------------------
+|     Empty slot        |         Empty slot | 
+---------------------------------------------
+
+>What do I have to do to make this work? I would preferrably want to fit
+>all those boards in the main CPU enclosure box. Do I have to re-assign any
+>addresses (or vectors, or what the correct PDP-speak is). Are there any
+>slots in the enclosure that are a no-no for the dual-sized boards?
+>
+You would have to check with others which of the serial boards is best 
+supported under 2.11BSD.  Steve Schultz is your best point of contact
+for this.
+
+Looking at you aoriginal configuration I think that the empty slot by
+your M8020 is your problem (unless there is a bus grant card in there)
+as there wouldn't be any BG continuity.
+
+This should work and allow you to ditch all of the rest. (saving it for
+a rainy day of course :-)).
+
+Regards
+
+Robin
+____________________________________________________________________
+Robin Birch     robin at falstaf.demon.co.uk
+
+M1ASU/2E0ARJ    Old computers and radios always welcome
+
+

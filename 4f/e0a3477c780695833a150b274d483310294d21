@@ -1,0 +1,94 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 3fb547aa
+	for <ml@inbox.vuxu.org>;
+	Wed, 16 Jan 2019 20:51:34 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E101494FCC; Thu, 17 Jan 2019 06:51:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4FC6594FB8;
+	Thu, 17 Jan 2019 06:51:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2F0FE94FB8; Thu, 17 Jan 2019 06:51:12 +1000 (AEST)
+Received: from mail.bitblocks.com (ns1.bitblocks.com [173.228.5.8])
+ by minnie.tuhs.org (Postfix) with ESMTP id CC4AE94FB7
+ for <tuhs@tuhs.org>; Thu, 17 Jan 2019 06:51:11 +1000 (AEST)
+Received: from bitblocks.com (localhost [127.0.0.1])
+ by mail.bitblocks.com (Postfix) with ESMTP id 21C22156E410;
+ Wed, 16 Jan 2019 12:50:36 -0800 (PST)
+From: Bakul Shah <bakul@bitblocks.com>
+To: "Steve Johnson" <scj@yaccman.com>
+In-reply-to: Your message of "Tue, 15 Jan 2019 14:32:16 -0800."
+ <da4473180043bc7132425eb2fd15a6f766dc9321@webmail.yaccman.com>
+References: <da4473180043bc7132425eb2fd15a6f766dc9321@webmail.yaccman.com>
+Comments: In-reply-to "Steve Johnson" <scj@yaccman.com>
+ message dated "Tue, 15 Jan 2019 14:32:16 -0800."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <10430.1547671835.1@bitblocks.com>
+Date: Wed, 16 Jan 2019 12:50:35 -0800
+Message-Id: <20190116205043.21C22156E410@mail.bitblocks.com>
+Subject: Re: [TUHS] Knuth and Unix
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, 15 Jan 2019 14:32:16 -0800 "Steve Johnson" <scj@yaccman.com> wrote:
+> I remember reading Knuth's paper, and certainly heard
+> DeRemer's name, but it didn't affect much of what I did.
+> There was a paper out of Stanford about that time that
+> influenced me greatly -- it was about pattern matching
+> languages, and proposed separating two ideas: 1.  "Here are
+> the patterns that match this tree".  And 2.  "If more than one
+> pattern matches, here's how to decide which one to use."
+> Given the constraints of size on the PDP 11, anything but
+> LR(1) was infeasable.  But using ambiguous grammars and
+> broadening the shift/reduce test to trest operator precedence
+> fit right into that pattern.  Another thing that I think was
+> unique to Yacc at the time was introducing symbols that
+> matched the empty string whose reduction caused program
+> actions.  Many similar parser systems at the time could not
+> deal with these "empty" symbols.
+
+Good to know all this. The Stanford paper you refer, would
+that be "fast pattern matching" by Knuth, Morris & Pratt?
+
+I remember struggling with empty strings and I also missed
+other yacc tricks.  In my formulation I had two kinds of
+rules: set rules and sequence rules. Set rules avoided
+unnecessary reductions in rules such as foo: bar|...
+
+For example:
+
+// sets
+expr = relexpr  | expr1
+expr1 = addexpr | expr2
+expr2 = mulexpr | expr3
+...
+
+// sequences
+relexpr: expr1  RELOP expr1
+addexpr: expr1 ('+'|'-') expr2
+mulexpr: expr2 ('*'|'/') expr3
+...
+
+Basically I completely avoided empty symbols -- even an empty
+file has an EOF! [I didn't try it on anything more complicated
+than (extended) Pascal so no idea how it would have fared on
+complexificated lanuages]

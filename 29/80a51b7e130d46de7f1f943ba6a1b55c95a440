@@ -1,0 +1,62 @@
+From: sms@2BSD.COM (Steven M. Schultz)
+Date: Wed, 30 Apr 2003 11:43:11 -0700 (PDT)
+Subject: [pups] 2.11BSD device config trouble
+Message-ID: <200304301843.h3UIhBa22154@moe.2bsd.com>
+
+Hi -
+
+> From: Jochen Kunz <jkunz at unixag-kl.fh-kl.de>
+> As already mentioned: If I add comments at the end of the lines it
+
+> cn      1 176540 344    5       cnrint  cnxint  # kl/dl-11 (on mvx11-aa)
+> cn      2 176550 354    5       cnrint  cnxint  # kl/dl-11 (on mvx11-aa)
+> cn      3 176560 364    5       cnrint  cnxint  # kl/dl-11 (on mvx11-aa)
+> cn 1 csr 176540 vector 344 attached
+> cn 2 csr 176550 vector 354 attached
+> cn 3 csr 176560 vector 364 attached
+> Sounds like a funny bug? 
+
+	Yes, it does.   A bug in the parsing.   Why it does not affect all
+	the lines is unknown.   Perhaps some trailing whitespace caused the
+	parser to exhibit the bug.
+
+> But if I try to use /dev/ttyl1 I get a message about a unknown interrupt
+> and the output of /dev/ttyl1 hangs after the first character. 
+	
+	What is the exact message?   I did a "strings /unix" and could not
+	not find a string that looked mentioned unknown or interrupt.
+
+	That would seem to indicate that the device is interrupting but not
+	at the expected vector.
+
+	It is possible to use 'adb' to look at the contents of the vectors.
+
+	adb -k /unix /dev/kmem
+	0344/o
+
+	will show the contents of the 0344 vector.  The value there should
+	be equal to 'cnrint' (or cnxint - I forget which comes first).
+
+> I have a M3106 DZQ11 that I can use instead. 
+
+	Definitely worth trying.   
+
+> The DHV is a DEC M3104:
+> dhv ? csr 160440 vector 310 didn't interrupt.
+> The DL11 card is a clone made by Sigma. 
+	
+	Ah, ok.  Thanks for the correction.   I misread the initial mail item.
+
+> > 'halt' button?   
+> [...]
+> Noticed that already. I am really not used to Unix stuff of that age.
+
+	:)  
+
+	I did the the same thing - wondered why I could never get a clean
+	file system.   Then I realized what was going on.
+
+	Cheers,
+	Steven Schultz
+
+

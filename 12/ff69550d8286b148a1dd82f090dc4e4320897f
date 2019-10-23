@@ -1,0 +1,65 @@
+From: clemc@ccc.com (Clem Cole)
+Date: Sat, 31 May 2014 15:48:09 -0400
+Subject: [TUHS] Bugs in V6 'dcheck'
+In-Reply-To: <20140531131504.AC41E18C0C8@mercury.lcs.mit.edu>
+References: <20140531131504.AC41E18C0C8@mercury.lcs.mit.edu>
+Message-ID: <86E5991D-308B-4700-946B-449A35C06084@ccc.com>
+
+btw.  there is a v6 version of fsck floating around.  CMU was still running v6 when Ted did his OYOC.  he later moved it to unix/TS (aka v7) which was the release mechanics out side of BTL.   I'm wonder if I can find a readable copy. 
+
+
+funny I remember the first time fsck saved our butts     we had had power failure and corrupted two file systems on the EE dept 11/34 I was running Icheck/dcheck and the like trying patch the system and getting it running a gaining.  this new grad student (tjk) says he has something he wanted to try that he wrote over the summer /he had started writing at michiga.     the machine was dead Ted had it on a tape and getting it on to an rk05 was a trick  - we ended up doing it on the IUS system in CS.  
+
+once it was running we were in awe   man that program migrated to all the CMU pdp11s within hours
+
+Clem
+> On May 31, 2014, at 9:15 AM, jnc at mercury.lcs.mit.edu (Noel Chiappa) wrote:
+> 
+> So it turns out the 'dcheck' distributed with V6 has two (well, three, but
+> the third one was only a potential problem for me) bugs it.
+> 
+> 
+> The first was a fence-post error on a table clearing operation; it could
+> cause the entry for the last inode of the disk in the constructed table of
+> directory entry counts to start with a non-zero count when a second disk was
+> scanned. However, it was only triggered in very specific circumstances:
+> 
+> - A larger disk was listed before a smaller one (either in the command line,
+>    or compiled in)
+> - The inode on the larger disk corresponding to the last inode on the smaller
+>    one was in use
+> 
+> I can understand how they never ran across this one.
+> 
+> 
+> The other one, however, which was an un-initalized variable, should have
+> bitten them anytime they had more than one disk listed! It caused the
+> constructed table of directory entry counts to be partially or wholly
+> (depending on the size of the two disks) blank in all disks after the first
+> one, causing numerous (bogus) error reports.
+> 
+> (It was also amusing to find an un-used procedure in the source; it looks
+> like dcheck was written starting with the code for 'icheck' - which explains
+> the second bug; since the logic in icheck is subtly different, that variable
+> _is_ set properly in icheck.)
+> 
+> How this bug never bit them I cannot understand - unless they saw it, and
+> couldn't be bothered to find and fix it!
+> 
+> To me, it's completely amazing to find such a serious bug in such a critical
+> piece of widely-distributd code! A lesson for archaeologists...
+> 
+> 
+> Anyway, a fixed version is here:
+> 
+>  http://ana-3.lcs.mit.edu/~jnc/tech/unix/ucmd/dcheck.c
+> 
+> if anyone cares/needs it.
+> 
+>    Noel
+> _______________________________________________
+> TUHS mailing list
+> TUHS at minnie.tuhs.org
+> https://minnie.tuhs.org/mailman/listinfo/tuhs
+
+

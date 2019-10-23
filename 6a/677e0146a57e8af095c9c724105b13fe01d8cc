@@ -1,0 +1,32 @@
+From: random832@fastmail.com (Random832)
+Date: Tue, 19 Dec 2017 17:30:35 -0500
+Subject: [TUHS] History of passwd fullname/info/"gecos" field (was Re:
+ pre-UNIX legacy in UNIX?)
+In-Reply-To: <d28cd69f-fd03-de8e-14ce-860ff9f25bdf@spamtrap.tnetconsulting.net>
+References: <CACCFpdx0UamZwaXf=LaAjFU=SfBx6RQJirj3qcGz49zDi_L=Mw@mail.gmail.com>
+ <d28cd69f-fd03-de8e-14ce-860ff9f25bdf@spamtrap.tnetconsulting.net>
+Message-ID: <1513722635.2334092.1210504848.09B5B6C0@webmail.messagingengine.com>
+
+On Tue, Dec 19, 2017, at 13:21, Grant Taylor via TUHS wrote:
+> Now I wonder if we are using the GECOS field to store the same data as 
+> years ago?  Or did we re-purpose the now unneeded GECOS to store name, 
+> address, office phone number, home phone, etc?
+
+The V6 and V7 passwd manpage says "GCOS job number, box number, optional GCOS user-id", and "The GCOS field is used only when communicating with that system, and in other installations can contain any desired information." (Has all information on what tools were used to communicate with it and how they consumed the passwd file been lost to history?)
+
+V3 and V4 say "GCOS job number and box number".
+
+V2 does not have the field.
+
+PWB describes the field as "comment" and says "The comment field should identify the user, e.g., <dept #> name (account #)." The distributed passwd file seems to have some structure to this field, with system accounts (all of the accounts in the file except "games") beginning with a dash and having (9999) after [the use of which is unclear].
+
+It looks like the usage to store the other things in the specific modern format originated at Berkeley - the chfn utility appears in 3BSD, with a description of this format in the manpage (which likely influenced other sites), and 4.2BSD prompts for each field individually. The format is associated with the Finger utility, which first appears in 2BSD and has the following comment in its source code:
+
+/*  This is a finger program.  It prints out useful information about users
+ *  by digging it up from various system files.  It is not very portable
+ *  because the most useful parts of the information (the full user name,
+ *  office, and phone numbers) are all stored in the VAX-unused gecos field
+ *  of /etc/passwd, which, unfortunately, other UNIXes use for other things.
+
+AUSAM contains extensive modifications to the code around the passwd handling - it uses a binary hashtable-based passwd database, with separate first and last name fields and a "staff or student number" (referred to in code as "other").
+

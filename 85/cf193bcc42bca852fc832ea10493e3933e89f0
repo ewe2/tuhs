@@ -1,0 +1,42 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Tue, 06 Jan 2015 23:20:04 +0100
+Subject: [TUHS] pdp11 UNIX memory allocation
+In-Reply-To: <mailman.149.1420581544.3354.tuhs@minnie.tuhs.org>
+References: <mailman.149.1420581544.3354.tuhs@minnie.tuhs.org>
+Message-ID: <54AC5F94.3080401@update.uu.se>
+
+On 2015-01-06 22:59, random832 at fastmail.us wrote:
+> On Tue, Jan 6, 2015, at 15:20, Johnny Billquist wrote:
+>> >Later model PDP-11 processors had a hardware feature called split I/D
+>> >space. This meant that you could have one 64Kb virtual memory space for
+>> >instructions, and one 64Kb virtual memory space for data.
+> Was it possible to read/write to the instruction space, or execute the
+> data space? From what I've seen, the calling convention for PDP-11 Unix
+> system calls read their arguments from directly after the trap
+> instruction (which would mean that the C wrappers for the system calls
+> would have to write their arguments there, even if assembly programs
+> could have them hardcoded.)
+
+Nope. A process cannot read or write to instruction space, nor can it 
+execute from data space.
+It's inherent in the MMU. All references related to the PC will be done 
+from I-space, while everything else will be done through D-space.
+
+So the MMU have two sets of page registers. One set maps I-space, and 
+another maps D-space. Of course, you can have them overlap, in which 
+case you get the traditional appearance of older models.
+
+The versions of Unix I am aware of push arguments on the stack. But of 
+course, the kernel can remap memory, and so can of course read the 
+instruction space. But the user program itself would not be able to 
+write anything after the trap instruction.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+
+

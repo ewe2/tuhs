@@ -1,0 +1,72 @@
+From: imp@bsdimp.com (Warner Losh)
+Date: Mon, 20 Nov 2017 22:14:41 -0700
+Subject: [TUHS] UNIX on S/370
+In-Reply-To: <20171121035112.GC9093@mcvoy.com>
+References: <20171121025646.380EB18C0B0@mercury.lcs.mit.edu>
+ <05e701d36277$0db803b0$29280b10$@ronnatalie.com>
+ <20171121035112.GC9093@mcvoy.com>
+Message-ID: <CANCZdfpfZoJS3hx2aCdjX0rYwKazscTykdy4ku8Vkm7-wq8xpA@mail.gmail.com>
+
+On Nov 20, 2017 8:51 PM, "Larry McVoy" <lm at mcvoy.com> wrote:
+
+Actually, how common was that?  I know at SGI we did that with O_DIRECT
+on files (and just automatically on the way for in networking and page
+flipped on the way out).  But it was a pile of work, you had to lock
+all the pages so that the pageout daemon didn't page them out, etc.
+
+So under what circumstances would Unix do DMA to/from user buffers
+rather than bcopy it?
+
+
+I assume you aren't talking about things like mmap where you can't really
+bcopy it...
+
+At Fusion I/O we had hooks into our PCIe flash card driver that would do
+DMA directly into user buffers (since we wanted IOPS and any extra copies
+got in the way of that). We also played fun tricks with 'extended I/O
+primitives' that were implemented with ioctls, but still did I/O to/from
+user buffers. This was so we could construct 1 transaction for what's
+basically an atomic writev (more complicated than that, because the atomic
+operation also supported delete/trim operations at the same time). This was
+to simplify checkpointing since it was an all or nothing thing: if we
+couldn't do it, or the system crashed in the middle, the transaction never
+happened. There were other, more extended I/O operations that involved read
+as well that were kinda crazy, but useful for a market segment we did well
+in. Also likely no the sort of thing that you were thinking about, but it
+was a novel use of DMA to user buffers.
+
+Warner
+
+On Mon, Nov 20, 2017 at 10:15:58PM -0500, Ron Natalie wrote:
+> That's a common optimization, but the only real requirement in the UNIX
+> kernel is the raw I/O bypasses the kernel buffer cache.
+>
+>
+> -----Original Message-----
+> From: TUHS [mailto:tuhs-bounces at minnie.tuhs.org] On Behalf Of Noel Chiappa
+> Sent: Monday, November 20, 2017 9:57 PM
+> To: tuhs at tuhs.org
+> Cc: jnc at mercury.lcs.mit.edu
+> Subject: Re: [TUHS] UNIX on S/370
+>
+>     > From: Larry McVoy
+>
+>     > So tape I can see being more weird, but isn't raw disk just "don't
+put
+>     > it in buffer cache"?
+>
+> One machines/controllers which are capable of it, with raw devices DMA
+> happens directly into the buffers in the process (which obviously has to
+be
+> resident while the I/O is happening).
+>
+>     Noel
+
+--
+---
+Larry McVoy                  lm at mcvoy.com
+http://www.mcvoy.com/lm
+-------------- next part --------------
+An HTML attachment was scrubbed...
+URL: <http://minnie.tuhs.org/pipermail/tuhs/attachments/20171120/92117e5a/attachment.html>
+

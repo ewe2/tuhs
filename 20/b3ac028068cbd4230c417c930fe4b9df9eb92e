@@ -1,0 +1,33 @@
+From: scj@yaccman.com (scj@yaccman.com)
+Date: Thu, 10 Mar 2016 10:09:34 -0800
+Subject: [TUHS] Documentation on B language?
+In-Reply-To: <20160309214302.GC9515@mercury.ccil.org>
+References: <201603092134.u29LYp9Q010455@coolidge.cs.Dartmouth.EDU>
+ <20160309214302.GC9515@mercury.ccil.org>
+Message-ID: <b6d1606dc5b03276bbffccba5827f6bb.squirrel@webmail.yaccman.com>
+
+From the standpoint of a compiler writer, the increment operators (and
+later, similar operators like &=) were surprisingly painful, on two
+levels.
+
+The first problem is that there were lots of nasty interactions between
+these operators and function calls.  Consider gems like:
+     f( ++i, ++i );
+     f( ++i, i++ );
+     f( i++, ++i );
+     f( i++, i++ );
+The "natural" behavior depended critically on whether the stack grew
+upwards or downwards.  Add to this the delights that arose if i was an
+external variable that was also referenced (or changed) within f.  This
+may seem like an unlikely event, but it happened all time when the macro
+implementation of getchar was introduced.
+
+The second problem was that most victims of the above had a lot of
+difficulty, at least the first time, in understanding what the bug was and
+tracking it down...  And many considered the behavior they saw a compiler
+bug (no mater what the documentation and/or the Standard said about
+"undefined")...
+
+
+
+

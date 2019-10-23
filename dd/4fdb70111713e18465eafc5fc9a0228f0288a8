@@ -1,0 +1,90 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Thu, 11 May 2017 17:15:20 -0700
+Subject: [TUHS] C declarations.
+In-Reply-To: Your message of "Thu, 11 May 2017 15:32:32 PDT."
+ <20170511223232.GM4341@mcvoy.com>
+References: <015401d2caa0$79762650$6c6272f0$@ronnatalie.com>
+ <68E8DC0A-D1B8-4FF0-AD26-ACDC57E308AF@pobox.com>
+ <20170511223232.GM4341@mcvoy.com>
+Message-ID: <20170512001520.38000124AEA4@mail.bitblocks.com>
+
+On Thu, 11 May 2017 15:32:32 PDT Larry McVoy <lm at mcvoy.com> wrote:
+> 
+> I dunno if it is one of its greatest joys but pointers in C have always 
+> made sense to me.
+> 
+> I'm curious as to what is busted about arrays in C?  To me they just
+> seemed like a way to define how to look at a wad of memory and they
+> seem to work for me.  About the only thing I don't like about them is
+> that there is no late binding as to the size, Ada has late binding and
+> I thought it could be useful (I only know because Rob Netzer and I 
+> wrote an Ada compiler for CS736 at UW-Madison that did a lot of Ada
+> but exceptions and late binding we did not do).
+
+Coming from a Pascal background I really liked the terseness
+of C. But theere were three things that bothered me.
+
+a) K&R style argument declarations. This got fixed in ANSI C.
+   C declarations were messy but that did not bother me much.
+
+b) No nested procedures. Gnu C had added them but the
+   implementation was a bit screwy and most people didn't care
+   in any case so there was no hope of this getting fixed.
+   Partly because most people used it as a portable assembly
+   language!
+
+c) arrays were not first class objects.  Given "T v[N];" v[i]
+   is of type T and i+v or v+i is of type T* -- this is
+   perfectly well defined and fine. What is not fine is that
+   an array is a second class object. Thus you can not do
+   for example,
+
+    int v[5];
+    struct foo {
+	int w[5];
+	int x;
+    } y;
+	...
+	y.w = v;
+
+   You can not pass a whole array to a function (or return
+   one) without enclosing it in a struct. You can not take an
+   address of an array, only an element of it. There is no way
+   to declare or pass a subarray. A function that operates on a
+   arbitray sized  multi dim. array can be written but can get
+   messy.
+
+   One big impact of current array behavior is that the onus
+   to do boundary condition checks is on the programmer and
+   can't be done by the compiler.
+
+Just as Pascal got "conformant arrays" in its 1990 standard,
+arrays could've been made first class (but without "ref"
+parameters code can look messy). For instance, consider the
+folloowing:
+
+    double a[5,20], b[20,10], c[5,10];
+    int err = mat_multiply(c, a, b);
+
+    int mat_mult(ref double c[int cx, cy], a[int ax, ay], b[int bx, by]) {
+	if (cx != ax || cy != by || ay != bx) return -1;
+	...
+	return 0;
+    }
+
+This can be implemented without much trouble and allows
+full boundary condition checking.  Currently the user will
+have to manually pass {a,b,c}{x,y} parameters and he would
+have to either create auxiliary vectors to point to each row
+or have the function to do all the index arithmetic explicitly
+(and the compiler can't check if your code has no boundary
+condition bugs).
+
+A slightly more difficult situation arises when you want to
+pass sub arrays. For instance,
+
+	mat_mutl(c[5,0:9], a[5,10:19], b[0:9,0:5])
+
+Here you will have to somehow pass stride and offset (or use
+iliffe vectors or some such).
+

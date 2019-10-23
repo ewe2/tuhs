@@ -1,0 +1,54 @@
+From: bqt@update.uu.se (Johnny Billquist)
+Date: Thu, 8 Dec 2016 19:11:13 +0100
+Subject: [TUHS] Unix & Memory Management Units (MMU)
+In-Reply-To: <mailman.13.1481217534.3779.tuhs@minnie.tuhs.org>
+References: <mailman.13.1481217534.3779.tuhs@minnie.tuhs.org>
+Message-ID: <633b4c57-b7c8-e9aa-540c-084582a38704@update.uu.se>
+
+On 2016-12-08 18:18, Paul Ruizendaal <pnr at planet.nl> wrote:
+>
+>>> DEC's Custom Special Systems (CSS) group .. build a simple base/limi
+>>> register device, soon after the 11/20 was released.> ... So an early
+>>> version of after the original 11/20 port from the PDP-7 had this
+>>> however.....
+>> Oh, right, I'd forgotten about that: the KS-11 - I've previously enquired to
+>> see if anyone had _any_ documentation for this, but so far, nada.
+> I was looking for that a few years back. Dennis Ritchie's home pages have
+> some info on this (https://www.bell-labs.com/usr/dmr/www/odd.html).
+> At the bottom of that page he writes:
+>
+> ""Back around 1970-71, Unix on the PDP-11/20 ran on hardware that not only did not support virtual memory, but didn't support any kind of hardware memory mapping or protection, for example against writing over the kernel. This was a pain, because we were using the machine for multiple users. When anyone was working on a program, it was considered a courtesy to yell "A.OUT?" before trying it, to warn others to save whatever they were editing.
+> [..snip..]
+> We knew the PDP-11/45, which did support memory mapping and protection for the kernel and other processes, was coming, but not instantly; in anticipation, we arranged with Digital Special Systems to buy a PDP-11/20 with KS-11 add-on. This was an extra system unit bolted to the processor that made it distinguish kernel from user mode, and provided a classical PDP-10 style "hi-seg" "low-seg" memory mapping unit. I seem to recall that maybe 6 of these had been made when we ordered it.""
+>
+> My hypothesis is that the very first versions of Unix were using a memory scheme similar to that used in the later LSX and MX derivatives: the kernel resides in lower memory and the user program in upper memory; each process switch implied a swap. Disclaimer: I have not studied the V0 source to verify this hypothesis.
+>
+> When this topic had my interest I looked for (but did not find) information on what ""the classical PDP-10 style "hi-seg" "low-seg" memory mapping unit"" was. Here my hypothesis would be that in kernel mode mapping was off, and that in user mode there were two segments, each with a base and limit into physical memory -- and that this setup has an echo in how the later KL-11 MMU was used.
+>
+> Does anyone have an idea what PDP-10 MMU Dennis may have been referring to?
+
+If you read the Wikipedia page about the PDP-10, you'd find the answer.
+
+Basically, kernel mode uses physical memory. User mode have a low 
+segment and a high segment. This is decided by the high bit of the address.
+For each segment, there is a base register and a length register.
+Commonly, the low segment stored read/write data, while the high segment 
+could be shared between processes, and have readonly data/code.
+
+But you could play in other ways with it, if you wanted to.
+
+Essex MUD, as far as I remember, had the game data in a shared hiseg, 
+which could be written by the program.
+
+So your guessing is pretty good. Not sure I'd say this is similar to how 
+the later PDP-11 MMU works, though. But I can see someone making the 
+comparison, since the PDP-11 pages can vary in size, within limits.
+
+	Johnny
+
+-- 
+Johnny Billquist                  || "I'm on a bus
+                                   ||  on a psychedelic trip
+email: bqt at softjar.se             ||  Reading murder books
+pdp is alive!                     ||  tryin' to stay hip" - B. Idol
+

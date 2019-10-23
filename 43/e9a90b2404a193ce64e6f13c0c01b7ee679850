@@ -1,0 +1,59 @@
+From: bakul@bitblocks.com (Bakul Shah)
+Date: Fri, 22 Sep 2017 13:09:50 -0700
+Subject: [TUHS] remaking make (Re: Another "craft" discussion topic -
+	mindless tool proliferation
+In-Reply-To: Your message of "Thu, 21 Sep 2017 18:08:05 -0700."
+ <20170922010805.GO25650@mcvoy.com>
+References: <20170919233525.k3otv5as6xi2rqht@thunk.org>
+ <91641FC6-4CF5-4682-B8C3-8BB3DCCB208C@orthanc.ca>
+ <alpine.DEB.2.11.1709211829040.2486@grey.csi.cam.ac.uk>
+ <20170921183924.oaj23%steffen@sdaoden.eu>
+ <20170922000207.GB64682@eureka.lemis.com>
+ <2A5F5EBA-0CCB-4756-A2CA-E9108E370EDC@orthanc.ca>
+ <20170922003819.GM25650@mcvoy.com>
+ <1827FFAA-EB54-44E9-84BF-D5EEF0CCB9FF@orthanc.ca>
+ <20170922005053.GN25650@mcvoy.com>
+ <3254B521-0895-4E42-8A0C-8F8E3451FDBE@orthanc.ca>
+ <20170922010805.GO25650@mcvoy.com>
+Message-ID: <20170922201005.79953156E523@mail.bitblocks.com>
+
+On Thu, 21 Sep 2017 18:08:05 -0700 Larry McVoy <lm at mcvoy.com> wrote:
+> 
+> I do wish that some simple make had stuffed a scripting language in there.
+> Anything, tcl, lua, even (horrors, can't believe I'm saying this) a little
+> lisp.  Or ideally a built in shell compat language.  All those backslashes
+> to make shell scripts work get old.
+
+Google's bazel seems to have a good model and abstraction
+facility.  For example, to build a C++ binary from
+{foo,main}.cc you can use
+
+cc_binary(
+	name = "foo",
+	srcs = ["foo.cc", "main.cc"],
+	hdrs = ["foo.h"],
+)
+
+The cc_binary macro encapsulates the common pattern for
+building c++ binaries, and allows you to specify just the
+essential (and optional) parameters.  You can also define your
+own rules (and this is how they are adding go support).
+
+Its implementation seems to rather heavy weight (its binary
+installer (without jdk8) for Macs is 111MB) and there are a
+number of other isses so I wouldn't want to use it but it is
+good for mining ideas.  Building something much simpler that
+serves the needs of most projects should be possible.  May
+even be worth experimenting using an s-expression syntax.
+Then the above example becomes
+
+(cc-binary 'foo
+  (srcs '(foo.cc main.cc))
+  (hdrs '(foo.h)))
+
+Shorter and much less clutter!  Ideally the program should
+have just have meta rule built-in and everything else can be
+bootstrapped but it may be advantageous to "precompile" some
+rules....
+
+

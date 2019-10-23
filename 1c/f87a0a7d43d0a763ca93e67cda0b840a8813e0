@@ -1,0 +1,30 @@
+From: wkt@tuhs.org (Warren Toomey)
+Date: Mon, 5 May 2008 17:50:17 +1000
+Subject: [Unix-jun72] C compiler status
+In-Reply-To: <20080505071212.GA80277@minnie.tuhs.org>
+References: <20080505060824.GA78841@minnie.tuhs.org>
+	<Pine.BSI.4.64.0805042053350.20114@malasada.lava.net>
+	<20080505071212.GA80277@minnie.tuhs.org>
+Message-ID: <20080505075017.GA81081@minnie.tuhs.org>
+
+On Mon, May 05, 2008 at 05:12:12PM +1000, Warren Toomey wrote:
+> It looks like we are not starting /usr/lib/c0 properly: the CPU never gets
+> to execute at 040000, and we end up in sysbreak without ever calling it.
+
+Um, just an observation: u0.s defines:
+
+core = orig+40000  / specifies beginning of user's core
+ecore = core+20000 / specifies end of user's core (4096 words)
+
+so a user program has 020000 bytes of space; but size /usr/lib/c0 gives:
+
+023326+03574+06640=035762, and 035762 >> 020000.
+
+Is the value of ecore arbitrary? What's above ecore, the kernel stack?
+Mind you, if we set ecore== 040000+035762, thats 075762 which doesn't
+leave much room, assuming that memory on the PDP-11/20 ends at 100000.
+
+	Warren
+
+
+

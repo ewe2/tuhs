@@ -1,0 +1,93 @@
+From: tih@hamartun.priv.no (Tom Ivar Helbekkmo)
+Date: Sat, 23 Sep 2017 16:57:35 +0200
+Subject: [TUHS] Excessive bouncing ... argh!
+In-Reply-To: <20170923141232.aotf4m5eol6gr3v6@thunk.org> (Theodore Ts'o's
+ message of "Sat, 23 Sep 2017 10:12:32 -0400")
+References: <20170921223420.GA27231@minnie.tuhs.org>
+ <m27ewprgys.fsf@thuvia.hamartun.priv.no>
+ <1bfefa2f-4433-0d13-5972-ffb92bae3fa1@tnetconsulting.net>
+ <20170923141232.aotf4m5eol6gr3v6@thunk.org>
+Message-ID: <m2wp4pbgyo.fsf@thuvia.hamartun.priv.no>
+
+Theodore Ts'o <tytso at mit.edu> writes:
+
+> That way only people who are using mail systems with DMARC get their
+> From field munged, instead of punishing everyone using the mailing
+> list.
+
+Why should anyone need to?  Of all the mailing lists I'm on, this one is
+the only one that has this problem.  For instance, on the NetBSD mailing
+lists, my email reaches other recipients "From:" my real email address,
+and SPF, DKIM, and DMARC all check out clean.  Here are the headers from
+a message I sent to a NetBSD list, as received by my own system (whereas
+the message I sent to the TUHS list last night was refused by my MTA):
+
+| Return-Path: <bounces-current-users-owner-tih=hamartun.priv.no at NetBSD.org>
+| Received: from 127.0.0.1 (HELO barsoom.hamartun.priv.no) by
+|  barsoom.hamartun.priv.no (Archiveopteryx 3.2.0) with lmtp id
+|  1490255725-9579-11611/4/764 for tih at hamartun.priv.no; Thu, 23 Mar 2017
+|  07:55:25 +0000
+| Received: from mail.netbsd.org (mail.NetBSD.org [IPv6:2001:470:a085:999::25])
+| 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+| 	(No client certificate requested)
+| 	by barsoom.hamartun.priv.no (Postfix) with ESMTPS id 3CA3B1C7147
+| 	for <tih at hamartun.priv.no>; Thu, 23 Mar 2017 08:55:23 +0100 (CET)
+| Authentication-Results: barsoom.hamartun.priv.no; dmarc=pass header.from=hamartun.priv.no
+| Authentication-Results: barsoom.hamartun.priv.no; spf=pass smtp.mailfrom=bounces-current-users-owner-tih=hamartun.priv.no at NetBSD.org
+| Authentication-Results: barsoom.hamartun.priv.no;
+| 	dkim=pass (1024-bit key) header.d=hamartun.priv.no header.i=@hamartun.priv.no header.b=Kykpwg+N
+| Received: by mail.netbsd.org (Postfix, from userid 605)
+| 	id 91AF78559D; Thu, 23 Mar 2017 07:55:16 +0000 (UTC)
+| Delivered-To: Current-Users at netbsd.org
+| Received: from localhost (localhost [127.0.0.1])
+| 	by mail.netbsd.org (Postfix) with ESMTP id 04AC385569
+| 	for <Current-Users at netbsd.org>; Thu, 23 Mar 2017 07:55:15 +0000 (UTC)
+| X-Virus-Scanned: amavisd-new at netbsd.org
+| Authentication-Results: mail.netbsd.org (amavisd-new);
+| 	dkim=pass (1024-bit key) header.d=hamartun.priv.no
+| Received: from mail.netbsd.org ([127.0.0.1])
+| 	by localhost (mail.netbsd.org [127.0.0.1]) (amavisd-new, port 10025)
+| 	with ESMTP id 07zfmByWfGGy for <Current-Users at netbsd.org>;
+| 	Thu, 23 Mar 2017 07:55:14 +0000 (UTC)
+| Received: from barsoom.hamartun.priv.no (barsoom.hamartun.priv.no [193.71.27.8])
+| 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+| 	(No client certificate requested)
+| 	by mail.netbsd.org (Postfix) with ESMTPS id C3DAC84CDD
+| 	for <Current-Users at netbsd.org>; Thu, 23 Mar 2017 07:55:12 +0000 (UTC)
+| Received: from thuvia.hamartun.priv.no (thuvia.hamartun.priv.no [193.71.27.7])
+| 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+| 	(No client certificate requested)
+| 	by barsoom.hamartun.priv.no (Postfix) with ESMTPS id 88A601C7147;
+| 	Thu, 23 Mar 2017 08:55:09 +0100 (CET)
+| Dkim-Signature: v=1; a=rsa-sha256; c=simple/simple; d=hamartun.priv.no;
+| 	s=barsoom; t=1490255709;
+| 	bh=CSM3cuXAMyJtu0wLEPB+K0BzqULiVelaGy5gTvWwfpU=;
+| 	h=From:To:Cc:Subject:References:Date:In-Reply-To;
+| 	b=Kykpwg+NK0kSkDYEkvrISX7fDtK9tYUogDcyAb0cSd1ogwCIYnAFSWKg3mnlJb+9g
+| 	 urP7MuokAxM2gUJeVqGdosqAjncrfMQYt0ii8Ops3Awx9q/Dx3bmDyEz8jMUIQxWmw
+| 	 oiCiL1ZkcjF/xGKvrV97jRW3BvVCzpRyZfO4ad1I=
+| Received: by thuvia.hamartun.priv.no (Postfix, from userid 501)
+| 	id 707E34DE48; Thu, 23 Mar 2017 08:55:09 +0100 (CET)
+| From: Tom Ivar Helbekkmo <tih at hamartun.priv.no>
+| To: Paul Goyette <paul at whooppee.com>
+| Cc: Current-Users at netbsd.org
+| Subject: Re: Error/warning message from rc.d/npf
+| References: <Pine.NEB.4.64.1703231345500.401 at speedy.whooppee.com>
+| Date: Thu, 23 Mar 2017 08:55:09 +0100
+| In-Reply-To: <Pine.NEB.4.64.1703231345500.401 at speedy.whooppee.com> (Paul
+| 	Goyette's message of "Thu, 23 Mar 2017 13:55:01 +0800")
+| Message-Id: <m2wpbg1l7m.fsf at thuvia.hamartun.priv.no>
+| User-Agent: Gnus/5.130012 (Ma Gnus v0.12) Emacs/24.5 (berkeley-unix)
+| Mime-Version: 1.0
+| Content-Type: text/plain
+| Sender: current-users-owner at NetBSD.ORG
+| List-Id: current-users.NetBSD.org
+| Precedence: bulk
+| Content-Transfer-Encoding: quoted-printable
+
+-tih
+-- 
+Most people who graduate with CS degrees don't understand the significance
+of Lisp.  Lisp is the most important idea in computer science.  --Alan Kay
+
+

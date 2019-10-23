@@ -1,0 +1,148 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 6b3165c0
+	for <ml@inbox.vuxu.org>;
+	Sat, 5 Oct 2019 18:16:22 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E54E49BCD0; Sun,  6 Oct 2019 04:16:20 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6D6DD9B8F0;
+	Sun,  6 Oct 2019 04:16:01 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=messagingengine.com header.i=@messagingengine.com header.b="HORliI2/";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A2A519B8F0; Sun,  6 Oct 2019 04:15:58 +1000 (AEST)
+X-Greylist: delayed 489 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 06 Oct 2019 04:15:57 AEST
+Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com
+ [64.147.123.25])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BDB18948D7
+ for <tuhs@tuhs.org>; Sun,  6 Oct 2019 04:15:57 +1000 (AEST)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+ by mailout.west.internal (Postfix) with ESMTP id 6DB80370;
+ Sat,  5 Oct 2019 14:07:47 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+ by compute3.internal (MEProxy); Sat, 05 Oct 2019 14:07:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+ messagingengine.com; h=cc:content-type:date:from:in-reply-to
+ :message-id:mime-version:references:subject:to:x-me-proxy
+ :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; bh=A9+51U
+ PJxcAo3kEPmJFVczaFYLzwLbvhrANGwCrJqiw=; b=HORliI2/BYFwkJYfG96aY9
+ ZbDNQ/yH1vOD5YOtTGDxTnD0ktWQR5GK0yPFUhJys95AlqmAGRWnBsAeZSDX7CsD
+ lzWEmstYoYTxM5AIvYIiYrzUoPaYlnFuzCDGIHClZHaS4ycDZJrEftKtI4R/iCb0
+ PvY5rEXmsE3YpZBWDtZu6kWG96bMEhWaCgWE29/vHwTZ7mhECUI4M04O2luwDX3v
+ KKs3BiNVo0cuX1enai/SbiHF+y/w6lIvfXE8rE6sQugIT8HIsV4eLe5vgJkzpRhX
+ btKdJMESppwaBUyFFzj9gC3Q/YGGjPHsSAvyNTZ0IqEpfDNZQgIKz5uPsx92L6yg
+ ==
+X-ME-Sender: <xms:8tuYXeehppWSUCV6O_vr4QButdznUk2UllwpvCReiV4-G4Q4pksbyg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedufedrheefgdduvddvucetufdoteggodetrfdotf
+ fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+ uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+ cujfgurhepfffhvffukfhfgggtuggjfgesthdtredttdervdenucfhrhhomhepvfhomhcu
+ lfhonhgvshcuoehtjhesvghnohhtihdrmhgvqeenucffohhmrghinhepghhithhhuhgsrd
+ gtohhmnecukfhppedufeejrdehtddrudejrdduvdenucfrrghrrghmpehmrghilhhfrhho
+ mhepthhjsegvnhhothhirdhmvgenucevlhhushhtvghrufhiiigvpedt
+X-ME-Proxy: <xmx:8tuYXbteHmfxvBnzGPlvIeVOmx258x4eyres-aR_cm--DaTGLwtSTQ>
+ <xmx:8tuYXYD-f3UoqqnUPiXNxAoEbvyO2bha-3BM480RuX01SyeDzCUBqg>
+ <xmx:8tuYXez4IHKKT0FWHrDB-2c56yI-YzQPTg9GXfh1ctLMyLSQSfRlaA>
+ <xmx:89uYXXGx0h2EsDRy14xT31tjw9eOZzDU8hIsTrKyk18__Ap5ThH93A>
+Received: from tom-desk.erg.abdn.ac.uk (tom-desk.erg.abdn.ac.uk [137.50.17.12])
+ by mail.messagingengine.com (Postfix) with ESMTPA id 350C880059;
+ Sat,  5 Oct 2019 14:07:46 -0400 (EDT)
+Date: Sat, 5 Oct 2019 19:05:04 +0100
+From: Tom Jones <tj@enoti.me>
+To: Leah Neukirchen <leah@vuxu.org>
+Message-ID: <20191005180503.GA31679@tom-desk.erg.abdn.ac.uk>
+References: <6dceffe228804a76de1e12f18d1fc0dc@inventati.org>
+ <87bluxpqy0.fsf@vuxu.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <87bluxpqy0.fsf@vuxu.org>
+User-Agent: Mutt/1.11.4 (2019-03-13)
+Subject: Re: [TUHS] Recovered /etc/passwd files
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Oct 03, 2019 at 09:30:31PM +0200, Leah Neukirchen wrote:
+> Finn O'Leary <finnoleary@inventati.org> writes:
+> 
+> > Hi, I remember that someone had recovered some ancient /etc/passwd files
+> > and had decrypted(?) them, and I remember reading that either ken or
+> > dmr's
+> > password was something interesting like './,..,/' (it was entirely
+> > punctuation characters, was around three different characters in
+> > total, and
+> > was pretty damn short). I've tried to find this since, as a friend was
+> > interested in it, and I cannot for the life of me find it!
+> 
+> I did this once, but I never managed to crack all of them.
+> It was bwk who used /.,/.,
+> 
+> My findings (from https://github.com/dspinellis/unix-history-repo/blob/BSD-3-Snapshot-Development/etc/passwd):
+> 
+> gfVwhuAMF0Trw:dmac
+> Pb1AmSpsVPG0Y:uio
+> ymVglQZjbWYDE:/.,/.,
+> c8UdIntIZCUIA:bourne
+> AAZk9Aj5/Ue0E:foobar
+> E9i8fWghn1p/I:apr1744
+> IIVxQSvq1V9R2:axolotl
+> 9EZLtSYjeEABE:network
+> P0CHBwE/mB51k:whatnot
+> Nc3IkFJyW2u7E:...hello
+> olqH1vDqH38aw:sacristy
+> 9ULn5cWTc0b9E:sherril.
+> N33.MCNcTh5Qw:uucpuucp
+> FH83PFo4z55cU:wendy!!!
+> OVCPatZ8RFmFY:cowperso
+> X.ZNnZrciWauE:5%ghj
+> IL2bmGECQJgbk:pdq;dq
+> 4BkcEieEtjWXI:jilland1
+> 8PYh/dUBQT9Ss:theik!!!
+> lj1vXnxTAPnDc:sn74193n
+> 
+> But I never managed to crack ken's password with the hash
+> ZghOT0eRm4U9s, and I think I enumerated the whole
+> 8 letter lowercase + special symbols key space.
+> 
+> The uncracked ones are:
+> 
+> ozalp:m5syt3.lB5LAE:40:10:& Babaoglu,4156423806:/usr/ozalp:/bin/csh
+
+m5syt3.lB5LAE:12ucdort
+
+> hpk:9ycwM8mmmcp4Q:9:10:Howard Katseff,2019495337:/usr/staff/hpk:/bin/csh
+> tbl:cBWEbG59spEmM:10:10:Tom London,2019492006:/usr/staff/tbl
+> ken:ZghOT0eRm4U9s:52:10:& Thompson:/usr/staff/ken
+> fabry:d9B17PTU2RTlM:305:10:Bob &,4156422714:/usr/staff/fabry:/bin/csh
+
+I pointed my FreeBSD build machine at the password file, but it didn't
+manage many guesses a second (55000 per core with 48 cores, using john). 
+
+I asked a friend to point their GPU rig at the password file. It is a
+MSI Graphics Card R9 290X and is doing about 255MHashes/Second using
+hashcat. He is going to do the alphanumeric space and then call it a
+day.
+
+    "for hashcat, 80s DES crypt is -m 1500"
+
+- [tj]
