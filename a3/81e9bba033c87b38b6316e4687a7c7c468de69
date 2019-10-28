@@ -1,0 +1,220 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 9ff78a66
+	for <ml@inbox.vuxu.org>;
+	Mon, 28 Oct 2019 22:09:30 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C69A39BC67; Tue, 29 Oct 2019 08:09:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DF5F69B5BF;
+	Tue, 29 Oct 2019 08:09:07 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="Lw1zN2QL";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id F3E869B5BF; Tue, 29 Oct 2019 08:09:05 +1000 (AEST)
+Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com
+ [209.85.222.181])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 46F879B57D
+ for <tuhs@tuhs.org>; Tue, 29 Oct 2019 08:09:05 +1000 (AEST)
+Received: by mail-qk1-f181.google.com with SMTP id m125so6169514qkd.8
+ for <tuhs@tuhs.org>; Mon, 28 Oct 2019 15:09:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=GaRaAeLOYl5eo50kFnkYvHgRE8zQJj75rxyVlNhWmAk=;
+ b=Lw1zN2QLnGuxa6r1elM2YCuc+kuLAa+MoqpJjjQD3zwx71uUsuNOw3ue88FKjTvrj9
+ k20UZ6LmwJVMdqsNybTZvWuxLt0OfWA/k390QPzP7UhGQpnXog3bJ3lpuQI1+4JSEmyu
+ j/vV8G9Fh2R3PlmaVtg4z3k26GPz/IpGqN34ZLMSmU53sj3AqH0JgTXsqQvlGqfAPzyW
+ 0qH7Gk7itLwIkTT1JmyWfEECUOsmV4AzQ8li+/ZmRprkGI1vxPBO6VQYjgxTXxEj10Sy
+ 013+74A7AeCDp6BxD/zB740YRfFKL9ECShQ0RSC+69AM0otzqTirJlGK+XEl1uui3AHr
+ 2Xlw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=GaRaAeLOYl5eo50kFnkYvHgRE8zQJj75rxyVlNhWmAk=;
+ b=rG1Yv73nt1zD4rxfzBrGMkITa6uW5seMHeWzHe5IQDW0hrxCHww9gkdC+vMO08uDaU
+ EPxhzLpEdmfyUMsdc88GilJWc4BL1HR8FEepH0nHDgvisK8Sm/rLUgYcTFtCjjKLQjz8
+ TSVW6laKEt1xzyuxR50AkE/x4bWtWba5IIiYSgAxvXoquQXbLAdD6bBfsMpWI9bLyIno
+ pvla3yPjFUZyjKcZEOpBRwJKooDJlMSJkkrRl85WDiZ8YRIz1lEcQL3QQ7srldYuh20f
+ GRrvRgdt3ekWpFsC4vGU+luI7IcXpQbzQ9oFOAcYj+Dtx83Tcp2hHHJnvnhEWoinjcWe
+ HM1A==
+X-Gm-Message-State: APjAAAUi1971HK4Ll1gzFIe7WRAssCwWhS3ZfkyRaWRpOtjqDl+Tj1lv
+ hcQsqCy1jzgafxH77/tk0eDdgKarttRs/YSI8rL2pw==
+X-Google-Smtp-Source: APXvYqzP38ACMgtLJbD/HtCuDalOIEEBIlEcMBwWsURcwCVZp8a9FtiDz2LZulqYJyr90swCHD8VuHae4q2eT3SJ9vg=
+X-Received: by 2002:a37:4e41:: with SMTP id c62mr5213022qkb.215.1572300544088; 
+ Mon, 28 Oct 2019 15:09:04 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191028200745.GA36348@fuz.su>
+In-Reply-To: <20191028200745.GA36348@fuz.su>
+From: Warner Losh <imp@bsdimp.com>
+Date: Mon, 28 Oct 2019 16:08:53 -0600
+Message-ID: <CANCZdfo-DnYM8_1mQZMcgKd7OP14iJ7ffF7PLJv-xMRBBTuaOw@mail.gmail.com>
+To: Robert Clausecker <fuz@fuz.su>
+Content-Type: multipart/alternative; boundary="00000000000069337d0595ffbf9f"
+Subject: Re: [TUHS] Design of the AT&T assembly syntax
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--00000000000069337d0595ffbf9f
+Content-Type: text/plain; charset="UTF-8"
+
+On Mon, Oct 28, 2019 at 2:16 PM Robert Clausecker <fuz@fuz.su> wrote:
+
+> Some time ago, I wrote a piece [1] about the design of the AT&T
+> assembler syntax.  While I'm still not quite sure if everything in there
+> is correct, this explanation seemed plausible to me; the PDP-11
+> assembler being adapted for the 8086, then the 80386 and then ELF
+> targets, giving us today's convoluted syntax.
+>
+> The one thing in this chain I have never found is an AT&T style
+> assembler for x86 before ELF was introduced.  Supposedly, it would get
+> away without % as a register prefix, thus being much less obnoxious to
+> use.  Any idea if such an assembler ever existed and if yes where?
+> I suppose Xenix might have shipped something like that.
+>
+> The only AT&T syntax assemblers I know today are those from Solaris,
+> the GNU project, the LLVM project, and possibly whatever macOS ships.
+> Are there (or where there) any other x86 AT&T assemblers?  Who was
+> the first party to introduce this?
+>
+
+VENIX 2.0 had this. It was a Pure AT&T syntax w/o % signs:
+
+eg
+|
+| VENIX/86 start off (bootstrap starts execution at location 0 `start').
+|
+| Relocate complete kernel down to low memory.
+        .text
+start:  cli
+        mov     dx,#LOWMEM      | base of relocated kernel
+        mov     cx,cs
+        cmp     cx,dx           | are we there (put there by bootstrap) ?
+        beq     L0002           | Yes.
+        mov     ds,cx
+
+which is clearly op dst, src.
+
+VENIX's compiler was from the MIT compiler collection which was a port of
+the portable C compiler to x86 that everybody used (it seems, I don't have
+a reference for that, just speculation).  You can find a version of
+this code in the TUHS archive in Applications/Portable_CC which has the
+8086.zip.
+
+There's follow on work from a university in Queens in 286.zip that adds
+near/far stuff (the original one didn't, and the VENIX code assumes none of
+the segment registers change in userland code for its context switching
+code). I've not looked at this code.
+
+All this code is dyed in the wool K&R code from a V7-level C compiler, so
+it won't compile on newer systems. And it's a right-royal pain in the
+backside to convert on the fly because it wasn't written to be portable to
+ANSI compilers and modern C compilers no longer have a K&R mode...
+
+Thanks again to Al Kossow for this being in the archive. It's possible to
+find this on FTP sites if you look hard enough. I found them in the past,
+but I can't find it now that I went looking, so I'm quite happy that it's
+in the archive. VENIX 2.1 released a newer version of the compiler than was
+in VENIX 2.0. I don't know if those pre-date or post-date this stuff.
+
+Sadly, the modern PCC project no longer works with 16-bit code, but I
+suppose that's par for the course these days.
+
+Warner
+
+Yours,
+> Robert Clausecker
+>
+> [1]: https://stackoverflow.com/a/42250270/417501
+>
+
+--00000000000069337d0595ffbf9f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Mon, Oct 28, 2019 at 2:16 PM Rober=
+t Clausecker &lt;<a href=3D"mailto:fuz@fuz.su">fuz@fuz.su</a>&gt; wrote:<br=
+></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;=
+border-left:1px solid rgb(204,204,204);padding-left:1ex">Some time ago, I w=
+rote a piece [1] about the design of the AT&amp;T<br>
+assembler syntax.=C2=A0 While I&#39;m still not quite sure if everything in=
+ there<br>
+is correct, this explanation seemed plausible to me; the PDP-11<br>
+assembler being adapted for the 8086, then the 80386 and then ELF<br>
+targets, giving us today&#39;s convoluted syntax.<br>
+<br>
+The one thing in this chain I have never found is an AT&amp;T style<br>
+assembler for x86 before ELF was introduced.=C2=A0 Supposedly, it would get=
+<br>
+away without % as a register prefix, thus being much less obnoxious to<br>
+use.=C2=A0 Any idea if such an assembler ever existed and if yes where?<br>
+I suppose Xenix might have shipped something like that.<br>
+<br>
+The only AT&amp;T syntax assemblers I know today are those from Solaris,<br=
+>
+the GNU project, the LLVM project, and possibly whatever macOS ships.<br>
+Are there (or where there) any other x86 AT&amp;T assemblers?=C2=A0 Who was=
+<br>
+the first party to introduce this?<br></blockquote><div><br></div><div>VENI=
+X 2.0 had this. It was a Pure AT&amp;T syntax w/o % signs:</div><div><br></=
+div><div>eg</div><div>|<br>| VENIX/86 start off (bootstrap starts execution=
+ at location 0 `start&#39;).<br>|<br>| Relocate complete kernel down to low=
+ memory.<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 .text<br>start: =C2=A0cli<br>=C2=A0=
+ =C2=A0 =C2=A0 =C2=A0 mov =C2=A0 =C2=A0 dx,#LOWMEM =C2=A0 =C2=A0 =C2=A0| ba=
+se of relocated kernel<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 mov =C2=A0 =C2=A0 cx,=
+cs<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 cmp =C2=A0 =C2=A0 cx,dx =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 | are we there (put there by bootstrap) ?<br>=C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 beq =C2=A0 =C2=A0 L0002 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 | Yes.<br>=C2=A0 =C2=A0 =C2=A0 =C2=A0 mov =C2=A0 =C2=A0 ds,cx<br></div>=
+<div><br></div><div>which is clearly op dst, src.</div><div><br></div><div>=
+VENIX&#39;s compiler was from the MIT compiler collection which was a port =
+of the portable C compiler to x86 that everybody used (it seems, I don&#39;=
+t have a reference for that, just speculation).=C2=A0 You can find a versio=
+n of this=C2=A0code in the TUHS archive in Applications/Portable_CC which h=
+as the 8086.zip.</div><div><br></div><div>There&#39;s follow on=C2=A0work f=
+rom a university in Queens in 286.zip that adds near/far stuff (the origina=
+l one didn&#39;t, and the VENIX code assumes none of the segment registers =
+change in userland code for its context switching code). I&#39;ve not looke=
+d at this code.</div><div><br></div><div>All this code is dyed in the wool =
+K&amp;R code from a V7-level C compiler, so it won&#39;t compile on newer s=
+ystems. And it&#39;s a right-royal pain in the backside to convert on the f=
+ly because it wasn&#39;t written to be portable to ANSI compilers and moder=
+n C compilers no longer have a K&amp;R mode...</div><div><br></div><div>Tha=
+nks again=C2=A0to Al=C2=A0Kossow for this being in the archive. It&#39;s po=
+ssible to find this on FTP sites if you look hard enough. I found them in t=
+he past, but I can&#39;t find it now that I went looking, so I&#39;m quite =
+happy that it&#39;s in the archive. VENIX 2.1 released a newer version of t=
+he compiler than was in VENIX 2.0. I don&#39;t know if those pre-date or po=
+st-date this stuff.</div><div><br></div><div>Sadly, the modern PCC project =
+no longer works with 16-bit code, but I suppose that&#39;s par for the cour=
+se these days.</div><div><br></div><div>Warner</div><div><br></div><blockqu=
+ote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px=
+ solid rgb(204,204,204);padding-left:1ex">
+Yours,<br>
+Robert Clausecker<br>
+<br>
+[1]: <a href=3D"https://stackoverflow.com/a/42250270/417501" rel=3D"norefer=
+rer" target=3D"_blank">https://stackoverflow.com/a/42250270/417501</a><br>
+</blockquote></div></div>
+
+--00000000000069337d0595ffbf9f--
