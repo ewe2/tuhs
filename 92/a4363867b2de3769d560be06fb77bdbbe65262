@@ -1,0 +1,95 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id ae6335d0
+	for <ml@inbox.vuxu.org>;
+	Tue, 29 Oct 2019 14:39:30 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 47AB59B623; Wed, 30 Oct 2019 00:39:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BAAF293D9E;
+	Wed, 30 Oct 2019 00:38:52 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 54AE193D9E; Wed, 30 Oct 2019 00:38:50 +1000 (AEST)
+Received: from mail-qk1-f196.google.com (mail-qk1-f196.google.com
+ [209.85.222.196])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 88B9493D5A
+ for <tuhs@tuhs.org>; Wed, 30 Oct 2019 00:38:49 +1000 (AEST)
+Received: by mail-qk1-f196.google.com with SMTP id g21so12409136qkm.11
+ for <tuhs@tuhs.org>; Tue, 29 Oct 2019 07:38:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+ bh=CKjzGkEIdGuzzP5VgTPS+kZyMzz34PxYqUt1YeQYWCM=;
+ b=f0cVoLzUzTdx4zspaKxKjIg2jaJaBQvZProhFJcaSpkj30+yQzH3DS+Kyuvj1ks2Sx
+ uUoaVu6M9zEklYK3AGcQJRQZSXQ7WwrA2k7hnETKu+CB3XgXYlyE61jo6rQ2vqPfk/HL
+ aFvz9pVDX5FBskR/8zytRHi2RWexrdOwITNpb0r8glIajBdo3KiV+rNKt9aVc6XnxJKM
+ Rh+AyoskKMpvTrm0GuWEkoh6zK+7BhJkVX0cX9iAQC/DR3mn0xWVm0HzXKgeBwmzm5L5
+ AXOUoxP7Pxf0mSgEOgNODeo07n0ekDodbTb4Z4GHKWybhFuXCp+g1uXq85Npi06F3uZA
+ 4RUA==
+X-Gm-Message-State: APjAAAV88e+OwtY/s3IKWer4fqwi0QUhlyWR8Ksvt9r1j1BmYCYTnfi0
+ oHsqdm1N8GF1UAwXDHRYI0WksG+RYuEZGRyjpq8m0tLI
+X-Google-Smtp-Source: APXvYqxj4AMe2zXly4isXvPV4wnAXxORywplWwkDIOM7mg+g+YiWGaauJLpyMab8P8RfB9gtHucvT5xSn+T7RFLiGZs=
+X-Received: by 2002:a37:4f06:: with SMTP id d6mr18657410qkb.369.1572359928376; 
+ Tue, 29 Oct 2019 07:38:48 -0700 (PDT)
+MIME-Version: 1.0
+From: Alexander Voropay <alec@sensi.org>
+Date: Tue, 29 Oct 2019 17:38:36 +0300
+Message-ID: <CAGqcPWDFH+z4SMhAOX6b9P+tGTTEwiQv7rN8nqrtDK4i_h3Yhg@mail.gmail.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Content-Type: text/plain; charset="UTF-8"
+Subject: [TUHS] Design of the AT&T assembly syntax
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Robert Clausecker <fuz@fuz.su> wrote:
+
+> > I've tried Microport SystemV /386 (SysV R3.2). It uses COFF
+> Nice find!  It seems to use lcall to selector 7 for system calls.  A
+> similar choice was made in 386BSD all the way through FreeBSD 2.2.8
+> where it was replaced with int $0x80 as in Linux.
+
+Technically speaking
+lcall $0x07,$0
+uses selector 0 with RPL=3 (bit0 and bit1==1) and LDT (bit2==1)
+
+It seems it's oldest way to call kernel from userspace on x86 architecture.
+AT&T's programmers used this sycall convention for SysVR3 and
+SysVR4 on i386 (not sure about SysVR2 on i286).
+There are very few examples with lcall-type syscall  i.e.
+http://www.sco.com/developers/devspecs/abi386-4.pdf
+(figure 3-26)
+(and leaked SysVR4 i386 sources)
+
+William Jolitz used this convention in his amazing articles about
+porting BSD4.3 to the i386 (c)1991
+http://www.informatica.co.cr/unix-source-code/research/1991/0101.html
+(p."System Call Inteface"). See also 386BSD 0.0:
+https://github.com/386bsd/386bsd/blob/0.0/arch/i386/i386/locore.s#L361
+(Did he run AT&T userspace on his kernel ???)
+As you mentioned, most of early *BSD systems on i386 also used lcall.
+
+Linus selected to use "DOS-style" call with INT 0x80.
+More recent BSD on i386 also use INT.
+https://john-millikin.com/unix-syscalls
+http://asm.sourceforge.net/intro/hello.html
+
+Solaris on x86 (ex. SysVR4) also uses lcall. See a
+https://www.cs.dartmouth.edu/sergey/cs258/solaris-on-x86.pdf
+p.4.2.3
+and Solaris (later OpenSolaris and later Illumos) sourcecode.
