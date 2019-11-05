@@ -1,0 +1,309 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.2 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_FONT_LOW_CONTRAST,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE,URIBL_SBL,URIBL_SBL_A
+	autolearn=no autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 93e63840
+	for <ml@inbox.vuxu.org>;
+	Tue, 5 Nov 2019 21:12:15 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 72FCE9C10F; Wed,  6 Nov 2019 07:12:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 20FFF93D9E;
+	Wed,  6 Nov 2019 07:11:46 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="Od+3H99B";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8CBBA93D9E; Wed,  6 Nov 2019 07:11:44 +1000 (AEST)
+Received: from mail-qt1-f181.google.com (mail-qt1-f181.google.com
+ [209.85.160.181])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DAA6093D24
+ for <tuhs@tuhs.org>; Wed,  6 Nov 2019 07:11:43 +1000 (AEST)
+Received: by mail-qt1-f181.google.com with SMTP id o49so31191357qta.7
+ for <tuhs@tuhs.org>; Tue, 05 Nov 2019 13:11:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=Nwrt8JBmB/HDERnpjlcSu5tvpVUGBNEbgQMYtUKylyU=;
+ b=Od+3H99BkrppHF8l9cc6bIVKheFdk8nHKeAEM5kxrVfRCi1t0dWd36h0yj2a43+Pyn
+ Takk1CJUhlufxM5zPuGGF2v6esJF3YPvAR2ZRJTYqkVqw16MkK9RTKcBiDofLdHyQVsY
+ lr4kYiNOsPWnvoHrwL4/St685Bu5BOyGh96kI=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=Nwrt8JBmB/HDERnpjlcSu5tvpVUGBNEbgQMYtUKylyU=;
+ b=es8y9ccaeQxdgwjM5+/IKoHqPxVrJ1U92XkTX5t5fNqBlc/Xl1qTgxqQ5PccjwSgMW
+ yJB7uw3w3j1ybQJfkExWrwOqxaDr4/j9LeekGCkP9VNL2IR+/z21XJjdfpysymaNZ+DL
+ mN3x3PqCaYcSAiVBcQQziUFOk6cM097/utA9cVXiRA7bk67+0xKiGr1zJEywyYhVdxPX
+ nFUrUHzwHzbYcALEfjVctXS0tp8c9RDRKoK77sdTVp+Cv3TpOvqrCanrNT+AKRgyLgvY
+ GC8JaY84Wgkr7qm6y9S7ZTnbgwa2y1Yy9TACXn5sPz9Sl8xyM0KUVJtwCvIcB/Py/LGY
+ Av2Q==
+X-Gm-Message-State: APjAAAXNFWZJcdtQkwTfsA2zjMETZ05spyzvocLg7pknT1fMM3vgPaBU
+ W9PsthtgRHn+P9rBdgc7ysi+SM5J7LmZ8DEQe9rO2Q6epOg4sg==
+X-Google-Smtp-Source: APXvYqyfueCFjSBzVCutzvTQvePMh7fA6kEhriDpzVCFWlRqcJ5s6oIcA9ekqFPcMjrhJIJ0uVNL0TCN+/RV7Pc37ck=
+X-Received: by 2002:ac8:31c5:: with SMTP id i5mr20178859qte.33.1572988302725; 
+ Tue, 05 Nov 2019 13:11:42 -0800 (PST)
+MIME-Version: 1.0
+References: <CAK7dMtBEbVCF5QRV9BFNtxhVHCaPPNadXZuSwQToaU9_9Nzg3w@mail.gmail.com>
+ <CAC5iaNH+FHo8cHMP4xjbEdjj4c5D78kkHQs9m_dVXxP5pyWtpQ@mail.gmail.com>
+ <CAC20D2PNgQFLxjx7eUK-Q7BVL-5xSyx2JUk46oTSV=wekAg1eg@mail.gmail.com>
+ <CAK7dMtAsBrLfuPOam0EfF3JyMqarnSrv-aHC8SwBRa=tpowzow@mail.gmail.com>
+ <CAFNqd5UgLiawhFx_KHpip-eN--p+rqFiOLXHjrdZc0mF4Vd5Lg@mail.gmail.com>
+ <CAC20D2ORG2Yrg06HC-8Bhihe1fB6zuXBzSg9a9CGhT04d39=OQ@mail.gmail.com>
+ <CAK7dMtC=P6pCL9ac0YGLZ=p_bFVqNdAT9wmaEeC7hebLauXC4Q@mail.gmail.com>
+In-Reply-To: <CAK7dMtC=P6pCL9ac0YGLZ=p_bFVqNdAT9wmaEeC7hebLauXC4Q@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Tue, 5 Nov 2019 16:11:15 -0500
+Message-ID: <CAC20D2MKK3DwKnBN_1AR3DGcc1Ri0Pak4tXJLz3xnuYjG5u4TQ@mail.gmail.com>
+To: Kevin Bowling <kevin.bowling@kev009.com>
+Content-Type: multipart/alternative; boundary="000000000000052ced05969fe1a0"
+Subject: Re: [TUHS] Amdahl UTS, AIX/370, AIX/ESA
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000052ced05969fe1a0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+I've long forgotten the name of the work.    I worked on the proposal and
+part of the design study, but not the project itself.  I had my hands full
+with leading the HP and DEC TNC stuff.  IIRC Joe Hopfield was the lead on
+it.     It was not really in the key of WINE.  It was sort of cross
+between UWIN and Interix POSIX subsystem that now ships as WSL.  I've
+forgotten a lot of the details now, to be honest.  I seem to remember they
+used the SLS as part of the scheme, but I think there was a 'process' that
+was booted under OS/400 that took serviced UNIX/POSIX processes system
+functions.  I'll send a note a couple of LCC alumni and see if I can find
+someone that knew more about it.
+
+Clem
+=E1=90=A7
+
+On Tue, Nov 5, 2019 at 3:42 PM Kevin Bowling <kevin.bowling@kev009.com>
+wrote:
+
+> Clem,
+>
+> I am very curious about this UNIX for OS/400 work it sounds either
+> different or much earlier than what I am familiar with.  I am familiar wi=
+th
+> the PASE environment that shipped around OS/400 V4R4 (1999?).  After
+> AS/400s started running PowerPCish CPUs (there is a bit of history there =
+I
+> won't dive into) PASE was like WINE for Linux.. same CPU arch, do some
+> library and linker/loader tricks to hoist a different (AIX 4.3 first)
+> environment within OS/400s understanding of the universe.  A year or so
+> later, some very bright group figured to use the OS/400's Single Level
+> Store as the device model/device virtualization for the CPU virtualizatio=
+n
+> (LPAR) in later POWER CPUs.  You could run Linux or OS/400 or AIX this
+> way.  That work was then somewhat inverted, and pHyp was born from the
+> OS/400's SILC idea of machine dependent code as a light weight firmware
+> hypervisor in the converging iSeries and pSeries POWER systems.. they
+> switched the device model/device virtualization to AIX called APV or
+> PowerVM.
+>
+> It was nicknamed "Fortress Rochester" for a reason.  They did some very
+> nice work.  But yeah IBM was running 4 large and extremely different
+> computing businesses in the 1990s and probably some smaller ones too.  Th=
+ey
+> were very different but the systems did interoperate pretty well given th=
+e
+> stakes.
+>
+> Regards,
+> Kevin
+>
+> On Tue, Nov 5, 2019 at 1:10 PM Clem Cole <clemc@ccc.com> wrote:
+>
+>>
+>>
+>> On Tue, Nov 5, 2019 at 2:03 PM Christopher Browne <cbbrowne@gmail.com>
+>> wrote:
+>>
+>>> The dates seem to decently explain the invisibility; introduction in
+>>> 1992
+>>>
+>> The formal introduction of the PS/2 was April 87 (by the crew of Mash fo=
+r
+>> the TV ads IIRC).  Again, if my memory serves LCC started working on UNI=
+X
+>> for the 370 in the mid'86s, actually before the PS/2 was announced, whic=
+h
+>> would be announced as AIX/370.   ISC had done the original 386 port for
+>> Intel, IBM, and AT&T - but that was for an ISA based systems originally
+>> [Phil Shevrin pulled one of the best sales jobs I ever knew -- he got pa=
+id
+>> three times for the same basic work].
+>>
+>> At some point (and I would have to ask someone like Bruce Walker or Greg
+>> Thiel for the better info), the contract got widen AIX to include the PS=
+/2
+>> - a.k.a. create AIX/386.  How much of the original ISC work was that bui=
+ld
+>> upon, I never knew.
+>>
+>> LCC worked for a number of years and the two AIX's were available for
+>> customers, probably under a special University license.   The formal
+>> introduction was later (and '92 sounds right). But there were sites that
+>> had one or both before that time.   I want to say, LCC worked with IBM f=
+or
+>> about 8-10 years starting in the mid-80s. BTW: They also did a UNIX port=
+ to
+>> AS/400 (on top of the native OS - similar to Eunice for the VAX or
+>> today's MingWin and Dave Korn's UWIN stuff).   I've forgotten the dates =
+on
+>> that, I want to say 93/94 time frame.
+>>
+>> Enough time has gone by, I think I can safely tell another story, WRT th=
+e
+>> AS/400.  When that happened, IBM and LCC had a number oif years under th=
+eir
+>> bridge and the LCC management team thought we knew how to work with IBM.
+>> Since we had a base IBM contract, we all figured that could be
+>> added/amended to as needed.  When the folks from Rochester called asking
+>> about a quote for the AS/400 work, our sales folks trotted out the exist=
+ing
+>> contract for AIX and figured - ok write a new SOW and we are done.   Nop=
+e
+>> -- different division/different set of lawyers.  Something was said to u=
+s
+>> in the form of 'Rochester Won the Baldridge Award.'   I remember our CEO
+>> groaning - and saying something like 'Here we go again.'  It was then I
+>> realized IBM was N different companies, each competing with each other.
+>>
+>> Clem
+>> =E1=90=A7
+>>
+>
+
+--000000000000052ced05969fe1a0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif">I&#39;ve long forgotten the name of the work.=C2=A0 =C2=
+=A0 I worked on the proposal and part of the design study, but not the proj=
+ect itself.=C2=A0 I had my hands full with leading the=C2=A0HP and DEC TNC =
+stuff.=C2=A0 IIRC Joe Hopfield was the lead on it.=C2=A0 =C2=A0 =C2=A0It wa=
+s not really in the key of WINE.=C2=A0 It was sort of cross between=C2=A0UW=
+IN and Interix POSIX subsystem that now ships as WSL.=C2=A0 I&#39;ve forgot=
+ten a lot of the details now, to=C2=A0be honest.=C2=A0 I seem to remember t=
+hey used the SLS as part of the scheme, but I think there was a &#39;proces=
+s&#39; that was booted under OS/400 that took serviced UNIX/POSIX processes=
+ system functions.=C2=A0 I&#39;ll send a note a couple of LCC alumni and se=
+e if I can find someone that knew more about it.</div><div class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><br></div><div cla=
+ss=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">Clem=
+=C2=A0 =C2=A0</div></div><div hspace=3D"streak-pt-mark" style=3D"max-height=
+:1px"><img alt=3D"" style=3D"width:0px;max-height:0px;overflow:hidden" src=
+=3D"https://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp=
+;type=3Dzerocontent&amp;guid=3D287cf167-9f84-44b8-a134-b628799bd085"><font =
+color=3D"#ffffff" size=3D"1">=E1=90=A7</font></div><br><div class=3D"gmail_=
+quote"><div dir=3D"ltr" class=3D"gmail_attr">On Tue, Nov 5, 2019 at 3:42 PM=
+ Kevin Bowling &lt;<a href=3D"mailto:kevin.bowling@kev009.com">kevin.bowlin=
+g@kev009.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" styl=
+e=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);paddin=
+g-left:1ex"><div dir=3D"ltr"><div>Clem,</div><div><br></div><div>I am very =
+curious about this UNIX for OS/400 work it sounds either different or much =
+earlier than what I am familiar with.=C2=A0 I am familiar with the PASE env=
+ironment that shipped around OS/400 V4R4 (1999?).=C2=A0 After AS/400s start=
+ed running PowerPCish CPUs (there is a bit of history there I won&#39;t div=
+e into) PASE was like WINE for Linux.. same CPU arch, do some library and l=
+inker/loader tricks to hoist a different (AIX 4.3 first) environment within=
+ OS/400s understanding of the universe.=C2=A0 A year or so later, some very=
+ bright group figured to use the OS/400&#39;s Single Level Store as the dev=
+ice model/device virtualization for the CPU virtualization (LPAR) in later =
+POWER CPUs.=C2=A0 You could run Linux or OS/400 or AIX this way.=C2=A0 That=
+ work was then somewhat inverted, and pHyp was born from the OS/400&#39;s S=
+ILC idea of machine dependent code as a light weight firmware hypervisor in=
+ the converging iSeries and pSeries POWER systems.. they switched the devic=
+e model/device virtualization to AIX called APV or PowerVM.<br></div><div><=
+br></div><div>It was nicknamed &quot;Fortress Rochester&quot; for a reason.=
+=C2=A0 They did some very nice work.=C2=A0 But yeah IBM was running 4 large=
+ and extremely different computing businesses in the 1990s and probably som=
+e smaller ones too.=C2=A0 They were very different but the systems did inte=
+roperate pretty well given the stakes.<br></div><div><br></div><div>Regards=
+,</div><div>Kevin<br></div></div><br><div class=3D"gmail_quote"><div dir=3D=
+"ltr" class=3D"gmail_attr">On Tue, Nov 5, 2019 at 1:10 PM Clem Cole &lt;<a =
+href=3D"mailto:clemc@ccc.com" target=3D"_blank">clemc@ccc.com</a>&gt; wrote=
+:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.=
+8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"lt=
+r"><div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial=
+,helvetica,sans-serif"><br></div></div><br><div class=3D"gmail_quote"><div =
+dir=3D"ltr" class=3D"gmail_attr">On Tue, Nov 5, 2019 at 2:03 PM Christopher=
+ Browne &lt;<a href=3D"mailto:cbbrowne@gmail.com" target=3D"_blank">cbbrown=
+e@gmail.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><div dir=3D"ltr"><div dir=3D"ltr">The dates seem to decently exp=
+lain the invisibility; introduction in 1992=C2=A0</div></div></blockquote><=
+div><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans=
+-serif">The formal introduction of the PS/2 was April 87 (by the crew of Ma=
+sh for the TV ads IIRC).=C2=A0 Again, if my memory serves LCC started worki=
+ng on UNIX for the 370 in the mid&#39;86s, actually before the PS/2 was ann=
+ounced, which would be announced as AIX/370.=C2=A0 =C2=A0ISC had done the o=
+riginal 386 port for Intel, IBM, and AT&amp;T - but that was for an ISA bas=
+ed systems originally [Phil Shevrin pulled one of the best sales jobs I eve=
+r knew -- he got paid three times for the same basic work].</span></div><di=
+v><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif"><br></span></div><div><span class=3D"gmail_default" style=3D"font-fam=
+ily:arial,helvetica,sans-serif">At some point (and I would=C2=A0have to ask=
+ someone like Bruce Walker or Greg Thiel for the better info), the contract=
+ got widen AIX to include the PS/2 - a.k.a. create AIX/386.=C2=A0 How much =
+of the original ISC work was that build upon, I never knew.=C2=A0</span></d=
+iv><div><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif"><br></span></div><div><span class=3D"gmail_default" style=3D"fo=
+nt-family:arial,helvetica,sans-serif">LCC worked for a number of years and =
+the two AIX&#39;s=C2=A0were available for customers, probably under a speci=
+al University license.=C2=A0 =C2=A0The formal introduction was later (and &=
+#39;92 sounds right). But there were sites that had one or both before that=
+ time.=C2=A0 =C2=A0I want to say, LCC worked with IBM for about 8-10 years =
+starting in the mid-80s. BTW: They also did a UNIX port to AS/400=C2=A0</sp=
+an><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif"></span><span class=3D"gmail_default" style=3D"font-family:arial,helv=
+etica,sans-serif">(</span><span class=3D"gmail_default" style=3D"font-famil=
+y:arial,helvetica,sans-serif">on top of the native OS - similar to Eunice f=
+or the VAX or today&#39;s MingWin and Dave Korn&#39;s UWIN stuff).=C2=A0 =
+=C2=A0I&#39;ve forgotten the dates on that, I want to say 93/94 time frame.=
+</span></div><div><span class=3D"gmail_default" style=3D"font-family:arial,=
+helvetica,sans-serif"><br></span></div><div><span class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif">Enough time has gone by, I =
+think I can safely tell another story, WRT the AS/400.=C2=A0 When that happ=
+ened, IBM and LCC had a number oif years under their bridge and the LCC man=
+agement team thought we knew how to work with IBM.=C2=A0 Since we had a bas=
+e IBM contract, we all figured that could be added/amended to as needed.=C2=
+=A0 When the folks from Rochester called asking about a quote for the AS/40=
+0 work, our sales folks trotted out the existing contract for AIX and figur=
+ed - ok write a new SOW and we are done.=C2=A0 =C2=A0Nope -- different divi=
+sion/different set of lawyers.=C2=A0 Something was said to us in the form o=
+f &#39;Rochester Won the Baldridge Award.&#39;=C2=A0 =C2=A0I remember our C=
+EO groaning - and saying something like &#39;Here we go again.&#39;=C2=A0 I=
+t was then I realized IBM was N different companies, each competing with ea=
+ch other.</span></div><div><span class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif"><br></span></div><div><span class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif">Clem</span></div><=
+/div></div><div hspace=3D"streak-pt-mark" style=3D"max-height:1px"><img alt=
+=3D"" style=3D"width: 0px; max-height: 0px; overflow: hidden;" src=3D"https=
+://mailfoogae.appspot.com/t?sender=3DaY2xlbWNAY2NjLmNvbQ%3D%3D&amp;type=3Dz=
+erocontent&amp;guid=3D509634ab-606c-4713-aa8a-dde7326a1766"><font size=3D"1=
+" color=3D"#ffffff">=E1=90=A7</font></div>
+</blockquote></div>
+</blockquote></div>
+
+--000000000000052ced05969fe1a0--
