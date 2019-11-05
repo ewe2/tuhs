@@ -1,0 +1,187 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a6d13bc5
+	for <ml@inbox.vuxu.org>;
+	Sat, 2 Nov 2019 20:13:44 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6A4B99B966; Sun,  3 Nov 2019 06:13:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2C73A93E3B;
+	Sun,  3 Nov 2019 06:13:04 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="pZ3iefVm";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AC5A993E3B; Sun,  3 Nov 2019 06:13:00 +1000 (AEST)
+Received: from mail-qt1-f171.google.com (mail-qt1-f171.google.com
+ [209.85.160.171])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4FBBA93D9D
+ for <tuhs@tuhs.org>; Sun,  3 Nov 2019 06:12:59 +1000 (AEST)
+Received: by mail-qt1-f171.google.com with SMTP id c26so17844123qtj.10
+ for <tuhs@tuhs.org>; Sat, 02 Nov 2019 13:12:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=dpqXZlM9qnAegTh5i6rOSJIHj4/+7hKnSxKSsMUwwTg=;
+ b=pZ3iefVm9o/9qvsn2AN3SdFSSPXAAryuYFBjbGTyl6fsonb7IlSwMde24jjPFgd73W
+ /92FWwlRbhNt3j4cIdHWVFT8+H3+013gS2gQ24YntJN2VSg6wjyZEf9BOvOUKt/64LWd
+ V/MXWXFKJZixXW1ehBqzA+U302bQ9tzALrie7eN7tvZZcphFd0mT9DmbO9rHpdPutkeQ
+ adoPXwrshJC2oGf2UCkfUsB4MDdVpAqgehEvRy4hHqRdQsCpv6PSTWd97cgd4gKZNUsn
+ wSktOu+XPqe5lIdBYZ9Qdu4S6bdiyxKaF2BBk6buL2f04f3CfwnnonjZJGTg+UfJigPi
+ RLew==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=dpqXZlM9qnAegTh5i6rOSJIHj4/+7hKnSxKSsMUwwTg=;
+ b=EFEm6o6dcso5QElKSAjQqFBWTCNbNyZhOLiTlT5CGk4SWPCU3hRgIXVf63twDLMiC5
+ 83ycFNAJhD/PZZSpzUZHpdA0waD+01N9kc/hHqTVc0YwxxhVj5bO4Gpe0KOa3A/+bM+U
+ OP6nBPkZQ/7rURNiX9Nj3aWVmWJsUNbE9BPf1PyU4fQYcjakwevtcBJysfTDqRBiByB9
+ m+Pnmn5ArKy2/bycTbExxlQ2nk45d95Kozax80NWfXehHPe4kFbBVlLXpzr4O0XiBmJu
+ T4RVG03qOdviDV+j4581rm06OI0zpQ91mhm8PRedQ0wwecBUdR27seeIWx2JBIpqEGyI
+ 2qeg==
+X-Gm-Message-State: APjAAAWxhK1UcQsjGoBblgSPFS4WHy5SYN9/p9FC3Qq7GNSDqHh+gV2i
+ nYyu57vw8hKUUIreN/ApoL6RcbVQ+Tf3BVmmFfzplRHgBCI=
+X-Google-Smtp-Source: APXvYqwI1+o+q8wqStMsjnRebbmHCUvgx3M/pTjOFIRTETzTgLwDkSABG5vJsjhASi2i9xWKUFXn6OMQjRKIVW8jt8s=
+X-Received: by 2002:ac8:7499:: with SMTP id v25mr5856316qtq.32.1572725578200; 
+ Sat, 02 Nov 2019 13:12:58 -0700 (PDT)
+MIME-Version: 1.0
+References: <201911021412.xA2ECEMr137264@tahoe.cs.Dartmouth.EDU>
+In-Reply-To: <201911021412.xA2ECEMr137264@tahoe.cs.Dartmouth.EDU>
+From: Warner Losh <imp@bsdimp.com>
+Date: Sat, 2 Nov 2019 14:12:47 -0600
+Message-ID: <CANCZdfr1yiMbM6KixYgTXgWn5PVOQTtXWBhYODUjD_n1Lqq0Lg@mail.gmail.com>
+To: Doug McIlroy <doug@cs.dartmouth.edu>
+Content-Type: multipart/alternative; boundary="0000000000006b0dac059662b5be"
+Subject: Re: [TUHS] Happy birthday Morris worm
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000006b0dac059662b5be
+Content-Type: text/plain; charset="UTF-8"
+
+On Sat, Nov 2, 2019 at 8:13 AM Doug McIlroy <doug@cs.dartmouth.edu> wrote:
+
+> Full disclosure: I served as a character witness at Robert Morris's trial.
+> Before the trial, the judge was quite incredulous that the prosecutor
+> was pursuing a felony charge and refused to let the trial go forward
+> without confirmation from the prosecutor's superiors in Washington.
+>
+> > I'm sure that Bob was proud of his son's accomplishments -- but not
+> that one.
+>
+> As Bob ut it, "It {being the father] is not a great career move."
+> Robert confessed to Bob as soon as he realized the folly of loosing
+> an exponential, even with a tiny growth rate per generation. I
+> believe that what brought computers to their knees was the
+> overwhelming number of attacks, not the cost of cecryption. The
+> worm did assure that only one copy would be allowed to proceed
+> at a time.
+>
+> During high school, Robert worked as a summer employee for Fred
+> Grampp. He got high marks for finding and correcting an exploit.
+>
+> > making use of known vulnerabilities
+>
+> Buffer overflows were known to cause misbehavior, but few people
+> at the time were conscious that the misbehavior could be controlled.
+> I do not know whether Berkeley agonized before distributing the
+> "debug" feature that allowed remote super-user access via sendmail.
+> But they certainly messed up by not documenting it.
+>
+
+Yes. The reason people freaked out when the worm came out was because it
+was the first one to hit the scene. The exploints that allowed it to
+propagate were known to a few, but the notion of a self propagating thing
+was quite novel (even if it had been theoretically discussed in many places
+prior to the worm, and even though others had proven it via slower moving
+vectors of BBS). It caught a lot of people off guard with their pants down,
+and it took a bunch of time to rectify (because it would reinfect if you
+weren't careful). That's why people wanted to prosecute on felony charges.
+But there was no intent to cause harm, and there was, at the time, no
+applicable law that could be used to charge as a felony anyway (apart from
+vague denial of property statues, which were at best a stretch).
+
+In hindsight people like to point at it and what a terrible thing it was,
+but Robert just got there first. Any number of people could have written it
+given the extremely lax security profiles of the time (things are better
+today, but we are not immune to buffer overflows or privilege escalation
+attacks).
+
+Warner
+
+--0000000000006b0dac059662b5be
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Sat, Nov 2, 2019 at 8:13 AM Doug M=
+cIlroy &lt;<a href=3D"mailto:doug@cs.dartmouth.edu">doug@cs.dartmouth.edu</=
+a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0p=
+x 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">Fu=
+ll disclosure: I served as a character witness at Robert Morris&#39;s trial=
+.<br>
+Before the trial, the judge was quite incredulous that the prosecutor<br>
+was pursuing a felony charge and refused to let the trial go forward<br>
+without confirmation from the prosecutor&#39;s superiors in Washington.<br>
+<br>
+&gt; I&#39;m sure that Bob was proud of his son&#39;s accomplishments -- bu=
+t not<br>
+that one.<br>
+<br>
+As Bob ut it, &quot;It {being the father] is not a great career move.&quot;=
+<br>
+Robert confessed to Bob as soon as he realized the folly of loosing<br>
+an exponential, even with a tiny growth rate per generation. I <br>
+believe that what brought computers to their knees was the<br>
+overwhelming number of attacks, not the cost of cecryption. The<br>
+worm did assure that only one copy would be allowed to proceed<br>
+at a time.<br>
+<br>
+During high school, Robert worked as a summer employee for Fred<br>
+Grampp. He got high marks for finding and correcting an exploit.<br>
+<br>
+&gt; making use of known vulnerabilities<br>
+<br>
+Buffer overflows were known to cause misbehavior, but few people<br>
+at the time were conscious that the misbehavior could be controlled.<br>
+I do not know whether Berkeley agonized before distributing the<br>
+&quot;debug&quot; feature that allowed remote super-user access via sendmai=
+l.<br>
+But they certainly messed up by not documenting it.<br></blockquote><div><b=
+r></div><div>Yes. The reason people freaked out when the worm came out was =
+because it was the first one to hit the scene. The exploints that allowed i=
+t to propagate were known to a few, but the notion of a self propagating th=
+ing was quite novel (even if it had been theoretically discussed in many pl=
+aces prior to the worm, and even though others had proven it via slower mov=
+ing vectors of BBS). It caught a lot of people off guard with their pants d=
+own, and it took a bunch of time to rectify (because it would reinfect if y=
+ou weren&#39;t careful). That&#39;s why people wanted to prosecute on felon=
+y charges. But there was no intent to cause harm, and there was, at the tim=
+e, no applicable law that could be used to charge as a felony anyway (apart=
+ from vague denial of property statues, which were at best a stretch).</div=
+><div><br></div><div>In hindsight=C2=A0people like to point at it and what =
+a terrible thing it was, but Robert just got there first. Any number of peo=
+ple could have written it given the extremely lax security profiles of the =
+time (things are better today, but we are not immune to buffer overflows or=
+ privilege=C2=A0escalation attacks).=C2=A0</div><div><br></div><div>Warner<=
+/div></div></div>
+
+--0000000000006b0dac059662b5be--

@@ -1,0 +1,126 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 9121c27b
+	for <ml@inbox.vuxu.org>;
+	Mon, 28 Oct 2019 22:24:40 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B8B919BC95; Tue, 29 Oct 2019 08:24:38 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EC90E9B5BF;
+	Tue, 29 Oct 2019 08:24:21 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 20FCE9B5BF; Tue, 29 Oct 2019 08:24:20 +1000 (AEST)
+Received: from fuz.su (fuz.su [5.135.162.8])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 956EF9B57D
+ for <tuhs@tuhs.org>; Tue, 29 Oct 2019 08:24:19 +1000 (AEST)
+Received: from fuz.su (localhost [127.0.0.1])
+ by fuz.su (8.15.2/8.15.2) with ESMTPS id x9SMOHCd045387
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Mon, 28 Oct 2019 23:24:17 +0100 (CET)
+ (envelope-from fuz@fuz.su)
+Received: (from fuz@localhost)
+ by fuz.su (8.15.2/8.15.2/Submit) id x9SMOHEV045386
+ for tuhs@tuhs.org; Mon, 28 Oct 2019 23:24:17 +0100 (CET)
+ (envelope-from fuz)
+Date: Mon, 28 Oct 2019 23:24:17 +0100
+From: Robert Clausecker <fuz@fuz.su>
+To: tuhs@tuhs.org
+Message-ID: <20191028222417.GA45136@fuz.su>
+References: <20191028200745.GA36348@fuz.su>
+ <CANCZdfo-DnYM8_1mQZMcgKd7OP14iJ7ffF7PLJv-xMRBBTuaOw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CANCZdfo-DnYM8_1mQZMcgKd7OP14iJ7ffF7PLJv-xMRBBTuaOw@mail.gmail.com>
+User-Agent: Mutt/1.12.2 (2019-09-21)
+Subject: Re: [TUHS] Design of the AT&T assembly syntax
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi Warner,
+
+On Mon, Oct 28, 2019 at 04:08:53PM -0600, Warner Losh wrote:
+> VENIX 2.0 had this. It was a Pure AT&T syntax w/o % signs:
+> 
+> eg
+> |
+> | VENIX/86 start off (bootstrap starts execution at location 0 `start').
+> |
+> | Relocate complete kernel down to low memory.
+>         .text
+> start:  cli
+>         mov     dx,#LOWMEM      | base of relocated kernel
+>         mov     cx,cs
+>         cmp     cx,dx           | are we there (put there by bootstrap) ?
+>         beq     L0002           | Yes.
+>         mov     ds,cx
+> 
+> which is clearly op dst, src.
+
+op dst, src is Intel syntax.  AT&T syntax has op src, dst like MACRO-11.
+There are a number of other differences: (a) | instead of / or # as a comment
+character (b) different mnemonics (beq instead of je) and (c) # instead of $
+as the comment character.
+
+Without seeing some more code, I'd say it's not AT&T syntax.
+
+> VENIX's compiler was from the MIT compiler collection which was a port of
+> the portable C compiler to x86 that everybody used (it seems, I don't have
+> a reference for that, just speculation).  You can find a version of
+> this code in the TUHS archive in Applications/Portable_CC which has the
+> 8086.zip.
+>
+> There's follow on work from a university in Queens in 286.zip that adds
+> near/far stuff (the original one didn't, and the VENIX code assumes none of
+> the segment registers change in userland code for its context switching
+> code). I've not looked at this code.
+
+Will have a look!
+
+> All this code is dyed in the wool K&R code from a V7-level C compiler, so
+> it won't compile on newer systems. And it's a right-royal pain in the
+> backside to convert on the fly because it wasn't written to be portable to
+> ANSI compilers and modern C compilers no longer have a K&R mode...
+> 
+> Thanks again to Al Kossow for this being in the archive. It's possible to
+> find this on FTP sites if you look hard enough. I found them in the past,
+> but I can't find it now that I went looking, so I'm quite happy that it's
+> in the archive. VENIX 2.1 released a newer version of the compiler than was
+> in VENIX 2.0. I don't know if those pre-date or post-date this stuff.
+
+Thank you for trying to dig up the source.
+
+> Sadly, the modern PCC project no longer works with 16-bit code, but I
+> suppose that's par for the course these days.
+
+OpenWatcom still works, but it's not too compatible.
+
+> Warner
+> 
+> Yours,
+> > Robert Clausecker
+> >
+> > [1]: https://stackoverflow.com/a/42250270/417501
+
+Yours,
+Robert Clausecker
+
+-- 
+()  ascii ribbon campaign - for an 8-bit clean world 
+/\  - against html email  - against proprietary attachments

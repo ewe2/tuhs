@@ -1,0 +1,366 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a39437c9
+	for <ml@inbox.vuxu.org>;
+	Mon, 4 Nov 2019 20:28:05 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2E5559C0BB; Tue,  5 Nov 2019 06:28:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8C5D59C092;
+	Tue,  5 Nov 2019 06:27:31 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="mDAgsm5a";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B54F19C092; Tue,  5 Nov 2019 06:27:28 +1000 (AEST)
+Received: from mail-qt1-f180.google.com (mail-qt1-f180.google.com
+ [209.85.160.180])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 157F89B5BB
+ for <tuhs@minnie.tuhs.org>; Tue,  5 Nov 2019 06:27:26 +1000 (AEST)
+Received: by mail-qt1-f180.google.com with SMTP id g50so25961078qtb.4
+ for <tuhs@minnie.tuhs.org>; Mon, 04 Nov 2019 12:27:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=gQftP25F0OLcLfbvzGKFW12NH7nPQZuzxTN0OLj2+c4=;
+ b=mDAgsm5aEL069uFIjRKA/KnBEfv0LVDXkut8oyGMhRuV3jRAlB5QGubJ7hYRFA9ZCf
+ rcmSFWDSWbGWdFAzK6O+VApi1NRhdhbT+0/e+m7Ax0bmMn7A6t3/yxvghIIeAZO4mxip
+ FPaJdfzt4YEu9P9HXISN5mtoAQUH92gLD5ojYewUulSChNW/+SQPWzwRfx5pA6lo7PoS
+ keLK86jkSgQY6NoCbUtKUqf9+ls1nI6BN80azXw1L1+AkJeyrwewxIc7CgCGAMmMS5JF
+ ZuXpHrY5BMPPsG0yxmxpDMPW01MErh0bujZ/7VGfVKGJ2GFUDqjiytUT7KpQWN1cZ3Rx
+ bd/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=gQftP25F0OLcLfbvzGKFW12NH7nPQZuzxTN0OLj2+c4=;
+ b=gO9mXa90C4iLewXtKTYV1swhxMjUeOF+JP9SL9uIxZ1amMBxfDijXOGsmBIGXNGAgo
+ +QbDnrHnLy5lHyDdKxtKThQPGt24A0S+HLwB2EqhbTpwiubfpxO22UU5/IKpmUQ2Lgpv
+ uMEWIrhvZqLmGjLwDXyueavcZhx+gi51AMB8ksJ3aWkyotkOQ7Q1QttIMHOH1xVGNDeB
+ mbCt168wNp54rg6oGqmYiRGMWHH1+e6tXFkiPd8AAjyEhKFDlJqZPOkCOBOeqcm7g8OZ
+ +UUJOhHBpt4+8pICHw/uE7XW63Ya7iQUZx2+d2Ov2x0TBp8zWnp7hoiui2VuX0h2vfgh
+ 6YEQ==
+X-Gm-Message-State: APjAAAVn6Bxq1Kv+LumuKbu3L1/61A9A24y3Vt1AZQ5q8EczUv/ag65U
+ vIbwI3VnEfCjuz8FE9UK63MNiMSn3pY/2hgdMA0=
+X-Google-Smtp-Source: APXvYqwI9hvsWW6OV4E5PkhUGXx9q+uDpEAJpGAyqFvA0XwHKaVGwFC/GeY/svkfqGZnfE0VtMjY/uvxuYIflZJcSds=
+X-Received: by 2002:ac8:4791:: with SMTP id k17mr14419941qtq.136.1572899245134; 
+ Mon, 04 Nov 2019 12:27:25 -0800 (PST)
+MIME-Version: 1.0
+References: <mailman.3.1572832803.30037.tuhs@minnie.tuhs.org>
+ <116B676F-5917-481A-9634-0E6C5F702B9B@mcjones.org>
+ <B3FDDCB1-F046-486C-B640-5A09D468A421@bitblocks.com>
+In-Reply-To: <B3FDDCB1-F046-486C-B640-5A09D468A421@bitblocks.com>
+From: Dan Cross <crossd@gmail.com>
+Date: Mon, 4 Nov 2019 15:27:08 -0500
+Message-ID: <CAEoi9W5_w93Ymba1Mmz10qQc7vdZuXTRu7tNZcYc5Z5gAFd2Lw@mail.gmail.com>
+To: Bakul Shah <bakul@bitblocks.com>
+Content-Type: multipart/alternative; boundary="000000000000c6188305968b24eb"
+Subject: Re: [TUHS] Happy birthday Morris worm
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000c6188305968b24eb
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Nov 4, 2019 at 1:58 PM Bakul Shah <bakul@bitblocks.com> wrote:
+
+> I am surprised no one mentioned *The Shockwave Rider *by John Brunner,
+> published in 1975. Excerpt:
+>
+> Then the answer dawned on him, and he almost laughed. Fluckner had
+> resorted to one of the oldest tricks in the store and turned loose in the
+> continental net a selfperpetuating tapeworm, probably headed by a
+> denunciation group "borrowed" from a major corporation, which would shunt
+> itself from one nexus to another every time his credit-code was punched
+> into a keyboard. It could take days to kill a worm like that, and sometim=
+es
+> weeks.
+>
+>
+In the 1983 movie "Wargames", at the very end as the staff at NORAD
+desperately try and disable the rogue artificial intelligence hell-bent on
+starting World War III, at one point they make a suggestion to send a
+"tapeworm" into the system", but it's judged too risky. They ultimately
+defeat the computer by getting it to play tic-tac-toe against itself and
+learn that nuclear war is unwinnable.
+
+        - Dan C.
+
+
+I read it in late 70s/early 80s and don't remember much of it but this bit
+> had burrowed its way in my subconscious. I have been meaning to re-read i=
+t
+> along with Stand on Zanzibar but they would be too depressing in the
+> present era!
+>
+> On Nov 4, 2019, at 10:10 AM, Paul McJones <paul@mcjones.org> wrote:
+>
+> Another possible source of inspiration =E2=80=94 including the name =E2=
+=80=9Cworm=E2=80=9D =E2=80=94 were
+> the publications by John Shoch and Jon Hupp on programs they wrote at Xer=
+ox
+> PARC around 1979-1980 and published in 1980 and 1982:
+>
+> John F. Shoch and Jon Hupp:
+>  The =E2=80=9CWorm" Programs =E2=80=94 Early Experience with a Distribute=
+d Computation.
+> Xerox SSL-80-3 and IEN 159. May 1980, revised September 1980
+> http://www.postel.org/ien/pdf/ien159.pdf
+>
+> John F. Shoch and Jon Hupp:
+>  The =E2=80=9CWorm" Programs =E2=80=94 Early Experience with a Distribute=
+d Computation.
+> CACM V25 N3 (March 1982)
+> http://www.eecs.harvard.edu/~margo/cs261/background/shoch.pdf
+>
+> On Nov 3, 2019, Paul Winalski <paul.winalski@gmail.com> wrote:
+>
+>
+> On 11/2/19, Warner Losh <imp@bsdimp.com> wrote:
+>
+>
+> the notion of a self propagating thing
+> was quite novel (even if it had been theoretically discussed in many plac=
+es
+> prior to the worm, and even though others had proven it via slower moving
+> vectors of BBS).
+>
+>
+> Novel to the Internet community, perhaps, but an idea that dates back
+> to the 1960s in IBM mainframe circles.  Self-submitting OS/360 JCL
+> jobs, which eventually caused a crash by filling the queue files with
+> jobs, were well-known in the raised-floor world.
+>
+> In hindsight people like to point at it and what a terrible thing it was,
+> but Robert just got there first.
+>
+>
+> Again, first on the Internet.  Back in 1980 I accidentally took down
+> DEC's internal engineering network (about 100 nodes, mostly VAX/VMS,
+> at the time) with a worm.  ...
+>
+> Robert Morris worked as an intern one summer in DEC's compiler group.
+> The Fortran project leader told Morris about my 1980 worm incident.
+> So he certainly had heard of the concept before he fashioned his
+> UNIX/Internet-based worm a few years later.
+>
+> -Paul W.
+>
+>
+>
+>
+
+--000000000000c6188305968b24eb
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto"><div dir=3D"ltr"><div dir=3D"ltr">On Mon, Nov 4, 2019 at =
+1:58 PM Bakul Shah &lt;<a href=3D"mailto:bakul@bitblocks.com" target=3D"_bl=
+ank" rel=3D"noreferrer">bakul@bitblocks.com</a>&gt; wrote:<br></div><div cl=
+ass=3D"gmail_quote"><blockquote class=3D"gmail_quote" style=3D"margin:0px 0=
+px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div>=
+I am surprised no one mentioned <i>The Shockwave Rider </i>by John Brunner,=
+ published in 1975. Excerpt:<div><br></div><blockquote style=3D"margin:0px =
+0px 0px 40px;border:none;padding:0px"><div>Then the answer dawned on him, a=
+nd he almost laughed. Fluckner had resorted to
+one of the oldest tricks in the store and turned loose in the continental n=
+et a selfperpetuating tapeworm, probably headed by a denunciation group &qu=
+ot;borrowed&quot; from a
+major corporation, which would shunt itself from one nexus to another every=
+ time his
+credit-code was punched into a keyboard. It could take days to kill a worm =
+like that, and
+sometimes weeks.</div></blockquote></div></blockquote><div><br></div><div>I=
+n the 1983 movie &quot;Wargames&quot;, at the very end as the staff at NORA=
+D desperately try and disable the rogue artificial intelligence hell-bent o=
+n starting World War III, at one point they make a suggestion to send a &qu=
+ot;tapeworm&quot; into the system&quot;, but it&#39;s judged too risky. The=
+y ultimately defeat the computer by getting it to play tic-tac-toe against =
+itself and learn that nuclear war is unwinnable.</div><div dir=3D"auto"><br=
+></div><div dir=3D"auto">=C2=A0 =C2=A0 =C2=A0 =C2=A0 - Dan C.</div><div dir=
+=3D"auto"><br></div><div><br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><div><div><div>I read it in late 70s/early 80s and don&#39;t rem=
+ember much of it but this bit had burrowed its way in my subconscious. I ha=
+ve been meaning to re-read it along with Stand on Zanzibar but they would b=
+e too depressing in the present era!</div><div><br><blockquote type=3D"cite=
+"><div>On Nov 4, 2019, at 10:10 AM, Paul McJones &lt;<a href=3D"mailto:paul=
+@mcjones.org" target=3D"_blank" rel=3D"noreferrer">paul@mcjones.org</a>&gt;=
+ wrote:</div><br><div><div>Another possible source of inspiration =E2=80=94=
+ including the name =E2=80=9Cworm=E2=80=9D =E2=80=94 were the publications =
+by John Shoch and Jon Hupp on programs they wrote at Xerox PARC around 1979=
+-1980 and published in 1980 and 1982:<div><br></div><div>John F. Shoch and =
+Jon Hupp:</div><div>=C2=A0The =E2=80=9CWorm&quot; Programs =E2=80=94 Early =
+Experience=C2=A0with a Distributed Computation.</div><div>Xerox SSL-80-3 an=
+d IEN 159. May 1980, revised September 1980</div><div><a href=3D"http://www=
+.postel.org/ien/pdf/ien159.pdf" target=3D"_blank" rel=3D"noreferrer">http:/=
+/www.postel.org/ien/pdf/ien159.pdf</a></div><div><br></div><div><div><div>J=
+ohn F. Shoch and Jon Hupp:</div><div>=C2=A0The =E2=80=9CWorm&quot; Programs=
+ =E2=80=94 Early Experience=C2=A0with a Distributed Computation.</div><div>=
+CACM V25 N3 (March 1982)</div><div><a href=3D"http://www.eecs.harvard.edu/~=
+margo/cs261/background/shoch.pdf" target=3D"_blank" rel=3D"noreferrer">http=
+://www.eecs.harvard.edu/~margo/cs261/background/shoch.pdf</a></div><div><br=
+></div><blockquote type=3D"cite"><div>On Nov 3, 2019, Paul Winalski &lt;<a =
+href=3D"mailto:paul.winalski@gmail.com" target=3D"_blank" rel=3D"noreferrer=
+">paul.winalski@gmail.com</a>&gt; wrote:</div></blockquote><blockquote type=
+=3D"cite"><br><div><span style=3D"font-family:Menlo-Regular;font-size:11px;=
+font-style:normal;font-variant-caps:normal;font-weight:normal;letter-spacin=
+g:normal;text-align:start;text-indent:0px;text-transform:none;white-space:n=
+ormal;word-spacing:0px;text-decoration:none;float:none;display:inline">On 1=
+1/2/19, Warner Losh &lt;</span><a href=3D"mailto:imp@bsdimp.com" style=3D"f=
+ont-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps=
+:normal;font-weight:normal;letter-spacing:normal;text-align:start;text-inde=
+nt:0px;text-transform:none;white-space:normal;word-spacing:0px" target=3D"_=
+blank" rel=3D"noreferrer">imp@bsdimp.com</a><span style=3D"font-family:Menl=
+o-Regular;font-size:11px;font-style:normal;font-variant-caps:normal;font-we=
+ight:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-tra=
+nsform:none;white-space:normal;word-spacing:0px;text-decoration:none;float:=
+none;display:inline">&gt; wrote:</span><br style=3D"font-family:Menlo-Regul=
+ar;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:no=
+rmal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:=
+none;white-space:normal;word-spacing:0px;text-decoration:none"><blockquote =
+type=3D"cite" style=3D"font-family:Menlo-Regular;font-size:11px;font-style:=
+normal;font-variant-caps:normal;font-weight:normal;letter-spacing:normal;te=
+xt-align:start;text-indent:0px;text-transform:none;white-space:normal;word-=
+spacing:0px;text-decoration:none"><br>the notion of a self propagating thin=
+g<br>was quite novel (even if it had been theoretically discussed in many p=
+laces<br>prior to the worm, and even though others had proven it via slower=
+ moving<br>vectors of BBS).<br></blockquote><br style=3D"font-family:Menlo-=
+Regular;font-size:11px;font-style:normal;font-variant-caps:normal;font-weig=
+ht:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-trans=
+form:none;white-space:normal;word-spacing:0px;text-decoration:none"><span s=
+tyle=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-var=
+iant-caps:normal;font-weight:normal;letter-spacing:normal;text-align:start;=
+text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;tex=
+t-decoration:none;float:none;display:inline">Novel to the Internet communit=
+y, perhaps, but an idea that dates back</span><br style=3D"font-family:Menl=
+o-Regular;font-size:11px;font-style:normal;font-variant-caps:normal;font-we=
+ight:normal;letter-spacing:normal;text-align:start;text-indent:0px;text-tra=
+nsform:none;white-space:normal;word-spacing:0px;text-decoration:none"><span=
+ style=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-v=
+ariant-caps:normal;font-weight:normal;letter-spacing:normal;text-align:star=
+t;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;t=
+ext-decoration:none;float:none;display:inline">to the 1960s in IBM mainfram=
+e circles.=C2=A0 Self-submitting OS/360 JCL</span><br style=3D"font-family:=
+Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:normal;fon=
+t-weight:normal;letter-spacing:normal;text-align:start;text-indent:0px;text=
+-transform:none;white-space:normal;word-spacing:0px;text-decoration:none"><=
+span style=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;fo=
+nt-variant-caps:normal;font-weight:normal;letter-spacing:normal;text-align:=
+start;text-indent:0px;text-transform:none;white-space:normal;word-spacing:0=
+px;text-decoration:none;float:none;display:inline">jobs, which eventually c=
+aused a crash by filling the queue files with</span><br style=3D"font-famil=
+y:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:normal;f=
+ont-weight:normal;letter-spacing:normal;text-align:start;text-indent:0px;te=
+xt-transform:none;white-space:normal;word-spacing:0px;text-decoration:none"=
+><span style=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;=
+font-variant-caps:normal;font-weight:normal;letter-spacing:normal;text-alig=
+n:start;text-indent:0px;text-transform:none;white-space:normal;word-spacing=
+:0px;text-decoration:none;float:none;display:inline">jobs, were well-known =
+in the raised-floor world.</span><br style=3D"font-family:Menlo-Regular;fon=
+t-size:11px;font-style:normal;font-variant-caps:normal;font-weight:normal;l=
+etter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;w=
+hite-space:normal;word-spacing:0px;text-decoration:none"><br style=3D"font-=
+family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:nor=
+mal;font-weight:normal;letter-spacing:normal;text-align:start;text-indent:0=
+px;text-transform:none;white-space:normal;word-spacing:0px;text-decoration:=
+none"><blockquote type=3D"cite" style=3D"font-family:Menlo-Regular;font-siz=
+e:11px;font-style:normal;font-variant-caps:normal;font-weight:normal;letter=
+-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-=
+space:normal;word-spacing:0px;text-decoration:none">In hindsight people lik=
+e to point at it and what a terrible thing it was,<br>but Robert just got t=
+here first.<br></blockquote><br style=3D"font-family:Menlo-Regular;font-siz=
+e:11px;font-style:normal;font-variant-caps:normal;font-weight:normal;letter=
+-spacing:normal;text-align:start;text-indent:0px;text-transform:none;white-=
+space:normal;word-spacing:0px;text-decoration:none"><span style=3D"font-fam=
+ily:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:normal=
+;font-weight:normal;letter-spacing:normal;text-align:start;text-indent:0px;=
+text-transform:none;white-space:normal;word-spacing:0px;text-decoration:non=
+e;float:none;display:inline">Again, first on the Internet.=C2=A0 Back in 19=
+80 I accidentally took down</span><br style=3D"font-family:Menlo-Regular;fo=
+nt-size:11px;font-style:normal;font-variant-caps:normal;font-weight:normal;=
+letter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;=
+white-space:normal;word-spacing:0px;text-decoration:none"><span style=3D"fo=
+nt-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:=
+normal;font-weight:normal;letter-spacing:normal;text-align:start;text-inden=
+t:0px;text-transform:none;white-space:normal;word-spacing:0px;text-decorati=
+on:none;float:none;display:inline">DEC&#39;s internal engineering network (=
+about 100 nodes, mostly VAX/VMS,</span><br style=3D"font-family:Menlo-Regul=
+ar;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:no=
+rmal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:=
+none;white-space:normal;word-spacing:0px;text-decoration:none"><span style=
+=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant=
+-caps:normal;font-weight:normal;letter-spacing:normal;text-align:start;text=
+-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;text-de=
+coration:none;float:none;display:inline">at the time) with a worm. =C2=A0..=
+.</span><br style=3D"font-family:Menlo-Regular;font-size:11px;font-style:no=
+rmal;font-variant-caps:normal;font-weight:normal;letter-spacing:normal;text=
+-align:start;text-indent:0px;text-transform:none;white-space:normal;word-sp=
+acing:0px;text-decoration:none"><br style=3D"font-family:Menlo-Regular;font=
+-size:11px;font-style:normal;font-variant-caps:normal;font-weight:normal;le=
+tter-spacing:normal;text-align:start;text-indent:0px;text-transform:none;wh=
+ite-space:normal;word-spacing:0px;text-decoration:none"><span style=3D"font=
+-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:no=
+rmal;font-weight:normal;letter-spacing:normal;text-align:start;text-indent:=
+0px;text-transform:none;white-space:normal;word-spacing:0px;text-decoration=
+:none;float:none;display:inline">Robert Morris worked as an intern one summ=
+er in DEC&#39;s compiler group.</span><br style=3D"font-family:Menlo-Regula=
+r;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:nor=
+mal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:n=
+one;white-space:normal;word-spacing:0px;text-decoration:none"><span style=
+=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant=
+-caps:normal;font-weight:normal;letter-spacing:normal;text-align:start;text=
+-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;text-de=
+coration:none;float:none;display:inline">The Fortran project leader told Mo=
+rris about my 1980 worm incident.</span><br style=3D"font-family:Menlo-Regu=
+lar;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:n=
+ormal;letter-spacing:normal;text-align:start;text-indent:0px;text-transform=
+:none;white-space:normal;word-spacing:0px;text-decoration:none"><span style=
+=3D"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant=
+-caps:normal;font-weight:normal;letter-spacing:normal;text-align:start;text=
+-indent:0px;text-transform:none;white-space:normal;word-spacing:0px;text-de=
+coration:none;float:none;display:inline">So he certainly had heard of the c=
+oncept before he fashioned his</span><br style=3D"font-family:Menlo-Regular=
+;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:norm=
+al;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:no=
+ne;white-space:normal;word-spacing:0px;text-decoration:none"><span style=3D=
+"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-ca=
+ps:normal;font-weight:normal;letter-spacing:normal;text-align:start;text-in=
+dent:0px;text-transform:none;white-space:normal;word-spacing:0px;text-decor=
+ation:none;float:none;display:inline">UNIX/Internet-based worm a few years =
+later.</span><br style=3D"font-family:Menlo-Regular;font-size:11px;font-sty=
+le:normal;font-variant-caps:normal;font-weight:normal;letter-spacing:normal=
+;text-align:start;text-indent:0px;text-transform:none;white-space:normal;wo=
+rd-spacing:0px;text-decoration:none"><br style=3D"font-family:Menlo-Regular=
+;font-size:11px;font-style:normal;font-variant-caps:normal;font-weight:norm=
+al;letter-spacing:normal;text-align:start;text-indent:0px;text-transform:no=
+ne;white-space:normal;word-spacing:0px;text-decoration:none"><span style=3D=
+"font-family:Menlo-Regular;font-size:11px;font-style:normal;font-variant-ca=
+ps:normal;font-weight:normal;letter-spacing:normal;text-align:start;text-in=
+dent:0px;text-transform:none;white-space:normal;word-spacing:0px;text-decor=
+ation:none;float:none;display:inline">-Paul W.</span><br style=3D"font-fami=
+ly:Menlo-Regular;font-size:11px;font-style:normal;font-variant-caps:normal;=
+font-weight:normal;letter-spacing:normal;text-align:start;text-indent:0px;t=
+ext-transform:none;white-space:normal;word-spacing:0px;text-decoration:none=
+"></div></blockquote></div><br></div></div></div></blockquote></div><br></d=
+iv></div></blockquote></div></div></div>
+
+--000000000000c6188305968b24eb--

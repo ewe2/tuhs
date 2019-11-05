@@ -1,0 +1,157 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4780217b
+	for <ml@inbox.vuxu.org>;
+	Tue, 29 Oct 2019 03:58:34 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6FB089B57D; Tue, 29 Oct 2019 13:58:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B5A3993D9E;
+	Tue, 29 Oct 2019 13:58:04 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="RCD7R1BN";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BE86093D9E; Tue, 29 Oct 2019 13:58:01 +1000 (AEST)
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com
+ [209.85.222.169])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A8B2693D5A
+ for <tuhs@tuhs.org>; Tue, 29 Oct 2019 13:58:00 +1000 (AEST)
+Received: by mail-qk1-f169.google.com with SMTP id 15so10910441qkh.6
+ for <tuhs@tuhs.org>; Mon, 28 Oct 2019 20:58:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=vdbwB/1OMdnhKNdu0+8kLpUZcso3BV3qmDYqcKZ7ab4=;
+ b=RCD7R1BNx0ESbNqFDw0FOgtoWrm5i3jdpgaqQ//Wb5M0tkKmlV+s9w9g5SDxC2XA4q
+ TJtku9nXktkL2kWgdeOwMR7RKXV51SQcUz71pvDJHuFbA6IjbqMFGhBu/CQgMMkaSwLn
+ X2tKb/20JK6JX93SkhpYhQiAR6QjX3PiA84B4jNCo8SIxWEczsXTYG9jVu03WtI3qqsr
+ Ub0BuhDiASd+dslOd9kBiWgVRo6KIAt1calEVCsBT21VHpVYf/M8iCbTi1j1gKKdfbbB
+ xSxyiLRT9S6j/ngxKhig/X2G/0eDikAarFqttdFMz6KgWIq7MtToGQwXW6Q2km+4KZxT
+ 4bkw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=vdbwB/1OMdnhKNdu0+8kLpUZcso3BV3qmDYqcKZ7ab4=;
+ b=dWvicVRDXgWq31P5ZxKAG74jjMuHFg86+vJa3abXWW++MeaIHdiqUe15235SWmNJVc
+ mELMYgVIe80jYRca7/NODcqx5DC1TLLkRyWWLTf7tMHLkOuFf3MK2uki6I0rYSnAoMvo
+ 9sxjphidTwAIOKKk8x094QgYln+66d+UmAzEZw/PF2ICuaFyob+ga1zGP9KaA1DfR9/f
+ g07vvzjVkwkJCOLHP1U5Jcuj0OwAAP1HinLISUnIS1Qz1CqGCm+lm8bnKnJiB86oQpLA
+ Q72VuDCYMAOIR5EKwzxn36W6CigBC3W9xR3sAk5benEHa3je6SkN7JfCicml8Q6V38kK
+ bm5A==
+X-Gm-Message-State: APjAAAUIRO9fxaEvA5tOrHHbmptuh+pci/C7HDlCJN6d3JjQpXTLrk5l
+ bjxrrwaygDak50ExOORpEpFl5aIEXPKQnTNozBeB+i7HwJA=
+X-Google-Smtp-Source: APXvYqzqTxwGEYv1cpoZFFBK7IhTvImXOsPb2Al3O7w3ibAL1DZuWaTCNRU4B+z3r/OeeyT2yajc1JPv+6A7jHft0b0=
+X-Received: by 2002:a37:b07:: with SMTP id 7mr18390717qkl.240.1572321479214;
+ Mon, 28 Oct 2019 20:57:59 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191029021843.GA24461@minnie.tuhs.org>
+In-Reply-To: <20191029021843.GA24461@minnie.tuhs.org>
+From: Warner Losh <imp@bsdimp.com>
+Date: Mon, 28 Oct 2019 21:57:47 -0600
+Message-ID: <CANCZdfoBWKZabCsSF0NZTKhnX_p2LvdH9mcvRWrziYpgMiLB3g@mail.gmail.com>
+To: Warren Toomey <wkt@tuhs.org>
+Content-Type: multipart/alternative; boundary="0000000000003ddb2d0596049f9c"
+Subject: Re: [TUHS] Fwd: UNIX-7 boots on sn 129
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000003ddb2d0596049f9c
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+That's awesome. I'll wager it is only the second PDP-7 to boot unix, and
+the first PDP-7A. And maybe the 6th machine ever. Well done.
+
+Warner
+
+On Mon, Oct 28, 2019, 8:19 PM Warren Toomey <wkt@tuhs.org> wrote:
+
+> All, I just received this from Stephen Jones at the LCM+L.
+>
+> ----- Forwarded message from Stephen Jones <StephenJo@livingcomputers.org=
+>
+> -----
+>
+> Subject: UNIX-7 boots on sn 129
+>
+>    Hello Folks .. you=E2=80=99ll hear through official channels along wit=
+h videos
+>    and pictures (hopefully soon) that we just got PDP-7 UNICS to boot on
+>    a real PDP-7 (sn 129) using our newly designed =E2=80=9CJK09=E2=80=9D =
+disk drive.
+>
+>    The recent posting of source is going to be great .. we=E2=80=99ve bee=
+n using
+>    the simh image that has been available for a while.
+>
+>    BTW, compiling the B Hello World on a real 7 is much more satisfying
+>    than it is under simh =E2=80=A6
+>
+>    More to come, please watch Living Computers for updates.
+>    (PS sorry we=E2=80=99re late to the BTL party).
+>
+>    Stephen M. Jones
+> ----- End forwarded message -----
+>
+
+--0000000000003ddb2d0596049f9c
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">That&#39;s awesome. I&#39;ll wager it is only the second =
+PDP-7 to boot unix, and the first PDP-7A. And maybe the 6th machine ever. W=
+ell done.<div dir=3D"auto"><br></div><div dir=3D"auto">Warner</div></div><b=
+r><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Mon, =
+Oct 28, 2019, 8:19 PM Warren Toomey &lt;<a href=3D"mailto:wkt@tuhs.org">wkt=
+@tuhs.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">All, I j=
+ust received this from Stephen Jones at the LCM+L.<br>
+<br>
+----- Forwarded message from Stephen Jones &lt;<a href=3D"mailto:StephenJo@=
+livingcomputers.org" target=3D"_blank" rel=3D"noreferrer">StephenJo@livingc=
+omputers.org</a>&gt; -----<br>
+<br>
+Subject: UNIX-7 boots on sn 129<br>
+<br>
+=C2=A0 =C2=A0Hello Folks .. you=E2=80=99ll hear through official channels a=
+long with videos<br>
+=C2=A0 =C2=A0and pictures (hopefully soon) that we just got PDP-7 UNICS to =
+boot on<br>
+=C2=A0 =C2=A0a real PDP-7 (sn 129) using our newly designed =E2=80=9CJK09=
+=E2=80=9D disk drive.<br>
+<br>
+=C2=A0 =C2=A0The recent posting of source is going to be great .. we=E2=80=
+=99ve been using<br>
+=C2=A0 =C2=A0the simh image that has been available for a while.<br>
+<br>
+=C2=A0 =C2=A0BTW, compiling the B Hello World on a real 7 is much more sati=
+sfying<br>
+=C2=A0 =C2=A0than it is under simh =E2=80=A6<br>
+<br>
+=C2=A0 =C2=A0More to come, please watch Living Computers for updates.<br>
+=C2=A0 =C2=A0(PS sorry we=E2=80=99re late to the BTL party).<br>
+<br>
+=C2=A0 =C2=A0Stephen M. Jones<br>
+----- End forwarded message -----<br>
+</blockquote></div>
+
+--0000000000003ddb2d0596049f9c--
