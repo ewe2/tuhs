@@ -1,0 +1,135 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8995a224
+	for <ml@inbox.vuxu.org>;
+	Tue, 12 Nov 2019 23:45:56 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 81F6B9C10C; Wed, 13 Nov 2019 09:45:55 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8E06B9BB79;
+	Wed, 13 Nov 2019 09:45:28 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 54B839BB79; Wed, 13 Nov 2019 09:45:26 +1000 (AEST)
+Received: from darkstar.fourwinds.com (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BA98A9BB5B
+ for <tuhs@tuhs.org>; Wed, 13 Nov 2019 09:45:25 +1000 (AEST)
+Received: from darkstar.fourwinds.com (localhost [127.0.0.1])
+ by darkstar.fourwinds.com (8.15.2/8.15.2) with ESMTPS id xACNjOsM571688
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
+ for <tuhs@tuhs.org>; Tue, 12 Nov 2019 15:45:24 -0800
+Received: from darkstar.fourwinds.com (jon@localhost)
+ by darkstar.fourwinds.com (8.15.2/8.15.2/Submit) with ESMTP id xACNjOhg571685
+ for <tuhs@tuhs.org>; Tue, 12 Nov 2019 15:45:24 -0800
+Message-Id: <201911122345.xACNjOhg571685@darkstar.fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: tuhs@tuhs.org
+In-reply-to: <20191112224151.GA36336@fuz.su>
+References: <1573592179.5935.for-standards-violators@oclsc.org>
+ <20191112221053.C2009156E80B@mail.bitblocks.com>
+ <20191112221418.GJ16268@mcvoy.com> <20191112224151.GA36336@fuz.su>
+Comments: In-reply-to Robert Clausecker <fuz@fuz.su>
+ message dated "Tue, 12 Nov 2019 23:41:51 +0100."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-ID: <571683.1573602323.1@darkstar.fourwinds.com>
+Content-Transfer-Encoding: 8bit
+Date: Tue, 12 Nov 2019 15:45:23 -0800
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] buffer overflow (Re: Happy birthday Morris worm
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Robert Clausecker writes:
+> Oh please no.  One of the things we've hopefully all learned from Pascal
+> is that length-prefixed strings suck because you can't perform anything
+> useful without copying the entire string.  Rob Pike and friends showed
+> how to get strings and vectors right in the Go language where you have a
+> builtin slice type which is essentially a structure
+>
+>     struct slice(type) {
+>             type *data;
+>             size_t len, cap;
+>     };
+>
+> where data points to a buffer, len is the length of meaningful data in
+> that buffer and cap is the total buffer size.  This allows the language
+> to take subslices and to append to existing slices without requiring
+> copies in most cases.  If a copy is necessary, the runtime can allocate
+> a slightly larger buffer in advance to allow for appending in amortised
+> linear time.
+>
+> Overall, much more versatile than Pascal strings.
+>
+> But let's get back to the topic, after all I promised not to flame as
+> much as Jörg did.
+>
+> Yours,
+> Robert Clausecker
+>
+> On Tue, Nov 12, 2019 at 02:14:18PM -0800, Larry McVoy wrote:
+> > On Tue, Nov 12, 2019 at 02:10:46PM -0800, Bakul Shah wrote:
+> > > On Tue, 12 Nov 2019 15:56:15 -0500 Norman Wilson <norman@oclsc.org> wrote:
+> > > >
+> > > > My longer-term reaction was to completely drop my sloppy
+> > > > old habit (common in those days not just in my code but in
+> > > > that of many others) of ignoring possible buffer overflows.
+> > > > I find it mind-boggling that people still make that mistake;
+> > > > it has been literal decades since the lesson was rubbed in
+> > > > our community's collective noses.  I am very disappointed
+> > > > that programming education seems not to care enough about
+> > > > this sort of thing, even today.
+> > > 
+> > > Unfortunately strcpy & other buffer overflow friendly
+> > > functions are still present in the C standard (I am looking at
+> > > n2434.pdf, draft of Sept 25, 2019). Is C really not fixable?
+> > 
+> > Someone needs to do Strcpy() etc that have the length in the 
+> > first bytes[s] of the string.
+> > -- 
+> > ---
+> > Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
+
+OK, been biting my tongue here.  I, for one, appreciate the fact that
+it's still legal to purchase and use power tools.  I like being able
+to use my chainsaw to cut up a tree without having to measure it first.
+And I don't have a variety of tree here that contains its length at the
+base.  Sure, things can go wrong; I have a scar on one leg to prove it.
+But that just shows that I need to be more careful, not that I need to
+try logging with a safety razor.
+
+C strings were great at the time, and are still great, especially in
+very small systems.  Go may be nicer in larger systems but I probably
+wouldn't want the overhead in a small embedded system.  The length at
+the start of a string has its issues too; do you want to consume 8
+bytes at the start of each string on a 64-bit machine, or have strings
+that can support different lengths and have to deal with converting
+between them?
+
+Programming isn't a good place for careless people.  I recognize that
+what passes for "software technology" these days is coming up with
+mechanisms that minimize the damage that can be done by unskilled
+people.  But it's never gonna work.  Sure, you can replace pointer
+problems with reference problems and so on, but that doesn't really
+solve anything.
+
+So let's not rehash our favorite arguments about strings until Warren
+shuts down the discussion.  Use that energy to get out there and teach
+people to be better and more careful programmers.
+
+Jon
