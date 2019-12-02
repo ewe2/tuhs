@@ -1,0 +1,175 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id b8899e93
+	for <ml@inbox.vuxu.org>;
+	Mon, 2 Dec 2019 18:37:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2D5399B795; Tue,  3 Dec 2019 04:37:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A9E489B782;
+	Tue,  3 Dec 2019 04:36:44 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E10809B782; Tue,  3 Dec 2019 04:36:40 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 97C8494BF2
+ for <tuhs@tuhs.org>; Tue,  3 Dec 2019 04:36:39 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 7095D16054; Mon,  2 Dec 2019 19:36:37 +0100 (CET)
+Date: Mon, 02 Dec 2019 19:36:36 +0100
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Message-ID: <20191202183636.KlLB9%steffen@sdaoden.eu>
+In-Reply-To: <m1ibDzG-0036tPC@more.local>
+References: <m1iVoBV-0036tPC@more.local>
+ <20191129215258.Vgu-C%steffen@sdaoden.eu> <m1ibDzG-0036tPC@more.local>
+Mail-Followup-To: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+User-Agent: s-nail v14.9.15-250-g50ff6cbd
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] another conversion of the CSRG BSD SCCS archives to Git
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hello.
+
+Please excuse the late reply.
+
+Greg A. Woods wrote in <m1ibDzG-0036tPC@more.local>:
+ |At Fri, 29 Nov 2019 22:52:58 +0100, Steffen Nurpmeso <steffen@sdaoden.eu>=
+ \
+ |wrote:
+ |Subject: Re: [TUHS] another conversion of the CSRG BSD SCCS archives to G=
+it
+ |> Greg A. Woods wrote in <m1iVoBV-0036tPC@more.local>:
+ |>|I've been fixing and enhancing James Youngman's git-sccsimport to use
+ |>|with some of my SCCS archives, and I thought it might be the ultimate
+ |>|stress test of it to convert the CSRG BSD SCCS archives.
+ |>|
+ |>|The conversion takes about an hour to run on my old-ish Dell server.
+ |>|
+ |>|This conversion is unlike others -- there is some mechanical compression
+ |>|of related deltas into a single Git commit.
+ |>|
+ |>|https://github.com/robohack/ucb-csrg-bsd
+ |>
+ |> Thanks for taking the time to produce a CSRG repo that seems to
+ |> mimic changesets as they really happened.  As i never made it
+ |> there on my own, i have switched to yours some weeks ago.  (Mind
+ |> you, after doing "gc --aggressive --prune=3Dall" the repository size
+ ...
+ |Ah!  I did indeed forget the "git gc" step that many conversion guides
+ |recommend.  I might change the import script to do that automatically,
+ |particularly if it has also initialised the repository in the same run.
+ |
+ |Apparently github themselves run it regularly:
+ |
+ | https://stackoverflow.com/a/56020315/816536
+ |
+ |Probably they do this by configuring "gc.auto" in each repository,
+ |though I've not found any reference to what they might configure it to.
+
+I do not know either, but i have the impression they work with
+individual repositories, possibly doing deduplication on the
+filesystem level, if at all.  (Some repositories shrink notably,
+while others do not.  And i say that because i think bitbucket,
+once they added git support, seemed to have used common storage
+for the individual git objects, at least i remember a post
+pointing to some git object <-> python <-> mercurial library
+layer.)
+
+ |However it seems that without the "--aggressive" option, nothing will be
+ |done in this repository.  With it though I go from 316M down to just 71M.
+
+It throws away intermediate full data and keeps only the deltas.
+It can also throw away reflog info (which i never have used).
+I always use it.  Now with my new machine i can even use it for
+the BSD repositories etc., whereas before each update added its
+own pack, and the normal gc only combined the packs, but did not
+resolve the intermediate deltas.  (Note however i have learned git
+almost a decade ago, and have not reread the documentation or
+technical papers ever since, let alone in full.)
+
+ |I don't see any way to force/tell/ask github to run "git gc --aggressive".
+
+Very computing intensive task.  Back when i was subscribed to the
+git ML around 2011 i was witness of Hamano asking and Jeff King
+(from Github by then) responding something like "[it is ok but] gc
+aggressive is a pain".  They must have changed the algorithm until
+then, now going much more over main memory and requiring much more
+of it, too, not truly honouring the provided pack.windowMemory /
+pack.threads options (once i tried last).  It has no recovery path
+too, for example my old machine could not garbage collect the
+FreeBSD repository, i even let it work almost over night (5+
+hours), and it did not made it, whereas my new one can do it in
+a few minutes, despite the CPUs not being that much faster, it is
+only about the memory (8GB instead of 2GB).
+
+I sometimes think about the fact that a lot of software seems to
+loose its capability to run in restricted environments.  Providing
+alternative runtime solutions is coding etc. intensive, of course,
+and in the way of a rapid development process, too.
+
+ |Perhaps I can just delete it from github and immediately re-create it
+ |with the re-packed repository, and in theory all the hashes should stay
+ |the same and any existing clones should be unaffected.  What do you think?
+
+=46rom the technical point i think this should simply work.  But No
+need to delete the repository, simply deleting the branch should
+be enough.  (Or fooling around with the update-ref that i often
+use, as in "update-ref newmaster master" "checkout newmaster",
+"branch -D master" (or "update-ref -d master"), then pushing, then
+re-renaming newmaster to master, and pushing again, etc.)
+
+Would be interesting to know how github does deduplication.  The
+real great ones of Bell Labs/Plan9 developed this venti / fossil
+storage with the blockhash-based permanent storage, and despite
+all the multimedia the curve of new allocation flattened after
+some time.  I would assume github would benefit dramatically from
+deduplication.
+
+ |Note I have some thoughts of re-doing the whole conversion anyway, with
+ |with more ideas on to dealing with "removed" files (SCCS files renamed
+ |to the likes of "S.foo") and also including the many files that were
+ |never checked into SCCS, perhaps even on a per-release basis, thus being
+ |able to create release tags that can be checked out to match the actual
+ |releases on the CDs.  But this will not happen quite so soon.
+
+That would be nice; having the real changesets is a real
+improvement already and however!  And even Spinellis Unix history
+repository seems not to be perfect even after years, i heard on
+some FreeBSD ML list.
+Ciao,
+
+ |     Greg A. Woods <gwoods@acm.org>
+ |
+ |Kelowna, BC     +1 250 762-7675           RoboHack <woods@robohack.ca>
+ |Planix, Inc. <woods@planix.com>     Avoncote Farms <woods@avoncote.ca>
+ --End of <m1ibDzG-0036tPC@more.local>
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
