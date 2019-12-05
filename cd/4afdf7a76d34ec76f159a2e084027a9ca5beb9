@@ -1,0 +1,258 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 6133dca9
+	for <ml@inbox.vuxu.org>;
+	Thu, 5 Dec 2019 19:38:30 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id F275B9BCCF; Fri,  6 Dec 2019 05:38:28 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 776569B57D;
+	Fri,  6 Dec 2019 05:38:06 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="BE85845w";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 90FDC9B57D; Fri,  6 Dec 2019 05:38:03 +1000 (AEST)
+Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com
+ [209.85.222.178])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4367A93D35
+ for <tuhs@minnie.tuhs.org>; Fri,  6 Dec 2019 05:38:02 +1000 (AEST)
+Received: by mail-qk1-f178.google.com with SMTP id c124so4421128qkg.0
+ for <tuhs@minnie.tuhs.org>; Thu, 05 Dec 2019 11:38:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=wa5wXZM7ULI+3QTYf6b9c2zN8PX7OBBjq5HSiI2HjdQ=;
+ b=BE85845wqLRTNOQD9MW0/a8zpO0gb3Q6THD5sztiQI5PUlXXA4bqXUYSWd06KRIJLn
+ pHaabA9cMDy0wwlEa7AsZGRalsWS9CA7UudqA8qE8D5bRia+vSb6O82pRLb9iucN2aql
+ nFKfbX5CNVVJIgX5rC6cUhpqQIZDQTU92cvrdK4GeKDDYlkA82CCTooNy2n4pPVXX9L7
+ pBA1i/Ju6zTSAnalhqa8Wm2yOgVB3YCCN0MHx8YZMI70e82aWCD2bwPSYzxZh416vm6D
+ 1SVjuTx0TZIfl/B1Md/4ytDC1zFI7JI6zJAOXiooimrSYlx2LMGN/3P88tSNLwNWvDUQ
+ JoCQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=wa5wXZM7ULI+3QTYf6b9c2zN8PX7OBBjq5HSiI2HjdQ=;
+ b=dckwZETswSWKYcHZd21jk7wD+reG94eXlFQnIKQM68Q27hzjiKi4Qjn4VyyD/q5v1W
+ D7Rhwvhkx4PPMDlKT8YpCUCQLX9Sq2rCyqxl6d9eH+2Qi2k67j+kdrLq7BSNOKwTSzh9
+ Or7Mq7sPuTw/WVlLJXYCgfirEMrhQUurznYJZh0eIut+ml1+HyRiTTYfdrsn6IIvlOaV
+ QjZR1HURFl+22EtbA4uAo640T8Wx5p6rJI3ubBHJO/1BFLNf0OiUGpfPRQ98QTlcTSob
+ 5g7lUzWjz8ZtFeCzlhikQ6uud6SfkUqHmDOXdA7zhSNdIlck1ZGTFkD4u9sBjbKfX/+H
+ UZEA==
+X-Gm-Message-State: APjAAAUgN06Bm5fJd6CxN/d386q6DSn6ognfjv2vaDo26qxa8PkS0wUx
+ /uqm5/QCvo4/ZQMGvh6iPrblQlvt88kyNeZLm9WeJTjbPvMVVQ==
+X-Google-Smtp-Source: APXvYqx5uXPa5HyHb8WPsPQrgRWfuHEQp/3xitrERam7pfcQf7Q2/HbilfSExNI36Rt/fxyn97g3i/8rbWc9kIT1ioM=
+X-Received: by 2002:a37:b0c5:: with SMTP id z188mr3648050qke.215.1575574681054; 
+ Thu, 05 Dec 2019 11:38:01 -0800 (PST)
+MIME-Version: 1.0
+References: <20191205190546.AE4E418C089@mercury.lcs.mit.edu>
+ <0e2901d5aba1$2932ff30$7b98fd90$@ronnatalie.com>
+In-Reply-To: <0e2901d5aba1$2932ff30$7b98fd90$@ronnatalie.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Thu, 5 Dec 2019 12:37:50 -0700
+Message-ID: <CANCZdfpU8=3zrGmpTtU-tsUP+FNhd80YByT39-mkNf-2iQuqkA@mail.gmail.com>
+To: Ronald Natalie <ron@ronnatalie.com>
+Content-Type: multipart/alternative; boundary="0000000000002e92e60598fa1195"
+Subject: Re: [TUHS] Origins of PPP
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000002e92e60598fa1195
+Content-Type: text/plain; charset="UTF-8"
+
+FreeBSD 1.0 shipped if_ppp.c, the kernel version of PPP which predated the
+userland version ppd, with the following headers:
+
+/*
+ * if_ppp.c - Point-to-Point Protocol (PPP) Asynchronous driver.
+ *
+ * Copyright (c) 1989 Carnegie Mellon University.
+ * All rights reserved.
+
+and later
+/*
+ *      $Id: if_ppp.c,v 1.4 1993/10/07 02:19:37 rgrimes Exp $
+ *      From: if_ppp.c,v 1.22 1993/08/31 23:20:40 paulus Exp
+ *      From: if_ppp.c,v 1.21 1993/08/29 11:22:37 paulus Exp
+ *      From: if_sl.c,v 1.11 84/10/04 12:54:47 rick Exp
+ */
+
+the $id line is FreeBSD's modification of this file in 1993. I'm unsure
+where the paulus files came from, but maybe netbsd, which has the earliest
+two ppp revs as:
+
+commit 2db2cc6845660ec5ce837a05838fb49f999903c6
+Author: paulus <paulus@netbsd.org>
+Date:   Tue Aug 31 00:05:31 1993 +0000
+
+    Modified if_ppp.c and if_ppp.h to add priority queueing for
+"interactive"
+    traffic (done in a similar fashion to if_sl.c), and BPF support.
+
+commit 0e20c036228474457205bae6fd791d9029dc85eb
+Author: deraadt <deraadt@netbsd.org>
+Date:   Sat Aug 14 06:38:50 1993 +0000
+
+    ppp from paul mackerras
+
+But it's not in NET/2. I've not checked 386BSD to see if it was in there,
+or not (since both FreeBSD 1.0 and NetBSD started from the tainted first
+4.4 BSD release). It's not in the 4.4 alpha BSD archive in the tuhs
+archive. Looks like it's from CMU, but I can't find earlier versions that
+Paul distributed with my quick google search, maybe others can find it?
+
+FreeBSD removed if_ppp.c in around FreeBSD 5 because it wasn't working due
+to the sorry state of the SMPification of the tty code interacting poorly
+with the slightyly less sorry state of the SMPification of the networks
+stack at the time and reconciling the differences was too hard. userland
+pppd worked just as well and had none of the thorny locking issues of a
+kernel bit of code that was trying to bridge two different domains.
+
+Warner
+
+On Thu, Dec 5, 2019 at 12:21 PM <ron@ronnatalie.com> wrote:
+
+> I still remember the laughter at the IETC when someone asked if PPP stood
+> for "Philip Pindeville's Protocol."
+>
+>
+> > -----Original Message-----
+> > From: TUHS <tuhs-bounces@minnie.tuhs.org> On Behalf Of Noel Chiappa
+> > Sent: Thursday, December 5, 2019 2:06 PM
+> > To: tuhs@minnie.tuhs.org
+> > Cc: jnc@mercury.lcs.mit.edu
+> > Subject: Re: [TUHS] Origins of PPP
+> >
+> >     > From: Paul Ruizendaal
+> >
+> >     > I'm looking for the origins of SLIP and PPP on Unix. Both seem to
+> have
+> >     > been developed long before their RFC's appeared.
+> >
+> > You're dealing with an epoch when the IETF motto - "rough consensus and
+> > running code" - really meant something. Formal RFC's way lagged protocol
+> > development; they're the last step in the process, pretty much.
+> >
+> > If you want to study the history, you'd need to look at Internet Drafts
+> (if
+> > they're still online). Failing that, look at the IETF Proceedings; I
+> think
+> all the
+> > ones from this period have been scanned in. They won't have the detail
+> that
+> > the I-D's would have, but they should give the rough outlines of the
+> history.
+> >
+> >       Noel
+>
+>
+
+--0000000000002e92e60598fa1195
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr">FreeBSD 1.0 shipped if_ppp.c, the kernel =
+version of PPP which predated the userland version ppd, with the following =
+headers:<div><br></div><div>/*</div><div>=C2=A0* if_ppp.c - Point-to-Point =
+Protocol (PPP) Asynchronous driver.<br>=C2=A0*<br>=C2=A0* Copyright (c) 198=
+9 Carnegie Mellon University.<br>=C2=A0* All rights reserved.<br></div><div=
+><br></div><div>and later</div><div>/*<br>=C2=A0* =C2=A0 =C2=A0 =C2=A0$Id: =
+if_ppp.c,v 1.4 1993/10/07 02:19:37 rgrimes Exp $<br>=C2=A0* =C2=A0 =C2=A0 =
+=C2=A0From: if_ppp.c,v 1.22 1993/08/31 23:20:40 paulus Exp<br>=C2=A0* =C2=
+=A0 =C2=A0 =C2=A0From: if_ppp.c,v 1.21 1993/08/29 11:22:37 paulus Exp<br>=
+=C2=A0* =C2=A0 =C2=A0 =C2=A0From: if_sl.c,v 1.11 84/10/04 12:54:47 rick Exp=
+<br>=C2=A0*/<br></div><div><br></div><div>the $id line is FreeBSD&#39;s mod=
+ification of this file in 1993. I&#39;m unsure where the paulus files came =
+from, but maybe netbsd, which has the earliest two ppp revs as:</div><div><=
+br></div><div>commit 2db2cc6845660ec5ce837a05838fb49f999903c6<br>Author: pa=
+ulus &lt;<a href=3D"mailto:paulus@netbsd.org">paulus@netbsd.org</a>&gt;<br>=
+Date: =C2=A0 Tue Aug 31 00:05:31 1993 +0000<br><br>=C2=A0 =C2=A0 Modified i=
+f_ppp.c and if_ppp.h to add priority queueing for &quot;interactive&quot;<b=
+r>=C2=A0 =C2=A0 traffic (done in a similar fashion to if_sl.c), and BPF sup=
+port.<br><br>commit 0e20c036228474457205bae6fd791d9029dc85eb<br>Author: der=
+aadt &lt;<a href=3D"mailto:deraadt@netbsd.org">deraadt@netbsd.org</a>&gt;<b=
+r>Date: =C2=A0 Sat Aug 14 06:38:50 1993 +0000<br><br>=C2=A0 =C2=A0 ppp from=
+ paul mackerras<br></div><div><br></div><div>But it&#39;s not in NET/2. I&#=
+39;ve not checked 386BSD to see if it was in there, or not (since both Free=
+BSD 1.0 and NetBSD started from the tainted first 4.4 BSD release). It&#39;=
+s not in the 4.4 alpha BSD archive in the tuhs archive. Looks like it&#39;s=
+ from CMU, but I can&#39;t find earlier versions that Paul distributed with=
+ my quick google search, maybe others can find it?</div><div><br></div><div=
+>FreeBSD removed if_ppp.c in around FreeBSD 5 because it wasn&#39;t working=
+ due to the sorry state of the SMPification of the tty code interacting poo=
+rly with the slightyly=C2=A0less sorry state of the SMPification of the net=
+works stack at the time and reconciling the differences was too hard. userl=
+and pppd worked just as well and had none of the thorny locking issues of a=
+ kernel bit of code that was trying to bridge two different domains.</div><=
+div><br></div><div>Warner<br></div></div><br><div class=3D"gmail_quote"><di=
+v dir=3D"ltr" class=3D"gmail_attr">On Thu, Dec 5, 2019 at 12:21 PM &lt;<a h=
+ref=3D"mailto:ron@ronnatalie.com">ron@ronnatalie.com</a>&gt; wrote:<br></di=
+v><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;borde=
+r-left:1px solid rgb(204,204,204);padding-left:1ex">I still remember the la=
+ughter at the IETC when someone asked if PPP stood<br>
+for &quot;Philip Pindeville&#39;s Protocol.&quot;<br>
+<br>
+<br>
+&gt; -----Original Message-----<br>
+&gt; From: TUHS &lt;<a href=3D"mailto:tuhs-bounces@minnie.tuhs.org" target=
+=3D"_blank">tuhs-bounces@minnie.tuhs.org</a>&gt; On Behalf Of Noel Chiappa<=
+br>
+&gt; Sent: Thursday, December 5, 2019 2:06 PM<br>
+&gt; To: <a href=3D"mailto:tuhs@minnie.tuhs.org" target=3D"_blank">tuhs@min=
+nie.tuhs.org</a><br>
+&gt; Cc: <a href=3D"mailto:jnc@mercury.lcs.mit.edu" target=3D"_blank">jnc@m=
+ercury.lcs.mit.edu</a><br>
+&gt; Subject: Re: [TUHS] Origins of PPP<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0&gt; From: Paul Ruizendaal<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0&gt; I&#39;m looking for the origins of SLIP and PP=
+P on Unix. Both seem to<br>
+have<br>
+&gt;=C2=A0 =C2=A0 =C2=A0&gt; been developed long before their RFC&#39;s app=
+eared.<br>
+&gt; <br>
+&gt; You&#39;re dealing with an epoch when the IETF motto - &quot;rough con=
+sensus and<br>
+&gt; running code&quot; - really meant something. Formal RFC&#39;s way lagg=
+ed protocol<br>
+&gt; development; they&#39;re the last step in the process, pretty much.<br=
+>
+&gt; <br>
+&gt; If you want to study the history, you&#39;d need to look at Internet D=
+rafts<br>
+(if<br>
+&gt; they&#39;re still online). Failing that, look at the IETF Proceedings;=
+ I think<br>
+all the<br>
+&gt; ones from this period have been scanned in. They won&#39;t have the de=
+tail<br>
+that<br>
+&gt; the I-D&#39;s would have, but they should give the rough outlines of t=
+he<br>
+history.<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0Noel<br>
+<br>
+</blockquote></div></div>
+
+--0000000000002e92e60598fa1195--
