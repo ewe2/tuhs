@@ -1,0 +1,115 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=FAKE_REPLY_C,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 5cb93e61
+	for <ml@inbox.vuxu.org>;
+	Thu, 14 Nov 2019 01:36:00 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1AAC49C13B; Thu, 14 Nov 2019 11:35:59 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2FA8893D97;
+	Thu, 14 Nov 2019 11:35:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AD77293D97; Thu, 14 Nov 2019 11:35:22 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 07D3693D52
+ for <tuhs@tuhs.org>; Thu, 14 Nov 2019 11:35:22 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 9E1F235E104; Wed, 13 Nov 2019 17:35:21 -0800 (PST)
+Date: Wed, 13 Nov 2019 17:35:21 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: tuhs@tuhs.org
+Message-ID: <20191114013521.GB10732@mcvoy.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] #defines and enums
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+FYI.
+
+----- Forwarded message from Linus Torvalds <torvalds@linux-foundation.org> -----
+
+Date: Wed, 13 Nov 2019 12:37:50 -0800
+From: Linus Torvalds <torvalds@linux-foundation.org>
+To: Larry McVoy <lm@mcvoy.com>
+Subject: Re: enum style?
+
+On Wed, Nov 13, 2019 at 10:28 AM Larry McVoy <lm@mcvoy.com> wrote:
+>
+> and asked what was the point of the #defines.  I couldn't answer, the only
+> thing I can think of is so you can say
+>
+>         int     flags = MS_RDONLY;
+>
+> Which is cool, but why bother with the enum?
+
+For the kernel we actually have this special "type-safe enum" checker
+thing, which warns about assigning one enum type to another.
+
+It's not really C, but it's close. It's the same tool we use for some
+other kernel-specific type checking (user pointers vs kernel pointers
+etc): 'sparse'.
+
+  http://man7.org/linux/man-pages/man1/sparse.1.html
+
+and in particular the "-Wenum-mismatch" flag to enable that warning
+when you assign an enum to another enum.
+
+It's quite useful for verifying that you pass the right kind of enum
+to functions etc - which is a really easy mistake to make in C, since
+they all just devolve into 'int' when they are used.
+
+However, we don't use it for the MS_xyz flag: those are just plain
+#define's in the kernel. But maybe somebody at some point wanted to do
+something similar for the ones you point at?
+
+The only other reason I can think of is that somebody really wanted to
+use an enum for namespace reasons, and then noticed that other people
+had used a #define and used "#ifdef XYZ" to check whether it was
+available, and then instead of changing the enums to #defines, they
+just added the self-defines.
+
+In the kernel we do that "use #define for discoberability" quite a lot
+particularly with architecture-specific helper functions. So you migth
+have
+
+   static inline some_arch_fn(..) ...
+   #define some_arch_fn some_arch_fn
+
+in an architecture file, and then in generic code we have
+
+   #ifndef some_arch_fn
+   static inline some_arch_fn(.,,) /* generic implemenbtation goes here */
+   #endif
+
+as a way to avoid extra configuration variables for the "do I have a
+special version X?"
+
+There's no way to ask "is the C symbol X available in this scope", so
+using the pre-processor for that is as close as you can get.
+
+               Linus
+
+----- End forwarded message -----
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 

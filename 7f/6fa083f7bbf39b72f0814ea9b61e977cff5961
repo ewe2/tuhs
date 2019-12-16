@@ -1,0 +1,73 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id cbcf0636
+	for <ml@inbox.vuxu.org>;
+	Wed, 13 Nov 2019 00:25:09 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 632239C6B0; Wed, 13 Nov 2019 10:25:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 906D29BB79;
+	Wed, 13 Nov 2019 10:24:39 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5A75E9BB79; Wed, 13 Nov 2019 10:24:36 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 0F0D39BB5B
+ for <tuhs@tuhs.org>; Wed, 13 Nov 2019 10:24:36 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 6874335E104; Tue, 12 Nov 2019 16:24:35 -0800 (PST)
+Date: Tue, 12 Nov 2019 16:24:35 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Robert Clausecker <fuz@fuz.su>
+Message-ID: <20191113002435.GK16268@mcvoy.com>
+References: <1573592179.5935.for-standards-violators@oclsc.org>
+ <20191112221053.C2009156E80B@mail.bitblocks.com>
+ <20191112221418.GJ16268@mcvoy.com> <20191112224151.GA36336@fuz.su>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20191112224151.GA36336@fuz.su>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] buffer overflow (Re:  Happy birthday Morris worm
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Nov 12, 2019 at 11:41:51PM +0100, Robert Clausecker wrote:
+> Oh please no.  One of the things we've hopefully all learned from Pascal
+> is that length-prefixed strings suck because you can't perform anything
+> useful without copying the entire string.  Rob Pike and friends showed
+> how to get strings and vectors right in the Go language where you have a
+> builtin slice type which is essentially a structure
+> 
+>     struct slice(type) {
+>             type *data;
+>             size_t len, cap;
+>     };
+> 
+> where data points to a buffer, len is the length of meaningful data in
+> that buffer and cap is the total buffer size.  
+
+We did something similar in BitKeeper but we added a spicy little twist.
+We encoded len and cap in one word by making cap increase in powers of
+2 only (which means you need log(n) bits for cap).  So it was a data
+structure that scaled both up and down.
+
+We used it everywhere in BitKeeper, it was super handy.
+
+http://repos.bkbits.net/bk/dev/src/libc/utils/lines.c?PAGE=anno&REV=56cf7e34BTkDFx47E54DPNG51B2uCA
