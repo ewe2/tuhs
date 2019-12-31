@@ -1,0 +1,338 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id fe32ff31
+	for <ml@inbox.vuxu.org>;
+	Wed, 18 Dec 2019 04:31:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 85E139BC21; Wed, 18 Dec 2019 14:31:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E2AA39BC14;
+	Wed, 18 Dec 2019 14:30:50 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="XwQBpXr/";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DBAB99BC14; Wed, 18 Dec 2019 14:30:48 +1000 (AEST)
+Received: from mail-vs1-f47.google.com (mail-vs1-f47.google.com
+ [209.85.217.47])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1039F9B92E
+ for <tuhs@minnie.tuhs.org>; Wed, 18 Dec 2019 14:30:48 +1000 (AEST)
+Received: by mail-vs1-f47.google.com with SMTP id x18so568509vsq.4
+ for <tuhs@minnie.tuhs.org>; Tue, 17 Dec 2019 20:30:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=OnhLJ1DlnBoJ33gjE+JBezQ/R5W5+JQILGmY2oysvaE=;
+ b=XwQBpXr/S2fY6B1ljZZpu/x7BZ+u12Riwcdbu6D6XfpPqxmqQuWhqiIFKlYgFS5okY
+ b12emih+/vl8rcFnEYkoo3NEznObzgI+fmISpqz+T57MXWCGMPQ5eGj7J3BDEObvVamU
+ sMGT+jFnZHUe3cR7PVrhpRc/VQrozk7y+s5IAOdTSAa/cevG7eiVWejt/jEXkdYtKg9s
+ SIQngLcDrYq/n0dCMC7ibfZiBx8T8eD299bTjDcv1e8OHbPofMeJ/wf2pIJuHZWM8ZFT
+ Hrkt9/4gfxoyG/1wrwyOl65SLdQIn3Xxu4e+9SDoeF3SwD1Yb0oq1BEDXykOUXL+eQzk
+ zrQg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=OnhLJ1DlnBoJ33gjE+JBezQ/R5W5+JQILGmY2oysvaE=;
+ b=L8d/nyMkiB1nbir6Kes/8BYl//4gHUgwDRlt4TjcUsdlcwosBvrONN+6fZr6Ji+wAy
+ N5wXqS6VrbKmelIaoZimlSz9z1YFHGjZtNlIQ561ZoxAdzvqxtjCLbpp4vqApnSz8R9M
+ QGQrj2Zd8444z+LbsAx1CoHi1QmBhOj0IjTo9PWkPPAlZs53ZK2nw6fwNrsMj2Tr3nXg
+ EOKl5WYg6Y6UsRVs+XwmmPjiY3P0dvtJt4qcFMk13iclCXFtnL4jxxJvrcxxJSeUUh8Y
+ 2sAlbENeBAwCj2rMozVNhwYzJ9G7QX3SoajFP1383dKvbycrS9p3zRtl4YnyDU6w2YsA
+ pYhg==
+X-Gm-Message-State: APjAAAU2jYrgwBpK7mjAgTdeRYWZ88aIru5g/Fe9+N7TjbcTYZf1gNxj
+ 2xVyhJXHPFdZuVF5tFpi+17v1fpFu4ml19151uU=
+X-Google-Smtp-Source: APXvYqxFTIBnjZ6UxiMqG3Q+XTpPLmNA5KGr/DcHFVBpSe6Wa1aQD+6E4sSxPHfmgLUTlxUEevaTSGwd8vPGnxYpBlw=
+X-Received: by 2002:a67:f349:: with SMTP id p9mr204258vsm.53.1576643447134;
+ Tue, 17 Dec 2019 20:30:47 -0800 (PST)
+MIME-Version: 1.0
+References: <D27BDF93-38A2-4C82-ADAB-4847F95D67A0@planet.nl>
+ <6be1d013-2323-9850-03fd-c4014c4a69e7@e-bbes.com>
+ <766B1E87-501A-4675-91A5-DCDA35FFEB98@planet.nl>
+In-Reply-To: <766B1E87-501A-4675-91A5-DCDA35FFEB98@planet.nl>
+From: Rob Pike <robpike@gmail.com>
+Date: Wed, 18 Dec 2019 15:30:36 +1100
+Message-ID: <CAKzdPgzNDi=LXZzPp=dcRDHuDXYdL3GP7+v64RczsdROK49u3w@mail.gmail.com>
+To: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: multipart/alternative; boundary="0000000000009a9e580599f2e8e1"
+Subject: Re: [TUHS] Blit source
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000009a9e580599f2e8e1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+The 68000 compiler was pcc and was under fairly continuous development
+during this project. So there may be no "missing version" of the compiler
+but just version skew between source and existing artifacts.
+
+-rob
+
+
+On Wed, Dec 18, 2019 at 2:55 PM Paul Ruizendaal <pnr@planet.nl> wrote:
+
+> Further to the below, I=E2=80=99ve now tried to build the Blit toolchain =
+(on a
+> contemporary OS). Other than the usual little issues, it does not take to=
+o
+> much effort to get running.
+>
+> Rebuilding the rom contents using the pre-existing libraries builds the
+> exact same bits, however here is also where the good stuff ends: this onl=
+y
+> assembles two files, compiles vitty.c and the rest is library; rebuilding
+> the libraries is different.
+>
+> The roms rely on four libaries (libsys, libj, liblayer and libc) and none
+> of the four rebuild to the exact same bytes or size. In several cases the
+> archives do not even have the exact same files in them. In general, the
+> regenerated object files often appear to be a little smaller (even when
+> compiled with optimization off). So far I cannot tell whether this is
+> because the compiler is different, or because the underlying source code =
+is
+> different. Probably a bit of both.
+>
+> So, it would seem that an adapted rom can be compiled, but how functional
+> it would be remains to be seen.
+>
+> The note about the missing compiler remains intriguing. First a
+> correction: I associate =E2=80=9Cccom=E2=80=9D with the DMR compiler, as =
+it lives in a
+> directory by that name; I had not realized that pcc also names its main
+> binary ccom. Beyond that it would seem that two different versions of thi=
+s
+> 68K compiler were floating around and maybe the surviving one puts
+> different debug info in the symbol table.
+>
+>
+>
+> >> Date: Sun, 15 Dec 2019 22:17:53 +0100
+> >> From: Angelo Papenhoff <aap@papnet.eu>
+> >>
+> >> On 15/12/19, Paul Ruizendaal wrote:
+> >>> I=E2=80=99m aware of this emulator:
+> >>> https://github.com/aap/blit <https://github.com/aap/blit>
+> >>
+> >> This is only a port to unix I did. The original one was written by aij=
+u.
+> >> The upstream version (which is in fact more up to date) is part of the
+> 9front repo:
+> >>
+> https://code.9front.org/hg/plan9front/file/5003ea45cc4d/sys/src/games/bli=
+t
+> >> Aiju reverse engineered the hardware from the source code on the secon=
+d
+> tape:
+> >>
+> https://www.tuhs.org/Archive/Distributions/Research/Dan_Cross_v8/v8jerq.t=
+ar.bz2
+> >
+> > Thanks! The =E2=80=9Cblit=E2=80=9D directory in that archive indeed app=
+ears to be what
+> I=E2=80=99m looking for. Hopefully it has enough to enable rebuilding fro=
+m source.
+> >>
+> >> I don't know how complete it is and I think the compiler is also not
+> >> included, but I'm not too sure how it all worked.
+> >
+> > From a quick inspection there appears to be a subdirectory =E2=80=9Cm=
+=E2=80=9D with
+> motorola tools. It appears to have a M68K pcc-based compiler. It also has
+> this README file:
+> >
+> > =3D=3D=3D
+> > the source for /usr/blit/lib/ccom has been lost.
+> > the source here (Mip and Mcc) is for a compiler that does not generate
+> > the correct symbol tables for joff and pi.
+> > we wish we had the source, but we don't, so the binary is precious.
+> > please handle it with care.
+> >
+> > if you decide you need to recompile ccom, contact us.
+> > we may have found a solution by then...
+> > =3D=3D=3D
+> >
+> > The =E2=80=9Cbin=E2=80=9D directory has that ccom binary. It suggests t=
+hat there once
+> was a M68K compiler that derived from the Ritchie PDP11 compiler. I assum=
+e
+> that the source for that has stayed missing ever since 1985.
+> >
+> >> On 16 Dec 2019, at 07:25, emanuel stiebler <emu@e-bbes.com> wrote:
+> >>
+> >> On 2019-12-15 21:45, Paul Ruizendaal wrote:
+> >>> I=E2=80=99m looking for source code of the original Blit as described=
+ here:
+> >>> http://doc.cat-v.org/bell_labs/blit/blit.pdf
+> >>
+> >> Thanks for trying again. It pops up on this list every few years, but
+> >> still no schematics (2002, 2012) =E2=80=A6
+> >
+> > It would seem that the circuit was intentionally simple and
+> straightforward: a M68K cpu, ram, rom, two 6850 UARTS and the circuit to
+> drive the display. The key aspects of the video circuitry (and mouse
+> circuitry) are discussed in this paper:
+> > https://9p.io/cm/cs/doc/87/archtr.ps.gz ("Hardware/Software Tradeoffs
+> for Bitmap Graphics on the Blit=E2=80=9D).
+> >
+> > It would seem to me that doing a version of the Blit that runs on a FPG=
+A
+> board and generates 720p HDMI output would not be impossible to do, if th=
+e
+> software can be configured to deal with a different geometry (e.g. 1024x7=
+20
+> instead of 800x1024). Whether that would be much different from running t=
+he
+> emulator on a PC remains unclear, of course.
+>
+>
+>
+>
+>
+
+--0000000000009a9e580599f2e8e1
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">The 68000 compiler was pcc and was under fairly continuous=
+ development during this project. So there may be no &quot;missing version&=
+quot; of the compiler but just version skew between source and existing art=
+ifacts.<div><br></div><div>-rob</div><div><br></div></div><br><div class=3D=
+"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On Wed, Dec 18, 2019 at=
+ 2:55 PM Paul Ruizendaal &lt;<a href=3D"mailto:pnr@planet.nl">pnr@planet.nl=
+</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D"margin:=
+0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">=
+Further to the below, I=E2=80=99ve now tried to build the Blit toolchain (o=
+n a contemporary OS). Other than the usual little issues, it does not take =
+too much effort to get running.<br>
+<br>
+Rebuilding the rom contents using the pre-existing libraries builds the exa=
+ct same bits, however here is also where the good stuff ends: this only ass=
+embles two files, compiles vitty.c and the rest is library; rebuilding the =
+libraries is different.<br>
+<br>
+The roms rely on four libaries (libsys, libj, liblayer and libc) and none o=
+f the four rebuild to the exact same bytes or size. In several cases the ar=
+chives do not even have the exact same files in them. In general, the regen=
+erated object files often appear to be a little smaller (even when compiled=
+ with optimization off). So far I cannot tell whether this is because the c=
+ompiler is different, or because the underlying source code is different. P=
+robably a bit of both.<br>
+<br>
+So, it would seem that an adapted rom can be compiled, but how functional i=
+t would be remains to be seen.<br>
+<br>
+The note about the missing compiler remains intriguing. First a correction:=
+ I associate =E2=80=9Cccom=E2=80=9D with the DMR compiler, as it lives in a=
+ directory by that name; I had not realized that pcc also names its main bi=
+nary ccom. Beyond that it would seem that two different versions of this 68=
+K compiler were floating around and maybe the surviving one puts different =
+debug info in the symbol table.<br>
+<br>
+<br>
+<br>
+&gt;&gt; Date: Sun, 15 Dec 2019 22:17:53 +0100<br>
+&gt;&gt; From: Angelo Papenhoff &lt;<a href=3D"mailto:aap@papnet.eu" target=
+=3D"_blank">aap@papnet.eu</a>&gt;<br>
+&gt;&gt; <br>
+&gt;&gt; On 15/12/19, Paul Ruizendaal wrote:<br>
+&gt;&gt;&gt; I=E2=80=99m aware of this emulator:<br>
+&gt;&gt;&gt; <a href=3D"https://github.com/aap/blit" rel=3D"noreferrer" tar=
+get=3D"_blank">https://github.com/aap/blit</a> &lt;<a href=3D"https://githu=
+b.com/aap/blit" rel=3D"noreferrer" target=3D"_blank">https://github.com/aap=
+/blit</a>&gt;<br>
+&gt;&gt; <br>
+&gt;&gt; This is only a port to unix I did. The original one was written by=
+ aiju.<br>
+&gt;&gt; The upstream version (which is in fact more up to date) is part of=
+ the 9front repo:<br>
+&gt;&gt; <a href=3D"https://code.9front.org/hg/plan9front/file/5003ea45cc4d=
+/sys/src/games/blit" rel=3D"noreferrer" target=3D"_blank">https://code.9fro=
+nt.org/hg/plan9front/file/5003ea45cc4d/sys/src/games/blit</a><br>
+&gt;&gt; Aiju reverse engineered the hardware from the source code on the s=
+econd tape:<br>
+&gt;&gt; <a href=3D"https://www.tuhs.org/Archive/Distributions/Research/Dan=
+_Cross_v8/v8jerq.tar.bz2" rel=3D"noreferrer" target=3D"_blank">https://www.=
+tuhs.org/Archive/Distributions/Research/Dan_Cross_v8/v8jerq.tar.bz2</a><br>
+&gt; <br>
+&gt; Thanks! The =E2=80=9Cblit=E2=80=9D directory in that archive indeed ap=
+pears to be what I=E2=80=99m looking for. Hopefully it has enough to enable=
+ rebuilding from source.<br>
+&gt;&gt; <br>
+&gt;&gt; I don&#39;t know how complete it is and I think the compiler is al=
+so not<br>
+&gt;&gt; included, but I&#39;m not too sure how it all worked.<br>
+&gt; <br>
+&gt; From a quick inspection there appears to be a subdirectory =E2=80=9Cm=
+=E2=80=9D with motorola tools. It appears to have a M68K pcc-based compiler=
+. It also has this README file:<br>
+&gt; <br>
+&gt; =3D=3D=3D<br>
+&gt; the source for /usr/blit/lib/ccom has been lost.<br>
+&gt; the source here (Mip and Mcc) is for a compiler that does not generate=
+<br>
+&gt; the correct symbol tables for joff and pi.<br>
+&gt; we wish we had the source, but we don&#39;t, so the binary is precious=
+.<br>
+&gt; please handle it with care.<br>
+&gt; <br>
+&gt; if you decide you need to recompile ccom, contact us.<br>
+&gt; we may have found a solution by then...<br>
+&gt; =3D=3D=3D<br>
+&gt; <br>
+&gt; The =E2=80=9Cbin=E2=80=9D directory has that ccom binary. It suggests =
+that there once was a M68K compiler that derived from the Ritchie PDP11 com=
+piler. I assume that the source for that has stayed missing ever since 1985=
+.<br>
+&gt; <br>
+&gt;&gt; On 16 Dec 2019, at 07:25, emanuel stiebler &lt;<a href=3D"mailto:e=
+mu@e-bbes.com" target=3D"_blank">emu@e-bbes.com</a>&gt; wrote:<br>
+&gt;&gt; <br>
+&gt;&gt; On 2019-12-15 21:45, Paul Ruizendaal wrote:<br>
+&gt;&gt;&gt; I=E2=80=99m looking for source code of the original Blit as de=
+scribed here:<br>
+&gt;&gt;&gt; <a href=3D"http://doc.cat-v.org/bell_labs/blit/blit.pdf" rel=
+=3D"noreferrer" target=3D"_blank">http://doc.cat-v.org/bell_labs/blit/blit.=
+pdf</a><br>
+&gt;&gt; <br>
+&gt;&gt; Thanks for trying again. It pops up on this list every few years, =
+but<br>
+&gt;&gt; still no schematics (2002, 2012) =E2=80=A6<br>
+&gt; <br>
+&gt; It would seem that the circuit was intentionally simple and straightfo=
+rward: a M68K cpu, ram, rom, two 6850 UARTS and the circuit to drive the di=
+splay. The key aspects of the video circuitry (and mouse circuitry) are dis=
+cussed in this paper:<br>
+&gt; <a href=3D"https://9p.io/cm/cs/doc/87/archtr.ps.gz" rel=3D"noreferrer"=
+ target=3D"_blank">https://9p.io/cm/cs/doc/87/archtr.ps.gz</a> (&quot;Hardw=
+are/Software Tradeoffs for Bitmap Graphics on the Blit=E2=80=9D).<br>
+&gt; <br>
+&gt; It would seem to me that doing a version of the Blit that runs on a FP=
+GA board and generates 720p HDMI output would not be impossible to do, if t=
+he software can be configured to deal with a different geometry (e.g. 1024x=
+720 instead of 800x1024). Whether that would be much different from running=
+ the emulator on a PC remains unclear, of course.<br>
+<br>
+<br>
+<br>
+<br>
+</blockquote></div>
+
+--0000000000009a9e580599f2e8e1--
