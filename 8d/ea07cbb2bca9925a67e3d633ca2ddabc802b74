@@ -1,0 +1,105 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e5ce2f74
+	for <ml@inbox.vuxu.org>;
+	Mon, 6 Jan 2020 03:41:59 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 933D79BBD6; Mon,  6 Jan 2020 13:41:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DB4AC9BB66;
+	Mon,  6 Jan 2020 13:41:17 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A25319BB4A; Mon,  6 Jan 2020 13:41:14 +1000 (AEST)
+X-Greylist: delayed 985 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 06 Jan 2020 13:41:14 AEST
+Received: from cuzuco.com (v.cuzuco.com [166.84.7.17])
+ by minnie.tuhs.org (Postfix) with ESMTP id 056279B545
+ for <tuhs@minnie.tuhs.org>; Mon,  6 Jan 2020 13:41:13 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by cuzuco.com (8.14.9/8.13.3) with SMTP id 0063O6lt010608
+ for <tuhs@minnie.tuhs.org>; Sun, 5 Jan 2020 22:24:19 -0500 (EST)
+Date: Sun, 5 Jan 2020 22:24:06 -0500 (EST)
+Message-Id: <202001060324.0063O6lt010608@cuzuco.com>
+From: Brian Walden <tuhs@cuzuco.com>
+To: <tuhs@minnie.tuhs.org>
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+More than you ever wanted to know about #
+The first shell to use it as a comment was csh(1), Bill Joy did this.
+This was also pre #! in the kernel so the shell had to exec scripts,
+not the kernel. This had traditionally been done after the exec() failed
+then shell ould run "sh argv[0]", but with two shells this was now a problem.
+So csh would look at the first line of the script and if it was a #\n
+it would exec csh on it if not it would exec sh(1) on it. This was check
+was also placed into to BSD's (not v7 nor att's) bourne shell so it could
+run csh scripts as well.
+
+However this was not the first use of # as a comment character. That award
+goes to Brian Kernighan's ratfor(1) (rational fortran) compiler in 1974-75.
+Then Feldman used in make(1) in 1976, followed by Kernighan's m4(1), learn(1)
+and most famously awk(1) in 1977
+
+Bourne shell, written around 1976, eventualy picked this up later on but after
+the initial v7 release.  And as some noted the : was kind of a comment, it
+was a command that did an exit(0) orginally for labels for Thompson's
+shell's goto command. The : command was eventually hard linked to the
+true(1) command
+
+Remember # was hard to type on teletypes as that was the erase character, so
+to enter it, you needed to type \#
+(# as erase and @ as line kill came from multics btw)
+It was so hard to type that the orignal assember based on DEC PAL-11R,
+that addressing syntax changed @ to * and # to $.
+In DEC it would be--
+MOV @X, R0;
+In UNIX asm it became --
+mov *x, r0
+So this is also why C pointers use * notation.
+
+-Brian
+
+> From: Dave Horsfall dave at horsfall.org
+>
+>On Sat, 4 Jan 2020, Chet Ramey wrote:
+>
+>>> Which reminds me: which Shell introduced "#" as a true comment?
+>>
+>> Define "true comment." The v7 shell had `#' as the comment character, but
+>> it only worked when in non-interactive shells. I think it was the Sys III
+>> shell that made it work when the shell was interactive.
+>
+>Yes, that's what I meant.
+>
+>> This is, incidentally, why bash has the `interactive_comments' option,
+>> which I saw in another message. BSD, which most of the GNU developers were
+>> using at the (pre-POSIX) time, used the v7 shell and didn't have
+>> interactive comments. When a sufficiently-advanced POSIX draft required
+>> them, we added it.
+>
+>I never did catch up with all the options on the various shells; I just
+>stick with the defaults in general.  Eg:
+>
+>     aneurin% man bash | wc -l
+>       5947
+>
+>Life's too short...
+>
+>-- Dave
