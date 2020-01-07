@@ -1,0 +1,98 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 3b31e488
+	for <ml@inbox.vuxu.org>;
+	Tue, 7 Jan 2020 21:28:54 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2F55B9BCDA; Wed,  8 Jan 2020 07:28:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 01CA09BCAB;
+	Wed,  8 Jan 2020 07:28:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3708E9BCAB; Wed,  8 Jan 2020 07:28:35 +1000 (AEST)
+X-Greylist: delayed 500 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 08 Jan 2020 07:28:33 AEST
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 703D79BCA9
+ for <tuhs@tuhs.org>; Wed,  8 Jan 2020 07:28:33 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 1CFFD4E1293E; Tue,  7 Jan 2020 21:20:13 +0000 (UTC)
+Date: Tue, 7 Jan 2020 21:20:13 +0000
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: tuhs@tuhs.org
+Message-ID: <20200107212013.GA17953@clarinet.employees.org>
+References: <202001070231.0072ViZp123105@tahoe.cs.Dartmouth.EDU>
+ <c450d139ce71b8b89953500d8737b788@firemail.de>
+ <8cf54833-dcc6-7958-f05f-f6606006b4d9@case.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8cf54833-dcc6-7958-f05f-f6606006b4d9@case.edu>
+User-Agent: Mutt/1.12.2 (2019-09-21)
+Subject: Re: [TUHS] screen editors
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Jan 07, 2020 at 03:45:24PM -0500, Chet Ramey wrote:
+> On my Mac OS X machine, it's about ten times smaller than vim
+> 
+> $ size /usr/local/bin/ce
+> __TEXT	__DATA	__OBJC	others	dec	hex
+> 114688	339968	0	4295024640	4295479296	10007d000
+> $ size /usr/bin/vim
+> __TEXT	__DATA	__OBJC	others	dec	hex
+> 1687552	176128	0	4295016448	4296880128	1001d3000
+> 
+> Similar numbers on RHEL 7, but due to the large bss, it's only about
+> 45% smaller than vim.
+
+So I got curious about those large numbers on the mac, and made use of 'otool -l'.
+
+It would seem that the values for __DATA reported by size correspond to the overall
+size of the 'load command' for the __DATA segment, and so includes bss as well.
+
+$ ls -l /usr/bin/vim
+-rwxr-xr-x  1 root  wheel  1530064 29 Jun  2018 /usr/bin/vim
+
+So 'size' on the mac is not so useful, but 'size -m /usr/bin/vim' gives
+information from which one could derive the normal 'size' output.
+
+$ size -m /usr/bin/vim
+Segment __PAGEZERO: 4294967296
+Segment __TEXT: 1388544
+	Section __text: 1271745
+	Section __stubs: 1044
+	Section __stub_helper: 1756
+	Section __cstring: 85892
+	Section __const: 14672
+	Section __unwind_info: 8944
+	total 1384053
+Segment __DATA: 155648
+	Section __got: 1056
+	Section __nl_symbol_ptr: 16
+	Section __la_symbol_ptr: 1392
+	Section __const: 38608
+	Section __data: 64432
+	Section __bss: 42520
+	Section __common: 5720
+	total 153744
+Segment __LINKEDIT: 36864
+total 4296548352
+
+DF
