@@ -1,0 +1,230 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=DKIM_ADSP_CUSTOM_MED,
+	DKIM_INVALID,DKIM_SIGNED,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 5a4cb0ac
+	for <ml@inbox.vuxu.org>;
+	Thu, 9 Jan 2020 04:34:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5F3EF9BCC1; Thu,  9 Jan 2020 14:34:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8926E9BCA9;
+	Thu,  9 Jan 2020 14:33:53 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="X/sf6xsE";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5C7EE9BCA9; Thu,  9 Jan 2020 14:33:51 +1000 (AEST)
+Received: from mail-yw1-f52.google.com (mail-yw1-f52.google.com
+ [209.85.161.52])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2C0F6945FC
+ for <tuhs@minnie.tuhs.org>; Thu,  9 Jan 2020 14:33:50 +1000 (AEST)
+Received: by mail-yw1-f52.google.com with SMTP id u139so2215042ywf.13
+ for <tuhs@minnie.tuhs.org>; Wed, 08 Jan 2020 20:33:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+ bh=Q7vevv451ZXGGFC7mNtFqozfmG1n1p6dFOJxaUNQ8OY=;
+ b=X/sf6xsEJ7J3l4WkpbU+qvzuS0pN9mZB8mDZoloU5XhzT/Wx9D/3i/wrDvMe30nm+Q
+ ywVwFHcuGMWf1BpRVOq7FuNac/SrOHyyZlEqGdXdmPOaVSQYCJMl+YsnrVbR+EcoJXgK
+ iXMGsP0UOJBzLvlQjzKUKNm+E8LzcYPvZkhJ7dUQrRa+G86ERsVE6zN7ckqYw43plCcm
+ SDc3dbX47jfhqD4pn/3xda1/Y9FIlZ7Tw08sDHlPTG7rnHnAGpx2eHwCUFPu9/lpVR8j
+ yJITgVVIMika+hh9JWY5wMljBwyQfijUmA7Pz8mg6WLyhGxW7nfWOprllumLOx261+gE
+ /lkQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to;
+ bh=Q7vevv451ZXGGFC7mNtFqozfmG1n1p6dFOJxaUNQ8OY=;
+ b=GJaT3JXiSLp8xS0DfBMb4+e42ZBNqJjyLCiMROaGIB7vVrI5XXpNJfbQebAdeMeaU8
+ 3Mz9W63gVAqSVRaLSRSlzbbR2tQ7p/Z1L7cg3Y43oCHBpVpqHHBpw+2xts9BCtHoAcQp
+ iGua54eTNUr28wmv1bzqGSC2Dz6IxYyP2yh0MwjlupFLmaNZNdJPLdbOzf57ZnBwVbYe
+ dk1M82mZCB7t5JFuj0whpHRJ63yrygw+acfli0yTJrbWOX0JCxuGoMg4KU3bPbcqvfkX
+ i4Jwlvq9/u4JaiJ+vzZG6B+uuLoHjwJ/kfUcLHyrZhYr79qi2SaeIFfgp5xXKXrrWcnX
+ D8Ww==
+X-Gm-Message-State: APjAAAXN7ML6oGQPEf9mNTwx9xBlRuMyuaCGn4mrxdBiZupYZqIA6v1y
+ q3o7i4yuRw4Rk99em5B0T3sXU/4+XhdJtgMI4U+mPw==
+X-Google-Smtp-Source: APXvYqzbsDyw/+5JhHZMft7lA91OyaiOaIrIVLJAi9Ma+zkscS7SZakMPjZRf3hRkq6IV3fDptsnDrpHg6MKJRjC/0s=
+X-Received: by 2002:a81:4f56:: with SMTP id d83mr6147241ywb.39.1578544429166; 
+ Wed, 08 Jan 2020 20:33:49 -0800 (PST)
+MIME-Version: 1.0
+References: <mailman.3.1578535201.23488.tuhs@minnie.tuhs.org>
+In-Reply-To: <mailman.3.1578535201.23488.tuhs@minnie.tuhs.org>
+From: bch <brad.harder@gmail.com>
+Date: Wed, 8 Jan 2020 20:33:38 -0800
+Message-ID: <CABfrOT_J+DD4LLqwqz=Mhr_iKUk_s_q6dyBjsJk_WA30hGu9WA@mail.gmail.com>
+To: "bakul@bitblocks.com" <bakul@bitblocks.com>, tuhs@minnie.tuhs.org
+Content-Type: multipart/alternative; boundary="000000000000f6733d059bad835f"
+Subject: Re: [TUHS] screen editors (Bakul Shaw)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000f6733d059bad835f
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Date: Wed, 8 Jan 2020 17:40:10 -0800
+> From: Bakul Shah <bakul@bitblocks.com>
+> To: Larry McVoy <lm@mcvoy.com>
+> Cc: Warner Losh <imp@bsdimp.com>, The Eunuchs Hysterical Society
+>         <tuhs@tuhs.org>
+> Subject: Re: [TUHS] screen editors
+> Message-ID: <D192F5A5-2A67-413C-8F5C-FCF195151E4F@bitblocks.com>
+> Content-Type: text/plain;       charset=3Dutf-8
+>
+> On Jan 8, 2020, at 5:28 PM, Larry McVoy <lm@mcvoy.com> wrote:
+> >
+> > On Wed, Jan 08, 2020 at 05:08:59PM -0700, Warner Losh wrote:
+> >> On Wed, Jan 8, 2020, 4:22 PM Dave Horsfall <dave@horsfall.org> wrote:
+> >>
+> >>> On Wed, 8 Jan 2020, Chet Ramey wrote:
+> >>>
+> >>>>> That's a real big vi in RHL.
+> >>>>
+> >>>> It's vim.
+> >>>
+> >>> It's also VIM on the Mac.
+> >>>
+> >>
+> >> Nvi is also interesting and 1/10th the size of vim. It's also the
+> FreeBSD
+> >> default for vi.
+> >
+> > I was gonna stay out of this thread (it has the feel of old folks
+> somehow)
+> > but 2 comments:
+> >
+> > Keith did nvi (I can't remember why?  licensing or something) and he di=
+d
+> > a pretty faithful bug for bug compatible job.  I've always wondered why=
+.
+> > I like Keith but it seemed like a waste.  There were other people takin=
+g
+> > vi forward, elvis, xvi (I hacked the crap out of that one, made it mmap
+> > the file and had a whole string library that treated \n like NULL) and
+> > I think vim was coming along.  So doing a compat vi felt like a step
+> > backward for me.
+> >
+> > For all the vim haters, come on.  Vim is awesome, it gave me the one
+> > thing that I wanted from emacs, multiple windows.  I use that all the
+> > time.  It's got piles of stuff that I don't use, probably should, but
+> > it is every bit as good of a vi as the original and then it added more.
+> > I'm super grateful that vim came along.
+>
+> The first thing I do on a new machine is to install nvi. Very grateful to
+> Keith Bostic for implementing it. I do use multiple windows =E2=80=94 onl=
+y
+> horizontal splits but that is good enough for me as all my terminal
+> windows are 80 chars wide. Not a vim hater but never saw the need.
+>
+
+Not sure if you=E2=80=99re saying horizontal splits are all you need, or al=
+l you=E2=80=99re
+aware of, but nvi =E2=80=9C:E somefile=E2=80=9D will split to a top/bottom =
+arrangement and
+=E2=80=9C:vsplit somefile=E2=80=9D will do a left/right arrangement, as wel=
+l as being able
+to =E2=80=9C:fg=E2=80=9D, =E2=80=9C:bg=E2=80=9D screens. I too am a (NetBSD=
+) nvi appreciator.
+
+-bch
+
+--000000000000f6733d059bad835f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div><div dir=3D"auto"><br></div><br></div><div><div class=3D"gmail_quote">=
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">
+Date: Wed, 8 Jan 2020 17:40:10 -0800<br>
+From: Bakul Shah &lt;<a href=3D"mailto:bakul@bitblocks.com" target=3D"_blan=
+k">bakul@bitblocks.com</a>&gt;<br>
+To: Larry McVoy &lt;<a href=3D"mailto:lm@mcvoy.com" target=3D"_blank">lm@mc=
+voy.com</a>&gt;<br>
+Cc: Warner Losh &lt;<a href=3D"mailto:imp@bsdimp.com" target=3D"_blank">imp=
+@bsdimp.com</a>&gt;, The Eunuchs Hysterical Society<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 &lt;<a href=3D"mailto:tuhs@tuhs.org" target=3D"=
+_blank">tuhs@tuhs.org</a>&gt;<br>
+Subject: Re: [TUHS] screen editors<br>
+Message-ID: &lt;<a href=3D"mailto:D192F5A5-2A67-413C-8F5C-FCF195151E4F@bitb=
+locks.com" target=3D"_blank">D192F5A5-2A67-413C-8F5C-FCF195151E4F@bitblocks=
+.com</a>&gt;<br>
+Content-Type: text/plain;=C2=A0 =C2=A0 =C2=A0 =C2=A0charset=3Dutf-8<br>
+<br>
+On Jan 8, 2020, at 5:28 PM, Larry McVoy &lt;<a href=3D"mailto:lm@mcvoy.com"=
+ target=3D"_blank">lm@mcvoy.com</a>&gt; wrote:<br>
+&gt; <br>
+&gt; On Wed, Jan 08, 2020 at 05:08:59PM -0700, Warner Losh wrote:<br>
+&gt;&gt; On Wed, Jan 8, 2020, 4:22 PM Dave Horsfall &lt;<a href=3D"mailto:d=
+ave@horsfall.org" target=3D"_blank">dave@horsfall.org</a>&gt; wrote:<br>
+&gt;&gt; <br>
+&gt;&gt;&gt; On Wed, 8 Jan 2020, Chet Ramey wrote:<br>
+&gt;&gt;&gt; <br>
+&gt;&gt;&gt;&gt;&gt; That&#39;s a real big vi in RHL.<br>
+&gt;&gt;&gt;&gt; <br>
+&gt;&gt;&gt;&gt; It&#39;s vim.<br>
+&gt;&gt;&gt; <br>
+&gt;&gt;&gt; It&#39;s also VIM on the Mac.<br>
+&gt;&gt;&gt; <br>
+&gt;&gt; <br>
+&gt;&gt; Nvi is also interesting and 1/10th the size of vim. It&#39;s also =
+the FreeBSD<br>
+&gt;&gt; default for vi.<br>
+&gt; <br>
+&gt; I was gonna stay out of this thread (it has the feel of old folks some=
+how)<br>
+&gt; but 2 comments:<br>
+&gt; <br>
+&gt; Keith did nvi (I can&#39;t remember why?=C2=A0 licensing or something)=
+ and he did<br>
+&gt; a pretty faithful bug for bug compatible job.=C2=A0 I&#39;ve always wo=
+ndered why.<br>
+&gt; I like Keith but it seemed like a waste.=C2=A0 There were other people=
+ taking<br>
+&gt; vi forward, elvis, xvi (I hacked the crap out of that one, made it mma=
+p<br>
+&gt; the file and had a whole string library that treated \n like NULL) and=
+<br>
+&gt; I think vim was coming along.=C2=A0 So doing a compat vi felt like a s=
+tep<br>
+&gt; backward for me.<br>
+&gt; <br>
+&gt; For all the vim haters, come on.=C2=A0 Vim is awesome, it gave me the =
+one<br>
+&gt; thing that I wanted from emacs, multiple windows.=C2=A0 I use that all=
+ the<br>
+&gt; time.=C2=A0 It&#39;s got piles of stuff that I don&#39;t use, probably=
+ should, but<br>
+&gt; it is every bit as good of a vi as the original and then it added more=
+.<br>
+&gt; I&#39;m super grateful that vim came along.<br>
+<br>
+The first thing I do on a new machine is to install nvi. Very grateful to<b=
+r>
+Keith Bostic for implementing it. I do use multiple windows =E2=80=94 only<=
+br>
+horizontal splits but that is good enough for me as all my terminal<br>
+windows are 80 chars wide. Not a vim hater but never saw the need.<br></blo=
+ckquote><div dir=3D"auto"><br></div><div dir=3D"auto">Not sure if you=E2=80=
+=99re saying horizontal splits are all you need, or all you=E2=80=99re awar=
+e of, but nvi =E2=80=9C:E somefile=E2=80=9D will split to a top/bottom arra=
+ngement and =E2=80=9C:vsplit somefile=E2=80=9D will do a left/right arrange=
+ment, as well as being able to =E2=80=9C:fg=E2=80=9D, =E2=80=9C:bg=E2=80=9D=
+ screens. I too am a (NetBSD) nvi appreciator.</div><div dir=3D"auto"><br><=
+/div><div dir=3D"auto">-bch</div><div dir=3D"auto"><br></div></div></div>
+
+--000000000000f6733d059bad835f--
