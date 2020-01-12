@@ -1,0 +1,150 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e7e538bc
+	for <ml@inbox.vuxu.org>;
+	Sun, 12 Jan 2020 23:41:18 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7C5FA9BD96; Mon, 13 Jan 2020 09:41:17 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CF8B69BD0F;
+	Mon, 13 Jan 2020 09:40:46 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C5AA69BD0F; Mon, 13 Jan 2020 09:40:42 +1000 (AEST)
+Received: from fourwinds.com (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 57D6A9BCA8
+ for <tuhs@tuhs.org>; Mon, 13 Jan 2020 09:40:42 +1000 (AEST)
+Received: from darkstar.fourwinds.com (localhost [127.0.0.1])
+ by fourwinds.com (8.15.2/8.15.2) with ESMTPS id 00CNee9P604561
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
+ for <tuhs@tuhs.org>; Sun, 12 Jan 2020 15:40:40 -0800
+Received: from darkstar.fourwinds.com (jon@localhost)
+ by darkstar.fourwinds.com (8.15.2/8.15.2/Submit) with ESMTP id 00CNeef0604557
+ for <tuhs@tuhs.org>; Sun, 12 Jan 2020 15:40:40 -0800
+Message-Id: <202001122340.00CNeef0604557@darkstar.fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+In-reply-to: <CAK7dMtBHfc35vb+5XP6WcBXDKsFyMxFSZ8vfgen7_5jgrnNxnQ@mail.gmail.com>
+References: <202001122225.00CMPc9S085970@tahoe.cs.Dartmouth.EDU>
+ <CAK7dMtBHfc35vb+5XP6WcBXDKsFyMxFSZ8vfgen7_5jgrnNxnQ@mail.gmail.com>
+Comments: In-reply-to Kevin Bowling <kevin.bowling@kev009.com>
+ message dated "Sun, 12 Jan 2020 15:40:15 -0700."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <604555.1578872440.1@darkstar.fourwinds.com>
+Date: Sun, 12 Jan 2020 15:40:40 -0800
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] Tech Sq elevator [ really type-checking ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Kevin Bowling writes:
+>
+> I am regularly surprised by how surprising type systems are to
+> computing professionals.
+
+I am currently astonished at this.  Unfortunately, I need to make a hopefully
+minor change to the linux kernel to support something that I want to do in my
+current project.  But, this is my first time looking at the internals which is
+way different that my recollection of UNIX kernels.  It's being enough of an
+adventure that I'm writing up a travelogue of my journey through the code.
+While I swore that I was done writing books this is sure looking like another
+one :-)
+
+So I came across this piece of what I consider to be bad programming that's
+all over the place...
+
+One of my programming style rules is to program in the language in which you're
+programming.  The canonical example of not doing this is the Bourne shell which
+was originally written using macros to redefine C to look like Algol68.
+
+Linux contains several sets of list_for_each_entry() macros that are essentially
+obfuscated for loops that generate inefficient code.  To make things worse, the
+way that they're implemented is by embedding list_head structures into other
+structures.
+
+In the diagram below, the labels above boxes are structure names.  Names inside
+of boxes are structure member names.  super_blocks, s_list, s_mounts, and
+mnt_instance are all list_head structures.  (Trick question, how many lines are
+in this diagram :-) )
+
++-----------------------------------------+
+|                     super_block         |
+|  +--------------+   +----------+        |
++->| super_blocks |<->|  s_list  |<- ... -+
+   +--------------+   +----------+
+                      |          |        mount              mount
+                      |   ...    |   +--------------+   +--------------+
+                      |          |   |      ...     |   |      ...     |
+                      +----------+   +--------------+   +--------------+
+                   +->| s_mounts |<->| mnt_instance |<->| mnt_instance |<- ... -+
+                   |  +----------+   +--------------+   +--------------+        |
+                   |                 |      ...     |   |      ...     |        |
+                   |                 +--------------+   +--------------+        |
+                   +------------------------------------------------------------+
+
+The bizarre thing to me is that the list_head structures point to other list_head
+structures that are embedded in other structures.  When one needs to access a
+non list-head member of the structure one has to pass both the structure type and
+the list_head member name to a macro that figures out how to subtract the offset
+of the list_head member of the structure from the address of that list_head to
+get the address of the structure, and then casts that as the structure type so
+that members can be accessed.
+
+The reason why I think that this is bad is because one can pass anything into that
+macro; you just have to know what type of structures make up the list which is not
+at all obvious as:
+
+        struct  foo     {
+                int                     bar;
+                struct  list_head       name;
+        };
+
+gives no information about the list, unlike this:
+
+        struct  foo     {
+                int                     bar;
+                struct  foo             *next;
+        };
+
+It completely bypasses the compiler type-checking.  In my opinion, very error prone.
+Not to mention completely opaque to someone reading the code.  Without even the
+consideration of decent comments, for example:
+
+        struct list_head        s_list;         /* Keep this first */
+        struct list_head        s_mounts;       /* list of mounts; _not_ for fs use */
+        struct list_head        s_inodes_wb;    /* writeback inodes */
+
+say nothing about what type of structures are in the lists.
+
+In addition to generating less-efficient code than a for loop would and avoiding
+type-checking, this approach seems to be used without much thought in the kernel
+where memory is at a premium.  Many of these are used to implement circular
+double-linked lists where neither the circularity nor the doubly-linking are
+needed or used.
+
+As an aside, one has to descend through 8 levels of macros calling macros and
+six extra header files just to track down what this stuff does and how it works.
+
+So I just don't get this at all.  I have no idea why someone would code this
+way in C unless they just wanted to foist a construct from another language
+that they preferred.  Somehow I expected better in the kernel.
+
+Like usual, I could be completely off-base here and if I am, please correct me.
+
+Jon
