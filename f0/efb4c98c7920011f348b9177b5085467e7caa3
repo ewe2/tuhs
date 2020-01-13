@@ -1,0 +1,135 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e9d96c27
+	for <ml@inbox.vuxu.org>;
+	Mon, 13 Jan 2020 00:45:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2FBEE9BD48; Mon, 13 Jan 2020 10:45:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D790D9BD0F;
+	Mon, 13 Jan 2020 10:44:52 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1D6539BD0F; Mon, 13 Jan 2020 10:44:50 +1000 (AEST)
+Received: from fourwinds.com (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C3C129BCA8
+ for <tuhs@tuhs.org>; Mon, 13 Jan 2020 10:44:48 +1000 (AEST)
+Received: from darkstar.fourwinds.com (localhost [127.0.0.1])
+ by fourwinds.com (8.15.2/8.15.2) with ESMTPS id 00D0ilvG616664
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT)
+ for <tuhs@tuhs.org>; Sun, 12 Jan 2020 16:44:47 -0800
+Received: from darkstar.fourwinds.com (jon@localhost)
+ by darkstar.fourwinds.com (8.15.2/8.15.2/Submit) with ESMTP id 00D0ilcV616661
+ for <tuhs@tuhs.org>; Sun, 12 Jan 2020 16:44:47 -0800
+Message-Id: <202001130044.00D0ilcV616661@darkstar.fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+In-reply-to: <AB452025-FCE9-4D41-992A-D3135683A6D6@bitblocks.com>
+References: <202001122225.00CMPc9S085970@tahoe.cs.Dartmouth.EDU>
+ <CAK7dMtBHfc35vb+5XP6WcBXDKsFyMxFSZ8vfgen7_5jgrnNxnQ@mail.gmail.com>
+ <202001122340.00CNeef0604557@darkstar.fourwinds.com>
+ <AB452025-FCE9-4D41-992A-D3135683A6D6@bitblocks.com>
+Comments: In-reply-to Bakul Shah <bakul@bitblocks.com>
+ message dated "Sun, 12 Jan 2020 16:35:51 -0800."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <616659.1578876287.1@darkstar.fourwinds.com>
+Date: Sun, 12 Jan 2020 16:44:47 -0800
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] Tech Sq elevator [ really type-checking ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Bakul Shah writes:
+> On Jan 12, 2020, at 3:40 PM, Jon Steinhart <jon@fourwinds.com> wrote:
+> > 
+> > Kevin Bowling writes:
+> >> 
+> >> I am regularly surprised by how surprising type systems are to
+> >> computing professionals.
+> > 
+> > I am currently astonished at this.  Unfortunately, I need to make a hopefully
+> > minor change to the linux kernel to support something that I want to do in my
+> > current project.  But, this is my first time looking at the internals which is
+> > way different that my recollection of UNIX kernels.  It's being enough of an
+> > adventure that I'm writing up a travelogue of my journey through the code.
+> > While I swore that I was done writing books this is sure looking like another
+> > one :-)
+> > 
+> > So I came across this piece of what I consider to be bad programming that's
+> > all over the place...
+> > 
+> > One of my programming style rules is to program in the language in which you're
+> > programming.  The canonical example of not doing this is the Bourne shell which
+> > was originally written using macros to redefine C to look like Algol68.
+> > 
+> > Linux contains several sets of list_for_each_entry() macros that are essentially
+> > obfuscated for loops that generate inefficient code.  To make things worse, the
+> > way that they're implemented is by embedding list_head structures into other
+> > structures.
+> > 
+> > In the diagram below, the labels above boxes are structure names.  Names inside
+> > of boxes are structure member names.  super_blocks, s_list, s_mounts, and
+> > mnt_instance are all list_head structures.  (Trick question, how many lines are
+> > in this diagram :-) )
+> > 
+> > +-----------------------------------------+
+> > |                     super_block         |
+> > |  +--------------+   +----------+        |
+> > +->| super_blocks |<->|  s_list  |<- ... -+
+> >    +--------------+   +----------+
+> >                       |          |        mount              mount
+> >                       |   ...    |   +--------------+   +--------------+
+> >                       |          |   |      ...     |   |      ...     |
+> >                       +----------+   +--------------+   +--------------+
+> >                    +->| s_mounts |<->| mnt_instance |<->| mnt_instance |<- ... -+
+> >                    |  +----------+   +--------------+   +--------------+        |
+> >                    |                 |      ...     |   |      ...     |        |
+> >                    |                 +--------------+   +--------------+        |
+> >                    +------------------------------------------------------------+
+> > 
+> > The bizarre thing to me is that the list_head structures point to other list_head
+> > structures that are embedded in other structures.  When one needs to access a
+> > non list-head member of the structure one has to pass both the structure type and
+> > the list_head member name to a macro that figures out how to subtract the offset
+> > of the list_head member of the structure from the address of that list_head to
+> > get the address of the structure, and then casts that as the structure type so
+> > that members can be accessed.
+>
+> There is similar code in FreeBSD kernel. Embedding head and next ptrs reduces
+> memory allocation and improves cache locality somewhat. Since C doesn't have
+> generics, they try to gain the same functionality with macros. See 
+>
+> https://github.com/freebsd/freebsd/blob/master/sys/sys/queue.h
+>
+> Not that this is the same as what Linux does (which I haven't dug into) but
+> I suspect they may have had similar motivation.
+
+Not sure that I understand.
+
+A list_head structure takes exactly the same amount of space as a pair of pointers,
+so the memory allocation should be identical.
+
+I also don't see the cache locality.  Both the embedded list_head and the start
+of the structure are accessed in either case; once the programmer has played
+guess-the-type the list macro returns a pointer to the start of the structure.
+
+So again, I'm just commenting on what I'm seeing in linux, and while it is
+possible that I may be misunderstanding something so far I don't think so.
+
+Jon
