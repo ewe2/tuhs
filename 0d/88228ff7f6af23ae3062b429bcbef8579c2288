@@ -1,0 +1,109 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id c1aa240b
+	for <ml@inbox.vuxu.org>;
+	Mon, 13 Jan 2020 00:22:56 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E4E229BDD6; Mon, 13 Jan 2020 10:22:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C2EA19BD5D;
+	Mon, 13 Jan 2020 10:22:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 640B19BD1C; Mon, 13 Jan 2020 10:22:20 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 03B639BD0F
+ for <tuhs@tuhs.org>; Mon, 13 Jan 2020 10:22:20 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 989DB35E104; Sun, 12 Jan 2020 16:22:19 -0800 (PST)
+Date: Sun, 12 Jan 2020 16:22:19 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Jon Steinhart <jon@fourwinds.com>
+Message-ID: <20200113002219.GJ9174@mcvoy.com>
+References: <202001122225.00CMPc9S085970@tahoe.cs.Dartmouth.EDU>
+ <CAK7dMtBHfc35vb+5XP6WcBXDKsFyMxFSZ8vfgen7_5jgrnNxnQ@mail.gmail.com>
+ <202001122340.00CNeef0604557@darkstar.fourwinds.com>
+ <20200112235051.GG9174@mcvoy.com>
+ <202001130001.00D012bC608441@darkstar.fourwinds.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202001130001.00D012bC608441@darkstar.fourwinds.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Tech Sq elevator [ really type-checking ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Jan 12, 2020 at 04:01:02PM -0800, Jon Steinhart wrote:
+> Larry McVoy writes:
+> > On Sun, Jan 12, 2020 at 03:40:40PM -0800, Jon Steinhart wrote:
+> > > Linux contains several sets of list_for_each_entry() macros that are essentially
+> > > obfuscated for loops that generate inefficient code.  
+> >
+> > Very common idiom in any real system.  BitKeeper has them as well, they are
+> > used everywhere.  They are too useful to not use.  The BitKeeper ones give
+> > you most of Perl's list capabilities.
+> 
+> I don't see it.  In the cases that I've seen so far in linux the only uses are
+> inserting, deleting, and traversing lists.  My opinion that anyone who can't
+> write
+> 	for (p = list; p != NULL; p = p->next)
+> 
+> shouldn't be programming, much less in the kernel.  To me, type-checking and
+> code clarity are vastly more important.  If I want to program in Perl, I do
+> so.  When I program in C that's what I do.
+> 
+> I do want to be clear that I'm coming at this from a code maintenance angle.
+
+I'd argue that the code we wrote for BitKeeper would hold up as some
+of the most professionally written code ever.  Every commit was peer
+reviewed by at least 2 other people, code that add/changed/deleted user
+interfaces had to have docs and tests.  The philosophy is very much in
+line with code maintenance, I vetoed stuff that was clever, my mantra was
+"write once, read many so optimize for read".
+
+Some dude on twitter found our code when we open sourced it and tweeted
+something like "Wow, I've just spent the afternoon reading some of the
+best written C code I've ever seen.  I didn't know C could be that nice".
+So it's not just my opinion, I don't know that dude.
+
+The list code that we have is super pleasant to use and has been
+in production use for over 2 decades.  And we maintained it easily,
+our 24x7 *average* responsive time on a bug report was 24 minutes.
+The only reason it was that high was because we had to sleep (we were
+spread out from East to West coast).  During working hours, response time
+was almost always under 10 minutes, usually 2-3 minutes.  By "response",
+I don't mean some automated nonsense that says "We value your input,
+this is to let you know your report has been entered into our system".
+I mean an engineer looked at the problem, figured out what was causing the
+problem by looking at our source, about 90% of the time we knew what the
+fix was, and we sent an update to the bug report with that information.
+
+The list structure was auto resizing, it knew both how much was allocated
+and how much was used in the first word of the list (we resized only in
+powers of 2 so we could store size in log2 bits, used the rest of the
+bits for the length), you could have a list in as short as two words 
+and it scaled really well to millions of entries.  
+
+It was, and is, super useful.  Wayne is back at Intel and he's teasing
+it out of our libc to use there.
+
+So you may not like it but that's you.  It has worked well in an extremely
+professional environment.  Well coding professional, personalities might
+have been a bit wonky :)
