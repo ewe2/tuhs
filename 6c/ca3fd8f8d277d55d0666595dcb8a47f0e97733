@@ -1,0 +1,164 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8c4fd616
+	for <ml@inbox.vuxu.org>;
+	Fri, 17 Jan 2020 16:02:20 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 51DC89C108; Sat, 18 Jan 2020 02:02:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DF1429C0F7;
+	Sat, 18 Jan 2020 02:01:08 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="munkgvBs";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1FF579C0F7; Sat, 18 Jan 2020 02:01:06 +1000 (AEST)
+Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com
+ [209.85.222.181])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BED379B842
+ for <tuhs@tuhs.org>; Sat, 18 Jan 2020 02:01:01 +1000 (AEST)
+Received: by mail-qk1-f181.google.com with SMTP id r14so23087370qke.13
+ for <tuhs@tuhs.org>; Fri, 17 Jan 2020 08:01:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=EciiI8y9u3kuA+tTemUw3ZIxbwfKrzwpmBhVUmhUNrA=;
+ b=munkgvBsr13VWmasZk2QEO2rwRDBmBDazLUR4dfPutE9QOm4+tXh6F7QQoznf5WArF
+ LYUIKFibWkYvj6+R41kb5/LT1obZDtn+2fPj9C2AUFoixispqCMSeH2aFI//gN/zj/Ie
+ /g0GATGLCnlYp0eZqjC0BL+9Kv/s0JTJ0sByn40JYyY/c4OB4pBpiK66HMSLGYI74TOe
+ CjjTkCQzIYt3Sw2+WTDnrQIrmg/0Bl5Ev+LRg5Xdp3HXMXgfK6/iaSJFY1lMiW63EjjT
+ 4QazRsEQEJCNum+IYu4IGQrIEngaJOlICk8KwY4nA3uRKwPXurnZ5opGPHVA0If8u8lg
+ b2Jg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=EciiI8y9u3kuA+tTemUw3ZIxbwfKrzwpmBhVUmhUNrA=;
+ b=guJk77FM0uTJ6fmBoo+TeRGIaJhbzibaQ7+kyFDH3aF6e7LW/6hL2eizGEHeMdyWGM
+ tQeLwDsG2OaAxa3zuEFgx/snpgE10KTCg64YsvNAthoODYkOFHig4a8GT0Gz8MDSb6tn
+ HDl+wTquXtYvzEPOULxplimQfQcqZZYs2LDtN8u4g+ckbo/gFTnUPuJziGKXDBJymyvG
+ hgBqaOH+yeJpUMIDjhUGLj7XMU++ENyjbM294DgoVNj2vvJAd8WkUuv/iQoDotVShbS6
+ SqthTbAMrygGyzh3y/etaytXWeMASCgQo9AfjhDd/2RWCclzC5zjhv/46gpUuJc5qYLG
+ pqSg==
+X-Gm-Message-State: APjAAAWH+ixj0srTG+AnneCf8kjUvU/SW82sf5LKpyMs1CjB+uv1J8Jw
+ yWmPXpSIRgAW0kOSRlDhiM8MMkm5wrn6T/vjNVaAuYyE
+X-Google-Smtp-Source: APXvYqxYZMboFNW3s5AQ26VBBq+kTNKzOoESn07v04w2xMeuy0cH7inmc43U25uTHVlGrA9cCn9+tstWtaEeC8WsvFQ=
+X-Received: by 2002:a37:a80a:: with SMTP id r10mr36319151qke.240.1579276860660; 
+ Fri, 17 Jan 2020 08:01:00 -0800 (PST)
+MIME-Version: 1.0
+References: <202001171431.00HEV3gF020029@tahoe.cs.Dartmouth.EDU>
+ <CAC20D2Ncjeo5xhC2nGEgAR_KnxytuanGHK-bj3yun7tc1q3-+w@mail.gmail.com>
+ <20200117152334.GJ28686@mcvoy.com>
+In-Reply-To: <20200117152334.GJ28686@mcvoy.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Fri, 17 Jan 2020 09:00:48 -0700
+Message-ID: <CANCZdfq9jZCHyuNfWV1khYpUvuStL6WWFQQH_TJh9mhp7o32ZQ@mail.gmail.com>
+To: Larry McVoy <lm@mcvoy.com>
+Content-Type: multipart/alternative; boundary="000000000000483aea059c580c72"
+Subject: Re: [TUHS] Lions book
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>,
+ Doug McIlroy <doug@cs.dartmouth.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000483aea059c580c72
+Content-Type: text/plain; charset="UTF-8"
+
+On Fri, Jan 17, 2020 at 8:24 AM Larry McVoy <lm@mcvoy.com> wrote:
+
+> On Fri, Jan 17, 2020 at 09:50:24AM -0500, Clem Cole wrote:
+> > 6th Edition is clear and if you want to understand what it takes and how
+> it
+> > works, John's commentary it difficult to beat.
+>
+> It's a good starting point but it's pretty outdated.  I like to go on and
+> on about how much I love the SunOS 4.x kernel but it is outdated as well.
+>
+> I wish there was a v6/SunOS like kernel that was as clean but had good
+> support for SMP and NUMA and TCP offload (and probably a long list of
+> other useful stuff I've forgotten).
+>
+> Teaching kids how a single threaded kernel works is cool but it's
+> also misleading, the world has gotten a lot more complex.  And while
+> the kernels of decades ago were clean and simple, I don't know of
+> a kernel to point people to that has the clean code that SunOS had.
+> Solaris isn't it, though it has some bright spots.  Linux is meh, it's
+> better than nothing by a lot but I would not point to it as "read this,
+> kid, you'll see the architecture".  It's not clear there is a good
+> answer.
+>
+
+It's but the first step on the road to understanding. I'd been working on
+the FreeBSD kernel for years when I re-read the Lions book. The stark
+simplicity of the v6 kernel helped everything suddenly 'click' into place
+in the code I was reading in the FreeBSD kernel, even with 30ish years of
+changes to the v6 code base that lead to the FreeBSD kernel...
+
+Newer systems are a lot more complicated. And they need to be to get the
+full performance out of the system. Yet understanding the basics without
+the extra clutter has great value.
+
+Warner
+
+--000000000000483aea059c580c72
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote">=
+<div dir=3D"ltr" class=3D"gmail_attr">On Fri, Jan 17, 2020 at 8:24 AM Larry=
+ McVoy &lt;<a href=3D"mailto:lm@mcvoy.com">lm@mcvoy.com</a>&gt; wrote:<br><=
+/div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bo=
+rder-left:1px solid rgb(204,204,204);padding-left:1ex">On Fri, Jan 17, 2020=
+ at 09:50:24AM -0500, Clem Cole wrote:<br>
+&gt; 6th Edition is clear and if you want to understand what it takes and h=
+ow it<br>
+&gt; works, John&#39;s commentary it difficult to beat.<br>
+<br>
+It&#39;s a good starting point but it&#39;s pretty outdated.=C2=A0 I like t=
+o go on and<br>
+on about how much I love the SunOS 4.x kernel but it is outdated as well.<b=
+r>
+<br>
+I wish there was a v6/SunOS like kernel that was as clean but had good<br>
+support for SMP and NUMA and TCP offload (and probably a long list of<br>
+other useful stuff I&#39;ve forgotten).<br>
+<br>
+Teaching kids how a single threaded kernel works is cool but it&#39;s<br>
+also misleading, the world has gotten a lot more complex.=C2=A0 And while<b=
+r>
+the kernels of decades ago were clean and simple, I don&#39;t know of<br>
+a kernel to point people to that has the clean code that SunOS had.<br>
+Solaris isn&#39;t it, though it has some bright spots.=C2=A0 Linux is meh, =
+it&#39;s<br>
+better than nothing by a lot but I would not point to it as &quot;read this=
+,<br>
+kid, you&#39;ll see the architecture&quot;.=C2=A0 It&#39;s not clear there =
+is a good<br>
+answer.<br></blockquote><div><br></div><div>It&#39;s but the first step on =
+the road to understanding. I&#39;d been working on the FreeBSD kernel for y=
+ears when I re-read the Lions book. The stark simplicity of the v6 kernel h=
+elped everything suddenly &#39;click&#39; into place in the code I was read=
+ing in the FreeBSD kernel, even with 30ish years of changes to the v6 code =
+base that lead to the FreeBSD kernel...</div><div><br></div><div>Newer syst=
+ems are a lot more complicated. And they need to be to get the full perform=
+ance out of the system. Yet understanding the basics without the extra clut=
+ter has great value.</div><div><br></div><div>Warner=C2=A0</div></div></div=
+>
+
+--000000000000483aea059c580c72--
