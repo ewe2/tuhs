@@ -1,0 +1,301 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 931ef4fc
+	for <ml@inbox.vuxu.org>;
+	Mon, 20 Jan 2020 20:17:12 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 02C489C147; Tue, 21 Jan 2020 06:17:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 355A69C0FD;
+	Tue, 21 Jan 2020 06:16:28 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="HjN1yS+n";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3BB459C0FD; Tue, 21 Jan 2020 06:16:26 +1000 (AEST)
+Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com
+ [209.85.160.176])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8FCF19BFE6
+ for <tuhs@tuhs.org>; Tue, 21 Jan 2020 06:16:22 +1000 (AEST)
+Received: by mail-qt1-f176.google.com with SMTP id d18so782460qtj.10
+ for <tuhs@tuhs.org>; Mon, 20 Jan 2020 12:16:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=uG/IjDA0uXBXIaGA5IpdBtYm7G7Nkq1phHejmTm4qRw=;
+ b=HjN1yS+ncTl3XFIgaArOhKYj0aCObjkEmoichhngq1BbeqlrQ+xmRcl3miDifo1Q9V
+ +H9YSn5+Lt5dQLsVQ2G3tUXYqas1AYC0XJANq7Ujg/u3pGki1swPNERo3jZR/RcTE5qY
+ UOuk5Qo5rQCObEeiyJjMjf08ShjuKlGaMz1vU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=uG/IjDA0uXBXIaGA5IpdBtYm7G7Nkq1phHejmTm4qRw=;
+ b=b4D3uQH++us+PZAC6EX8KP8swe33p/sNYBjuUWj76bwCP/U/c3RH9SA9qQt6xAJuhv
+ wx1SShQ62qUeheKGWvgtb2n94UTtaGxTl0lEL5AObjn/rCvQtWopKNND8ZAjx+9VXR/o
+ ptSdVdib/N6DNI2fKPSDbVBdeExc/hUM+CzTC7RJnFxu9iWlh44w1NmWdULbw83hygXs
+ 1DJqdwpbcvaPxlZK6cYkSL/umAeR8v7htroNNQ+Qni7r19clHH7a9U30dbs+xx3t2jqV
+ TUjAIuBO6NjkcesOOJj8CItKyIbgITW6yqYwtkD1xPt3gIDb68GpH+pXg16nXmsjmtvM
+ ABng==
+X-Gm-Message-State: APjAAAXJZfZbd03ckBfdKhqX6qdDwVixKWtDJ5rclfuhnrC7KsCz4ROR
+ EnwhGIzfLZf7m1Yl521vFN+4pjnkv1yvsU4hWO3Wh1SlZwuLMQ==
+X-Google-Smtp-Source: APXvYqxszyfPmxxl3u6zTRBAnARCi6JMMpON0EG1eRtE+sosqYKN0fXv3z6UwBJu4Nm1x3M6XnCpyUg6EwiRp9eLk5E=
+X-Received: by 2002:ac8:4513:: with SMTP id q19mr1086332qtn.253.1579551381678; 
+ Mon, 20 Jan 2020 12:16:21 -0800 (PST)
+MIME-Version: 1.0
+References: <20200117195908.GF15253@ancienthardware.org>
+ <20200118035051.GC481935@mit.edu>
+ <20200118041913.GB67053@eureka.lemis.com> <20200119024900.GA15860@mit.edu>
+ <20200119031225.GI67053@eureka.lemis.com>
+ <20200119035808.GK67053@eureka.lemis.com>
+ <20200119132551.GC15860@mit.edu> <m1itNo9-0036tPC@more.local>
+ <CAKr6gn3Vhzn=g_55NdOQfQCUqi9YBSBZNbjM+YMoS8cg82PSbQ@mail.gmail.com>
+ <CAC20D2ONRuze8sxOkiuWqYV7i6+vy9r3jGuM3P52fin2gQHKjg@mail.gmail.com>
+ <20200120180432.GJ28686@mcvoy.com>
+ <CAC20D2M70qm-sgK+Oq8c7EK2pDO+pdz=pL8VbE2C8tw=CwQE-A@mail.gmail.com>
+ <202001201946.00KJk5er3071186@darkstar.fourwinds.com>
+In-Reply-To: <202001201946.00KJk5er3071186@darkstar.fourwinds.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Mon, 20 Jan 2020 15:15:55 -0500
+Message-ID: <CAC20D2O5wHbEdVKCR7VHVoyeLzoQO9XT3dy=UqeAPGqybLYu3w@mail.gmail.com>
+To: Jon Steinhart <jon@fourwinds.com>
+Content-Type: multipart/alternative; boundary="000000000000027ce9059c97f77e"
+Subject: Re: [TUHS] Early Linux and BSD (was: On the origins of Linux - "an
+ academic question")
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000027ce9059c97f77e
+Content-Type: text/plain; charset="UTF-8"
+
+On Mon, Jan 20, 2020 at 2:47 PM Jon Steinhart <jon@fourwinds.com> wrote:
+
+> I remember it slightly differently than Clem, but close.
+
+Ouch -- I was 1/2 of the Magnolia development team -- I remember a lot
+about it!!!
+For the curious when bitsavers comes back:   <goog_573452328>
+http://bitsavers.trailing-edge.com/pdf/tektronix/magnolia/
+
+Roger Bates had just finished the Dorado at PARC.  I had just left CMU.
+ We were cubical mates in TekLabs.   Motorola had an experimental chip that
+was not yet numbered.   We were given them in the Computer Research group
+in Tek Labs. So, we started building a personal computer at night for
+ourselves.
+
+Our boss saw the notes and asked what we would do differently if Tek paid
+for it.  I was originally using 8" floppies and immediately said 'a real
+disk.'   We got a Tek '$10K project' and a few months to build a prototype.
+I already had written (well sort of hacked) a simple C compiler based on
+Dennis's PDP-11 compiler (when it screwed up it would sometimes include
+PDP-11 code - and I never supported FP).   Paul Blattner wrote an assembler
+and linker.     Using that, Steve Glaser and I ported UNIX/V7 to it.
+
+
+
+> The Magnolia wasn't a UNIX workstation, it was an experimental Smalltalk
+> machine.
+
+That was 2+ years later actually.   Once they had the system, a couple of
+other folks moved Smalltalk to it.  And in fact, it eventually did release
+it as a product called the 4404.
+
+
+
+
+> I don't recall
+> much about it, but I don't think that it had to address many of the
+> problems
+> that UNIX had at the time with the 68000 such as the lack of a MMU.
+
+Be careful... It most definitely did have an MMU, I designed it!!!  The
+Xerox Altos and Dorado's never had MMU's.  So Roger was not familiar with
+them.  I had to teach him.   Magnolia had a base/limit register MMU similar
+to the PDP-11/70.  The original OS was V7 and swapped.  It ran just fine.
+
+
+
+> I think
+> that the Magnolia predated the 68010 and certainly predated the 68020 and
+> awful but usable PMMU.
+
+The wire-wrapped prototype was originally an X-series chip and yes the
+first 'production' units were real 10Mhz 68000s.   After I went back to
+grad school, Roger spliced a 68010 into and ripped out my MMU.  The late
+Terry Laskodi put 4.1BSD on it.
+
+
+
+> Part of the issue was that the Magnolia was developed in Tek Labs, which
+> was
+> the research end of things.  It wasn't a product organization, the Magnolia
+> at the time hadn't gone through any of the rigorous environmental testing
+> required by Tek which was a company that actually provided warranty
+> service.
+> And there was no marketing, not that Tek was a marketing powerhouse.  Given
+> the way that things panned out I don't think that the Magnolia would have
+> been
+> a player once things like Suns appeared, if for no other reason that Tek
+> had no
+> clue as to how to do anything in volume and our stuff was way too
+> expensive.
+>
+Very possible, but they did have first mover position.  In fact, folks at
+Harvard Business as much as said so later.  There is a great HBS case study
+written about it called "Why Skunk Projects Don't Work" (which I have
+somewhere) -- I should get that scanned at added to the Magnolia archive on
+BitSavers.
+
+
+
+
+>
+> In any case, while the 32032 was a problem, the real reason that Tek failed
+> in the workstation biz was management.
+
+No doubt... but it was 3 years later.   Which I think was a huge issue.
+
+
+
+
+>  "well, we have 2 RS-232 ports and a parallel port and so we'll work with
+> that."
+
+Which of course was what Magnolia had been 3.5 years earlier and was what
+became the 4404 Smalltalk machine.
+
+--000000000000027ce9059c97f77e
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif"><br></div></div><br><div class=3D"gmai=
+l_quote"><div dir=3D"ltr" class=3D"gmail_attr"><font color=3D"#ff0000">On M=
+on, Jan 20, 2020 at 2:47 PM Jon Steinhart &lt;<a href=3D"mailto:jon@fourwin=
+ds.com">jon@fourwinds.com</a>&gt; wrote:<br></font></div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><font color=3D"#ff0000">I remember it slig=
+htly differently than Clem, but close.=C2=A0 </font></blockquote><div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><f=
+ont color=3D"#ff0000"></font><font color=3D"#0000ff">Ouch -- I was 1/2 of t=
+he=C2=A0Magnolia development=C2=A0team -- I remember a lot about it!!!</fon=
+t></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,s=
+ans-serif"><font color=3D"#0000ff">For the curious when bitsavers=C2=A0come=
+s back:=C2=A0<a href=3D"goog_573452328">=C2=A0</a></font><span style=3D"fon=
+t-family:Arial,Helvetica,sans-serif"><a href=3D"http://bitsavers.trailing-e=
+dge.com/pdf/tektronix/magnolia/">http://bitsavers.trailing-edge.com/pdf/tek=
+tronix/magnolia/</a></span></div><div class=3D"gmail_default" style=3D"font=
+-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></di=
+v><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-se=
+rif"><font color=3D"#0000ff">Roger Bates had just finished the Dorado at PA=
+RC.=C2=A0 I had just left CMU.=C2=A0 =C2=A0We were cubical mates in TekLabs=
+.=C2=A0 =C2=A0Motorola had an experimental chip that was not yet=C2=A0numbe=
+red.=C2=A0 =C2=A0We were given them in the=C2=A0Computer Research group in =
+Tek Labs. So, w</font><span style=3D"font-family:Arial,Helvetica,sans-serif=
+"><font color=3D"#0000ff">e started building a personal computer at night f=
+or ourselves.=C2=A0=C2=A0</font></span></div><div class=3D"gmail_default" s=
+tyle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br=
+></font></div><div class=3D"gmail_default" style=3D"font-family:arial,helve=
+tica,sans-serif"><font color=3D"#0000ff">Our boss saw the notes and asked w=
+hat we would do differently if Tek paid for it.=C2=A0 I was originally usin=
+g 8&quot; floppies and immediately=C2=A0said &#39;a real disk.&#39;=C2=A0 =
+=C2=A0We got a Tek &#39;$10K project&#39; and a few months to build a proto=
+type. I already had written (well sort of hacked) a simple C compiler based=
+ on Dennis&#39;s PDP-11 compiler (when it screwed up it would sometimes inc=
+lude PDP-11 code - and I never supported FP).=C2=A0 =C2=A0Paul Blattner wro=
+te an assembler and linker.=C2=A0 =C2=A0 =C2=A0Using that, Steve Glaser and=
+ I ported UNIX/V7 to it.</font></div></div><div><font color=3D"#ff0000"><br=
+></font></div><div><font color=3D"#ff0000">=C2=A0</font></div><blockquote c=
+lass=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px soli=
+d rgb(204,204,204);padding-left:1ex"><font color=3D"#ff0000">The Magnolia w=
+asn&#39;t<span class=3D"gmail_default" style=3D"font-family:arial,helvetica=
+,sans-serif"> </span>a UNIX workstation, it was an experimental Smalltalk m=
+achine.=C2=A0</font></blockquote><div><div class=3D"gmail_default" style=3D=
+"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">That was 2=
++ years later actually.=C2=A0 =C2=A0Once they had the system, a couple of o=
+ther folks moved Smalltalk to it.=C2=A0 And in fact, it eventually did rele=
+ase it as a product called the 4404.</font></div><br></div><div><br></div><=
+div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0=
+px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"><font col=
+or=3D"#ff0000"> I don&#39;t recall<br>
+much about it, but I don&#39;t think that it had to address many of the pro=
+blems<br>
+that UNIX had at the time with the 68000 such as the lack of a MMU.=C2=A0</=
+font></blockquote><div><div class=3D"gmail_default" style=3D"font-family:ar=
+ial,helvetica,sans-serif"><font color=3D"#0000ff">Be careful... It most def=
+initely did have an MMU, I designed it!!!=C2=A0 The Xerox Altos and Dorado&=
+#39;s never had MMU&#39;s.=C2=A0 So Roger was not familiar with them.=C2=A0=
+  I had to teach him.=C2=A0 =C2=A0Magnolia had a base/limit register MMU si=
+milar to the PDP-11/70.=C2=A0 The original OS was V7 and swapped.=C2=A0 It =
+ran just fine.</font></div><br></div><div>=C2=A0<br></div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><font color=3D"#ff0000"> I think<br>
+that the Magnolia predated the 68010 and certainly predated the 68020 and<b=
+r>
+awful but usable PMMU.=C2=A0</font></blockquote><div><div class=3D"gmail_de=
+fault" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#000=
+0ff">The wire-wrapped prototype was originally an X-series chip and yes the=
+ first &#39;production&#39; units were real 10Mhz 68000s.=C2=A0 =C2=A0After=
+ I went back to grad school, Roger spliced a 68010 into and ripped out my M=
+MU.=C2=A0 The late Terry Laskodi put 4.1BSD on it.</font></div></div><div><=
+br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin=
+:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"=
+><font color=3D"#ff0000">Part of the issue was that the Magnolia was develo=
+ped in Tek Labs, which was<br>
+the research end of things.=C2=A0 It wasn&#39;t a product organization, the=
+ Magnolia<br>
+at the time hadn&#39;t gone through any of the rigorous environmental testi=
+ng<br>
+required by Tek which was a company that actually provided warranty service=
+.<br>
+And there was no marketing, not that Tek was a marketing powerhouse.=C2=A0 =
+Given<br>
+the way that things panned out I don&#39;t think that the Magnolia would ha=
+ve been<br>
+a player once things like Suns appeared, if for no other reason that Tek ha=
+d no<br>
+clue as to how to do anything in volume and our stuff was way too expensive=
+.<br></font></blockquote><div><div class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif"><font color=3D"#0000ff">Very possible, but=
+ they did have first mover position.=C2=A0 In fact, folks at Harvard Busine=
+ss as much as said so later.=C2=A0 </font><span style=3D"color:rgb(0,0,255)=
+">There is a great HBS case study written about it called &quot;Why Skunk P=
+rojects Don&#39;t Work&quot; (which I have somewhere) -- I should get that =
+scanned at added to the Magnolia archive on BitSavers.</span></div><br></di=
+v><div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><font color=3D"#ff0000">
+<br>In any case, while the 32032 was a problem, the real reason that Tek fa=
+iled<br>
+in the workstation biz was management.=C2=A0</font></blockquote><div><div c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><fo=
+nt color=3D"#0000ff">No doubt... but it was 3 years later.=C2=A0 =C2=A0Whic=
+h I think was a huge issue.</font></div><br></div><div><br></div><div>=C2=
+=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8e=
+x;border-left:1px solid rgb(204,204,204);padding-left:1ex"><font color=3D"#=
+ff0000">=C2=A0&quot;well, we have 2 RS-232 ports and a parallel<span class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"> </span=
+>port and so we&#39;ll work with that.&quot;=C2=A0</font></blockquote><div>=
+<span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-ser=
+if"><font color=3D"#0000ff">Which of course was what Magnolia had been 3.5 =
+years earlier and was what became the 4404 Smalltalk machine.</font></span>=
+<span style=3D"color:rgb(255,0,0)">=C2=A0</span></div></div></div>
+
+--000000000000027ce9059c97f77e--
