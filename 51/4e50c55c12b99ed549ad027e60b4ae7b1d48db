@@ -1,0 +1,114 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 4ebde522
+	for <ml@inbox.vuxu.org>;
+	Sat, 8 Feb 2020 19:00:13 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E5B8F9CCC6; Sun,  9 Feb 2020 05:00:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B193F9CCAD;
+	Sun,  9 Feb 2020 04:59:46 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E60919CCAB; Sun,  9 Feb 2020 04:59:44 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D27869CCAA
+ for <tuhs@tuhs.org>; Sun,  9 Feb 2020 04:59:43 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id AD27118C0EB; Sat,  8 Feb 2020 13:59:42 -0500 (EST)
+To: tuhs@tuhs.org
+Message-Id: <20200208185942.AD27118C0EB@mercury.lcs.mit.edu>
+Date: Sat,  8 Feb 2020 13:59:42 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] UNIBUS issues (Was: Spacewar at Bell Labs)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+   > From: Dave Horsfall <dave@horsfall.org>
+
+    > [ Getting into COFF territory, I think ]
+
+I'm sending this reply to TUHS since the message I'm replying to has some
+errors, and I'd like for the corrections to be in the record close by.
+
+    > On Thu, 30 Jan 2020, Clem Cole wrote:
+
+    >> They way they tried to control it was to license the bus interface chips
+    >> (made privately by Western Digital for them IIRC but were not available
+    >> on the open market).
+
+Although DEC did have some custom chips for QBUS interfacing, they didn't
+always use them (below). And for the UNIBUS, the chips were always, AFAIK,
+open market (and the earliest ones may have predated the UNIBUS).
+
+E.g. the M105 Address Selector, a single-width FLIP CHIP, used in the earliest
+PDP-11's when devices such as the RK11-C, RP11 and TM11 were made out of a
+mass of small FLIP CHIPS, used SP380A's for its bus receivers and 8881's for
+transmitters.
+
+On the QBUS, the KDF11-A and KDJ11-A CPU cards used AMD 2908's as bus
+transceivers, even though DEC had its own custom chips. The KDF11-A also
+used DS8640's and DS8641's (transmitters and receivers), and also an 8881!
+(The UNIBUS and QBUS were effectively identical at the analog level, which is
+why a chip that historical was still in use.)
+
+
+    >> If I recall it was the analog characteristics that were tricky with
+    >> something like the BUS acquisition for DMA and Memory timing, but I
+    >> admit I've forgotten the details.
+
+One _possibility_ for what he was talking about was that it took DEC a while
+to get a race/metastability issue with daisy-chained bus grant lines under
+control. (The issue is explained in some detail here:
+
+  https://gunkies.org/wiki/Bus_Arbitration_on_the_Unibus_and_QBUS
+
+and linked pages.) This can been seen in the myriad of etch revisions for the
+M782 and related 'bus grant' FLIP CHIPs:
+
+  https://gunkies.org/wiki/M782_Interrupt_Control
+
+By comparison, the M105 only had 3 through it's whole life!
+
+It wasn't until the M7821 etch D revision, which came out in 1977, almost a
+decade after the first PDP-11's appeared, that they seemed to have absorbed
+that the only 'solution' to the race/metastability issue involved adding
+delays.
+
+In all fairness, the entire field didn't really appreciate the metastability
+issue until the LINC guys at WUSTL did a big investigation of it, and then
+started a big campaign to educate everyone about it - it wasn't DEC being
+particularly clueless.
+
+
+    > Hey, if the DEC marketoids didn't want 3rd-party UNIBUS implementations
+    > then why was it published?
+
+Well, exactly - but it's useful to remember the differening situation for DEC
+from 1970 (first PDP-11's) and later.
+
+In 1970 DEC was mostly selling to scientists/engineers, who wanted to hook up
+to some lab equipment they'd built, and OEM's, who often wanted to use a mini
+to control some value-added gear of their own devising. An open bus was really
+necessary for those markets. Which is why the 1970 PDP-11/20 manual goes into
+a lot of detail on how to interface to the PDP-11's UNIBUS.
+
+Later, of course, they were in a different business model.
+
+       Noel
