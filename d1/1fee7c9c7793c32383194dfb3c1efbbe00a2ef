@@ -1,0 +1,281 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 7693c778
+	for <ml@inbox.vuxu.org>;
+	Sun, 9 Feb 2020 13:26:00 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D121A9CCB4; Sun,  9 Feb 2020 23:25:58 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 093069CCAD;
+	Sun,  9 Feb 2020 23:25:22 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ieee.org header.i=@ieee.org header.b="EizuJH7z";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A886C9CCAD; Sun,  9 Feb 2020 23:25:19 +1000 (AEST)
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com
+ [209.85.208.169])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 14BF49CCA9
+ for <tuhs@tuhs.org>; Sun,  9 Feb 2020 23:25:18 +1000 (AEST)
+Received: by mail-lj1-f169.google.com with SMTP id w1so4105095ljh.5
+ for <tuhs@tuhs.org>; Sun, 09 Feb 2020 05:25:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ieee.org; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+ bh=BuEN7lKbZCQB8Grx+FI9dyVVSDw0wpx0AXgBqRmLXE8=;
+ b=EizuJH7zi8KgXpDwPOVsNfRE3oIHdFoDVZgdTao+Puz1HwinydzkndDzsX9OK2Wmbz
+ DE5fAsu2QH8SqWaZCChYn8p/GgPz54TaXW0eiRjvtMWMhhCDXsvOHJBJOr3tke5SlNrZ
+ tNsdY/io0ndqQPi2uwV2Y9DlutiuQDbmjwznU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to;
+ bh=BuEN7lKbZCQB8Grx+FI9dyVVSDw0wpx0AXgBqRmLXE8=;
+ b=IdFdvCXyWx8JuP/XaLsGVpdSvI7S69iOMy1Z/xdTqJ4fnTD+wcM072gBV4eCnj3inf
+ /T2KsNPNNdR3QVWqp7lmpATk1n2o05MLrQ9m7BuFy9NAG/icrveEQD3Ht9w6MGVAcIeu
+ Z2APjlpyMcSGhlMiJT5hcxICrOlAwciCw3TI6+reMOjWBvWS97YcKT87INU5HNZpvuaD
+ q26iG2B2wtnZo9bnJMAXxL6K/S0Mi/aWTfAWiDV0yUmaH+PNe8A7mkvBNNHrWxNuDsIP
+ vdO8uQXJTBFMeUFVvTDj44PIa/tCktTojjwmR8JjgsB4IW5OCjxMAfLqWS6FFM5LELw8
+ T/hA==
+X-Gm-Message-State: APjAAAUo0iqkJBtfJt9+kqtrjy6Zh9NU2XbeMvyonHtOOTiGOd4FdoTn
+ dyFt4mbztGX7Frg97xtYfrooD1AVy0R5JcnTpIi3w5gn
+X-Google-Smtp-Source: APXvYqxY50vgmv2pPrpSX1fMEHLBG8NmCzF/QOCssQOVdxLoPQDgkVlTZsmiB2nYadv7EygthGN+45QGGVO1V5KIjE0=
+X-Received: by 2002:a2e:300e:: with SMTP id w14mr5200892ljw.222.1581254715819; 
+ Sun, 09 Feb 2020 05:25:15 -0800 (PST)
+MIME-Version: 1.0
+References: <20200208073619.GC23759@minnie.tuhs.org>
+ <CAC20D2PLvd2japrBFCtMZVQQLPw+0-eFWEMZc9nhpm-_zGLV7Q@mail.gmail.com>
+ <2d62a168-fb58-aae3-7641-082d26c16ece@andrewnesbit.org>
+ <CAEuQd1ATwFXxp4gxU7X1Jh6ehgueCeqewML7iSqB_cg4diwzvg@mail.gmail.com>
+In-Reply-To: <CAEuQd1ATwFXxp4gxU7X1Jh6ehgueCeqewML7iSqB_cg4diwzvg@mail.gmail.com>
+From: John Adams <jack.adams@ieee.org>
+Date: Sun, 9 Feb 2020 08:24:41 -0500
+Message-ID: <CANv4r+hEAAG1rx_PTya-w-PP+yyR3D8EhuoTXFRmsKFK5x4YwQ@mail.gmail.com>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Content-Type: multipart/alternative; boundary="000000000000a2e4d2059e248d93"
+Subject: Re: [TUHS] [COFF] Idea: a regular video chat
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000a2e4d2059e248d93
+Content-Type: text/plain; charset="UTF-8"
+
+Excellent idea,  can't wait for the first session!
+*John "Jack" Lossin Adams*
+*LinkedIn CV <http://www.linkedin.com/in/johnlossinadams>*
+
+
+*We live in a society exquisitely dependent on science and technology, in
+which hardly *
+
+*anyone knows anything about science and technology. - Carl Sagan*
+
+
+*Only two things are infinite, the universe and human stupidity, *
+*and I'm not sure about the former. - Albert Einstein*
+
+
+
+On Sat, Feb 8, 2020 at 12:51 PM Tyler Adams <coppero1237@gmail.com> wrote:
+
+> Very cool, would love it!
+>  Tyler
+>
+>
+> On Sat, Feb 8, 2020 at 6:07 PM U'll Be King of the Stars <
+> ullbeking@andrewnesbit.org> wrote:
+>
+>> On 08/02/2020 15:41, Clem Cole wrote:
+>> > Possibly -  signal works really well and has few if any issues
+>> > security/privacy/ownership issues.
+>>
+>> I think it's a WONDERFUL idea!!
+>>
+>> I don't mind what multimedia and video converencing technology we use.
+>> (Obviously it must meet fundmental technical requirements.)
+>>
+>> The point that Clem makes about "security/privacy/ownership issues" is
+>> important.  Now could be a good time for one to open the discussion
+>> about their expectations.
+>>
+>> Andrew
+>>
+>>
+>> > On Fri, Feb 7, 2020 at 11:36 PM Warren Toomey <wkt@tuhs.org
+>> > <mailto:wkt@tuhs.org>> wrote:
+>> >
+>> >     [x-posting to COFF]
+>> >
+>> >     Idea: anybody interested in a regular video chat? I was thinking of
+>> >     one that progresses(*) through three different timezones
+>> (Asia/Aus/NZ,
+>> >     then the Americas, then Europe/Africa) so that everybody should be
+>> >     able to get to two of the three timezones.
+>> >
+>> >       (* like a progressive dinner)
+>> >
+>> >     30-60 minutes each one, general old computing. Perhaps a guest
+>> speaker
+>> >     now and then with a short presentation. Perhaps a theme now and
+>> then.
+>> >     Perhaps just chew the fat, shoot the breeze as well.
+>> >
+>> >     Platform: Zoom or I'd be happy to set up a private Jitsi instance.
+>> >     Something else?
+>> >
+>> >     How often: perhaps weekly or fortnightly through the three
+>> timezones,
+>> >     so it would cycle back every three or six weeks.
+>> >
+>> >     Comments, suggestions?!
+>> >
+>> >     Cheers, Warren
+>> >     _______________________________________________
+>> >     COFF mailing list
+>> >     COFF@minnie.tuhs.org <mailto:COFF@minnie.tuhs.org>
+>> >     https://minnie.tuhs.org/cgi-bin/mailman/listinfo/coff
+>> >
+>>
+>
+
+--000000000000a2e4d2059e248d93
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-size:small;colo=
+r:#0000ff"><font size=3D"4">Excellent idea,=C2=A0 can&#39;t wait for the fi=
+rst session!</font><br clear=3D"all"></div><div><div dir=3D"ltr" class=3D"g=
+mail_signature" data-smartmail=3D"gmail_signature"><div dir=3D"ltr"><div><d=
+iv dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div><div dir=3D=
+"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><=
+div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=
+=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr=
+"><font size=3D"4"><b>John &quot;Jack&quot; Lossin Adams</b><font size=3D"2=
+"><br></font></font></div><div></div><div dir=3D"ltr"><div dir=3D"ltr"><fon=
+t size=3D"4"><span style=3D"color:rgb(0,0,255)"></span><b><span style=3D"co=
+lor:rgb(0,0,255)"><font size=3D"2"><a href=3D"http://www.linkedin.com/in/jo=
+hnlossinadams" target=3D"_blank">LinkedIn CV</a></font></span></b><span sty=
+le=3D"background-color:rgb(255,255,255)"> </span><span style=3D"color:rgb(0=
+,0,255)"><b><br></b></span></font></div></div></div></div></div></div></div=
+></div></div></div></div></div></div></div></div></div></div></div><br></di=
+v></div><blockquote style=3D"margin:0px 0px 0px 40px;border:medium none;pad=
+ding:0px"><div><div><b><font color=3D"#000000">We live in a society exquisi=
+tely dependent on science and technology, in which hardly <br></font></b></=
+div></div></blockquote><blockquote style=3D"margin:0px 0px 0px 40px;border:=
+medium none;padding:0px"><blockquote style=3D"margin:0px 0px 0px 40px;borde=
+r:medium none;padding:0px"><div><div><b><font color=3D"#000000">anyone know=
+s anything about science and technology. - Carl Sagan</font></b></div></div=
+></blockquote></blockquote><div><div dir=3D"ltr"><div><div dir=3D"ltr"><div=
+ dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D=
+"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><=
+div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=
+=3D"ltr"><div style=3D"margin-left:40px"><b><span style=3D"color:rgb(0,0,0)=
+">Only two things are infinite, the universe and human stupidity, <br></spa=
+n></b></div><div style=3D"margin-left:40px"><div style=3D"margin-left:40px"=
+><b><span style=3D"color:rgb(0,0,0)">and I&#39;m not sure about the former.=
+ - Albert Einstein</span></b><br></div></div><div style=3D"margin-left:40px=
+"><div style=3D"margin-left:40px"><span style=3D"color:rgb(0,0,0)"></span><=
+/div></div></div></div></div></div></div></div></div></div></div></div></di=
+v></div></div></div></div></div><div><div dir=3D"ltr"><div dir=3D"ltr"><div=
+ dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D=
+"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><=
+div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div sty=
+le=3D"margin-left:40px"><b><span style=3D"color:rgb(0,0,0)"><br></span></b>=
+</div></div></div></div></div></div></div></div></div></div></div></div></d=
+iv></div></div></div></div></div></div></div></div></div></div></div><br></=
+div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr">On=
+ Sat, Feb 8, 2020 at 12:51 PM Tyler Adams &lt;<a href=3D"mailto:coppero1237=
+@gmail.com">coppero1237@gmail.com</a>&gt; wrote:<br></div><blockquote class=
+=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rg=
+b(204,204,204);padding-left:1ex"><div dir=3D"ltr">Very cool, would love it!=
+<br clear=3D"all"><div><div><div dir=3D"ltr">=C2=A0Tyler</div></div><br></d=
+iv></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_att=
+r">On Sat, Feb 8, 2020 at 6:07 PM U&#39;ll Be King of the Stars &lt;<a href=
+=3D"mailto:ullbeking@andrewnesbit.org" target=3D"_blank">ullbeking@andrewne=
+sbit.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote" style=3D=
+"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-le=
+ft:1ex">On 08/02/2020 15:41, Clem Cole wrote:<br>
+&gt; Possibly -=C2=A0 signal works really well and has few if any issues <b=
+r>
+&gt; security/privacy/ownership issues.<br>
+<br>
+I think it&#39;s a WONDERFUL idea!!<br>
+<br>
+I don&#39;t mind what multimedia and video converencing technology we use. =
+<br>
+(Obviously it must meet fundmental technical requirements.)<br>
+<br>
+The point that Clem makes about &quot;security/privacy/ownership issues&quo=
+t; is <br>
+important.=C2=A0 Now could be a good time for one to open the discussion <b=
+r>
+about their expectations.<br>
+<br>
+Andrew<br>
+<br>
+<br>
+&gt; On Fri, Feb 7, 2020 at 11:36 PM Warren Toomey &lt;<a href=3D"mailto:wk=
+t@tuhs.org" target=3D"_blank">wkt@tuhs.org</a> <br>
+&gt; &lt;mailto:<a href=3D"mailto:wkt@tuhs.org" target=3D"_blank">wkt@tuhs.=
+org</a>&gt;&gt; wrote:<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0[x-posting to COFF]<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0Idea: anybody interested in a regular video chat? I=
+ was thinking of<br>
+&gt;=C2=A0 =C2=A0 =C2=A0one that progresses(*) through three different time=
+zones (Asia/Aus/NZ,<br>
+&gt;=C2=A0 =C2=A0 =C2=A0then the Americas, then Europe/Africa) so that ever=
+ybody should be<br>
+&gt;=C2=A0 =C2=A0 =C2=A0able to get to two of the three timezones.<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0(* like a progressive dinner)<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A030-60 minutes each one, general old computing. Perh=
+aps a guest speaker<br>
+&gt;=C2=A0 =C2=A0 =C2=A0now and then with a short presentation. Perhaps a t=
+heme now and then.<br>
+&gt;=C2=A0 =C2=A0 =C2=A0Perhaps just chew the fat, shoot the breeze as well=
+.<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0Platform: Zoom or I&#39;d be happy to set up a priv=
+ate Jitsi instance.<br>
+&gt;=C2=A0 =C2=A0 =C2=A0Something else?<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0How often: perhaps weekly or fortnightly through th=
+e three timezones,<br>
+&gt;=C2=A0 =C2=A0 =C2=A0so it would cycle back every three or six weeks.<br=
+>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0Comments, suggestions?!<br>
+&gt; <br>
+&gt;=C2=A0 =C2=A0 =C2=A0Cheers, Warren<br>
+&gt;=C2=A0 =C2=A0 =C2=A0_______________________________________________<br>
+&gt;=C2=A0 =C2=A0 =C2=A0COFF mailing list<br>
+&gt;=C2=A0 =C2=A0 =C2=A0<a href=3D"mailto:COFF@minnie.tuhs.org" target=3D"_=
+blank">COFF@minnie.tuhs.org</a> &lt;mailto:<a href=3D"mailto:COFF@minnie.tu=
+hs.org" target=3D"_blank">COFF@minnie.tuhs.org</a>&gt;<br>
+&gt;=C2=A0 =C2=A0 =C2=A0<a href=3D"https://minnie.tuhs.org/cgi-bin/mailman/=
+listinfo/coff" rel=3D"noreferrer" target=3D"_blank">https://minnie.tuhs.org=
+/cgi-bin/mailman/listinfo/coff</a><br>
+&gt; <br>
+</blockquote></div>
+</blockquote></div>
+
+--000000000000a2e4d2059e248d93--
