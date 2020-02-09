@@ -1,0 +1,113 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.7 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE,WEIRD_QUOTING autolearn=ham
+	autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 92a190c5
+	for <ml@inbox.vuxu.org>;
+	Sun, 9 Feb 2020 00:19:45 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6A5A19CCAE; Sun,  9 Feb 2020 10:19:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C77EF9CCAD;
+	Sun,  9 Feb 2020 10:19:32 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 136819CCAD; Sun,  9 Feb 2020 10:19:31 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AB8E69CCA9
+ for <tuhs@tuhs.org>; Sun,  9 Feb 2020 10:19:30 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 3740835E104; Sat,  8 Feb 2020 16:19:30 -0800 (PST)
+Date: Sat, 8 Feb 2020 16:19:30 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Rob Pike <robpike@gmail.com>
+Message-ID: <20200209001930.GF21264@mcvoy.com>
+References: <C63994DC-C33E-48E6-BB5B-79A36E15132C@tuhs.org>
+ <CAKzdPgy6WJ_bUSY4hUoqtq41F1dYH_9SGLK_istBAb5Hv346EA@mail.gmail.com>
+ <CANCZdfqkAmo+4LcM9MJps9knoJa6sbd5WX94QN0MDcGZLBKeAQ@mail.gmail.com>
+ <CAKzdPgxeqBaXgFEHE7tvxXa6ZywTYY-eCtcZUGRBzGQUsU6BHg@mail.gmail.com>
+ <46c41c18-5b44-14e5-1f0a-9272866993da@case.edu>
+ <CAKzdPgw-YK0SAPUnwsjbQ_RGLsMUt2_A7+OYJ-9sxq98hmmOdw@mail.gmail.com>
+ <b18775ce-a2e5-7238-c36d-70014c25ff22@case.edu>
+ <CAKzdPgwRr_U9MeoM8AHziY=EAEj48W+m+SRASda_hGwauKqysw@mail.gmail.com>
+ <62548c3e-4692-c2d3-f06f-745353490b95@case.edu>
+ <CAKzdPgxZXp24KK5D06x1sgh3HS5xZqxbDwY5N7SipDaoBvX0LQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKzdPgxZXp24KK5D06x1sgh3HS5xZqxbDwY5N7SipDaoBvX0LQ@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Warner's Early Unix Presentation
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> In today's Unix (I use the term loosely) world, the phrase "free of
+> decoration" is apostasy.
+
+Yeah, it's annoying.  When I was building my last big system (BitKeeper)
+I "solved" the problem by having -s (silent) as an option to pretty much
+every command that produced output.
+
+In terms of controlling output, we took the SCCS keywords on steriods,
+we evolved it to sort of a little programming language.  I was told
+that "bk changes" (think git log sort of) couldn't be taught to produce
+JSON output.  Oh, it can't huh.  Below is the input that tells it to do
+just that.  It's sort of awk like, control words are $word,  "quoted stuff
+is printed, :THING: means print whatever THING is, variables are $0 .. $9
+and eval to "" or 0 in numerical context.  The main body script, much like
+awk calls it on each line, the script is called on each commit (and it 
+optionally recurses into files as well).  I'm pretty proud of it, it
+works really, really well.
+
+$ cat `bk bin`/dspec-changes-json
+# dspec-v2
+# The default dspec used by 'bk changes -json'
+
+$begin {
+	"[\n"
+}
+
+$if (:CHANGESET: && !:COMPONENT_V:) {
+	$if($0 -eq 1) {
+		"\},\n"
+	}
+	"\{\n"
+	"  \"key\": \":MD5KEY:\",\n"
+	"  \"user\": \":USER:\",\n"
+	"  \"host\": \":HOST:\",\n"
+	"  \"date\": \":Dy:-:Dm:-:Dd:T:T::TZ:\",\n"
+	"  \"serial\": :DS:,\n"
+	"  \"comments\": \"" $each(:C:){$json{(:C:)}\\n} "\",\n"
+        $if (:TAGS:) {
+             "  \"tags\": [ "
+             $each(:TAGS:){:JOIN:"\""(:TAGS:)"\""}
+             " ],\n"
+        }
+        "  \"parents\": [ "
+            $if(:PARENT:){"\"" :MD5KEY|PARENT: "\""}
+            $if(:PARENT: && :MPARENT:){," "}
+            $if(:MPARENT:){"\"" :MD5KEY|MPARENT: "\""}
+            " ]\n"
+	${0=1}		 		# we need to close off the changeset
+}
+
+$end {
+	$if($0 -eq 1) {
+		"\}\n"
+	}
+	"]\n"
+}
