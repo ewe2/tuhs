@@ -1,0 +1,94 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 482fcc14
+	for <ml@inbox.vuxu.org>;
+	Tue, 11 Feb 2020 07:46:54 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8B5A29BD85; Tue, 11 Feb 2020 17:46:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 635F29BCE3;
+	Tue, 11 Feb 2020 17:46:33 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 063D09BCE3; Tue, 11 Feb 2020 17:46:31 +1000 (AEST)
+Received: from freefriends.org (freefriends.org [96.88.95.60])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4C6809BCDE
+ for <tuhs@tuhs.org>; Tue, 11 Feb 2020 17:46:30 +1000 (AEST)
+X-Envelope-From: arnold@skeeve.com
+X-Envelope-To: <tuhs@tuhs.org>
+Received: from freefriends.org (freefriends.org [96.88.95.60])
+ by freefriends.org (8.14.7/8.14.7) with ESMTP id 01B7kTGm032158
+ (version=TLSv1/SSLv3 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+ for <tuhs@tuhs.org>; Tue, 11 Feb 2020 00:46:29 -0700
+Received: (from arnold@localhost)
+ by freefriends.org (8.14.7/8.14.7/Submit) id 01B7kTrT032157
+ for tuhs@tuhs.org; Tue, 11 Feb 2020 00:46:29 -0700
+From: arnold@skeeve.com
+Message-Id: <202002110746.01B7kTrT032157@freefriends.org>
+X-Authentication-Warning: frenzy.freefriends.org: arnold set sender to
+ arnold@skeeve.com using -f
+Date: Tue, 11 Feb 2020 00:46:29 -0700
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: [TUHS] compiling v9sh
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+For anyone who's interested, here is what it took to compile Geoff
+Collyer's v9sh on Ubuntu 18.04.
+
+Arnold
+----------------------------------
+diff -ur v9sh/error.c v9sh-new/error.c
+--- v9sh/error.c	2017-07-29 11:45:07.000000000 +0300
++++ v9sh-new/error.c	2020-02-10 17:31:33.275920947 +0200
+@@ -24,7 +24,7 @@
+ 	}
+ 	if (per) {
+ 		prs(colon);
+-		prs(errno < 0 || errno >= sys_nerr? "Bad errno": sys_errlist[errno]);
++		prs(strerror(errno));
+ 	}
+ 	newline();
+ 	exitsh(ERROR);
+diff -ur v9sh/pathserv.c v9sh-new/pathserv.c
+--- v9sh/pathserv.c	2017-07-29 12:06:25.000000000 +0300
++++ v9sh-new/pathserv.c	2020-02-10 17:29:43.666971083 +0200
+@@ -30,7 +30,7 @@
+ {
+ 	struct stat buf;
+ 
+-	if (stat(name, &buf) == 0 && (buf.st_mode&S_IFMT) == S_IFREG &&
++	if (stat(name, &buf) == 0 && S_ISREG(buf.st_mode) &&
+ 	    access(name, EXECUTE) == 0)
+ 		return 0;
+ 	else
+diff -ur v9sh/xec.c v9sh-new/xec.c
+--- v9sh/xec.c	2017-07-29 12:27:02.000000000 +0300
++++ v9sh-new/xec.c	2020-02-10 17:29:50.607030967 +0200
+@@ -612,7 +612,7 @@
+ 
+ 			if (flags&ttyflg && (dir1 = spname(tempdir, &score)) &&
+ 			    stat(dir1, &sb) == 0 &&
+-			    (sb.st_mode&S_IFMT) == S_IFDIR &&
++			    S_ISDIR(sb.st_mode) &&
+ 			    access(dir1, EXECUTE) == 0) {
+ 				/* dir1 is a searchable directory. */
+ 				if (score < bestscore) {
