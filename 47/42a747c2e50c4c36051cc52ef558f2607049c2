@@ -1,0 +1,444 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 461c25c5
+	for <ml@inbox.vuxu.org>;
+	Tue, 18 Feb 2020 13:02:48 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B30E99D527; Tue, 18 Feb 2020 23:02:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 009E29D518;
+	Tue, 18 Feb 2020 23:02:03 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="key not found in DNS" (0-bit key; unprotected) header.d=kev009.com header.i=@kev009.com header.b="Kimf6M3j";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D2B639D518; Tue, 18 Feb 2020 23:02:02 +1000 (AEST)
+Received: from mail-io1-f46.google.com (mail-io1-f46.google.com
+ [209.85.166.46])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E5E189CD7A
+ for <tuhs@minnie.tuhs.org>; Tue, 18 Feb 2020 23:02:01 +1000 (AEST)
+Received: by mail-io1-f46.google.com with SMTP id n21so10037176ioo.10
+ for <tuhs@minnie.tuhs.org>; Tue, 18 Feb 2020 05:02:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kev009.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=rnS2/6HQDRp+/WkQfVK9+ZClTZOvQvqugl4jGdkd3sM=;
+ b=Kimf6M3jOTPc3XNcnaowvZ62+zHJNdr0aTGK2pPeaMOpRq9p46V0CwL7fnG4I4KS6f
+ a/3HBLEcpY58CdxOMe2rryUOdwrSbszISO1TWqfTBNpo+wOweZYMOwnOxTq5L3w1EhDA
+ XelhQNAF85Zafp52ZsNghOH1rOsTz4ouKQAYk=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=rnS2/6HQDRp+/WkQfVK9+ZClTZOvQvqugl4jGdkd3sM=;
+ b=Qw5kX1fJH7azSvXoJZHpLyy0fNHvlve2hXZ6GMlxBi7CZjvV+clhm21avsnzio3qks
+ R0klXX27y7Lc8AlXorWbXIWZXhbDjroJKWvAWL4Jp8UcvnSl8U67LLny7LHgz2+3hGuA
+ 1S3g7gJZBQyj4bVefqIVD5ITD/e1Ry7sgxGruOMxgGdTpUhFtkj5jWkyBUVgyKiUwYTE
+ veWsnJZEfDveFAPnoA5BlAPWB/aDaXyxLZwb8gBdmQ7iYA0Nvn3N3UQCbYB0yrKqX9CO
+ MkW9vq/mGw9cSfznh8zaRvL5S26RrI/QdsUldq+ltgW2YnMCMGkdd8MNNxZ+322UtNah
+ nAbA==
+X-Gm-Message-State: APjAAAXVbTElqz+L8t5xwY4r8OZfALASo+MoHq7qIHcOMheFIwdePhmW
+ 7/K3xw2VSxQzHNQaNPEGpQxNYKPOtKlDOT1CSh2C2+ku
+X-Google-Smtp-Source: APXvYqxpXb0lg2nptF5OIi4ZUx49YdbVImnqeRbjEWXYhM4uJe82Fa5h6zCzNICBaH7ebdIji83c7XaqJdy2Bfdg1dc=
+X-Received: by 2002:a02:c6d5:: with SMTP id r21mr16405913jan.129.1582030919698; 
+ Tue, 18 Feb 2020 05:01:59 -0800 (PST)
+MIME-Version: 1.0
+References: <25E62EB5E090E7CB.88de76ea-9cec-4c1e-a00f-b15eb755ab0a@mail.outlook.com>
+ <CAK7dMtBqctAj7ndVGqi9Q2Zz-mbr1Ce7QCRcVN2grQLxwXMm7A@mail.gmail.com>
+ <25E62EB5E090E7CB.b51df4ee-f07b-4926-bf33-ba7bfcd485d9@mail.outlook.com>
+ <CAK7dMtBy50GvVPwHHO9sjBDe579NYhmS2wTj-ORP0aoVub0whg@mail.gmail.com>
+ <25E62EB5E090E7CB.36bb1263-cdbe-4b01-9db9-3fed23e83b02@mail.outlook.com>
+In-Reply-To: <25E62EB5E090E7CB.36bb1263-cdbe-4b01-9db9-3fed23e83b02@mail.outlook.com>
+From: Kevin Bowling <kevin.bowling@kev009.com>
+Date: Tue, 18 Feb 2020 06:01:49 -0700
+Message-ID: <CAK7dMtCnZhy=OWSpgGRxsh-g-1fPc1kU06FQ28V=wakqep4ZRQ@mail.gmail.com>
+To: Jason Stevens <jsteve@superglobalmegacorp.com>
+Content-Type: multipart/alternative; boundary="000000000000fe1db9059ed9469d"
+Subject: Re: [TUHS] Bitsavers' RT/PC, AIX, AOS, etc. recent additions
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000fe1db9059ed9469d
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Thanks for clarifying.  I will reassert that the three pieces of systems
+software I mentioned (VRM, AIX2, AOS) are not Mach in any way I know
+about.  AOS may have some generic cross pollination, it=E2=80=99d be whatev=
+er was
+going on at CSRG also for non-RT (4.2-4.3?) BSD platforms at the time of
+checkout. Kirk or Warner may be able to elucidate if provided the date and
+some reference material from AOS or I can do some original research.
+
+Most distinctly and important:  VRM is not in any way Mach, it was its own
+bespoke microkernel.  The microkernel would have been the most =E2=80=9CMac=
+h=E2=80=9D part
+of Mach research, so this makes the VRM concept even more unique and
+enjoyable to me being so different and ambitious.  Therefore I don=E2=80=99=
+t think
+it is particularly correct to say any of VRM, AIX, AOS software is Mach
+without its ukernel.
+
+What you linked is a very late port (late 1990s) of a hybrid of 4.3 and 4.4
+BSD (late meaning in the time when Net, Free, and Open had long taken over
+from CSRG BSD).  I will quote a Twitter communication I had with Miod
+Vallat in the past:
+=E2=80=9CAlso it's not really 4.4. It's a mix of 4.3BSD-Reno plus the 4.4 V=
+FS layer
+and new system calls. It still uses the 4.3, pre-Mach, VM system, hence no
+mmap(2).=E2=80=9D
+
+What Miod means by =E2=80=9Cpre-Mach=E2=80=9D above: 4.4 BSD adopted the ke=
+rnel memory
+subsystem of Mach into the existing BSD monolithic kernel. Not any of the
+ukernel or things like Mach IPC.
+
+Not trying to be overly pedantic with you just trying to keep the records
+straight since these machines are one of my keen interests and I welcome
+new information on them.
+
+Regards,
+Kevin
+
+On Tue, Feb 18, 2020 at 5:30 AM Jason Stevens <
+jsteve@superglobalmegacorp.com> wrote:
+
+> Oh sure!
+>
+> I'm having to use my phone...
+>
+> It's the combined sources here:
+> http://bitsavers.trailing-edge.com/bits/IBM/RT/rt_bsd44/
+>
+> doc  mk
+> jsteve@localhost:~/rt_bsd4/src/sys/.local/mach2.4$ pwd
+> /home/jsteve/rt_bsd4/src/sys/.local/mach2.4
+>
+> jsteve@localhost:~/rt_bsd4/src/sys/.local/mach2.4/mk/conf$ cat vers*
+> 69
+> 5
+> 1
+> X
+>
+> So 5.1x edit 69
+>
+> jsteve@localhost:~/rt_bsd4/src/sys/.local/mach2.4/mk$ more CHANGELOG
+> HISTORY
+>  17-May-88 David Golub (dbg) at Carnegie-Mellon University
+>  XM21:
+>         David Black completely rewrote the accurate timing code
+>         (which is now implemented on all machines) and the priority
+>         and scheduling algorithms. The system now correctly reports
+>         cpu_usage per thread.
+>
+>
+>
+> The all file has this before i386 was added.
+>
+> So it's an older v2 than what is on the CSRG CD, but not as old as the VA=
+X
+> '86 stuff.
+>
+> It seems to be March 11 1989, although that could be when this was either
+> archived or ported..  I guess they didn't exactly sync to a public kernel
+> tree all that often.
+>
+>
+>
+> On Tue, Feb 18, 2020 at 4:05 PM +0800, "Kevin Bowling" <
+> kevin.bowling@kev009.com> wrote:
+>
+> I=E2=80=99m asking exactly where the Mach is in the linked archive. VRM, =
+AIX or
+>> AOS? Can you support this with a reference for my own documentation
+>>
+>> On Tue, Feb 18, 2020 at 1:02 AM Jason Stevens <
+>> jsteve@superglobalmegacorp.com> wrote:
+>>
+>>> It's the CMU micro kernel.  The hybrid "2.6" lived on in NeXTSTEP, and
+>>> OPENSTEP, with various upgrades to bring it up to OS X.
+>>>
+>>> The RT as I understand it was a research machine, hence the BSD ports,
+>>> and Mach port.
+>>>
+>>> What is interesting the more I dig around is that there was ROMP
+>>> coprocoessor cards, and an OS/2 and DOS monitor program to let you boot=
+ BSD
+>>> on the card.  Peripheral IO was done on the x86 side.
+>>>
+>>> If RT's are rare, I can't imagine how impossible it would be to get one
+>>> of those cards!
+>>>
+>>> The BSD assembler and linker source is in the archives too, no doubt
+>>> it'll help someone make a RT emulator.
+>>>
+>>> Get Outlook for Android <https://aka.ms/ghei36>
+>>>
+>>>
+>>>
+>>> On Tue, Feb 18, 2020 at 12:54 PM +0800, "Kevin Bowling" <
+>>> kevin.bowling@kev009.com> wrote:
+>>>
+>>> Can you clarify what is Mach in this archive if I have a gap in my
+>>>> knowledge? I didn=E2=80=99t know the VRM had any direct relationship t=
+o Mach
+>>>>
+>>>> Regards,
+>>>> Kevin
+>>>>
+>>>> On Mon, Feb 17, 2020 at 9:43 PM Jason Stevens <
+>>>> jsteve@superglobalmegacorp.com> wrote:
+>>>>
+>>>>> Interesting stuff!  And another version of Mach is buried in there.
+>>>>>
+>>>>> So the 4 csrg cd set may have updates to the romp support as it's an
+>>>>> older version of the 5.1 kernel from 89...  Not that think there is a=
+ny
+>>>>> Mach romp users.
+>>>>>
+>>>>> Get Outlook for Android <https://aka.ms/ghei36>
+>>>>>
+>>>>> ------------------------------
+>>>>> *From:* TUHS <tuhs-bounces@minnie.tuhs.org> on behalf of Charles H
+>>>>> Sauer <sauer@technologists.com>
+>>>>> *Sent:* Tuesday, February 18, 2020, 5:51 a.m.
+>>>>> *To:* TUHS
+>>>>> *Subject:* [TUHS] Bitsavers' RT/PC, AIX, AOS, etc. recent additions
+>>>>>
+>>>>> The Bitsavers' RSS feed (
+>>>>> http://user.xmission.com/~legalize/vintage/bitsavers-bits.xml) seemed
+>>>>> to me to be dominated by RT, AIX, AOS (BSD for RT), etc. stuff in the=
+ last
+>>>>> week or so. I've only sampled a few items, but discovered a few thing=
+s that
+>>>>> I should have known (or knew and forgot?) while I was at IBM.
+>>>>> http://www.bitsavers.org/pdf/ibm/pc/rt/ -- voice: +1.512.784.7526
+>>>>> e-mail: sauer@technologists.com fax: +1.512.346.5240 Web: https://tec=
+hnologists.com/sauer/
+>>>>> Facebook/Google/Skype/Twitter
+>>>>> <https://technologists.com/sauer/Facebook/Google/Skype/Twitter>:
+>>>>> CharlesHSauer
+>>>>>
+>>>>
+
+--000000000000fe1db9059ed9469d
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div><div><div dir=3D"auto">Thanks for clarifying.=C2=A0 I will reassert th=
+at the three pieces of systems software I mentioned (VRM, AIX2, AOS) are no=
+t Mach in any way I know about.=C2=A0 AOS may have some generic cross polli=
+nation, it=E2=80=99d be whatever was going on at CSRG also for non-RT (4.2-=
+4.3?) BSD platforms at the time of checkout. Kirk or Warner may be able to =
+elucidate if provided the date and some reference material from AOS or I ca=
+n do some original research.</div></div><div dir=3D"auto"><br></div><div di=
+r=3D"auto">Most distinctly and important: =C2=A0VRM is not in any way Mach,=
+ it was its own bespoke microkernel.=C2=A0 The microkernel would have been =
+the most =E2=80=9CMach=E2=80=9D part of Mach research, so this makes the VR=
+M concept even more unique and enjoyable to me being so different and ambit=
+ious.=C2=A0 Therefore I don=E2=80=99t think it is particularly correct to s=
+ay any of VRM, AIX, AOS software is Mach without its ukernel.</div><div dir=
+=3D"auto"><br></div><div dir=3D"auto">What you linked is a very late port (=
+late 1990s) of a hybrid of 4.3 and 4.4 BSD (late meaning in the time when N=
+et, Free, and Open had long taken over from CSRG BSD).=C2=A0 I will quote a=
+ Twitter communication I had with Miod Vallat in the past:</div></div><div =
+dir=3D"auto">=E2=80=9CAlso it&#39;s not really 4.4. It&#39;s a mix of 4.3BS=
+D-Reno plus the 4.4 VFS layer and new system calls. It still uses the 4.3, =
+pre-Mach, VM system, hence no mmap(2).=E2=80=9D</div><div dir=3D"auto"><br>=
+</div><div dir=3D"auto">What Miod means by =E2=80=9Cpre-Mach=E2=80=9D above=
+: 4.4 BSD adopted the kernel memory subsystem of Mach into the existing BSD=
+ monolithic kernel. Not any of the ukernel or things like Mach IPC.</div><d=
+iv dir=3D"auto"><br></div><div dir=3D"auto">Not trying to be overly pedanti=
+c with you just trying to keep the records straight since these machines ar=
+e one of my keen interests and I welcome new information on them.=C2=A0</di=
+v><div dir=3D"auto"><br></div><div dir=3D"auto">Regards,</div><div dir=3D"a=
+uto">Kevin</div><div><div><br><div class=3D"gmail_quote"><div dir=3D"ltr" c=
+lass=3D"gmail_attr">On Tue, Feb 18, 2020 at 5:30 AM Jason Stevens &lt;<a hr=
+ef=3D"mailto:jsteve@superglobalmegacorp.com" target=3D"_blank">jsteve@super=
+globalmegacorp.com</a>&gt; wrote:<br></div><blockquote class=3D"gmail_quote=
+" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><=
+div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,255,255);tex=
+t-align:left" dir=3D"auto">Oh sure!=C2=A0</div><div style=3D"color:rgb(33,3=
+3,33);background-color:rgb(255,255,255);text-align:left" dir=3D"auto"><br><=
+/div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,255,255);te=
+xt-align:left" dir=3D"auto">I&#39;m having to use my phone...=C2=A0=C2=A0</=
+div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,255,255);tex=
+t-align:left" dir=3D"auto"><br></div><div style=3D"color:rgb(33,33,33);back=
+ground-color:rgb(255,255,255);text-align:left" dir=3D"auto">It&#39;s the co=
+mbined sources here:</div><div style=3D"color:rgb(33,33,33);background-colo=
+r:rgb(255,255,255);text-align:left" dir=3D"auto"><a href=3D"http://bitsaver=
+s.trailing-edge.com/bits/IBM/RT/rt_bsd44/" target=3D"_blank">http://bitsave=
+rs.trailing-edge.com/bits/IBM/RT/rt_bsd44/</a><br></div><div style=3D"color=
+:rgb(33,33,33);background-color:rgb(255,255,255);text-align:left" dir=3D"au=
+to"><br></div><div id=3D"m_8376118454524103139m_3787324825967450097ms-outlo=
+ok-mobile-signature" dir=3D"auto" style=3D"text-align:left"><div dir=3D"aut=
+o" style=3D"text-align:left"><span>doc =C2=A0mk<br></span><div>jsteve@local=
+host:~/rt_bsd4/src/sys/.local/mach2.4$ pwd<br></div><div>/home/jsteve/rt_bs=
+d4/src/sys/.local/mach2.4<br></div><br></div><div dir=3D"auto" style=3D"tex=
+t-align:left">jsteve@localhost:~/rt_bsd4/src/sys/.local/mach2.4/mk/conf$ ca=
+t vers*</div><div dir=3D"auto" style=3D"text-align:left">69</div><div dir=
+=3D"auto" style=3D"text-align:left">5</div><div dir=3D"auto" style=3D"text-=
+align:left">1</div><div dir=3D"auto" style=3D"text-align:left">X</div><div =
+dir=3D"auto" style=3D"text-align:left"><br></div><div dir=3D"auto" style=3D=
+"text-align:left">So 5.1x edit 69</div><div dir=3D"auto" style=3D"text-alig=
+n:left"><br></div><div dir=3D"auto" style=3D"text-align:left">jsteve@localh=
+ost:~/rt_bsd4/src/sys/.local/mach2.4/mk$ more CHANGELOG</div><div dir=3D"au=
+to" style=3D"text-align:left">HISTORY</div><div dir=3D"auto" style=3D"text-=
+align:left">=C2=A017-May-88  David Golub (dbg) at Carnegie-Mellon Universit=
+y</div><div dir=3D"auto" style=3D"text-align:left">=C2=A0XM21:</div><div di=
+r=3D"auto" style=3D"text-align:left">=C2=A0 =C2=A0 =C2=A0 =C2=A0 David Blac=
+k completely rewrote the accurate timing code</div><div dir=3D"auto" style=
+=3D"text-align:left">=C2=A0 =C2=A0 =C2=A0 =C2=A0 (which is now implemented =
+on all machines) and the priority</div><div dir=3D"auto" style=3D"text-alig=
+n:left">=C2=A0 =C2=A0 =C2=A0 =C2=A0 and scheduling algorithms.  The system =
+now correctly reports</div><div dir=3D"auto" style=3D"text-align:left">=C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 cpu_usage per thread.</div><div dir=3D"auto" style=
+=3D"text-align:left"><br></div><div dir=3D"auto" style=3D"text-align:left">=
+<br></div><div dir=3D"auto" style=3D"text-align:left"><br></div><div dir=3D=
+"auto" style=3D"text-align:left">The all file has this before i386 was adde=
+d.=C2=A0</div><div dir=3D"auto" style=3D"text-align:left"><br></div><div di=
+r=3D"auto" style=3D"text-align:left">So it&#39;s an older v2 than what is o=
+n the CSRG CD, but not as old as the VAX &#39;86 stuff.=C2=A0</div><div dir=
+=3D"auto" style=3D"text-align:left"><br></div><div dir=3D"auto" style=3D"te=
+xt-align:left">It seems to be March 11 1989, although that could be when th=
+is was either archived or ported..=C2=A0 I guess they didn&#39;t exactly sy=
+nc to a public kernel tree all that often.=C2=A0</div></div></div><div><br>=
+<br><br>
+<div class=3D"gmail_quote">On Tue, Feb 18, 2020 at 4:05 PM +0800, &quot;Kev=
+in Bowling&quot; <span dir=3D"ltr">&lt;<a href=3D"mailto:kevin.bowling@kev0=
+09.com" target=3D"_blank">kevin.bowling@kev009.com</a>&gt;</span> wrote:<br=
+>
+<br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">
+
+
+
+
+<div dir=3D"3D&quot;ltr&quot;">
+<div><div dir=3D"auto">I=E2=80=99m asking exactly where the Mach is in the =
+linked archive. VRM, AIX or AOS? Can you support this with a reference for =
+my own documentation</div></div><div><br><div class=3D"gmail_quote"><div di=
+r=3D"ltr" class=3D"gmail_attr">On Tue, Feb 18, 2020 at 1:02 AM Jason Steven=
+s &lt;<a href=3D"mailto:jsteve@superglobalmegacorp.com" target=3D"_blank">j=
+steve@superglobalmegacorp.com</a>&gt; wrote:<br></div><blockquote class=3D"=
+gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-=
+left:1ex"><div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,2=
+55,255);text-align:left" dir=3D"auto">It&#39;s the CMU micro kernel.=C2=A0 =
+The hybrid &quot;2.6&quot; lived on in NeXTSTEP, and OPENSTEP, with various=
+ upgrades to bring it up to OS X.=C2=A0</div><div style=3D"color:rgb(33,33,=
+33);background-color:rgb(255,255,255);text-align:left" dir=3D"auto"><br></d=
+iv><div style=3D"color:rgb(33,33,33);background-color:rgb(255,255,255);text=
+-align:left" dir=3D"auto">The RT as I understand it was a research machine,=
+ hence the BSD ports, and Mach port.=C2=A0</div><div style=3D"color:rgb(33,=
+33,33);background-color:rgb(255,255,255);text-align:left" dir=3D"auto"><br>=
+</div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,255,255);t=
+ext-align:left" dir=3D"auto">What is interesting the more I dig around is t=
+hat there was ROMP coprocoessor cards, and an OS/2 and DOS monitor program =
+to let you boot BSD on the card.=C2=A0 Peripheral IO was done on the x86 si=
+de.=C2=A0</div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,2=
+55,255);text-align:left" dir=3D"auto"><br></div><div style=3D"color:rgb(33,=
+33,33);background-color:rgb(255,255,255);text-align:left" dir=3D"auto">If R=
+T&#39;s are rare, I can&#39;t imagine how impossible it would be to get one=
+ of those cards!=C2=A0</div><div style=3D"color:rgb(33,33,33);background-co=
+lor:rgb(255,255,255);text-align:left" dir=3D"auto"><br></div><div style=3D"=
+color:rgb(33,33,33);background-color:rgb(255,255,255);text-align:left" dir=
+=3D"auto">The BSD assembler and linker source is in the archives too, no do=
+ubt it&#39;ll help someone make a RT emulator.=C2=A0</div><div id=3D"m_8376=
+118454524103139m_3787324825967450097m_1506884524483653083ms-outlook-mobile-=
+signature"><div><br></div>Get <a href=3D"https://aka.ms/ghei36" target=3D"_=
+blank">Outlook for Android</a></div></div><div><br><br><br>
+<div class=3D"gmail_quote">On Tue, Feb 18, 2020 at 12:54 PM +0800, &quot;Ke=
+vin Bowling&quot; <span dir=3D"ltr">&lt;<a href=3D"mailto:kevin.bowling@kev=
+009.com" target=3D"_blank">kevin.bowling@kev009.com</a>&gt;</span> wrote:<b=
+r>
+<br>
+
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">
+
+
+
+
+<div dir=3D"3D&quot;ltr&quot;">
+<div><div dir=3D"auto">Can you clarify what is Mach in this archive if I ha=
+ve a gap in my knowledge? I didn=E2=80=99t know the VRM had any direct rela=
+tionship to Mach</div></div><div dir=3D"auto"><br></div><div dir=3D"auto">R=
+egards,</div><div dir=3D"auto">Kevin</div><div><br><div class=3D"gmail_quot=
+e"><div dir=3D"ltr" class=3D"gmail_attr">On Mon, Feb 17, 2020 at 9:43 PM Ja=
+son Stevens &lt;<a href=3D"mailto:jsteve@superglobalmegacorp.com" target=3D=
+"_blank">jsteve@superglobalmegacorp.com</a>&gt; wrote:<br></div><blockquote=
+ class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc soli=
+d;padding-left:1ex"><div><div style=3D"color:rgb(33,33,33);background-color=
+:rgb(255,255,255);text-align:left" dir=3D"auto">Interesting stuff!=C2=A0 An=
+d another version of Mach is buried in there.=C2=A0</div><div style=3D"colo=
+r:rgb(33,33,33);background-color:rgb(255,255,255);text-align:left" dir=3D"a=
+uto"><br></div><div style=3D"color:rgb(33,33,33);background-color:rgb(255,2=
+55,255);text-align:left" dir=3D"auto">So the 4 csrg cd set may have updates=
+ to the romp support as it&#39;s an older version of the 5.1 kernel from 89=
+...=C2=A0 Not that think there is any Mach romp users.=C2=A0</div><div id=
+=3D"m_8376118454524103139m_3787324825967450097m_1506884524483653083m_-91838=
+07882949694226ms-outlook-mobile-signature"><div><br></div>Get <a href=3D"ht=
+tps://aka.ms/ghei36" target=3D"_blank">Outlook for Android</a></div><div id=
+=3D"m_8376118454524103139m_3787324825967450097m_1506884524483653083m_-91838=
+07882949694226id-656e35de-775f-4dc9-a156-d4cca9ba0990"><div style=3D"font-f=
+amily:sans-serif;font-size:12pt;color:rgb(0,0,0)"><br></div><hr style=3D"di=
+splay:inline-block;width:98%"><div id=3D"m_8376118454524103139m_37873248259=
+67450097m_1506884524483653083m_-9183807882949694226divRplyFwdMsg"><strong>F=
+rom:</strong> TUHS &lt;<a href=3D"mailto:tuhs-bounces@minnie.tuhs.org" targ=
+et=3D"_blank">tuhs-bounces@minnie.tuhs.org</a>&gt; on behalf of Charles H S=
+auer &lt;<a href=3D"mailto:sauer@technologists.com" target=3D"_blank">sauer=
+@technologists.com</a>&gt;<br><strong>Sent:</strong> Tuesday, February 18, =
+2020, 5:51 a.m.<br><strong>To:</strong> TUHS<br><strong>Subject:</strong>=
+=C2=A0[TUHS] Bitsavers&#39; RT/PC, AIX, AOS, etc. recent additions<br></div=
+><br>The Bitsavers&#39; RSS feed=20
+(<a href=3D"http://user.xmission.com/~legalize/vintage/bitsavers-bits.xml" =
+target=3D"_blank">http://user.xmission.com/~legalize/vintage/bitsavers-bits=
+.xml</a>) seemed=20
+to me to be dominated by RT, AIX, AOS (BSD for RT), etc. stuff in the=20
+last week or so. I&#39;ve only sampled a few items, but discovered a few=20
+things that I should have known (or knew and forgot?) while I was at IBM.
+
+<a href=3D"http://www.bitsavers.org/pdf/ibm/pc/rt/" target=3D"_blank">http:=
+//www.bitsavers.org/pdf/ibm/pc/rt/</a>
+
+--=20
+voice: +1.512.784.7526       e-mail: <a href=3D"mailto:sauer@technologists.=
+com" target=3D"_blank">sauer@technologists.com</a>
+fax: +1.512.346.5240         Web: <a href=3D"https://technologists.com/saue=
+r/Facebook/Google/Skype/Twitter" target=3D"_blank">https://technologists.co=
+m/sauer/
+Facebook/Google/Skype/Twitter</a>: CharlesHSauer
+<br></div></div></blockquote></div></div>
+
+</div>
+
+</blockquote>
+</div>
+</div></blockquote></div></div>
+
+</div>
+
+</blockquote>
+</div>
+</div></blockquote></div></div>
+</div>
+
+--000000000000fe1db9059ed9469d--
