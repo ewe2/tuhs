@@ -1,0 +1,88 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id cb9365ea
+	for <ml@inbox.vuxu.org>;
+	Sun, 8 Mar 2020 23:17:40 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 95D9A9D7A9; Mon,  9 Mar 2020 09:17:37 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7540A9D795;
+	Mon,  9 Mar 2020 09:17:16 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 00D1C9D795; Mon,  9 Mar 2020 09:17:13 +1000 (AEST)
+X-Greylist: delayed 460 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 09 Mar 2020 09:17:10 AEST
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 76DF39D794
+ for <tuhs@tuhs.org>; Mon,  9 Mar 2020 09:17:10 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Sun, 08 Mar 2020 19:09:01 -0400
+Message-ID: <1583708946.8301.for-standards-violators@oclsc.org>
+Subject: [TUHS] sockets (was Re:  First appearance of named pipes)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Derek Fawcus:
+
+  Yeah - I always found that a bit weird, having to use socketpair()
+  to get a bidirectional "pipe".
+
+In the Research system, pipes became bidirectional when
+they became streams.  That happened slightly before my
+time, but so far as I know it broke absolutely nothing.
+
+Some time in the late 1980s, the System V people wanted
+to allow pipes to be streams, but were worried about the
+bidirectionality.  They proposed to have a new system call
+to make a bidirectional pipe.
+
+I attended a meeting with the relevant programmers and
+program manager to find out why they thought pipes couldn't
+just be bi-directional, as they had been without fuss in
+the Research system for some years.  They agreed with me
+that that was how it ought to be; the trouble was that
+System V releases all had to pass an official System V
+Verification Suite (reasonable enough), and that suite
+checked not only that you could read the one pipe file
+descriptor and write the other, but that you couldn't
+do it the wrong way.
+
+Wait a minute, I said.  I'm pretty sure that's not how
+the official System V Interface Description reads.  Anyone
+got a current copy handy?
+
+We found one, and we looked, and sure enough, the official
+verification suite was wrong.  The specification said
+that data written to fd[1] must be readable from fd[0],
+but nothing about the other direction: full-duplex pipes
+were not required but neither were they outlawed!
+
+The programming group was delighted: I'd given them the
+ammo they needed to do it right (make pipes streams, and
+make them full-duplex by default).  I believe that is
+how it came out, though the only reference I have is
+Solaris 10, where the manual page specifically says
+that what pipe(2) makes is full-duplex (and a stream).
+
+I wish POSIX and Linux and the BSDs would catch up; that
+was only 30 years ago.
+
+Norman Wilson
+Toronto ON
