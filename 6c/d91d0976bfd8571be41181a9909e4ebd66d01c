@@ -1,0 +1,81 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id b4adb433
+	for <ml@inbox.vuxu.org>;
+	Mon, 9 Mar 2020 17:09:46 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 13E0F93D70; Tue, 10 Mar 2020 03:09:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B70F593D29;
+	Tue, 10 Mar 2020 03:09:08 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 28E9D93D29; Tue, 10 Mar 2020 03:09:05 +1000 (AEST)
+Received: from ppsw-40.csi.cam.ac.uk (ppsw-40.csi.cam.ac.uk [131.111.8.140])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3C2EB93D06
+ for <tuhs@tuhs.org>; Tue, 10 Mar 2020 03:09:04 +1000 (AEST)
+X-Cam-AntiVirus: no malware found
+X-Cam-ScannerInfo: http://help.uis.cam.ac.uk/email-scanner-virus
+Received: from grey.csi.cam.ac.uk ([131.111.57.57]:48812)
+ by ppsw-40.csi.cam.ac.uk (ppsw.cam.ac.uk [131.111.8.138]:25)
+ with esmtps (TLSv1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
+ id 1jBLtm-000Mhp-kX (Exim 4.92.3)
+ (return-path <dot@dotat.at>); Mon, 09 Mar 2020 17:09:02 +0000
+Date: Mon, 9 Mar 2020 17:09:02 +0000
+From: Tony Finch <dot@dotat.at>
+To: Norman Wilson <norman@oclsc.org>
+In-Reply-To: <1583708946.8301.for-standards-violators@oclsc.org>
+Message-ID: <alpine.DEB.2.20.2003091627290.24181@grey.csi.cam.ac.uk>
+References: <1583708946.8301.for-standards-violators@oclsc.org>
+User-Agent: Alpine 2.20 (DEB 67 2015-01-07)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] sockets (was Re:  First appearance of named pipes)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Norman Wilson <norman@oclsc.org> wrote:
+>
+> I wish POSIX and Linux and the BSDs would catch up; that
+> was only 30 years ago.
+
+After sockets were added to BSD, pipe() was implemented using them. But it
+was a slightly different implementation than socketpair().
+
+e.g.
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=4.2BSD/usr/src/sys/sys/uipc_syscalls.c
+
+and the amusing comment at the top of
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=4.2BSD/usr/src/sys/sys/uipc_pipe.c
+
+But the socket-backed pipes weren't bidirectional even though they could
+have been - see this fix in FreeBSD
+https://svnweb.freebsd.org/base/head/sys/kern/uipc_syscalls.c?r1=12843&r2=13146
+
+Which did not last long because socket-backed pipe were soon replaced
+with a new (bidirectional) implementation
+https://svnweb.freebsd.org/base/head/sys/kern/sys_pipe.c?view=log&log_pagestart=200#rev13675
+
+Tony.
+-- 
+f.anthony.n.finch  <dot@dotat.at>  http://dotat.at/
+Ardnamurchan Point to Cape Wrath: South or southwest 4 or 5, increasing 6 to
+gale 8, then veering west later. Rough or very rough, occasionally high in
+west. Rain or drizzle, then showers. Moderate or good, occasionally poor at
+first.
