@@ -1,0 +1,93 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,RDNS_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: (qmail 31677 invoked from network); 11 Mar 2020 01:15:25 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from unknown (HELO minnie.tuhs.org) (45.79.103.53)
+  by inbox.vuxu.org with ESMTP; 11 Mar 2020 01:15:25 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 051919BC13; Wed, 11 Mar 2020 11:15:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 29C1C9BB47;
+	Wed, 11 Mar 2020 11:14:54 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3F2F39BB47; Wed, 11 Mar 2020 11:14:51 +1000 (AEST)
+Received: from mail.cs.dartmouth.edu (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B14F39BB46
+ for <tuhs@tuhs.org>; Wed, 11 Mar 2020 11:14:50 +1000 (AEST)
+Received: from tahoe.cs.Dartmouth.EDU (tahoe.cs.dartmouth.edu [129.170.212.20])
+ by mail.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTPS id 02B1Em9k2663197
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Tue, 10 Mar 2020 21:14:48 -0400
+Received: from tahoe.cs.Dartmouth.EDU (localhost.localdomain [127.0.0.1])
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.14.3) with ESMTP id 02B1EmaN029286
+ for <tuhs@tuhs.org>; Tue, 10 Mar 2020 21:14:48 -0400
+Received: (from doug@localhost)
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.15.2/Submit) id 02B1ElO2029285
+ for tuhs@tuhs.org; Tue, 10 Mar 2020 21:14:47 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <202003110114.02B1ElO2029285@tahoe.cs.Dartmouth.EDU>
+Date: Tue, 10 Mar 2020 21:14:47 -0400
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] eqn anomaly
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I was surprised that eqn parses the macro call below as having two
+arguments, each with an unmatched ".
+        .EQ
+        define f % $1 %
+        f("a,b")
+        .EN
+Ralph Corderoy found that the comma can be hidden by replacing it with
+\N'44'. A somewhat cleaner way to hide it is
+        .EQ
+        define f % $1 %
+        define comma % , %
+        f(a comma b)
+        .EN
+This works too.
+        .EQ
+        f(f(a comma b))
+        .EN
+[Note for cognoscenti. Eqn's practice in expanding macro arguments clashes
+with troff's. Eqn expands nested calls after substitution in the outer
+macro definition; troff expands while collecting arguments of the outer
+call. I've found no documentation of the eqn behavior.]
+
+The classical man page for eqn asserts categorically, `Strings enclosed
+in double quotes " " are passed through untouched.'  Unfortunately the
+version of Kernighan/Cherry User's Guide that describes macros with
+arguments says little about how arguments are parsed except that they
+are separated by commas--nothing about whether commas are hidden by
+parentheses or quotes.
+
+Certainly splitting at a comma in a quoted string violates the plain
+meaning of the man-page assertion. If anyone has v10 (or perhaps something
+else after v7) running, I'd be grateful to learn what classic eqn actually
+did. I'm morally certain that if it did split and anyone had complained
+to Brian, he would have fixed it.
+
+These observations lead me to file a bug report.
+
+Doug
