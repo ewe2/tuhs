@@ -1,0 +1,97 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,RDNS_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: (qmail 1322 invoked from network); 26 Mar 2020 01:37:26 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from unknown (HELO minnie.tuhs.org) (45.79.103.53)
+  by inbox.vuxu.org with ESMTP; 26 Mar 2020 01:37:26 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CC9DB9CDB2; Thu, 26 Mar 2020 11:37:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E323B9CD7C;
+	Thu, 26 Mar 2020 11:36:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 00E219CD7C; Thu, 26 Mar 2020 11:36:17 +1000 (AEST)
+X-Greylist: delayed 938 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 26 Mar 2020 11:36:16 AEST
+Received: from ppsw-41.csi.cam.ac.uk (ppsw-41.csi.cam.ac.uk [131.111.8.141])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C52159CD73
+ for <tuhs@minnie.tuhs.org>; Thu, 26 Mar 2020 11:36:16 +1000 (AEST)
+X-Cam-AntiVirus: no malware found
+X-Cam-ScannerInfo: http://help.uis.cam.ac.uk/email-scanner-virus
+Received: from grey.csi.cam.ac.uk ([131.111.57.57]:47066)
+ by ppsw-41.csi.cam.ac.uk (ppsw.cam.ac.uk [131.111.8.139]:25)
+ with esmtps (TLSv1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
+ id 1jHHCF-000YaH-S6 (Exim 4.92.3)
+ (return-path <dot@dotat.at>); Thu, 26 Mar 2020 01:20:35 +0000
+Date: Thu, 26 Mar 2020 01:20:35 +0000
+From: Tony Finch <dot@dotat.at>
+To: Richard Salz <rich.salz@gmail.com>
+In-Reply-To: <CAFH29trbW7cd6J6CbT5kchob==8catih=X2D=RUALYLEPeB+6A@mail.gmail.com>
+Message-ID: <alpine.DEB.2.20.2003260106400.2480@grey.csi.cam.ac.uk>
+References: <20200306224431.D226C18C080@mercury.lcs.mit.edu>
+ <3D1DBF45-AE50-4027-8AAA-6C1D97D28D4D@planet.nl>
+ <20200307163935.GA57521@clarinet.employees.org>
+ <CAKzdPgyQE6idAQNJ4sarjOUL8nvAF7m9BgY6NCjep6_wZMpjzQ@mail.gmail.com>
+ <20200308151332.GA70333@clarinet.employees.org>
+ <5dbf2153-5993-242a-5ba9-54b49a38569e@spamtrap.tnetconsulting.net>
+ <20200323084943.GA341861@straylight.m.ringlet.net>
+ <20200324094710.GB83316@clarinet.employees.org>
+ <127f7c5c-a607-8f5b-1760-5a308c279836@tnetconsulting.net>
+ <CAFH29tpdKYpj=5U8P2UPMEECH6PNjjP+EwzgeoU_rh=AiM5Nbw@mail.gmail.com>
+ <c3c56201-0266-a64d-929f-edd5052a8467@spamtrap.tnetconsulting.net>
+ <CAFH29trbW7cd6J6CbT5kchob==8catih=X2D=RUALYLEPeB+6A@mail.gmail.com>
+User-Agent: Alpine 2.20 (DEB 67 2015-01-07)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] sockets (was Re: First appearance of named pipes)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Grant Taylor <gtaylor@tnetconsulting.net>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+So I fooled around making an HTTP request from bash...
+
+	(printf 'HEAD / HTTP/1.0\r\nHost: dotat.at\r\n\r\n'; cat 1>&2) \
+		0<>/dev/tcp/dotat.at/http 1>&0
+
+And I wondered if it would work with ksh too. It does, but there is weirdness.
+
+Bash's <> operator follows POSIX, so in my one-liner the 0 is redundant.
+
+https://pubs.opengroup.org/onlinepubs/007908799/xcu/chap2.html#tag_001_007_007
+
+However when I look at a ksh man page I find it says
+
+https://github.com/att/ast/blob/master/src/cmd/ksh93/sh.1#L3458
+
+    <>word    Open file word for reading and writing as standard output.
+
+I thought POSIX got features like this from ksh so I'm curious that a
+weird little incompatibilty like this has crept in.
+
+(The copy of ksh.1 I have from the CSRG archives lacks <> so I guess that
+version was ksh88?)
+
+Tony.
+-- 
+f.anthony.n.finch  <dot@dotat.at>  http://dotat.at/
+Sole: Northerly 6 or 7 at first in west, otherwise easterly or northeasterly 5
+or 6. Moderate or rough, occasionally very rough in west. Showers in west.
+Good.
