@@ -1,0 +1,73 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,RDNS_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: (qmail 16354 invoked from network); 27 Mar 2020 10:51:55 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from unknown (HELO minnie.tuhs.org) (45.79.103.53)
+  by inbox.vuxu.org with ESMTP; 27 Mar 2020 10:51:55 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 43FCA9D9D2; Fri, 27 Mar 2020 20:51:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D47AB9D577;
+	Fri, 27 Mar 2020 20:51:16 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1D1959D577; Fri, 27 Mar 2020 20:51:13 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D93709D56C
+ for <tuhs@minnie.tuhs.org>; Fri, 27 Mar 2020 20:51:12 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 66AFF4E11BDF; Fri, 27 Mar 2020 10:51:12 +0000 (UTC)
+Date: Fri, 27 Mar 2020 11:51:12 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+Message-ID: <20200327105112.GA11907@clarinet.employees.org>
+References: <20200306224431.D226C18C080@mercury.lcs.mit.edu>
+ <3D1DBF45-AE50-4027-8AAA-6C1D97D28D4D@planet.nl>
+ <20200307163935.GA57521@clarinet.employees.org>
+ <CAKzdPgyQE6idAQNJ4sarjOUL8nvAF7m9BgY6NCjep6_wZMpjzQ@mail.gmail.com>
+ <20200308151332.GA70333@clarinet.employees.org>
+ <5dbf2153-5993-242a-5ba9-54b49a38569e@spamtrap.tnetconsulting.net>
+ <20200323084943.GA341861@straylight.m.ringlet.net>
+ <20200324094710.GB83316@clarinet.employees.org>
+ <127f7c5c-a607-8f5b-1760-5a308c279836@tnetconsulting.net>
+ <CAFH29tpdKYpj=5U8P2UPMEECH6PNjjP+EwzgeoU_rh=AiM5Nbw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFH29tpdKYpj=5U8P2UPMEECH6PNjjP+EwzgeoU_rh=AiM5Nbw@mail.gmail.com>
+Subject: Re: [TUHS] sockets (was Re: First appearance of named pipes)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Mar 25, 2020 at 07:47:48PM -0400, Richard Salz wrote:
+> > One point being that one could fork/exec a program with those fd's
+> > attached to stdin/stdout and it could operate as a normal filter, w/
+> 
+> Hasn't that pretty much worked ever since BSD wrote inetd?
+
+The socket fd is dup'ed and then applied to stdin & stdout for the child
+process.  So if say the child closes stdout, stdin still has the underlying
+'file' open in both read and write mode, hence the reader at the far end
+will not receive any form of 'close' notification (e.g. EOF on read).
+
+If a socket fd could be split (or partially dup'ed) in to new read-only
+and write-only fds, and the original fd then closed, that 'issue' would
+go away.  Obviously it hasn't been much of an issue...
+
+DF
