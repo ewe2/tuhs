@@ -1,0 +1,190 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HTML_MESSAGE,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham
+	autolearn_force=no version=3.4.2
+Received: (qmail 7299 invoked from network); 28 Apr 2020 13:04:07 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with UTF8ESMTPZ; 28 Apr 2020 13:04:07 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B10329C966; Tue, 28 Apr 2020 23:03:55 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 89F4D94895;
+	Tue, 28 Apr 2020 23:03:24 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; secure) header.d=mxes.net header.i=@mxes.net header.b="EJkODKCP";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 7B5B094895; Tue, 28 Apr 2020 23:03:21 +1000 (AEST)
+Received: from smtp-out-3.mxes.net (smtp-out-3.mxes.net [198.205.123.68])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 89E1D94621
+ for <tuhs@tuhs.org>; Tue, 28 Apr 2020 23:03:19 +1000 (AEST)
+Received: from Customer-MUA (mua.mxes.net [10.0.0.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPSA id 6ABCF75992;
+ Tue, 28 Apr 2020 09:03:17 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mxes.net; s=mta;
+ t=1588078997; bh=acFgSOB9tldE5A+IP3s/sDr47dqT1fSIbB1DUuSdABo=;
+ h=From:Message-Id:Content-Type:Mime-Version:Subject:Date:
+ In-Reply-To:To:References;
+ b=EJkODKCPINjQ/EA+FVM3myhl8TM4apzclQ6JJ4GuBU33X8+hxWKAWhLYDc4VdDd83
+ yBhUdymBufPEsmFbhFaXjrL/iDAzjJy0zXuz9MkQqCvCOSU090zrt4F1VUxhNZzIy0
+ ZE1W4cr/xHxltc0yx/sia1rbBmJbXzNLS3GxUh/Q=
+From: Ronald Natalie <ron@ronnatalie.com>
+Message-Id: <3642A182-45AA-43F8-A07B-8FAB69AD84A9@ronnatalie.com>
+Content-Type: multipart/alternative;
+ boundary="Apple-Mail=_D14DF2E7-172C-488E-B3FB-44EF4A165B05"
+Mime-Version: 1.0 (Mac OS X Mail 13.4 \(3608.80.23.2.2\))
+Date: Tue, 28 Apr 2020 09:03:16 -0400
+In-Reply-To: <CAHYQbfA6pKX46RqJipojKjWzEfS_bkWyW2bz5wpj5aTOw10ucA@mail.gmail.com>
+To: Jacob Ritorto <jacob.ritorto@gmail.com>
+References: <CAHYQbfA6pKX46RqJipojKjWzEfS_bkWyW2bz5wpj5aTOw10ucA@mail.gmail.com>
+X-Mailer: Apple Mail (2.3608.80.23.2.2)
+X-Sent-To: <dHVoc0B0dWhzLm9yZw==>
+Subject: Re: [TUHS] as(1) on Ultrix-11 vs 2.11BSD
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+--Apple-Mail=_D14DF2E7-172C-488E-B3FB-44EF4A165B05
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=utf-8
+
+Yes, you aren=E2=80=99t programming 2.11 BSD correctly.
+
+Your examples are the older UNIX syscalls (your programs work correctly =
+in Version 6 by the way as well).
+
+In 2.11 BSD, all the arguments for the syscalls are inline (i.e., none =
+are passed in registers.   This appears to be the beginnings of making =
+the kernel protable across architectures.
+The systent table no longer has separate fields for args in registers =
+and not in registers and the code in sys/pdp/trap.c doesn=E2=80=99t look =
+at the registers anymore.
+
+
+> On Apr 27, 2020, at 9:56 PM, Jacob Ritorto <jacob.ritorto@gmail.com> =
+wrote:
+>=20
+>         mov     $1,r0
+>         sys     4
+>         a
+>         6
+>         sys     1
+
+Proper code now should be:
+          sys 4
+         1
+         a
+         6
+        sys 1
+        0
+
+
+Note your previous code used to just return 6 from the program (the =
+return value of write).
+
+
+
+--Apple-Mail=_D14DF2E7-172C-488E-B3FB-44EF4A165B05
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=utf-8
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dutf-8"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" class=3D"">Yes, =
+you aren=E2=80=99t programming 2.11 BSD correctly.<div class=3D""><br =
+class=3D""></div><div class=3D"">Your examples are the older UNIX =
+syscalls (your programs work correctly in Version 6 by the way as =
+well).</div><div class=3D""><br class=3D""></div><div class=3D"">In 2.11 =
+BSD, all the arguments for the syscalls are inline (i.e., none are =
+passed in registers. &nbsp; This appears to be the beginnings of making =
+the kernel protable across architectures.</div><div class=3D"">The =
+systent table no longer has separate fields for args in registers and =
+not in registers and the code in sys/pdp/trap.c doesn=E2=80=99t look at =
+the registers anymore.</div><div class=3D""><br class=3D""></div><div =
+class=3D""><br class=3D""></div><div class=3D""><div><blockquote =
+type=3D"cite" class=3D""><div class=3D"">On Apr 27, 2020, at 9:56 PM, =
+Jacob Ritorto &lt;<a href=3D"mailto:jacob.ritorto@gmail.com" =
+class=3D"">jacob.ritorto@gmail.com</a>&gt; wrote:</div><br =
+class=3D"Apple-interchange-newline"><div class=3D""><span =
+style=3D"caret-color: rgb(0, 0, 0); font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant-caps: normal; font-weight: =
+normal; letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; float: none; =
+display: inline !important;" class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; mov =
+&nbsp; &nbsp; $1,r0</span><br style=3D"caret-color: rgb(0, 0, 0); =
+font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant-caps: normal; font-weight: normal; letter-spacing: normal; =
+text-align: start; text-indent: 0px; text-transform: none; white-space: =
+normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
+text-decoration: none;" class=3D""><span style=3D"caret-color: rgb(0, 0, =
+0); font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant-caps: normal; font-weight: normal; letter-spacing: normal; =
+text-align: start; text-indent: 0px; text-transform: none; white-space: =
+normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
+text-decoration: none; float: none; display: inline !important;" =
+class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; sys &nbsp; &nbsp; 4</span><br =
+style=3D"caret-color: rgb(0, 0, 0); font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant-caps: normal; font-weight: =
+normal; letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none;" class=3D""><span =
+style=3D"caret-color: rgb(0, 0, 0); font-family: Helvetica; font-size: =
+12px; font-style: normal; font-variant-caps: normal; font-weight: =
+normal; letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; float: none; =
+display: inline !important;" class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; =
+a</span><br style=3D"caret-color: rgb(0, 0, 0); font-family: Helvetica; =
+font-size: 12px; font-style: normal; font-variant-caps: normal; =
+font-weight: normal; letter-spacing: normal; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: =
+none;" class=3D""><span style=3D"caret-color: rgb(0, 0, 0); font-family: =
+Helvetica; font-size: 12px; font-style: normal; font-variant-caps: =
+normal; font-weight: normal; letter-spacing: normal; text-align: start; =
+text-indent: 0px; text-transform: none; white-space: normal; =
+word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: =
+none; float: none; display: inline !important;" class=3D"">&nbsp; &nbsp; =
+&nbsp; &nbsp; 6</span><br style=3D"caret-color: rgb(0, 0, 0); =
+font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant-caps: normal; font-weight: normal; letter-spacing: normal; =
+text-align: start; text-indent: 0px; text-transform: none; white-space: =
+normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
+text-decoration: none;" class=3D""><span style=3D"caret-color: rgb(0, 0, =
+0); font-family: Helvetica; font-size: 12px; font-style: normal; =
+font-variant-caps: normal; font-weight: normal; letter-spacing: normal; =
+text-align: start; text-indent: 0px; text-transform: none; white-space: =
+normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; =
+text-decoration: none; float: none; display: inline !important;" =
+class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; sys &nbsp; &nbsp; =
+1</span></div></blockquote></div><br class=3D""></div><div =
+class=3D"">Proper code now should be:</div><div class=3D"">&nbsp; &nbsp; =
+&nbsp; &nbsp; &nbsp; sys 4</div><div class=3D"">&nbsp; &nbsp; &nbsp; =
+&nbsp; &nbsp;1</div><div class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; =
+&nbsp;a</div><div class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; =
+&nbsp;6</div><div class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; sys 1</div><div =
+class=3D"">&nbsp; &nbsp; &nbsp; &nbsp; 0</div><div class=3D""><br =
+class=3D""></div><div class=3D""><br class=3D""></div><div class=3D"">Note=
+ your previous code used to just return 6 from the program (the return =
+value of write).</div><div class=3D""><br class=3D""></div><div =
+class=3D""><br class=3D""></div></body></html>=
+
+--Apple-Mail=_D14DF2E7-172C-488E-B3FB-44EF4A165B05--
