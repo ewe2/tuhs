@@ -1,0 +1,100 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: (qmail 26203 invoked from network); 29 Apr 2020 14:19:39 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with UTF8ESMTPZ; 29 Apr 2020 14:19:39 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A441F9C9A8; Thu, 30 Apr 2020 00:19:31 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C0E059C95C;
+	Thu, 30 Apr 2020 00:19:03 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; secure) header.d=mxes.net header.i=@mxes.net header.b="EHmWrwSg";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1C4DB9C917; Thu, 30 Apr 2020 00:19:01 +1000 (AEST)
+Received: from smtp-out-4.mxes.net (smtp-out-4.mxes.net [198.205.123.69])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BA5C79C841
+ for <tuhs@minnie.tuhs.org>; Thu, 30 Apr 2020 00:18:59 +1000 (AEST)
+Received: from squirrelmail.mxes.net (squirrelmail.mxes.net [198.205.123.113])
+ (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+ key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+ (No client certificate requested)
+ by smtp.mxes.net (Postfix) with ESMTPS id EB1F575981;
+ Wed, 29 Apr 2020 10:18:57 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mxes.net; s=mta;
+ t=1588169938; bh=JUq6mhJijAb8Oa0JEXK3XnCSz1YbMoDJiuYbafukNUM=;
+ h=Message-ID:In-Reply-To:References:Date:Subject:From:To:
+ MIME-Version:Content-Type;
+ b=EHmWrwSgHfH9KSrcQSbNyZGwvS/KszHMesamv8AdE8niekhbCk+AG1J+aRf30SF7K
+ Tl1h2rf9UCuERA+ggGNCGhxP5t94wNRNaEPICZjY961SWSt8LBC7XKh+VcAwKBLp58
+ ingSC69fCK3MGKGjBH8NXP6jBW3i9XhA/7xC2O2I=
+Received: from squirrelmail.tuffmail.net (squirrelmail.mxes.net
+ [198.205.123.113])
+ (using TLSv1 with cipher ECDHE-RSA-AES128-SHA (128/128 bits))
+ (No client certificate requested)
+ by squirrelmail.mxes.net (Postfix) with ESMTPSA id 1BE5475AF0;
+ Wed, 29 Apr 2020 10:18:57 -0400 (EDT)
+Message-ID: <a5bcdfa7c2f7388ede9ccdfba62c9055.squirrel@squirrelmail.tuffmail.net>
+In-Reply-To: <9A1BF33E-49C9-4712-BF25-4C0BBC504CD1@planet.nl>
+References: <9A1BF33E-49C9-4712-BF25-4C0BBC504CD1@planet.nl>
+Date: Wed, 29 Apr 2020 10:18:57 -0400
+From: ron@ronnatalie.com
+To: "Paul Ruizendaal" <pnr@planet.nl>
+User-Agent: SquirrelMail/1.4.23
+MIME-Version: 1.0
+Content-Type: text/plain;charset=utf-8
+X-Priority: 3 (Normal)
+Importance: Normal
+Content-Transfer-Encoding: quoted-printable
+X-Sent-To: <dHVoc0BtaW5uaWUudHVocy5vcmc=>
+Subject: Re: [TUHS] as(1) on Ultrix-11 vs 2.11BSD
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Thanks for the link.   With that help, I fixed the bug in the program:
+
+   mov $6., -(sp)
+     mov $1f, -(sp)
+     mov $1,-(sp)
+     mov $0,-(sp)
+     sys 4
+     add $8., sp
+     mov $0,-(sp)
+     mov $0,-(sp)
+     sys 1
+1:   <hello>
+
+
+>> Sorry, I typed that in haste without testing. I don=E2=80=99t have a 2=
+.11 system
+>> to try it on. However, reading the source code, I did that wrong. The
+>> args go on the stack, not in line with the code.
+>> mov $6, -(sp)
+>> mov a, -(sp)
+>> mov $1,-(sp)
+>> sys 4
+>
+> Without suggesting that every helpful post should be tested, I find the
+> superb https://unix50.org web emulator excellent for such things.
+>
+> Many thanks to the folks hosting & maintaining this great resource!
+>
+>
+
+
