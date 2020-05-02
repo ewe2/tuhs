@@ -1,0 +1,98 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: (qmail 5888 invoked from network); 2 May 2020 17:45:50 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 May 2020 17:45:50 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 644D29C9C5; Sun,  3 May 2020 03:45:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 580B09C853;
+	Sun,  3 May 2020 03:45:23 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2F8EC9C853; Sun,  3 May 2020 03:45:20 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D11BF9C851
+ for <tuhs@tuhs.org>; Sun,  3 May 2020 03:45:19 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id EADB035E141; Sat,  2 May 2020 10:45:18 -0700 (PDT)
+Date: Sat, 2 May 2020 10:45:18 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-ID: <20200502174518.GC30768@mcvoy.com>
+References: <202005020252.0422qnFL066007@tahoe.cs.Dartmouth.EDU>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202005020252.0422qnFL066007@tahoe.cs.Dartmouth.EDU>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] SDB debugger
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+So I definitely remember adb, I liked it for the same reasons that Rob
+did, it told you the truth.
+
+I also remember using a sdb debugger, not sure if it was at Sun or 
+when I was doing a Sys V port.  I liked it, it was reasonable.
+
+I think dbx ended up becoming the one I used on BSD.  Gdb eventually
+got good enough but I'm with Rob, it was a mess early on.
+
+But truth be known, I'm sort of a printf() debugger.  The main thing
+I use gdb for is a stack trace, that's usually enough.  The BitKeeper
+source has this "gem":
+
+void
+gdb_backtrace(void)
+{
+        FILE    *f;
+        char    *cmd;
+
+        unless (getenv("_BK_BACKTRACE")) return;
+        unless ((f = efopen("BK_TTYPRINTF")) ||
+            (f = fopen(DEV_TTY, "w"))) {
+                f = stderr;
+        }
+        cmd = aprintf("gdb -batch -ex backtrace '%s/bk' %u 1>&%d 2>&%d",
+            bin, getpid(), fileno(f), fileno(f));
+
+        system(cmd);
+        free(cmd);
+        if (f != stderr) fclose(f);
+}
+
+
+On Fri, May 01, 2020 at 10:52:49PM -0400, Doug McIlroy wrote:
+> >  Does anyone know if dbx ended up 8 or 9th
+> 
+> I believe the only debuggers on research machines were
+> db      v1-v6
+> adb     v7,v9,v10
+> cdb     v3-v6
+> sdb     v8-v9
+> pi      v8-v10
+> 
+> Doug
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
