@@ -1,0 +1,125 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25561 invoked from network); 16 May 2020 23:26:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 16 May 2020 23:26:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2CB359C966; Sun, 17 May 2020 09:26:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B0A509C5E4;
+	Sun, 17 May 2020 09:26:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 7CC059C5E4; Sun, 17 May 2020 09:26:10 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7F5949C5E1
+ for <tuhs@tuhs.org>; Sun, 17 May 2020 09:26:09 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 8909016054; Sun, 17 May 2020 01:26:07 +0200 (CEST)
+Date: Sun, 17 May 2020 01:26:07 +0200
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Ronald Natalie <ron@ronnatalie.com>
+Message-ID: <20200516232607.nLiIx%steffen@sdaoden.eu>
+In-Reply-To: <5DB09C5A-F5DA-4375-AAA5-0711FC6FB1D9@ronnatalie.com>
+References: <20200515213138.8E0F72D2D71E@macaroni.inf.ed.ac.uk>
+ <alpine.DEB.2.21.2005151752250.19733@sd-119843.dedibox.fr>
+ <077a01d62b08$e696bee0$b3c43ca0$@ronnatalie.com>
+ <20200515233427.31Vab%steffen@sdaoden.eu>
+ <5DB09C5A-F5DA-4375-AAA5-0711FC6FB1D9@ronnatalie.com>
+Mail-Followup-To: Ronald Natalie <ron@ronnatalie.com>,
+ The Eunuchs Hysterical Society <tuhs@tuhs.org>
+User-Agent: s-nail v14.9.19-42-g6235a28f
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] v7 K&R C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Ronald Natalie wrote in
+<5DB09C5A-F5DA-4375-AAA5-0711FC6FB1D9@ronnatalie.com>:
+ |> On May 15, 2020, at 7:34 PM, Steffen Nurpmeso <steffen@sdaoden.eu> wrote:
+ |> ron@ronnatalie.com wrote in
+ |> <077a01d62b08$e696bee0$b3c43ca0$@ronnatalie.com>:
+ |>|Char is different.  One of the silly foibles of C.    char can be \
+ |>|signed or
+ |>|unsigned at the implementation's decision.
+ |> 
+ |> And i would wish Thompson and Pike would have felt the need to
+ |> design UTF-8 ten years earlier.  Maybe we would have a halfway
+ |> usable "wide" character interface in the standard (C) library.
+
+ |The issue is making char play double duty as a basic storage unit and \
+ |a native character.
+ |This means you can never have 16 (or 32 bit) chars on any machine that \
+ |you wanted to support 8 bit integers.
+
+Oh, I am not the person to step in here.
+  [I deleted 60+ lines of char*/void*, and typedefs,
+  etc. experiences i had.  And POSIX specifying that a byte has
+  8-bit.  And soon that NULL/(void*)0 has all bits 0.]
+
+  Unicode / ISO 10646 did not exist by then. sure.
+
+  I am undecided.  I was a real fan of UTF-32 (32-bit character)
+  at times, but when i looked more deeply in Unicode, it turned
+  out to be false thinking: some languages are so complex that you
+  need to address entire sentences, or at least encapsulate
+  "graphem" boundaries, going for "codepoints" is just wrong.
+
+  Then i thought Microsoft and their UTF-16 decision was not that
+  bad, because almost all real life characters of Unicode can
+  nonetheless be addressed by a single 16-bit codepoint, and that
+  eases programming.  But moreover UTF-8 needs three bytes for
+  most of them.
+
+Why did it happen?  Why was the char type overloaded like this?
+Why was there no byte or "mem" type?  It is to this day, i think,
+that ISO C allows to bypass their (terrible) aliasing rules by
+casting to and from char*.
+
+In v5 usr/src/s2/mail.c i see
+
+  +getfield(buf)
+  +char buf[];
+  +{
+  +       int j;
+  +       char c;
+  +
+  +       j = 0;
+  +       while((c = buf[j] = getc(iobuf)) >= 0)
+  +       if(c==':' || c=='\n') {
+  +               buf[j] =0;
+  +               return(1);
+  +       } else
+  +               j++;
+  +       return(0);
+  +}
+
+so here the EOF was different and char was signed 7-bit it seems.
+At that time at latest i have to admit that i have not looked in
+old source code for years.  But just had a quick look in the dmr/
+of 5th revision, and there you see "char lowbyte", for example.
+
+A nice Sunday from Germany! i wish you, and the list,
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
