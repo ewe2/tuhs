@@ -1,0 +1,84 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 21946 invoked from network); 22 May 2020 20:02:20 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 May 2020 20:02:20 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 24F509C606; Sat, 23 May 2020 06:02:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 966D59C5E8;
+	Sat, 23 May 2020 06:01:56 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 79D959C5E8; Sat, 23 May 2020 06:01:54 +1000 (AEST)
+Received: from pio-pvt-msa2.bahnhof.se (pio-pvt-msa2.bahnhof.se [79.136.2.41])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BB67B9C194
+ for <tuhs@tuhs.org>; Sat, 23 May 2020 06:01:53 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by pio-pvt-msa2.bahnhof.se (Postfix) with ESMTP id DDFD241F51
+ for <tuhs@tuhs.org>; Fri, 22 May 2020 22:01:51 +0200 (CEST)
+X-Virus-Scanned: Debian amavisd-new at bahnhof.se
+Received: from pio-pvt-msa2.bahnhof.se ([127.0.0.1])
+ by localhost (pio-pvt-msa2.bahnhof.se [127.0.0.1]) (amavisd-new, port 10024)
+ with ESMTP id wQ1DB4I2Vd19 for <tuhs@tuhs.org>;
+ Fri, 22 May 2020 22:01:50 +0200 (CEST)
+Received: from localhost (unknown [155.4.14.29])
+ (Authenticated sender: mc327956)
+ by pio-pvt-msa2.bahnhof.se (Postfix) with ESMTPA id E95B041F50
+ for <tuhs@tuhs.org>; Fri, 22 May 2020 22:01:50 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+ by localhost (Postfix) with ESMTPS id 75B792E032E
+ for <tuhs@tuhs.org>; Fri, 22 May 2020 22:01:50 +0200 (CEST)
+Date: Fri, 22 May 2020 20:01:49 +0000
+From: Michael =?utf-8?B?S2rDtnJsaW5n?= <michael@kjorling.se>
+To: tuhs@tuhs.org
+Message-ID: <5507c573-f458-4eec-8d15-fee211a3b76d@localhost>
+References: <BC361958-C8A0-4F42-8E9D-A3E981749CCC@serissa.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <BC361958-C8A0-4F42-8E9D-A3E981749CCC@serissa.com>
+Subject: Re: [TUHS] where did "main" come from?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 22 May 2020 14:43 -0400, from stewart@serissa.com (Lawrence Stewart):
+> C main programs define “main”.
+
+I don't have a ready answer to your question where that name came
+from, but it's worth remembering (and easy to forget) that main()
+isn't the actual starting point of execution of a C program. Rather,
+the starting point is a function within the C library, which does some
+early setup work and then ultimately calls main() and takes care of
+passing the return value from main() back to the operating system (see
+[1] for Linux, for example).
+
+This is perhaps most obvious in C programs for Microsoft Windows,
+which don't have the traditional main() but do have a WinMain() in its
+place.
+
+It looks like at least glibc uses _start as the actual entry point
+[2]. In turn, on x86-64 (and very likely also on other architectures),
+that calls __libc_start_main(), which in turn calls main() via a
+function pointer passed to it.
+
+ [1]: https://refspecs.linuxbase.org/LSB_3.1.0/LSB-generic/LSB-generic/baselib---libc-start-main-.html
+ [2]: https://blogs.oracle.com/linux/hello-from-a-libc-free-world-part-1-v2
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael@kjorling.se
+ “Remember when, on the Internet, nobody cared that you were a dog?”
+
