@@ -1,0 +1,146 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SUBJ_OBFU_PUNCT_FEW autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 28761 invoked from network); 31 May 2020 16:51:11 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 May 2020 16:51:11 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C165D9C949; Mon,  1 Jun 2020 02:51:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A7C869C5E5;
+	Mon,  1 Jun 2020 02:50:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B6EFD9C5E5; Mon,  1 Jun 2020 02:50:51 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 479119C1EA
+ for <tuhs@tuhs.org>; Mon,  1 Jun 2020 02:50:51 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id EDA5E35E0BB; Sun, 31 May 2020 09:50:50 -0700 (PDT)
+Date: Sun, 31 May 2020 09:50:50 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Richard Salz <rich.salz@gmail.com>
+Message-ID: <20200531165050.GS22016@mcvoy.com>
+References: <1jeHk5-5LM-00@marmaro.de>
+ <CAC20D2Pm9_u8BiExe+ELjt0jb4qnB-d-bUFbNCvpXJnDma68yQ@mail.gmail.com>
+ <1jfNb2-7JV-00@marmaro.de>
+ <CAC20D2P6_knffBX66XMb-SZf+om1AOooN36xaea+M0=Tb5weqg@mail.gmail.com>
+ <CAFH29toQesHQtrwQPw=eO4uiy3mw-PrvT3WcYaukBW9BP3hBWA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFH29toQesHQtrwQPw=eO4uiy3mw-PrvT3WcYaukBW9BP3hBWA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] mh/hm, mmh (was: fmt(1): history, POSIX, -t, -c)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, May 31, 2020 at 12:25:47PM -0400, Richard Salz wrote:
+> Originally ihnp4!mirror!rs@seismo.arpa, then ihnp4!mirror!rs@seismo.css.gov
+> and then rs%mirror.uucp@seismo.css.gov and then rs@mirror.tmc.com  Thanks
+> to Mary Ann and the "UUCP Mapping Project" for making much of that possible
+> and Peter Honeyman for Pathlias
+
+My first real research paper was with Udi Manber and it was all about 
+compressing the pathalias maps.  I had them on a 40MB disk on a Masscomp
+that had 20 users.  The format was
+
+seismo.css.gov	geowhiz!geophiz!uwisc!ihnp4!mirror
+
+in other words
+
+destination	path!to!get!there
+
+I went to Udi and explained that all of our stuff started with
+geowhiz!geophiz!uwisc
+so that string was replicated over and over and it took too much
+space.
+
+Once Udi understood the problem he went "You have time best case,
+space worst case, you can reverse them like so"
+
+seismo	-> mirror
+mirror	-> ihnp4
+ihnp4	-> uwisc
+uswisc	-> geophiz
+geophiz	-> geowhiz
+
+and you'll have time worst case and space best case.  I was like "oh,
+yeah, you are right, cool, thanks" and got up to leave.  Not so fast,
+says Udi, that's not "interesting".  What would be interesting is if
+you could approximate time best case and space best case.
+
+With that, I started down the only dynamic programming problem I have
+ever solved.  Udi's idea was to break the graph at what he called
+pivot points, where the pivot points as much as possible got rid of
+the replicated strings.  He also wanted to limit lookups to just
+2.
+
+So I had to read in the maps and build a graph from them on my
+creaky microvax with 4MB of ram.  Doing so lead me to the first
+place I taught Udi about systems.  I was fgets() each line and 
+mallocing a copy of it.  Then I sorted with qsort() and it took
+overnight to get the sorted array.  Udi asked what sort?  Qsort.
+Oh, that's garbage, use a radix sort, that will be better.  WTF
+is a radix sort, look that up, implemented it, it was worse.
+
+So I start poking around and somehow realized we were thrashing
+VM, we didn't fit, and I have no idea how I figured out that
+malloc was fragmenting memory but I did.  Probably figured out
+that most of my program was backed by swap, not files, and that's
+usually malloc or brk.
+
+So I wrote my own malloc that grabbed memory in 300KB chunks (why
+that size, I dunno, seemed right).  Then I allocated memory out
+of those chunks.  Got rid of the fragmentation and we fit in
+4MB.  qsort worked fine, took about 20 minutes (we didn't really
+fit but we were way closer).
+
+Udi was watching as I was doing all this, I think I was working
+in his office, it was his microvax.  The fragmentation thing 
+taught him that when Unix says it has virtual memory and you
+can just use it, it only works well when you fit.
+
+So the programming problem turned out that you calculated the 
+space it work take for every possible pivot point and then at
+the end, you took the set that gave you the minimum space.  We
+wrote, heh, who am I kidding, Udi wrote, a paper about it.  I
+was still green on writing papers, they were hard for me.  I told
+Udi that and he stared at me blankly and said "Writing papers is
+easy if you know the content.  You just make a good outline and
+fill it in."  He's right, that's how you do it, and it is easy
+if you know and can make the outline.
+
+I went on to do a lot of work with/for him.  I wrote a user level
+thread library that made me write swtch() in assembler for the VAX
+(I believe I did a 68K version too but the source I have is VAX
+only).  I "cheated" and did 99% of the work in C and popped down
+the rabbit hole to assembler, did the nasty, and popped back out
+as a different thread.  112 lines:
+
+http://www.mcvoy.com/lm/T/src/Tasm.S
+
+Funny Udi story, I was young and wild and drove too fast and got 
+tickets.  So I got a radar detector that beeped when it saw the
+radar gun.  Udi upgraded the microvax to some newer release of
+X10 or X11 and the new xclock beeped on the hour.  Every time
+it beeped, I jumped because it sounded just like the radar 
+detector.  Udi asked about it, I explained, he laughed and said
+"Larry, you're hacking too fast" each time I jumped :)
+
+Good times.  I almost did a PhD under him but I didn't care for
+the CS department at Tucson where he went and I liked industry
+too much.
