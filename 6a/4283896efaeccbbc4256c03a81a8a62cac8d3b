@@ -1,0 +1,123 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 27854 invoked from network); 1 Jun 2020 23:43:16 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Jun 2020 23:43:16 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 917AB9C92B; Tue,  2 Jun 2020 09:43:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1856F9C5F1;
+	Tue,  2 Jun 2020 09:42:39 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6CBDA9C5F1; Tue,  2 Jun 2020 09:42:35 +1000 (AEST)
+X-Greylist: delayed 1491 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 02 Jun 2020 09:42:34 AEST
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D0B9193D46
+ for <tuhs@minnie.tuhs.org>; Tue,  2 Jun 2020 09:42:34 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id CBAB118C073; Mon,  1 Jun 2020 19:17:42 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200601231742.CBAB118C073@mercury.lcs.mit.edu>
+Date: Mon,  1 Jun 2020 19:17:42 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Ruizendaal
+
+    > This time looking into non-blocking file access.  (... right now my
+    > scope is 'communication files' (tty's, pipes, network connections).
+    > ...
+    > First appearance of non-blocking behaviour seems to have been with
+    > Chesson's multiplexed files ... in 1979.
+
+At around that point in time (I don't have the very _earliest_ code, to get an
+exact date, but the oldest traces I see [in mapalloc(), below] are from
+September '78), the CSR group at MIT-LCS (which were the people in LCS doing
+networking) was doing a lot with asynchronous I/O (when you're working below
+the reliable stream level, you can't just do a blocking 'read' for a packet;
+it pretty much has to be asynchronous). I was working in Unix V6 - we were
+building an experimental 1Mbit/second ring - and there was work in Multics as
+well.
+
+I don't think the wider Unix community heard about the Unix work, but our
+group regularly filed updates on our work for the 'Internet Monthly Reports',
+which was distributed to the whole TCP/IP experimental community. If you can
+find an archive of early issues (I'm too lazy to go look for one), we should
+be in there (although our report will alsocover the Multics TCP/IP work, and
+maybe some other stuff too).
+
+
+There were two main generations of code; I don't recall the second one well,
+and I'm too lazy to go look, but I can tell you off the top of my head a bit
+about how the first one worked. Open/read/write all looked standard to the
+user in the process (the latter two were oriented to packets, a bit like raw
+disks being blocks); multiple operations could be queued in each
+direction. (There was only one user allowed at a time for the network device;
+no input demultiplexing.)
+
+Whenever an I/O operation completed, the process was sent a signal. Since the
+read/write call had long since returned, it had to do a getty() to get info
+about that operation - the size of the packet, error indications, etc.
+
+One complication was that for a variety of reasons (we wanted to avoid having
+to copy data, and the interface did not have packet buffers) we did DMA
+directly to/from the user's memory; this meant the process has to be locked
+in place while I/O was pending.
+
+(I didn't realize it at the time, but we dodged a bullet there; a comment
+in xalloc(), which I only absorbed recently, explains the problem. More
+here:
+
+  https://gunkies.org/wiki/UNIX_V6_internals#exec()_and_pure-text_images
+
+if anyone wants the gory details.)
+
+
+That all (the queing, signals for I/O completion, locking the process to a
+fixed location in memory while it continued to run) etc all worked well, as I
+recall (although I guess it couldn't do an sbrk() while locked), but one
+complication was the UNIBUS map on the -11/70.
+
+The DSSR/RTS group at LCS wanted to have a ring interface, but their machine
+was a /70 (ours, the one the driver was initially done on/for, was a /40), so
+with DMA we had to use the UNIBUS map.
+
+The stock V6 code had mapalloc(), (and mapfree(), both called on all DMA
+operations), but... it allocated the whole map to whatever I/O operation asked
+for the map. Clearly, if you're about to start a network input operation, and
+wait a packet to show up, you don't want the disk controller to have to sit
+and wait for for a packet to show up so _it_ can have the map.
+
+Luckily, mapalloc() was called with a pointer to the buffer header (which had
+all the info about the xfer), so I added a 'ubmap' array, and called the
+existing malloc() on it, to allocate only a big enough chunk of the UNIBUS map
+for the I/O operation defined by the header. Since there was 248KB of map
+space, and the largest single DMA transfer possible in V6 was about 64KB
+(maybe a little more, for a max-sized process with its 'user' block), there
+was never a problem with contention for the map, and we didn't have to touch
+any of the other drivers at all.
+
+That was dandy, and only a couple of lines of extra code, but I somehow made a
+math error in my changes, and as I recall I had to debug it with a printf() in
+mapalloc(). I was not popular that day! Luckily, the error was quickly
+obvious, a fix was applied, and we were on our way.
+
+	 Noel
+
