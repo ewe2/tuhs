@@ -1,0 +1,99 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 7400 invoked from network); 2 Jun 2020 22:20:31 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jun 2020 22:20:31 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CE7679CAEA; Wed,  3 Jun 2020 08:20:26 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 091B99CA34;
+	Wed,  3 Jun 2020 08:20:05 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 836D19CA34; Wed,  3 Jun 2020 08:20:03 +1000 (AEST)
+X-Greylist: delayed 350 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 03 Jun 2020 08:20:02 AEST
+Received: from cfcl.com (cpepool4cmts2-144.sanbrunocable.com [24.143.248.144])
+ by minnie.tuhs.org (Postfix) with ESMTP id 7243F9C96B
+ for <tuhs@minnie.tuhs.org>; Wed,  3 Jun 2020 08:20:02 +1000 (AEST)
+Received: from spot.local (spot.local [IPv6:fe80::85b:cbb9:d06e:2fce])
+ by cfcl.com (Postfix) with ESMTP id D928EF1E37D;
+ Tue,  2 Jun 2020 15:14:11 -0700 (PDT)
+Content-Type: text/plain;
+	charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 13.0 \(3608.40.2.2.4\))
+From: Rich Morin <rdm@cfcl.com>
+In-Reply-To: <CAC20D2PRThvBqMz_ApiQk1f36F1Yz4VSqf_BB1dnuC9HNxfOvQ@mail.gmail.com>
+Date: Tue, 2 Jun 2020 15:14:10 -0700
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <0BF3AFA4-0B0E-45AA-A3AA-609704AF493F@cfcl.com>
+References: <20200602201334.95D9718C079@mercury.lcs.mit.edu>
+ <CAC20D2PRThvBqMz_ApiQk1f36F1Yz4VSqf_BB1dnuC9HNxfOvQ@mail.gmail.com>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3608.40.2.2.4)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Case study (read, war story :-) of non-blocking I/O...
+
+Back in the mid-70's, I was doing scientific support programming for an =
+X-Ray sky survey,
+using Fortran-63 under DRUM SCOPE on a CDC 3800 system which NRL's Space =
+Sciences Division
+had (sigh) acquired and cobbled together from the US Government "excess =
+property" list.
+
+Most of the time, our satellite was used in "scan mode", spinning on an =
+axis which pointed
+at the Sun.  This let us collect data on a two degree wide strip of sky. =
+ So, every six
+months we scanned the entire X-ray sky.  The track was basically a =
+helix, bent to match the
+shape of the Earth's orbit.  Every so often, in order to look at a =
+particularly interesting
+area, the spinning would be stopped, so the instrument could be put into =
+"point mode".
+
+The challenge was to "bin" this data for further analysis.  We did this =
+by loading sets of
+7-track tapes onto a CDC 813 drive, then dumping it out into 36 2x10 =
+degree bins.  This put
+a quarter of the data onto a set of tapes.  Rinse, repeat for the other =
+3/4 of the data
+(after skipping past the already-written data).  The result was 36 =
+tapes, each holding an
+8x10 degree bin (plus one extra tape for any point mode data).=20
+
+IIRC, we had five tape drives; my challenge was to keep them all as busy =
+as possible, so as
+to dump the data set expeditiously.  Because I had asynchronous I/O =
+(mostly in the form of
+BUFFER IN and BUFFER OUT commands), I was able to implement a simple but =
+quite effective
+polling loop.  The machine room was a bit of a madhouse, but the tapes =
+were written about
+as quickly as the hardware allowed.  Asynchronous I/O FTW...
+
+=
+https://en.wikipedia.org/wiki/United_States_Naval_Research_Laboratory#Spac=
+e_sciences
+=
+https://en.wikipedia.org/wiki/High_Energy_Astronomy_Observatory_1#A1:_Larg=
+e-Area_Sky_Survey_instrument
+https://ub.fnwi.uva.nl/computermuseum/cdcdisk.html
+
+-r
+
