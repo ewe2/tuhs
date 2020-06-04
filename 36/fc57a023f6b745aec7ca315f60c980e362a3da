@@ -1,0 +1,74 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 10020 invoked from network); 4 Jun 2020 16:50:39 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 4 Jun 2020 16:50:39 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DA6809CB48; Fri,  5 Jun 2020 02:50:34 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 70B799C600;
+	Fri,  5 Jun 2020 02:50:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 554F29C600; Fri,  5 Jun 2020 02:50:12 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F3BD19C1C8
+ for <tuhs@tuhs.org>; Fri,  5 Jun 2020 02:50:11 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 58A1935E12D; Thu,  4 Jun 2020 09:50:11 -0700 (PDT)
+Date: Thu, 4 Jun 2020 09:50:11 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Warner Losh <imp@bsdimp.com>
+Message-ID: <20200604165011.GC18437@mcvoy.com>
+References: <ADC32296-73FD-46D4-A3D6-4EA03A956103@planet.nl>
+ <CAC20D2McV_i0d=m33McRVoPda8ZVLawaKJxndYDLbqAnHLE_Wg@mail.gmail.com>
+ <CANCZdfrefhG42UEx=WXrVNvrxR0oBpT1u7oz6_PitjZDAbSALw@mail.gmail.com>
+ <CAKzdPgyP0Vtkwh50hQQpFuFaztw9i+4fi2BVAzPhm8upJh4e_Q@mail.gmail.com>
+ <alpine.BSF.2.21.9999.2006011328160.31987@aneurin.horsfall.org>
+ <20200601145801.GE22016@mcvoy.com>
+ <20200604090436.GJ279@server.rulingia.com>
+ <CANCZdfo289SQhA3tu5Z=RsDv3VrxgZ00r3M7mPNPCMEQiMvuQA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CANCZdfo289SQhA3tu5Z=RsDv3VrxgZ00r3M7mPNPCMEQiMvuQA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Jun 04, 2020 at 08:19:58AM -0600, Warner Losh wrote:
+> The kicker is that all of the kernel is callback driven. The
+> upper half queues the request and then sleeps until the lower half signals
+> it to wakeup. And that signal is often just a wakeup done from the
+> completion routine in the original request. All of that would be useful in
+> userland for high volume activity, none of it is exposed...
+
+Yeah, I've often wondered why this stuff wasn't exposed.  We already have
+signal handlers, seems like that maps.  
+
+I tried to get the NFS guys at Sun to rethink the biod junk and do it like
+UFS does, where it queues something and gets a callback.  I strongly suspect
+that two processes, one to queue, one to handle callbacks, would be more
+efficient and actually faster than the biod nonsense.
+
+That's one of the arguments I lost unfortunately.
+
+Warner, exposing that stuff in FreeBSD is not really that hard, I suspect.
+Might be a fun project for a young kernel hacker with some old dude like
+you or me or someone, watching over it and thinking about the API.
+
+--lm
