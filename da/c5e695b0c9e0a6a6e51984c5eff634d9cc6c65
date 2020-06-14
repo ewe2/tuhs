@@ -1,0 +1,113 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 12300 invoked from network); 14 Jun 2020 08:41:42 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 14 Jun 2020 08:41:42 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D0E379C253; Sun, 14 Jun 2020 18:41:35 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 35DCF9C1C8;
+	Sun, 14 Jun 2020 18:40:17 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=aueb.gr header.i=@aueb.gr header.b="jsmAOmeW";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 52D049C1C8; Sun, 14 Jun 2020 18:40:12 +1000 (AEST)
+X-Greylist: delayed 422 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 14 Jun 2020 18:40:10 AEST
+Received: from blade-b3-vm-relay.servers.aueb.gr
+ (blade-b3-vm-relay.servers.aueb.gr [195.251.255.106])
+ by minnie.tuhs.org (Postfix) with ESMTP id 62AA0945D9
+ for <tuhs@minnie.tuhs.org>; Sun, 14 Jun 2020 18:40:10 +1000 (AEST)
+Received: from blade-a1-vm-smtp.servers.aueb.gr
+ (blade-a1-vm-smtp.servers.aueb.gr [195.251.255.217])
+ by blade-b3-vm-relay.servers.aueb.gr (Postfix) with ESMTP id E0EC4B7F
+ for <tuhs@minnie.tuhs.org>; Sun, 14 Jun 2020 11:33:06 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aueb.gr; s=201901;
+ t=1592123586; bh=QkrV9R2Y9kjCxQL6uIhjFvnYHSb1N73IDfjjBd7Mubo=;
+ h=To:From:Subject:Date:From;
+ b=jsmAOmeWVIgeoYuxN/BdMggBuhZzXyHHuBhp6lW7D1Py7TzcEqM48QzEsw54JxKqi
+ J8sdhqNcUp0/XNemf+Wh1IsNgBQH5xses0Rxxlnpa1i4qIgCwGt2pMFRgGi1TKtRH6
+ ow1tobL6myNgFR7VLAOz15nehwBjhpS6Zkbmvnoys8/3ptxjY1WsRZFZZVbDuto7Fc
+ Sv2DBQl1qXdFIR8FFk4SVmsNsHTC6CSxm9Rd1IyKSHc/+XFZuFvhF/IIZnDdOanK+M
+ ecr9JyhtLR2tLo8bZDXxaRsmey7CUqDn4lZoXMZMI7fA8JpXCGjGSAkQXVmyf0UWSU
+ ID3BFqjCzw+Ig==
+Received: from [192.168.136.3] (ppp-94-66-137-11.home.otenet.gr [94.66.137.11])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+ (No client certificate requested) (Authenticated sender: dds)
+ by blade-a1-vm-smtp.servers.aueb.gr (Postfix) with ESMTPSA id B9ACDA9D
+ for <tuhs@minnie.tuhs.org>; Sun, 14 Jun 2020 11:33:06 +0300 (EEST)
+To: TUHS main list <tuhs@minnie.tuhs.org>
+From: Diomidis Spinellis <dds@aueb.gr>
+Phone: +30 210 8203621
+Message-ID: <ea640743-7c88-8b94-3262-30dd6649810f@aueb.gr>
+Date: Sun, 14 Jun 2020 11:33:07 +0300
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.9.0
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: el
+Content-Transfer-Encoding: 7bit
+Subject: [TUHS] Accessing the PDP-11/70 MMU registers and the kernel's u area
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+ From the 2.11 BSD sources I understand that the PDP-11/70 MMU address 
+and data registers, KDSA and KDSD, start at 0172360 and 0172320 
+respectively [1].  Yet, when I read the register contents I don't get 
+what I would expect to see: increasing by 0200 memory values for KDSA 
+and the same constant value for KDSD [2].  I checked this by looking at 
+/dev/mem.
+
+# od -o /dev/mem 0172360 | head -1
+0172360  000002 000016 001403 012700 000400 000402 012700 000200
+
+# od /dev/mem 0172320 | head -1
+0172320  101016 005064 000026 005067 175456 016467 000006 175430
+
+I get the same results when I examine the memory through SIMH:
+
+sim> examine 172360
+172360: 000002
+sim> examine 172362
+172362: 000016
+sim> examine 172364
+172364: 001403
+
+sim> examine 172320
+172320: 101016
+sim> examine 172322
+172322: 005064
+
+The MMU kernel instruction registers, KISA and KISD, contain similarly 
+nonsensical values as do the registers located at a different memory 
+location (077320, 0772360) indicated in another source [3].  What am I 
+missing?
+
+My goal is to access from the console the kernel's u area.  According to 
+mem(4) and the symbols in /unix, this should be at address 0140000. 
+Indeed, accessing it through /dev/kmem I get the expected results for 
+e.g. u_comm and u_uid.  However, I have been unable to find it in the 
+machine's physical memory, hence my question regarding the MMU's operation.
+
+[1] 
+https://github.com/RetroBSD/2.11BSD/blob/master/usr/sys/pdpstand/M.s#L346
+[2] 
+https://github.com/RetroBSD/2.11BSD/blob/master/usr/sys/pdpstand/M.s#L247
+[3] https://gunkies.org/wiki/PDP-11_Memory_Management
+
+Diomidis
