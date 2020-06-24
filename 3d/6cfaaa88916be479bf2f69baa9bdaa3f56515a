@@ -1,0 +1,139 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=LOTS_OF_MONEY,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 26743 invoked from network); 24 Jun 2020 19:37:17 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Jun 2020 19:37:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 20EC1945A7; Thu, 25 Jun 2020 05:37:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B7B829459A;
+	Thu, 25 Jun 2020 05:36:50 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 9386A9459A; Thu, 25 Jun 2020 05:36:48 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2E24C94599
+ for <tuhs@minnie.tuhs.org>; Thu, 25 Jun 2020 05:36:48 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id BFD5C35E140; Wed, 24 Jun 2020 12:36:47 -0700 (PDT)
+Date: Wed, 24 Jun 2020 12:36:47 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Clem Cole <clemc@ccc.com>
+Message-ID: <20200624193647.GB14302@mcvoy.com>
+References: <4FC7FA55-5035-41A2-B52F-AE26DC8BED2C@planet.nl>
+ <20200623140124.GR22291@mcvoy.com>
+ <CAC20D2OkGKj58=XPcPW+NoAXE3i+_mRSeBD-oJUY36FSdBBd5A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAC20D2OkGKj58=XPcPW+NoAXE3i+_mRSeBD-oJUY36FSdBBd5A@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] VFS prior to 1984
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>, Paul Ruizendaal <pnr@planet.nl>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Jun 23, 2020 at 11:12:40AM -0400, Clem Cole wrote:
+> Rusty and team did the VFS layer Sun @ (Larry will have to tell
+> you who actually built it, I never knew).  
+
+Steve Kleiman is the only author on the VFS paper so I'm guessing that 
+was him.
+
+Rusty was NFS.
+
+Joe Moran (sun!mojo if I remember correctly) did the VM implementation,
+it was co-designed by Joe, Shannon, and Gingell.
+
+Side story: part of the reason I wanted to go to Sun was because when
+I was a CS student at UW-Madison, Joe was a little older than me, and
+I sat and watched him do a BSD port to a 68K (I think) in a little more
+than 24 hours (sketchy on the time, I think that's right, almost positive
+it was more than 20 hours, it was a chunk of time).  As a guy who wanted
+to be next to the metal, it was impressive.
+
+> In the end, early NFS was
+> notorious for putting 'holes' in the files because of the automatic seek in
+> every operation and errors not coming until close(2) time.
+
+You have no idea how many of those holes that 16 bit SCCS checksum has
+found (BitKeeper kept it).
+
+> EFS used an RPC and a RUDP layer that Perry and Alan Atlas built, but it
+> was not nearly as flexible as what Sun built [which had a crude interface
+> generator], although until years later when Mike Leibensger built PIG (the
+> Paceline Interface Generator) NFS RPC was always a PITA and not much better
+> in practice than what we had at Masscomp.
+
+Oh, I don't know if I agree.  I took the RPC mechanism and vectorized it.
+I probably have the code somewhere.  It was pretty neat, 10Mbit was the
+common networking and I did RPC Vector calls to the rstatd on literally
+every machine in the Mountain View campus.  It was thousands of machines
+and it worked.  The code split the RPC back into send and receive and
+the code had to start gathering up answers before it was finished 
+sending the questions or the packets would be dropped.
+
+It worked surprisingly well.  Ron Minnich and Gene Kim made an NFS client
+that worked as demo-ware.  There is a paper about below, note that I'm
+co-author only because I wrote the RPC vector code, I believe Gene did
+the in kernel code, it was Ron and Gene's project.  
+
+http://mcvoy.com/lm/papers/bigfoot.pdf
+
+> In fact, the point of the EFS paper was it's all about the recovery when
+> there is a failure/error.  If you read his paper, Rusty's point was who
+> cares if there is an error (I've always felt vindicated that while I lost
+> the war, over time everyone came to our way of thinking and now NFS
+> V4 looks a whole lot like EFS did).
+
+Yeah, they were sort of cavalier about errors in public.  The weird
+thing is Sun ran their entire network on Sun machines.  Everything was
+NFSv2 when I got there, the routers were Sun workstations, the servers
+were Sun servers, the clients were Sun workstations.  They ate their own
+dogfood and NFS just worked, it was pretty unheard of to hear about NFS
+issues other than performance tuning (stupid biods etc).
+
+> Having a DFS as a feature was an incredible advance and proved we needed
+> something (and it needed to be standard in all systems).   NFS really lead
+> the market with that advance, although it sort of took a few years to make
+> it really good.  The fact is that others had the same idea before or at
+> least contemporary with it.
+
+NFS was solid in v2 at Sun.  I went to SGI and NFS was complete garbage.
+SGI's networking principle engineer told me, when I complained about
+NFS not being reliable, "That's what rcp is for".  I was flabbergasted,
+the networking group generated $18M/year in NFS sales.
+
+It wasn't just SGI, every vender other Sun had a crappy NFS implementation.
+I'm surprised NFS didn't have a worse rep because while NFS worked on Suns,
+it really didn't work anywhere near as well elsewhere.
+
+> That said, and to give the NFS team* a huge amount of credit *(and great
+> applause), the VFS layer was better thought out than the FSS and in fact
+> made it possible to add a lot of different file systems into UNIX later.
+> FSS was much more ad hoc.
+
+The VFS layer was Steve, NFS was Rusty.
+
+> At LCC, when we built VPROC for TNC a few years later, we used some of the
+> same ideas from VFS and of course used VFS for the file system layer since
+> TNC had to have full POSIX semantics.  (It's a shame VPROC never caught on
+> the way VFS did).
+
+VPROC was very cool and a requirement for any sort of distributed single
+system image OS.  I agree it is a shame that it didn't catch on.
+
+--lm
