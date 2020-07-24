@@ -1,0 +1,73 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31589 invoked from network); 24 Jul 2020 14:34:33 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Jul 2020 14:34:33 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CADD39C9F7; Sat, 25 Jul 2020 00:34:30 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9ADEA9C8DE;
+	Sat, 25 Jul 2020 00:33:26 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BDEAC9C8DE; Sat, 25 Jul 2020 00:33:21 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 43C6E9C8B1
+ for <tuhs@minnie.tuhs.org>; Sat, 25 Jul 2020 00:33:21 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 18E9C18C073; Fri, 24 Jul 2020 10:33:20 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200724143320.18E9C18C073@mercury.lcs.mit.edu>
+Date: Fri, 24 Jul 2020 10:33:20 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] V6 Console IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Larry McVoy
+
+    > Yeah, write is unbuffered though I think Noel is correct, it's going to
+    > a tty and the tty will buffer until \n
+
+The 'wait until newline' is on the input side.
+
+Output is buffered (in the sense that characters are held in the kernel until
+the output device can take them); but normally output will start to happen as
+soon as the device is able to take them. Only a certain amount can be
+buffered though, after that (the 'high water', I think it's called), the
+process is blocked if it tries to do output, and awakened when the buffered
+output level goes past the 'low water' mark.
+
+Note that getchar() and putchar() are subroutines in a library; looking
+at the source:
+
+  https://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/s4/getchr.s
+
+you can see how they relate to the actual read/write calls to the OS.
+
+    > So you probably have to set the tty in raw mode
+
+Probably best to run such programs from something other than the main console,
+because if there's a bug in the program, and the terminal is in raw mode, if
+you're on the console, you may have to reboot the system to regain control of
+the system. (Interrupt characters, ^D etc won't work.)
+
+    > (sorry that I'm vague, I never ran V6).
+
+Tnat's OK, I pretty much have the V6 kernel memorized, from working with
+it back in the day... :-)
+
+	Noel
