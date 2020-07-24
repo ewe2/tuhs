@@ -1,0 +1,99 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28296 invoked from network); 24 Jul 2020 14:03:07 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Jul 2020 14:03:07 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8AF6A9C9E8; Sat, 25 Jul 2020 00:02:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5CB7D9C8DE;
+	Sat, 25 Jul 2020 00:01:42 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 068179C8DE; Sat, 25 Jul 2020 00:01:39 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 64B7B9C8B1
+ for <tuhs@minnie.tuhs.org>; Sat, 25 Jul 2020 00:01:38 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 121CA35E088; Fri, 24 Jul 2020 07:01:38 -0700 (PDT)
+Date: Fri, 24 Jul 2020 07:01:38 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Paul Riley <paul@rileyriot.com>
+Message-ID: <20200724140138.GD11199@mcvoy.com>
+References: <CAD05_j1H76SDy_c0WyWXCHgiAfnEzVYFxDtrq1x=f7OZAhAXfg@mail.gmail.com>
+ <20200724025712.GL10855@mcvoy.com>
+ <CAD05_j0B+2qDBCXsLSM2fn6k=LO7L7WFO53TJL3aKaTG2QyDcg@mail.gmail.com>
+ <CAD05_j2Y=0AJWdwZbQONbt-bxjbhdQqmmuoFeorCVzyC3XnD-g@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAD05_j2Y=0AJWdwZbQONbt-bxjbhdQqmmuoFeorCVzyC3XnD-g@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] V6 Console IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Yeah, write is unbuffered though I think Noel is correct, it's going to
+a tty and the tty will buffer until \n
+
+So you probably have to set the tty in raw mode (sorry that I'm vague,
+I never ran V6).
+
+On Fri, Jul 24, 2020 at 12:54:40PM +0800, Paul Riley wrote:
+> Sorry, I see you used "write".
+> 
+> *Paul Riley*
+> 
+> 
+> 
+> On Fri, 24 Jul 2020 at 12:41, Paul Riley <paul@rileyriot.com> wrote:
+> 
+> > Larry,
+> >
+> > Thanks for that. The documentation for putchar says that it only puts the
+> > low byte of the argument, so I assume that passing an int is ok.
+> >
+> > Paul
+> >
+> > *Paul Riley*
+> >
+> >
+> > On Fri, 24 Jul 2020 at 10:57, Larry McVoy <lm@mcvoy.com> wrote:
+> >
+> >> > int main() {
+> >> > int c;
+> >> > while ((c = getchar()) != EOF) {
+> >> > putchar(c);
+> >> > }
+> >> > }
+> >>
+> >> int
+> >> main()
+> >> {
+> >>         int     c;
+> >>         char    C;
+> >>
+> >>         while ((c = getchar()) != EOF) {
+> >>                 C = c;
+> >>                 write(1, &C, 1);
+> >>         }
+> >> }
+> >>
+> >
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
