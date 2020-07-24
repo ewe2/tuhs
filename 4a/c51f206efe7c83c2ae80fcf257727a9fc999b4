@@ -1,0 +1,64 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 16354 invoked from network); 24 Jul 2020 02:28:51 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Jul 2020 02:28:51 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D45CD9C9DF; Fri, 24 Jul 2020 12:28:46 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1D1DE9C9E1;
+	Fri, 24 Jul 2020 12:28:13 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CAF279C8DE; Fri, 24 Jul 2020 12:28:09 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 14F149C8B1
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Jul 2020 12:28:09 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id D9E1E18C073; Thu, 23 Jul 2020 22:28:07 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200724022807.D9E1E18C073@mercury.lcs.mit.edu>
+Date: Thu, 23 Jul 2020 22:28:07 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] V6 Console IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > I'm struggling however with how C processes the IO. It seems that when I
+    > type at the console, my typing is immediately echoed to my terminal
+    > window. ...  nothing appears on the terminal until I press enter, when
+    > the system displays the whole line of input ... How
+    > can I suppress the original C/Unix echo, and get my output to appear
+    > immediately?
+
+This is not a C issue; it's the Unix I/O system (and specifically, terminal I/O).
+
+Normally, Unix terminal input is done line-at-a-time: i.e. the read() call to
+the OS (whether for 1 character, or a large number) doesn't return until an
+enire line has been typed, and [Retrurn] has been hit; then the entire line is
+available. While it's being buffered by the OS, echoing is done, and rubout
+processing is also performed.
+
+One can suppress all this; there's a mode call 'raw' (the normal mode is
+sometime labelled 'cooked') which suppresses all that, and just gives one the
+characters actually typed, as they are typed. The stty() system call can be
+used to turn this on.
+
+See the V6 tty(IV) manual entry for more. stty() is in stty(II).
+
+    Noel
