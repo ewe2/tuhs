@@ -1,0 +1,137 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 24502 invoked from network); 29 Jul 2020 13:43:42 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Jul 2020 13:43:42 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 538989CAA5; Wed, 29 Jul 2020 23:43:41 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4352E9CAA3;
+	Wed, 29 Jul 2020 23:43:05 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 113339CAA3; Wed, 29 Jul 2020 23:42:57 +1000 (AEST)
+Received: from hop.toad.com (75-101-100-43.dsl.static.fusionbroadband.com
+ [75.101.100.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 15B889C9E4
+ for <tuhs@minnie.tuhs.org>; Wed, 29 Jul 2020 23:42:55 +1000 (AEST)
+Received: from hop.toad.com (localhost [127.0.0.1])
+ by hop.toad.com (8.12.9/8.12.9) with ESMTP id 06TDgjm0026261;
+ Wed, 29 Jul 2020 06:42:45 -0700
+To: Clem Cole <clemc@ccc.com>
+In-reply-to: <CAC20D2NRF2CHESt_Virro2Op4mVDH2JCRBN7g5a2CvU1X=kUAw@mail.gmail.com> 
+References: <6a0063f8-128d-751d-114f-a0f811d02098@gmail.com>
+ <CAC20D2NRF2CHESt_Virro2Op4mVDH2JCRBN7g5a2CvU1X=kUAw@mail.gmail.com>
+Comments: In-reply-to Clem Cole <clemc@ccc.com>
+ message dated "Tue, 28 Jul 2020 20:21:19 -0400."
+Date: Wed, 29 Jul 2020 06:42:45 -0700
+Message-ID: <26260.1596030165@hop.toad.com>
+From: John Gilmore <gnu@toad.com>
+Subject: Re: [TUHS] 2bsd tarball -> pdtar, with a side of uuslave
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>, simh@groups.io
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Clem Cole <clemc@ccc.com> wrote:
+> 'nuf said ... I hope.
+
+Not quite, Clem!
+
+There was another chapter to the "tar wars" after UNIX and after POSIX.
+
+After I left Sun in about 1985, I worked on a project with GNU and the
+BSD folks, to find or write freely available implementations of many
+popular UNIX commands.  Since we didn't find a free "tar" program, I
+wrote one from scratch, based on the SunOS man page and on running the
+tar binary from SunOS 3.3.
+
+This was eventually posted to Usenet's mod.sources as "pdtar" on
+1986-12-10, as Volume 7 Issue 88.  A July 1987 version went on the Sun
+User Group tape.  A later version was posted to comp.sources.unix on
+1987-11-29 as Volume 12, issue 68 in 3 parts.  By then, it built and ran
+on SunOS, Xenix, Unisoft, Vax 4.2BSD, V7 and USG systems, MSDOS, and
+Minix.  And "Utzoonix", Henry Spencer's customized system.
+
+In the process I discovered various quirks in the Unix tar program.  It
+null-terminated some of the fixed-length octal fields in the tar headers
+and space-terminated others.  I made my code produce bit-for-bit
+identical tar files, except for the leftover buffer garbage at the ends
+of files and in the last block after the second end-of-file all-zero
+header, which I zeroed.
+
+The UNIX tar program was also reading and writing the files in the file
+system in 512-byte reads and writes.  Eg when extracting a file from a
+tape with the default blocking factor of 20, it would do 20 writes to
+the file rather than a single 10k write.  pdtar did better.
+
+Oh, and by the way, the tar format DID use numerical uid and gid fields,
+encoded in ascii numerals in octal.  Thus they were both numeric and
+ascii!  What it didn't do was put in the NAMES of the user and their
+group; that idea came in with POSIX drafts, and went into separate
+fields that had been undefined & ignored in UNIX tar.
+
+I put the pdtar code into the public domain, so it could be widely used.
+This produced a variety of support headaches.  In particular, people who
+used it on MSDOS kept contacting me over the years about bugs or
+documentation or not working with certain hardware.  Those ports were
+largely distributed as binaries by other people who never bothered to
+include nor publish the matching source code.  So I couldn't support the
+users who were having trouble, which was frustrating for both them and
+me.  This eventually led me to understand more of the value in using the
+GNU General Public License.
+
+When the GNU Project later wanted someone else to enhance tar to satisfy
+some of the user requirements from the absence of dump(8), like
+incremental backups, they asked if I would mind if they put their
+improved version under the GPL.  I had no problem with that, and the
+pdtar code became the base code for GNU Tar, which (along with the
+simple BusyBox tar) seems to have become the main implementation in the
+wild today.
+
+	John
+	
+PS: In that period, I also wrote the first reliable free implementation
+of uucp, called gnuucp.  This code was based on "uuslave.c 1.7 08/12/85
+12:04:20" which had been posted to the ACGNJ BBS system at +1 201 753
+9758.  Original author unknown.  BSD and I went through a legal
+interaction with AT&T to verify that the uuslave code had NOT come from
+any proprietary UNIX code.  The uuslave code barely limped (and had CP/M
+ifdef's), but it did point out the basics of the 'g' protocol.  Once I
+got it working on UNIX, I ran it for a few weeks with my friends at
+lll-crg in Livermore, CA, then posted it to net.sources on 1987-03-25,
+article-id hoptoad.1925.  By this time it had been ported to MSDOS by
+Tim Pozar.  Soon it became the backbone of Tim's FIDOnet <-> Usenet
+gateway (UFGATE) software, which enabled thousands of (largely teenage)
+FIDOnet nodes to join the Usenet and swap email with UNIX machines and
+thus with the early Internet.  Many years later, Ian Taylor wrote a
+complete free replacement for uucp, called Taylor UUCP, which seems to
+be what people were using last time I saw anyone using uucp.  By
+coincidence, Ian also later worked with me at Cygnus, the first company
+doing commercial support for free software.
+
+A modern web search turns up this about uuslave's BBS:
+
+  http://bbslist.textfiles.com/201/oldschool.html
+
+  "201-753-9758   ACGNJ BBS #2 	(1983-1990)	Kevin Tillbrook 	RBBS
+
+  "I used to run an RBBS system for the Amateur Computer Group of NJ
+  (ACGNJ) for a number of years. It was run on a Zenith PC w/20 meg HD
+  and later using DesqView for multi-tasking (which was way too slow on
+  that hardware). I had a BBS running before that, but this is what I am
+  noted for." - Kevin Tillbrook
+
+Does anybody here (from New Jersey perhaps) know where uuslave came
+from?  It's always been a mystery to me.
