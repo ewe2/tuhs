@@ -1,0 +1,100 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25249 invoked from network); 1 Aug 2020 21:13:38 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Aug 2020 21:13:38 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8E0939CB51; Sun,  2 Aug 2020 07:13:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 297529C9E3;
+	Sun,  2 Aug 2020 07:13:00 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8D2929C9E3; Sun,  2 Aug 2020 07:12:57 +1000 (AEST)
+Received: from mail.cs.dartmouth.edu (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C52F293DFC
+ for <tuhs@tuhs.org>; Sun,  2 Aug 2020 07:12:56 +1000 (AEST)
+Received: from tahoe.cs.Dartmouth.EDU (tahoe.cs.dartmouth.edu [129.170.212.20])
+ by mail.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTPS id 071LCsrw3236768
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Sat, 1 Aug 2020 17:12:54 -0400
+Received: from tahoe.cs.Dartmouth.EDU (localhost.localdomain [127.0.0.1])
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.14.3) with ESMTP id 071LCsQI037248
+ for <tuhs@tuhs.org>; Sat, 1 Aug 2020 17:12:54 -0400
+Received: (from doug@localhost)
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.15.2/Submit) id 071LCsdo037245
+ for tuhs@tuhs.org; Sat, 1 Aug 2020 17:12:54 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <202008012112.071LCsdo037245@tahoe.cs.Dartmouth.EDU>
+Date: Sat, 01 Aug 2020 17:12:54 -0400
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] Regular Expressions
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> 1. What's the provenance of regex in unix (when did it appear, in what form, etc)?
+> 2. What are the 'best' implementations throughout unix (keep it pre1980s)?
+> 3. What are some of the milestones along the way (major changes, forks, disagreements)?
+
+
+The editor ed was in Unix from day 1. For the necessarily tiny
+ implementation, Ken discarded various features
+from the ancestral qed. Among the casualties was alternation
+in regular expressions. It has never fully returned.
+
+Ken's original paper described a method for simulating all paths
+of a nondeterministic finite automaton in parallel, although he
+didn't describe it in these exact terms. This meant he had to
+keep track of up to n possible states, where n is the number of
+terminal symbols in the regular expression.
+
+"Computing Reviews" published a scathing critique of the paper:
+everyone knows a deterministic automaton can recognize regular
+expressions with one state transition per input character; what
+a waste of time to have to keep track of multiple states! What the
+review missed was that the size of the DFA can be exponential in n.
+For one-shot use, as in an editor, it can take far longer to construct
+the DFA than to run it.
+
+This lesson came home with a vengeance when Al Aho wrote egrep,
+which implemented full regular expressions as DFA's. I happened
+to be writing calendar(1) at the same time, and used egrep to
+
+search calendar files for dates in rather free formats for today
+and all days through the next working day.  Here's an example
+(egrep interprets newline as "|"):
+
+(^|[ (,;])(([Aa]ug[^ ]* *|(08|8)/)0*1)([^0123456789]|$)
+(^|[ (,;])((\* *)0*1)([^0123456789]|$)
+(^|[ (,;])(([Aa]ug[^ ]* *|(08|8)/)0*2)([^0123456789]|$)
+(^|[ (,;])((\* *)0*2)([^0123456789]|$)
+(^|[ (,;])(([Aa]ug[^ ]* *|(08|8)/)0*3)([^0123456789]|$)
+(^|[ (,;])((\* *)0*3)([^0123456789]|$)
+
+Much to Al's chagrin, this regular expression took the better
+part of a minute to compile into a DFA, which would then run in
+microseconds. The trouble was that the DFA was enormously
+bigger than the input--only a tiny fraction of the machine's
+states would be visited; the rest were useless. That led
+him to the brilliant idea of constructing the machine on
+the fly, creating only the states that were pertinent to
+the input at hand. That innovation made the DFA again
+competitive with an NFA.
+
+Doug
