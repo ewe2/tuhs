@@ -1,0 +1,135 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 16376 invoked from network); 17 Aug 2020 23:50:46 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Aug 2020 23:50:46 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2DBBB9E1A2; Tue, 18 Aug 2020 09:50:42 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0927D9CAB6;
+	Tue, 18 Aug 2020 09:50:03 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 45E979CAB6; Tue, 18 Aug 2020 09:49:59 +1000 (AEST)
+X-Greylist: delayed 583 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 18 Aug 2020 09:49:58 AEST
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2F4169C8BB
+ for <tuhs@tuhs.org>; Tue, 18 Aug 2020 09:49:58 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 916E416056; Tue, 18 Aug 2020 01:40:13 +0200 (CEST)
+Date: Tue, 18 Aug 2020 01:40:13 +0200
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Richard Salz <rich.salz@gmail.com>
+Message-ID: <20200817234013.2Y5X5%steffen@sdaoden.eu>
+In-Reply-To: <CAFH29tpbNrUKVP2hp25wdu9BYCxQr+RrmcWJ8F+SbtwsGE4VKw@mail.gmail.com>
+References: <20200817020224.104B518C095@mercury.lcs.mit.edu>
+ <CABH=_VRRy7mgpgcoayq8v7pW5UL8jcZOH=t=Dt2063=Qn24e-A@mail.gmail.com>
+ <CAJohCK+aqCKiYNALrJAdPv=q=+uw8++0oCMR_O10kUJ62m=tVA@mail.gmail.com>
+ <CABH=_VQ98bw1nj3nkL0RF3ATX=Sy3=Bqg1Lt+tY-XYH6Kep8Dw@mail.gmail.com>
+ <CAJohCKKc9s0K=QdBvBjQ9W_uk9HCRr+o3sy4qGac1aTP47LmLw@mail.gmail.com>
+ <CABH=_VS8mHAADKmxtinBQ1Y87suN3rLd2Cj=4mD4FmACN8dQtQ@mail.gmail.com>
+ <CAJohCK+EbnA8ESapTtD7wE7sdGGLCNzz3bFpQu=BaQsy1m9jog@mail.gmail.com>
+ <CAFH29tpbNrUKVP2hp25wdu9BYCxQr+RrmcWJ8F+SbtwsGE4VKw@mail.gmail.com>
+Mail-Followup-To: Richard Salz <rich.salz@gmail.com>,
+ Jim Geist <velocityboy@gmail.com>,
+ The Eunuchs Hysterical Society <tuhs@tuhs.org>,
+ Noel Chiappa <jnc@mercury.lcs.mit.edu>
+User-Agent: s-nail v14.9.19-103-ga01f6c13
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] Memory management in Dennis Ritchie's C Compiler
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>,
+ Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Richard Salz wrote in
+ <CAFH29tpbNrUKVP2hp25wdu9BYCxQr+RrmcWJ8F+SbtwsGE4VKw@mail.gmail.com>:
+ |Apache has the "pool" concept, per-request storage; there are a few
+
+And BSD Mail had the "stringdope" of Kurt Shoens from the very
+start in 1978.  It serves allocations of various size until reset
+time.  (Different to the Apache thing it does not support
+destructor calls -- if i recall the Apache stuff, i have looked
+into that two decades ago.)
+
+I personally had objects caches and fluctuating object caches
+backed by generic C types
+
+        pub GOCache(uir _objsz, uir _growby=8-1);
+        ...
+        pub uir count(void) const { return(m_count); }
+        pub void *alloc(void);
+        pub GOCache &free(void *_ptr);
+        pub GOCache &clear(void);
+        pub GOCache &swap(GOCache &_t);
+
+and used via all-inline template wrappers
+
+  template<class T> class OCache : private GOCache{
+    ...
+    OCache(uir _growby=8-1) : Super(szof(T), _growby) {}
+    ...
+    pub T *newObject(void) { return(SF_newHeap(T, Super::alloc())); }
+    pub OCache &delObject(T *_tptr){
+      _AssertRetThis(_tptr != NIL);
+      _tptr->~T();
+      return(s(Me&,Super::free(_tptr)));
+    }
+    ...
+
+The difference was that the normal could not free individual
+chunks, the other could
+
+      pri union Atom{
+        Chunk   *owner; // used
+        Atom    *next;  // free
+      }SF_CC_PACKED;
+
+      pri struct Chunk{
+        Chunk   *right;
+        Atom    *free;  // freelist
+        ui1     *top;   // cast point or NIL if full
+        uir     count;  // user pointers this Chunk
+      }SF_CC_PACKED;
+
+vs
+
+      pri struct Atom{
+        Atom    *next;
+      }SF_CC_PACKED;
+
+      pri struct Chunk{
+        Chunk   *right;
+        ui1     *top;   // cast point or NIL if full
+      }SF_CC_PACKED;
+
+(here the free Atom free list was part of the cache object).
+That even worked out fine to serve nodes on hashmap and list
+objects, in practice.
+
+ |versions:
+ |   https://commons.apache.org/proper/commons-pool/ (java)
+ |   http://www.apachetutor.org/dev/pools (C server)
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
