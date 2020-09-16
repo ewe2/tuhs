@@ -1,0 +1,109 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11839 invoked from network); 16 Sep 2020 05:29:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 16 Sep 2020 05:29:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 597B99CB8A; Wed, 16 Sep 2020 15:29:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4724D9C73F;
+	Wed, 16 Sep 2020 15:29:06 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 054529C73F; Wed, 16 Sep 2020 15:29:04 +1000 (AEST)
+X-Greylist: delayed 429 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 16 Sep 2020 15:29:03 AEST
+Received: from lb1-smtp-cloud9.xs4all.net (lb1-smtp-cloud9.xs4all.net
+ [194.109.24.22])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3B7459C6B1
+ for <tuhs@tuhs.org>; Wed, 16 Sep 2020 15:29:03 +1000 (AEST)
+Received: from cust-27e06a8f ([IPv6:fc0c:c122:908c:cb8e:3cc1:64e8:cd54:9bbd])
+ by smtp-cloud9.xs4all.net with ESMTPA
+ id IPt8kLxMWXgwIIPt9kn3eP; Wed, 16 Sep 2020 07:21:51 +0200
+Received: from arno by mail.ancienthardware.org with local (Exim 4.94)
+ (envelope-from <arno@ancienthardware.org>)
+ id 1kIPt7-0006Q7-Lm; Wed, 16 Sep 2020 07:21:49 +0200
+Date: Wed, 16 Sep 2020 07:21:49 +0200
+From: Arno Griffioen <arno.griffioen@ieee.org>
+To: tuhs@tuhs.org
+Message-ID: <20200916052149.GH3311@ancienthardware.org>
+References: <DFA6E8C5-FA9A-42AA-B46C-289E373E053A@eschatologist.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <DFA6E8C5-FA9A-42AA-B46C-289E373E053A@eschatologist.net>
+X-CMAE-Envelope: MS4wfOTvhRLXIkI0bDaAC4RiLlZ7te+eOZQmYNRKDhV7yKyBj8ZLPKkUAplzK3R08ZqQ0gl9DhUVn+0qvIvsN6hwy1VUXxYKKC/gk+2tp5VBNNOcQZDKv7gk
+ /DmchEextGrw8rgTkiVw3863GrxtoAyqdzd0NgyUK7S63uQ8IsArNR4aPnE2wU/e/2iiR2TAVo0P3JinVuFmMUZOXFcEfoXqgqvaZFzU1XTK35CzcsTSVqCL
+ gpJ6yrHarEybDnobU7QM8g==
+Subject: Re: [TUHS] Historical sources for 68010 + 68451 systems?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Sep 15, 2020 at 04:28:36PM -0700, Chris Hanson wrote:
+> I have an MVME121 that I’d like to run some stuff on. I’m planning what I’ll 
+> need to do to port MINIX 1.5 but since this has a 68451 segmented MMU, I’d 
+> like to actually make use of it.
+
+Quite doable to adapt MINIX to this. Did a similar thing ages ago while 
+still in school on a 68010 machine (not really VME, but similar card-cage
+setup) that had a custom MMU built from some SRAM and some control logic on 
+it. Used MINIX 1.1 at the time though..
+
+Only had 1MB physical RAM and the MMU could provide a virtual address space 
+of 4MB.
+
+Initially ported MINIX to the machine 'as is' from the ST version and then
+modified the MINIX kernel to allow it to use the 4MB virtual space and
+such.
+
+Because of the bare-bones MMU design it had some interesting quirks that made 
+it a good learning experience at the time. (and some very odd serial chips
+for the terminals that had their own 'interesting' behaviour but that's
+a different story..)
+
+Originally the machine did have a real SVR2 UNIX running on it, but sadly it 
+was binary-only, so apart from some dis-assembly of bootstrap bits to learn
+how to get MINIX to start on this machine it was not very useful.
+
+> I figure at minimum I could have several segments set up to enforce 
+> protections and a stable per-process address space, but it’d be good to 
+> have an example.
+
+Yup. You may run into some of the shortcuts in the MINIX kernel when you start
+doing MMU work though, especially if you want to separate the kernel
+'processes' as well. 
+
+For performance the microkernel architecture of MINIX was violated in a few 
+spots, mostly around FS and MM, where one kernel process would/could modify
+another's memory without going through the message passing mechanism.
+
+Introduce an MMU and that kinda breaks and needs some cleaning up ;)
+
+As MINIX later on did get a 386 port and cleanups/fixes that may now be a
+non-issue on 1.5.
+
+Another option would be Linux/m68k and perhaps starting on the 'nommu'
+version that runs on basic 68000's too and seeing how much functionality could 
+be used from the 68451 to enhance it. 
+
+Some of the Coldfire CPU's have similar limited MMU's that are supported for 
+some functions of basic memory protection in the 'nommu' tree.
+
+As far as real UNIX sources go.. SUN2's were 68010's too although AFAIK
+with a custom SUN designed MMU logic? Perhaps some old sources available in 
+that corner though.
+
+							Bye, Arno.
