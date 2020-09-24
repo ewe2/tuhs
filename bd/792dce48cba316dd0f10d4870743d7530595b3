@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 14379 invoked from network); 24 Sep 2020 13:04:59 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Sep 2020 13:04:59 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 400DD9CEA4; Thu, 24 Sep 2020 23:04:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E428A9CBCA;
+	Thu, 24 Sep 2020 23:04:08 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D7BF29CBCA; Thu, 24 Sep 2020 23:04:04 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1C85B9CB3A
+ for <tuhs@minnie.tuhs.org>; Thu, 24 Sep 2020 23:04:04 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id EDE4718C09F; Thu, 24 Sep 2020 09:04:02 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200924130402.EDE4718C09F@mercury.lcs.mit.edu>
+Date: Thu, 24 Sep 2020 09:04:02 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > On my physical '03 I have twin Sykes floppy drives. I note that in the
+    > LSX archives there is a Sykes driver, so I can adapt that I guess.
+
+Yes, here:
+
+ https://www.tuhs.org/cgi-bin/utree.pl?file=LSX/sys/sykfd.c
+
+It looks like it should be a straight drop-in, to run it on Mini-Unix. Not
+sure if your controller is the exact same model, though? Is there any
+documentation on yours? (I haven't done any searching.)
+
+If you want to boot from it, you'll need to write a bootstrap for it; I poked
+around, but didn't see one. (Not sure how they booted machines with one, back
+in the day; maybe it wasn't the only drive, and they booted off something
+else.)  You can probably modify the RX one:
+
+  https://www.tuhs.org/cgi-bin/utree.pl?file=LSX/src/rxboot.s
+  https://www.tuhs.org/cgi-bin/utree.pl?file=LSX/src/rxboot2.s
+
+Note that this is a 2-stage bootstrap, apparently as a result of the small
+hardware block size on the RX.
+
+And of course there's still the issue of 'how to get bits onto it'. Can
+floppies for it be written on some other kind of machine? If so, someone on
+the Classic Computers list:
+
+  http://www.classiccmp.org/mailman/listinfo/cctalk
+
+may be able to help you write those, or an RL02 pack.
+
+
+You should start by getting some experience building V6 OS loads (Mini-Unix
+will be _very_ similar); use a simulator. I have a lengthy tutorial here:
+
+  http://www.chiappa.net/~jnc/tech/V6Unix.html
+
+It's in terms of Ersatz-11, which I prefer because it has that nice DOS device,
+which makes it easy to get files into the Unix (so I can use my normal editor on
+the host machine). However, I gather most people prefer SIMH; there is a tutorial
+here:
+
+  https://gunkies.org/wiki/Running_Unix_v6_in_SIMH
+
+(I didn't write it; I know nothing of SIMH) for that option.
+
+How do people using SIMH get files into a Unix running on one? Larry Allen
+just wrote a PDP-11 simulator in Rust, and he's thinking about adding a
+paper-tape reader (connectable to a file), so that if he installs the stock
+V6 PTR driver, he can just do 'cat /dev/ptr > myfile'; sort of like how
+VM/370 used the virtual card reader.
+
+       Noel
+
