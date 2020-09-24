@@ -1,0 +1,73 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11132 invoked from network); 24 Sep 2020 01:28:41 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Sep 2020 01:28:41 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 47B229CEA7; Thu, 24 Sep 2020 11:28:40 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EAA9B9CC8C;
+	Thu, 24 Sep 2020 11:28:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B5C4E9CC8C; Thu, 24 Sep 2020 11:28:16 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 316EC9CBCA
+ for <tuhs@minnie.tuhs.org>; Thu, 24 Sep 2020 11:28:16 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 1FC1E18C099; Wed, 23 Sep 2020 21:28:15 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200924012815.1FC1E18C099@mercury.lcs.mit.edu>
+Date: Wed, 23 Sep 2020 21:28:15 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > Would also be great if supported RL02 drives. ;)
+
+_Support_ for RL02's will not be a problem (but there are probably some issues
+- see below). I have an RL11 driver for V6, which will be easy to include in a
+system build. There is also a RL V6 boostrap (which lives in block 0 - it
+loads the OS from a V6 filesystem); how to load it off the RL pack on actual
+hardware, I'm not sure; do you have some PROM device that has an RL bootstrap
+in it?
+
+Or do you have some other drive which is going to be your boot device? If not,
+how are you going to get the bits onto an RL pack? This was a bit of an issue
+for Fritz Muelller with his -11/45 (with an RK05 drive); he finally wound up
+having to load it over a serial line, which took several hours. He used
+something called PDP11GUI, and you're in luck, that does support RL02's.
+
+Also, I'm not sure if you've had any experience with an old removable-pack
+drive. If not, you have to be very careful with them; if you have a head
+crash, the heads are now unobtainium, so a head crash will turn the drive into
+junk. (Which is a big part of why Dave Bridgham and I are doing to QSIC RK11
+emulator...) The packs need to be absolutely clean; a number of people have
+experience with them, you should probably qget some lessons from them before trying
+to use it.
+
+
+    > I'd imagine the V6 TTY driver would support boards with multiple serial
+    > ports. Guess that's what's needed for multi user access.
+
+The TTY code in V6 consists of two levels of driver. The bottom layer is a
+driver which is specific to the particular type of card one's using; DL-11,
+DZ-11, etc. If the card supports multiple lines, that driver will too. Then
+there's a layer above that, tty.c, which the low-level driver uses to interace
+to the OS; the user talks to that. That layer is multi-line.
+
+   Noel
