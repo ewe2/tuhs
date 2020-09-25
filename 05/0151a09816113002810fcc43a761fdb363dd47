@@ -1,0 +1,103 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26250 invoked from network); 25 Sep 2020 22:09:13 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 25 Sep 2020 22:09:13 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id F2A1E9CEB7; Sat, 26 Sep 2020 08:09:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C952294552;
+	Sat, 26 Sep 2020 08:08:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6386A94552; Sat, 26 Sep 2020 08:08:23 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BF28493D65
+ for <tuhs@minnie.tuhs.org>; Sat, 26 Sep 2020 08:08:22 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 6433218C0AA; Fri, 25 Sep 2020 18:08:21 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200925220821.6433218C0AA@mercury.lcs.mit.edu>
+Date: Fri, 25 Sep 2020 18:08:21 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > I have two RLV-12/RL02 emulator boards I had made from Peter Schranz's
+    > design (5volts.ch). They take an SD card
+
+Ah, you're all set, then - doubly so, in fact. Not only do you have reliable
+mass storage, but you should be able to put the Unix filesystem on an SD card,
+to get the bits into the machine.
+
+I'm not familiar with that board, but it sounds pretty good; QBUS<->SD. I
+don't know how that board uses the SD card, in terms of where it keeps the
+RL02 image, but if you can find that out, SD<->USB3 adaptors are cheap and
+plentiful, and it shouldn't be too hard to load the disk image into it using
+one of them. (For the QSIC, I found a 'dd' for Winsdoze and used that to write
+the disk image onto the SD card.)
+
+
+    > I don't have any PROMs other than what would be on the '03 or '23+
+    > boards now.
+
+Not a problem: if you hook up the -11's console to another computer, you
+can download a bootstrap into it over the serial line, using the -11's ODT.
+(There's a page here:
+
+  http://gunkies.org/wiki/Running_an_LSI-11_from_Unix_V6
+
+which talks briefly about how to do that. Things like PDP11GUI can do it too,
+I think.) I don't use an RK bootstrap in ROM to boot from the emulated RK11 on
+the QSIC; I just load in a short RK bootstrap. I don't know of one lying
+around for the RL11, but one would be trivial to whip up.
+
+
+Speaking of booting, I have Mini-Uix booting under an -11/05 simulator
+(Ersatz-11); I used the RK image from here:
+
+  http://www.tavi.co.uk/unixhistory/mini-unix/munixrks.zip
+
+and it just started right up. So that's the big hurdle; been busy with other
+stuff, but I'll work on getting it to boot on an '03 'soon'.
+
+You probably want to do the same; having it running under a simulator will
+make it easy to build new OS images, e.g. for a system with RL02's. Build the
+new system, name it 'rlmx', copy the simulator disk image into the SD card,
+and away you go.
+
+
+Oh, I recently realized how to make a  bit more room on an -11/03: most
+DEC small QBUS memory cards allow you to use half the 'I/O page' for memory,
+if you need it. I.e. instead of having 56KB of memory, and 8 KB of
+address space for device registers (a lot more than is really needed), the
+memory can be configured to be 60KB of memory.
+
+It can be a bit of a hassle to use it; to have more room for the OS (for more
+drivers, or disk buffers, or whatever), some pieces of Mini-Unix need to be
+recompiled, to move up the address where user processes are loaded. Larger
+user processes are the same thing; they aren't automatically enabled when
+there's more memory, you have to change a config file, recompile some things,
+and build a new system.
+
+What kind of memory card(s) do you have for the -11/03?
+
+     Noel
+
+
