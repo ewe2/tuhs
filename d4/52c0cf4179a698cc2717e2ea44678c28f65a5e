@@ -1,0 +1,111 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 9368 invoked from network); 29 Sep 2020 19:16:06 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Sep 2020 19:16:06 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 513739CF0C; Wed, 30 Sep 2020 05:16:03 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 965A99CEDA;
+	Wed, 30 Sep 2020 05:15:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 626FF9CED4; Wed, 30 Sep 2020 05:15:23 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 1F7CF9CED0
+ for <tuhs@tuhs.org>; Wed, 30 Sep 2020 05:15:22 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Tue, 29 Sep 2020 15:15:06 -0400
+Message-ID: <1601406910.6529.for-standards-violators@oclsc.org>
+Subject: [TUHS] SH script formatting
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+if test; then
+	stuff
+
+and
+
+if test
+then
+	stuff
+
+are functionally equivalent.  I wouldn't say one or the
+other `is preferred.'  I use the former because I think
+it's a little more readable because more compact.  But
+it's really a matter of style, like whether you write
+
+	if (test) {
+		(multi-statement block)
+
+or
+
+	if (test)
+	{
+		(multi-statement block)
+
+I have a stronger opinion about those who use overly-
+cryptic constructions like
+
+	test && {
+		shell commands
+	}
+
+because it means exactly the same thing as
+
+	if test; then
+		shell commands
+
+but is more obscure to read.  But again it's a question
+of style, not of dogma.
+
+As an aside, I think one excuse that is sometimes used
+for that sort of construct is when it's
+
+	test || {
+		commands
+	}
+
+because Bourne's original shell had no not operator.
+For a long time after shell functions appeared, I would
+add this function to any of my shell scripts that needed
+it:
+
+	not() {
+		if "$@"; then
+			return 1
+		else
+			return 0
+	}
+
+so I could say
+
+	if not test; then
+		commands
+	fi
+
+Modern Bourne-shell descendants have a built-in ! operator:
+
+	if ! test; then
+		commands
+	fi
+
+I'm not keen on most of what has been stuffed into bash and
+ksh and the like, but ! is a real improvement.  I believe
+POSIX mandates it, and I think they're right.
+
+Norman Wilson
+Toronto ON
