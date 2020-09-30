@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25866 invoked from network); 30 Sep 2020 17:59:11 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Sep 2020 17:59:11 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E57539CEFE; Thu,  1 Oct 2020 03:59:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E6AD49CEC6;
+	Thu,  1 Oct 2020 03:58:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 107FF9CEC6; Thu,  1 Oct 2020 03:58:19 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 704A79CEC4
+ for <tuhs@minnie.tuhs.org>; Thu,  1 Oct 2020 03:58:18 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 4575B18C0B2; Wed, 30 Sep 2020 13:58:17 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200930175817.4575B18C0B2@mercury.lcs.mit.edu>
+Date: Wed, 30 Sep 2020 13:58:17 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > Can you clarify something for me regarding memory? I understand the
+    > bottom area of memory in a Unix system is for the Kernel and it's stuff,
+    > and that the top 8kB is set aside for device I/O
+
+Well, technically, the top 8KB of _address space_, not of memory - it's mostly
+used for device registers, etc. Here:
+
+  http://gunkies.org/wiki/Unix_V6_kernel_memory_layout
+
+is a bit more detail on how the memory is laid out.
+
+    > The LSI-11 board has 4kW of RAM on it, and I have already a 16KW
+    > board. If I want to further expand the RAM, and say I buy another 16kW
+    > board, that makes an arithmetic sum of 32kW for the boards, making 36kW
+    > total. Can the 4kW of on-board RAM be disabled, and only the 32kW on
+    > the boards be used?
+
+Yeah, if you look at LSI-11 documentation, there are jumpers that allow
+configuration of the on-board memory. Depending on the etch revision; for my F
+revision, jumper W11 (at the top, towards the handle edge, in the middle of
+that edge; just below the W1/W2 jumper pair) should be out to disable the
+on-board memory.
+
+Or you could configure the two 32KB boards to be at 020000 and 0120000; there
+will be 72KB of memory total on the QBUS, but the LSI-11 CPU (no memory
+management) will only be able to 'see' the bottom 56KB.
+
+
+    > Is it ok for the installed RA mto overlap the 8kW at the high memory
+    > area?
+
+Yeah, what the CPU sees as the I/O page (at 0160000-0177776 in its address
+space) is actually at 0760000-0777776 on the QBUS (on a Q18 QBUS); the CPU
+automagically translates the 0160000-0177776 addresses up. On a PDP-11
+with memory management, the MMU has to be set up to do that. E.g. in V6,
+in:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=V6/usr/sys/conf/m40.s
+
+there is the following code:
+
+  / initialize io segment
+
+  mov $IO,(r0)+
+  mov $77406,(r1)+		/ rw 4k
+
+to set the I/O page in kernel address space to point to the I/O page on the
+bus.
+
+	Noel
