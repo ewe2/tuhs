@@ -1,0 +1,70 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 6012 invoked from network); 6 Oct 2020 20:34:57 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Oct 2020 20:34:57 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1F9B29CFB4; Wed,  7 Oct 2020 06:34:50 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8AF209CF88;
+	Wed,  7 Oct 2020 06:34:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3E4A79CF81; Wed,  7 Oct 2020 06:34:20 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AD94E9CF80
+ for <tuhs@minnie.tuhs.org>; Wed,  7 Oct 2020 06:34:19 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 8E9D618C0B2; Tue,  6 Oct 2020 16:34:18 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201006203418.8E9D618C0B2@mercury.lcs.mit.edu>
+Date: Tue,  6 Oct 2020 16:34:18 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > I just realized that the _first_ entry, #'9', is actually #0 _in the
+    > directory_; u_count counts _down_, whereas the code looks through dir
+    > entries going _up_.
+
+Fixed that (kept my own index of which entry it was working on, and
+caculated the name location in the buffer, and got:
+
+  chk 0 15 2 '..'
+  chk 1 14 18 '.'
+  chk 2 13 34 'bin'
+  chk 3 12 50 'dev'
+  chk 4 11 66 'etc'
+
+etc... and it blew right past the 'etc' entry, to the end of the
+directory. WTF?
+
+    > Still don't understand why I can't print the dir entries out of the u
+    > area, though.
+
+Now that my brain has turned on, I'll bet that's not _my_ bug, I'll bet it's
+_the_ bug! If the directory entry in u.u_dent.u_name is all 0's, _of course_
+the match is going to fail.
+
+
+Just for grins, I set the CPU type in Ersatz-11 to "40 EIS NOMMU" and... it
+booted up fine! I suspect there must be an issue with the -11/05 emulation in
+Ersatz-11, since MiniUnix worked fine on _real_ -11/05's.
+
+Now to see if 'cc' works on an '-11/40' - then back to the /03.
+
+    Noel
