@@ -1,0 +1,88 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.3 required=5.0 tests=MAILING_LIST_MULTI,
+	NICE_REPLY_A,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 12287 invoked from network); 6 Oct 2020 16:31:28 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Oct 2020 16:31:28 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 972239CF3D; Wed,  7 Oct 2020 02:31:23 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 170E89CE97;
+	Wed,  7 Oct 2020 02:30:34 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2FF2E9CE97; Wed,  7 Oct 2020 02:30:32 +1000 (AEST)
+X-Greylist: delayed 485 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 07 Oct 2020 02:30:31 AEST
+Received: from outpost.toaster.com (outpost.toaster.com [198.199.105.224])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 956C69CE93
+ for <tuhs@minnie.tuhs.org>; Wed,  7 Oct 2020 02:30:31 +1000 (AEST)
+Received: from [192.168.88.10] (unknown [68.74.114.1])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+ (No client certificate requested) (Authenticated sender: jay)
+ by outpost.toaster.com (Postfix) with ESMTPSA id 897A93FCDE
+ for <tuhs@minnie.tuhs.org>; Tue,  6 Oct 2020 09:22:25 -0700 (PDT)
+To: tuhs@minnie.tuhs.org
+References: <20201006144648.773F918C0C4@mercury.lcs.mit.edu>
+From: jay-tuhs9915@toaster.com
+Message-ID: <5d6b9566-06de-1288-1cb9-a22d68f5c1e2@toaster.com>
+Date: Tue, 6 Oct 2020 09:22:25 -0700
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.1
+MIME-Version: 1.0
+In-Reply-To: <20201006144648.773F918C0C4@mercury.lcs.mit.edu>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 10/6/2020 7:46 AM, Noel Chiappa wrote:
+
+ > I'm not a SIMH user, though (I'm an Ersatz-11 person); is there 
+anyone who is, who'd like to play with MiniUnix with me?
+
+I've been meaning to jump into this, since I own both an 11/05 and an 
+11/03, which I'd very much like to run Unix on.  I've also used simh for 
+various things (including bringing up 2.9BSD on my 11/23), but I can 
+hardly call myself an expert.
+
+Are there any notes you can share on how to get to the point you're at?
+
+ >    for(cp = &u.u_dbuf[0]; cp < &u.u_dbuf[DIRSIZ]; cp++)
+ >        if(*cp != cp[u.u_dent.u_name - u.u_dbuf])
+
+Found this in the v6 sources 
+(http://www.retro11.de/ouxr/u6ed/usr/sys/ken/nami.c.html).  The code is 
+doing a string comparison between the name in the current directory 
+entry (u_dent) and the current pathname component (in u_dbuf).   The 
+expression in brackets is the relative distance between the two name 
+fields within the u struct.  If the if expression evaluates to true, 
+then the names do *not* match, and the code loops back to eloop to check 
+the next entry.
+
+Since namei() searches for a particular named entry in a directory, its 
+reasonable to assume that this particular comparison would fail a number 
+of times before finding the correct entry.
+
+ > It seems to check most of the (wrong) directory entries OK, but then 
+inexplicably (to me) fails.
+
+In what way does it fail?  Is it simply that namei() doesn't find the 
+file its looking for?
+
+--Jay
+
