@@ -1,0 +1,106 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28972 invoked from network); 6 Oct 2020 19:05:16 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Oct 2020 19:05:16 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 00C119CFAE; Wed,  7 Oct 2020 05:05:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 132419CF81;
+	Wed,  7 Oct 2020 05:04:29 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E4A8E9CF81; Wed,  7 Oct 2020 05:04:26 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CE0339CF80
+ for <tuhs@minnie.tuhs.org>; Wed,  7 Oct 2020 05:04:25 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id B1E7718C0B7; Tue,  6 Oct 2020 15:04:24 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201006190424.B1E7718C0B7@mercury.lcs.mit.edu>
+Date: Tue,  6 Oct 2020 15:04:24 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: jay-tuhs9915
+
+    > Are there any notes you can share on how to get to the point you're at?
+
+Well, there are three areas where the /03 version needs work, over the /05:
+
+- No LTC clock register
+- No switch register
+- PS access only via MFPS/MTPS instructions
+
+For the first two, the needed changes are identical to the ones detailed here:
+
+  http://gunkies.org/wiki/Running_UNIX_V6_on_an_-11/23
+
+These have all been tested on the /23. Rather than anyone make the exact same
+changes independently, I can put up the modified versions of the MiniUnix
+files for them (low.s, main.c and param.h).
+
+For the third, I have an mch.s with a conditional assembly flag that _should_
+do it all; like I said, there are also really minor edits to bio.c, clock.c,
+slp.c, and tty.c. Again, I can upload the mch.s which is already done.
+
+I haven't been able to _confirm_ that these work, but it should be mostly good;
+the changes are pretty straight-foward.
+
+
+    > The code is doing a string comparison between the name in the current
+    > directory entry (u_dent) and the current pathname component (in
+    > u_dbuf). The expression in brackets is the relative distance between the
+    > two name fields within the u struct.
+
+Yeah, I'd worked that out (the immediately preceding comment in the code -
+"String compare the directory entry and the current component" - indicates
+what it's doing, and as my "the term inside the []'s seems to be an offset
+.. into the copy of the current directory entry" indicates, I'd worked out how
+it did that. I was still puzzled by some othet aspects of the code, I just
+included that to give a flavour of the code.
+
+    > In what way does it fail? Is it simply that namei() doesn't find the
+    > file its looking for?
+
+Right. It's looking for 'etc' in the root directory (only one block), and
+it looks at the following entries:
+
+  9 146 '05mx'
+  8 130 'usr'
+  7 114 'tmp'
+  6 98 'mnt'
+  5 82 'lib'
+
+(I put a printf() in the loop; I've added prf.c to the load so I can do
+that. The numbers are the index, u.u_count - although it's already been
+descremented at that point, so it will be '0' when doing the last entry - and
+location of that entry in the directory, given next to it. For some reason, I
+can't get the entry to print from u.u_dent.u_name, so I'm printing it straight
+from the block buffer, bp->b_addr[]. I can print the _inode number_,
+u.u_dent.u_ino as a string, but not the dir entry. Wierd.)
+
+Anyway, after printing the entry for 5, it goes to 'done', with u_error
+containing '2'. I can't see how it could do that.
+
+I'm using printf() because I'm too lazy to figure out how to build a kernel
+with a debugger like DDT included. (We never did that when we were working
+on V6 at MIT BITD; ISR we mostly just used printf() back then, too.)
+
+   Noel
+
