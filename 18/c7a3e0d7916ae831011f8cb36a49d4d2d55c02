@@ -1,0 +1,96 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 3504 invoked from network); 6 Oct 2020 15:11:19 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Oct 2020 15:11:19 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5015B9CEF9; Wed,  7 Oct 2020 01:11:14 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9D62E9CE97;
+	Wed,  7 Oct 2020 01:09:46 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BFE679CE97; Wed,  7 Oct 2020 01:09:43 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3EC169CE93
+ for <tuhs@tuhs.org>; Wed,  7 Oct 2020 01:09:43 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 773F918C0C4; Tue,  6 Oct 2020 10:46:48 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20201006144648.773F918C0C4@mercury.lcs.mit.edu>
+Date: Tue,  6 Oct 2020 10:46:48 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    >> Then on to trying to find out why MiniUnix crashes whenever I try and do
+    >> anything significant.
+
+    > I decided I wasn't up to tackling that, so instead I did all the edits
+    > to produce an LSI-11 version of MX. ... I need to go
+    > back and put conditional assembly flags in mch.s so there's only one
+    > source file for both kinds of system. Doesn't boot, though.
+
+So this has turned into a big swamp.
+
+I went back and did the conditionals, and I can turn off the -11/03 flag and
+produce the identical binary to the original mch.o file. -11/05 systems built
+with that still won't boot, though!
+
+So I had made some minor changes elsewhere in the system; e.g. a few files
+(bio.c, clock.c, slp.c, and tty.c) refer the the PS explicitly (a no-no in the
+-11/03) so I changed them all to call getps() and putps(), and added /05
+versions of those to mch.s; so I backed them out, and re-built the system
+using the original binaries of those; _still_ won't boot.
+
+I then tried the original 'rkmx', and that _does_ boot; so there's no
+mysterious damage to the file system. But now I'm deeply puzzled, since the
+new system (which won't boot) should be basically identical (OK, not
+bit-for-bit identical, but close).
+
+
+So then I started trying to see why the new /05 system won't boot; the exec()
+call in process 1 that starts /etc/init seems to be failing. Digging into
+that, the call to namei() (in sys1$exec()) seems to be failing? Huh? The
+file-system is OK (see above)?
+
+So I'm trying to work out how that is happening. Which is non-trivial;
+namei() is pretty convoluted. I can deal with the fact that there are two
+nested loops using goto's (not the best form, but I can grok it), but then I
+run into things like this:
+
+     for(cp = &u.u_dbuf[0]; cp < &u.u_dbuf[DIRSIZ]; cp++)
+	 if(*cp != cp[u.u_dent.u_name - u.u_dbuf])
+
+Check out that second line! (And Heinz didn't touch it; this copy is from the
+V6 source.) I'm not sure I 100% grok it, but I think I get roughly what it's
+doing: 'cp' seems to be a (moving) pointer into the filename being matched,
+and the term inside the []'s seems to be an offset from there into the copy of
+the current directory entry in the 'u' structure. (Which is a constant, it
+doesn't need to be recomputed each time around the loop, though.) It seems to
+check most of the (wrong) directory entries OK, but then inexplicably (to me)
+fails.
+
+
+At this point I'm getting a bad feeling that there could be a sim issue; that
+could also explain the problem I'm seeing with the crashes, when trying to run
+'cc' under the as-distributed -11/05 version.`
+
+I'm not a SIMH user, though (I'm an Ersatz-11 person); is there anyone who is,
+who'd like to play with MiniUnix with me?
+
+	Noel
