@@ -1,0 +1,80 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8043 invoked from network); 8 Oct 2020 16:07:15 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 8 Oct 2020 16:07:15 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 630F59CFBD; Fri,  9 Oct 2020 02:07:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0017D9CF80;
+	Fri,  9 Oct 2020 02:06:24 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 863A49CF80; Fri,  9 Oct 2020 02:06:20 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A497A9CF36
+ for <tuhs@minnie.tuhs.org>; Fri,  9 Oct 2020 02:06:19 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 98D6718C09C; Thu,  8 Oct 2020 12:06:18 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201008160618.98D6718C09C@mercury.lcs.mit.edu>
+Date: Thu,  8 Oct 2020 12:06:18 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > Now to see if 'cc' works on an '-11/40'
+
+Yeah, the C compiler works fine on a /40; so the SOB bug (or perhaps some
+_other_ one I haven't found yet) must have affected it too.
+
+The thing that's odd about that bug is that SOB works _sometimes_ on an /05;
+the 'rkmx' on the distro tape will boot (which if the SOB _never_ worked, it
+wouldn't). So there must be a data dependency somehow.  John Wilson says the
+SOB is very optimized, so maybe there's a bug.
+
+
+    > then back to the /03.
+
+Well, I tried /03 version, and it doesn't work; /etc/init continually
+restarts.
+
+The thing is that _every_ file except mch.s is identical between the '05'
+version (which runs fine on the /40; above), and the /03 version.  So the bug
+must be in mch.s - unless there's somehow an /03 dependency somewhere else I
+missed. I looked through init.c, didn't see anything.
+
+Here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/Mini/mch.s
+
+is the mch.s source, if anyone wants to look through it and see if they see
+anything. It's conditionalized for the /03; there's a very simple header file
+(here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/Mini/03mch.s
+
+for the 03 version) to set the flags (so one doesn't have to edit the main file
+to change the flag settings).
+
+I had a careful look at mch.s, before I started, checking all the added
+conditionalized code; found one that could have been an issue (I was using a
+temporary register, r0, that had needed data in it), but the rest all looked
+OK. I have some ideas on how to proceed on working out what's going on, but
+I'm done for today, gotta do other stuff.
+
+    Noel
