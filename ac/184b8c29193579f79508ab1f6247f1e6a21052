@@ -1,0 +1,84 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 21757 invoked from network); 28 Oct 2020 16:04:20 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Oct 2020 16:04:20 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id ECC5B9CE6A; Thu, 29 Oct 2020 02:04:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 304669B4D2;
+	Thu, 29 Oct 2020 02:03:35 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 187769B4D2; Thu, 29 Oct 2020 02:03:31 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8C29C9B4D1
+ for <tuhs@minnie.tuhs.org>; Thu, 29 Oct 2020 02:03:30 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 7959318C0A8; Wed, 28 Oct 2020 12:03:29 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201028160329.7959318C0A8@mercury.lcs.mit.edu>
+Date: Wed, 28 Oct 2020 12:03:29 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: [TUHS] LSI-11 MINI-UNIX improvements
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I've made a number of 'improvements' to the LSI-11 version of MINI-UNIX.
+
+(I'm starting to be fairly impressed with MINI-UNIX; for people who have a
+hardware PDP-11 with no memory management, it's a very capable system; most
+of V6, and very good source compatability.)
+
+
+First, with help from feedback from Paul Riley, I've improved the "Running
+MINI-UNIX on the LSI-11" page:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/Mini/Mini.html
+
+It should be pretty usable at this point, but more feedback on further
+improvements gratefully accepted! (Hint, hint :-)
+
+
+In code changes, I have a new version of mch.s:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/Mini/mch.s
+
+The main improvements are a tiny prs() and prn(), to allow systems to leave
+out prf.c to save space, but still be able to print messages (rather than
+simply dying silently, as is MINI-UNIX's wont). The prs() also saves and
+restores the console'e CSR, and prints with console interrupts off (to prevent
+spurious interrupts).
+
+An idea from Milo Velimirovic (use the top of the stack!) resulted in minor
+improvements in two places where there wasn't a register free to use
+MFPS/MTPS.
+
+
+Also,I have a working RL driver for MINI-UNIX now (I was able to attach a V6
+filesystem to RL0 and then could do "icheck /dev/rl0" and it worked); I'll be
+up-loading that, and adding directions for using it, 'soon'. (It pretty much
+just worked; pulled out the XMem bits, and the raw I/O calls, and it worked
+right off.)
+
+To make an RL the root filesystem, I need to tweak a few more things; the
+parameters ROOTDEV, etc - crucially, including SWPLO and NSWAP - are currently
+set in param.h, so you'd have to recompile the OS to switch disk types. I'm
+going to put them back as externals in conf.c, the way they are in V6; that
+way you'll only need an 'rlconf.c' to switch roots. (I'm not sure why they
+were moved; it only saves one word each to make them #define's.)
+
+     Noel
