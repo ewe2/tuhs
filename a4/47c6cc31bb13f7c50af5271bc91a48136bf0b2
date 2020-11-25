@@ -1,0 +1,106 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26115 invoked from network); 25 Nov 2020 20:03:42 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 25 Nov 2020 20:03:42 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 79D1295075; Thu, 26 Nov 2020 06:03:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 774DD94858;
+	Thu, 26 Nov 2020 06:03:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A2D1094858; Thu, 26 Nov 2020 06:03:11 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A5F22944AE
+ for <tuhs@minnie.tuhs.org>; Thu, 26 Nov 2020 06:03:10 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 9AAE416057; Wed, 25 Nov 2020 21:03:08 +0100 (CET)
+Date: Wed, 25 Nov 2020 21:03:08 +0100
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+Message-ID: <20201125200308.Kc4ne%steffen@sdaoden.eu>
+In-Reply-To: <20201125180048.IvtOI%steffen@sdaoden.eu>
+References: <9c1595cc-54a1-8af9-0c2d-083cb04dd97c@spamtrap.tnetconsulting.net>
+ <20201125180048.IvtOI%steffen@sdaoden.eu>
+Mail-Followup-To: Grant Taylor <gtaylor@tnetconsulting.net>,
+ cctalk <cctalk@classiccmp.org>, tuhs@minnie.tuhs.org
+User-Agent: s-nail v14.9.19-163-g944e9e7a
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] Seeking wisdom from Unix Greybeards
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: cctalk <cctalk@classiccmp.org>, tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Steffen Nurpmeso wrote in
+ <20201125180048.IvtOI%steffen@sdaoden.eu>:
+ |Grant Taylor wrote in
+ | <9c1595cc-54a1-8af9-0c2d-083cb04dd97c@spamtrap.tnetconsulting.net>:
+ ||As I find myself starting yet another project that that wants to use 
+ ||ANSI control sequences for colorization of text, I find myself -- yet 
+ ||again -- wondering if there is a better way to generate the output from 
+ ||the code in a way that respects TERMinal capabilites.
+ ||
+ ||Is there a better / different control sequence that I can ~> should use 
+ ||for colorizing / stylizing output that will account for the differences 
+ ||in capabilities between a VT100 and XTerm?
+ ||
+ ||Can I wrap things that I output so that I don't send color control 
+ ||sequences to a TERMinal that doesn't support them?
+ |
+ |  color_init() {
+ |     [ -n "${NOCOLOUR}" ] && return
+ |     [ -n "${MAILX_CC_TEST_NO_COLOUR}" ] && return
+ |     # We do not want color for "make test > .LOG"!
+ |     if (command -v stty && command -v tput) >/dev/null 2>&1 &&
+
+Of course that subshell (..if it is one..) is not necessary, it
+could be { ..; } or x&&y&&, whatever.
+Must be a leftover, or whatever i have thought once i wrote this.
+
+ |           (<&1 >/dev/null stty -a) 2>/dev/null; then
+ |        { sgr0=`tput sgr0`; } 2>/dev/null
+ |        [ $? -eq 0 ] || return
+ |        { saf1=`tput setaf 1`; } 2>/dev/null
+ |        [ $? -eq 0 ] || return
+ |        { saf2=`tput setaf 2`; } 2>/dev/null
+ |        [ $? -eq 0 ] || return
+ |        { saf3=`tput setaf 3`; } 2>/dev/null
+ |        [ $? -eq 0 ] || return
+ |        { b=`tput bold`; } 2>/dev/null
+ |        [ $? -eq 0 ] || return
+ |
+ |        COLOR_ERR_ON=${saf1}${b} COLOR_ERR_OFF=${sgr0}
+ |        COLOR_WARN_ON=${saf3}${b} COLOR_WARN_OFF=${sgr0}
+ |        COLOR_OK_ON=${saf2} COLOR_OK_OFF=${sgr0}
+ |        unset saf1 saf2 saf3 b
+ |     fi
+ |}
+ |
+ |Is what i use for a make system.
+
+A sh(1)-based test, to be exact.
+
+Ciao,
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
