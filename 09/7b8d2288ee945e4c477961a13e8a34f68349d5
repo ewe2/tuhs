@@ -1,0 +1,116 @@
+From: lm at mcvoy.com (Larry McVoy)
+Date: Thu, 26 Nov 2020 15:23:40 -0800
+Subject: [TUHS] Seeking wisdom from Unix Greybeards
+In-Reply-To: <CACYmRNC_CXg=p-FzU_7cMUyW-nGGY+niSt7Ch1WvxC3ezExE3Q@mail.gmail.com>
+References: <9c1595cc-54a1-8af9-0c2d-083cb04dd97c@spamtrap.tnetconsulting.net>
+ <CACYmRNAtdJu0ui=CgrEcWH6J3uikCh0=aCLNvk0+V29rypDBAg@mail.gmail.com>
+ <71fdfa2e-1483-4985-3f55-6760b3a84ec0@gmail.com>
+ <20201126182937.GN9589@mcvoy.com>
+ <CACYmRNC_CXg=p-FzU_7cMUyW-nGGY+niSt7Ch1WvxC3ezExE3Q@mail.gmail.com>
+Message-ID: <20201126232340.GE9609@mcvoy.com>
+
+Did I miss a reason for the alternative?   Because if you add a caching
+layer this approach has been working for me for decades.  I rewrote
+dired in perl just because perl was everywhere and I could.  I've been
+dragging the perl one around since at least 1990 and it worked for me
+on pretty much any version of Unix.  I think MacOS isn't supported but
+I'm sure it could be.
+
+To avoid calling tput over and over again, I cached the output for each
+terminal and then just evaled the cache which sets a bunch of variables
+to the escapes I needed.
+
+It performed just fine on 20mhz SPARCstations so I'm sort of wondering
+why the solution for the problem isn't good enough.
+
+# Dig out all the terminal info so we know the escape chars for this terminal.
+sub terminal_init
+{
+	local($term) = "$ENV{'HOME'}/.term/$ENV{'TERM'}";
+	local($i) = 0;
+
+	$| = 1;
+	@pids = ();
+	$SIG{TERM} = sub { exit(0); };
+	$SIG{PIPE} = 'IGNORE';
+	# RedHat 5.0 seems to get this wrong somehow.
+	#chop($tc_rows = `tput lines`);
+	#chop($tc_cols = `tput cols`);
+	open(STTY, "stty -a|");
+	while (defined($_ = <STTY>)) {
+		last if /rows = \d/ || /\d rows/ || /rows \d/;
+	}
+	close(STTY);
+	#speed 9600 baud; rows 58; columns 80; line = 0;
+	#speed 9600 baud; 47 rows; 80 columns;
+	#rows = 66; columns = 80
+	$tc_cols = 0;
+	if (/rows (\d+); columns (\d+);/) {
+		$tc_rows = $1;
+		$tc_cols = $2;
+	} elsif (/(\d+) rows; (\d+) columns;/) {
+		$tc_rows = $1;
+		$tc_cols = $2;
+	} elsif (/rows = (\d+); columns = (\d+)/) {
+		$tc_rows = $1;
+		$tc_cols = $2;
+	}
+	if ($tc_cols == 0) {
+		die "Can't get terminal settings.\n";
+	}
+	$half_of_screen = int($tc_rows / 2);
+
+	# it's cached, go grab it.
+	if (-f $term) {
+		open(T, $term);
+		@t = <T>;
+		close(T);
+		eval "@t";
+		&ttyraw;
+		return unless $i < $tc_rows;
+	}
+
+	print "Getting terminal info just this once and saving it...";
+	mkdir("$ENV{'HOME'}/.term", 0755);
+	open(T, ">$term");
+	$tc_smcup = `tput smcup`;
+	$tc_rmcup = `tput rmcup`;
+	$tc_bold = `tput bold`;
+	$tc_normal = `tput sgr0`;
+	$tc_clear = `tput clear`;
+	$tc_clreos = `tput ed`;
+	$tc_clreol = `tput el`;
+
+	if ($tc_cols < 60) {
+		die "$0: needs 60 columns";
+	}
+	if (length($tc_clreos) == 0) {
+		die "$0: needs clear to end of screen";
+	}
+	if (length($tc_clreol) == 0) {
+		die "$0: needs clear to end of line";
+	}
+
+	print T "\$tc_smcup = \"$tc_smcup\";\n";
+	print T "\$tc_rmcup = \"$tc_rmcup\";\n";
+	print T "\$tc_bold = \"$tc_bold\";\n";
+	print T "\$tc_normal = \"$tc_normal\";\n";
+	print T "\$tc_clear = \"$tc_clear\";\n";
+	print T "\$tc_clreol = \"$tc_clreol\";\n";
+	print T "\$tc_clreos = \"$tc_clreos\";\n";
+
+	for ($i = 0; $i < $tc_rows; ++$i) {
+		$left[$i] = `tput cup $i 0`;
+		print T '$left[' . "$i] = \"" . $left[$i] . "\";\n";
+		if ($i < $half_of_screen) {
+			$middle[$i] = `tput cup $i 44`;
+			print T
+			    '$middle[' . "$i] = \"" . $middle[$i] . "\";\n";
+		}
+	}
+	print T '$i = ' . "$i;\n";
+	close(T);
+	print "done\n";
+	&ttyraw;
+}
+
