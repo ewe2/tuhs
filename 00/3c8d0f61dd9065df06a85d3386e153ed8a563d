@@ -1,0 +1,104 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 24844 invoked from network); 29 Dec 2020 02:16:00 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Dec 2020 02:16:00 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CBB409C5F2; Tue, 29 Dec 2020 12:15:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 513739C245;
+	Tue, 29 Dec 2020 12:15:43 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 13CBE9C245; Tue, 29 Dec 2020 12:15:40 +1000 (AEST)
+X-Greylist: delayed 2047 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 29 Dec 2020 12:15:38 AEST
+Received: from nb3.reedmedia.net (nb3.reedmedia.net [71.19.148.35])
+ by minnie.tuhs.org (Postfix) with ESMTPS id AEFF69C223
+ for <tuhs@minnie.tuhs.org>; Tue, 29 Dec 2020 12:15:38 +1000 (AEST)
+Received: from [47.185.45.31] (helo=reedmedia.net)
+ by nb3.reedmedia.net with esmtpa (Exim 4.89)
+ (envelope-from <reed@reedmedia.net>)
+ id 1ku40w-0001Fu-CC; Tue, 29 Dec 2020 01:41:30 +0000
+Received: from reed@reedmedia.net by reedmedia.net with local (mailout 0.17)
+ id 3246-1609206084; Mon, 28 Dec 2020 19:41:25 -0600
+Date: Mon, 28 Dec 2020 19:41:24 -0600 (CST)
+From: "Jeremy C. Reed" <reed@reedmedia.net>
+X-X-Sender: reed@t1.m.reedmedia.net
+To: ron minnich <rminnich@gmail.com>
+In-Reply-To: <CAP6exYJMNUuU=EFo659=SEj-coD2eo5_yNGeKzAojDqp1tKObQ@mail.gmail.com>
+Message-ID: <alpine.NEB.2.21.2012281906520.5010@t1.m.reedmedia.net>
+References: <CAP6exYJMNUuU=EFo659=SEj-coD2eo5_yNGeKzAojDqp1tKObQ@mail.gmail.com>
+User-Agent: Alpine 2.21 (NEB 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] Which years saw the introduction of (1) #! and (2)
+ symbolic links
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+(Just first question here ...)
+
+Early BSD shells could look at first bytes (0404) to indicate was a 
+pascal object to run the Berkeley pascal interpreter.
+When csh was introduced, the csh would run the other shell /bin/sh if 
+the first character was not a # pound.  So csh used the single # as 
+magic to run the script with csh. The # was a comment for csh, make, and 
+awk (but not for standard sh which could use a : colon for the comment).
+
+Have a look at top of 4BSD's /usr/src/sys/newsys/sys1.c below. This code 
+is not in v7 nor 32V.
+
+From uucp Thu Jan 10 01:37:58 1980
+>From dmr Thu Jan 10 04:25:49 1980 remote from research
+The system has been changed so that if a file being executed
+begins with the magic characters #! , the rest of the line is understood
+to be the name of an interpreter for the executed file.
+Previously (and in fact still) the shell did much of this job;
+it automatically executed itself on a text file with executable mode
+when the text file's name was typed as a command.
+Putting the facility into the system gives the following
+benefits.
+
+1) It makes shell scripts more like real executable files,
+because they can be the subject of 'exec.'
+
+2) If you do a 'ps' while such a command is running, its real
+name appears instead of 'sh'.
+Likewise, accounting is done on the basis of the real name.
+
+3) Shell scripts can be set-user-ID.
+
+4) It is simpler to have alternate shells available;
+e.g. if you like the Berkeley csh there is no question about
+which shell is to interpret a file.
+
+5) It will allow other interpreters to fit in more smoothly.
+
+To take advantage of this wonderful opportunity,
+put
+
+	#! /bin/sh
+
+at the left margin of the first line of your shell scripts.
+Blanks after ! are OK.  Use a complete pathname (no search is done).
+At the moment the whole line is restricted to 16 characters but
+this limit will be raised.
+
+
+From uucp Thu Jan 10 01:37:49 1980
+>From dmr Thu Jan 10 04:23:53 1980 remote from research
+
