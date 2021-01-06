@@ -1,0 +1,105 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13858 invoked from network); 6 Jan 2021 18:28:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Jan 2021 18:28:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 603E29C896; Thu,  7 Jan 2021 04:28:46 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4B81D9C793;
+	Thu,  7 Jan 2021 04:28:20 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1E3619C793; Thu,  7 Jan 2021 04:28:17 +1000 (AEST)
+X-Greylist: delayed 449 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 07 Jan 2021 04:28:16 AEST
+Received: from ste-pvt-msa2.bahnhof.se (ste-pvt-msa2.bahnhof.se
+ [213.80.101.71])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1F7539C792
+ for <tuhs@minnie.tuhs.org>; Thu,  7 Jan 2021 04:28:16 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by ste-pvt-msa2.bahnhof.se (Postfix) with ESMTP id 924443F496
+ for <tuhs@minnie.tuhs.org>; Wed,  6 Jan 2021 19:20:31 +0100 (CET)
+X-Virus-Scanned: Debian amavisd-new at bahnhof.se
+Received: from ste-pvt-msa2.bahnhof.se ([127.0.0.1])
+ by localhost (ste-ftg-msa2.bahnhof.se [127.0.0.1]) (amavisd-new, port 10024)
+ with ESMTP id 7csbHGzNzbIQ for <tuhs@minnie.tuhs.org>;
+ Wed,  6 Jan 2021 19:20:30 +0100 (CET)
+Received: by ste-pvt-msa2.bahnhof.se (Postfix) with ESMTPA id B8A9F3F433
+ for <tuhs@minnie.tuhs.org>; Wed,  6 Jan 2021 19:20:30 +0100 (CET)
+Received: from localhost (localhost [127.0.0.1])
+ by localhost (Postfix) with ESMTPS id 0345E2E0303
+ for <tuhs@minnie.tuhs.org>; Wed,  6 Jan 2021 19:20:44 +0100 (CET)
+Date: Wed, 6 Jan 2021 18:20:42 +0000
+From: Michael =?utf-8?B?S2rDtnJsaW5n?= <michael@kjorling.se>
+To: tuhs@minnie.tuhs.org
+Message-ID: <d0935488-ddd6-4d99-a034-c14305e62995@localhost>
+References: <alpine.BSF.2.21.9999.2012311806460.82237@aneurin.horsfall.org>
+ <CAK6BEgdH7OOsw3p3d_bLsjhR+bv_ZrG9mvVSLa3hgJKhjLVK6w@mail.gmail.com>
+ <202012310810.0BV8ADZ3027195@freefriends.org>
+ <CANCZdfoKV7A46ho3ORghFZEddROty3A-y2bn1VY0m=ipBxFF6w@mail.gmail.com>
+ <20210106163225.GC2973@darioniedermann.it>
+ <CAEdTPBeiKfSau8SD9Y1ru427Z3XErSNzCtwaF7CwFcKQGvcftg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAEdTPBeiKfSau8SD9Y1ru427Z3XErSNzCtwaF7CwFcKQGvcftg@mail.gmail.com>
+Subject: Re: [TUHS] The 2038 bug...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 6 Jan 2021 12:08 -0500, from henry.r.bent@gmail.com (Henry Bent):
+>> On recent Linux/i386 kernels it's actually 64 bits. In practice, only
+>> users who are stuck with old i386 Linux versions will have a problem.
+> 
+> Do you happen to know what the cutoff is?  Are 2.6 kernels (still very
+> common) safe?  3.x?  4.x?
+
+I haven't dug particularly deeply, but unless I am missing something,
+Debian Buster's 4.19 kernel seems to map `time_t` to plain `long`
+regardless of architecture. I don't have an i386 architecture system
+handy, but wouldn't that make it 32 bits wide on i386 & Co?
+
+linux/time.h:
+
+struct timespec {
+        __kernel_time_t tv_sec;                 /* seconds */
+        long            tv_nsec;                /* nanoseconds */
+};
+
+asm-generic/posix_types.h:
+
+#ifndef __kernel_long_t
+typedef long            __kernel_long_t;
+typedef unsigned long   __kernel_ulong_t;
+#endif
+/* ... */
+typedef __kernel_long_t __kernel_time_t;
+
+Both from Debian's linux-libc-dev package, version 4.19.160-2, amd64
+architecture.
+
+If that's right, then I'd definitely expect anything 2.x and 3.x to be
+unsafe, and 4.x to at best be suspect; so Dario's mention of 5.6
+doesn't sound unreasonable as a first guess.
+
+We've got maybe fifteen years before this starts to become a real
+issue. Time to start working on those upgrade plans...
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael@kjorling.se
+ “Remember when, on the Internet, nobody cared that you were a dog?”
+
