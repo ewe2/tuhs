@@ -1,0 +1,142 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id e162e965
+	for <ml@inbox.vuxu.org>;
+	Sun, 8 Mar 2020 21:42:56 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DEB5B9D7B1; Mon,  9 Mar 2020 07:42:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A16549D795;
+	Mon,  9 Mar 2020 07:42:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CF92B9D795; Mon,  9 Mar 2020 07:42:22 +1000 (AEST)
+Received: from lb2-smtp-cloud8.xs4all.net (lb2-smtp-cloud8.xs4all.net
+ [194.109.24.25])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6DF929D794
+ for <tuhs@minnie.tuhs.org>; Mon,  9 Mar 2020 07:42:20 +1000 (AEST)
+Received: from mba2.fritz.box ([80.101.112.122])
+ by smtp-cloud8.xs4all.net with ESMTPA
+ id B3gejdauqhVf8B3gfjE9U8; Sun, 08 Mar 2020 22:42:18 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.11\))
+Message-Id: <868FEF19-8F8A-4DFA-8773-1C67FB32CE74@planet.nl>
+Date: Sun, 8 Mar 2020 22:42:16 +0100
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3445.104.11)
+X-CMAE-Envelope: MS4wfIi3KVfkZsULlr8ukjZvoJInuE/mw39wAEx2FiII6+S0oIJFS/mUAuXwmupqX/RSidBupsFvsl8ZsFPgBXcfZ+qNteSSAOssVRrkWP5b1rqj9lFmDXeL
+ 9AJPpMl1USFrQAtMuEG8Alq8HL0BGsDUQjeRVNCI41bnj7F6Gpwweicg
+Subject: [TUHS] First appearance of named pipes
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> Always bemused me that to get a named local I/O connection one ended =
+up with "Unix domain (what does that even mean?) sockets" rather than =
+named pipes, especially since sockets are about as natural a Unix =
+concept as lawn mowers. I've been told, but haven't confirmed, that =
+early sockets didn't even support read and write. They still don't =
+support open and close, and never will.
+
+My interest in Unix networking 1975-1985 originally came from wondering =
+how we came up with this alien feeling socket API as the dominant model. =
+The original ideas for this API are in the recently found CSRG tech =
+reports #4 and #3 - which I hope to discuss on this list in Spring.
+
+I think we have to distinguish the API and the underlying paradigms.
+
+When it comes to the =E2=80=9CArpa=E2=80=9D lineage of Unix networking, =
+the original API model was fully within the open-read-write-close =
+framework. See for instance RFC681 and this document: =
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=3DBBN-Vax-TCP/doc/net.5.P; =
+the entire BBN network API model fits on a few pages of =E2=80=98man=E2=80=
+=99 text.
+
+In 1975 Arpa Unix, the network name space was integrated with the file =
+name space, by creating a character special file for each network host. =
+This was possible because at that time an Arpa network address was 8 =
+bits, and this fitted in the minor number; when Arpa addresses were =
+expanded to 24 bits soon after this approach was abandoned (but one =
+could think of a mechanism akin to symbolic links that could have =
+continued the practice). One could have an entry for the local host, =
+e.g. =E2=80=9C/n/local=E2=80=9D or something like that.
+
+In my mind, =E2=80=9Csocket=E2=80=9D does not only refer to the sockets =
+API, but also to the concept of a bi-directional, possibly remote, named =
+pipe; =E2=80=98named' as in =E2=80=9Cdiscoverable by a possibly =
+unrelated process=E2=80=9D, i.e. the in file name space, the network =
+name space if different, etc. [aside: I realise (now) that this is a =
+confusing use of the word socket, but I don=E2=80=99t have a better =
+phrase at hand.] In my opinion, it is this concept that has proven =
+strong and durable, much more so than the socket API itself.
+
+When viewed in this definition a =E2=80=98fifo=E2=80=99 is a limited =
+form of socket: it is unidirectional, local only (although in the 1981 =
+S/F-Unix it wasn=E2=80=99t) and a server process cannot easily =
+distinguish or delegate individual client connections. The Rand Port was =
+better in the sense that it prefixed each client=E2=80=99s data with a =
+header block.
+
+> Networks are not intrinsically more special than any other I/O =
+peripheral, but they have become gilded unicorns mounted on rotating =
+hovercrafts compared to the I/O devices Unix supported before them. -rob
+
+"Networks are not intrinsically more special than any other I/O =
+peripheral=E2=80=9D: that indeed is the paradigm that underlies =
+Spider-Datakit-streams-STREAMS-Plan9, networks are just an I/O =
+peripheral. There is nothing wrong with that paradigm, excellent systems =
+can be built on top of it.
+
+The other paradigm is that the network is a (mostly hidden) substrate =
+that carries bidirectional pipes between processes. It would seem to me =
+that there is nothing wrong with that paradigm either and it can be =
+implemented in a =E2=80=9Cnatural Unix=E2=80=9D way as well.
+
+> On Sun, Mar 8, 2020 at 3:48 AM Derek Fawcus <dfawcus+lists-tuhs at =
+employees.org> wrote:
+>=20
+>> > On Sat, Mar 07, 2020 at 01:17:09PM +0100, Paul Ruizendaal wrote:=20
+>> > >=20
+>> > > Interestingly, Luderer also refers to a 1978 paper by Steve =
+Holmgren (one of the Arpa Unix authors), suggesting =E2=80=99sockets=E2=80=
+=99 (in today=E2=80=99s parlance) for interproces communication.=20
+>> >
+>> > Could that simply be bleed over of terminology from the ARPAnet / =
+Internet=20
+>> > usage, in that "socket" is used to refer to protocol end points?
+
+I meant =E2=80=99socket=E2=80=99 in the sense that I described above.
+
+=E2=80=9CSocket=E2=80=9D must be one of the most overloaded words in =
+networking. My understanding is that on the Arpanet the =E2=80=9Csocket =
+number=E2=80=9D was what we now would call a "port number=E2=80=9D, =
+although I think it was initially meant to identify a user on a host, =
+rather than a service on a host. In the 1980 BBN TCP implementation =
+=E2=80=9Csocket=E2=80=9D is used to mean =E2=80=9Cip address=E2=80=9D. A =
+year later, Bill Joy uses =E2=80=9Csocket=E2=80=9D as an API call name.
+
+>> >
+>> > i.e. see these from 1970:=20
+>> >
+>> >  https://tools.ietf.org/html/rfc54
+>> >  https://tools.ietf.org/html/rfc55
+>> >  https://tools.ietf.org/html/rfc60
+>> >
+>> > DF

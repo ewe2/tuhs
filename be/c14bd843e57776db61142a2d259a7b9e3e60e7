@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11843 invoked from network); 21 Sep 2020 21:40:28 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 21 Sep 2020 21:40:28 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 746089CAF8; Tue, 22 Sep 2020 07:40:25 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7D25A93D5F;
+	Tue, 22 Sep 2020 07:39:50 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CE07F93D33; Tue, 22 Sep 2020 07:39:46 +1000 (AEST)
+Received: from minun.buric.co (minun.buric.co [51.15.8.196])
+ by minnie.tuhs.org (Postfix) with ESMTP id 4D4DD93D06
+ for <tuhs@tuhs.org>; Tue, 22 Sep 2020 07:39:46 +1000 (AEST)
+Received: by minun.buric.co (Postfix, from userid 1000)
+ id 9767A35C0EA8; Mon, 21 Sep 2020 23:39:42 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+ by minun.buric.co (Postfix) with ESMTP id 83E8935C0E74;
+ Mon, 21 Sep 2020 17:39:42 -0400 (EDT)
+Date: Mon, 21 Sep 2020 17:39:42 -0400 (EDT)
+From: Steve Nickolas <usotsuki@buric.co>
+X-X-Sender: mary@sd-119843.dedibox.fr
+To: John Cowan <cowan@ccil.org>
+In-Reply-To: <CAD2gp_T=RjQkrFeaeu-e4b4qvQFa-uZWTgg6mBiOJhF5fJh9qw@mail.gmail.com>
+Message-ID: <alpine.DEB.2.21.2009211732330.13076@sd-119843.dedibox.fr>
+References: <20200920230057.C5D1A4422E@lignose.oclsc.org>
+ <CAC20D2PqgrYnADwJJc3rvtgRXB92FKgCT2ycot9bhUoEGPe=+Q@mail.gmail.com>
+ <CANCZdfo+LL-xfk6rygrZaremzNfYEmxAmMPaeuiOhrV9uCk3ag@mail.gmail.com>
+ <alpine.DEB.2.21.2009210151560.11761@sd-119843.dedibox.fr>
+ <CAD2gp_T=RjQkrFeaeu-e4b4qvQFa-uZWTgg6mBiOJhF5fJh9qw@mail.gmail.com>
+User-Agent: Alpine 2.21 (DEB 202 2017-01-01)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII; format=flowed
+Subject: Re: [TUHS] reviving a bit of WWB
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, 21 Sep 2020, John Cowan wrote:
+
+> On Mon, Sep 21, 2020 at 1:55 AM Steve Nickolas <usotsuki@buric.co> wrote:
+>
+>
+>> I've never written anything that uses varargs, so I've never run into
+>> that.  But I've actually done quite a bit of work with an environment
+>> where this isn't true: MS-DOS using the large or huge model.  In this
+>> environment, sizeof(int)=2, and sizeof(void*) is 4. Of course, it's not
+>> conformant to pass an int variable as an argument where a pointer variable
+>> is expected.
+>>
+>
+> If the compiler was ISO-conformant (which it almost certainly was not),
+> that would not matter.  0 in int context would be a 2-byte int with all
+> bits zero, and 0 in pointer context would be a 4-byte null pointer,
+> probably with all bits zero.
+
+The compiler I used at least tried to be C89. (Borland Turbo C++ 1.01)
+
+> C doesn't require that the address represented by the null pointer (whether
+> or not it is all-bits-zero) is inaccessible, merely that there is no C
+> object or function there.  A simple shim of the appropriate size (1, 2, 4,
+> 8 bytes depending on the CPU's alignment rules) will suffice.
+
+Which was nice with the tiny model: a .COM file organized at near 0x0100, 
+and iirc, there was guaranteed to be 0xCD 0x20 at 0x0000.  (The 8086 "INT 
+20H" instruction.  I just checked in DOSEMU with PC DOS 7, and that is 
+exactly what shows up there.)
+
+"ANSI C" doesn't mean a lot though when 95% of the code I run across uses 
+extensions.  I still have not successfully kitbashed the Bourne shell onto 
+native DOS, OS/2 or Windows without an emulation layer - in any form.  Did 
+come *pretty* close with the Forsyth shell but I couldn't work around the 
+lack of fork() (OS/2 does have a near-exact counterpart for pipe(), but 
+it's not exposed by the pipe() call for some reason.)  I like my Unix 
+shells even on Microsoft OSes...call me crazy. ;)
+
+-uso.

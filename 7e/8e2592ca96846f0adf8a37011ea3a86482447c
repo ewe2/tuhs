@@ -1,0 +1,83 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28267 invoked from network); 20 Sep 2020 23:03:03 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 20 Sep 2020 23:03:03 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id BE2419CBB0; Mon, 21 Sep 2020 09:03:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6205A94483;
+	Mon, 21 Sep 2020 09:02:45 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4C80C94483; Mon, 21 Sep 2020 09:02:43 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 1C4C493F0F
+ for <tuhs@tuhs.org>; Mon, 21 Sep 2020 09:02:42 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id C5D1A4422E; Sun, 20 Sep 2020 19:00:57 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200920230057.C5D1A4422E@lignose.oclsc.org>
+Date: Sun, 20 Sep 2020 19:00:57 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] reviving a bit of WWB
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Doug McIlroy:
+
+  To put it more strongly. this is not a legal C source file.
+          char *s = NULL;
+  But this is.
+          char *s = 0;
+
+Clem Cole:
+
+   67)The macro NULL is defined in <stddef.h> (and other headers) as a null
+   pointer constant; see 7.19.
+
+====
+
+$ cat null.c
+char *s = NULL;
+$ cat zero.c
+char *s = 0;
+$
+
+zero.c is a legal C program.  null.c is not.  Create
+files exactly as shown and compile them if you don't
+believe me.
+
+Prepend `#include <stddef.h>' (or <stdlib.h> or <stdio.h>)
+to null.c and it becomes legal, but I think that's Doug's
+point: you need an include file.
+
+Personally I prefer to use NULL instead of 0 when spelling
+out a null pointer, because I think it's clearer:
+	if ((buf = malloc(SIZE)) == NULL)
+		error("dammit andrew");
+though I am willing to omit it when there's no confusion
+about = vs ==:
+	if (*p)
+		dammit(*p, "andrew");
+
+But that's just a question of style, and Doug's is fine too.
+
+The language does not require the compiler to pre-define
+NULL or to recognize it as a keyword; you have to include
+an appropriate standard header file.
+
+Norman Wilson
+Toronto ON (not 0N nor NULLN)

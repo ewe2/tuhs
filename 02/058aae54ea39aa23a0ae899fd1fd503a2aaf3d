@@ -1,0 +1,81 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31796 invoked from network); 21 Sep 2020 19:38:19 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 21 Sep 2020 19:38:19 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id EBB5C9CBFE; Tue, 22 Sep 2020 05:38:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E857793D5F;
+	Tue, 22 Sep 2020 05:37:33 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4A0DA93D33; Tue, 22 Sep 2020 05:37:30 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B3F5193D33
+ for <tuhs@minnie.tuhs.org>; Tue, 22 Sep 2020 05:37:29 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 7B84918C0F2; Mon, 21 Sep 2020 15:37:28 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200921193728.7B84918C0F2@mercury.lcs.mit.edu>
+Date: Mon, 21 Sep 2020 15:37:28 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > Using LSX on the 11/03... Will LSX handle cards with multiple serial
+    > ports?
+
+Ah, I just read this carefully; LSX only supports a single user at a time, so
+there's no use to multiple serial lines? (But see below.) (I thought Heinz'
+reply message to this referred to Mini-Unix, which does suppport multiple
+users, but on reading it again I see it does not.)
+
+
+If you want multiple users on an -11/03, Mini-Unix would be an option; it
+doesn't support the -11/03 'out of the box', but looking at it, it shouldn't
+be too hard. (Heinz mentioned that it had been done before.) Change all cases
+of 'mov xx, PS' in mch.s:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=Mini-Unix/usr/sys/mxsys/mch.s
+
+to 'MTPS xx' (PS access needs a special instructtion in the /03); that might
+be all you need to do. (Installing a KEV11-A, so you can avoid using the
+instruction emulation package for EIS instructions would be nice, but
+apparently isn't required.)
+
+
+If Mini-Unix supports multiple users, it ought to be possible to do the same
+with LSX. (I'm not sure what the rationale was for making LSX single-user:
+perhaps the RX was too slow; perhaps there was no need in their use case;
+etc.)
+
+But it would probably be more work than going the Mini-Unix route; e.g.
+to start with, init only supports a single user:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=LSX/src/init.c
+
+and the tty driver:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=LSX/sys/tv.c
+
+only supports a single line. One could cross-port the needed 'stuff' from
+Mini-Unix, but it'd probably be easier to do the Mini-Unix -11/03 conversion.
+
+	   Noel

@@ -1,0 +1,92 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 27624 invoked from network); 31 Dec 2020 18:37:11 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Dec 2020 18:37:11 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 762BB9C7B8; Fri,  1 Jan 2021 04:37:05 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5BEFE9C78B;
+	Fri,  1 Jan 2021 04:36:34 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 041659C78B; Fri,  1 Jan 2021 04:36:31 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6255A94B6C
+ for <tuhs@tuhs.org>; Fri,  1 Jan 2021 04:36:30 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 0BVIaPRq008512
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 31 Dec 2020 13:36:26 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id C5DCC15C3515; Thu, 31 Dec 2020 13:36:25 -0500 (EST)
+Date: Thu, 31 Dec 2020 13:36:25 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Adam Thornton <athornton@gmail.com>
+Message-ID: <X+4aKbZWyHHOf4aZ@mit.edu>
+References: <alpine.BSF.2.21.9999.2012311806460.82237@aneurin.horsfall.org>
+ <CAK6BEgdH7OOsw3p3d_bLsjhR+bv_ZrG9mvVSLa3hgJKhjLVK6w@mail.gmail.com>
+ <202012310810.0BV8ADZ3027195@freefriends.org>
+ <CANCZdfoKV7A46ho3ORghFZEddROty3A-y2bn1VY0m=ipBxFF6w@mail.gmail.com>
+ <950DAE25-BCAD-47EF-8FCE-A716271A3C25@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <950DAE25-BCAD-47EF-8FCE-A716271A3C25@gmail.com>
+Subject: Re: [TUHS] The 2038 bug...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Dec 31, 2020 at 09:09:33AM -0700, Adam Thornton wrote:
+> 
+> So if you *can* rebuild the software for a newer architecture…then
+> suddenly there’s a wider time_t and the 33d bit is suddenly 1 but
+> nothing breaks.  And if you can’t, you’re probably by that point
+> running it in emulation anyway, at which point your emulation
+> environment can know that 1/1/1970 is really whatever/2038, and your
+> software is partying like it was just 1969.
+
+Emulation is the key problem.  I still have a production server
+running on a Linode VM which was installed using Debian 6.0 using i386
+binaries sometime in 2011.  I kept it on 32-bits because it's more RAM
+efficient, and it would have been a pain to reconfigure all of its
+services if I were to reinstall it to use a 64-bit OS --- and Debian
+has had silky-smooth upgrades from Debian 6.0 all the way up to Debian
+10.0 in 2019.  There is some discussion of dropping i386 support in
+Debian, which may force the issue, but up until now, it's just been
+easier for me to do major updates every 2-3 years to the latest Debian
+stable, and rely on security updates in between major updates.
+
+Twenty years ago, one of larger customers for the company I was
+working for at the time (VA Linux Systems) was one of the new
+electronic stock exchanges, and they were using Linux boxes with
+PDP-11 emulators because their stock trading software was written in
+Macro-11 and running on RSTS/E.  They had tried three times to rewrite
+it so it could run on something more modern, but each time, the
+rewrite had ended in failure.  So they simply sharded the problem, so
+one x86 server running RSTS/E in emulation would service stocks
+symbols AAAA--ADZZ, and the next would service stocks AEAA--AFZZ, and
+so on.  Given that this was back in 1999, I assume they had solved the
+Y2K problem one way or another, but even if they hadn't yet, I suspect
+it would have been easier for them to fix the problem by asking their
+dedicated Macro-11 Software Engineering team to fix it, than to ask
+that same team to help the other team put themselves out of a job
+(which for some reason, never seemed to happen successfully...)
+
+       	   		      	     	- Ted

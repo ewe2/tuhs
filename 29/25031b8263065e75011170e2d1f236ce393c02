@@ -1,0 +1,233 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 46adb58c
+	for <ml@inbox.vuxu.org>;
+	Tue, 14 Jan 2020 23:18:43 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7203B9C040; Wed, 15 Jan 2020 09:18:42 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 437F29BFE2;
+	Wed, 15 Jan 2020 09:18:05 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="key not found in DNS" (0-bit key; unprotected) header.d=kev009.com header.i=@kev009.com header.b="SkEQs8ek";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 919329BFE2; Wed, 15 Jan 2020 09:18:01 +1000 (AEST)
+Received: from mail-il1-f195.google.com (mail-il1-f195.google.com
+ [209.85.166.195])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6FBA49B898
+ for <tuhs@tuhs.org>; Wed, 15 Jan 2020 09:17:58 +1000 (AEST)
+Received: by mail-il1-f195.google.com with SMTP id x5so13130776ila.6
+ for <tuhs@tuhs.org>; Tue, 14 Jan 2020 15:17:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kev009.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc:content-transfer-encoding;
+ bh=8i7NntowFmipuwklp6niBQOCrPg/foy+3JIV4CSSa/Q=;
+ b=SkEQs8ekyh7HjpHnr9McYvcHecu7KXoQphfQNZIotscK82XlRHJ1/gYzSye3YMEOiL
+ lMjqrGr5r+bibMYjCRUagIR4CyuxhXsAgnCWkZHzP+HlEmmZYmzeqtOl+Qw+QynGO/Xh
+ Lt8kadLaPjJg5zVbUJW5IU5OQr/ErRlQEp13A=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc:content-transfer-encoding;
+ bh=8i7NntowFmipuwklp6niBQOCrPg/foy+3JIV4CSSa/Q=;
+ b=H4TIxEr5I1r7Fp5ZXlxTzHkrS+2srNkUAVp0xQiyB1s+0qW2U/wOLXJBjB9WEH2geE
+ olv9G6vZY7qQxQamXTeG7WsZLRKXwZqfx7VTGw7nx4yhamn0nRQHNz7GaEhll7lwbQHl
+ VWv82VHA/dXy6GWqH7dxaeTtuxB5yYhImG7MJ654U9k5APCeHuyFtNPT6F3eQ6QP24Js
+ u+uu+UITQMvxpTSBv5x4eDkIGkWLlyfSMrhuBuvVYyb5AAg6E3jkQvIU7Lt+lX9Db3Ki
+ TFDzpIeSql2EwrPIz6fOP759ZMY2+5mUJIrriWhGdbjw5joeHVbckurhiaX3hcVod5zf
+ HN4w==
+X-Gm-Message-State: APjAAAVn7U/jkP2uTxo/e6+D5mmQlqKorjjii1n8dtBS58vy/qZ/Iogi
+ sUE3/VPGweHkJEuiZLPSkol4hEsFK0BwWs0caJnzznJf4jz2UQ==
+X-Google-Smtp-Source: APXvYqx6chHE5G2i4epsvM5hnwUXMnJglFHiW5rBwpDORInANNxsb8DOnZAKSQQDG6zEy4Ywc2MojU14ZeQIYkn8dy8=
+X-Received: by 2002:a92:c686:: with SMTP id o6mr895734ilg.212.1579043877546;
+ Tue, 14 Jan 2020 15:17:57 -0800 (PST)
+MIME-Version: 1.0
+References: <202001121343.00CDhYHK132101@tahoe.cs.Dartmouth.EDU>
+ <CANCZdfrPvQKEhb2dP1_iM72pZU_Gw7dPMZLy4GMKU-1Q5iEY7w@mail.gmail.com>
+ <CAK7dMtAH2frfiTCy=XxeYb4F5u5ndQsMVk_-MSxQd6aVfjWOwQ@mail.gmail.com>
+ <202001122034.00CKYQ39571239@darkstar.fourwinds.com>
+ <CAK7dMtBhRNUS4t-CaUFnWAP7TWpLRetTA36pL5wP1q6=19APnQ@mail.gmail.com>
+ <202001122044.00CKiUNV573279@darkstar.fourwinds.com>
+ <CAK7dMtB0-dpyZHsxuLpL8dCEJGV24xuD9VE+ueYFM_dbFxPicg@mail.gmail.com>
+ <202001122137.00CLbMrw582813@darkstar.fourwinds.com>
+ <CAEoi9W4fXLaTRM1mv4wnVbifCFBEw_iKL9cds8ds-FBRTwM-=g@mail.gmail.com>
+ <CAEoi9W6LedGGjWPO=ZgZzVdGLqs8drhqcWkvA_DfKTOtMDgegQ@mail.gmail.com>
+ <CAEoi9W5nykr0V_qgXCr-5W=T6k_5h8j87-YNDnWCRj21DfPwfA@mail.gmail.com>
+In-Reply-To: <CAEoi9W5nykr0V_qgXCr-5W=T6k_5h8j87-YNDnWCRj21DfPwfA@mail.gmail.com>
+From: Kevin Bowling <kevin.bowling@kev009.com>
+Date: Tue, 14 Jan 2020 16:17:46 -0700
+Message-ID: <CAK7dMtDRjWJ3B1wpndTcuCmxfDen+rg_6dFDQJtVh5WS5qcLqw@mail.gmail.com>
+To: Dan Cross <crossd@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] Tech Sq elevator (Was: screen editors) [ really I think
+ efficiency now ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Thanks Dan, this message is exactly what I was trying to express.  To
+piggyback on some of your idea, one limitation on getting at the
+representation is the simplicity of the shell.  If you look back at
+The Mother of All Demos, or environments like the LispM, Project
+Oberon, Alto, even the BLIT it seems to me like there may be ways to
+harmonize the underlying representation with ({use?, implementation?,
+mental model?} What is it that makes the unix shell and pipelines so
+desirable and unchanged?
+
+One thing I notice is that as my millenial peers learn, adopt, and use
+unix as software or doctrine, it is a fixture.  It seems like older
+generations have some of this as well but we can make computers do
+whatever we want;  there are no rules only conventions.
+
+I'm not trying to convince anyone of anything, there is mounting
+science that we basically never change our minds on anything.  The
+conversation was useful for solidifying my own views and maybe making
+people who have done this for a long time to express their views on
+the basics for shared consideration.
+
+Regards,
+Kevin
+
+On Mon, Jan 13, 2020 at 4:48 PM Dan Cross <crossd@gmail.com> wrote:
+>
+> [Resending as this got squashed a few days ago. Jon, sorry for the duplic=
+ate. Again.]
+>
+> On Sun, Jan 12, 2020 at 4:38 PM Jon Steinhart <jon@fourwinds.com> wrote:
+>>
+>> [snip]
+>> So I think that the point that you're trying to make, correct me if I'm =
+wrong,
+>> is that if lists just knew how long they were you could just ask and tha=
+t it
+>> would be more efficient.
+>
+>
+> What I understood was that, by translating into a lowest-common-denominat=
+or format like text, one loses much of the semantic information implicit in=
+ a richer representation. In particular, much of the internal knowledge (li=
+ke type information...) is lost during translation and presentation. Put an=
+other way, with text as usually used by the standard suite of Unix tools, t=
+ype information is implicit, rather than explicit. I took this to be less a=
+n issue of efficiency and more of expressiveness.
+>
+> It is, perhaps, important to remember that Unix works so well because of =
+heavy use of convention: to take Doug's example, the total number of comman=
+ds might be easy to find with `wc` because one assumes each command is pres=
+ented on a separate line, with no gaudy header or footer information or ext=
+raneous explanatory text.
+>
+> This sort of convention, where each logical "record" is a line by itself,=
+ is pervasive on Unix systems, but is not guaranteed. In some sense, those =
+representations are fragile: a change in output might break something else =
+downstream in the pipeline, whereas a representation that captures more sem=
+antic meaning is more robust in the face of change but, as in Doug's exampl=
+e, often harder to use. The Lisp Machine had all sorts of cool information =
+in the image and a good Lisp hacker familiar with the machine's structures =
+could write programs to extract and present that information. But doing so =
+wasn't trivial in the way that '| wc -l' in response to a casual query is.
+>
+>> While that may be true, it sort of assume that this is something so comm=
+on that
+>> the extra overhead for line counting should be part of every list.  And =
+it doesn't
+>> address the issue that while maybe you want a line count I may want a ch=
+aracter
+>> count or a count of all lines that begin with the letter A.  Limiting th=
+is example
+>> to just line numbers ignores the fact that different people might want d=
+ifferent
+>> information that can't all be predicted in advance and built into every =
+program.
+>
+>
+> This I think illustrates an important point: Unix conventions worked well=
+ enough in practice that many interesting tasks were not just tractable, bu=
+t easy and in some cases trivial. Combining programs was easy via pipelines=
+. Harder stuff involving more elaborate data formats was possible, but, wel=
+l, harder and required more involved programming. By contrast, the Lisp mac=
+hine could do the hard stuff, but the simple stuff also required non-trivia=
+l programming.
+>
+> The SQL database point was similarly interesting: having written programs=
+ to talk to relational databases, yes, one can do powerful things: but the =
+amount of programming required is significant at a minimum and often substa=
+ntial.
+>
+>>
+>> It also seems to me that the root problem here is that the data in the o=
+riginal
+>> example was in an emacs-specific format instead of the default UNIX text=
+ file
+>> format.
+>>
+>> The beauty of UNIX is that with a common file format one can create tool=
+s that
+>> process data in different ways that then operate on all data.  Yes, it's=
+ not as
+>> efficient as creating a custom tool for a particular purpose, but is muc=
+h better
+>> for casual use.  One can always create a special purpose tool if a parti=
+cular
+>> use becomes so prevalent that the extra efficiency is worthwhile.  If yo=
+u're not
+>> familiar with it, find a copy of the Communications of the ACM issue whe=
+re Knuth
+>> presented a clever search algorithm (if I remember correctly) and McIlro=
+y did a
+>> critique.  One of the things that Doug pointed out what that while Don's=
+ code was
+>> more efficient, by creating a new pile of special-purpose code he introd=
+uced bugs.
+>
+>
+> The flip side is that one often loses information in the conversion to te=
+xt: yes, there are structured data formats with text serializations that ca=
+n preserve the lost information, but consuming and processing those with th=
+e standard Unix tools can be messy. Seemingly trivial changes in text, like=
+ reversing the order of two fields, can break programs that consume that da=
+ta. Data must be suitable for pipelining (e.g., perhaps free-form text must=
+ be free of newlines or something). These are all limitations. Where I thin=
+k the argument went awry is in not recognizing that very often those proble=
+ms, while real, are at least tractable.
+>
+>> Many people have claimed, incorrectly in my opinion, that this model fai=
+ls in the
+>> modern era because it only works on text data.  They change the subject =
+when I
+>> point out that ImageMagick works on binary data.  And, there are now str=
+eam
+>> processing utilities for JSON data and such that show that the UNIX mode=
+l still
+>> works IF you understand it and know how to use it.
+>
+>
+> Certainly. I think you hit the nail on the head with the proviso that one=
+ must _understand_ the Unix model and how to use it. If one does so, it's v=
+ery powerful indeed, and it really is applicable more often than not. But i=
+t is not a panacea (not that anyone suggested it is). As an example, how do=
+ I apply an unmodified `grep` to arbitrary JSON data (which may span more t=
+han one line)? Perhaps there is a way (I can imagine a 'record2line' progra=
+m that consumes a single JSON object and emits it as a syntactically valid =
+one-liner...) but I can also imagine all sorts of ways that might go wrong.
+>
+>         - Dan C.
+>

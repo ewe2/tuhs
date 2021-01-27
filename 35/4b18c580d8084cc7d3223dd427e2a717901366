@@ -1,0 +1,236 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 0626ced4
+	for <ml@inbox.vuxu.org>;
+	Sat, 4 Jan 2020 22:38:09 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 93CB79B483; Sun,  5 Jan 2020 08:38:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 779789516C;
+	Sun,  5 Jan 2020 08:37:41 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="kpLs6FRH";
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=case.edu header.i=@case.edu header.b="5BFpK5g/";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="JC4ONhGY";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 57B429516C; Sun,  5 Jan 2020 08:37:39 +1000 (AEST)
+X-Greylist: delayed 361 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 05 Jan 2020 08:37:38 AEST
+Received: from mpv4-2015.case.edu (mpv4-2015.CWRU.Edu [129.22.103.195])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B3BE795165
+ for <tuhs@minnie.tuhs.org>; Sun,  5 Jan 2020 08:37:38 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578177458;
+ bh=WMOow4IAkXfBlavsstS8baRVMOcVSEujQ95bMjuPfls=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=kpLs6FRHjIVIiMWgW7YOXwu4CE1KYjug+//c2f0btv3W7+EnnxbRsYHtmTcTYEwSvs
+ Tvn4XIN/KVdSV4GVEvQzj7sm+zvnqp4/DXHkGtcWC/UJ/XAbGvbCMKeZuPMiJdaOO2K
+ QM+MCFRbjEW3buuSKTIdYBUXqIBD8cC88RyE+bnnsFiVJ7wqA+zEuCQO4pmjZ43TJQV
+ kWoQLa3pKUvknfzb+fNns7Ahd+pyasg1Lbd5AekLE/ZC86DAA/huI5SjwVLWm1Dx2nA
+ fSj9+S8DK5fU8IHRhOtKLZC+ETTc25t/YFyeWZecbSmmNbCTsXixFkKbZyKeGdzkJm2
+ DE0paajA==
+Received: from mpv6-2015.CWRU.Edu (EHLO mpv6-2015.case.edu) ([129.22.103.202])
+ by mpv4-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id BCA59231; Sat, 04 Jan 2020 17:31:36 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578177094;
+ bh=lalIqSIDPxsHGXyQzuoz8MFGz5NXCwTINB95X0uWZek=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=5BFpK5g/SFKMTAyaX6/7yD2nSy7Q095hZj/nIRUFWMnsYEceoxCe5jHiVdwkHqwSlD
+ lzsZJpBs4BDj9stiBghmq++V+zToYnbZP2KYZ5ZaKaUPPLFpJD9O5KXOMXMVEB4PTN9
+ iTBJJvECdIsuevnrOD9AVncxztSZ2ZubazUbj+WG+Vfdfm1fp4vXck9CUsaKXg2nc5J
+ z3w218VfbEk+ZZ9a1X2Stz2mPdg0BE9OCf0Y4ZKe7uDtVKvvabsMOpT5LyoW/B4SrZG
+ UeKmq1jv5ZuTbvSe6yXJt+q4ionOMbhafR2Zrf9P0t1RbMbCsiztLV3o2FeSmFSEaZx
+ F3FJRb7g==
+Received: from mail-yb1-f197.google.com (EHLO mail-yb1-f197.google.com)
+ ([209.85.219.197])
+ by mpv6-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id DDN56210; Sat, 04 Jan 2020 17:31:34 -0500 (EST)
+Received: by mail-yb1-f197.google.com with SMTP id d17so16580348ybl.11
+ for <tuhs@minnie.tuhs.org>; Sat, 04 Jan 2020 14:31:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu; s=g-case;
+ h=reply-to:cc:subject:to:references:from:autocrypt:organization
+ :message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=lalIqSIDPxsHGXyQzuoz8MFGz5NXCwTINB95X0uWZek=;
+ b=JC4ONhGYKqMWnZSgD3LAgmbA9Zo8caMflbMU59Ljj4E4Mjb0F6yGUCyATrrJ/rUx/h
+ n+Y4fRnK8IipNB4zcYM2c4vbohCffTt52Ji4tYyirq7e7qH+OaRITwDj5zAb0Xua9qiT
+ VoT55dOf1v5HKK0MuUQvRZ1CJq5dwzgz2Fa8fjYbsCWuR45w6MFDnTsekrhjbkMNwWlH
+ /Pq/RjdOxBbskgEYlwUFlTkxisFkXuAkASpgEzrN7oKBAFhPr0dnRG5hxJM6663c4TFW
+ 1gsTrtnlf04/C6qFxx9ocSTtAwvZoVJHV/+AErV0eU15kjivNs9w6l5uIJABU6EMo7cf
+ cV0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:reply-to:cc:subject:to:references:from:autocrypt
+ :organization:message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=lalIqSIDPxsHGXyQzuoz8MFGz5NXCwTINB95X0uWZek=;
+ b=Ou4OFkmv8NiCwl8Q1/MvWmqi+q7KCF83iFQpTRXWZu6Dxo8Or75hMkX/Bfr8wnl0v/
+ M3Q9ag3r1C4kHgyimITV3E1RdnsZC4SjoCfhXLOzzl6lQBEDVRwVg+4YHBC9U+K5xQlV
+ i6C0cy7BP7DO2LAZaSftl6/XT5d75pVgjSLi++4fYdgOamYgobXbEhupC0SrRy8FWKWc
+ 0ayLWXdd1NFYAchOTVKuKAWI/9OMQ8SgX+tbuMW0Ncb9hq/20g9dXwl73L1Sib2xI32i
+ /s1UQoO5aQh3pPyUqQL1GrR1HVamJ4K60GYHxtiI5GVXXnH4Sx+F5LwqXhONsQE9BJDW
+ izdA==
+X-Gm-Message-State: APjAAAUunPDB5hwbYJeLnHNtvV7QtdLX4Itg1Ua0doTdo1OVQkgtIeZv
+ DjXMMyO/GAh/mKe6tkgcRe1XtqjziJLvRjk91kyXE6a3rdJdXaIvuThs3C9dHXY8HQq2f0nInPm
+ 3ETudSVy3Dqcblmbp
+X-Received: by 2002:a25:3182:: with SMTP id
+ x124mr29220247ybx.323.1578177093776; 
+ Sat, 04 Jan 2020 14:31:33 -0800 (PST)
+X-Google-Smtp-Source: APXvYqxZ9xu5pPEl/tZta5IFjHWD2OowF56rQef+Tq8t40vVIgU+opGjG+v1YdCfAYNHm+rPzfc+Tw==
+X-Received: by 2002:a25:3182:: with SMTP id
+ x124mr29220229ybx.323.1578177093426; 
+ Sat, 04 Jan 2020 14:31:33 -0800 (PST)
+Received: from [192.168.1.3] (cpe-107-10-246-128.neo.res.rr.com.
+ [107.10.246.128])
+ by smtp.gmail.com with ESMTPSA id w138sm26317883ywd.89.2020.01.04.14.31.32
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+ Sat, 04 Jan 2020 14:31:32 -0800 (PST)
+To: Robert Clausecker <fuz@fuz.su>, tuhs@minnie.tuhs.org
+References: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+ <1ingL0-5g6-00@marmaro.de> <20200104114750.GA30769@fuz.su>
+From: Chet Ramey <chet.ramey@case.edu>
+Autocrypt: addr=chet.ramey@case.edu; prefer-encrypt=mutual; keydata=
+ mQGiBEEOsGwRBACFa0A1oa71HSZLWxAx0svXzhOZNQZOzqHmSuGOG92jIpQpr8DpvgRh40Yp
+ AwdcXb8QG1J5yGAKeevNE1zCFaA725vGSdHUyypHouV0xoWwukYO6qlyyX+2BZU+okBUqoWQ
+ koWxiYaCSfzB2Ln7pmdys1fJhcgBKf3VjWCjd2XJTwCgoFJOwyBFJdugjfwjSoRSwDOIMf0D
+ /iQKqlWhIO1LGpMrGX0il0/x4zj0NAcSwAk7LaPZbN4UPjn5pqGEHBlf1+xDDQCkAoZ/VqES
+ GZragl4VqJfxBr29Ag0UDvNbUbXoxQsARdero1M8GiAIRc50hj7HXFoERwenbNDJL86GPLAQ
+ OTGOCa4W2o29nFfFjQrsrrYHzVtyA/9oyKvTeEMJ7NA3VJdWcmn7gOu0FxEmSNhSoV1T4vP2
+ 1Wf7f5niCCRKQLNyUy0wEApQi4tSysdz+AbgAc0b/bHYVzIf2uO2lIEZQNNt+3g2bmXgloWm
+ W5fsm/di50Gm1l1Na63d3RZ00SeFQos6WEwLUHEB0yp6KXluXLLIZitEJLQwQ2hldCBSYW1l
+ eSAoQ2FzZSBzdGFuZGFyZCkgPGNoZXQucmFtZXlAY2FzZS5lZHU+iF8EExECAB8FAkPi19EC
+ GwMHCwkIBwMCAQMVAgMDFgIBAh4BAheAAAoJELtYafBk6nSrelkAn31Gsuib7GcCZHbv5L5t
+ VKYR9LklAJ4hzUHKA49Z0QXR+qCb80osIcmPSbkBDQRBDrBvEAQAkK6TAOKBEM+EC4j6V/7o
+ /riVZqcgU5cid2qG9TXdwNtD9a3kvA/ObZBO93sX59wc6Bnwo4VJxsOmMlpGrAjJsxNwg3QH
+ akEtf8LXRbVpj5xStdmBdQZUhIQyalo/2/TZq5OijtddUQcL5cs70hTv/FpT3wUvr2Xr8rjF
+ 41IFEz8AAwcD/A0CZEGlzIrT5WCBnl6xBog/8vKiUCbarByat3d1mL6DbizvKNXQRTC9E/vE
+ dENAWCQCjr75Bu55xT8n3SXGtWdDC5xmZ/P3OBYORP8yl8H8I1FIosWOFirbIeYdZPq8SPD1
+ HL+EXo9zSiHVrrZRJ19ooCKKbSdXHFCY+aJG+0KZiEkEGBECAAkFAkEOsG8CGwwACgkQu1hp
+ 8GTqdKvjcACfZlkVCDwaz/NTO9cy3t69oWpVPNwAnRwe0qk/WL/gfhH346xh5B3HFbFN
+Organization: ITS, Case Western Reserve University
+Message-ID: <ba1e897d-c474-2425-b5dd-29f4913abe1f@case.edu>
+Date: Sat, 4 Jan 2020 17:31:31 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.3.1
+MIME-Version: 1.0
+In-Reply-To: <20200104114750.GA30769@fuz.su>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Junkmail-Status: score=9/90, host=mpv4-2015.case.edu
+X-Junkmail-PrAS-Raw: score=9/90, refid=2.7.2:2020.1.4.212418:17:9.975, ip=,
+ rules=__YOUTUBE_RCVD, DKIM_SIGNATURE,
+ __X_GOOGLE_DKIM_SIGNATURE, __HAS_REPLYTO, __HAS_CC_HDR,
+ __SUBJ_REPLY, __BOUNCE_CHALLENGE_SUBJ,
+ __BOUNCE_NDR_SUBJ_EXEMPT, __TO_MALFORMED_2, __TO_NAME,
+ __TO_NAME_DIFF_FROM_ACC, __HAS_REFERENCES, __REFERENCES,
+ __HAS_FROM, FROM_EDU_TLD, __HAS_MSGID, __SANE_MSGID,
+ DATE_TZ_NA, __USER_AGENT, __MOZILLA_USER_AGENT,
+ __MIME_VERSION, __IN_REP_TO, __CT, __CT_TEXT_PLAIN, __CTE,
+ __REPLYTO_SAMEAS_FROM_ADDY, __REPLYTO_SAMEAS_FROM_ACC,
+ __FROM_DOMAIN_IN_ANY_CC1, __FROM_DOMAIN_IN_ANY_CC2,
+ __TO_IN_SUBJECT2, __REPLYTO_SAMEAS_FROM_DOMAIN,
+ __DKIM_ALIGNS_1, __DKIM_ALIGNS_2, __ANY_URI, __URI_MAILTO,
+ __URI_WITH_PATH, __URI_NO_WWW, __CP_URI_IN_BODY,
+ __SUBJ_ALPHA_NEGATE, __URI_IN_BODY, __URI_NOT_IMG,
+ __MAIL_CHAIN, __FORWARDED_MSG, __BODY_NO_MAILTO,
+ __NO_HTML_TAG_RAW, BODYTEXTP_SIZE_3000_LESS,
+ BODY_SIZE_2000_2999, __MIME_TEXT_P1, __MIME_TEXT_ONLY,
+ [TRUNCATED], so=2010-03-03 19:42:08, dmn=2016-08-03-0138
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Reply-To: chet.ramey@case.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 1/4/20 6:47 AM, Robert Clausecker wrote:
+
+>> This is what wonder about: Why make ``>file'' a simple command,
+>> when -- as far as I can currently see -- there is no reason to do
+>> so, as all uses could have been achieved in more regular ways as
+>> well?
+
+I'm going to answer in terms of the Bourne shell and its successors.
+
+> I think the key reason is that the shell does not build an AST from
+> the command you type, instead executing the phrases it encounters as it
+> sees them.  
+
+This is false.
+
+> So when the shell sees ">file", it opens "file" for writing
+> in preparation of the rest of the command.  
+
+Also not correct, at least if you mean opening it before completing the
+parse.
+
+> If no command comes, the
+> line is handled the same way as an empty one and the redirections are
+> discarded.  
+
+Not really. The shell parses the line into a list of words. Those words
+make up a simple command, since none of the words were identified as a
+reserved word, and so are not the first word of a compound command. It's
+the default case, basically.
+
+The POSIX standard gives a pretty good summary of what happens next:
+the redirections get separated out and the rest of the words are
+expanded.
+
+You already have to deal with the expansions returning nothing, since the
+words could all be null variable expansions, so the case where there are
+no words besides redirections and assignment statements isn't that much
+different.
+
+> The shell could print an error here, 
+
+It could, but Bourne chose not to.
+
+> but avoiding the side
+> effect of opening "file" for lines just consisting of redirects would be
+> difficult.  But then, why should it print an error?  The behaviour is
+> not harmful after all 
+
+This is true. There aren't any other cases where the shell makes a null
+expansion an error without being directly asked, so it would not have
+made sense to make a command consisting entirely of words that expand to
+null an error. There's no good reason to treat a null command differently
+from that case.
+
+> and I'd say that nobody really thought about this
+> being a thing when the shell was originally written.
+
+On the contrary, I think Bourne made a conscious choice to handle
+redirections `separately' from simple command expansion and execution, and
+a conscious choice to continue to process redirections (in a subshell, as
+if the shell had forked to execute a non-builtin) when word expansion
+resulted in no words.
+
+It's the `exec' case with redirections that I think was the special case,
+since Bourne's (v7) shell didn't allow redirections with builtins at all.
+
+Chet
+
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet@case.edu    http://tiswww.cwru.edu/~chet/

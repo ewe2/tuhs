@@ -1,0 +1,80 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 15163 invoked from network); 19 May 2020 12:30:25 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 19 May 2020 12:30:25 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 833159C1E6; Tue, 19 May 2020 22:30:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 076C29C178;
+	Tue, 19 May 2020 22:29:43 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 967739C178; Tue, 19 May 2020 22:29:40 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 268F19C15F
+ for <tuhs@tuhs.org>; Tue, 19 May 2020 22:29:40 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 07AE618C086; Tue, 19 May 2020 08:29:39 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200519122939.07AE618C086@mercury.lcs.mit.edu>
+Date: Tue, 19 May 2020 08:29:39 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] v7 K&R C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+There was a recent message I now can't find that I wanted to reply to,
+something about which type to use to get a certain effect.
+
+I wanted to reply to say that I felt that it was not really the best way to
+go, to have one set of type names that tried to denote both i) the semantics
+of the data, and ii) the size of the item, using arbitrary names.
+
+This came up for me when we started to try and write portable networking code.
+There, you need to be able to specify very precisely how long fields are
+(well, in lower-level protocols, which use non-printable formats). How to do
+that in a way that was portable, in the compilers of the day, was a real
+struggle. (It might be doable now, but I think the fixes that allowed it were
+still just patches to something that had gone in the wrong direction, above.)
+
+I created a series of macros for type definitions, ones that separately and
+explicitly specified the semantics and size. They looked like 'xxxy', where
+'xxx' was the semantics (signed and unsigned integers, bit field, etc),
+and 'y' was a length indication (byte, short, long, and others). So you'd
+see things like 'unsb' and 'intl'.
+
+The interesting twist was a couple of unusual length specifiers; among them,
+'w' stood for 'the machine's natural word length', and 'f' meant 'no
+particular length, just whatever's fastest on this architecture/compiler, and
+at least 16 bits'. The former was useful in OSy type code; the latter for
+locals and things where nobody outside the machine would see them.
+
+Then you'd have to have a file of macro definitions (only one per machine)
+which translated them all into the local architecture/compiler - some didn't
+go, of course (no 'unsb' on a PDP-11), but it all worked really, really well,
+for many years.
+
+E.g. at one point, as a dare/hack, I said I'd move the MOS operating system, a
+version written in portable C (with that type name system) to the AMD 29000
+over one night. This wasn't totaly crazy; I'd already gotten the debugger (a
+DDT written in similar portable C) to run on the machine, so I knew where the
+potholes were. I'd have to write a small amount of machine language (which I
+could traslate from the M68K version), but most of it should just compile and
+go. I didn't quite make it, it wasn't quite running when people started coming
+in the next morning; but IIRC it started to work later that day.
+
+   Noel

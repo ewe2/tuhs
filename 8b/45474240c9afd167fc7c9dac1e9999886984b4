@@ -1,0 +1,84 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 12481 invoked from network); 14 Jun 2020 13:55:51 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 14 Jun 2020 13:55:51 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5D6679C21E; Sun, 14 Jun 2020 23:55:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9F2D39C1C8;
+	Sun, 14 Jun 2020 23:55:12 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 71C699C1C8; Sun, 14 Jun 2020 23:55:09 +1000 (AEST)
+Received: from mail.cs.dartmouth.edu (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D4A93945D9
+ for <tuhs@tuhs.org>; Sun, 14 Jun 2020 23:55:08 +1000 (AEST)
+Received: from tahoe.cs.Dartmouth.EDU (tahoe.cs.dartmouth.edu [129.170.212.20])
+ by mail.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTPS id 05EDt6CN475684
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Sun, 14 Jun 2020 09:55:06 -0400
+Received: from tahoe.cs.Dartmouth.EDU (localhost.localdomain [127.0.0.1])
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.14.3) with ESMTP id 05EDt6K6067821
+ for <tuhs@tuhs.org>; Sun, 14 Jun 2020 09:55:06 -0400
+Received: (from doug@localhost)
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.15.2/Submit) id 05EDt5YM067818
+ for tuhs@tuhs.org; Sun, 14 Jun 2020 09:55:05 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <202006141355.05EDt5YM067818@tahoe.cs.Dartmouth.EDU>
+Date: Sun, 14 Jun 2020 09:55:05 -0400
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] v7 K&R C [really lexers]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Interesting. My "speak" program had a trivial lexer that
+recognized literal tokens, many of which were prefixes
+of others, by maximum-munch binary search in a list of
+1600 entries. Entries gave token+translation+rewrite.
+The whole thing fit in 15K.
+
+Many years later I wrote a regex recognizer that special-cased
+alternations of lots of literals. I believe Gnu's regex.c does
+that, too. (My regex also supported conjunction and negation--
+legitimate regular-language operations--implemented by
+continuation-passing to avoid huge finite-state machines.)
+
+We have here a case of imperfect communication in 1127. Had I
+been conscious of the lex-explosion problem, I might have
+thought of speak and put support for speak-like tables
+into lex. As it happened, I only used yacc/lex once, quite
+successfully, for a small domain-specific language. 
+
+Doug
+
+Steve Johnson wrote:
+
+I also gave up on lex for parsing fairly early.   The problem was
+reserved words.  These looked like identifiers, but the state machine to
+pick out a couple of dozen reserved words out of all identifiers was too
+big for the PDP-11.   When I wrote spell, I ran into the same problem.
+I had some rules that wanted to convert plurals to singular forms that
+would be found in the dictionary.   Writing a rule to recognize .*ies
+and convert the "ies" to "y" blew out the memory after only a handful of
+patterns.   My solution was to pick up words and reverse them before
+passing them through lex, so I looked for the pattern "sei.*", converted
+it to "y" and then reversed the word again.  As it turned out, I only
+owned spell for a few weeks because Doug and others grabbed it and ran
+with it.

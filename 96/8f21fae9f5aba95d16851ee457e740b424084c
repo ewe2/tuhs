@@ -1,0 +1,133 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id c27d6a71
+	for <ml@inbox.vuxu.org>;
+	Fri, 10 Jan 2020 14:28:14 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 940669B83F; Sat, 11 Jan 2020 00:28:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3F9E393D85;
+	Sat, 11 Jan 2020 00:27:44 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1289A93D07; Sat, 11 Jan 2020 00:27:42 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 90FA393D07
+ for <tuhs@minnie.tuhs.org>; Sat, 11 Jan 2020 00:27:41 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 8642618C09C; Fri, 10 Jan 2020 09:27:40 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200110142740.8642618C09C@mercury.lcs.mit.edu>
+Date: Fri, 10 Jan 2020 09:27:40 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] wump.c for v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Clem Cole <clemc@ccc.com>
+
+    > So, unless anyone else can illuminate, I'm not sure where the first cpp
+    > that some of us using v6 had originated.
+
+I recall a prior extensive discussion about 'cpp'. I looked, and found it
+(March 30, 2017) but it was a private discussion, not on TUHS (although you
+were part of it :-). Here are clips of what I wrote (I don't want to re-post
+what others wrote) from what I wrote, which tell most of the story:
+
+
+There were a series of changes to C before V7 came out, resulting in the
+so-called 'phototypsetter C compiler' (previously discussed on TUHS), and they
+included the preprocessor. There's that series of short notes describing
+changes to C (and the compiler), and they include mention of the preprocessor.
+
+[Available here: http://gunkies.org/wiki/Typesetter_C for those who want to see
+them.]
+
+The MIT 'V6' Unix (which was, AFAICT, an augmented version of an early version
+of PWB Unix) had that C compiler; and if you look at the PWB1 tree online, it
+does have the C with 'cpp':
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=PWB1/sys/c/c
+
+I did a diff of that 'cpp' with the MIT one, and they are basically identical.
+
+----
+
+I went looking for the C manual in the V6 distro, to see if it mentioned the
+pre-processor. And it does:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/doc/c/c5
+
+(Section 12, "Compiler control lines", about half way down.) So, I'm like,
+'WTF? I just looked at cc.c and no mention of cpp!'
+
+So I looked a little harder, and if you look at the cc.c in the distro (URL
+above), you see this:
+
+	insym(&defloc, "define");
+	insym(&incloc, "include");
+	insym(&eifloc, "endif");
+	insym(&ifdloc, "ifdef");
+	insym(&ifnloc, "ifndef");
+	insym(&unxloc, "unix");
+
+The pre-processor is integrated into 'cc' in the initial V6. So we do have a very
+early version of it, after all...
+
+----
+
+So, 'cc' in V5 also included pre-processor support (just #define and #include,
+though):
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V5/usr/source/s1/cc.c
+
+Although we don't have the source to 'cc' to show it, V4 also appears to have
+had it, per the man page:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/man/man1/cc.1
+
+"If the -p flag is used, only the macro prepass is run on all files whose name
+ends in .c"; and the V4 system source:
+
+  http://minnie.tuhs.org/cgi-bin/utree.pl?file=V4/nsys
+
+also has .h files.
+
+No sign of it in the man page for cc.1 in V3, though.
+
+
+This all makes sense. .h files aren't any use with[out] #include, and without
+#include, you have to have the structure definition, etc in multiple source
+files. So #include would have gotten added very early on.
+
+In V3, the system was apparently still in assembler, so no need.
+
+-----
+
+
+Also, there's an error in:
+
+    https://ewe2.ninja/computers/cno/
+
+when it says "V6 was a very different beast for programming to V7. No c
+preprocessor. The practical upshot of this is no #includes." that's
+clearly incorrect (see above). Also, if you look at Lions (which is pure
+early V6), in the source section, all the .c files have #include's.
+
+      Noel

@@ -1,0 +1,70 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 30455 invoked from network); 23 Jun 2020 22:18:01 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 23 Jun 2020 22:18:01 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4DB75945B2; Wed, 24 Jun 2020 08:17:56 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B2FDE9459A;
+	Wed, 24 Jun 2020 08:17:31 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 352189459A; Wed, 24 Jun 2020 08:17:29 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 2251294599
+ for <tuhs@tuhs.org>; Wed, 24 Jun 2020 08:17:28 +1000 (AEST)
+From: Norman Wilson <norman@oclsc.org>
+To: tuhs@tuhs.org
+Date: Tue, 23 Jun 2020 18:17:14 -0400
+Message-ID: <1592950638.2831.for-standards-violators@oclsc.org>
+Subject: Re: [TUHS] VFS prior to 1984
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Rob Pike:
+
+  For my taste, the various Unix file system switches that I've seen are too
+  firmly tied to the idea of blocks and disks and all that, making them less
+  flexible than they should have been. That's why the Plan 9 version is about
+  names and byte streams, to make it as general as possible.
+
+=====
+
+The only file-system switch I know well is that in the later
+Research systems.  It has nothing to do with disks or blocks.
+It is about names and inodes: turn name to struct inode, read
+arbitrary chunk of data, write arbitrary chunk of data, create
+file, unlink file, abominable ill-defined system call that just
+wouldn't die erm I mean ioctl, and so on.
+
+It was certainly a cheap hack (as its author cheerfully admitted)
+but it really was about I/O operations, not about simulating
+disks.  That's why it so easily supported /proc (the one that
+was just about processes, not the misnamed Linux one that
+is really about all things in the kernel so you don't need
+/dev/kmem).
+
+I don't know a lot about later VFSes like those in SunOS or
+Linux or the BSDs.  Blockiness might well have crept in in
+support of memory-mapped I/O or in collaboration with the
+buffer-cache implementation.  The Research version was never
+used directly to support different on-disk file system formats
+(we did a different pjw cheap hack for the one case that
+mattered in the kernel, and used the idea later developed
+more by FUSE for other cases because speed didn't matter).
+
+Norman Wilson
+Toronto ON

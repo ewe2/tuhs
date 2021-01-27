@@ -1,0 +1,96 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18265 invoked from network); 14 Jun 2020 14:47:09 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 14 Jun 2020 14:47:09 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A81159C24B; Mon, 15 Jun 2020 00:47:02 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EBFFD9C1C8;
+	Mon, 15 Jun 2020 00:46:46 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4DC919C1C8; Mon, 15 Jun 2020 00:46:45 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E3FF6945D9
+ for <tuhs@minnie.tuhs.org>; Mon, 15 Jun 2020 00:46:44 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id E4BBF18C09D; Sun, 14 Jun 2020 10:46:43 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200614144643.E4BBF18C09D@mercury.lcs.mit.edu>
+Date: Sun, 14 Jun 2020 10:46:43 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Accessing the PDP-11/70 MMU registers and the kernel's u
+ area
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Diomidis Spinellis
+
+    > From the 2.11 BSD sources I understand that the PDP-11/70 MMU address
+    > and data registers, KDSA and KDSD, start at 0172360 and 0172320
+    > respectively ...
+
+Expressed as 16-bit addreses, on a PDP-11 with mapping disabled, yes.
+
+    > I checked this by looking at /dev/mem. 
+
+I don't know about 2.11, but in other PDP-11 Unixes, /dev/mem gives access to
+the actual CPU memory bus (which on a /34, etc, is the 18-bit address UNIBUS;
+on a /70 it's a separate 22-bit address bus).  In the /70 memory address
+space, the 'I/O page' (which is where the PxR's live) is at the top end of it,
+i.e. the registers are at 017772360 (KDSAR0), etc.
+
+    > What am I missing?
+
+PDP-11's have a plethora of address spaces, of different sizes. You need to
+always be aware of which one you're working in.
+
+    > My goal is to access from the console the kernel's u area.  According to
+    > mem(4) and the symbols in /unix, this should be at address 0140000.
+
+In the kernel virtual address space, yes.
+
+    > Indeed, accessing it through /dev/kmem I get the expected results for
+    > e.g. u_comm and u_uid.
+
+Because /dev/kmem gives access to kernel address space for the _current_
+process.
+
+    > I have been unable to find it in the machine's physical memory
+
+By far and away the easiest thing, for the _current_ process, is to
+use /dev/kmem, which automagally applies the correct mapping.
+
+For other processes, if the process is swapped in, there's some field in the
+proc structure which says where in physical memory it us. IIRC, the user
+struct and the kernel stack are stored in the very bottom of that.
+
+(This article:
+
+    http://gunkies.org/wiki/Unix_V6_dump_analysis#Memory_layouts
+
+goes into some detail for V6. Not sure how different 2.11 is; I know it uses
+one block of kernel address space to map in code overlays, but I don't know
+all the details of how it works.)
+
+Anyway, using that, one could read the user area in /dev/mem, at the
+appropriate location.
+
+For swapped-out processes, a similar algorithm applies, but you'll
+have to look in the swap device (obviously).
+
+     Noel

@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18434 invoked from network); 6 Jul 2020 23:34:56 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Jul 2020 23:34:56 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 12C129C72C; Tue,  7 Jul 2020 09:34:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9CC4494598;
+	Tue,  7 Jul 2020 09:33:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 41A7F94598; Tue,  7 Jul 2020 09:33:50 +1000 (AEST)
+X-Greylist: delayed 605 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 07 Jul 2020 09:33:48 AEST
+Received: from hop.toad.com (75-101-100-43.dsl.static.fusionbroadband.com
+ [75.101.100.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id ECEFC94588
+ for <tuhs@tuhs.org>; Tue,  7 Jul 2020 09:33:48 +1000 (AEST)
+Received: from hop.toad.com (localhost [127.0.0.1])
+ by hop.toad.com (8.12.9/8.12.9) with ESMTP id 066NNbm0023549;
+ Mon, 6 Jul 2020 16:23:37 -0700
+To: Chris Torek <torek@torek.net>, gnu@toad.com
+In-reply-to: <202007061651.066GpW9s048139@elf.torek.net> 
+References: <202007061651.066GpW9s048139@elf.torek.net>
+Comments: In-reply-to Chris Torek <torek@torek.net>
+ message dated "Mon, 06 Jul 2020 09:51:27 -0700."
+Date: Mon, 06 Jul 2020 16:23:37 -0700
+Message-ID: <23548.1594077817@hop.toad.com>
+From: John Gilmore <gnu@toad.com>
+Subject: Re: [TUHS] ECC memory
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Chris Torek <torek@torek.net> wrote:
+> I keep thinking I'll replace it with a new box that does have ECC,
+> but haven't gotten around to it yet.  I see some consumer-priced
+> AMD CPUs have at least theoretical ECC support but I haven't found
+> anything that says the ECC actually works, and have seen a few
+> articles that hint that it doesn't.
+
+All the AMD Ryzen CPUs and chipsets have built-in ECC.  It's easy since
+the CPU pins talk directly to main memory.  This is one among thousands
+of reasons to avoid buying Intel CPUs.
+
+The machine I'm typing on has ECC memory, and I bought it in 2019.  You
+have to pick a motherboard that wasn't designed by dolts.  (I got the
+Gigabyte Aorus "AX-370-GAMING5", which of course is no longer
+manufactured.)  And you have to spend an extra $5 or $10 on your DIMMs.
+Get the motherboard maker's "Qualified Vendor List", e.g.:
+
+    http://download.gigabyte.us/FileList/Memory/mb_memory_ga-ax370-gaming5_pinnacle_v4.pdf
+
+Be sure there *are* some approved ECC dimms on the list.  Buy those.
+You may or may not have to fiddle something in the BIOS settings.
+
+Check dmesg when you first boot the machine (booting the installer is
+fine).  Make sure the Linux kernel sees the DIMMS, isn't subverted by
+the BIOS, and understands the CPU/memory control registers.  When it
+works, you'll see something like:
+
+[    0.180161] EDAC MC: Ver: 3.0.0
+[    9.389338] EDAC amd64: Node 0: DRAM ECC enabled.
+[    9.389339] EDAC amd64: F17h detected (node 0).
+[    9.389375] EDAC MC: UMC0 chip selects:
+[    9.389376] EDAC amd64: MC: 0:     0MB 1:     0MB
+[    9.389376] EDAC amd64: MC: 2:  4096MB 3:  4096MB
+[    9.389378] EDAC MC: UMC1 chip selects:
+[    9.389379] EDAC amd64: MC: 0:     0MB 1:     0MB
+[    9.389379] EDAC amd64: MC: 2:  4096MB 3:  4096MB
+[    9.389380] EDAC amd64: using x8 syndromes.
+[    9.389380] EDAC amd64: MCT channel count: 2
+[    9.389422] EDAC MC0: Giving out device to module amd64_edac controller F17h: DEV 0000:00:18.3 (INTERRUPT)
+[    9.389428] EDAC PCI0: Giving out device to module amd64_edac controller EDAC PCI controller: DEV 0000:00:18.0 (POLLED)
+[    9.389429] AMD64 EDAC driver v3.5.0
+
+Success!  Non-flaky main memory in a PC clone!  Cost: about $50 plus
+paying attention.
+
+	John
+	

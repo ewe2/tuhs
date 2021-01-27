@@ -1,0 +1,117 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	NICE_REPLY_A,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 31097 invoked from network); 26 Jan 2021 17:51:46 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 26 Jan 2021 17:51:46 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5EBB99BA3F; Wed, 27 Jan 2021 03:51:44 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id F39C39B720;
+	Wed, 27 Jan 2021 03:51:16 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 73D819B720; Wed, 27 Jan 2021 03:51:13 +1000 (AEST)
+X-Greylist: delayed 3855 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 27 Jan 2021 03:51:12 AEST
+Received: from mail.kaybuena.com (rrcs-71-42-153-194.sw.biz.rr.com
+ [71.42.153.194])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B1E829B715
+ for <tuhs@minnie.tuhs.org>; Wed, 27 Jan 2021 03:51:12 +1000 (AEST)
+Received: from [192.168.147.6] (4dot2 [71.42.153.195])
+ by mail.kaybuena.com (8.15.2/8.15.2) with ESMTP id 10QGksPx2280277
+ for <tuhs@minnie.tuhs.org>; Tue, 26 Jan 2021 10:46:54 -0600
+To: tuhs@minnie.tuhs.org
+References: <E1l444e-0002Mj-N4@tanda>
+ <CAEdTPBfZRVVQzmT28MoLsGpz1z-kNea5n3zpupvzn5Ts=Dg6Qw@mail.gmail.com>
+From: "Charles H. Sauer" <sauer@technologists.com>
+Message-ID: <8a17ae54-1b00-e9f7-ea44-763c29c4023f@technologists.com>
+Date: Tue, 26 Jan 2021 10:46:56 -0600
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.1
+MIME-Version: 1.0
+In-Reply-To: <CAEdTPBfZRVVQzmT28MoLsGpz1z-kNea5n3zpupvzn5Ts=Dg6Qw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] System V Release 2, adding swap?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 1/26/2021 10:05 AM, Henry Bent wrote:
+> On Mon, 25 Jan 2021 at 11:02, Arnold Robbins <arnold@skeeve.com 
+> <mailto:arnold@skeeve.com>> wrote:
+> 
+>     Hi.
+> 
+>     Does anyone know how to add swap space on a System V Release 2 system?
+>     In particular, on an emulated AT&T 3B1. The kernel is S5R1 or S5R2
+>     vintage.
+> 
+>     I don't see any commands with 'swap' in their names.
+> 
+> A little bit of Google Groups trawling turned up this: 
+> https://groups.google.com/g/comp.sys.att/c/8XLILI3K8-Y/m/VxVMJNdt9NQJ 
+> <https://groups.google.com/g/comp.sys.att/c/8XLILI3K8-Y/m/VxVMJNdt9NQJ>
+> 
+> But I don't have one of those systems, so I have no way to verify.
+> 
+> -Henry
+
+I don't know about 3B versions, but on Dell SVR4 on 86Box 
+(https://notes.technologists.com/notes/2021/01/19/koko-dell-unix-sustainable/) 
+I see
+/ # apropos swap
+swap(1m): swap - swap administrative interface
+swapctl(2): swapctl - manage swap space
+...
+
+I've never tried to adjust swap, just trust that our install did the 
+right thing. On this system, freshly booted, with 32M memory and 5G 
+"disk", I see
+/ # swap -l
+path                 dev  swaplo blocks   free
+/dev/swap            0,2       0  98784  90960
+
+Here's the beginning of man swap:
+NAME
+      swap - swap administrative interface
+
+SYNOPSIS
+      /usr/sbin/swap -a swapname swaplow swaplen
+      /usr/sbin/swap -d swapname swaplow
+      /usr/sbin/swap -l [ -s ]
+      /usr/sbin/swap -s
+
+DESCRIPTION
+      swap provides a method of adding, deleting, and monitoring the  system
+      swap  areas  used  by  the  memory manager.  The following options are
+      recognized:
+
+      -a   Add the specified swap area.  swapname is the name of  the  block
+           special partition, e.g., /dev/dsk/0s2 or a regular file.  swaplow
+           is the offset in 512-byte blocks into  the  partition  where  the
+           swap  area  should begin.  swaplen is the length of the swap area
+           in 512-byte blocks.  This option can only be used by  the  super-
+           user.   If  additional  swap areas are added, it is normally done
+           during the system start up routine  /etc/rc2.d  when  going  into
+           multi-user mode.
+...
+
+Charlie
+-- 
+voice: +1.512.784.7526       e-mail: sauer@technologists.com
+fax: +1.512.346.5240         Web: https://technologists.com/sauer/
+Facebook/Google/Skype/Twitter: CharlesHSauer

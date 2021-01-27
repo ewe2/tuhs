@@ -1,0 +1,409 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 8776648e
+	for <ml@inbox.vuxu.org>;
+	Mon, 6 Jan 2020 22:15:31 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id EA8F39BB79; Tue,  7 Jan 2020 08:15:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 97D1C9BB66;
+	Tue,  7 Jan 2020 08:15:06 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="wkmhNbD7";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2729D9BB66; Tue,  7 Jan 2020 08:15:05 +1000 (AEST)
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com
+ [209.85.222.169])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2D4719BB4A
+ for <tuhs@minnie.tuhs.org>; Tue,  7 Jan 2020 08:15:04 +1000 (AEST)
+Received: by mail-qk1-f169.google.com with SMTP id a203so41295651qkc.3
+ for <tuhs@minnie.tuhs.org>; Mon, 06 Jan 2020 14:15:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=ZJuCQhSF/JrXXnAmI5J4lEVk2L590G/niwrO1Vf9Xc4=;
+ b=wkmhNbD7jv94NyGrBLp8KkS9Ig9TinSpoUn8m7dyl9I3OQ0NSccxkmDm3SQL5kguPq
+ xze2y15/YFmg11bn1HF7z/SLlCSRyiJ76EvDJPSHVrNQOAaJnkv8/ETcrbr+MGDBXA9I
+ sRFSPNvNO965ptxEGFAzEyxehJAGTnSh0/DZ+A/XV+jUSPSDJwC8BQX+HEGYst6soH6Z
+ PJl7Oc2h1VjRs4/OykIvobNtIguE2Ev2ieOvi4+v7124MuwwaFYIRb78S1/N7rxlwZMa
+ AYZH45ZPhTPZcVDbMZrnlgV5WhmPPe/ipTFhB2DUt/jfO/pK0yICtAGBBUCb1PDHbjQZ
+ oZRw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=ZJuCQhSF/JrXXnAmI5J4lEVk2L590G/niwrO1Vf9Xc4=;
+ b=kPloYo7h1149BYz1j+5ZqYzrQ+aQ9j8Pkh23t7H/piFTxkWbi9+WmZfiAFa3eqn/SH
+ eAb6H4zlCM7eqxxBlp820h1m72hR1uCVE1rrwT17RZlyUZBLOX/6ZN5CQeN/LNJ6ehCz
+ kXdNM+QyH7k5m/7QQ0rPrP6tmWEaIuW+ldvOm9dBHmSFoazC1CwNFxlZDZZIwJy0kbuJ
+ TtMVud2sqA/Mmyfew3rhViYlOTRfouWGdZQWETIoc3tzcpVT8TkvycnozXXjY/H+RWvz
+ +2iKIEH/pML1P7gv8gBKenn9zMpzWF/szvLTQj+2t+qj3yr5bSy2JK04OXoe1g5f9FGh
+ n/xQ==
+X-Gm-Message-State: APjAAAVp08ZCvZsGJC4MtdLwZFWxFTZk8q+SGKSfoOD7yel/JhEOZpD7
+ proHa4EOtbkxnep+UetmEmvk96+7G1OF05ZyAEgTzKNX
+X-Google-Smtp-Source: APXvYqykvN94TlE0Q+YdvfJpx8zB6noY/DF6bVqtlLHk/Q5bKbyNPgoLtg42cQUVL4wbOl2Urd4GgZ5H/XhVKt+YRX0=
+X-Received: by 2002:a05:620a:94f:: with SMTP id
+ w15mr83166340qkw.380.1578348903125; 
+ Mon, 06 Jan 2020 14:15:03 -0800 (PST)
+MIME-Version: 1.0
+References: <42cf63eb-d51e-d1ab-34ed-fbff94e18999@gmail.com>
+ <CAC20D2MbCHSgfRr4PJWofsx8+_jOaAGuR=80L8qmkTvY1afyNg@mail.gmail.com>
+ <682F5EA8-A1D2-4A5A-933F-C46B3631030E@gmail.com>
+ <CAC20D2PEG6RX0eygd0jAK9+U79DC2yayjNSyi6bquZs=dT5YiA@mail.gmail.com>
+ <CANCZdfrryN7iaHsSF0Wpdd6-t55mWia-BReC_chiEVw9GHQ9ng@mail.gmail.com>
+ <ca32965e-2b2f-83ce-2403-7c99a03e2eb1@gmail.com>
+ <CANCZdfoEhGBzy13mGvw8jJNz0pvYVjBFy3-9BQ0mN8-4HB7bLw@mail.gmail.com>
+ <CAC20D2M5bpr_SY2VNYpQXTMYbsTQH94WRzJndmm0EJcJdWohhg@mail.gmail.com>
+ <CAC20D2PzZ+4qVE7Tnb0tYiqchzfjWnjkR_SenSrJRTL2E80XKA@mail.gmail.com>
+In-Reply-To: <CAC20D2PzZ+4qVE7Tnb0tYiqchzfjWnjkR_SenSrJRTL2E80XKA@mail.gmail.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Mon, 6 Jan 2020 15:14:50 -0700
+Message-ID: <CANCZdfp0R8_UJg0FzFDrGeY9yqtJGEEK=jyX_58xAfQdLrm2+A@mail.gmail.com>
+To: Clem Cole <clemc@ccc.com>
+Content-Type: multipart/alternative; boundary="000000000000b3eb16059b7ffd0f"
+Subject: Re: [TUHS] wump.c for v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>, Will Senn <will.senn@gmail.com>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000b3eb16059b7ffd0f
+Content-Type: text/plain; charset="UTF-8"
+
+You have V4 sources? The TUHS archive doesn't have them that I've seen...
+
+Warner
+
+On Mon, Jan 6, 2020, 2:38 PM Clem Cole <clemc@ccc.com> wrote:
+
+> Some day ....   So I took a peak at the V5 crt0.s and guess what -- it
+> matches!
+>
+> On Mon, Jan 6, 2020 at 4:08 PM Clem Cole <clemc@ccc.com> wrote:
+>
+>> You got my curiosity up and found the V5 and V6 source code (I did not
+>> have V4 easy to get, where I am today) ;-)
+>>
+>> A big clue of it being C will be having crt0.s (below) in the first few
+>> bytes of the disassembled code.  We see the a.out header (i.e. start at
+>> offset 20 for the code) and look what's there.  I'm going to guess that is
+>> at 046 is the address of _main, from the call instruction at address 034.
+>> The Trap 1 is a sys exit @ address 044.
+>> But .. the V6 crt0.s source has a call to _exit, which is lacking in the
+>> binary below.   So it means that the binary was not created with the C
+>> runtime and probably not the v6 C compiler in the sources.  So I took a
+>> peak at the V6 crt0.s and guess what -- it matches!
+>>
+>> So, I'm going to guess the binary was compiled and linked with an earlier
+>> compiler.  Ao ... if I had to guess, the programs are similar, but possibly
+>> different.
+>>
+>> % more wump.das
+>> ;
+>> ; pdp11dasm version 0.0.3
+>> ; disassembly of wump
+>> ;
+>> 000000: 000407                  br      20                      ; ..
+>> ;
+>> 000002: 005334                  dec     @(r4)+                  ; \.
+>> 000004: 004524                  jsr     r5,(r4)+                ; T.
+>> 000006: 002312                  bge     37777777634             ; J.
+>> 000010: 000000                  halt                            ; ..
+>> 000012: 000000                  halt                            ; ..
+>> 000014: 000000                  halt                            ; ..
+>> ;
+>> 000016: 000001                  wait                            ; ..
+>> 000020: 170011                  setd                            ; .p
+>> 000022: 010600                  mov     r6,r0                   ; ..
+>> 000024: 011046                  mov     (r0),-(r6)              ; &.
+>> 000026: 005720                  tst     (r0)+                   ; P.
+>> 000030: 010066 000002           mov     r0,2(r6)                ; 6...
+>> 000034: 004767 000006           call    46                      ; w...
+>> 000040: 022626                  cmp     (r6)+,(r6)+             ; .%
+>> 000042: 005000                  clr     r0                      ; ..
+>> 000044: 104401                  trap    1                       ; ..
+>> 000046: 004567 005174           jsr     r5,5246                 ; w.|.
+>> 000052: 005746                  tst     -(r6)                   ; f.
+>> 000054: 012716 011230           mov     #11230,(r6)             ; N...
+>> 000060: 004737 002776           call    @#2776                  ; _.~.
+>> 000064: 004767 002262           call    2352                    ; w.2.
+>> 000070: 022700 000171           cmp     #171,r0                 ; @%y.
+>> 000074: 001027                  bne     154                     ; ..
+>> 000076: 005004                  clr     r4                      ; ..
+>> 000100: 010400                  mov     r4,r0                   ; ..
+>> 000102: 006300                  asl     r0                      ; @.
+>> 000104: 005760 005334           tst     5334(r0)                ; p.\.
+>> 000110: 001421                  beq     154                     ; ..
+>> 000112: 032704 000001           bit     #1,r4                   ; D5..
+>> 000116: 001403                  beq     126                     ; ..
+>> 000120: 012716 000024           mov     #24,(r6)                ; N...
+>> 000124: 000402                  br      132                     ; ..
+>> ;
+>> 000126: 012716 000003           mov     #3,(r6)                 ; N...
+>> 000132: 010400                  mov     r4,r0                   ; ..
+>> 000134: 006300                  asl     r0                      ; @.
+>> 000136: 016046 005334           mov     5334(r0),-(r6)          ; &.\.
+>> 000142: 004737 002776           call    @#2776                  ; _.~.
+>>
+>>
+>>
+>>
+>>
+>> V6: s4/crt0.s:
+>> / C runtime startoff
+>>
+>> .globl  savr5
+>> .globl  _exit
+>>
+>> .globl  _main
+>>
+>> start:
+>>         setd
+>>         mov     sp,r0
+>>         mov     (r0),-(sp)
+>>         tst     (r0)+
+>>         mov     r0,2(sp)
+>>         jsr     pc,_main
+>>         mov     r0,(sp)
+>>         jsr     pc,*$_exit
+>>         sys     exit
+>>
+>> .bss
+>> savr5:  .=.+2
+>>
+>> V5: s4/crt0.s:
+>> / C runtime startoff
+>>
+>> .globl  savr5
+>>
+>> .globl  _main
+>>
+>> start:
+>>         setd
+>>         mov     sp,r0
+>>         mov     (r0),-(sp)
+>>         tst     (r0)+
+>>         mov     r0,2(sp)
+>>         jsr     pc,_main
+>>         cmp     (sp)+,(sp)+
+>>         clr     r0
+>>         sys     exit
+>>
+>> .bss
+>> savr5:  .=.+2
+>>
+>> On Mon, Jan 6, 2020 at 1:48 PM Warner Losh <imp@bsdimp.com> wrote:
+>>
+>>>
+>>>
+>>> On Mon, Jan 6, 2020 at 11:38 AM Will Senn <will.senn@gmail.com> wrote:
+>>>
+>>>> On 1/6/20 12:29 PM, Warner Losh wrote:
+>>>>
+>>>> The good news is that disassembly will tell you right away if it was
+>>>> written in C or not.
+>>>>
+>>>>
+>>>> OK. I give up. How?
+>>>>
+>>>
+>>> Generally, the C compiler generates code that's quite distinctive (at
+>>> least PCC does, not sure about Dennis' compiler). People writing free
+>>> assembler tend to do really weird things for function entry / return.
+>>>
+>>> And it will likely tell you if it's some weird wrapper around another
+>>> binary, though that wasn't too common at bell labs.
+>>>
+>>> Warner
+>>>
+>>
+
+--000000000000b3eb16059b7ffd0f
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+PGRpdiBkaXI9ImF1dG8iPllvdSBoYXZlIFY0IHNvdXJjZXM/IFRoZSBUVUhTIGFyY2hpdmUgZG9l
+c24mIzM5O3QgaGF2ZSB0aGVtIHRoYXQgSSYjMzk7dmUgc2Vlbi4uLjxkaXYgZGlyPSJhdXRvIj48
+YnI+PC9kaXY+PGRpdiBkaXI9ImF1dG8iPldhcm5lcjwvZGl2PjwvZGl2Pjxicj48ZGl2IGNsYXNz
+PSJnbWFpbF9xdW90ZSI+PGRpdiBkaXI9Imx0ciIgY2xhc3M9ImdtYWlsX2F0dHIiPk9uIE1vbiwg
+SmFuIDYsIDIwMjAsIDI6MzggUE0gQ2xlbSBDb2xlICZsdDs8YSBocmVmPSJtYWlsdG86Y2xlbWNA
+Y2NjLmNvbSI+Y2xlbWNAY2NjLmNvbTwvYT4mZ3Q7IHdyb3RlOjxicj48L2Rpdj48YmxvY2txdW90
+ZSBjbGFzcz0iZ21haWxfcXVvdGUiIHN0eWxlPSJtYXJnaW46MCAwIDAgLjhleDtib3JkZXItbGVm
+dDoxcHggI2NjYyBzb2xpZDtwYWRkaW5nLWxlZnQ6MWV4Ij48ZGl2IGRpcj0ibHRyIj48ZGl2IGNs
+YXNzPSJnbWFpbF9kZWZhdWx0IiBzdHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNh
+bnMtc2VyaWYiPlNvbWUgZGF5IC4uLi7CoCDCoFNvIEkgdG9vayBhIHBlYWsgYXQgdGhlPGZvbnQg
+Y29sb3I9IiMwMDAwZmYiPiA8Zm9udCBzdHlsZT0iYmFja2dyb3VuZC1jb2xvcjpyZ2IoMjU1LDI1
+NSwwKSI+VjU8L2ZvbnQ+IDwvZm9udD5jcnQwLnMgYW5kIGd1ZXNzIHdoYXQgLS0gaXQgbWF0Y2hl
+cyHCoDwvZGl2PjwvZGl2Pjxicj48ZGl2IGNsYXNzPSJnbWFpbF9xdW90ZSI+PGRpdiBkaXI9Imx0
+ciIgY2xhc3M9ImdtYWlsX2F0dHIiPk9uIE1vbiwgSmFuIDYsIDIwMjAgYXQgNDowOCBQTSBDbGVt
+IENvbGUgJmx0OzxhIGhyZWY9Im1haWx0bzpjbGVtY0BjY2MuY29tIiB0YXJnZXQ9Il9ibGFuayIg
+cmVsPSJub3JlZmVycmVyIj5jbGVtY0BjY2MuY29tPC9hPiZndDsgd3JvdGU6PGJyPjwvZGl2Pjxi
+bG9ja3F1b3RlIGNsYXNzPSJnbWFpbF9xdW90ZSIgc3R5bGU9Im1hcmdpbjowcHggMHB4IDBweCAw
+LjhleDtib3JkZXItbGVmdDoxcHggc29saWQgcmdiKDIwNCwyMDQsMjA0KTtwYWRkaW5nLWxlZnQ6
+MWV4Ij48ZGl2IGRpcj0ibHRyIj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0IiBzdHlsZT0iZm9u
+dC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNhbnMtc2VyaWYiPllvdSBnb3QgbXkgY3VyaW9zaXR5
+IHVwIGFuZCBmb3VuZCB0aGUgVjUgYW5kIFY2IHNvdXJjZSBjb2RlIChJIGRpZCBub3QgaGF2ZSBW
+NCBlYXN5IHRvIGdldCwgd2hlcmUgSSBhbSB0b2RheSkgOy0pPC9kaXY+PGRpdiBjbGFzcz0iZ21h
+aWxfZGVmYXVsdCIgc3R5bGU9ImZvbnQtZmFtaWx5OmFyaWFsLGhlbHZldGljYSxzYW5zLXNlcmlm
+Ij48YnI+PC9kaXY+PGRpdiBjbGFzcz0iZ21haWxfZGVmYXVsdCIgc3R5bGU9ImZvbnQtZmFtaWx5
+OmFyaWFsLGhlbHZldGljYSxzYW5zLXNlcmlmIj5BIGJpZyBjbHVlIG9mIGl0IGJlaW5nIEMgd2ls
+bCBiZSBoYXZpbmfCoGNydDAucyAoYmVsb3cpIGluIHRoZSBmaXJzdCBmZXcgYnl0ZXMgb2YgdGhl
+IGRpc2Fzc2VtYmxlZCBjb2RlLsKgIFdlIHNlZSB0aGUgYS5vdXQgaGVhZGVyIChpLmUuIHN0YXJ0
+IGF0IG9mZnNldCAyMCBmb3IgdGhlIGNvZGUpIGFuZCBsb29rIHdoYXQmIzM5O3MgdGhlcmUuwqAg
+SSYjMzk7bSBnb2luZyB0byBndWVzcyB0aGF0IGlzIGF0IDA0NiBpcyB0aGUgYWRkcmVzcyBvZiBf
+bWFpbiwgZnJvbSB0aGUgY2FsbCBpbnN0cnVjdGlvbiBhdCBhZGRyZXNzIDAzNC4gVGhlIFRyYXAg
+MSBpcyBhIHN5cyBleGl0wqBAIGFkZHJlc3MgMDQ0LjwvZGl2PjxkaXYgY2xhc3M9ImdtYWlsX2Rl
+ZmF1bHQiIHN0eWxlPSJmb250LWZhbWlseTphcmlhbCxoZWx2ZXRpY2Esc2Fucy1zZXJpZiI+QnV0
+IC4uIHRoZSBWNiBjcnQwLnMgc291cmNlIGhhcyBhIGNhbGwgdG8gX2V4aXQsIHdoaWNowqBpcyBs
+YWNraW5nIGluIHRoZSBiaW5hcnkgYmVsb3cuwqAgwqBTbyBpdCBtZWFucyB0aGF0IHRoZSBiaW5h
+cnkgd2FzIG5vdCBjcmVhdGVkIHdpdGggdGhlIEMgcnVudGltZSBhbmQgcHJvYmFibHkgbm90IHRo
+ZSB2NiBDIGNvbXBpbGVyIGluIHRoZSBzb3VyY2VzLsKgIFNvIEkgdG9vayBhIHBlYWsgYXQgdGhl
+IFY2IGNydDAucyBhbmQgZ3Vlc3Mgd2hhdCAtLSBpdCBtYXRjaGVzIcKgPC9kaXY+PGRpdiBjbGFz
+cz0iZ21haWxfZGVmYXVsdCIgc3R5bGU9ImZvbnQtZmFtaWx5OmFyaWFsLGhlbHZldGljYSxzYW5z
+LXNlcmlmIj48YnI+PC9kaXY+PGRpdiBjbGFzcz0iZ21haWxfZGVmYXVsdCIgc3R5bGU9ImZvbnQt
+ZmFtaWx5OmFyaWFsLGhlbHZldGljYSxzYW5zLXNlcmlmIj5TbywgSSYjMzk7bSBnb2luZyB0byBn
+dWVzcyB0aGUgYmluYXJ5IHdhcyBjb21waWxlZCBhbmQgbGlua2VkIHdpdGjCoGFuIGVhcmxpZXIg
+Y29tcGlsZXIuwqAgQW8gLi4uIGlmIEkgaGFkIHRvIGd1ZXNzLCB0aGUgcHJvZ3JhbXMgYXJlIHNp
+bWlsYXIsIGJ1dCBwb3NzaWJseSBkaWZmZXJlbnQuwqAgwqA8L2Rpdj48ZGl2IGNsYXNzPSJnbWFp
+bF9kZWZhdWx0IiBzdHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNhbnMtc2VyaWYi
+Pjxicj48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0Ij48Zm9udCBmYWNlPSJtb25vc3Bh
+Y2UiIGNvbG9yPSIjOTkwMGZmIj4lIG1vcmUgd3VtcC5kYXM8YnI+Ozxicj47IHBkcDExZGFzbSB2
+ZXJzaW9uIDAuMC4zPGJyPjsgZGlzYXNzZW1ibHkgb2Ygd3VtcDxicj47PGJyPjAwMDAwMDogMDAw
+NDA3IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgYnIgwqAgwqAgwqAyMCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoDsgLi48YnI+Ozxicj4wMDAwMDI6IDAwNTMzNCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoGRlYyDCoCDCoCBAKHI0KSsgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqA7IFwuPGJyPjAwMDAwNDogMDA0NTI0IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKganNyIMKg
+IMKgIHI1LChyNCkrIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgOyBULjxicj4wMDAwMDY6IDAwMjMx
+MiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoGJnZSDCoCDCoCAzNzc3Nzc3NzYzNCDCoCDCoCDC
+oCDCoCDCoCDCoCA7IEouPGJyPjAwMDAxMDogMDAwMDAwIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgaGFsdCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDsgLi48YnI+
+MDAwMDEyOiAwMDAwMDAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBoYWx0IMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgOyAuLjxicj4wMDAwMTQ6IDAwMDAwMCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoCDCoGhhbHQgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqA7IC4uPGJyPjs8YnI+MDAwMDE2OiAwMDAwMDEgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqB3YWl0IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgOyAu
+Ljxicj4wMDAwMjA6IDE3MDAxMSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoHNldGQgwqAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqA7IC5wPGJyPjAwMDAyMjogMDEwNjAw
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW92IMKgIMKgIHI2LHIwIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIDsgLi48YnI+MDAwMDI0OiAwMTEwNDYgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqBtb3YgwqAgwqAgKHIwKSwtKHI2KSDCoCDCoCDCoCDCoCDCoCDCoCDCoDsgJmFtcDsuPGJy
+PjAwMDAyNjogMDA1NzIwIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgdHN0IMKgIMKgIChyMCkr
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgUC48YnI+MDAwMDMwOiAwMTAwNjYgMDAwMDAy
+IMKgIMKgIMKgIMKgIMKgIG1vdiDCoCDCoCByMCwyKHI2KSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDC
+oDsgNi4uLjxicj4wMDAwMzQ6IDAwNDc2NyAwMDAwMDYgwqAgwqAgwqAgwqAgwqAgY2FsbCDCoCDC
+oDQ2IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgOyB3Li4uPGJyPjAwMDA0MDogMDIy
+NjI2IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgY21wIMKgIMKgIChyNikrLChyNikrIMKgIMKg
+IMKgIMKgIMKgIMKgIDsgLiU8YnI+MDAwMDQyOiAwMDUwMDAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqBjbHIgwqAgwqAgcjAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqA7IC4uPGJy
+PjAwMDA0NDogMTA0NDAxIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgdHJhcCDCoCDCoDEgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgOyAuLjxicj4wMDAwNDY6IDAwNDU2NyAwMDUx
+NzQgwqAgwqAgwqAgwqAgwqAganNyIMKgIMKgIHI1LDUyNDYgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgOyB3LnwuPGJyPjAwMDA1MjogMDA1NzQ2IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgdHN0
+IMKgIMKgIC0ocjYpIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgZi48YnI+MDAwMDU0OiAw
+MTI3MTYgMDExMjMwIMKgIMKgIMKgIMKgIMKgIG1vdiDCoCDCoCAjMTEyMzAsKHI2KSDCoCDCoCDC
+oCDCoCDCoCDCoCA7IE4uLi48YnI+MDAwMDYwOiAwMDQ3MzcgMDAyNzc2IMKgIMKgIMKgIMKgIMKg
+IGNhbGwgwqAgwqBAIzI3NzYgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqA7IF8ufi48YnI+MDAw
+MDY0OiAwMDQ3NjcgMDAyMjYyIMKgIMKgIMKgIMKgIMKgIGNhbGwgwqAgwqAyMzUyIMKgIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgOyB3LjIuPGJyPjAwMDA3MDogMDIyNzAwIDAwMDE3MSDCoCDC
+oCDCoCDCoCDCoCBjbXAgwqAgwqAgIzE3MSxyMCDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCA7IEAl
+eS48YnI+MDAwMDc0OiAwMDEwMjcgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBibmUgwqAgwqAg
+MTU0IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgLi48YnI+MDAwMDc2OiAwMDUwMDQg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBjbHIgwqAgwqAgcjQgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqA7IC4uPGJyPjAwMDEwMDogMDEwNDAwIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgbW92IMKgIMKgIHI0LHIwIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgLi48YnI+
+MDAwMTAyOiAwMDYzMDAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBhc2wgwqAgwqAgcjAgwqAg
+wqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqA7IEAuPGJyPjAwMDEwNDogMDA1NzYwIDAwNTMz
+NCDCoCDCoCDCoCDCoCDCoCB0c3QgwqAgwqAgNTMzNChyMCkgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqA7IHAuXC48YnI+MDAwMTEwOiAwMDE0MjEgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqBiZXEg
+wqAgwqAgMTU0IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgLi48YnI+MDAwMTEyOiAw
+MzI3MDQgMDAwMDAxIMKgIMKgIMKgIMKgIMKgIGJpdCDCoCDCoCAjMSxyNCDCoCDCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCA7IEQ1Li48YnI+MDAwMTE2OiAwMDE0MDMgwqAgwqAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqBiZXEgwqAgwqAgMTI2IMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgLi48
+YnI+MDAwMTIwOiAwMTI3MTYgMDAwMDI0IMKgIMKgIMKgIMKgIMKgIG1vdiDCoCDCoCAjMjQsKHI2
+KSDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoDsgTi4uLjxicj4wMDAxMjQ6IDAwMDQwMiDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCDCoCDCoGJyIMKgIMKgIMKgMTMyIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIDsgLi48YnI+Ozxicj4wMDAxMjY6IDAxMjcxNiAwMDAwMDMgwqAgwqAgwqAgwqAgwqAg
+bW92IMKgIMKgICMzLChyNikgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgOyBOLi4uPGJyPjAwMDEz
+MjogMDEwNDAwIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgIMKgbW92IMKgIMKgIHI0LHIwIMKgIMKg
+IMKgIMKgIMKgIMKgIMKgIMKgIMKgIDsgLi48YnI+MDAwMTM0OiAwMDYzMDAgwqAgwqAgwqAgwqAg
+wqAgwqAgwqAgwqAgwqBhc2wgwqAgwqAgcjAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAgwqAg
+wqA7IEAuPGJyPjAwMDEzNjogMDE2MDQ2IDAwNTMzNCDCoCDCoCDCoCDCoCDCoCBtb3YgwqAgwqAg
+NTMzNChyMCksLShyNikgwqAgwqAgwqAgwqAgwqA7ICZhbXA7LlwuPGJyPjAwMDE0MjogMDA0NzM3
+IDAwMjc3NiDCoCDCoCDCoCDCoCDCoCBjYWxsIMKgIMKgQCMyNzc2IMKgIMKgIMKgIMKgIMKgIMKg
+IMKgIMKgIMKgOyBfLn4uPC9mb250Pjxicj48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0
+IiBzdHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNhbnMtc2VyaWYiPjxicj48L2Rp
+dj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0IiBzdHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVs
+dmV0aWNhLHNhbnMtc2VyaWYiPjxicj48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0IiBz
+dHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNhbnMtc2VyaWYiPjxicj48L2Rpdj48
+ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0IiBzdHlsZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0
+aWNhLHNhbnMtc2VyaWYiPjxicj48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0IiBzdHls
+ZT0iZm9udC1mYW1pbHk6YXJpYWwsaGVsdmV0aWNhLHNhbnMtc2VyaWYiPjxicj48L2Rpdj48ZGl2
+IGNsYXNzPSJnbWFpbF9kZWZhdWx0Ij48Zm9udCBmYWNlPSJtb25vc3BhY2UiIGNvbG9yPSIjMDAw
+MGZmIj5WNjogczQvY3J0MC5zOjwvZm9udD48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0
+Ij48Zm9udCBmYWNlPSJtb25vc3BhY2UiIGNvbG9yPSIjMDAwMGZmIj4vIEMgcnVudGltZSBzdGFy
+dG9mZjxicj48YnI+Lmdsb2JsIMKgc2F2cjU8YnI+Lmdsb2JsIMKgX2V4aXQ8YnI+PGJyPi5nbG9i
+bCDCoF9tYWluPGJyPjxicj5zdGFydDo8YnI+wqAgwqAgwqAgwqAgc2V0ZDxicj7CoCDCoCDCoCDC
+oCBtb3YgwqAgwqAgc3AscjA8YnI+wqAgwqAgwqAgwqAgbW92IMKgIMKgIChyMCksLShzcCk8YnI+
+wqAgwqAgwqAgwqAgdHN0IMKgIMKgIChyMCkrPGJyPsKgIMKgIMKgIMKgIG1vdiDCoCDCoCByMCwy
+KHNwKTxicj7CoCDCoCDCoCDCoCBqc3IgwqAgwqAgcGMsX21haW48YnI+wqAgwqAgwqAgwqAgbW92
+IMKgIMKgIHIwLChzcCk8YnI+wqAgwqAgwqAgwqAganNyIMKgIMKgIHBjLCokX2V4aXQ8YnI+wqAg
+wqAgwqAgwqAgc3lzIMKgIMKgIGV4aXQ8YnI+PGJyPi5ic3M8YnI+c2F2cjU6IMKgLj0uKzI8L2Zv
+bnQ+PGJyPjwvZGl2PjxkaXYgY2xhc3M9ImdtYWlsX2RlZmF1bHQiIHN0eWxlPSJmb250LWZhbWls
+eTphcmlhbCxoZWx2ZXRpY2Esc2Fucy1zZXJpZiI+PGJyPjwvZGl2PjxkaXYgY2xhc3M9ImdtYWls
+X2RlZmF1bHQiPjxmb250IGZhY2U9Im1vbm9zcGFjZSIgY29sb3I9IiMwMDAwZmYiPlY1OiBzNC9j
+cnQwLnM6PGJyPjwvZm9udD48L2Rpdj48ZGl2IGNsYXNzPSJnbWFpbF9kZWZhdWx0Ij48Zm9udCBm
+YWNlPSJtb25vc3BhY2UiIGNvbG9yPSIjMDAwMGZmIj4vIEMgcnVudGltZSBzdGFydG9mZjxicj48
+YnI+Lmdsb2JsIMKgc2F2cjU8YnI+PGJyPi5nbG9ibCDCoF9tYWluPGJyPjxicj5zdGFydDo8YnI+
+wqAgwqAgwqAgwqAgc2V0ZDxicj7CoCDCoCDCoCDCoCBtb3YgwqAgwqAgc3AscjA8YnI+wqAgwqAg
+wqAgwqAgbW92IMKgIMKgIChyMCksLShzcCk8YnI+wqAgwqAgwqAgwqAgdHN0IMKgIMKgIChyMCkr
+PGJyPsKgIMKgIMKgIMKgIG1vdiDCoCDCoCByMCwyKHNwKTxicj7CoCDCoCDCoCDCoCBqc3IgwqAg
+wqAgcGMsX21haW48YnI+wqAgwqAgwqAgwqAgY21wIMKgIMKgIChzcCkrLChzcCkrPGJyPsKgIMKg
+IMKgIMKgIGNsciDCoCDCoCByMDxicj7CoCDCoCDCoCDCoCBzeXMgwqAgwqAgZXhpdDxicj48YnI+
+LmJzczxicj5zYXZyNTogwqAuPS4rMjwvZm9udD48YnI+PC9kaXY+PC9kaXY+PGJyPjxkaXYgY2xh
+c3M9ImdtYWlsX3F1b3RlIj48ZGl2IGRpcj0ibHRyIiBjbGFzcz0iZ21haWxfYXR0ciI+T24gTW9u
+LCBKYW4gNiwgMjAyMCBhdCAxOjQ4IFBNIFdhcm5lciBMb3NoICZsdDs8YSBocmVmPSJtYWlsdG86
+aW1wQGJzZGltcC5jb20iIHRhcmdldD0iX2JsYW5rIiByZWw9Im5vcmVmZXJyZXIiPmltcEBic2Rp
+bXAuY29tPC9hPiZndDsgd3JvdGU6PGJyPjwvZGl2PjxibG9ja3F1b3RlIGNsYXNzPSJnbWFpbF9x
+dW90ZSIgc3R5bGU9Im1hcmdpbjowcHggMHB4IDBweCAwLjhleDtib3JkZXItbGVmdDoxcHggc29s
+aWQgcmdiKDIwNCwyMDQsMjA0KTtwYWRkaW5nLWxlZnQ6MWV4Ij48ZGl2IGRpcj0ibHRyIj48ZGl2
+IGRpcj0ibHRyIj48YnI+PC9kaXY+PGJyPjxkaXYgY2xhc3M9ImdtYWlsX3F1b3RlIj48ZGl2IGRp
+cj0ibHRyIiBjbGFzcz0iZ21haWxfYXR0ciI+T24gTW9uLCBKYW4gNiwgMjAyMCBhdCAxMTozOCBB
+TSBXaWxsIFNlbm4gJmx0OzxhIGhyZWY9Im1haWx0bzp3aWxsLnNlbm5AZ21haWwuY29tIiB0YXJn
+ZXQ9Il9ibGFuayIgcmVsPSJub3JlZmVycmVyIj53aWxsLnNlbm5AZ21haWwuY29tPC9hPiZndDsg
+d3JvdGU6PGJyPjwvZGl2PjxibG9ja3F1b3RlIGNsYXNzPSJnbWFpbF9xdW90ZSIgc3R5bGU9Im1h
+cmdpbjowcHggMHB4IDBweCAwLjhleDtib3JkZXItbGVmdDoxcHggc29saWQgcmdiKDIwNCwyMDQs
+MjA0KTtwYWRkaW5nLWxlZnQ6MWV4Ij4NCiAgDQogICAgDQogIA0KICA8ZGl2Pg0KICAgIDxkaXY+
+T24gMS82LzIwIDEyOjI5IFBNLCBXYXJuZXIgTG9zaCB3cm90ZTo8YnI+DQogICAgPC9kaXY+DQog
+ICAgPGJsb2NrcXVvdGUgdHlwZT0iY2l0ZSI+DQogICAgICANCiAgICAgIDxkaXYgZGlyPSJsdHIi
+Pg0KICAgICAgICA8ZGl2PlRoZSBnb29kIG5ld3MgaXMgdGhhdCBkaXNhc3NlbWJseSB3aWxsIHRl
+bGwgeW91IHJpZ2h0IGF3YXkNCiAgICAgICAgICBpZiBpdCB3YXMgd3JpdHRlbiBpbiBDIG9yIG5v
+dC48L2Rpdj4NCiAgICAgICAgPGJyPg0KICAgICAgICA8ZGl2IGNsYXNzPSJnbWFpbF9xdW90ZSI+
+PGJyPg0KICAgICAgICA8L2Rpdj4NCiAgICAgIDwvZGl2Pg0KICAgIDwvYmxvY2txdW90ZT4NCiAg
+ICA8Zm9udCBmYWNlPSJIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIj5PSy4gSSBnaXZlIHVw
+LiBIb3c/PGJyPjwvZm9udD48L2Rpdj48L2Jsb2NrcXVvdGU+PGRpdj48YnI+PC9kaXY+PGRpdj5H
+ZW5lcmFsbHksIHRoZSBDIGNvbXBpbGVyIGdlbmVyYXRlc8KgY29kZSB0aGF0JiMzOTtzIHF1aXRl
+IGRpc3RpbmN0aXZlIChhdCBsZWFzdCBQQ0MgZG9lcywgbm90IHN1cmUgYWJvdXQgRGVubmlzJiMz
+OTsgY29tcGlsZXIpLiBQZW9wbGUgd3JpdGluZyBmcmVlIGFzc2VtYmxlciB0ZW5kIHRvIGRvIHJl
+YWxseSB3ZWlyZCB0aGluZ3MgZm9yIGZ1bmN0aW9uIGVudHJ5IC8gcmV0dXJuLjwvZGl2PjxkaXY+
+PGJyPjwvZGl2PjxkaXY+QW5kIGl0IHdpbGwgbGlrZWx5IHRlbGwgeW91IGlmIGl0JiMzOTtzIHNv
+bWUgd2VpcmQgd3JhcHBlciBhcm91bmQgYW5vdGhlciBiaW5hcnksIHRob3VnaCB0aGF0IHdhc24m
+IzM5O3QgdG9vIGNvbW1vbiBhdCBiZWxsIGxhYnMuPC9kaXY+PGRpdj48YnI+PC9kaXY+PGRpdj5X
+YXJuZXI8YnI+PC9kaXY+PC9kaXY+PC9kaXY+DQo8L2Jsb2NrcXVvdGU+PC9kaXY+DQo8L2Jsb2Nr
+cXVvdGU+PC9kaXY+DQo8L2Jsb2NrcXVvdGU+PC9kaXY+DQo=
+--000000000000b3eb16059b7ffd0f--

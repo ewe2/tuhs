@@ -1,0 +1,83 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,RDNS_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.2
+Received: (qmail 14545 invoked from network); 10 Mar 2020 18:43:17 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from unknown (HELO minnie.tuhs.org) (45.79.103.53)
+  by inbox.vuxu.org with ESMTP; 10 Mar 2020 18:43:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4165F9BC10; Wed, 11 Mar 2020 04:43:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 534489BB61;
+	Wed, 11 Mar 2020 04:42:58 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E69919BB61; Wed, 11 Mar 2020 04:42:55 +1000 (AEST)
+Received: from mail.cs.dartmouth.edu (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5A0739BB47
+ for <tuhs@tuhs.org>; Wed, 11 Mar 2020 04:42:55 +1000 (AEST)
+Received: from coolidge.cs.dartmouth.edu (coolidge.cs.dartmouth.edu
+ [129.170.213.217])
+ by mail.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTPS id 02AIgr3r2604197
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Tue, 10 Mar 2020 14:42:53 -0400
+Received: from coolidge.cs.dartmouth.edu (localhost [127.0.0.1])
+ by coolidge.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTP id 02AIgrYK082210
+ for <tuhs@tuhs.org>; Tue, 10 Mar 2020 14:42:53 -0400
+Received: (from doug@localhost)
+ by coolidge.cs.dartmouth.edu (8.15.2/8.15.2/Submit) id 02AIgr2x082209
+ for tuhs@tuhs.org; Tue, 10 Mar 2020 14:42:53 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <202003101842.02AIgr2x082209@coolidge.cs.dartmouth.edu>
+Date: Tue, 10 Mar 2020 14:42:53 -0400
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] Command line options and complexity
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> This begs questions of stability
+
+Astute question. I had that in my original draft, but eliminited
+it for what I thought was clarity. Anyway, depending on implementation
+of sort, you may need sort -s. Of course it doesn't matter which copy
+among several equal lines uniq produces, nor does it matter in sort 
+when there are no comparison options--they're all the same.
+
+> I don't know enough about the
+> internals of sed to know even what algorithm it uses 
+> (... a disk-based merge sort?)
+
+sed is not a sorting program--basically it copies input to     
+output, making line-by-line editing changes. That's the       
+way I meant to use it in sed s/nonkeys//|sort -keys|uniq.
+(I have added options to sort, hopefully for clarity).
+The argument to sed here means substitute the empty
+string for the nonkey fields (specified by a regular expression).
+
+
+If "sed" was a typo for "sort", all versions of sort that
+I know of use an internal sorting algorithm for big chunks
+of the file, then combines the chunks by merge. But internal
+sorting varies all over the map--variations on quicksort,
+radix sort, merge sort, ...
+
+Doug

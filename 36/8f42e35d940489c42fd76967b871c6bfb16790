@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23527 invoked from network); 22 Jul 2020 02:35:57 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 Jul 2020 02:35:57 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 97A1E9C8FC; Wed, 22 Jul 2020 12:35:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 838F89C8DD;
+	Wed, 22 Jul 2020 12:34:42 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CCF4C9C8DD; Wed, 22 Jul 2020 12:34:38 +1000 (AEST)
+X-Greylist: delayed 397 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 22 Jul 2020 12:34:36 AEST
+Received: from wopr.sciops.net (wopr.sciops.net [216.126.196.60])
+ by minnie.tuhs.org (Postfix) with ESMTP id AEA189C8C3
+ for <tuhs@minnie.tuhs.org>; Wed, 22 Jul 2020 12:34:36 +1000 (AEST)
+Received: (qmail 92113 invoked by uid 1001); 21 Jul 2020 19:27:54 -0700
+Date: Tue, 21 Jul 2020 19:27:54 -0700
+From: Kurt H Maier <khm@sciops.net>
+To: Dan Cross <crossd@gmail.com>
+Message-ID: <20200722022754.GC90608@wopr>
+Mail-Followup-To: Dan Cross <crossd@gmail.com>,
+ Warner Losh <imp@bsdimp.com>, TUHS main list <tuhs@minnie.tuhs.org>,
+ Grant Taylor <gtaylor@tnetconsulting.net>
+References: <862d8a34-456d-33c1-7ef0-58c6e8089de9@tnetconsulting.net>
+ <202007211822.06LIMBJ4018831@freefriends.org>
+ <CANCZdfpMORPnd1A3ZvRuP_isATpRCB8eBse3ucQYCDxMgwZ7kA@mail.gmail.com>
+ <CAEoi9W7J3GfPSZ2fduVZj7NfwbTgmE049XcG1AU_z-eW=5D4cQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAEoi9W7J3GfPSZ2fduVZj7NfwbTgmE049XcG1AU_z-eW=5D4cQ@mail.gmail.com>
+Subject: Re: [TUHS] /bin vs /sbin
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Grant Taylor <gtaylor@tnetconsulting.net>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Jul 21, 2020 at 09:44:31PM -0400, Dan Cross wrote:
+>
+> When I first came on the scene, there was a convention that I thought
+> worked well: the "dataless" node. I have no idea why it was called that; I
+> suppose because most interesting data was on a centrally managed file
+> server. Anyway, this was under SunOS 4: the idea was that each node had a
+> small disk; enough to hold / and swap, but mounted /usr, /usr/local and  
+> user directories from a file server. So commonly used stuff (/bin/csh, ls,
+> etc etc) all came from a local disk, while everything else was shared.
+> Disks in workstations were small and basically turn-key so that we didn't
+> back them up: if one crashed, oh well: throw a new one in it and reimage /.
+> Swap was transient anyway. A variation was to have an owning-user's home   
+> directory on the node if the local disk was big enough. Sometimes there'd  
+> be a /scratch partition for bulk storage that persisted across reboots
+> (/tmp came from tmpfs and was a swap-backed RAM disk). We'd back up local  
+> home dirs and maybe the scratch directories.
+>
+> In our network, we used `amd` and NIS (YP!) to get access to everyone's
+> home dir on every node.
+>
+> I rather liked the overall setup; it was nice. It became a deprecated
+> configuration on the move to Solaris 2.x: a workstation was either diskfull
+> or diskless. The idea of a compromise between the two extremes went away.  
+>
+>         - Dan C.
+        
+This is how we run our clusters, but instead of NFS-mounting the system
+directories, it fetches a cpio archive and unpacks it into a RAM disk, 
+then switches root to that.  Any local disk is mounted as scratch space,
+home directories come from an NFS server, and the main working
+filesystem is a high-performance distributed filesystem.  It works
+exceptionally well at the cost of whatever RAM is used to store the root
+filesystem -- these days, negligible.  AFS is available but not much
+engaged by our users.  Everything boots over PXE and entirely changing
+the purpose and loadout of a computer is one or two commands away.  It's
+very pleasant.
+       
+khm
+

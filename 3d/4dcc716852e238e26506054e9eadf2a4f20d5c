@@ -1,0 +1,84 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: (qmail 11022 invoked from network); 27 Apr 2020 18:47:59 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with UTF8ESMTPZ; 27 Apr 2020 18:47:59 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7BFBA9C772; Tue, 28 Apr 2020 04:47:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 000E39B92D;
+	Tue, 28 Apr 2020 04:47:24 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 15D1E9B92D; Tue, 28 Apr 2020 04:47:23 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BA1A294895
+ for <tuhs@tuhs.org>; Tue, 28 Apr 2020 04:47:22 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 2223B4E11CAB; Mon, 27 Apr 2020 18:47:22 +0000 (UTC)
+Date: Mon, 27 Apr 2020 19:47:22 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: tuhs@tuhs.org
+Message-ID: <20200427184722.GA64072@clarinet.employees.org>
+References: <20200427174553.2801618C09B@mercury.lcs.mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200427174553.2801618C09B@mercury.lcs.mit.edu>
+Subject: Re: [TUHS] v7 K&R C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Apr 27, 2020 at 01:45:53PM -0400, Noel Chiappa wrote:
+> So I've been confused by this thread, and I'm hoping someone can deconfuse me
+> - but I think I may have figured it out.
+> 
+> What's confusing me is that in C, the -> operator is followed by "an
+> identifier [which] designates a member of a structure or union object" (I
+> checked the spec to make sure my memory hadn't dropped any bits) - but g, h
+> above are arguments; so I couldn't figure out what was going on.
+
+See below.
+
+DF
+
+#include <stdio.h>
+
+struct h_ret { void (*i)(); };
+struct g_ret { struct h_ret *(*h)(); };
+struct f_ret { struct g_ret *(*g)(); };
+
+void i_fn() { printf("I\n"); }
+
+struct h_ret h_val = { i_fn };
+struct h_ret *h_fn() { printf("H\n"); return &h_val; }
+
+struct g_ret g_val = { h_fn };
+struct g_ret *g_fn() { printf("G\n"); return &g_val; }
+
+struct f_ret f_val = { g_fn };
+struct f_ret *f_fn() { printf("F\n"); return &f_val; }
+
+void fred(struct f_ret *(*f)())
+{
+#if 1
+	(*(*(*(*f)()->g)()->h)()->i)();
+#else
+	f()->g()->h()->i();
+#endif
+}
+
+int main() { fred(f_fn); return 0; }
+

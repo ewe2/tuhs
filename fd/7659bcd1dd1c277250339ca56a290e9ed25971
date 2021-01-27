@@ -1,0 +1,98 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32073 invoked from network); 17 May 2020 16:34:53 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 May 2020 16:34:53 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 34D559C9AD; Mon, 18 May 2020 02:34:51 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A86939C5E0;
+	Mon, 18 May 2020 02:34:40 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CBC8C9C5E0; Mon, 18 May 2020 02:34:38 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7FB9F9C2EE
+ for <tuhs@tuhs.org>; Mon, 18 May 2020 02:34:38 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 5499A4E11B08; Sun, 17 May 2020 16:34:38 +0000 (UTC)
+Date: Sun, 17 May 2020 17:34:37 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: tuhs@tuhs.org
+Message-ID: <20200517163437.GB5127@clarinet.employees.org>
+References: <m1jYCHm-0036tPC@more.local>
+ <CABH=_VRucqOpJvZVRqhz6Bv-kVe6P-7Hk3SFDuO0XyKZ_=oCBg@mail.gmail.com>
+ <CAC20D2NTRE4cK5jewe-Yuo1UVnH6pY2u-wSt8NiG-5hBkzvvzQ@mail.gmail.com>
+ <CABH=_VT9dU7kuJSa+iN6zdF7RMpS-hE92DsyeSuMkTmrYGL_9g@mail.gmail.com>
+ <357EFE54-BD94-4C10-8C43-C6735BF7D317@via.net>
+ <20200511202555.GU17035@mcvoy.com>
+ <CABH=_VS8XO8BQA=fMCGTf8u-ubXLKT1tzUJ5ntTXWkjeGk1sSA@mail.gmail.com>
+ <alpine.BSF.2.21.9999.2005140930270.18677@aneurin.horsfall.org>
+ <CAC0cEp-UH-8sRzOAgurmzx5NRRSYbtiqydM=a-DDOX1gAro05g@mail.gmail.com>
+ <20200514172107.GI20771@mcvoy.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200514172107.GI20771@mcvoy.com>
+Subject: Re: [TUHS] v7 K&R C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, May 14, 2020 at 10:21:07AM -0700, Larry McVoy wrote:
+> On Wed, May 13, 2020 at 08:42:55PM -0400, John P. Linderman wrote:
+> > I never liked call by reference. When I was trying to understand a chunk of
+> > code, it was a great mental simplification to know that whatever a called
+> > routine did, it couldn't have an effect on the code I was trying to
+> > understand except through a returned value and (ghastly) global variables.
+
+That has always been my issue with the C++ references, that one could not
+read a piece of code in isolation, and know when a reference may be made.
+
+I guess I'd be happy with references if the syntax always required one to
+write '&x' when they're being created, then the called function can choose
+if it either wishes to use a pointer or a reference, the only difference
+being the syntax used to deref the reference.
+
+As to Doug's point about new arithmetic types and overloading, I recall
+a few years ago reading on the 9fans list about an extension there (in KenC?)
+which supported them in C.  I've not managed to dig up the details again,
+maybe someone else could.  As I recall it involved defining structs.
+
+> Call by value is fine for things like a single integer or whatever.  When
+> you have some giant array, you want to pass a pointer.
+> 
+> And "const" helps a lot with indicating the subroutine isn't going to
+> change it.
+
+However that is simply the ABI, i.e. it should be possible for a sufficiently
+clever compiler to implement such a call-by-value as a call-by-constish-reference.
+
+i.e. this:
+    somefn(struct s p) {...}
+    struct s ss;  somefn(ss);
+
+in effect becomes syntax sugar for:
+    somefn(constish ref struct s p) {...}
+    struct s ss;  somefn(&ss);
+
+Where 'constish' does not allow 'ss' to be altered even if somefn() assigns
+to 'p', because in that case it would do sufficient copying so as to
+make things work.  There was a proposed MIPS ABI which stated this.
+
+The current C semantics in effect do that, but with the ABIs always having
+the caller make a copy and pass a reference to it, rather than allowing the
+callee to make a copy if/when required.
+
+DF

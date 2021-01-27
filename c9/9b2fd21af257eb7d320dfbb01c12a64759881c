@@ -1,0 +1,221 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 26100e5e
+	for <ml@inbox.vuxu.org>;
+	Thu, 9 Jan 2020 02:43:26 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B6B529BCDB; Thu,  9 Jan 2020 12:43:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CFD3E9BCA9;
+	Thu,  9 Jan 2020 12:42:49 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="rGE7kBAV";
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=case.edu header.i=@case.edu header.b="ryE8/DGu";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="PZRcgtBz";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 822C19BCA9; Thu,  9 Jan 2020 12:42:46 +1000 (AEST)
+Received: from mpv1-2015.case.edu (mpv2-2015.CWRU.Edu [129.22.103.227])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C344E945FC
+ for <tuhs@tuhs.org>; Thu,  9 Jan 2020 12:42:44 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578537764;
+ bh=2EhE3dmGxcH88O6PLq65BO4k+amjHoN7d0sUI5y6oGs=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type;
+ b=rGE7kBAVqriNs6jMHFkyUPJgbWtUuRKnaZ5gcRfgH1Q7cYEHYIFU2hNfKenDDNWWPs
+ 7IRpLCbp2xSXzQNrtyZSEf1Ol7bku7nf+3b5uwvEpiww/JyodsNU3yQXpjy0TK90+KY
+ 7lAn58tozZW6UaDV4C5N+Y89X8KDKtare74F3mM/C7XeeryBDkyvL9dw4ng7X/2Eq1D
+ Ucrbb0aqQswAnqp/Yr7TgG0kScM2cqiYPKEvpAPObVcjbaSAWgaPgCHXEswc5EgqxUX
+ x4vFYEYtvooEumuSIxTg8IvHz2zKrcpjm38i3mWuOl6/ZXIsNx37m85EjWTbOPL2Uq0
+ r0pqmP3Q==
+Received: from mpv6-2015.CWRU.Edu (EHLO mpv6-2015.case.edu) ([129.22.103.202])
+ by mpv2-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id BDN34167; Wed, 08 Jan 2020 21:42:43 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578537763;
+ bh=2EhE3dmGxcH88O6PLq65BO4k+amjHoN7d0sUI5y6oGs=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type;
+ b=ryE8/DGuJ34b57NudB0jjAyPhz083Ern1xBbkRXwAlL2sby4xi35GawSwhnpvt3UBH
+ tl7PrLSuE3AtZwCVMDF6q6jK9P4yWCNo7yCq756ZuAZwzX0dfoGjYnXVg8chjiUvgTx
+ v1pe70WUFT9xg5LaBMoJ+b3mkfTfo+1YhWF5dM6HpBX28u4mDGGb+tfe8cqGBz7aA3v
+ Zk3xrel6+/CZeFJ25qE+FND1Hq3elfLSgZBbZahRX1eSlGwpqW8Z5UXQdg9FWicrObl
+ jMxrHyasiWpYd/DXtMsdHaYsgS4zPNrYLSB7FfMlHT5rhqZMIp0xoIbYprC/O3kFcYI
+ subLZGzw==
+Received: from mail-yw1-f69.google.com (EHLO mail-yw1-f69.google.com)
+ ([209.85.161.69])
+ by mpv6-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id DDS93299; Wed, 08 Jan 2020 21:42:42 -0500 (EST)
+Received: by mail-yw1-f69.google.com with SMTP id 16so3857594ywz.5
+ for <tuhs@tuhs.org>; Wed, 08 Jan 2020 18:42:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu; s=g-case;
+ h=reply-to:cc:subject:to:references:from:openpgp:autocrypt
+ :organization:message-id:date:user-agent:mime-version:in-reply-to;
+ bh=2EhE3dmGxcH88O6PLq65BO4k+amjHoN7d0sUI5y6oGs=;
+ b=PZRcgtBzA3X6oEpB+peZS077M7ryXB0reA55rWYvV07m/mGjnmaC4l4+cOgrsiQeKg
+ InrAxzmR15MZp7rsflg2p4WHH++VPlhpmY4sc08ezfJCKXUWIN3E93ewSg94gR0q4TmM
+ VYDFQLsVqSv0ReGUojB4s4+atZ95MZq4y4mOmF4zETkbkz4TLcHY4B6RHTvu5hM8+C1L
+ MdJoREY4ijyRhJDAlTvgRi00nX1dD/HhlQ/Om4U2GTzvIFs21Y1dOSo4abVurJ8SC+aD
+ Vu88bMMdev7m1YIdYwVjKbX6jsQVHXc5UItmfriOGSIpeHN+bz4mMS8jBtKnV0hlotRu
+ g26g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:reply-to:cc:subject:to:references:from:openpgp
+ :autocrypt:organization:message-id:date:user-agent:mime-version
+ :in-reply-to;
+ bh=2EhE3dmGxcH88O6PLq65BO4k+amjHoN7d0sUI5y6oGs=;
+ b=oUeXwM3bTyeUUTyy310Ap0LvJbeni3kdAkcKYekTrBRvlecjVSNj5YFmFRkJdEk/KQ
+ 4GHG86ZHQH374BxW70TLcbPfYYzUEK6AXwtvNC8ywEt3XRFEJYUCkMcP406fomYnE3jc
+ HTUh63ipKmPE1zlvbkC332NBe7h0wFR+0sxtCAKO79mczepcYuc2RfZXTOJs5t2zlt8H
+ K0/DFX++nciqeoWB4To293EgGfU12ZkVrK0/NjdNgP/Pdw0/CjogwRYX7S0A+xCBlUPO
+ 8DsKei4mphX6MRd6Nq/XHITUDemsoeBqYYTzpSt8vuZAssSbN7JA/2jxPFu4zqdywNdh
+ OJ9A==
+X-Gm-Message-State: APjAAAXlDNUkNisnFI65Rgaq8U6n8geXRCzrgqbMQzelKtOxctvIWk9+
+ kK9K+V0wtmPq5A4FMXFAGFyVCy5Oqshj94D/ZSLBfR2EtxAzLx2ys3ck/akHOM3jy3E+UPPJc2k
+ lvZfa6uk=
+X-Received: by 2002:a81:66c1:: with SMTP id a184mr5675836ywc.372.1578537761307; 
+ Wed, 08 Jan 2020 18:42:41 -0800 (PST)
+X-Google-Smtp-Source: APXvYqyZunGcLT7pnmoAWzZliCOI5mkJz46iqW1sxwWB7clZygLBzSZLZA1Bfjxra8FX84pN8owgOw==
+X-Received: by 2002:a81:66c1:: with SMTP id a184mr5675826ywc.372.1578537760977; 
+ Wed, 08 Jan 2020 18:42:40 -0800 (PST)
+Received: from ?IPv6:2605:a000:1223:c4ad:e452:872a:a375:ebb0?
+ ([2605:a000:1223:c4ad:e452:872a:a375:ebb0])
+ by smtp.gmail.com with ESMTPSA id q16sm2346827ywa.110.2020.01.08.18.42.39
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Wed, 08 Jan 2020 18:42:40 -0800 (PST)
+To: "Greg 'groggy' Lehey" <grog@lemis.com>, Larry McVoy <lm@mcvoy.com>
+References: <CAMYpm86i7RkeBY6oYfoZEuO3gQoSDLJ0O-HNBuKOQOKEzcSCOQ@mail.gmail.com>
+ <bbeafd3f-786c-fe60-cf87-0f7e202025f7@case.edu>
+ <alpine.BSF.2.21.9999.2001091020340.40155@aneurin.horsfall.org>
+ <CANCZdfriS_9BHA0V8FJe-dWCD59LoR+7K=LF+FQLp-N7zcZnHg@mail.gmail.com>
+ <20200109012830.GC16808@mcvoy.com> <20200109021403.GR64020@eureka.lemis.com>
+From: Chet Ramey <chet.ramey@case.edu>
+Openpgp: preference=signencrypt
+Autocrypt: addr=chet.ramey@case.edu; prefer-encrypt=mutual; keydata=
+ mQGiBEEOsGwRBACFa0A1oa71HSZLWxAx0svXzhOZNQZOzqHmSuGOG92jIpQpr8DpvgRh40Yp
+ AwdcXb8QG1J5yGAKeevNE1zCFaA725vGSdHUyypHouV0xoWwukYO6qlyyX+2BZU+okBUqoWQ
+ koWxiYaCSfzB2Ln7pmdys1fJhcgBKf3VjWCjd2XJTwCgoFJOwyBFJdugjfwjSoRSwDOIMf0D
+ /iQKqlWhIO1LGpMrGX0il0/x4zj0NAcSwAk7LaPZbN4UPjn5pqGEHBlf1+xDDQCkAoZ/VqES
+ GZragl4VqJfxBr29Ag0UDvNbUbXoxQsARdero1M8GiAIRc50hj7HXFoERwenbNDJL86GPLAQ
+ OTGOCa4W2o29nFfFjQrsrrYHzVtyA/9oyKvTeEMJ7NA3VJdWcmn7gOu0FxEmSNhSoV1T4vP2
+ 1Wf7f5niCCRKQLNyUy0wEApQi4tSysdz+AbgAc0b/bHYVzIf2uO2lIEZQNNt+3g2bmXgloWm
+ W5fsm/di50Gm1l1Na63d3RZ00SeFQos6WEwLUHEB0yp6KXluXLLIZitEJLQwQ2hldCBSYW1l
+ eSAoQ2FzZSBzdGFuZGFyZCkgPGNoZXQucmFtZXlAY2FzZS5lZHU+iF8EExECAB8FAkPi19EC
+ GwMHCwkIBwMCAQMVAgMDFgIBAh4BAheAAAoJELtYafBk6nSrelkAn31Gsuib7GcCZHbv5L5t
+ VKYR9LklAJ4hzUHKA49Z0QXR+qCb80osIcmPSbkBDQRBDrBvEAQAkK6TAOKBEM+EC4j6V/7o
+ /riVZqcgU5cid2qG9TXdwNtD9a3kvA/ObZBO93sX59wc6Bnwo4VJxsOmMlpGrAjJsxNwg3QH
+ akEtf8LXRbVpj5xStdmBdQZUhIQyalo/2/TZq5OijtddUQcL5cs70hTv/FpT3wUvr2Xr8rjF
+ 41IFEz8AAwcD/A0CZEGlzIrT5WCBnl6xBog/8vKiUCbarByat3d1mL6DbizvKNXQRTC9E/vE
+ dENAWCQCjr75Bu55xT8n3SXGtWdDC5xmZ/P3OBYORP8yl8H8I1FIosWOFirbIeYdZPq8SPD1
+ HL+EXo9zSiHVrrZRJ19ooCKKbSdXHFCY+aJG+0KZiEkEGBECAAkFAkEOsG8CGwwACgkQu1hp
+ 8GTqdKvjcACfZlkVCDwaz/NTO9cy3t69oWpVPNwAnRwe0qk/WL/gfhH346xh5B3HFbFN
+Organization: ITS, Case Western Reserve University
+Message-ID: <afc4a1fb-01a0-0826-b267-21397a311f9a@case.edu>
+Date: Wed, 8 Jan 2020 21:48:40 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:60.0)
+ Gecko/20100101 Thunderbird/60.9.1
+MIME-Version: 1.0
+In-Reply-To: <20200109021403.GR64020@eureka.lemis.com>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="8myym2tdRUXPiQF01vQ8bYSVJoVCuMng1"
+X-Junkmail-Status: score=8/90, host=mpv2-2015.case.edu
+X-Junkmail-PrAS-Raw: score=8/90, refid=2.7.2:2020.1.9.15717:17:8.317, ip=,
+ rules=__YOUTUBE_RCVD, DKIM_SIGNATURE,
+ __X_GOOGLE_DKIM_SIGNATURE, __HAS_REPLYTO, __HAS_CC_HDR,
+ __MULTIPLE_RCPTS_CC_X2, __CC_NAME,
+ __CC_NAME_DIFF_FROM_ACC, __SUBJ_REPLY,
+ __BOUNCE_CHALLENGE_SUBJ, __BOUNCE_NDR_SUBJ_EXEMPT,
+ __SUBJ_ALPHA_END, __TO_MALFORMED_2, __TO_NAME,
+ __TO_NAME_DIFF_FROM_ACC, __HAS_REFERENCES, __REFERENCES,
+ __HAS_FROM, FROM_EDU_TLD, __HAS_MSGID, __SANE_MSGID,
+ DATE_TZ_NA, __USER_AGENT, __MOZILLA_USER_AGENT,
+ __MIME_VERSION, __IN_REP_TO, __CT, __CTYPE_HAS_BOUNDARY,
+ __CTYPE_MULTIPART, __REPLYTO_SAMEAS_FROM_ADDY,
+ __REPLYTO_SAMEAS_FROM_ACC, __FROM_DOMAIN_IN_ANY_CC2,
+ __REPLYTO_SAMEAS_FROM_DOMAIN, __DKIM_ALIGNS_1,
+ __DKIM_ALIGNS_2, __MIME_TEXT_P2, __HAS_ATTACHMENT1,
+ __ANY_URI, __URI_MAILTO, __URI_WITH_PATH, __URI_NO_WWW,
+ __CP_URI_IN_BODY, __SUBJ_ALPHA_NEGATE, __URI_IN_BODY,
+ __URI_NOT_IMG, __MAIL_CHAIN, __FORWARDED_MSG,
+ __BODY_NO_MAILTO, [TRUNCATED], so=2010-03-03 19:42:08,
+ dmn=2016-08-03-0138
+Subject: Re: [TUHS] screen editors
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Reply-To: chet.ramey@case.edu
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--8myym2tdRUXPiQF01vQ8bYSVJoVCuMng1
+Content-Type: multipart/mixed; boundary="7c9HOKuTNnrd7UbdTtve9PhtOz7a62l7n";
+ protected-headers="v1"
+From: Chet Ramey <chet.ramey@case.edu>
+Reply-To: chet.ramey@case.edu
+To: Greg 'groggy' Lehey <grog@lemis.com>, Larry McVoy <lm@mcvoy.com>
+Cc: chet.ramey@case.edu, The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Message-ID: <afc4a1fb-01a0-0826-b267-21397a311f9a@case.edu>
+Subject: Re: [TUHS] screen editors
+References: <CAMYpm86i7RkeBY6oYfoZEuO3gQoSDLJ0O-HNBuKOQOKEzcSCOQ@mail.gmail.com>
+ <bbeafd3f-786c-fe60-cf87-0f7e202025f7@case.edu>
+ <alpine.BSF.2.21.9999.2001091020340.40155@aneurin.horsfall.org>
+ <CANCZdfriS_9BHA0V8FJe-dWCD59LoR+7K=LF+FQLp-N7zcZnHg@mail.gmail.com>
+ <20200109012830.GC16808@mcvoy.com> <20200109021403.GR64020@eureka.lemis.com>
+In-Reply-To: <20200109021403.GR64020@eureka.lemis.com>
+
+--7c9HOKuTNnrd7UbdTtve9PhtOz7a62l7n
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+
+On 1/8/20 9:14 PM, Greg 'groggy' Lehey wrote:
+
+> My vague recollection is that Rob Kolstad paid him to do it for
+> BSD/386.  As you say, licensing, and that BSD/386 *really* needed a vi
+> editor.
+>=20
+> Does anybody know where Rob is?
+
+Colorado Springs, according to Twitter.
+
+--=20
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet@case.edu    http://tiswww.cwru.edu/~chet/=
+
+
+
+--7c9HOKuTNnrd7UbdTtve9PhtOz7a62l7n--
+
+--8myym2tdRUXPiQF01vQ8bYSVJoVCuMng1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
+
+iF0EARECAB0WIQR8ATX7CIqvbGbGULm7WGnwZOp0qwUCXhaUjwAKCRC7WGnwZOp0
+q32fAJ9IRLY51QlNSwfqwr2XxMEC7+kYlQCggMU3eqPKa36E0vNZWyQ9MZBSMHQ=
+=NzlE
+-----END PGP SIGNATURE-----
+
+--8myym2tdRUXPiQF01vQ8bYSVJoVCuMng1--
+

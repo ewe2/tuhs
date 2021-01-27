@@ -1,0 +1,77 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13718 invoked from network); 2 Jun 2020 23:21:30 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jun 2020 23:21:30 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DB1249CB3E; Wed,  3 Jun 2020 09:21:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CA2299CA34;
+	Wed,  3 Jun 2020 09:21:15 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BF0879CA34; Wed,  3 Jun 2020 09:21:14 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7FE659C96B
+ for <tuhs@minnie.tuhs.org>; Wed,  3 Jun 2020 09:21:14 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 3D4B935E12D; Tue,  2 Jun 2020 16:21:14 -0700 (PDT)
+Date: Tue, 2 Jun 2020 16:21:14 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Rob Pike <robpike@gmail.com>
+Message-ID: <20200602232114.GA22016@mcvoy.com>
+References: <F364B944-42D3-4AAA-88DB-6EBBFEDF9F21@planet.nl>
+ <CABH=_VRjxL=p8f+ePVvBWKuQN3aFE-BW4aE9MAcjwkK-Mm1rkg@mail.gmail.com>
+ <202006021759.052Hx5Et022619@freefriends.org>
+ <CABH=_VQj_3qdK+Cu3t5hZPQFUny_TFPxR51Cfuj=Av4Jt3cYyQ@mail.gmail.com>
+ <CAC20D2NT-KGP6hb0Zsd2uNpMJjRDxp3EKU2xC2WJW1U8Npawjw@mail.gmail.com>
+ <515ABF82-79D4-4DB8-90F1-4DDD512C7706@serissa.com>
+ <202006022203.052M3wpa167150@darkstar.fourwinds.com>
+ <CAKzdPgxQnFWf-E99zEyZJBB5z23ZUKwj-Dffe9y5if9R-w3Qpg@mail.gmail.com>
+ <CAKzdPgxH=Ub-EZLmNnRR4W75ipqjt6a_UmwG5nPqwUDRopxOGw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKzdPgxH=Ub-EZLmNnRR4W75ipqjt6a_UmwG5nPqwUDRopxOGw@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] non-blocking IO - threads
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Jun 03, 2020 at 09:09:08AM +1000, Rob Pike wrote:
+> The first mistake people made was to split "thread" from "process". What
+> those words mean today is not what they meant a generation ago.
+
+So I'm a fan of your quote, Rob, "If you think you need threads, your
+processes are too fat".
+
+Years ago, I asked Linus if he could fix the one flaw with that point
+of view.  Which is, processes can't share page tables.  So N processes
+will have N page tables, need an N way bigger TBL, to get the same
+performance.
+
+What I asked Linus to try and do is allow a process to share all or
+part of its page table with another process.  If that could be done,
+we could pretty do what you said, just use processes and if they want
+to act like threads, just share the page table.
+
+And I just looked, he seems to have done it.  man 2 clone on a
+Linux box.  It's the swiss army knife of features, feels messy.
+
+I don't know if CLONE_VM will share the page tables, I'll ask
+Linus.
+
+--lm

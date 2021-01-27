@@ -1,0 +1,65 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31974 invoked from network); 10 Aug 2020 13:13:07 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 10 Aug 2020 13:13:07 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 25A509B727; Mon, 10 Aug 2020 23:13:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BBCD09B5D6;
+	Mon, 10 Aug 2020 23:12:36 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 9C23F9B5D6; Mon, 10 Aug 2020 23:12:33 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 307EE9B5C7
+ for <tuhs@minnie.tuhs.org>; Mon, 10 Aug 2020 23:12:33 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 14B6E18C082; Mon, 10 Aug 2020 09:12:32 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200810131232.14B6E18C082@mercury.lcs.mit.edu>
+Date: Mon, 10 Aug 2020 09:12:32 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] 211bsd kermit working
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Will Senn
+
+    > $c
+    > 0177520: ~signal(016,01) from ~sysinit+034
+    > 0177542: ~sysinit() from ~main+010
+    > 0177560: _main() from start+0104
+
+    > If this means it got signal 16... or 1 from the sysinit call (called
+    > from main)
+
+I'm not sure that interpretation is correct. I think that trace shows signal()
+being called from sysinit().
+
+On V6, signal() was a system call which one could use to set the handlers for
+signals (or set them to be ignored, or back to the default action). In. 2.11
+it seems to be a shim layer which provides the same interface, but uses
+the Berserkly signal system interface underneath:
+
+  https://www.tuhs.org/cgi-bin/utree.pl?file=2.11BSD/include/signal.h
+  https://www.tuhs.org/cgi-bin/utree.pl?file=2.11BSD/man/cat3/signal.0
+
+So maybe the old binary for kermit is still trying to use the (perhaps
+now-removed) signal system call?
+
+	     Noel
+

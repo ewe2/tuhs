@@ -1,0 +1,106 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 24553 invoked from network); 6 Jun 2020 13:29:50 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Jun 2020 13:29:50 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6FF049C83E; Sat,  6 Jun 2020 23:29:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id BADCB93D6A;
+	Sat,  6 Jun 2020 23:29:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 45F8393D6A; Sat,  6 Jun 2020 23:29:08 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id BD70793D56
+ for <tuhs@tuhs.org>; Sat,  6 Jun 2020 23:29:07 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id B7FAB18C079; Sat,  6 Jun 2020 09:29:06 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200606132906.B7FAB18C079@mercury.lcs.mit.edu>
+Date: Sat,  6 Jun 2020 09:29:06 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Peter Jeremy <peter@rulingia.com>
+
+    > My view may be unpopular but I've always been disappointed that Unix
+    > implemented blocking I/O only and then had to add various hacks to cover
+    > up for the lack of asynchonous I/O.  It's trivial to build blocking I/O
+    > operations on top of asynchonous I/O operations.  It's impossible to do
+    > the opposite without additional functionality.
+
+Back when I started working on networks, I looked at other kinds of systems
+to see what general lessons I could learn about the evolution of systems, which
+might apply to the networks we were building. (I should have written all that up,
+never did, sigh.)
+
+One major one was that a system, when small, often collapses multiple needs
+onto one machanism. Only as the system grows in size do scaling effects, etc
+necessitate breaking them up into separate mechanisms. (There are some good
+examples in file systems, for example.)
+
+I/O is a perfect example of this; a small system can get away with only one
+kind; it's only when the system grows that one benefits from having both
+synchronous and asynchronous. Since the latter is more complicated, _both_ in
+the system and in the applications which use it, it's no surprise that
+synchronous was the pick.
+
+
+The reasons why synchronous is simpler in applications have a nice
+illustration in operating systems, which inevitably support both blocking
+(i.e. implied process switching) and non-blocking 'operation initiation' and
+'operation completed notification' mechanisms. (The 'timeout/callout'
+mechanism is Unix is an example of the latter, albeit specialized to timers.)
+
+Prior to the Master Control Program in the Burroughs B000 (there may be older
+examples, but I don't know of them - I would be more than pleased to be
+informed of any such, if there are), the technique of having a per-process
+_kernel_ stack, and on a process block (and implied switch), switching stacks,
+was not used. This idea was picked up for Jerry Saltzer's PhD thesis, used in
+Multics, and then copied by almost every other OS since (including Unix).
+
+The advantage is fairly obvious: if one is deep in some call stack, one can
+just wait there until the thing one needs is done, and then resume without
+having to work one's way back to that spot - which will inevitably be
+complicated (perhaps more in the need to _return_ through all the places that
+called down - although the code to handle a 'not yet' return through all those
+places, after the initial call down, will not be inconsiderable either).
+
+
+Exactly the same reasoning applies to blocking I/O; one can sit where one is,
+waiting for the I/O to be done, without having to work one's way back there
+later. (Examples are legion, e.g. in recursive descent parsers - and can make
+the code _much_ simpler.)
+
+It's only when one _can't_ wait for the I/O to complete (e.g. for a packet to
+arrive - although others have mentioned other examples in this thread, such as
+'having other stuff to do in the meanwhile') than having only blocking I/O
+becomes a problem...
+
+In cases where blocking would be better, one can always build a 'blocking' I/O
+subsystem on top of asynchronous I/O primitives.
+
+However, in a _tiny_ system (remember my -11/40 which ran Unix on a system
+with _48KB_ of main memory _total_- i.e. OS and application together had to be
+less than 48KB - no virtual memory on that machine :-), building blocking I/O
+on top of asynchonous I/O, for those very few cases which need it, may not be
+the best use of very limited space - although I agree that it's the way to go,
+overall.
+
+	Noel

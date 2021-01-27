@@ -1,0 +1,108 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 1389cc18
+	for <ml@inbox.vuxu.org>;
+	Thu, 20 Feb 2020 16:23:40 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8ECE893D45; Fri, 21 Feb 2020 02:23:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A6D6C93D2D;
+	Fri, 21 Feb 2020 02:23:12 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0332993D2D; Fri, 21 Feb 2020 02:23:09 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8A9BF93D1B
+ for <tuhs@minnie.tuhs.org>; Fri, 21 Feb 2020 02:23:08 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 3021235E141; Thu, 20 Feb 2020 08:23:08 -0800 (PST)
+Date: Thu, 20 Feb 2020 08:23:08 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: arnold@skeeve.com
+Message-ID: <20200220162308.GK30841@mcvoy.com>
+References: <CAFH29tofawAMrywyW=S5ZW2F-U-1tbOm55+PMN+_vg=uDWFUNg@mail.gmail.com>
+ <202002180017.01I0HI0I1415945@darkstar.fourwinds.com>
+ <m1j3xUB-0036tPC@more.local>
+ <CAC20D2Mv_XqaBi=rx1rOaQLWmp3Ds_r7czG2OJV8nOuC=rrLaw@mail.gmail.com>
+ <m1j49OT-0036tRC@more.local> <20200219044444.GO30841@mcvoy.com>
+ <CANcLFn6ZFs_tvDv0ckSKTR_q8RSNZF5b7Fnfw-SFKioCRJRbBQ@mail.gmail.com>
+ <615399517.295857.1582135972871@email.ionos.co.uk>
+ <f88dd839-907f-e5e6-8119-8dc9da0c7ff4@gmail.com>
+ <202002200727.01K7RFwj014313@freefriends.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202002200727.01K7RFwj014313@freefriends.org>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] man Macro Package and pdfmark
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Feb 20, 2020 at 12:27:15AM -0700, arnold@skeeve.com wrote:
+> Michael Huff <mphuff@gmail.com> wrote:
+> As Larry and others have pointed out, the unbundling of various components
+> was a big mistake by the vendors.  It just made users angry and motivated
+> them to switch to other Unix systems.
+
+I really fault Sun for that one.  There was a time when every open source
+package "just worked (TM)" if you built it on a Sun.  All the other platforms
+were fiddly (leading to that monstrosity called autoconf), Sun just worked.
+So developers fought hard to get a Sun over the other platforms.
+
+When you have that lead and you screw over the people who gave you that 
+lead, yeah, shame on you, Sun.
+
+> Also, early Solaris was a dog. Performance was poor. It improved over
+> time, but it wasn't until around Solaris 2.4 or 2.5 that running it
+> wasn't painful.
+
+Early Solaris was awful, just awful.  They pulled out sockets and replaced
+them with Lachman's STREAMS based TCP/IP stack (really convergent's stack,
+I believe Lachman bought it from them).  Performance was horrible, they
+brought in Mentat's stack and had to work on that, and eventually they
+brought back sockets.  I dunno if there is any STREAMS stuff left, that
+was a horrible idea.
+
+Another idea, not sure if this shipped or not, was to use a thread for
+each 8K block headed to disk.  The kernel stack was 24K (which is nuts
+but that's another story).  So think about what a dd if=/dev/zero of=XXX
+does to your system.  Each I/O costs you 8K (data) + 24K (stack) not to
+mention the other overhead for a thread.  It means you only get to use
+25% of ram for dirty pages. 
+
+Bat shit crazy, right?  I pointed all that out to the VM / FS people
+and they did it anyway, they were in love with threads.  It was just
+as awful as I predicted and they ripped it all out and started over.
+
+To this day, I'm baffled that I could see that that was a horrible idea
+and really smart people did not.  Lots of those people were smarter
+than me.  It speaks to why you shouldn't push your shiny new feature
+too hard.  And it lead to these in http://www.mcvoy.com/lm/quotes.html
+
+    Think of it this way: threads are like salt, not like pasta. You
+    like salt, I like salt, we all like salt. But we eat more pasta.
+
+    --me
+
+    A computer is a state machine. Threads are for people who can't
+    program state machines.
+
+    --Alan Cox
+
+Both very on point for the Sun people.

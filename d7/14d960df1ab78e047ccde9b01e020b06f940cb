@@ -1,0 +1,101 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 047cca1a
+	for <ml@inbox.vuxu.org>;
+	Sat, 4 Jan 2020 10:07:56 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id D42559B48C; Sat,  4 Jan 2020 20:07:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C21AF9516B;
+	Sat,  4 Jan 2020 20:07:23 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E5A669516B; Sat,  4 Jan 2020 20:07:20 +1000 (AEST)
+Received: from marmaro.de (marmaro.de [176.28.23.198])
+ by minnie.tuhs.org (Postfix) with ESMTP id 1F3AC95165
+ for <tuhs@minnie.tuhs.org>; Sat,  4 Jan 2020 20:07:19 +1000 (AEST)
+Received: by marmaro.de (masqmail 0.3.6-dev, from userid 1000) id 1ingL0-5g6-00
+ for <tuhs@minnie.tuhs.org>; Sat, 04 Jan 2020 11:07:18 +0100
+To: tuhs@minnie.tuhs.org
+In-reply-to: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+References: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+Comments: In-reply-to Doug McIlroy <doug@cs.dartmouth.edu> message dated "Fri,
+ 03 Jan 2020 21:58:56 -0500."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <21829.1578132438.1@marmaro.de>
+Content-Transfer-Encoding: quoted-printable
+Date: Sat, 04 Jan 2020 11:07:18 +0100
+From: markus schnalke <meillo@marmaro.de>
+Message-ID: <1ingL0-5g6-00@marmaro.de>
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hoi.
+
+[2020-01-03 21:58] Doug McIlroy <doug@cs.dartmouth.edu>
+>
+> > I'm interested in the possible motivations for a redirection to be
+> > a simple command.
+> =
+
+> I use it to truncate a file to zero length.
+> Or to create (an empty) file.
+
+Thanks for the replies.
+
+My question was not about the use cases for ``>file'' but *why*
+it was made a simple command. Let me explain:
+
+One creates an empty file or truncates a file with:
+
+	>file
+
+why not with:
+
+	:>file
+?
+
+To me it looks to be the more sensible ... more regular way.
+
+IO redirections for the shell itself could be made with:
+
+	exec >file 5>&
+
+no matter if ``>file'' is a simple command or not. Because of
+``exec'' the line is valid syntax (although the grammer probably
+was retro-fitted), and the manpages (mksh, bash, heirloom sh) all
+document exec without a command as a separate case (and the code
+probably handles it as a separate case as well), thus nothing is
+gained here from making ``>file'' a simple command.
+
+This is what wonder about: Why make ``>file'' a simple command,
+when -- as far as I can currently see -- there is no reason to do
+so, as all uses could have been achieved in more regular ways as
+well?
+
+So, was it rather by accident and it settled or is there something
+I don't see yet? Came `:' later in development, for instance, or
+was it special in a way that it couldn't be used to create and
+truncate files? Or is there even some clever design that I haven't
+understood yet? Are there use cases that can only be achieved with
+``>file'' but not with ``:>file''?
+
+
+meillo

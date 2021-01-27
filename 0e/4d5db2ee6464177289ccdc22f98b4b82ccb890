@@ -1,0 +1,190 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a046eebf
+	for <ml@inbox.vuxu.org>;
+	Sun, 5 Jan 2020 02:42:46 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9EE4195189; Sun,  5 Jan 2020 12:42:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 53D049516C;
+	Sun,  5 Jan 2020 12:42:07 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="trI4rjY2";
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=case.edu header.i=@case.edu header.b="Q26RP22W";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="d8x20Gq2";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B1AC79516C; Sun,  5 Jan 2020 12:42:04 +1000 (AEST)
+Received: from mpv1-2015.case.edu (mpv1-2015.CWRU.Edu [129.22.103.226])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C14FF95165
+ for <tuhs@tuhs.org>; Sun,  5 Jan 2020 12:42:03 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578192123;
+ bh=kgrsi5R9o9gm9wcpToek2DA7a/nBf7rwWk1Z62cT9Yk=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=trI4rjY2YI/OXOZcCQkUK7ub6Q+8OJ539Exd59c9tzLK1vml75htUXConPHU3Azwgs
+ Y6Uyl5nX+ZT0jV3WW+87vfXMTlxYkX1izzYscBZq9/qlXBQKTmBI0LFZUlSD9hyNeR1
+ VTTAD38owCuh+54ihKHfQmkgpDepkjDDJLdwc1pxmJhy/NXTIbMvPZYxeDPXFRy/pcJ
+ CC8gYroVs1C+nm6pJxtf8cSXTphDL/hqeB2DHBaP/kNymwz/MXd40ve/RLoNuVYeM+S
+ 79oJaQyiDJCMLmwXXp8ZUIVcLLWS+BdgrIbYz92B0sar5qgQH6lXpAWin1UqXcn+qNo
+ G+NvIavQ==
+Received: from mpv6-2015.CWRU.Edu (EHLO mpv6-2015.case.edu) ([129.22.103.202])
+ by mpv1-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id BDH06470; Sat, 04 Jan 2020 21:42:02 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578192122;
+ bh=EZq6dFjgTHJRicg019IkJ1KwMY2FoPhiNUw2eyB4ZYw=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=Q26RP22W7FHOlpOO80kD75dJDs1NMgD5mAc+BbL3dY+FFN0os5kpFqHoalkUAAh2cA
+ WHW9k7XRTLXFWB48dTBZZ+csbN7aVnYeXm3ReiDNeUiTW3qWM5d3vru1YwCK45EMYX5
+ d+Qomb8LZoZu83qZJbwwF8+cWocqothcs1AiQhLNtpd3Cm8pIf+SGBpwX4fDiqkLAQG
+ +u2HUTplqN2xUMjN0VWHLWjGDUlYBm4zQb1uvtFytw8jYtNb+kGEx6Knkl2wcpF2WFq
+ r8IsmpfAg9uCkr2zERNg8he+LyvHkY42sUVSD0TMCtG37Up6698drK02+NqHG33Fc5v
+ 0cfnoClQ==
+Received: from mail-yw1-f72.google.com (EHLO mail-yw1-f72.google.com)
+ ([209.85.161.72])
+ by mpv6-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id DDN62516; Sat, 04 Jan 2020 21:42:02 -0500 (EST)
+Received: by mail-yw1-f72.google.com with SMTP id q130so37372812ywh.11
+ for <tuhs@tuhs.org>; Sat, 04 Jan 2020 18:42:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu; s=g-case;
+ h=reply-to:cc:subject:to:references:from:autocrypt:organization
+ :message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=EZq6dFjgTHJRicg019IkJ1KwMY2FoPhiNUw2eyB4ZYw=;
+ b=d8x20Gq2njx/XkQkcX7iapdb8fND3qz9dQSdRbVHPQpkYD0q4btJY998U9YrZxhtK6
+ t/pWTTd3KWqUcKeWMTgjUwR3gzCBpYbR/j31oAIOK4ME7AGTPFTEu/bOMvn9xryrFPfy
+ S9RMqKnOJbZMuzsXMxe1sCiiMlQLvHPG867MQRpiV2Pjus/LztVoPg2CQjyi+bhUu1/b
+ c2eboqcAzBz+5BNmFHuw/VN3g5xB4pW+w5/ZNxNLHTaAnmuz50rHukvpaUww1NxcNoqV
+ CUduRvS0+nNmJOejeT/XgI/NF0qhrdfLs2gbBU4RVJI7FOnq2rf+wOWuAhDahxILtQRP
+ K9VA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:reply-to:cc:subject:to:references:from:autocrypt
+ :organization:message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=EZq6dFjgTHJRicg019IkJ1KwMY2FoPhiNUw2eyB4ZYw=;
+ b=r/bCrC2olNNUcBFsSvV4V7TWl4G476lIxIu5ywz8jGK8znFx7LE1iMKac+7toLi6l+
+ M5XythciIovCEHkAbI9IqeCDQe0H5C6Znp44pDAbTCEuRtJHTBtZ+JPU0aW7AKPk6tUv
+ qH5dziaYWascGZbo1Mm4KtejyGRpe+IjjFI3tRjQjWKXSD0kkPW+s2i0T8BHzVmxFH8r
+ Oq0TiZouBdmKoiAzUkjHMxCfIiVfHR0HTpkeWz2/XWEGk+UYnX4B0BVkF/86jxDM0Wah
+ ELcJQ8/xJiClWHpyYJbUlv99YctmLujQ3oO89HY0zN83f+iMSsoEtILgSwgh3KkAG+ky
+ 85BA==
+X-Gm-Message-State: APjAAAWnVxy/uK6//D+241XMzldxRdOpAfvOZsbvhyhrbDM84P1G84T7
+ ZknlcgBP/Tt/L7WpyEGUJUhwDRQYVvTp+NtsEteBLZhku/FqHpkJ1IBMzs2QnDQdUe6bCW7c6+B
+ EK8wGCHM=
+X-Received: by 2002:a25:3502:: with SMTP id c2mr3865089yba.452.1578192121888; 
+ Sat, 04 Jan 2020 18:42:01 -0800 (PST)
+X-Google-Smtp-Source: APXvYqyCwDUY3Po71LSHl27wF+Df9OriJfpg4oVfTLo1421wyW720GSUYCVtWl3Q4keeLree5umXUA==
+X-Received: by 2002:a25:3502:: with SMTP id c2mr3865080yba.452.1578192121581; 
+ Sat, 04 Jan 2020 18:42:01 -0800 (PST)
+Received: from [192.168.1.3] (cpe-107-10-246-128.neo.res.rr.com.
+ [107.10.246.128])
+ by smtp.gmail.com with ESMTPSA id t5sm26970162ywc.3.2020.01.04.18.42.00
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+ Sat, 04 Jan 2020 18:42:00 -0800 (PST)
+To: Dave Horsfall <dave@horsfall.org>,
+ The Eunuchs Hysterical Society <tuhs@tuhs.org>
+References: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+ <1ingL0-5g6-00@marmaro.de>
+ <alpine.BSF.2.21.9999.2001050758110.40155@aneurin.horsfall.org>
+ <alpine.BSF.2.21.9999.2001050810160.40155@aneurin.horsfall.org>
+ <CANCZdfp6QGqpiRkz-t3y+jwTkfmYCdxCQk+1=rh7qcKyHoSEQw@mail.gmail.com>
+ <CACqnu4UAUQmPOfjmz1ZVgNtVRFG=9a=PYtGu4vSKGHv05aNjSg@mail.gmail.com>
+ <df91940b-737d-1c7c-635a-207615842a77@case.edu>
+ <alpine.BSF.2.21.9999.2001051045580.40155@aneurin.horsfall.org>
+From: Chet Ramey <chet.ramey@case.edu>
+Autocrypt: addr=chet.ramey@case.edu; prefer-encrypt=mutual; keydata=
+ mQGiBEEOsGwRBACFa0A1oa71HSZLWxAx0svXzhOZNQZOzqHmSuGOG92jIpQpr8DpvgRh40Yp
+ AwdcXb8QG1J5yGAKeevNE1zCFaA725vGSdHUyypHouV0xoWwukYO6qlyyX+2BZU+okBUqoWQ
+ koWxiYaCSfzB2Ln7pmdys1fJhcgBKf3VjWCjd2XJTwCgoFJOwyBFJdugjfwjSoRSwDOIMf0D
+ /iQKqlWhIO1LGpMrGX0il0/x4zj0NAcSwAk7LaPZbN4UPjn5pqGEHBlf1+xDDQCkAoZ/VqES
+ GZragl4VqJfxBr29Ag0UDvNbUbXoxQsARdero1M8GiAIRc50hj7HXFoERwenbNDJL86GPLAQ
+ OTGOCa4W2o29nFfFjQrsrrYHzVtyA/9oyKvTeEMJ7NA3VJdWcmn7gOu0FxEmSNhSoV1T4vP2
+ 1Wf7f5niCCRKQLNyUy0wEApQi4tSysdz+AbgAc0b/bHYVzIf2uO2lIEZQNNt+3g2bmXgloWm
+ W5fsm/di50Gm1l1Na63d3RZ00SeFQos6WEwLUHEB0yp6KXluXLLIZitEJLQwQ2hldCBSYW1l
+ eSAoQ2FzZSBzdGFuZGFyZCkgPGNoZXQucmFtZXlAY2FzZS5lZHU+iF8EExECAB8FAkPi19EC
+ GwMHCwkIBwMCAQMVAgMDFgIBAh4BAheAAAoJELtYafBk6nSrelkAn31Gsuib7GcCZHbv5L5t
+ VKYR9LklAJ4hzUHKA49Z0QXR+qCb80osIcmPSbkBDQRBDrBvEAQAkK6TAOKBEM+EC4j6V/7o
+ /riVZqcgU5cid2qG9TXdwNtD9a3kvA/ObZBO93sX59wc6Bnwo4VJxsOmMlpGrAjJsxNwg3QH
+ akEtf8LXRbVpj5xStdmBdQZUhIQyalo/2/TZq5OijtddUQcL5cs70hTv/FpT3wUvr2Xr8rjF
+ 41IFEz8AAwcD/A0CZEGlzIrT5WCBnl6xBog/8vKiUCbarByat3d1mL6DbizvKNXQRTC9E/vE
+ dENAWCQCjr75Bu55xT8n3SXGtWdDC5xmZ/P3OBYORP8yl8H8I1FIosWOFirbIeYdZPq8SPD1
+ HL+EXo9zSiHVrrZRJ19ooCKKbSdXHFCY+aJG+0KZiEkEGBECAAkFAkEOsG8CGwwACgkQu1hp
+ 8GTqdKvjcACfZlkVCDwaz/NTO9cy3t69oWpVPNwAnRwe0qk/WL/gfhH346xh5B3HFbFN
+Organization: ITS, Case Western Reserve University
+Message-ID: <854eca1c-e5e5-5d8b-f5af-30cd1735096e@case.edu>
+Date: Sat, 4 Jan 2020 21:41:59 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.3.1
+MIME-Version: 1.0
+In-Reply-To: <alpine.BSF.2.21.9999.2001051045580.40155@aneurin.horsfall.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Junkmail-Status: score=9/90, host=mpv1-2015.case.edu
+X-Junkmail-PrAS-Raw: score=9/90, refid=2.7.2:2020.1.5.12716:17:9.975, ip=,
+ rules=__YOUTUBE_RCVD, DKIM_SIGNATURE,
+ __X_GOOGLE_DKIM_SIGNATURE, __HAS_REPLYTO, __HAS_CC_HDR,
+ __SUBJ_REPLY, __BOUNCE_CHALLENGE_SUBJ,
+ __BOUNCE_NDR_SUBJ_EXEMPT, __TO_MALFORMED_2, __TO_NAME,
+ __TO_NAME_DIFF_FROM_ACC, __HAS_REFERENCES, __REFERENCES,
+ __HAS_FROM, FROM_EDU_TLD, __HAS_MSGID, __SANE_MSGID,
+ DATE_TZ_NA, __USER_AGENT, __MOZILLA_USER_AGENT,
+ __MIME_VERSION, __IN_REP_TO, __CT, __CT_TEXT_PLAIN, __CTE,
+ __REPLYTO_SAMEAS_FROM_ADDY, __REPLYTO_SAMEAS_FROM_ACC,
+ __FROM_DOMAIN_IN_ANY_CC1, __FROM_DOMAIN_IN_ANY_CC2,
+ __TO_IN_SUBJECT2, __REPLYTO_SAMEAS_FROM_DOMAIN,
+ __DKIM_ALIGNS_1, __DKIM_ALIGNS_2, __ANY_URI, __URI_MAILTO,
+ __URI_WITH_PATH, __URI_NO_WWW, __CP_URI_IN_BODY,
+ __SUBJ_ALPHA_NEGATE, __URI_IN_BODY, __URI_NOT_IMG,
+ __MAIL_CHAIN, __FORWARDED_MSG, __BODY_NO_MAILTO,
+ __NO_HTML_TAG_RAW, BODYTEXTP_SIZE_3000_LESS,
+ BODY_SIZE_1000_1099, __MIME_TEXT_P1, __MIME_TEXT_ONLY,
+ [TRUNCATED], so=2010-03-03 19:42:08, dmn=2016-08-03-0138
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Reply-To: chet.ramey@case.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 1/4/20 6:53 PM, Dave Horsfall wrote:
+> On Sat, 4 Jan 2020, Chet Ramey wrote:
+> 
+>> It's elegant until you forget that `:' continues to process redirections.
+> 
+> So just keep remembering that it's an actual command :-)
+> 
+> Which reminds me: which Shell introduced "#" as a true comment?
+
+Define "true comment." The v7 shell had `#' as the comment character, but
+it only worked when in non-interactive shells. I think it was the Sys III
+shell that made it work when the shell was interactive.
+
+This is, incidentally, why bash has the `interactive_comments' option,
+which I saw in another message. BSD, which most of the GNU developers were
+using at the (pre-POSIX) time, used the v7 shell and didn't have
+interactive comments. When a sufficiently-advanced POSIX draft required
+them, we added it.
+
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet@case.edu    http://tiswww.cwru.edu/~chet/

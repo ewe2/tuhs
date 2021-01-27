@@ -1,0 +1,89 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.1 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 14763 invoked from network); 11 Jan 2021 07:28:12 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 11 Jan 2021 07:28:12 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 24D4B9CB15; Mon, 11 Jan 2021 17:28:06 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 27D569C88F;
+	Mon, 11 Jan 2021 17:27:31 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=alanlee.org header.i=@alanlee.org header.b="Z1a90gjT";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 9D4899C88F; Mon, 11 Jan 2021 17:27:27 +1000 (AEST)
+X-Greylist: delayed 524 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 11 Jan 2021 17:27:25 AEST
+Received: from taz.retrotronics.org (taz.retrotronics.org [66.228.61.155])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CE0019C88A
+ for <tuhs@tuhs.org>; Mon, 11 Jan 2021 17:27:25 +1000 (AEST)
+Received: from www.retrotronics.org (localhost [IPv6:::1])
+ by taz.retrotronics.org (Postfix) with ESMTP id 5F55814D8E0
+ for <tuhs@tuhs.org>; Mon, 11 Jan 2021 02:18:40 -0500 (EST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 taz.retrotronics.org 5F55814D8E0
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=alanlee.org;
+ s=default; t=1610349520;
+ bh=5Tw23m1o+kWgyCQSr2wms9z0rawmpv7QK8qHc8lL3qw=;
+ h=Date:From:To:Subject:In-Reply-To:References:From;
+ b=Z1a90gjTduLvoP+PhRMHbFWCPUXeZqTgFbRiBIoMVmTFjyffWzHkdyg+kX//EfF4B
+ Cl7fdlujYS7WTmm85Hjm/AggNSONvRzk/1xD38eLS86Pvs2jP7RngELaVapO8r6Y9p
+ dj52PC2pRPijDCbLGOx8G6Pjt9v80FJ0gjB0kAqU=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date: Mon, 11 Jan 2021 02:18:40 -0500
+From: alan@alanlee.org
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+In-Reply-To: <20201231161228.GG28420@mcvoy.com>
+References: <alpine.BSF.2.21.9999.2012311806460.82237@aneurin.horsfall.org>
+ <CAK6BEgdH7OOsw3p3d_bLsjhR+bv_ZrG9mvVSLa3hgJKhjLVK6w@mail.gmail.com>
+ <202012310810.0BV8ADZ3027195@freefriends.org>
+ <CANCZdfoKV7A46ho3ORghFZEddROty3A-y2bn1VY0m=ipBxFF6w@mail.gmail.com>
+ <950DAE25-BCAD-47EF-8FCE-A716271A3C25@gmail.com>
+ <20201231161228.GG28420@mcvoy.com>
+Message-ID: <32aeb853e5c56bc04dd2e9e2310f96a7@alanlee.org>
+X-Sender: alan@alanlee.org
+User-Agent: Roundcube Webmail/1.3.2 
+Subject: Re: [TUHS] The 2038 bug...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+64-bit migration is the ideal solution.  However there is a band-aid 
+that can be applied to extend the life of 32-bit only systems.  One 
+could reclaim part of the previous epoch window going forward.  That is, 
+once 32-bit time_t rolls over, assume any value from -2 billion to some 
+additional arbitrary positive time offset had indeed just rolled over.  
+Add a whole 0x100000000 to it in a 64-bit context and evaluate (or 
+evaluate against the old epoch ~+136 years).  It means a 32-bit time_t 
+in this context would instead mis-represent dates from 1902 forward to 
+some arbitrary threshold as modern >2038 dates.  But time_t was never 
+meant to track dates outside of 'near term' relative to 'modern day' - 
+eg +/- 68 years from 1970 when it was conceived.  It's reasonable to 
+assume as the use of such software has moved forward in time, its time 
+reference should as well.
+
+-Alan H.
+
+On 2020-12-31 11:12, Larry McVoy wrote:
+> On Thu, Dec 31, 2020 at 09:09:33AM -0700, Adam Thornton wrote:
+>> Whereas, time_t is basically internal, right?
+> 
+> time_t is used in syscalls, see Warner's email about i386.  It's a
+> mess for 32 bit kernels.

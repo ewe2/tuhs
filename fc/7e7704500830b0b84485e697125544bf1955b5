@@ -1,0 +1,207 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id bba5ad99
+	for <ml@inbox.vuxu.org>;
+	Fri, 3 Jan 2020 12:59:26 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9BC57951BB; Fri,  3 Jan 2020 22:59:25 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 25DDB9516B;
+	Fri,  3 Jan 2020 22:58:48 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D1E449516B; Fri,  3 Jan 2020 22:58:44 +1000 (AEST)
+X-Greylist: delayed 763 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Fri, 03 Jan 2020 22:58:44 AEST
+Received: from marmaro.de (marmaro.de [176.28.23.198])
+ by minnie.tuhs.org (Postfix) with ESMTP id 0C3E895165
+ for <tuhs@tuhs.org>; Fri,  3 Jan 2020 22:58:43 +1000 (AEST)
+Received: by marmaro.de (masqmail 0.3.6-dev, from userid 1000)
+ id 1inMKv-0Km-00; Fri, 03 Jan 2020 13:45:53 +0100
+To: tuhs@tuhs.org
+User-Agent: meillo's mail handler (mmh)
+X-License: CC0 (http://marmaro.de/rights)
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-ID: <1287.1578055553.1@marmaro.de>
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 03 Jan 2020 13:45:53 +0100
+From: markus schnalke <meillo@marmaro.de>
+Message-ID: <1inMKv-0Km-00@marmaro.de>
+Subject: [TUHS] sh:  cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hoi,
+
+in a computer forum I came across a very long command line,
+including `xargs' and `sh -c'. Anyways, throughout the thread
+it was modified several times, when accidently a pipe symbol
+appeared between the command and the output redirection. The
+command line did nothing; it ran successful. I was confused,
+because I expected to see a syntax error in case of
+``cmd|>file''. This made me wonder ...
+
+
+With help of Sven Mascheck, I was able to clear my understanding.
+The POSIX shell grammer provided the answer:
+
+pipeline         :      pipe_sequence =
+
+                 ... =
+
+ =
+
+pipe_sequence    :                             command =
+
+                 | pipe_sequence '|' linebreak command =
+
+                 ; =
+
+command          : simple_command =
+
+                 ... =
+
+ =
+
+simple_command   : cmd_prefix cmd_word cmd_suffix =
+
+                 | cmd_prefix cmd_word =
+
+                 | cmd_prefix   <--- HIER! =
+
+                 | cmd_name cmd_suffix =
+
+                 | cmd_name =
+
+                 ; =
+
+ =
+
+cmd_prefix       :            io_redirect =
+
+                 ... =
+
+ =
+
+io_redirect      :           io_file =
+
+                 ... =
+
+ =
+
+io_file          : '<'       filename =
+
+                 | LESSAND   filename =
+
+                 | '>'       filename =
+
+                 ... =
+
+ =
+
+A redirection is a (full) simple_command ... and because
+``simple_command | simple_command'' is allowed, so is
+``io_file | io_file''. This can lead to such strange (but
+valid) command lines like:
+ =
+
+	<a | >b =
+
+	>b | <a =
+
+ =
+
+Sven liked this one:
+
+	:|>: =
+
+
+Here some further fun variants:
+ =
+
+	:|:>: =
+
+
+	<:|:>: =
+
+
+They would provide nice puzzles. ;-)
+
+
+My understanding was helped most by detaching from the
+semantics and focussing on syntax. This one is obviously
+valid, no matter it has no effect:
+ =
+
+	:|:|: =
+
+
+=46rom there it was easier to grasp:
+ =
+
+	>a | >a | >a =
+
+ =
+
+Which is valid, because ``>a'' is a (complete) simple_command.
+ =
+
+Thus, no bug but consistent grammer. ;-) =
+
+
+
+If one would have liked to forbid such a corner case,
+additional special case handling would have been necessary
+=2E.. which is in contrast to the Unix way.
+ =
+
+
+Sven checked the syntax against various shells with these
+results:
+
+- Syntax ok in these shells:
+
+SVR2 sh (Ultrix), SVR4 sh (Heirloom)
+ksh93
+bash-1.05, bash-aktuell
+pdksh-5.2.14
+ash-0.4.26, dash-0.5.6.1
+posh-0.3.7, posh-0.12.3
+mksh-R24, mksh-R52b
+yash-2.29
+zsh-3.0.8, zsh-4.3.17
+
+- Exception to the rule:
+
+7thEd sh:
+
+=C2=A0=C2=A0=C2=A0 # pwd|>>file
+=C2=A0=C2=A0=C2=A0 # echo $?
+=C2=A0=C2=A0=C2=A0 141
+
+On first sight ok, but with a silent error ... SIGPIPE (128+13).
+
+
+I'd be interested in any stories and information around this
+topic.
+
+What about 7thEd sh?
+
+
+meillo

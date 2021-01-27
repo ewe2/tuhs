@@ -1,0 +1,104 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 673c32e1
+	for <ml@inbox.vuxu.org>;
+	Sat, 4 Jan 2020 11:56:11 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2D43D9B528; Sat,  4 Jan 2020 21:56:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C237A9516B;
+	Sat,  4 Jan 2020 21:55:42 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1AD1A9516B; Sat,  4 Jan 2020 21:55:40 +1000 (AEST)
+X-Greylist: delayed 465 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 04 Jan 2020 21:55:38 AEST
+Received: from fuz.su (fuz.su [5.135.162.8])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F0DAF95165
+ for <tuhs@minnie.tuhs.org>; Sat,  4 Jan 2020 21:55:38 +1000 (AEST)
+Received: from fuz.su (localhost [127.0.0.1])
+ by fuz.su (8.15.2/8.15.2) with ESMTPS id 004Blo6V030787
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@minnie.tuhs.org>; Sat, 4 Jan 2020 12:47:50 +0100 (CET)
+ (envelope-from fuz@fuz.su)
+Received: (from fuz@localhost)
+ by fuz.su (8.15.2/8.15.2/Submit) id 004BloUY030786
+ for tuhs@minnie.tuhs.org; Sat, 4 Jan 2020 12:47:50 +0100 (CET)
+ (envelope-from fuz)
+Date: Sat, 4 Jan 2020 12:47:50 +0100
+From: Robert Clausecker <fuz@fuz.su>
+To: tuhs@minnie.tuhs.org
+Message-ID: <20200104114750.GA30769@fuz.su>
+References: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+ <1ingL0-5g6-00@marmaro.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1ingL0-5g6-00@marmaro.de>
+User-Agent: Mutt/1.12.2 (2019-09-21)
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Good morning!
+
+On Sat, Jan 04, 2020 at 11:07:18AM +0100, markus schnalke wrote:
+> One creates an empty file or truncates a file with:
+> 
+> 	>file
+> 
+> why not with:
+> 
+> 	:>file
+> ?
+> 
+> To me it looks to be the more sensible ... more regular way.
+> 
+> IO redirections for the shell itself could be made with:
+> 
+> 	exec >file 5>&
+> 
+> no matter if ``>file'' is a simple command or not. Because of
+> ``exec'' the line is valid syntax (although the grammer probably
+> was retro-fitted), and the manpages (mksh, bash, heirloom sh) all
+> document exec without a command as a separate case (and the code
+> probably handles it as a separate case as well), thus nothing is
+> gained here from making ``>file'' a simple command.
+> 
+> This is what wonder about: Why make ``>file'' a simple command,
+> when -- as far as I can currently see -- there is no reason to do
+> so, as all uses could have been achieved in more regular ways as
+> well?
+
+I think the key reason is that the shell does not build an AST from
+the command you type, instead executing the phrases it encounters as it
+sees them.  So when the shell sees ">file", it opens "file" for writing
+in preparation of the rest of the command.  If no command comes, the
+line is handled the same way as an empty one and the redirections are
+discarded.  The shell could print an error here, but avoiding the side
+effect of opening "file" for lines just consisting of redirects would be
+difficult.  But then, why should it print an error?  The behaviour is
+not harmful after all and I'd say that nobody really thought about this
+being a thing when the shell was originally written.
+
+Yours,
+Robert Clausecker
+
+-- 
+()  ascii ribbon campaign - for an 8-bit clean world 
+/\  - against html email  - against proprietary attachments

@@ -1,0 +1,174 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 6b524878
+	for <ml@inbox.vuxu.org>;
+	Sat, 8 Feb 2020 22:30:25 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 570359CCC2; Sun,  9 Feb 2020 08:30:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C43999CCAB;
+	Sun,  9 Feb 2020 08:30:05 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="MizxshUD";
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=case.edu header.i=@case.edu header.b="tYiVmzyS";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="CVvTlfPY";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DE8A49CCAB; Sun,  9 Feb 2020 08:30:01 +1000 (AEST)
+Received: from mpv1-2015.case.edu (mpv1-2015.CWRU.Edu [129.22.103.226])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 043899CCAA
+ for <tuhs@tuhs.org>; Sun,  9 Feb 2020 08:29:59 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1581201000;
+ bh=FgzUOmt4yrnO+uxS7HZKw6eNX9knpYcAotnptJUisv4=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=MizxshUDgswyRW+p0zUo5WbTYSyg9Fly3H1q2Bf7CfBQWvjcc+cmtkqHSW0aWMEAh1
+ l3tHuL53OeE0nR7cIuDTKWgxaa6rlKp4eBN5PLvIGfbPxcjqybPvpOUdvCwYgIwYnfe
+ ILedaw6MlaA0DUZxoYHqIgYZsPfjOpbiWP9CUrxVQxLeTi/9RDcyF1UGRcdluKYlLfa
+ gyrf8kNgp934gOPZo6uip55m7akENwV1eKXSF/FAXgtJhevyqq6kNpI9a8QL4Zc+xNX
+ 0nTMSuXpCwCBfHs/WH4yL9+OwGXyLtj1DGPwt26mEEJ/Mtjcf4K7709p9m3utMwe52G
+ H1SXQGeQ==
+Received: from mpv6-2015.CWRU.Edu (EHLO mpv6-2015.case.edu) ([129.22.103.202])
+ by mpv1-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id BDZ38988; Sat, 08 Feb 2020 17:29:58 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1581200998;
+ bh=aBLvLParH5b87tba74FDzDP3BcwvtUmcqUvJCTSKQ/Q=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=tYiVmzySX1f0g8BOLT/h/Cw6KVKMyT7BVP3IV1f8CrTyZSQQsLya2SKRnMSY8MPPKO
+ PJg9jZxZWIIt0N58x9BpvmTXblp7YBm+hVqypxEEUhZ2faVQC1bJfHcr6hu78Z/QBK2
+ +2oip64fKQ6JdpvGD9+/jfseaf6bYmR09f6DyZsUay7U7v8URJHv+29jpOm1rMP+Kw1
+ kU5b+AHn1/HBqAEsOccJjXHwYGRsvM8KvgDa2661+oiXHFum79V2LdD/lMzyotf8UP9
+ hg66tLiA4uXegI1VaBXDI8EaJHFvIxB+P4dFrxs/QQqEUUPeBjf0tKl4fng8nqM3cOh
+ m3BXlLIQ==
+Received: from mail-yb1-f199.google.com (EHLO mail-yb1-f199.google.com)
+ ([209.85.219.199])
+ by mpv6-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id DFJ56352; Sat, 08 Feb 2020 17:29:58 -0500 (EST)
+Received: by mail-yb1-f199.google.com with SMTP id y123so679635yby.6
+ for <tuhs@tuhs.org>; Sat, 08 Feb 2020 14:29:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu; s=g-case;
+ h=reply-to:cc:subject:to:references:from:autocrypt:organization
+ :message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=aBLvLParH5b87tba74FDzDP3BcwvtUmcqUvJCTSKQ/Q=;
+ b=CVvTlfPYd+SMl6q9Fa5xSyr1IzO7p8HY7mCtOOI4p1dqifCdMO4m1NlsSSB3+It63E
+ WEYlrwCGAOpRJ4bU2MDYHBgK4TC90w9r3C2gqX2Knvjenwm5rySKnxBpVa97IFKz9T6/
+ kshB5+7CtU0Bfr09gvTU9cGaTX9N/hzxK8lOqZ3drlibfiuLnx3UyR0EMpYYxZLmvF78
+ KDdWOwTH0e0XCwe3VlTJVmEObNU7Hic3jbkb+FvPTND6uBkffGHgxY9AY35faAzue+D4
+ ETZd+KSXUZQArYOxSyQhWqAlGddF/SB6He2dvIBBXohLD2IO0RWqFQv5N0YlUwBgE3tV
+ 0npw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:reply-to:cc:subject:to:references:from:autocrypt
+ :organization:message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=aBLvLParH5b87tba74FDzDP3BcwvtUmcqUvJCTSKQ/Q=;
+ b=J5JDkKeLBSdU4m3ggggSW+ByA0dMOvoCPBVBOmxBxHGL4TvI2UmbaSJSi0GIUYFtO5
+ /TGM76B7CFap1tfbYYQTA5/g+Pgma9gFBFOxEOVTbNp9wSbMNXO9JL5ACRiKrVqaKSjm
+ 1HEp4pn0rmFRKa4jCR4gepeELh6zI99Fm8WhTY+OTWYSSmtw0PKc1YNdna9OGC26ck9g
+ XQ9Ri6kI7zRWJjX7rVEYzqq2F7EthiuoL40o8HSC5iX32C5C98mDWhF8AM5OGad/vj+0
+ 8hbgBsmrQy1o3P/ajQoYu9eL1n/YS+ZYotpqfDkXRK/pOH8HHOUZev567R9aNXH2Ie9F
+ 1y4g==
+X-Gm-Message-State: APjAAAXGJVE2uvYeWOzA2a6wf5+mQeaEZ2awWdKHyXjkyHXkh0DWpbLH
+ KYP8jimPkwIBlaCKnoEHHQoiSjvRN1vlzl/4leQdm6LM/gNsRjeE3g66h9ClciS6sZaDziM+Xvt
+ Wkxl8c1w=
+X-Received: by 2002:a25:5c43:: with SMTP id q64mr4139343ybb.312.1581200998068; 
+ Sat, 08 Feb 2020 14:29:58 -0800 (PST)
+X-Google-Smtp-Source: APXvYqxb5yhED+XxuK/D7l/pRYfkQN70RuQcQWhTVLfr9HnnjIQf9ujMqdKsrOVIHnFvGLXxtSzKvw==
+X-Received: by 2002:a25:5c43:: with SMTP id q64mr4139331ybb.312.1581200997748; 
+ Sat, 08 Feb 2020 14:29:57 -0800 (PST)
+Received: from ?IPv6:2605:a000:1223:e2ef:d4db:b872:e934:2785?
+ ([2605:a000:1223:e2ef:d4db:b872:e934:2785])
+ by smtp.gmail.com with ESMTPSA id 132sm3227289ywt.92.2020.02.08.14.29.55
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+ Sat, 08 Feb 2020 14:29:56 -0800 (PST)
+To: Rob Pike <robpike@gmail.com>, Warner Losh <imp@bsdimp.com>
+References: <C63994DC-C33E-48E6-BB5B-79A36E15132C@tuhs.org>
+ <CAKzdPgy6WJ_bUSY4hUoqtq41F1dYH_9SGLK_istBAb5Hv346EA@mail.gmail.com>
+ <CANCZdfqkAmo+4LcM9MJps9knoJa6sbd5WX94QN0MDcGZLBKeAQ@mail.gmail.com>
+ <CAKzdPgxeqBaXgFEHE7tvxXa6ZywTYY-eCtcZUGRBzGQUsU6BHg@mail.gmail.com>
+From: Chet Ramey <chet.ramey@case.edu>
+Autocrypt: addr=chet.ramey@case.edu; prefer-encrypt=mutual; keydata=
+ mQGiBEEOsGwRBACFa0A1oa71HSZLWxAx0svXzhOZNQZOzqHmSuGOG92jIpQpr8DpvgRh40Yp
+ AwdcXb8QG1J5yGAKeevNE1zCFaA725vGSdHUyypHouV0xoWwukYO6qlyyX+2BZU+okBUqoWQ
+ koWxiYaCSfzB2Ln7pmdys1fJhcgBKf3VjWCjd2XJTwCgoFJOwyBFJdugjfwjSoRSwDOIMf0D
+ /iQKqlWhIO1LGpMrGX0il0/x4zj0NAcSwAk7LaPZbN4UPjn5pqGEHBlf1+xDDQCkAoZ/VqES
+ GZragl4VqJfxBr29Ag0UDvNbUbXoxQsARdero1M8GiAIRc50hj7HXFoERwenbNDJL86GPLAQ
+ OTGOCa4W2o29nFfFjQrsrrYHzVtyA/9oyKvTeEMJ7NA3VJdWcmn7gOu0FxEmSNhSoV1T4vP2
+ 1Wf7f5niCCRKQLNyUy0wEApQi4tSysdz+AbgAc0b/bHYVzIf2uO2lIEZQNNt+3g2bmXgloWm
+ W5fsm/di50Gm1l1Na63d3RZ00SeFQos6WEwLUHEB0yp6KXluXLLIZitEJLQwQ2hldCBSYW1l
+ eSAoQ2FzZSBzdGFuZGFyZCkgPGNoZXQucmFtZXlAY2FzZS5lZHU+iF8EExECAB8FAkPi19EC
+ GwMHCwkIBwMCAQMVAgMDFgIBAh4BAheAAAoJELtYafBk6nSrelkAn31Gsuib7GcCZHbv5L5t
+ VKYR9LklAJ4hzUHKA49Z0QXR+qCb80osIcmPSbkBDQRBDrBvEAQAkK6TAOKBEM+EC4j6V/7o
+ /riVZqcgU5cid2qG9TXdwNtD9a3kvA/ObZBO93sX59wc6Bnwo4VJxsOmMlpGrAjJsxNwg3QH
+ akEtf8LXRbVpj5xStdmBdQZUhIQyalo/2/TZq5OijtddUQcL5cs70hTv/FpT3wUvr2Xr8rjF
+ 41IFEz8AAwcD/A0CZEGlzIrT5WCBnl6xBog/8vKiUCbarByat3d1mL6DbizvKNXQRTC9E/vE
+ dENAWCQCjr75Bu55xT8n3SXGtWdDC5xmZ/P3OBYORP8yl8H8I1FIosWOFirbIeYdZPq8SPD1
+ HL+EXo9zSiHVrrZRJ19ooCKKbSdXHFCY+aJG+0KZiEkEGBECAAkFAkEOsG8CGwwACgkQu1hp
+ 8GTqdKvjcACfZlkVCDwaz/NTO9cy3t69oWpVPNwAnRwe0qk/WL/gfhH346xh5B3HFbFN
+Organization: ITS, Case Western Reserve University
+Message-ID: <46c41c18-5b44-14e5-1f0a-9272866993da@case.edu>
+Date: Sat, 8 Feb 2020 17:29:26 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0)
+ Gecko/20100101 Thunderbird/68.4.2
+MIME-Version: 1.0
+In-Reply-To: <CAKzdPgxeqBaXgFEHE7tvxXa6ZywTYY-eCtcZUGRBzGQUsU6BHg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Junkmail-Status: score=8/80, host=mpv1-2015.case.edu
+X-Junkmail-PrAS-Raw: score=8/80, refid=2.7.2:2020.2.8.214217:17:8.317, ip=,
+ rules=__YOUTUBE_RCVD, DKIM_SIGNATURE,
+ __X_GOOGLE_DKIM_SIGNATURE, __HAS_REPLYTO, __HAS_CC_HDR,
+ __MULTIPLE_RCPTS_CC_X2, __CC_NAME,
+ __CC_NAME_DIFF_FROM_ACC, __SUBJ_REPLY,
+ __BOUNCE_CHALLENGE_SUBJ, __BOUNCE_NDR_SUBJ_EXEMPT,
+ __TO_MALFORMED_2, __MULTIPLE_RCPTS_TO_X2, __TO_NAME,
+ __TO_NAME_DIFF_FROM_ACC, __HAS_REFERENCES, __REFERENCES,
+ __HAS_FROM, FROM_EDU_TLD, __HAS_MSGID, __SANE_MSGID,
+ DATE_TZ_NA, __USER_AGENT, __MOZILLA_USER_AGENT,
+ __MIME_VERSION, __IN_REP_TO, __CT, __CT_TEXT_PLAIN, __CTE,
+ __REPLYTO_SAMEAS_FROM_ADDY, __REPLYTO_SAMEAS_FROM_ACC,
+ __FROM_DOMAIN_IN_ANY_CC2, __REPLYTO_SAMEAS_FROM_DOMAIN,
+ __DKIM_ALIGNS_1, __DKIM_ALIGNS_2, __ANY_URI, __URI_MAILTO,
+ __URI_WITH_PATH, __URI_ENDS_IN_SLASH, __URI_NO_WWW,
+ __CP_URI_IN_BODY, __SUBJ_ALPHA_NEGATE, __URI_IN_BODY,
+ __URI_NOT_IMG, __MAIL_CHAIN, __BODY_NO_MAILTO,
+ __NO_HTML_TAG_RAW, BODYTEXTP_SIZE_400_LESS, [TRUNCATED],
+ so=2010-03-03 19:42:08, dmn=2016-08-03-0138
+Subject: Re: [TUHS] Warner's Early Unix Presentation
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Reply-To: chet.ramey@case.edu
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 2/8/20 4:50 PM, Rob Pike wrote:
+> The GNU "Bourne
+> again" shell is missing all that stuff I did.
+
+Like what, for instance?
+
+
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet@case.edu    http://tiswww.cwru.edu/~chet/

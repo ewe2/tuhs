@@ -1,0 +1,98 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 2857 invoked from network); 1 Dec 2020 16:47:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Dec 2020 16:47:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AD73F9C21A; Wed,  2 Dec 2020 02:47:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 957819C204;
+	Wed,  2 Dec 2020 02:47:26 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8DA129C204; Wed,  2 Dec 2020 02:47:24 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2A5A59C203
+ for <tuhs@minnie.tuhs.org>; Wed,  2 Dec 2020 02:47:24 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id E908735E202; Tue,  1 Dec 2020 08:47:23 -0800 (PST)
+Date: Tue, 1 Dec 2020 08:47:23 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Warner Losh <imp@bsdimp.com>
+Message-ID: <20201201164723.GT18187@mcvoy.com>
+References: <15511090.6330.1606835354160.JavaMail.root@zimbraanteil>
+ <202012011538.0B1FcLi5023858@freefriends.org>
+ <CANCZdfqMtd-CrwUJPVDbc434+hbQEZoYbT-YuTqMmP2Q6yWqwA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CANCZdfqMtd-CrwUJPVDbc434+hbQEZoYbT-YuTqMmP2Q6yWqwA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] The UNIX Command Language (1976)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Dec 01, 2020 at 09:24:17AM -0700, Warner Losh wrote:
+> On Tue, Dec 1, 2020 at 8:39 AM <arnold@skeeve.com> wrote:
+> 
+> > It was recognized that goto was not necessary if one had proper control
+> > structures in a language (if/else, while), and that code with no (or
+> > minimal) gotos was easier to read and understand.
+> >
+> 
+> This is true for simple flow control. However, when you had to break out of
+> multiple levels, or continue not the inner loop, but the middle loop, the
+> use of extra booleans sure made the code less understandable than a 'goto'
+> a label that stood in for that purpose... This was something that wasn't
+> well understood by language designers, and even today C and C++ neither
+> have good flow control beyond the basics. Even though both break and
+> continue could take an optional count without breaking old code....
+
+Probably need to move this to COFF... but.
+
+Yeah, I've tons of examples of
+
+int
+somefunc()
+{
+	char	*a = 0;
+	int	*b = 0;
+	flat	*c = 0;
+	int	ret = 0;
+
+	if (something) {
+		a = malloc(something);
+	} else {
+		ret = NO_SOMETHING;
+		goto error;
+    	}
+	// same for b, c
+error:
+	unless (ret) ret = GENERIC_ERROR;
+	if (a) free(a);
+	if (b) free(b);
+	if (c) free(c);
+	return (ret);
+}
+
+and you can handle a lot of simple cases that way.  But sometimes the 
+unraveling is more difficult than a simple free so I might have a
+	goto unravel;
+instead of the generic
+	goto out;
+
+I love goto *if* you figure out a pattern for using it and stick to that.
+For the people who don't like goto, what is your feeling on longjmp()?

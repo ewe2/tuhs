@@ -1,0 +1,429 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13766 invoked from network); 22 Aug 2020 03:30:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 Aug 2020 03:30:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 04DF09CA48; Sat, 22 Aug 2020 13:30:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 53A9F9B67B;
+	Sat, 22 Aug 2020 13:29:58 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 755019B67B; Sat, 22 Aug 2020 13:29:54 +1000 (AEST)
+Received: from mail.cs.dartmouth.edu (mail.cs.dartmouth.edu [129.170.212.100])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 55DEA93D61
+ for <tuhs@tuhs.org>; Sat, 22 Aug 2020 13:29:53 +1000 (AEST)
+Received: from tahoe.cs.Dartmouth.EDU (tahoe.cs.dartmouth.edu [129.170.212.20])
+ by mail.cs.dartmouth.edu (8.15.2/8.15.2) with ESMTPS id 07M3ToO81743200
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Fri, 21 Aug 2020 23:29:50 -0400
+Received: from tahoe.cs.Dartmouth.EDU (localhost.localdomain [127.0.0.1])
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.14.3) with ESMTP id 07M3To6J041996
+ for <tuhs@tuhs.org>; Fri, 21 Aug 2020 23:29:50 -0400
+Received: (from doug@localhost)
+ by tahoe.cs.Dartmouth.EDU (8.15.2/8.15.2/Submit) id 07M3ToZP041995
+ for tuhs@tuhs.org; Fri, 21 Aug 2020 23:29:50 -0400
+From: Doug McIlroy <doug@cs.dartmouth.edu>
+Message-Id: <202008220329.07M3ToZP041995@tahoe.cs.Dartmouth.EDU>
+Date: Fri, 21 Aug 2020 23:29:50 -0400
+To: tuhs@tuhs.org
+User-Agent: Heirloom mailx 12.5 7/5/10
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="=_5f40912e.nbH1SDdY/mjJu9h4UoWZEarxt7CntgLHpyeFS2sbxBd7UHsN"
+Subject: Re: [TUHS] bare m4 (was BTL summmer employees)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This is a multi-part message in MIME format.
+
+--=_5f40912e.nbH1SDdY/mjJu9h4UoWZEarxt7CntgLHpyeFS2sbxBd7UHsN
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+
+> >> Even high-school employees could make lasting contributions.  I am
+> >> indebted to Steve for a technique he conceived during his first summer
+> >> assignment: using macro definitions as if they were units of associative
+> >> memory. This view of macros stimulated previously undreamed-of uses.
+>
+> > Can you give some examples of what this looked like?
+>
+
+See attached for an answer to Arnold's question
+
+Doug
+
+--=_5f40912e.nbH1SDdY/mjJu9h4UoWZEarxt7CntgLHpyeFS2sbxBd7UHsN
+Content-Type: text/plain;
+ charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="defonly.m4"
+
+define(_,`dnl')_  unobtrusive dnl, used for readability
+_
+_ m4 is Turing complete even when stripped to the bare minimum
+_ of one builtin: `define'. This is not news; Christopher Strachey
+_ demonstrated it in his ancestral GPM, described in "A general 
+_ purpose macrogenerator", The Computer Journal 8 (1965) 225-241.
+_ 
+_ This program illustrates the fact by implementing bit-by-bit
+_ binary arithmetic, systematically employing some unusual m4
+_ idioms, used in largely functional style:
+_
+_  1. Case-switching via macro names constructed on the fly.
+_  2. Representing data structures by nested parenthesized lists.
+_  3. Using macros as named places to store data.
+_
+_ A case switch (Idiom 1)
+_
+_ An essential feature of programming is conditional execution.
+_ Suppose there are predicates that yield `T' or `F' for true
+_ or false. A conditional switch of the form
+_
+_    if(<T or F>,`<T action>', `<F action>')
+_
+_ constructs calls for `if_T, or `if_F' that select the
+_ appropriate action:
+_
+define(if,`if_$1(`$2',`$3')')_
+define(if_T,`$1')_
+define(if_F,`$2')_
+_
+_ Example
+_
+_    if(T,`yes',`no') => if_T(`yes',`no') => yes
+_    if(F,`yes',`no') => if_F(`yes',`no') => no
+_
+_ Basic Boolean functions are easy to define in terms of `if':
+_
+define(not,`if($1,`F',`T')')_
+define(and,`if($1,`$2',`F')')_
+define(or,`if($1,`T',`$2')')_
+define(xor,`if($1,`not($2)',`$2')')_
+_
+_ List representation (Idiom 2)
+_
+_ In order to provide access to individual members, sequences
+_ of data values may be represented as right-associated lists.
+_ In particular, binary integers may be represented in this
+_ manner:
+_
+_    (1,(0,(1,(1,()))))
+_
+_ To facilitate arithmetic algorithms, the presentation
+_ is little-endian. In customary base-2 notation the
+_ example becomes 1101 (decimal 13). An empty list `()' acts
+_ as terminator. Non-significant 0's (leading zeros in
+_ customary notation) are not allowed;
+_ the value zero is represented by the empty list.
+_
+_ Macros as named storage (Idiom 3)
+_
+_ Example
+_
+_    define(thirteen,`(1,(0,(1,(1,()))))')_
+_
+_ Individual list elements may be accessed by a pun, in which
+_ the outer parentheses of a list are taken to be the
+_ argument-list delimiters in a macro call. Two basic macros
+_ use this schem to extract "head" and "tail" parts, <h>
+_ and <t>, from a nonempty list:
+_
+_    head((<h>,<t>)) ==> <h>
+_    tail((<h>,<t>)) ==> <t>
+_
+define(head,`_head$1')_
+define(_head,`$1')_
+_
+define(tail,`_tail$1')_
+define(_tail,`$2')_
+_
+_ Example
+_
+_    head(thirteen) ==> _head(1,(0,(1,(1,()))))  => 1
+_    tail(thirteen) ==> _tail(1,(0,(1,(1,())))) => (0,(1,(1,()))
+_
+_ (In showing the progress of macro expansion => denotes a single
+_ step; ==> denotes multiple steps.)
+_
+_ According to the rules of m4, `head' and `tail' also work on
+_ the empty list, `()',in which case either function yields an
+_ empty string, `'. This property of `head' will be exploited.
+_
+_ A digit-equality test, `eqd', is useful in arithmetic. It 
+_ switches on two arguments chosen from the set {`', `0', `1'}
+_ and yields `T' or `F' according as they are or are not equal.
+_ The "digit" `' arises from expressions such as `head(())'.
+_ The macro switches on its two arguments in the same way that
+_ `if' switches on one argument.
+_
+define(eqd,`eqd_$1_$2()')_
+define(eqd__,`T')_
+define(eqd__0,`F')_
+define(eqd__1,`F')_
+_
+define(eqd_0_,`F')_
+define(eqd_0_0,`T')_
+define(eqd_0_1,`F')_
+_
+define(eqd_1_,`F')_
+define(eqd_1_0,`F')_
+define(eqd_1_1,`T')_
+_
+_ Example
+_
+_    eqd(1,0) => eqd_1_0() => F
+_
+_ The () appended by `eqd' is defensive. If () were
+_ omitted, then <text> would mistakenly be eaten in a
+_ rare juxtaposition like
+_
+_    eqd(1,0)(<text>) => eqd_1_0(<text>) => F
+_
+_ The easiest arithmetic function is the successor function.
+_ It can be programmed entirely in terms of functions
+_ already defined. (The name `Succ' is capitalized to
+_ distinguish it from a different implementation that
+_ will soon be described.)
+_
+define(Succ,`if(eqd(head($1),`'),`(1,())','_
+``if(eqd(head($1),`0'),`(1,tail($1))',`(0,Succ(tail($1)))')')')_
+_
+_ (Right and left quotes before and after `_' bring it to top
+_ level to keep it out of the text of `Succ'.)
+_
+_ `Succ' ultimately expands in one of three different ways,
+_ each presented in a different context: the first alternative
+_ of an `if', the first alternative of a nested `if', and the
+_ second alternative of an `if'. It would be notionally
+_ cleaner to use a 3-way switch.
+_
+_ Unfortunately, overt switch code relies on Idiom 1, a glaring
+_ deviation from the mainstream functional style employed in
+_ `Succ'. Fortunately, a remedy is at hand: macros that hide
+_ the idiom.
+_
+_ A general pattern for switching on the head of the operand of
+_ a unary operation, <op>, is
+_
+_    define(<op>,`_<op>(head($1))($1)')_
+_    define<_<op>,`<op>_$1')_
+_
+_ The pattern is hidden once and for all in the macro
+_ `cases1(<op>)'.
+_
+define(cases1,`_cases1(dol(1),`$1')')_
+define(_cases1,`define($2,`_$2(head($1))($1)')_
+define(_$2,`$2_$1')')_
+define(dol,`$$1')_
+_
+_ The magic here is the "dollar macro"
+_
+_    dol(1) => $1
+_
+_ which results in `$1' being substituted for `$1' [sic] throughout
+_ the replacement text of `_cases1', while <op> is substituted for
+_ `$2'. When <op> is `succ', the expansion proceeds thus:
+_
+_    cases1(succ) => _cases1(dol(1),`succ') =>
+_    define(succ,`_succ(head($1))($1)')define(_succ,`succ_$1')
+_
+_ Code for individual cases of the successor function remains
+_ to be supplied.
+_
+cases1(succ)_
+define(succ_,`(1,())')_
+define(succ_0,`(1,tail($1))')_
+define(succ_1,`(0,succ(tail($1)))')_
+_
+_ Example
+_
+_    succ((1,()) => _succ(1,())((1,())) => succ_1((1,())) =>
+_    (0,succ(tail((1,())))) ==> (0,succ(()) ==> (0,(1,()))
+_
+_ Some small constants may be defined for future use (Idiom 3).
+_
+define(zero,())_
+define(one,succ(zero))_
+define(two,succ(one))_
+_
+_ Here is a pretty-print macro that converts binary numbers
+_ in list form to ordinary binary notation.
+_
+define(base2,`if(eqd(head($1),`'),`0',`_base2($1)')')_
+cases1(_base2)
+define(_base2_,`')_
+define(_base2_0,`_base2(tail($1))0')_
+define(_base2_1,`_base2(tail($1))1')_
+_
+_ Example, with `thirteen' as given in a previous example
+_
+_    base2(zero) ==> 0
+_    base2(thirteen) ==> 1101
+_
+_ A counter based on `succ' may be held in a macro whose content may
+_ be updated by a macro`incr' or read out simply by expanding it.
+_
+define(incr,`define(`$1',succ($1))')_
+_
+_ Example
+_
+_    define(mycounter,())
+_    incr(`mycounter')
+_    incr(`mycounter')
+_    base2(mycounter) => 10
+_
+_ Binary operations may be defined by switching on two
+_ parameters. The switching code, generated by a macro
+_ `cases2', is very like that generated by `cases1' with
+_ two calls of the dollar macro instead of one.
+_ 
+define(cases2,`_cases2(dol(1),dol(2),$1)')_
+define(_cases2,`define($3,`_$3(head($1),head($2))($1,$2)')_
+define(_$3,`$3_$1_$2')')_
+_
+_ Now comes addition of binary numbers
+_
+cases2(add)_
+define(add__,zero)_
+define(add__0,`$2')_
+define(add__1,`$2')_
+define(add_0_,`$1')_
+define(add_0_0,`(0,add(tail($1),tail($2))')_
+define(add_0_1,`(1,add(tail($1),tail($2))')_
+define(add_1_,`$1')_
+define(add_1_0,`(1,add(tail($1),tail($2))')_
+define(add_1_1,`(0,add(tail($1),succ(tail($2))))')_
+_
+_ Further arithmetic operations like multiplication, power,
+_ and comparisons can be programmed similarly, as can a 
+_ a division operator that yields a (quotient,remainder)
+_ pair.
+_
+_ Definitions of operations need not switch on all arguments.
+_ This boringly similar macro provides the switch for
+_ a function that switches on the second of two arguments:
+_
+define(cases2of2,`_cases2of2(dol(1),dol(2),$1)')_
+define(_cases2of2,`define($3,`_$3(head($2))($1,$2)')_
+define(_$3,`$3_$1')')_
+_
+_ A higher-level switch-generator might take the form
+_
+_    cases(<op>,<switchparms>,<parms>)
+_
+_ where <switchparms> is a list of parameter numbers to
+_ switch on, and <parms> is a list of all parameter numbers.
+_ Then cases2of2 would be definable without messing with
+_ the dollar macro:
+_
+_    define(case2of2,`cases(<op>,(2,()),(1,(2,())))')
+_
+_ Other data types
+_
+_ The basic list-processing operations, head and tail, are
+_ agnostic about the content of lists. Head values can
+_ come from any set, for example alphanumeric characters.
+_ In principle a string-equality operator declared
+_ by `cases2(eqs)' could be programmed to yield `T' or
+_ `F' for examples like
+_
+_    eqs((W,(O,(R,(D,(1,()))))),(W,(O,(R,(D,(2,())))))
+_ 
+_ but it would require a daunting N^2 = 3969 case macros,
+_ where N counts uppercase, lowercase and numeric characters
+_ plus the empty character. Fortunately there is a trick 
+_ that reduces the number of case macros to N = 63.
+_
+_ For every character <c> define a case macro `eqc_<c>' to
+_ yield `F'. Here's a small sample:
+_
+define(eqc_A,`F')_
+define(eqc_B,`F')_
+define(eqc_C,`F')_
+define(eqc_D,`F')_
+define(eqc_,`F')_
+_
+_ Then `eqc(<a>,<b>)' redefines `eqc_<a>' to yield `T' and
+_ calls `eqc_<b>'. The result is `T' only if <a> and <b> are
+_ the same. Finally `eqc' restores the definition of `eqc_<a>'.
+_ The only subtlety in the definition of `eqc' is the empty
+_ quotes that keep the result of `eqc_$2' from being tacked
+_ onto `define':
+_
+define(eqc,`define(`eqc_$1',`T')eqc_$2`'define(`eqc_$1',`F')')_
+_
+_ In terms of `eqc' string-comparison becomes
+_
+define(eqs,`if(eqc(head($1),`'),`T',`if(eqc(head($1),head($2)),'_
+``eqs(tail($1),tail($2))',`F')')')_
+_
+_ One might hope to automate the writing of case definitions
+_ for `eqc' by iterating over a list like
+_
+_    (A,(B,(C,(D,())))
+_
+_ The hope is apparently vain: to identify the end of the list
+_ one needs a case switch over the set of elements that may
+_ appear in the list--infinite regress. I know of no workaround
+_ much less laborious than writing out all the cases directly.
+_
+_ Universality
+_
+_ It's not hard to envision simulating a simple computer, except
+_ for interactive input-out--a deficiency that is shared with
+_ Turing machines. Thus, aside from resource limitations, bare
+_ m4 is Turing complete.
+_
+_ The program counter is maintained by `incr', and converted
+_ to string form by `base2'.
+_
+_ The <n>th word of memory is a binary number held in a macro
+_ named W<n>, where <n> is expressed in string form.
+_.
+_ Operation codes are a limited set of binary numbers <op>, and
+_ may be switched on by converting them to string form I<op>.
+_
+_ A branch operation redefines the location counter.
+_
+_ An assignment redefines the designated word.
+_
+_ Other operations are coded in styles illustrated above.
+_
+_ Words need not be limited in size. Numbers may be kept
+_ in sign-magnitude form.
+_
+_ Instructions may be of variable length--one word of opcode,
+_ and following words of addresses or immediate operands.
+_
+_ A control macro fetches an opcode according to the location
+_ counter.  If the opcode is a halt instruction, the control
+_ terminates. Otherwise it calls the designated operation,
+_ updates the instruction counter according to the opcode,
+_ and calls the control recursively.
+_
+_ Advice for m4
+_
+_ Recursion of the control macro is unlimited and unavoidable.
+_ Ufortunately few, if any, m4 implementations implement tail
+_ calls so as not to grow the program stack. Doing so would
+_ help this and other deeply recursive applications.
+_
+
+--=_5f40912e.nbH1SDdY/mjJu9h4UoWZEarxt7CntgLHpyeFS2sbxBd7UHsN--

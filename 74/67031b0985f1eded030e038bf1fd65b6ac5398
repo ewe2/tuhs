@@ -1,0 +1,85 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25704 invoked from network); 2 Jun 2020 20:14:06 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jun 2020 20:14:06 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 92A469CAED; Wed,  3 Jun 2020 06:14:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4453A9CA34;
+	Wed,  3 Jun 2020 06:13:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EADB69CA34; Wed,  3 Jun 2020 06:13:35 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7329D9C96B
+ for <tuhs@minnie.tuhs.org>; Wed,  3 Jun 2020 06:13:35 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 95D9718C079; Tue,  2 Jun 2020 16:13:34 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200602201334.95D9718C079@mercury.lcs.mit.edu>
+Date: Tue,  2 Jun 2020 16:13:34 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Winalski
+
+    > I'm curious as to what the rationale was for Unix to have been designed
+    > with basic I/O being blocking rather than asynchronous.
+
+It's a combination of two factors, I reckon. One, which is better depends a
+lot on the type of thing you're trying to do. For many typical thing (e.g.
+'ls'), blocking is a good fit. And, as As Arnold says, asyhchronous I/O is
+more complicated, and Unix was (well, back then at least) all about getting
+the most bang for the least bucks.
+
+More complicated things do sometimes benefit from asynchronous I/O, but
+complicated things weren't Unix's 'target market'. E.g. even though pipes
+post-date the I/O decision, they too are a better match to blocking I/O.
+
+
+    > From: Arnold Skeeve
+
+    > the early Unixs were on smaller -11s, not the /45 or /70 with split I&D
+    > space and the ability to address lost more RAM.
+
+Ahem. Lots more _core_. People keeep forgetting that we're looking at
+decicions made at a time when each bit in main memory was stored in a
+physically separate storage device, and having tons of memory was a dream of
+the future.
+
+E.g. the -11/40 I first ran Unix on had _48 KB_ of core memory - total!
+And that had to hold the resident OS, plus the application! It's no
+surprise that Unix was so focused on small size - and as a corollary, on
+high bang/buck ratio.
+
+But even in his age of lighting one's cigars with gigabytes of main memory
+(literally), small is still beautiful, because it's easier to understand, and
+complexity is bad. So it's too bad Unix has lost that extreme parsimony.
+
+
+    > From: Dan Cross 
+
+    > question whether asynchrony itself remains untamed, as Doug put it, or
+    > if rather it has proved difficult to retrofit asynchrony onto a system
+    > designed around fundamentally synchronous primitives?
+
+I'm not sure it's 'either or'; I reckon they are both true.
+
+
+	Noel

@@ -1,0 +1,74 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 19d03df9
+	for <ml@inbox.vuxu.org>;
+	Sun, 8 Mar 2020 15:14:03 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 624799D778; Mon,  9 Mar 2020 01:14:01 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CAB1F9D698;
+	Mon,  9 Mar 2020 01:13:35 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 16C619D698; Mon,  9 Mar 2020 01:13:33 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C46909D649
+ for <tuhs@minnie.tuhs.org>; Mon,  9 Mar 2020 01:13:32 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 69E084E11B68; Sun,  8 Mar 2020 15:13:32 +0000 (UTC)
+Date: Sun, 8 Mar 2020 16:13:32 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+Message-ID: <20200308151332.GA70333@clarinet.employees.org>
+References: <20200306224431.D226C18C080@mercury.lcs.mit.edu>
+ <3D1DBF45-AE50-4027-8AAA-6C1D97D28D4D@planet.nl>
+ <20200307163935.GA57521@clarinet.employees.org>
+ <CAKzdPgyQE6idAQNJ4sarjOUL8nvAF7m9BgY6NCjep6_wZMpjzQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKzdPgyQE6idAQNJ4sarjOUL8nvAF7m9BgY6NCjep6_wZMpjzQ@mail.gmail.com>
+Subject: [TUHS] sockets (was Re:  First appearance of named pipes)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Mar 08, 2020 at 01:36:14PM +1100, Rob Pike wrote:
+> Always bemused me that to get a named local I/O connection one ended
+> up with "Unix domain (what does that even mean?) sockets" rather than
+> named pipes,
+
+Yeah - I always found that a bit weird, having to use socketpair()
+to get a bidirectional "pipe".
+
+> I've been told, but haven't confirmed, that
+> early sockets didn't even support read and write. They still don't
+> support open and close, and never will.
+
+Err - granted on the open; but if my memory serves, close() has been
+supported on them ever since I started using them ('87).  Otherwise
+the normal fork/dup/close/exec pattern for child processes would not
+work.
+
+Now what would have been useful is a way to have distinct fd's for
+the local read and write end of (e.g.) a TCP socket - such that one
+direction could be closed w/o closing the other.  Or maybe some
+fcntl() to dup the bidirectional fd in to a pair of unidirectional
+fds.  That way one could dispense with shutdown for closing one
+direction, making children and fd passed programs socket agnostic.
+
+DF

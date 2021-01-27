@@ -1,0 +1,134 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a50e8b2d
+	for <ml@inbox.vuxu.org>;
+	Wed, 22 Jan 2020 13:15:07 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C4E949C20E; Wed, 22 Jan 2020 23:15:06 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E817B9C14A;
+	Wed, 22 Jan 2020 23:14:32 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 76C509C14A; Wed, 22 Jan 2020 23:14:30 +1000 (AEST)
+Received: from lb2-smtp-cloud7.xs4all.net (lb2-smtp-cloud7.xs4all.net
+ [194.109.24.28])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 937269C102
+ for <tuhs@minnie.tuhs.org>; Wed, 22 Jan 2020 23:14:29 +1000 (AEST)
+Received: from mba2.fritz.box ([80.101.112.122])
+ by smtp-cloud7.xs4all.net with ESMTPA
+ id uFpyijEpZrNgyuFpzirO7y; Wed, 22 Jan 2020 14:14:27 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.11\))
+Message-Id: <9F01CB16-2F5D-4853-AA3D-0C4E3411EEB5@planet.nl>
+Date: Wed, 22 Jan 2020 14:14:26 +0100
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3445.104.11)
+X-CMAE-Envelope: MS4wfA67RXmoDmus4QlS95iCsQ0bhJ5Utg6y7LuQtYi53rAEGyY4Q5gVwfb/IM60EOwUJl13VqCvq2M+m6LRg7pP4eBDNJ3hdGI8711jF2yX4vpOt9OcYA5r
+ 5xYy3MKaWP95KdU9kzgn2MJJvdXiaajMeXDInJtFfO+NO1VVh5gbGap1
+Subject: Re: [TUHS] Unix on Zilog Z8000?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+My memory failed me: the part numbers were Z8001/Z8002 for the original =
+and Z8003/Z8004 for the revised chips (segmented/unsegmented).
+
+Hence it is unlikely that the Onyx had any form of demand paging (other =
+than extending the stack in PDP11-like fashion).
+
+=E2=80=94=E2=80=94
+
+A somewhat comparable machine to the Onyx was the Zilog S8000. It ran =
+=E2=80=9CZeus=E2=80=9D, which was also a Unix version:
+https://www.mirrorservice.org/sites/www.bitsavers.org/pdf/zilog/s8000/
+
+Instead of the MMU described below it used the Zilog segmented MMU =
+chips, 3 of them. These could be used to give a plain 16 bit address =
+space divided in 3 segments, or could be used with the segmented =
+addresses of the Z8001. The approach used by Onyx seems much cleaner to =
+me, and reminiscent of the MMU on a DG Eclipse.
+
+I think the original chips were the Z8000 (unsegmented) and the the =
+Z8001 (segmented). These could not abort/restart instructions and were =
+replaced by the Z8002 (unsegmented) and Z8003 (segmented). On these =
+chips one could effectively assert reset during a fault and this would =
+leave the registers in a state where a software routine could roll back =
+the faulted instruction.
+
+If the sources to the Onyx Unix survived, it would be interesting to see =
+if it used this capability of the Z8002 and implemented a form demand =
+paging.
+
+Last but not least, the Xenix overview I linked earlier =
+(http://seefigure1.com/images/xenix/xenix-timeline.jpg) shows Xenix =
+ports to 4 other Z800 machines: Paradyne, Compucorp, Bleasedale and =
+Kontron; maybe all of these never got to production.
+
+
+> Message: 7
+> Date: Tue, 21 Jan 2020 21:32:51 +0000
+> From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+> To: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+> Subject: [TUHS] Onyx (was Re:  Unix on Zilog Z8000?)
+> Message-ID: <20200121213251.GA25322@clarinet.employees.org>
+> Content-Type: text/plain; charset=3Dus-ascii
+>=20
+> On Tue, Jan 21, 2020 at 01:28:14PM -0500, Clem Cole wrote:
+>> The Onyx box redated all the 68K and later Intel or other systems.
+>=20
+> That was a fun bit of grubbing around courtesy of a bitsavers mirror
+> (https://www.mirrorservice.org/sites/www.bitsavers.org/pdf/onyx/).
+>=20
+> It seems they started with a board based upon the non-segmented Z8002
+> and only later switched to using the segmented Z8001.  In the initial
+> board, they created their own MMU:
+>=20
+> Page 6 of: =
+https://www.mirrorservice.org/sites/www.bitsavers.org/pdf/onyx/c8002/Onyx_=
+C8002_Brochure.pdf
+>=20
+> Memory Management Controller:
+>=20
+> The Memory Management Controller (MMC) enables the C8002 to perform
+> address translation, memory block protection, and separation of
+> instruction and data spaces. Sixteen independent map sets are
+> implemented, with each map set consisting of an instruction map and
+> a data map. Within each map there are 32 page registers. Each page
+> register relocates and validates a 2K byte page. The MMC generates
+> a 20 bit address allowing the C8002 to access up to one Mbyte of
+> physical memory.
+>=20
+> So I'd guess the MMC was actually programed through I/O instuctions
+> to io space, and hence preserved the necessary protection domains.
+>=20
+> Cute.  I've had a background interest in the Z8000 (triggered by =
+reading
+> a Z80000 datasheet around 87/88), and always though about using
+> the segmented rather than unsegmented device.
+>=20
+> The following has a bit more info about the version of System III
+> ported to their boxes:
+>=20
+> =
+https://www.mirrorservice.org/sites/www.bitsavers.org/pdf/onyx/c8002/UNIX_=
+3.0.3_Software_Release_Notice_May83.pdf
+>=20
+> DF

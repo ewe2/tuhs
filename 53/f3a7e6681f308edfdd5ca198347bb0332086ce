@@ -1,0 +1,89 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31139 invoked from network); 30 Sep 2020 18:52:04 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Sep 2020 18:52:04 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 785019CEEE; Thu,  1 Oct 2020 04:51:59 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5B83F9CEC6;
+	Thu,  1 Oct 2020 04:51:26 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 947509CEC6; Thu,  1 Oct 2020 04:51:22 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CECCA9CEC4
+ for <tuhs@minnie.tuhs.org>; Thu,  1 Oct 2020 04:51:21 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 8E91A18C0B2; Wed, 30 Sep 2020 14:51:20 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200930185120.8E91A18C0B2@mercury.lcs.mit.edu>
+Date: Wed, 30 Sep 2020 14:51:20 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > It is definite, though, that Q22 memory won't work with an LSI-11/2
+    > (M7270) ...  I'll try an LSI-11 (M7264) tomorrow, make sure it's the
+    > same; it and the LSI-11/2 are similar enough that it should, but it'd be
+    > good to confirm it.
+
+Yes, it too won't work with Q22 memory (tried it, no go - ODT won't even start).
+
+
+    > Then back to trying to work out why Mini-Unix is so fragile for me.
+
+I tried some changes in the simulator set-up, to see if that would fix my
+issue; no luck.
+
+It's quite problematic: if I boot Mini-Unix on a clean copy of the RK pack, cd
+to /usr/sys/dev, cp kl.c to nkl.c, and 'cc -c nlk.c', Mini-Unix reliably
+restarts (trashing the disk in the process). (If I omit the 'cp', I can 'cc -c
+kl.c' 3 times, and Mini-Unix restarts on the third.) Something's seriously
+wrong.
+
+I think before I try debugging it directly, I'll try one of the other
+Mini-Unix repositories; the one I've been using (from Bob Eager's site) may
+have some bit-rot.
+
+
+    > From: Paul Riley <paul@rileyriot.com>
+
+    > I'm checking with Peter Schranz about whether or not his RLV12/RL02
+    > boards can run on the '03.
+
+Dave Bridgham and I discussed whether the QSIC would work with an -11/03, and
+that analysis should apply equally to the RLV12. Our conclusion was that it
+should; here's our reasoning:
+
+The device registers on the board should work fine on either Q18 or
+Q22. That's because when going to the I/O page, the CPU asserts a special bus
+line, BBS7 (that says 'this cycle is to the I/O page'). The device doesn't
+look at the higher address lines when that's on, just BDAL00-12; so if the
+LSI-11 is messing with some of BDAL181-21, it shouldn't matter.
+
+For DMA cycles from the device to memory, since the CPU requires Q18 memory
+to work, the device too should be able to read/write to Q18 memory. At least,
+that's our theory.
+
+
+I guess all this PDP-11 hardware detail isn't really on-topic for this list; I
+should move it to Classic Computers, or something. Sorry all; it's
+intermingled with early Unix stuff, and it was easier to keep it all in one
+place.
+
+	Noel

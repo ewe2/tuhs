@@ -1,0 +1,109 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 20258 invoked from network); 25 Jan 2021 23:56:28 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 25 Jan 2021 23:56:28 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6EF6C9C7A5; Tue, 26 Jan 2021 09:56:26 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3E70C9C641;
+	Tue, 26 Jan 2021 09:56:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6D7349C641; Tue, 26 Jan 2021 09:55:59 +1000 (AEST)
+X-Greylist: delayed 558 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 26 Jan 2021 09:55:57 AEST
+Received: from hop.toad.com (75-101-100-43.dsl.static.fusionbroadband.com
+ [75.101.100.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5D6D99C5FD
+ for <tuhs@minnie.tuhs.org>; Tue, 26 Jan 2021 09:55:57 +1000 (AEST)
+Received: from hop.toad.com (localhost [127.0.0.1])
+ by hop.toad.com (8.12.9/8.12.9) with ESMTP id 10PNkYSb009728;
+ Mon, 25 Jan 2021 15:46:34 -0800
+To: Dan Cross <crossd@gmail.com>
+In-reply-to: <CAEoi9W4TMh=SSrk=pqprark7+ctvZLsbW8h00pf31KbtUAy_CQ@mail.gmail.com> 
+References: <20210124211100.GI21030@mcvoy.com>
+ <202101242114.10OLEYGk966708@darkstar.fourwinds.com>
+ <20210124212525.GJ21030@mcvoy.com>
+ <CAEoi9W5=toe-bb+6-zC0odkx4_C4X4FZpK4+ZJTAqCKGOCXP7w@mail.gmail.com>
+ <202101242333.10ONXjcI974038@darkstar.fourwinds.com>
+ <fc52a1a1-2136-ae39-110c-93a38e73ff94@bitsavers.org>
+ <202101250021.10P0L3Z2976588@darkstar.fourwinds.com>
+ <CAC20D2OhTW+eebyub7dVMBGZy1zoOja=ojGB_=TOjgB0wEJdHQ@mail.gmail.com>
+ <6557f782-ecb1-6476-1eda-e23f30f9bbea@bitsavers.org>
+ <CAFH29to9GaKVxUXw8uwbeMAcF6izD=8gqhqROzCOSEA5xOA5aQ@mail.gmail.com>
+ <20210125160430.GR21030@mcvoy.com>
+ <CAEoi9W4TMh=SSrk=pqprark7+ctvZLsbW8h00pf31KbtUAy_CQ@mail.gmail.com>
+Comments: In-reply-to Dan Cross <crossd@gmail.com>
+ message dated "Mon, 25 Jan 2021 11:37:25 -0500."
+Date: Mon, 25 Jan 2021 15:46:34 -0800
+Message-ID: <9727.1611618394@hop.toad.com>
+From: John Gilmore <gnu@toad.com>
+Subject: Re: [TUHS] tangential unix question: whatever happened to NeWS?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Dan Cross <crossd@gmail.com> wrote:
+> I guess it's potentially faster if you don't have to swab
+> bytes between similar architectures?
+
+The "potential" speedup is completely superficial, and the N^2
+complexities make the code hard to test and hard to maintain.  It's
+better to do something simple and correct, and then you can leave it
+untouched for a decade.
+
+I implemented the byte-order handling code in the GNU BFD library back
+in the early '90s.  We picked up every integer as a series of unsigned
+byte accesses and shifted them and added them, even when the byte order
+of the data matched the byte order of the machine.  Some machines can do
+unaligned 4- or 8-byte fetches and some can't.  The people who design
+object file formats (or packet formats) don't always align things on the
+boundaries that your hardware prefers.  We wrote simple, easy to test
+code that would and did run on ANY machine.  We did the same for stores
+as well as loads.
+
+Every data structure had two representations: The external one, defined
+by a struct full of unsigned char arrays; and the internal one, in
+native data formats.  For each data format, we wrote a trivial routine
+to convert the external format to the internal; and its inverse.  These
+called a series of the lower level pick-up-bytes-in-particular-order
+routines, one call per struct member.  None of this was even inlined at
+the time.
+
+I never measured the overhead of these get- or put- routines as being
+above 1% or 2% in the execution of the whole program (e.g. the GNU
+linker).
+
+We had enough complexity to deal with already, because every vendor made
+their own slightly different version of COFF or ELF or a.out object file
+formats.  Some of these were in different byte orders.  Some truly
+insane vendors had the object file HEADERS in one byte order and the
+actual binaries in a different byte order!  We made a library that could
+read and write them all -- and manage their symbol tables -- and even
+link them together from a variety of formats and write the resulting
+binary in a different format.  This was all part of making the GNU
+compilers into cross-compilers, in which your "host" byte order and
+object file format are completely orthogonal to your "target" byte order
+and object file format.  We then built test suites that built the same
+test code on a dozen host systems and made sure that all the resulting
+binaries for target system "X" were bit-for-bit identical.  Building in
+those capabilities, and that level of reliability, was much more
+important than any 2% speedup.
+
+Premature optimization is the root of much evil.
+
+	John
+	

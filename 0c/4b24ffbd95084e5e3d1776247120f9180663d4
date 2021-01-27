@@ -1,0 +1,108 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28349 invoked from network); 11 May 2020 18:37:41 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 11 May 2020 18:37:41 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 778F09C5F7; Tue, 12 May 2020 04:37:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DBF259C2ED;
+	Tue, 12 May 2020 04:37:23 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A95F99C2ED; Tue, 12 May 2020 04:37:21 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4EDD89B75D
+ for <tuhs@tuhs.org>; Tue, 12 May 2020 04:37:21 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 077D135E149; Mon, 11 May 2020 11:37:20 -0700 (PDT)
+Date: Mon, 11 May 2020 11:37:20 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Paul Winalski <paul.winalski@gmail.com>
+Message-ID: <20200511183720.GR17035@mcvoy.com>
+References: <CF4F4BC8-F9ED-4A4A-BBFB-E11F2539CF99@gmail.com>
+ <CANV78LSvRwb6bDsZBzsEgunu62vYksofOj3MO9rEGqHa9fi_vQ@mail.gmail.com>
+ <6D6EFA0C-36C3-4225-A331-D1998A07C50A@gmail.com>
+ <CAKzdPgwyF3E=hSSfxw38R7Wcr6RXofpEg_6i_41AG33t2VwUuw@mail.gmail.com>
+ <CAKzdPgz6wYnKkv1UCLanhWbWv+bVx6Hoy39P3VhP06HMhdL+iA@mail.gmail.com>
+ <3cb1126796176debe28aa66672ba27ae@yaccman.com>
+ <CAKzdPgyYUCPDn3KjRgx6Aw_=AD8O2Mdk0WkmPZCH9oN+XkPebg@mail.gmail.com>
+ <20200511005745.GL17035@mcvoy.com> <m1jYCHm-0036tPC@more.local>
+ <CABH=_VRucqOpJvZVRqhz6Bv-kVe6P-7Hk3SFDuO0XyKZ_=oCBg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CABH=_VRucqOpJvZVRqhz6Bv-kVe6P-7Hk3SFDuO0XyKZ_=oCBg@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] v7 K&R C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, May 11, 2020 at 02:25:15PM -0400, Paul Winalski wrote:
+> On 5/11/20, Greg A. Woods <woods@robohack.ca> wrote:
+> >
+> > The lameness of typedef (and in how enum is related to typedef) is one
+> > of the saddest parts of C.  (The other is the default promotion to int.)
+> 
+> I would add a third:  file-scope declarations being global by default.
+> One must use the keyword "static" to restrict a file-scope declaration
+> to the file it's declared in.  And why "static"?  All file-scope
+
+I never cared for "static" either, seemed weird.  All my code is
+
+#define	private	static
+
+private int
+super_duper(void)
+{
+...
+}
+
+and everyone knows what that means at a glance.
+
+> declarations have static allocation.  Why isn't the keyword "local" or
+> "own"?  Anyway, the way it ought to be is that file-scope declarations
+> are restricted to the file they're declared in.  To make the symbol
+> visible outside its file, you should have to explicitly say "global".
+> 
+> > It would be trivial to fix too -- for a "new" C, that is.  Making it
+> > backward compatible for legacy code would be tough, even with tooling to
+> > help fix the worst issues.  I've seen far too much code that would be
+> > hard to fix by hand, e.g. some that even goes so far as to assume things
+> > like arithmetic on enum values will produce other valid enum values.
+> 
+> This ought to be easy to fix using a compiler command line option for
+> the legacy behavior.  Many C compilers do this already to support K&R
+> semantics vs. standard C semantics.
+> 
+> > Ideally enums could be a value in any native type, including float/double.
+> 
+> Except pointers, of course.
+> 
+> >> IMHO, without your semantics, enums are pretty useless, #define is good
+> >> enough and more clear.
+> >
+> > Actually that's no longer true with a good modern toolchain, especially
+> > with respect to the debugger.  A good debugger can now show the enum
+> > symbol for a (matching) value of a properly typedefed variable.
+> 
+> Indeed.
+> 
+> -Paul W.
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 

@@ -1,0 +1,198 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 505d715d
+	for <ml@inbox.vuxu.org>;
+	Tue, 21 Jan 2020 18:45:58 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 94CCF9C203; Wed, 22 Jan 2020 04:45:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2A78F9C1FF;
+	Wed, 22 Jan 2020 04:45:27 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="GkDTLeRK";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 086A49C1FF; Wed, 22 Jan 2020 04:45:26 +1000 (AEST)
+Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com
+ [209.85.160.175])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 061759C14A
+ for <tuhs@tuhs.org>; Wed, 22 Jan 2020 04:45:22 +1000 (AEST)
+Received: by mail-qt1-f175.google.com with SMTP id d5so3521988qto.0
+ for <tuhs@tuhs.org>; Tue, 21 Jan 2020 10:45:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=Ma5aAqFRJAv32g1E3T8/j5ZAzrgw4QuiDluUV1/sxZI=;
+ b=GkDTLeRKE0ehrqdNt/t2celwDc2/tV5opB7wpg3p7fsYo5UrqRR2GT6gvTUH+Sf3bL
+ 59URPOJFOWe5Or6tHj17hfJelPc91+1dX+SB5Cf8IEbO4gHBGwKtaCZPqwp48RbW8a6l
+ iruopqhElv6lm37d+F8cmReY+BjWzIoSgjyvA=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=Ma5aAqFRJAv32g1E3T8/j5ZAzrgw4QuiDluUV1/sxZI=;
+ b=Y2ggfj4XNZ89sGMvcRL8OO8609b29x4MCSo+mR1/j0gfN7yICaspN0W2EaeZJF9zlz
+ f9lZm3wlFHRDTXyIdNJyiqhVVNn3U5LLY0JoR8iLmoHt2IHWdHSzvGH0gc0C3Q/tcrYX
+ 3Yq2FonKqpbkBl/NTXsxkg4c44zmezQeTal4oAUQ7SAFWxo4TakXAe/+/uaZk/E2W1Ep
+ hxPaM/IjqwrdJKSRfI2BCpq7ES8Myu5Cqqds2jZWQPLa4IcSDk2ZEb+iiCXqbYMmELLi
+ ptt2OLL2vWDDk91oR9xG9vjeFMRNmfzMEKuAbqTdYUIpA8sRiWWOM+CMxA861v6f/G31
+ n7bg==
+X-Gm-Message-State: APjAAAUfArIK8wTtkBPLRzMOcNcUZUYaCXd67B3EHTuo8yHWAQGsJGAI
+ jOXqcgzaVNZssP73BFyDdPuksG1Zir/VwpqnyC0p9FjfzpIojA==
+X-Google-Smtp-Source: APXvYqx8a5nj/6371wr8N9v3Ec/6Xd6hpiRBkW9nfrTTCxEOVKyaBbtpI7vxgURXz3Eg4a9x3M1s58n0tLKTl/3cuKM=
+X-Received: by 2002:ac8:4513:: with SMTP id q19mr5915776qtn.253.1579632321055; 
+ Tue, 21 Jan 2020 10:45:21 -0800 (PST)
+MIME-Version: 1.0
+References: <20200117195908.GF15253@ancienthardware.org>
+ <20200118035051.GC481935@mit.edu>
+ <20200118041913.GB67053@eureka.lemis.com> <20200119024900.GA15860@mit.edu>
+ <20200119031225.GI67053@eureka.lemis.com>
+ <20200119035808.GK67053@eureka.lemis.com>
+ <20200119132551.GC15860@mit.edu> <m1itNo9-0036tPC@more.local>
+ <CAKr6gn3Vhzn=g_55NdOQfQCUqi9YBSBZNbjM+YMoS8cg82PSbQ@mail.gmail.com>
+ <CAC20D2ONRuze8sxOkiuWqYV7i6+vy9r3jGuM3P52fin2gQHKjg@mail.gmail.com>
+ <20200120180432.GJ28686@mcvoy.com>
+ <CAC20D2M70qm-sgK+Oq8c7EK2pDO+pdz=pL8VbE2C8tw=CwQE-A@mail.gmail.com>
+ <202001201946.00KJk5er3071186@darkstar.fourwinds.com>
+ <7wk15l70u3.fsf@junk.nocrew.org>
+ <202001211717.00LHHaxP3280983@darkstar.fourwinds.com>
+ <CAC20D2OY1SPzeLaDvigY7=WhL=BiEqPo8XebZ5yWd2jAgjM0sA@mail.gmail.com>
+In-Reply-To: <CAC20D2OY1SPzeLaDvigY7=WhL=BiEqPo8XebZ5yWd2jAgjM0sA@mail.gmail.com>
+From: Clem Cole <clemc@ccc.com>
+Date: Tue, 21 Jan 2020 13:44:55 -0500
+Message-ID: <CAC20D2MeAtw4fLoGbtqhVfH98xo1oFuAXXrnHfMXEnJLLK_R5w@mail.gmail.com>
+To: Jon Steinhart <jon@fourwinds.com>
+Content-Type: multipart/alternative; boundary="0000000000005f54eb059caacf79"
+Subject: Re: [TUHS] Early Linux and BSD
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--0000000000005f54eb059caacf79
+Content-Type: text/plain; charset="UTF-8"
+
+sorry...    all *MPU* boards had to be the revision but we may have done
+the same with the CPU boards.
+
+On Tue, Jan 21, 2020 at 1:43 PM Clem Cole <clemc@ccc.com> wrote:
+
+>
+>
+> On Tue, Jan 21, 2020 at 12:18 PM Jon Steinhart <jon@fourwinds.com> wrote:
+>
+>> My memory is very very very fuzzy on this.  I seem to recall that
+>> microcode
+>> state was pushed onto a stack in certain cases,
+>
+> State, not the code.
+>
+> In fact, Masscomp having built the first MP UNIX box, ran into this
+> problem early on.  Different processor stepping had different internal
+> microcode state on the stack after an IRQ.  If you resumed with a processor
+> that was a different processor revision, the wrong state was returned.
+>
+> Will may remember this, but Masscomp issues strick orders to the FE that
+> all CPU boards had to be the revision.  You could not just swap a CPU
+> board, they had to go as sets. It was a real bummer.
+>
+> Moto fixed that with the 020 and later devices as more people made MP
+> systems.
+>
+>
+>
+>
+>
+>> ...  just heard grumbles from other folks about it.
+>>
+> Probably me ...  it took me, tjt and Terry Hayes about 3-4 weeks to figure
+> out that problem.   It was not originally documented, other than to state
+> on certain faults X bytes of reserved information was pushed on the stack.
+>
+>
+> BTS: I don't remember, but it may have started with the 68010.
+>  Becuase before that, the 'executor' was wait stated and the fixor handled
+> and fixed the fault so the 68000 never actually saw  fault in the original
+> Masscomp CPU board.   The "MPU" board was the same board with a couple of
+> PAL's changed and an 68010 as the executor.   It was allowed to actually
+> fault and do something else while the fixor corrected the fault.  But the
+> key is that when the fault was repaired, another executor on a different
+> MPU board could be the processor that 'returned' from the fault.   That
+> ended up being a no-no.
+>
+
+--0000000000005f54eb059caacf79
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif">sorry...=C2=A0 =C2=A0 all <i><font col=
+or=3D"#ff0000">MPU</font></i> boards had to be the revision but we may have=
+ done the same with the CPU boards.</div></div><br><div class=3D"gmail_quot=
+e"><div dir=3D"ltr" class=3D"gmail_attr">On Tue, Jan 21, 2020 at 1:43 PM Cl=
+em Cole &lt;<a href=3D"mailto:clemc@ccc.com">clemc@ccc.com</a>&gt; wrote:<b=
+r></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex=
+;border-left:1px solid rgb(204,204,204);padding-left:1ex"><div dir=3D"ltr">=
+<div dir=3D"ltr"><div style=3D"font-family:arial,helvetica,sans-serif"><br>=
+</div></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_=
+attr">On Tue, Jan 21, 2020 at 12:18 PM Jon Steinhart &lt;<a href=3D"mailto:=
+jon@fourwinds.com" target=3D"_blank">jon@fourwinds.com</a>&gt; wrote:<br></=
+div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;bor=
+der-left:1px solid rgb(204,204,204);padding-left:1ex">My memory is very ver=
+y very fuzzy on this.=C2=A0 I seem to recall that microcode<br>
+state was pushed onto a stack in certain cases,</blockquote><div><div style=
+=3D"font-family:arial,helvetica,sans-serif">State, not the code.</div><div =
+style=3D"font-family:arial,helvetica,sans-serif"><br></div><div style=3D"fo=
+nt-family:arial,helvetica,sans-serif">In fact, Masscomp having built the fi=
+rst MP UNIX box, ran into this problem early on.=C2=A0 Different processor =
+stepping had different internal microcode state on the stack after an IRQ.=
+=C2=A0 If you resumed with a processor that was a different processor revis=
+ion, the wrong state was returned.</div><div style=3D"font-family:arial,hel=
+vetica,sans-serif"><br></div><div style=3D"font-family:arial,helvetica,sans=
+-serif">Will may remember this, but Masscomp issues strick orders=C2=A0to t=
+he FE that all CPU boards had to be the revision.=C2=A0 You could not just =
+swap a CPU board, they had to go as sets. It was a real bummer.=C2=A0</div>=
+<div style=3D"font-family:arial,helvetica,sans-serif"><br></div><div style=
+=3D"font-family:arial,helvetica,sans-serif">Moto fixed that with the 020 an=
+d later devices as more people made MP systems.</div><br></div><div><br></d=
+iv><div><br></div><div>=C2=A0</div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><span class=3D"gmail_default" style=3D"font-family:arial,helveti=
+ca,sans-serif">... </span>=C2=A0just heard grumbles from other folks about =
+it.<br></blockquote><div><span class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif">Probably me ...=C2=A0 it took me, tjt and Terr=
+y Hayes about 3-4 weeks to figure out that problem.</span>=C2=A0<span class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=C2=A0 =
+It was not originally documented, other than to state on certain faults X b=
+ytes of reserved information was pushed on the stack.=C2=A0 =C2=A0</span></=
+div><div><span class=3D"gmail_default" style=3D"font-family:arial,helvetica=
+,sans-serif"><br></span></div><div><span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif">BTS: I don&#39;t remember, but it ma=
+y have started with the 68010.=C2=A0 =C2=A0Becuase=C2=A0before that, the &#=
+39;executor&#39; was wait stated and the fixor handled and fixed the fault =
+so the 68000 never actually saw=C2=A0 fault in the original Masscomp CPU bo=
+ard.=C2=A0 =C2=A0The &quot;MPU&quot; board was the same board with a couple=
+ of PAL&#39;s changed and an 68010 as the executor.=C2=A0 =C2=A0It was allo=
+wed to actually fault and do something else while the fixor=C2=A0corrected =
+the fault.=C2=A0 But the key is that when the fault was repaired, another e=
+xecutor on a different MPU board could be the processor that &#39;returned&=
+#39; from the fault.=C2=A0 =C2=A0That ended up being a no-no.</span></div><=
+/div></div>
+</blockquote></div></div>
+
+--0000000000005f54eb059caacf79--

@@ -1,0 +1,182 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 52479039
+	for <ml@inbox.vuxu.org>;
+	Sun, 5 Jan 2020 15:11:31 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CDCCD9B549; Mon,  6 Jan 2020 01:11:30 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7169095170;
+	Mon,  6 Jan 2020 01:11:01 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="EA27YORr";
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=case.edu header.i=@case.edu header.b="lkOT8cPy";
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=case.edu header.i=@case.edu header.b="DU5/XzIx";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AF1D49516C; Mon,  6 Jan 2020 01:10:58 +1000 (AEST)
+Received: from mpv3-2015.case.edu (mpv3-2015.CWRU.Edu [129.22.103.194])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A8A8495165
+ for <tuhs@tuhs.org>; Mon,  6 Jan 2020 01:10:57 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578237057;
+ bh=txUOnlS3Gh0Pdy4V2eQH8vEeK6lf403l7Ak14WjEqL8=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=EA27YORr6M58hQO5ZSQ0lfPW765+b/QkUFVKt/3ABo5G6hWzKTZyPGRRV1K+K0j99H
+ 1gMcjTTTPtR+xIwUMN2gBIYe7w9z6WHniMNfe6YOzveQST0rSYgYVV4vI7I03jncjwB
+ ThxlpJba1fXcl22p2OUIDT2CTjxqKWBXjCh7vnj6qE9NtFz9wnUq+nCVp+y41/GH9ge
+ HVCNLp/8LcfTPcFs8/77UddebWs06SXYXrRvQ8JH8qbi1kWW45dxWwkwelzL4BoYTTR
+ lpmLSnF4oz3f3MsW0ACB/9QzknTqE/mr0N4vW0pspWGKL1PhKpQlSvrsv5A1Hby41m5
+ Q/M3g+Kw==
+Received: from mpv6-2015.CWRU.Edu (EHLO mpv6-2015.case.edu) ([129.22.103.202])
+ by mpv3-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id BCG70457; Sun, 05 Jan 2020 10:10:56 -0500 (EST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu;
+ s=smtp-primary; t=1578237056;
+ bh=4a9rhZ2YtWC0pEPHfrWJ9MWikn3cKu4NlWSkUGbWmxE=;
+ h=Reply-To:Cc:Subject:To:References:From:Message-ID:Date:
+ MIME-Version:In-Reply-To:Content-Type:Content-Transfer-Encoding;
+ b=lkOT8cPy3WoftIja7wRM8fsIOTVWCRxw/YT26tjsSU+8yUJZAD1BijZSjwrjfCbagA
+ sFM8Epp/SODB/h9V96iGp4DuIaScenN5wtR/bMgxhSZ5+qOJevKYttkkUFGNyfKoo0+
+ pcGZLPIL4MB8Skgf7bAsWaSXmtiTHDHETq11Av4QLyo4K1+YU5YFelMBVUQJQLZytxn
+ oAICWZgZBN8XyAwpHWJSPADCYCwP3Efe2hCX7CuzUUHEJ2lkClzO4/+T0G3EeCAqNW2
+ 3fZ4M7Y6XzHrWHgKFjbuO76TH/O1OY6qMihQO+kuvQGhoNsfnZkK0guwZsKOcJLlfSs
+ 9x9d8/Nw==
+Received: from mail-yw1-f72.google.com (EHLO mail-yw1-f72.google.com)
+ ([209.85.161.72])
+ by mpv6-2015.case.edu (MOS 4.4.8-GA FastPath queued)
+ with ESMTP id DDN81057; Sun, 05 Jan 2020 10:10:56 -0500 (EST)
+Received: by mail-yw1-f72.google.com with SMTP id r189so38290554ywf.13
+ for <tuhs@tuhs.org>; Sun, 05 Jan 2020 07:10:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=case.edu; s=g-case;
+ h=reply-to:cc:subject:to:references:from:openpgp:autocrypt
+ :organization:message-id:date:user-agent:mime-version:in-reply-to
+ :content-language:content-transfer-encoding;
+ bh=4a9rhZ2YtWC0pEPHfrWJ9MWikn3cKu4NlWSkUGbWmxE=;
+ b=DU5/XzIx7QVUNzyVH8/o69hlzGYjArUS0lbIS+58KOuxeoSblDSwaDPxar3kJmXeUy
+ /xunr95lpCtK4AsQRIqgSTsHuwXhY91hQAvE+AsX3Uo5iO+wbQkU/duwkm1XSynAEjZm
+ 0xtdXUPf64aFS0+JTK7yQQas9p0O6KSN8/kWXaysZuidlkx1uRnu7q6HBGauxWfL6goQ
+ GEL5HV0f/iNHwTfSdSJbVhNePI6KiQyg6TGpcQyszLW3hry8sbN6JqhiSWu1dKein9OD
+ vfXVCVHtn8x56m71UGCc8toSYJGwFenOHxvIleA3hpqyZ2ouXb/OjzilK4w8diLLsgwr
+ OWug==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:reply-to:cc:subject:to:references:from:openpgp
+ :autocrypt:organization:message-id:date:user-agent:mime-version
+ :in-reply-to:content-language:content-transfer-encoding;
+ bh=4a9rhZ2YtWC0pEPHfrWJ9MWikn3cKu4NlWSkUGbWmxE=;
+ b=Ym6o3pkpWPq53xtc4BcSUkLNzVmWpNGp4zbAtvHwGRAkKLG9eT26tRZp+ONEJLZZSx
+ 2gMPk5G7PY5CM1Hox43Fe1uoFyAw3p87mp6le79PVXsOaPd54nARgANoxGe1YFoba6m9
+ laIlyHlcNpb6lHArmM7HNas6JevyxTY3xU50PDKj1xQVCmaht0ip3ZctV0JDihJiN8KR
+ GCevMpcVP6U4W76UlRLkb6V3FRmj2y494sSBf3HIi7WXM7peUNwTXusGRYdfyjZmpwuw
+ vnC5gm2yBYkZL6izXZvprn5ihY08101z3fcnn3T+CJvUAkqDArI/FZi3HIZ7SvsnpW/O
+ lpoQ==
+X-Gm-Message-State: APjAAAWegXJKUlv2gRxFRbcU4PfBOIZE+7KA7/nnp8VwZa00ry5/R5rJ
+ XH2cRJiJ1K9GQJJD856+ua4s026yvqj3wqEl6AfU172pepnu3wtP5rlJnMIiz/ID0TCs46r5hjL
+ BeBMdYLE=
+X-Received: by 2002:a81:98c7:: with SMTP id
+ p190mr70770757ywg.385.1578237055473; 
+ Sun, 05 Jan 2020 07:10:55 -0800 (PST)
+X-Google-Smtp-Source: APXvYqxeo0I1JVAEgBD3KzZptNlW60G6vYhNTY+WLbZwmg3FQJi5ZyCTWhQEi6YiCBAtjFy4ONXgoA==
+X-Received: by 2002:a81:98c7:: with SMTP id
+ p190mr70770738ywg.385.1578237055158; 
+ Sun, 05 Jan 2020 07:10:55 -0800 (PST)
+Received: from ?IPv6:2605:a000:1223:c4ad:c05:102:f11b:cd45?
+ ([2605:a000:1223:c4ad:c05:102:f11b:cd45])
+ by smtp.gmail.com with ESMTPSA id v38sm27329412ywh.63.2020.01.05.07.10.53
+ (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+ Sun, 05 Jan 2020 07:10:54 -0800 (PST)
+To: Brantley Coile <brantley@coraid.com>
+References: <202001040258.0042wuic1359237@mail.cs.dartmouth.edu>
+ <1ingL0-5g6-00@marmaro.de>
+ <alpine.BSF.2.21.9999.2001050758110.40155@aneurin.horsfall.org>
+ <202001042106.004L69C1448350@darkstar.fourwinds.com>
+ <026e2abb-fe04-4186-d3b2-0f32109d323a@neophilic.com>
+ <CAP2nic03vxZ-G=WBPVuakVKikZxa8CqUM=xNHsrBC-_enj+Lpw@mail.gmail.com>
+ <52886e4e-2987-c309-053a-d229e1f33831@case.edu>
+ <749E0F47-FEF9-4424-8A7B-F0B6805306F5@coraid.com>
+From: Chet Ramey <chet.ramey@case.edu>
+Openpgp: preference=signencrypt
+Autocrypt: addr=chet.ramey@case.edu; prefer-encrypt=mutual; keydata=
+ mQGiBEEOsGwRBACFa0A1oa71HSZLWxAx0svXzhOZNQZOzqHmSuGOG92jIpQpr8DpvgRh40Yp
+ AwdcXb8QG1J5yGAKeevNE1zCFaA725vGSdHUyypHouV0xoWwukYO6qlyyX+2BZU+okBUqoWQ
+ koWxiYaCSfzB2Ln7pmdys1fJhcgBKf3VjWCjd2XJTwCgoFJOwyBFJdugjfwjSoRSwDOIMf0D
+ /iQKqlWhIO1LGpMrGX0il0/x4zj0NAcSwAk7LaPZbN4UPjn5pqGEHBlf1+xDDQCkAoZ/VqES
+ GZragl4VqJfxBr29Ag0UDvNbUbXoxQsARdero1M8GiAIRc50hj7HXFoERwenbNDJL86GPLAQ
+ OTGOCa4W2o29nFfFjQrsrrYHzVtyA/9oyKvTeEMJ7NA3VJdWcmn7gOu0FxEmSNhSoV1T4vP2
+ 1Wf7f5niCCRKQLNyUy0wEApQi4tSysdz+AbgAc0b/bHYVzIf2uO2lIEZQNNt+3g2bmXgloWm
+ W5fsm/di50Gm1l1Na63d3RZ00SeFQos6WEwLUHEB0yp6KXluXLLIZitEJLQwQ2hldCBSYW1l
+ eSAoQ2FzZSBzdGFuZGFyZCkgPGNoZXQucmFtZXlAY2FzZS5lZHU+iF8EExECAB8FAkPi19EC
+ GwMHCwkIBwMCAQMVAgMDFgIBAh4BAheAAAoJELtYafBk6nSrelkAn31Gsuib7GcCZHbv5L5t
+ VKYR9LklAJ4hzUHKA49Z0QXR+qCb80osIcmPSbkBDQRBDrBvEAQAkK6TAOKBEM+EC4j6V/7o
+ /riVZqcgU5cid2qG9TXdwNtD9a3kvA/ObZBO93sX59wc6Bnwo4VJxsOmMlpGrAjJsxNwg3QH
+ akEtf8LXRbVpj5xStdmBdQZUhIQyalo/2/TZq5OijtddUQcL5cs70hTv/FpT3wUvr2Xr8rjF
+ 41IFEz8AAwcD/A0CZEGlzIrT5WCBnl6xBog/8vKiUCbarByat3d1mL6DbizvKNXQRTC9E/vE
+ dENAWCQCjr75Bu55xT8n3SXGtWdDC5xmZ/P3OBYORP8yl8H8I1FIosWOFirbIeYdZPq8SPD1
+ HL+EXo9zSiHVrrZRJ19ooCKKbSdXHFCY+aJG+0KZiEkEGBECAAkFAkEOsG8CGwwACgkQu1hp
+ 8GTqdKvjcACfZlkVCDwaz/NTO9cy3t69oWpVPNwAnRwe0qk/WL/gfhH346xh5B3HFbFN
+Organization: ITS, Case Western Reserve University
+Message-ID: <f7893585-038e-409a-a9fa-430ea59c0a73@case.edu>
+Date: Sun, 5 Jan 2020 10:16:44 -0500
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:60.0)
+ Gecko/20100101 Thunderbird/60.9.1
+MIME-Version: 1.0
+In-Reply-To: <749E0F47-FEF9-4424-8A7B-F0B6805306F5@coraid.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Junkmail-Status: score=8/90, host=mpv3-2015.case.edu
+X-Junkmail-PrAS-Raw: score=8/90, refid=2.7.2:2020.1.5.143917:17:8.510, ip=,
+ rules=__YOUTUBE_RCVD, DKIM_SIGNATURE,
+ __X_GOOGLE_DKIM_SIGNATURE, __HAS_REPLYTO, __HAS_CC_HDR,
+ __MULTIPLE_RCPTS_CC_X2, __CC_NAME,
+ __CC_NAME_DIFF_FROM_ACC, __SUBJ_REPLY,
+ __BOUNCE_CHALLENGE_SUBJ, __BOUNCE_NDR_SUBJ_EXEMPT,
+ __TO_MALFORMED_2, __TO_NAME, __TO_NAME_DIFF_FROM_ACC,
+ __HAS_REFERENCES, __REFERENCES, __HAS_FROM, FROM_EDU_TLD,
+ __HAS_MSGID, __SANE_MSGID, DATE_TZ_NA, __USER_AGENT,
+ __MOZILLA_USER_AGENT, __MIME_VERSION, __IN_REP_TO, __CT,
+ __CT_TEXT_PLAIN, __CTE, __REPLYTO_SAMEAS_FROM_ADDY,
+ __REPLYTO_SAMEAS_FROM_ACC, __FROM_DOMAIN_IN_ANY_CC2,
+ __REPLYTO_SAMEAS_FROM_DOMAIN, __DKIM_ALIGNS_1,
+ __DKIM_ALIGNS_2, __ANY_URI, __URI_MAILTO, __URI_WITH_PATH,
+ __URI_NO_WWW, __CP_URI_IN_BODY, __SUBJ_ALPHA_NEGATE,
+ SUPERLONG_LINE, __URI_IN_BODY, __URI_NOT_IMG,
+ __MAIL_CHAIN, __BODY_NO_MAILTO, __NO_HTML_TAG_RAW,
+ BODYTEXTP_SIZE_3000_LESS, BODY_SIZE_800_899,
+ __MIME_TEXT_P1, [TRUNCATED], so=2010-03-03 19:42:08,
+ dmn=2016-08-03-0138
+Subject: Re: [TUHS] sh: cmd | >file
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Reply-To: chet.ramey@case.edu
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 1/5/20 3:15 AM, Brantley Coile wrote:
+> V7 indeed did not have "#" as a comment. Programs use the ":" command for that, and was careful of what was in the comment. The ":" command was called SYSNULL in the source. 
+>     Later versions of Steve's shell had COMCHAR defined to be a "#" and tested for that symbol in word(), eating up all the characters until it got to a newline. The version of Seventh Edition I used to carry around and embed in things had that mod. My original Seventh did not.
+
+I think the 7th edition shell I have must have those changes, since it
+definitely understands `#' comments.
+
+-- 
+``The lyf so short, the craft so long to lerne.'' - Chaucer
+		 ``Ars longa, vita brevis'' - Hippocrates
+Chet Ramey, UTech, CWRU    chet@case.edu    http://tiswww.cwru.edu/~chet/

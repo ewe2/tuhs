@@ -1,0 +1,74 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8797 invoked from network); 17 Aug 2020 02:03:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Aug 2020 02:03:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 008D89E185; Mon, 17 Aug 2020 12:03:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CA4389CAB0;
+	Mon, 17 Aug 2020 12:02:28 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 961D79CAB0; Mon, 17 Aug 2020 12:02:25 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1705F9C8BB
+ for <tuhs@tuhs.org>; Mon, 17 Aug 2020 12:02:25 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 104B518C095; Sun, 16 Aug 2020 22:02:24 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200817020224.104B518C095@mercury.lcs.mit.edu>
+Date: Sun, 16 Aug 2020 22:02:24 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Memory management in Dennis Ritchie's C Compiler
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Dibyendu Majumdar
+
+    > the C compiler from V7/V10.  I wanted to check if anyone here knows
+    > about the memory management in the compiler (c0 only for now). I am
+    > trying to migrate the memory management to malloc/free but I am
+    > struggling to understand exactly how memory is being managed.
+
+Well, I don't know much about the V7 compiler; the V6 one, which I have looked
+at, doesn't (except for the optimizer, C2) use allocated memory at all.
+
+The V7 compiler seems to use sbrk() (the system call to manage the location of
+the end of a process' data space), and manage the additional data space
+'manually'; it does not seem to use a true generic heap. See gblock() in
+c01.c:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=V7/usr/src/cmd/c/c01.c
+
+which seems to use two static variables (curbase and coremax) to manage
+that additional memory:
+
+  p = curbase;
+  if ((curbase =+ n) >= coremax) {
+	if (sbrk(1024) == -1) {
+		error("Out of space");
+		exit(1);
+		}
+	coremax =+ 1024;
+	}
+   return(p);
+
+My guess is that there's no 'free' at all; each C source file is processed
+by a new invocation of C0, and the old 'heap' is thrown away when the
+process exits when it gets to the EOF.
+
+	Noel

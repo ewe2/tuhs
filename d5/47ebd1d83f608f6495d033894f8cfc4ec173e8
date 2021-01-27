@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11355 invoked from network); 1 Oct 2020 12:52:15 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Oct 2020 12:52:15 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8C0339CEE8; Thu,  1 Oct 2020 22:52:06 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A67E69CEDA;
+	Thu,  1 Oct 2020 22:51:23 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BB4999CECD; Thu,  1 Oct 2020 22:51:20 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id EFDAD9CEC6
+ for <tuhs@minnie.tuhs.org>; Thu,  1 Oct 2020 22:51:19 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id DDBBC18C0EB; Thu,  1 Oct 2020 08:51:18 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201001125118.DDBBC18C0EB@mercury.lcs.mit.edu>
+Date: Thu,  1 Oct 2020 08:51:18 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > So mounting Mini-Unix on a running V6 system I guess allows you to run
+    > Mini-Unix user mode binaries stuff
+
+Ah, no. They are all link-loaded to run at TOPSYS (060000), so won't run on
+V6 native. 
+
+    > Or do you plan to recompile on a stable system?
+
+Well, I need to find out what the problem is, first.
+
+
+Still, notable progress: using my 'mount the Mini-Unix RK pack on a V6 system'
+hack (which woked fine; the native V6 'icheck' and 'dcheck' work on that
+pack), I was able to sucessfully compile a few tweaked system modules (to get
+my usual line-editing chars, and turn off that irritating lower-case mode),
+and then build an OS load which could sucessfully boot. So good progress
+there. A couple of things I learned:
+
+- MiniUnix tools use the 'new' archive format, so the V6 vanilla 'ar' doen't
+grok MiniUnix archives (e.g. lib1/lib2). I have a 'nar', which I found on the
+'Shoppa disks', which can deal with them. (We don't have source for it, but
+I'll bet the MIT PWB1 system has that; I'll get to that eventuallly. There's also
+an 'ar.c' on the MiniUnix disk; between the two, we'll be able to reconstitute
+source for 'nar'.)
+
+- Also, the vanilla V6 linker, 'ld', _also_ doesn't understand new archives;
+so the shell file to build a new system, 'shld':
+
+  ld -a -x low.o conf.o lib1 lib2
+
+blows out because it doesn't grok the libraries. Also, the '-a' flag, which
+says 'link starting at 0, not TOPSYS', doesn't exist in the V6 'ld'.
+
+I got around all that by unpacking lib1 (using 'nar', above) - it only contains
+two files - and then listing the files to link directly:
+
+  ld -x low.o conf.o syso emulo dev/kl.o dev/devstart.o dev/rk.o
+
+The vanilla V6 linker of course produces an output linked at 0 without
+the -a flag.
+
+
+At some point, I'll produce a 'MiniUnix ld' on vanilla V6, so I can build
+MiniUnix versions of applications there; the first will be the shell, so I
+don't have to keep typing 'chdir' instead of 'cd'! :-)
+
+Then on to trying to find out why MiniUnix crashes whenever I try and do
+anything significant.
+
+       Noel

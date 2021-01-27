@@ -1,0 +1,81 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8365 invoked from network); 12 Oct 2020 22:44:02 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 12 Oct 2020 22:44:02 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 697EF9CA91; Tue, 13 Oct 2020 08:43:59 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4E3059CA7A;
+	Tue, 13 Oct 2020 08:43:31 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E9C129CA7A; Tue, 13 Oct 2020 08:43:27 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5B51D93D6D
+ for <tuhs@minnie.tuhs.org>; Tue, 13 Oct 2020 08:43:27 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 51A1618C0E7; Mon, 12 Oct 2020 18:43:26 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201012224326.51A1618C0E7@mercury.lcs.mit.edu>
+Date: Mon, 12 Oct 2020 18:43:26 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > port Mini-Unix will create some demand for device drivers on the /03
+    > systems, so may be worthwhile to implement RAW device.
+
+I'm not sure I understand this ("worthwhile to implement RAW device"); let me
+explain what the removal of 'raw' I/O devices from MINI-UNIX really means, and
+then ask what it is that you are after.
+
+
+Early Unix (no idea about later ones) supports two classes of devices; 'block'
+devices, which can be used to hold file-systems, and 'character' devices,
+which cannot. (I seem to recall a paper, perhaps from the Unix BSTJ issue,
+which talks about them in some detail.)
+
+The former are those where the underlying physical device has restricted
+semantics; they are block-addressable mass storage devices. All access to them
+is via the system's block buffer pool, so reads/writes by the user of
+arbitrary size and location are possible. 'Character' devices are everything
+else.
+
+'Raw' devices are an interface to the devices of 'block' devices which does
+not go through the system's buffer pool; I/O operations to them perform DMA
+directly to the user process' memory. They are 'character' devices, in the
+Unix device taxonomy. The only semantics available are those supported by the
+hardware - e.g. seeks only to block boundaries.
+
+So when I say that MINI-UNIX doesn't have 'raw' devices, it just means that
+e.g. the RK disk controller device _only_ talks to the Unix block buffer
+system; if a user program wants to look at the disk contents, it has to go
+via that system.
+
+
+So, with that in hand, what exactly is the need you forsee for raw devices
+in MINI-UNIX?
+
+Also, I've started to work on getting the V6 RL driver to work in MINI-UNIX;
+it should have been easy (just delete the charater device interface), but
+for some reason it didn't work when I tried it. I'll look at it in more
+detail 'soon'.
+
+       Noel

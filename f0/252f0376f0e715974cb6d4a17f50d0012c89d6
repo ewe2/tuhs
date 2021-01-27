@@ -1,0 +1,102 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id a321317e
+	for <ml@inbox.vuxu.org>;
+	Tue, 3 Mar 2020 14:20:04 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3207D9D653; Wed,  4 Mar 2020 00:20:00 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 059D393D90;
+	Wed,  4 Mar 2020 00:19:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1729D93D90; Wed,  4 Mar 2020 00:19:27 +1000 (AEST)
+Received: from lb1-smtp-cloud9.xs4all.net (lb1-smtp-cloud9.xs4all.net
+ [194.109.24.22])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1DDC593D35
+ for <tuhs@minnie.tuhs.org>; Wed,  4 Mar 2020 00:19:25 +1000 (AEST)
+Received: from mba2.fritz.box ([80.101.112.122])
+ by smtp-cloud9.xs4all.net with ESMTPA
+ id 98OJjVDSd9Im298OKjztL4; Tue, 03 Mar 2020 15:19:24 +0100
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.11\))
+Message-Id: <D4896B35-D6C8-4D05-BEE8-61B94671C439@planet.nl>
+Date: Tue, 3 Mar 2020 15:19:22 +0100
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3445.104.11)
+X-CMAE-Envelope: MS4wfD6tmmb1tWYfzX/6USJj4qJlglzWK4KcLvGRKzdXqJiuqze5TSj17+A4kUOLuO8R+YLEF8roJPPQ1t2pSXJ/Cjn+Z7WS4suxr9oAeZgduR7V9Y6Bifwy
+ NnmiXObbyBOqleeq1p4lIcOHWurF1EOTsja6y/WDKYbkfpYSUeSjifVa
+Subject: [TUHS] Early Datakit
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I=E2=80=99m making a little progress with early Datakit & Unix.
+
+It would seem that there were various experimental protocols before URP =
+was arrived upon.
+
+The first protocol appears to have been designed by Chesson in 1979. One =
+Fraser paper says: ""The first Datakit protocols used a packet structure =
+that was aligned with cell boundaries. Chesson designed a file transfer =
+protocol that transported data in variable length packets, each ending =
+with a trailer.=E2=80=9D I think this protocol is being described in his =
+paper "Datakit Software Architecture=E2=80=9D (vol. 2, pp. 20.2.1-20.2.5 =
+Proceedings of the IEEE Int. Conf. on Communications, June 1979, Boston) =
+- which unfortunately does not seem to be available in the IEEE online =
+library. Maybe it will surface some day.
+
+Next there was a protocol tied to a Datakit terminal interface board =
+that used an 8-slot packet sequence/acknowledge mechanism that carried =
+over into URP. Not much appears to have been published about this.
+
+The most interesting experiment seems to have been a project by Luderer, =
+Che and Marshall to build a Datakit-based distributed Unix in 1980/81. =
+Marshall is credited by Fraser as one of the inventors of the URP =
+protocol. The papers are =E2=80=9CA virtual switch as the basis for =
+distributed systems=E2=80=9D and =E2=80=9CA distributed unix system =
+based on a virtual circuit switch=E2=80=9D (available online from the =
+ACM library).
+
+The first has a good overview description of how early Datakit worked =
+(including interface hardware) and describes the Network Kernel or =E2=80=9C=
+NK protocol=E2=80=9D. It would seem that URP combines the flow & =
+retransmission control from the terminal interface board with the =
+concept of a single simple receiver algorithm from NK. Unfortunately the =
+paper does not describe the design of the NK transmitter algorithm(s). =
+It confirms that everything ran on V7, but it remains unclear how the =
+Datakit channels were exposed to the user (I currently assume as a =
+cluster of character devices, with the major number identifying the =
+switch connection and the minor number identifying the channel - similar =
+to what later would be used in V8).
+
+The second has a description of a modified Unix system, where clients =
+(=E2=80=9CS-Unix=E2=80=9D) talk to file servers (=E2=80=9CF-Unix=E2=80=9D)=
+, with the file servers mounted into the local file tree of the client. =
+This appears to predate the work of Weinberger for the V8 network file =
+system and its implementation appears different.
+
+Questions:
+
+- Are Luderer, Che and Marshall still around? (especially Bill Marshall =
+might still recall some more details of the genesis of the URP protocol)
+
+- Any recollections about S/F-Unix and how it did or did not influence =
+V8-V10/Plan9?=

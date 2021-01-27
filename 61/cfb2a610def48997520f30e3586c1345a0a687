@@ -1,0 +1,411 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 342bef70
+	for <ml@inbox.vuxu.org>;
+	Wed, 19 Feb 2020 20:19:33 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 38ABA93D74; Thu, 20 Feb 2020 06:19:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 821D693D1B;
+	Thu, 20 Feb 2020 06:18:59 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="pOiQY6aS";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B577393D1B; Thu, 20 Feb 2020 06:18:56 +1000 (AEST)
+Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com
+ [209.85.210.181])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3AC3A93D09
+ for <tuhs@minnie.tuhs.org>; Thu, 20 Feb 2020 06:18:56 +1000 (AEST)
+Received: by mail-pf1-f181.google.com with SMTP id s1so614703pfh.10
+ for <tuhs@minnie.tuhs.org>; Wed, 19 Feb 2020 12:18:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20161025;
+ h=subject:to:references:from:message-id:date:user-agent:mime-version
+ :in-reply-to:content-language;
+ bh=HZkL4G8zvZLjDXUt5XmiztVbkxlTraIoNarSRuAj7hM=;
+ b=pOiQY6aSvWbo8gxUjLS7RC51ZRUGb2MD+Tem8JDHK1PhleKn2MEgqW2ceGX/q151Hy
+ EjDCg2zVf77y1fOS3kCHvWV/CnO1cxxVR1O6QaO4VKjMuH1edQZt4KouiuJcJ0VOVpGo
+ yjNHda4kCtLNeVnS1FFaFwMb3ahalSM1SZzjMDRFe1SWRUP/t54RcXt3GSjitJXGfnYo
+ O77lplFINDaIUbJzN70We1gXf81XcD0S3G09vlf1RM/AfMOdtrusKjPD71fuCUlInGhR
+ vHv0gAF6r5CZ9SHqmrL2995Sr8NEsyybE1dyGBYrlgfG/DCZoOFFBw7Yo9tNEAzIVR4E
+ DkxA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:subject:to:references:from:message-id:date
+ :user-agent:mime-version:in-reply-to:content-language;
+ bh=HZkL4G8zvZLjDXUt5XmiztVbkxlTraIoNarSRuAj7hM=;
+ b=JvI28/m7CpavV72YEz2uhnWLgMCCWIuiLgbkVyFOrFrWxzC0w5QME4aSDZWR1RSh7P
+ LJlVZrM1u6HfFMjlpS3vmHo0WDfuA/9gjcNOEYh0aCWk5xLOQsphcI8StEbCsby25dWN
+ ZyZ17SjES9v4I6qVAC4DjjFcOabio1UunPdfvOBvmny7ha9ADR3mFPxRW5nJeOgzVtul
+ B64td9T9ivjEWdSz7ysWjUXd4MUpAQ1Hjzz8UtdEL6mR+evSH5qcBluedQq4fFPruRDo
+ GsYTmoHsNGKFlq54tYBSsAoTkVG5JXs8AXBZ7Qjbd8nkGf6RBzcs4dvnT6NVSQcbRtHd
+ Xu3w==
+X-Gm-Message-State: APjAAAXem0S1alZSx73463/ykDSnZIgHH2YSwYmJdeMqdue7gI4kVJT1
+ heqo09Vy3VypUAAuD+VdOJLiAu7+
+X-Google-Smtp-Source: APXvYqwBg2WT/Q4PjAM3Mz1RS9kDoXtt0PpsrTvk3Ohns4RNq2wh21xMXLQvd7zlF2HImJWHOLgQZA==
+X-Received: by 2002:a63:7c16:: with SMTP id x22mr29718147pgc.335.1582143535159; 
+ Wed, 19 Feb 2020 12:18:55 -0800 (PST)
+Received: from [192.168.1.2] (210-171-42-72.gci.net. [72.42.171.210])
+ by smtp.googlemail.com with ESMTPSA id w18sm568716pge.4.2020.02.19.12.18.54
+ for <tuhs@minnie.tuhs.org>
+ (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+ Wed, 19 Feb 2020 12:18:54 -0800 (PST)
+To: tuhs@minnie.tuhs.org
+References: <202002171520.01HFKqKi026749@tahoe.cs.Dartmouth.EDU>
+ <4d252035b323b7583c5760c952d1982c@firemail.de>
+ <202002171839.01HId8FT1358073@darkstar.fourwinds.com>
+ <e5b0fe5d7296bc11e4f380ec39a8f223@firemail.de>
+ <CAFH29tofawAMrywyW=S5ZW2F-U-1tbOm55+PMN+_vg=uDWFUNg@mail.gmail.com>
+ <202002180017.01I0HI0I1415945@darkstar.fourwinds.com>
+ <m1j3xUB-0036tPC@more.local>
+ <CAC20D2Mv_XqaBi=rx1rOaQLWmp3Ds_r7czG2OJV8nOuC=rrLaw@mail.gmail.com>
+ <m1j49OT-0036tRC@more.local> <20200219044444.GO30841@mcvoy.com>
+ <CANcLFn6ZFs_tvDv0ckSKTR_q8RSNZF5b7Fnfw-SFKioCRJRbBQ@mail.gmail.com>
+ <615399517.295857.1582135972871@email.ionos.co.uk>
+From: Michael Huff <mphuff@gmail.com>
+Message-ID: <f88dd839-907f-e5e6-8119-8dc9da0c7ff4@gmail.com>
+Date: Wed, 19 Feb 2020 11:18:53 -0900
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.5.0
+MIME-Version: 1.0
+In-Reply-To: <615399517.295857.1582135972871@email.ionos.co.uk>
+Content-Type: multipart/alternative;
+ boundary="------------668BB719A27468FD70F3004B"
+Content-Language: en-US
+Subject: Re: [TUHS] man Macro Package and pdfmark
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+This is a multi-part message in MIME format.
+--------------668BB719A27468FD70F3004B
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+
+I've only tried it in virtual machines. It feels slower and more 
+sluggish than OpenIndiana (which is based on Illumos, which is the 
+post-Oracle open solaris) -but I don't use OI a whole lot either.
+
+Since there's an opening I'm curious about something mentioned earlier 
+in the thread, so I'll ask.
+
+It was said earlier that SunOS included a compiler, but it was dropped 
+in Solaris. Was it possible for people to carry over the old SunOS 
+compiler and use it on Solaris? Did people do that, or did they just 
+have their companies spring for the actual Solaris compiler?
+
+
+On 2/19/2020 9:12 AM, Emile Bye wrote:
+> Hello all,
+>
+>
+> I'm a new member of the list and have been reading quietly in the 
+> background.
+>
+>
+> Changing the subject slightly (it's kind of relevant)... Has anyone 
+> had a look at the new Solaris?  Apart from it using the Gnome 3 DE 
+> which is very sluggish, it's awful!
+>
+> 11.3 is the last version I'm going to install on anything I've got!  
+> (My Sun Blade 2500 will have Solaris 10 though... much better...)
+>
+> Rant over...
+>
+> Apologies for being a little off-topic,
+>
+>
+>
+> Emile
+>> On 19 February 2020 at 18:01 Earl Baugh <earl.baugh@gmail.com> wrote:
+>>
+>> What was more frustrating to Sun users was that there WAS a compiler 
+>> included in Sun OS,
+>> but it went away with Solaris.  I saw a noticeable change in code 
+>> available in binary form only after that.
+>> At least until the GNU stuff got stable enough to use...
+>>
+>> (I was a customer of MIke's when he first start Cygnus for support of 
+>> the GNU compilers...
+>> I was working in a secured facility and multiple times I spoke with 
+>> him on the phone typing in patches
+>> by hand -- as he relayed them -- because of the time and hassle it 
+>> took to get a tape in with the patch...)
+>>
+>> Earl
+>>
+>>
+>> On Tue, Feb 18, 2020 at 11:45 PM Larry McVoy < lm@mcvoy.com 
+>> <mailto:lm@mcvoy.com>> wrote:
+>>
+>>     On Tue, Feb 18, 2020 at 12:22:56PM -0800, Greg A. Woods wrote:
+>>     > At the times I referred to the lack of freely available AT&T
+>>     source code
+>>     > was extremely limiting in how people viewed the availability of
+>>     such
+>>     > "add-on" tools for Unix -- including the C compiler!
+>>
+>>     This wasn't just an AT&T thing, Sun and SGI and everyone charged
+>>     for their
+>>     C compiler.  I sort of get it, writing a good compiler is up
+>>     there with
+>>     writing a good kernel in effort, not quite the same, but probably
+>>     the
+>>     2nd hardest thing to do.  So the compiler people cost a lot,
+>>     companies
+>>     wanted to get that cost back.
+>>
+>>     It was stupid.  Having a free compiler meant that more people would
+>>     write apps for your platform.   It should have been a loss leader.
+>>
+>>     > > For folks running binary only systems from
+>>     Masscomp/Sun/DEC/HP/IBM and the
+>>     > > like, it is possible it was different.
+>>     >
+>>     > It was _very_ different.
+>>     >
+>>     > If you weren't out in the trenches of end-user Unix-based
+>>     systems at the
+>>     > time it may not have been as obvious as to just how restrictive
+>>     it was
+>>     > to have proprietary fee-based licensing of such add-on
+>>     software.  Most
+>>     > end-users couldn't even pay their vendors for ditroff -- their
+>>     vendors
+>>     > didn't want to have to license it from AT&T, even when they had
+>>     > advocates inside the companies (e.g. I did some work supporting
+>>     software
+>>     > for a couple such vendors and was never able to convince
+>>     them).  Some,
+>>     > as you mention, were all-in, but it wasn't until UNIX System V
+>>     Release 4
+>>     > became more widely available that systems based on it were more
+>>     likely
+>>     > to have ditroff, and sometimes (though much more rarely) the
+>>     "new" dpost
+>>     > post-processor was also included.  I don't know if there were
+>>     different
+>>     > licensing terms for SysVr4 or not.  Don't get me started on how
+>>     hard it
+>>     > also was to get some end users to buy a C compiler too.
+>>
+>>     Yep, lived through this as well.  I fought with Sun to make more
+>>     stuff
+>>     free for developers, it just didn't make sense to not do that but
+>>     the
+>>     powers that were didn't get it.
+>>
+>>     One thing that Sun did do, probably in spite of itself, was fund
+>>     Michael Tiemann's work on C++.  He worked out some deal that that
+>>     work would be open source and he pretty much made GNU C++ work
+>>     for some definition of work (C++ is a mess).
+>>
+>
+
+--------------668BB719A27468FD70F3004B
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+    I've only tried it in virtual machines. It feels slower and more
+    sluggish than OpenIndiana (which is based on Illumos, which is the
+    post-Oracle open solaris) -but I don't use OI a whole lot either.<br>
+    <p>Since there's an opening I'm curious about something mentioned
+      earlier in the thread, so I'll ask. <br>
+    </p>
+    <p>It was said earlier that SunOS included a compiler, but it was
+      dropped in Solaris. Was it possible for people to carry over the
+      old SunOS compiler and use it on Solaris? Did people do that, or
+      did they just have their companies spring for the actual Solaris
+      compiler?</p>
+    <p><br>
+    </p>
+    <div class="moz-cite-prefix">On 2/19/2020 9:12 AM, Emile Bye wrote:<br>
+    </div>
+    <blockquote type="cite"
+      cite="mid:615399517.295857.1582135972871@email.ionos.co.uk">
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <meta charset="UTF-8">
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> Hello all, </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> I'm a new member of the list and have been reading
+        quietly in the background. </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> Changing the subject slightly (it's kind of
+        relevant)... Has anyone had a look at the new Solaris?  Apart
+        from it using the Gnome 3 DE which is very sluggish, it's awful!
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> 11.3 is the last version I'm going to install on
+        anything I've got!  (My Sun Blade 2500 will have Solaris 10
+        though... much better...) </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> Rant over... </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> Apologies for being a little off-topic, </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> <br>
+      </div>
+      <div style="font-size: 11pt; font-family: arial, helvetica,
+        sans-serif;"> Emile  </div>
+      <blockquote type="cite"> On 19 February 2020 at 18:01 Earl Baugh
+        <a class="moz-txt-link-rfc2396E" href="mailto:earl.baugh@gmail.com">&lt;earl.baugh@gmail.com&gt;</a> wrote: <br>
+        <br>
+        <div dir="ltr">
+          <div> What was more frustrating to Sun users was that there
+            WAS a compiler included in Sun OS, </div>
+          <div> but it went away with Solaris.  I saw a noticeable
+            change in code available in binary form only after that. </div>
+          <div> At least until the GNU stuff got stable enough to use...
+          </div>
+          <div> <br>
+          </div>
+          <div> (I was a customer of MIke's when he first start Cygnus
+            for support of the GNU compilers... </div>
+          <div> I was working in a secured facility and multiple times I
+            spoke with him on the phone typing in patches </div>
+          <div> by hand -- as he relayed them -- because of the time and
+            hassle it took to get a tape in with the patch...) </div>
+          <div> <br>
+          </div>
+          <div> Earl <br>
+          </div>
+          <div> <br>
+          </div>
+        </div>
+        <br>
+        <div class="ox-1c061daeb7-gmail_quote">
+          <div class="ox-1c061daeb7-gmail_attr" dir="ltr"> On Tue, Feb
+            18, 2020 at 11:45 PM Larry McVoy &lt; <a
+              href="mailto:lm@mcvoy.com" moz-do-not-send="true">lm@mcvoy.com</a>&gt;
+            wrote: <br>
+          </div>
+          <blockquote> On Tue, Feb 18, 2020 at 12:22:56PM -0800, Greg A.
+            Woods wrote: <br>
+            &gt; At the times I referred to the lack of freely available
+            AT&amp;T source code <br>
+            &gt; was extremely limiting in how people viewed the
+            availability of such <br>
+            &gt; "add-on" tools for Unix -- including the C compiler!  <br>
+            <br>
+            This wasn't just an AT&amp;T thing, Sun and SGI and everyone
+            charged for their <br>
+            C compiler.  I sort of get it, writing a good compiler is up
+            there with <br>
+            writing a good kernel in effort, not quite the same, but
+            probably the <br>
+            2nd hardest thing to do.  So the compiler people cost a lot,
+            companies <br>
+            wanted to get that cost back. <br>
+            <br>
+            It was stupid.  Having a free compiler meant that more
+            people would <br>
+            write apps for your platform.   It should have been a loss
+            leader. <br>
+            <br>
+            &gt; &gt; For folks running binary only systems from
+            Masscomp/Sun/DEC/HP/IBM and the <br>
+            &gt; &gt; like, it is possible it was different. <br>
+            &gt; <br>
+            &gt; It was _very_ different. <br>
+            &gt; <br>
+            &gt; If you weren't out in the trenches of end-user
+            Unix-based systems at the <br>
+            &gt; time it may not have been as obvious as to just how
+            restrictive it was <br>
+            &gt; to have proprietary fee-based licensing of such add-on
+            software.  Most <br>
+            &gt; end-users couldn't even pay their vendors for ditroff
+            -- their vendors <br>
+            &gt; didn't want to have to license it from AT&amp;T, even
+            when they had <br>
+            &gt; advocates inside the companies (e.g. I did some work
+            supporting software <br>
+            &gt; for a couple such vendors and was never able to
+            convince them).  Some, <br>
+            &gt; as you mention, were all-in, but it wasn't until UNIX
+            System V Release 4 <br>
+            &gt; became more widely available that systems based on it
+            were more likely <br>
+            &gt; to have ditroff, and sometimes (though much more
+            rarely) the "new" dpost <br>
+            &gt; post-processor was also included.  I don't know if
+            there were different <br>
+            &gt; licensing terms for SysVr4 or not.  Don't get me
+            started on how hard it <br>
+            &gt; also was to get some end users to buy a C compiler too.
+            <br>
+            <br>
+            Yep, lived through this as well.  I fought with Sun to make
+            more stuff <br>
+            free for developers, it just didn't make sense to not do
+            that but the <br>
+            powers that were didn't get it. <br>
+            <br>
+            One thing that Sun did do, probably in spite of itself, was
+            fund <br>
+            Michael Tiemann's work on C++.  He worked out some deal that
+            that <br>
+            work would be open source and he pretty much made GNU C++
+            work <br>
+            for some definition of work (C++ is a mess). <br>
+            <br>
+          </blockquote>
+        </div>
+      </blockquote>
+      <div style="font-size: 11pt; font-family:
+        arial,helvetica,sans-serif;" class="default-style"> <br>
+          </div>
+    </blockquote>
+  </body>
+</html>
+
+--------------668BB719A27468FD70F3004B--

@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29917 invoked from network); 7 Aug 2020 16:07:59 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 7 Aug 2020 16:07:59 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DEF6F9CAB4; Sat,  8 Aug 2020 02:07:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4853D9C1D7;
+	Sat,  8 Aug 2020 02:07:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C5C089C1D7; Sat,  8 Aug 2020 02:07:24 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 579D89C1CE
+ for <tuhs@tuhs.org>; Sat,  8 Aug 2020 02:07:24 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 5E16918C08B; Fri,  7 Aug 2020 12:07:23 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200807160723.5E16918C08B@mercury.lcs.mit.edu>
+Date: Fri,  7 Aug 2020 12:07:23 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Debugging help sought
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Warner Losh
+
+    > 8 I think was the limit.
+
+IIRC, you could use longer names than that (in C), but external references
+only used the first 7 (in C - C symbols had a leading '_' tacked on; I used to
+know why), 8 (in assembler).
+
+    > Could that cause this error?
+
+Seems unlikely - see below.
+
+
+    > The error comes from lookloc. This is called for external type
+    > relocations. It searches the local symbol table for something that
+    > matches the relocation entry. This error happens when it can't find
+    > it...
+
+Someone who actually looked at the source:
+
+  https://www.tuhs.org/cgi-bin/utree.pl?file=V7/usr/src/cmd/ld.c
+
+instead of just guessing. Give that man a star!
+
+I spent a while looking at the code, trying to figure out i) how it works, and
+ii) what's going wrong with that message, but I don't have a definitive
+answer. The code is not super well commented, so one has to actually
+understand what it's doing! :-)
+
+It seems to my initial perusal that it maintains two symbol tables, one for
+globals (which accumulates as each file is processed), and one for locals
+(which is discarded/reset for each file). As Werner mentioned, the message
+appears when a local symbol referenced in the relocation information in the
+current file can't be found (in the local symbol table).
+
+It's not, I think, simply due to too many local symbols in an input file -
+there seems to be a check for that as it's reading the input file symbol
+table:
+
+   if (lp >= &local[NSYMPR])
+           error(1, "Local symbol overflow");
+   *lp++ = symno;
+   *lp++ = sp;
+
+although of course there could be a bug which breaks this check. It seems to
+me that this is an 'impossible' error, one which can only happen due to i) a
+bug in the loader (a fencepost error, or something), or ii) an error in the
+input a.out file.
+
+I don't want to spend more time on it, since I'm not sure if you've managed to
+bypass the problem. If not, let me know, and we'll track it down. (This may
+involve you addding some printf's so we have more info about the details.)
+
+    Noel
+

@@ -1,0 +1,72 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id 2db88e58
+	for <ml@inbox.vuxu.org>;
+	Mon, 6 Jan 2020 06:31:32 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id BCD7B9BB81; Mon,  6 Jan 2020 16:31:31 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 36B679BB68;
+	Mon,  6 Jan 2020 16:31:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A6FEE9BB66; Mon,  6 Jan 2020 16:30:59 +1000 (AEST)
+Received: from cuzuco.com (v.cuzuco.com [166.84.7.17])
+ by minnie.tuhs.org (Postfix) with ESMTP id 158489BB4A
+ for <tuhs@minnie.tuhs.org>; Mon,  6 Jan 2020 16:30:58 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by cuzuco.com (8.14.9/8.13.3) with SMTP id 0066U7U7023760
+ for <tuhs@minnie.tuhs.org>; Mon, 6 Jan 2020 01:30:14 -0500 (EST)
+Date: Mon, 6 Jan 2020 01:30:07 -0500 (EST)
+Message-Id: <202001060630.0066U7U7023760@cuzuco.com>
+From: Brian Walden <tuhs@cuzuco.com>
+To: <tuhs@minnie.tuhs.org>
+Subject: [TUHS] # (was Re: sh: cmd | >file)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+A bit more on this.
+csh(1) was wrtten around 1978 and yes # as a comment was only for
+scrtipts, think it was why would you need to comment interactively?
+And the # as an addition to be a comment in Bourne shell had to be around 1980
+as that is when Dennis Ritchie added #! to exec(2) in the kernel. From this
+point on this forced all UNIX scripting languages to use # as a comment as
+it just exec'd the first string after the #! with the name of the current
+file being exec'd as the single argument. So things like perl(1) and python(1)
+had to use # if they wanted the #! mechanism to work for them too.
+
+So this worked great for shell scripts, it didn't work for awk(1) nor sed(1)
+nor s(1)(that is R(1) now) scripts (all needed a -f for input from file)
+nor dc(1) scripts as dc had no comment character.
+While Research UNIX got !# in 1980, this was after the 7th Edition release
+and the 8th Edition wasn't released until 1985), BSD got it around 1982-83,
+and System V didn't implement it until 1988. Eventully #! was extented
+so #!/usr/bin/awk -f would work.
+
+Also Bill Joy was the first to use # as a comment character in an /etc config
+file for his /etc/ttycap (which became /etc/termcap) for vi(1). Most configs
+did not have a comment at all at that time, while /etc/master used a * as a
+comment (SCCS used * as a comment too btw)
+
+Also before you say wait! ALGOL uses # as comment and is older than
+Kernighan' ratfor(1). This is a later addition. The original used the EBCDIC
+cent sign character to start and another cent sign to end the comment
+(i.e. programmer's two cents). If you were on an ASCII system this became
+"co" (for comment) as the original ASCII does not have a cent sign
+
+-Brian

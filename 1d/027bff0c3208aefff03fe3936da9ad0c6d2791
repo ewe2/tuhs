@@ -1,0 +1,49 @@
+From: jnc at mercury.lcs.mit.edu (Noel Chiappa)
+Date: Fri, 27 Nov 2020 06:54:44 -0500 (EST)
+Subject: [TUHS] Apple IIe Unix?
+Message-ID: <20201127115444.E581018C091@mercury.lcs.mit.edu>
+
+    > From: Steve Nickolas
+
+    > there's no easy way to do preemptive multitasking without extra
+    > hardware.
+
+Perhaps you're using some idiosyncratic definition of "preemptive" and
+"multitasking", but to me that statement's not accurate.
+
+Let's take the "multitasking" part first: that just means 'two or more
+computations can run at the same time, sharing the machine' - and that's not
+hard to do, without special hardware, provided there's some way (in the
+organization of the software) to save the state of one when the other is
+running. Many simple systems do this; e.g. the MOS system that I used on
+LSI-11's, BITD.
+
+"Preemptive" is a bit trickier, because things have to be organized so that
+one 'task' can be temporarily stopped arbitrarily (i.e. without it explicitly
+giving up the processor, which is what e.g.MOS did) to let another run. There
+does need to be some asynchronous way of inciting the second 'task' to run,
+but interrupts (either clock, or device) do that, and pretty much every
+machine has those. MINI-UNIX, for example, has premptive multitasking.
+
+The thing that takes special hardware is _protecting_ one task from a bug in
+another - a bug which could trash the first tasks's (or the system's!)
+memory. One has to have memory management of some kind to do that.
+
+
+    > From: Dave Horsfall
+
+    > I would start with something like Mini-Unix
+
+MINI-UNIX would be a good place to start if one wanted to bring up a system on
+a machine without memory management; there's nothing in the kernel which is
+PDP-11 dependent that I can think of (unlike V6, which had a fairly heavy
+dependency on the PDP-11 memory management hardware - although one could of
+course rip that all out, as MINI-UNIX did).
+
+However, one's still looking at a fair amount of work, both to get rid of any
+traces of PDP-11isms (e.g. stack growth direction), and translate the
+assembler part (startup, and access to non-C operations). Something like FUZIX
+might be an easier option.
+
+       Noel
+

@@ -1,0 +1,107 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.2 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,DKIM_VALID_EF,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE
+	autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id f6064158
+	for <ml@inbox.vuxu.org>;
+	Sun, 23 Feb 2020 20:27:34 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7A7E69D6F6; Mon, 24 Feb 2020 06:27:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A248B9D6C1;
+	Mon, 24 Feb 2020 06:27:09 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=tuhs.org; s=dkim;
+	t=1582489645; bh=e1m0+ArI6gqQUmsQb/7VR5cFHwzmtpnhuQ2DFCn3p4s=;
+	h=Date:From:To:Subject:List-Id:List-Unsubscribe:List-Archive:
+	 List-Post:List-Help:List-Subscribe:From;
+	b=HtL2ai9HjfTE/eba6m2X8AVFIeWMSTrPPOADB8a7giA+KMqlyQhsD+i6tw/8mvp8R
+	 +MiOgDhkrJ6MtREKIecczkiEKmay/wWS73DuWr4FX4o3U/LMQUR3DJWr9o01zWkgHM
+	 poyKXCGzB1uinPQZu//bJYJMmVl7/D7WSj9lBtIk=
+Received: by minnie.tuhs.org (Postfix, from userid 1000)
+ id 902059CE1E; Mon, 24 Feb 2020 06:27:07 +1000 (AEST)
+Date: Mon, 24 Feb 2020 06:27:07 +1000
+From: Warren Toomey <wkt@tuhs.org>
+To: tuhs@tuhs.org
+Message-ID: <20200223202707.GB16651@minnie.tuhs.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.9.4 (2018-02-28)
+Subject: [TUHS] Fwd: Unix V0 on SIMH PDP-9
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+All, I received this interesting e-mail from Michael Thompson:
+----- 
+
+Date: Fri, 21 Feb 2020 12:50:12 -0500
+From: Michael Thompson <michael.99.thompson@gmail.com>
+To: Warren Toomey <wkt@tuhs.org>
+Subject: Unix V0 on SIMH PDP-9
+
+   I modified the PDP-7 .simh file so it will run on a SIMH PDP-9.
+   (attached)
+   We have a running PDP-9 at the RICM. If I added EAE, (we likely have
+   the necessary parts) and made a disk emulator like the one at the LCM,
+   we could also run UNIX V0 on it. It would be nice to have the disk
+   emulator emulate an RB disk, but that would also require emulating a
+   DMA adapter.
+   I am considering making an FPGA to emulate the memory controller and
+   32KW of memory. If I did that, I could put the RB and DMA emulation in
+   the same device.
+   --
+   Michael Thompson
+
+----- End forwarded message -----
+
+
+set cpu 8k
+set cpu eae
+set cpu history=100
+show cpu
+
+# set up SIMH devices:
+
+# UNIX character translations (CR to NL, ESC to ALTMODE):
+set tti unix
+
+# RB09 fixed head disk:
+set rb ena
+att rb image.fs
+
+# enable TELNET in GRAPHICS-2 keyboard/display(!!)
+#set g2in ena
+#att -U g2in 12345
+
+# disable hardware UNIX-7 doesn't know about:
+set lpt disa
+set drm disa
+set dt disa
+set mt disa
+set rf disa
+set ttix disa
+set ttox disa
+
+# show device settings:
+show dev
+
+# load and run the paper tape bootstrap
+# (loads system from disk)
+load boot.rim 010000
+go
+
+Cheers, Warren

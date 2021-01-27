@@ -1,0 +1,54 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 30602 invoked from network); 2 Jun 2020 00:09:20 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jun 2020 00:09:20 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C11869C974; Tue,  2 Jun 2020 10:09:17 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C0FD49C5F1;
+	Tue,  2 Jun 2020 10:08:49 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1585A9C5F1; Tue,  2 Jun 2020 10:08:47 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9916F93D46
+ for <tuhs@minnie.tuhs.org>; Tue,  2 Jun 2020 10:08:46 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id CF26E18C073; Mon,  1 Jun 2020 20:08:45 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200602000845.CF26E18C073@mercury.lcs.mit.edu>
+Date: Mon,  1 Jun 2020 20:08:45 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] non-blocking IO
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > when you're working below the reliable stream level, you can't just do a
+    > blocking 'read' for a packet; it pretty much has to be asynchronous
+
+Oh, you should look at the early BBN TCP for V6 Unix - they would have faced
+the same issue, with their TCP process. They did have the capac() call (which
+kind of alleviates the need for non-blocking I/O), but that may have only been
+available for ports/pipes; I'm not sure if the ARPANET device supported it.
+
+(With the NCP as well, that did some amount of demultiplexing in the kernel,
+and probably had buffering there, so, if so, in theory capac() could have been
+done there. Of course, with the ARPANET link being only 100Kbit/sec maximum -
+although only to a host on the same IMP - the overhead of copying buffered
+data made kernel buffering more 'affordable'.)
+
+     Noel

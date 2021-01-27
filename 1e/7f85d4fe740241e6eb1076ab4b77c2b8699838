@@ -1,0 +1,99 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.5 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SUBJ_ALL_CAPS autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 18509 invoked from network); 17 Jan 2021 20:54:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Jan 2021 20:54:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id EA9179C723; Mon, 18 Jan 2021 06:54:44 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 50A279C654;
+	Mon, 18 Jan 2021 06:54:13 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BE37F9C63F; Mon, 18 Jan 2021 06:54:08 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 5ACA49C63D
+ for <tuhs@tuhs.org>; Mon, 18 Jan 2021 06:54:07 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id 739CB43F88; Sun, 17 Jan 2021 15:52:43 -0500 (EST)
+To: tuhs@tuhs.org
+Message-Id: <20210117205243.739CB43F88@lignose.oclsc.org>
+Date: Sun, 17 Jan 2021 15:52:43 -0500 (EST)
+From: norman@oclsc.org (Norman Wilson)
+Subject: [TUHS] EGREG
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Andrew Hume (dammit andrew):
+
+  i have probed recently about the origins of the bEGREGb (its all greg cession's fault) error in Research Unix.
+  alas, i recall nothing about this, and can't recall ever getting the message.
+
+===
+
+Your memory fails you, which is not unreasonable for stuff you
+probably haven't thought about in more than 30 years:
+
+/*
+	SCSI Pass-Thru driver for the TD Systems UD? -- Andrew Hume
+	Ninth Edition Unix
+*/
+
+[...]
+
+scsiwrite(dev)
+	dev_t dev;
+{
+	register count;
+	register struct scsi *p = &scsi[minor(dev)];
+	register struct mscmd *cmd = &p->junk->cmd.msg;
+	unsigned char flag, bus_id;
+
+	if(p->flag&NEXTWR)
+		p->flag &= ~NEXTWR;
+	else {
+		u.u_error = EGREG;
+		return;
+	}
+
+As I remember it, EGREG went into errno.h and libc out
+of a desire to have some never-normally-used error to
+be returned when debugging.  I forget just who was in
+the UNIX Room conversation that created it; almost certainly
+I was.  I thought andrew was as well; very likely one or
+more of andrew td presotto.
+
+I do remember being a bit annoyed at Andrew for putting it
+in permanent use in the raw-SCSI driver (which was at the
+time of interest mainly to Andrew for controlling an
+early optical-disc jukebox, used by the original File
+Motel backup system).
+
+As to the origin of `It's all Greg's fault' as a meme,
+that was already around and established when I arrived at
+the Labs in mid-1984, though Greg himself had already
+moved west.  Maybe Doug or Ken remembers how that started.
+
+Andrew himself was responsible for or blamed by more than
+one meme of the days.  The scsi driver spawned one, in fact:
+the first attempt used a SCSI interface from Emulex, which
+never worked quite right, and despite repeated phone calls
+to Emulex Andrew could never get it figured out.  He tried
+and tried, though, and his attempts spawned the catch
+phrase `Time to call Emulex again!'
+
+Norman Wilson
+Toronto ON

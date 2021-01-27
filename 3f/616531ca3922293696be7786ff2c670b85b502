@@ -1,0 +1,90 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29264 invoked from network); 7 Jun 2020 21:36:58 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 7 Jun 2020 21:36:58 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 84A1B9CA68; Mon,  8 Jun 2020 07:36:55 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A08A19C5F8;
+	Mon,  8 Jun 2020 07:36:29 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 878C39C5F8; Mon,  8 Jun 2020 07:36:26 +1000 (AEST)
+X-Greylist: delayed 1251 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 08 Jun 2020 07:36:25 AEST
+Received: from elf.torek.net (unknown [96.78.171.221])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 9EECF9C5E5
+ for <tuhs@minnie.tuhs.org>; Mon,  8 Jun 2020 07:36:25 +1000 (AEST)
+Received: from elf.torek.net (localhost [127.0.0.1])
+ by elf.torek.net (8.15.2/8.15.2) with ESMTP id 057LFV6v089953;
+ Sun, 7 Jun 2020 14:15:32 -0700 (PDT) (envelope-from torek@torek.net)
+Message-Id: <202006072115.057LFV6v089953@elf.torek.net>
+From: Chris Torek <torek@torek.net>
+To: Nemo Nusquam <cym224@gmail.com>
+In-reply-to: Your message of "Sun, 07 Jun 2020 14:50:34 -0400."
+ <17d519b0-384c-fddd-9fe1-700bbe9821be@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <89951.1591564526.1@elf.torek.net>
+Date: Sun, 07 Jun 2020 14:15:26 -0700
+X-Greylist: inspected by milter-greylist-4.6.2 (elf.torek.net [127.0.0.1]);
+ Sun, 07 Jun 2020 14:15:32 -0700 (PDT) for IP:'127.0.0.1'
+ DOMAIN:'localhost' HELO:'elf.torek.net' FROM:'torek@torek.net' RCPT:''
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.6.2
+ (elf.torek.net [127.0.0.1]); Sun, 07 Jun 2020 14:15:32 -0700 (PDT)
+Subject: Re: [TUHS] History of popularity of C
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Yes, both Rust and Go are being used.
+
+Rust has some advantages: like C++, it can compile to very fast
+code that does not need a garbage collector but that provides
+type-safety.  It also gives you thread-safety through clever
+compiler analysis of who "owns" any given variable or data.
+
+The ownership / lifetime-analysis / borrow-checker is quite
+complicated and takes a lot of getting-used-to.  I have not
+written anything "real" in Rust and had not had time to really
+learn it (I was hoping to learn it for real and write code in
+it the last few years, but that never actually happened).
+
+Meanwhile, Go is actually a really nice language to use.  It has a
+few quirks, but it gives you reasonably-fast-running code that
+(because there is a garbage collector) does not require nearly as
+much skull-sweat when figuring out who owns memory and how to make
+sure it gets released appropriately.  Its built in channels and
+goroutine support makes multi-threaded cod, and using all the CPUs
+effectively, also much easier.
+
+You pay (sometimes noticeably) for the GC, but the price is not
+too bad in less time-critical situations.  The GC has a few short
+stop-the-world points but since Go 1.6 or so, it's pretty smooth,
+unlike what I remember from 1980s Lisp systems. :-)  (Note: I
+started with Go 1.11, so I don't have a lot of history, nor that
+much experience in it.  But I do like it.)
+
+Both Go and Rust have build systems.  In Rust, this is a separate
+front-end from the compiler proper (rustc): you run "cargo build",
+for instance.  In Go, you run "go build", "go test", etc., to
+build and invoke unit tests and so on.  Rust has generics (think
+C++ templates, except sane) and Go lacks them although there's a
+plan for them in Go 2.0.  Rust has, or at least had, rather bad
+array support when I last looked at it: you could make an array
+out of any type, but with only up to 32 elements.
+
+Chris

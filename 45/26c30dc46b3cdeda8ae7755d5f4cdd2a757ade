@@ -1,0 +1,68 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 27099 invoked from network); 20 Sep 2020 22:52:50 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 20 Sep 2020 22:52:50 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A60169CE53; Mon, 21 Sep 2020 08:52:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A32CC94483;
+	Mon, 21 Sep 2020 08:52:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DC43194483; Mon, 21 Sep 2020 08:52:28 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id ECCDE93F0F
+ for <tuhs@tuhs.org>; Mon, 21 Sep 2020 08:52:27 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id C579E4422E; Sun, 20 Sep 2020 18:51:06 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200920225106.C579E4422E@lignose.oclsc.org>
+Date: Sun, 20 Sep 2020 18:51:06 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] reviving a bit of WWB
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Brantley Coile:
+
+  The fact that a pointer of zero generates a hardware trap is not
+  defined in the language, whereas a 0 is is defined to be a null pointer.
+
+=====
+
+The language doesn't require that dereferencing a null pointer
+cause a trap, either.  There's no way to guarantee that behaviour
+in all environments unless every pointer dereference must include
+instructions to check for the null-pointer value, because C can
+run in environments in which any pointer value might be a valid
+address.
+
+On modern machines it's conventional for the null-pointer value
+in C, what you get when you assign 0 to a pointer, to be all-zeroes;
+and for operating systems to arrange that that address is unmapped.
+But that wasn't always so (on the PDP-7 there was no memory map;
+on the PDP-11 once memory-mapping was added, address space was
+too dear to throw away an eighth of it just to block null-pointer
+dereferencing), and it may still not be (consider a C program
+on an embedded system running without a memory map).
+
+It's good that modern systems usually whap you in the head if you
+deference a null pointer, but it's not required, and those who
+rely on it are as foolish as those who used to rely on the
+accident that the byte at address 0 on early VAX UNIX was a zero.
+
+Norman Wilson
+p&p6 and f(

@@ -1,0 +1,513 @@
+Return-Path: <tuhs-bounces@minnie.tuhs.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.6 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,HTML_MESSAGE,MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.2
+Received: from minnie.tuhs.org (minnie.tuhs.org [45.79.103.53])
+	by inbox.vuxu.org (OpenSMTPD) with ESMTP id bc84891d
+	for <ml@inbox.vuxu.org>;
+	Mon, 20 Jan 2020 17:50:54 +0000 (UTC)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E39D49C13F; Tue, 21 Jan 2020 03:50:52 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E70869C0FD;
+	Tue, 21 Jan 2020 03:49:38 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=bsdimp-com.20150623.gappssmtp.com header.i=@bsdimp-com.20150623.gappssmtp.com header.b="c5sy4yvR";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 196449C0FD; Tue, 21 Jan 2020 03:49:38 +1000 (AEST)
+Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com
+ [209.85.222.172])
+ by minnie.tuhs.org (Postfix) with ESMTPS id EE8589BFE6
+ for <tuhs@tuhs.org>; Tue, 21 Jan 2020 03:49:33 +1000 (AEST)
+Received: by mail-qk1-f172.google.com with SMTP id z76so56971qka.2
+ for <tuhs@tuhs.org>; Mon, 20 Jan 2020 09:49:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=bsdimp-com.20150623.gappssmtp.com; s=20150623;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=8+LwvxWKJRES06LPd78PEJrsu8vDsKGJmR/VBA4fFzw=;
+ b=c5sy4yvREZ5m81pUOYwY3gxT6AQqo6aKkhr6JO112YVccKC/sZHjDNQ7je/9rn77wG
+ P5ps1B47RSllWybUg6vucImmXsIqp6KRUBdeiUw3ABYRk+QJ3eztXR02ptcYjvT1g/Rm
+ qgwGsHCO9DoOw+8H4w3HRxhsyD86qy8QhIVaQsngz0a69rjdMBhbiN2jS256WV6DDVNY
+ VT7lULjrOnySyJNA45hnsInA6Zh8CgqHINCjUv8ciXAddJwGPkl/MTqFrS9r5g5FjhqB
+ f30MO21Dr/1wgNPjhTsv0XwPKJlT0SGD1eoA16uL5e9pcP8Tyyz0t+KfT7hYL65Ta60U
+ hphw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=8+LwvxWKJRES06LPd78PEJrsu8vDsKGJmR/VBA4fFzw=;
+ b=ZmK7tYG/jAmGIYGR41JVxdIvMY1cCB9JNB6r7vXS3Pcmv897VIWEdm1suRXFp8uTO6
+ wehsvS8nHpuorYZ0tk/zxq1CBOefPkkquu5egmJH8FcCoRHwpsOt6KTOcyW7gFH7p8S6
+ Cqsj3Hb7V1f3+kV2IMNZdy/IEy2Hd1e8q2jxfzF8NWNXmIz/Rs7y9j8A9J2B3YWDXiaE
+ ISehe/FroBqs8vPdIiFu/oYhp8CO1erfHyjqEvCdP3PTARgmv7MojN11zp5Bx1TDo6eq
+ F9H32ixu6f9YDKnQ/VNk8v0eClmhONmAFOXZLNBxGRBFbAIfkrsl2QbNVYeBrwaoT3bJ
+ CIOg==
+X-Gm-Message-State: APjAAAXysT0/20Lo+IFQ8tdT+osWMRuc+F97OO1bJWyHni+NNCfrDnt2
+ qKbUsYr/JA1RMbL5VSc/tjVq3lwAKu3GdJOPMy9LXXno
+X-Google-Smtp-Source: APXvYqzW2FZM+j0gvcIKgqlkI/i496g8ZZib0ke43LdpoRw+QI9xCTAZEDpvv4AbrufAIh5JduPA5b5c7zBr9EsTy6w=
+X-Received: by 2002:a05:620a:795:: with SMTP id 21mr746301qka.60.1579542573010; 
+ Mon, 20 Jan 2020 09:49:33 -0800 (PST)
+MIME-Version: 1.0
+References: <C7972CAB-7A91-49CD-9F7A-9675400E81E5@alchemistowl.org>
+ <20200117195908.GF15253@ancienthardware.org> <20200118035051.GC481935@mit.edu>
+ <20200118041913.GB67053@eureka.lemis.com> <20200119024900.GA15860@mit.edu>
+ <20200119031225.GI67053@eureka.lemis.com>
+ <20200119035808.GK67053@eureka.lemis.com>
+ <20200119132551.GC15860@mit.edu> <m1itNo9-0036tPC@more.local>
+ <CAKr6gn3Vhzn=g_55NdOQfQCUqi9YBSBZNbjM+YMoS8cg82PSbQ@mail.gmail.com>
+ <CAC20D2ONRuze8sxOkiuWqYV7i6+vy9r3jGuM3P52fin2gQHKjg@mail.gmail.com>
+In-Reply-To: <CAC20D2ONRuze8sxOkiuWqYV7i6+vy9r3jGuM3P52fin2gQHKjg@mail.gmail.com>
+From: Warner Losh <imp@bsdimp.com>
+Date: Mon, 20 Jan 2020 10:49:21 -0700
+Message-ID: <CANCZdfrw7KUZjyaJ0eBxrn2S-VDrj5amY-YFD4B5sPEu==mHUQ@mail.gmail.com>
+To: Clem Cole <clemc@ccc.com>
+Content-Type: multipart/alternative; boundary="000000000000f8e5c4059c95e96e"
+Subject: Re: [TUHS] Early Linux and BSD (was: On the origins of Linux - "an
+ academic question")
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000f8e5c4059c95e96e
+Content-Type: text/plain; charset="UTF-8"
+
+Thanks Clem.
+
+One minor clarification.  Jordan and the patchkit work did predate NetBSD.
+However, the NetBSD project formed a little before the FreeBSD project that
+grew out of the patchkit days. Jordan didn't get that moving until NetBSD
+made rumblings... it was still a time that you heard a lot of what was
+going on by word of mouth, not so much by postings and email...
+
+The OpenBSD split was years later... and a complicated mix of personality
+conflicts and technical differences. But in many ways it was a smaller
+split since for a long time they were almost 100% compatible at the driver
+level (something you could never really say about net and free).
+
+Warner
+
+On Mon, Jan 20, 2020, 10:21 AM Clem Cole <clemc@ccc.com> wrote:
+
+>
+>
+> On Sun, Jan 19, 2020 at 10:52 PM George Michaelson <ggm@algebras.org>
+> wrote:
+>
+>> It does me no credit, that I initially reacted very badly to 386BSD,
+>> and the initial {Net,Free,Open} situation.
+>>
+> First, be careful.   What we sometimes call 386BSD as a 'release' started
+> just as a port of NET2 to the 386 based 'commodity' hardware platform.  The
+> history is that in the late 1970s/early 80s Bill Jolitz was working for Nat
+> Semi and ported BSD 4.1, to a multibus based NS16032 board that NS had
+> built, which was similar to the Stanford University Network (SUN) terminal
+> what had a 68000.  He eventually built a 'luggable' using that and
+> updated to the port to 4.2++.   He (and Lynn I believe) started a company
+> to sell that hardware/software solution and for whatever reason, it did not
+> really take off.
+>
+> At some point, he got his hands on a 386based PC (Compaq I think) and
+> started to move his port over to that system.   A number of people helped
+> him (for instance I did a bunch of the AT/disk controller work as I had
+> access to the WD design documents for another consulting gig I had at the
+> time - Bill mentioned this in the articles BTW).
+>
+> Bill and Lynn's NS16032 and 386 code went back to the CSRG 'masters' -
+> although how and that happened was never completely clear to me. The SCCS
+> deltas tell at least part of the story.     Bill managed to make a bootable
+> image that mostly installed on a PC/386 as the minicomputer versions did
+> from the formal release.   The ftp area of ucbvax had all of these bootable
+> images available for download such as one for an HP 68K system and I think
+> the DEC VAX and PMAX, the CCG system and a few others IIRC.  As I have said
+> in other messages if you were a UCB licensee you had the passwords to
+> look/download from that area.    Bill placed that version in the same ftp
+> area.  The 386 based port went viral at least with the UCB licensees.  (In
+> fact, if Linus had known about it, theoretically he could have used it
+> also.   His university was licensee, but as Larry McVoy likes to point, not
+> all the schools were as free with the IP, so I will not go down that
+> rathole).
+>
+> The bottom line is that many people (like me on a Wyse386) started with
+> Bill's original port; including the BSDi founders.
+>
+> When Jolitz and BSDi went separate ways, Jolitiz continued to update the
+> CSRG 386 based tarball (to an extent).  One of the issues was there
+> originally was attempt to keep the different architectural versions of BSD
+> in sync ( to a point and NetBSD does yet exist).    A number of people were
+> unhappy and the speed, depth *etc*. of the 386 version, most
+> notably Jordan Hubbard and FreeBSD was born.  The two biggest issues Jordan
+> wanted to fix, was easier install and a bit wider support for more hardware
+> (again I sent Jordan the changes to FreeBSN 1x for the Wyse and a couple of
+> NCR boxes).  The NetBSD project would birth from the original ideals of
+> CSRG and trying to keep everything the same but that's still in the future.
+>
+>
+>
+>
+>>
+>> I found all this "fragmentation" pretty hard to understand. -BSDI felt
+>> like it had occupied the space, and I couldn't entirely understand
+>> what was going on, or why any of it mattered.
+>>
+> See below....
+>
+>
+>
+>
+>> What I think I missed (didn't understand) was how draining support was
+>> for Berkeley, and in the absence of a sugar daddy
+>>
+> Herein is the issue that many people on the sidelines missed.
+>
+> CRSG was a large project and funded a lot of work at UCB in EECS. It never
+> funded me (I was funded by Tektronix, HP, DEC *et al*), but that project
+> did a fund a number of students.  However, at some point CSRG stopped being
+> a research project and started being a support project for DARPA.  There
+> was also a good deal of resentment by some groups in EECS that were not
+> getting DARPA funding.
+> I'll not say if that was good or bad but I will say that it did cause
+> great deal consternation at UCB within the department and many people doing
+> more formal research were not happy.    In the end, the EECS
+> Department mothers and fathers along with the Dean *et al*, decided to
+> stop/end the CSRG project.  Many people who were directly or indirectly
+> working on BSD, like Mary Ann and myself, had graduated and had since
+> left.  Bob Kridle had formed Mt. Xinu, Asa Romberger has formed Unisoft, Joy
+> had left/was leaving for Sun, *etc*.    So the question remained what to
+> do with CSRG.   As to what everyone would do, became every person for
+> her/himself and as we know some of the folks, along with a few folks from
+> the USENIX community formed BSDi.
+>
+> As was noted elsewhere, NetBSD would eventually be formed by volunteers to
+> keep the different ports alive (in fact much of the efforts was from folks
+> not at UCB), but that was still in the offing.   Remember, while CSRG
+> itself was not a research project, a lot of people around the world were
+> using the BSD code base for their own research.  The whole idea of NetBSD
+> was to create a uniform platform that people could compare things.  So, the
+> question of how that was to come about or do any work on BSD if DARPA was
+> not paying the bills, was still an open one.  But, the idea that would
+> eventually create FreeBSD, was supporting a pure commodity *solution for
+> day-to-day use, not as a research platform*. [I'll leave off the later
+> OpenBSD/NetBSD fork by Theo here as it has little to do with the question].
+>
+> BSDi had a similar/same goal of producing something like SunOS/VMS *etc* but
+> supported on commodity hardware.  That solution was to sell it and using
+> the revenues from the support contract, be able to pay people to do that
+> work.  As I said and in some other messages, it is noted that Bill Jolitz
+> wanted something more FOSS.   Truth is BSDi code was 'open source' but it
+> took a $1K license to *get the source from them*.
+>
+> In the end, the real problem was not the infighting between the different
+> BSD camps, but AT&T, who wanted the entire pie.  Clearly, their executives
+> saw anything other than their complete control of the UNIX IP as a threat.
+> Hence the court case, the eventually AT&T/Sun relationship *etc*...
+>
+> Your lack of 'sugar daddy,' really comes back to that.   There were few
+> people at the time that could pay the bills.  Until then DARPA had been
+> it.  I do not know if DARPA wanted out or if another group could have been
+> formed that could take over CSRG.  I did have discussions with Rob over a
+> beer that at least the thought had crossed the BSDi folks mind, that once
+> started; they would apply for a DARPA contract.
+>
+> At the time had blow up, I was a consultant and I personally was
+> considering what I was going to do next and if they had had a real future,
+> the talks with Rob might have gotten more serious.   My wife wanted me to
+> stop being independent if we were to start a family (I would join Locus
+> instead).
+>
+> BTW: I was in an interesting position as I was friends with all of the
+> different sides in the war/original fight.  Like Jolitz, I wanted to see
+> what we now call a 'FOSS' release of BSD.   But like Rob, I knew it was
+> going to take some revenue stream to make it happen/continue the support.
+>   In the end, the AT&T legal mess blew it all up.   BSDi ended up failing
+> and Jordan's work stayed around.
+>
+> BTW: what pays for Linux development these days by number of 'committers
+> salary' is Intel (#1), IBM (#2), then a load of other firms including the
+> different distros.  But for *any* platform to be successful and actually
+> continue to be used in the market, someone has to pay the salaries of some
+> set of professional programmers to do the work.
+>
+> That said when AT&T injoined BSDi and UCB a lot of people (myself
+> included) started to hack on Linux.  But just think if AT&T had actually
+> won the case and courts decided UNIX was allowed to be a trade secret, then
+> Linux and all of the UNIX 'clones' would have been in violation.
+>
+> No matter what flavor of UNIX you like, we are all in debt to UCB and BSDi
+> for settling the IP argument.  The court was clear, the >>ideas<< behind
+> UNIX (*a.k.a.* the intellectual property) came from Ken, Dennis and
+> friends at AT&T and *they did own it.*   But because of the 1956 consent
+> decree that published the ideas and the moment the ideas were published, we
+> all can now >>use<< them.  The provenance of the source code does not
+> relate to the provenance of the idea, so* the source code itself does not
+> define what UNIX is or is not.  *
+>
+> I bring this all up in hopes to try to close this rat hole of Linux, *vs*.
+> *BSD.   Like editors, we all have our own favorites.  That's cool, we don't
+> want one thing to be forced down our throat.  Having a choice is what is
+> good.   And what I value, Larry or Jon may not necessarily like.   Most of
+> us if not all on this list probably want something that approximates Ken
+> and Dennis's original ideas not what IBM, DEC, CDC were trying to make us
+> use in the old days or what Microsoft calls a system today.
+>
+> The discussion of how we got there and what people valued at the time is
+> useful so we can try to remember the history and learn from it; but getting
+> into right/wrong, good/bad, or you could have had this is a tad tiresome;
+> IMO.
+>
+
+--000000000000f8e5c4059c95e96e
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">Thanks=C2=A0Clem.<div dir=3D"auto"><br></div><div dir=3D"=
+auto">One minor clarification.=C2=A0 Jordan and the patchkit work did preda=
+te NetBSD. However, the NetBSD project formed a little before the FreeBSD p=
+roject that grew out of the patchkit days. Jordan didn&#39;t get that movin=
+g until NetBSD made rumblings... it was still a time that you heard a lot o=
+f what was going on by word=C2=A0of mouth, not so much by postings and emai=
+l...</div><div dir=3D"auto"><br></div><div dir=3D"auto">The OpenBSD split w=
+as years later... and a complicated mix of personality conflicts and techni=
+cal differences. But in many ways it was a smaller split since for a long t=
+ime they were almost 100% compatible at the driver level (something you cou=
+ld never really say about net and free).</div><div dir=3D"auto"><br></div><=
+div dir=3D"auto">Warner</div></div><br><div class=3D"gmail_quote"><div dir=
+=3D"ltr" class=3D"gmail_attr">On Mon, Jan 20, 2020, 10:21 AM Clem Cole &lt;=
+<a href=3D"mailto:clemc@ccc.com">clemc@ccc.com</a>&gt; wrote:<br></div><blo=
+ckquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #c=
+cc solid;padding-left:1ex"><div dir=3D"ltr"><div dir=3D"ltr"><div class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font color=
+=3D"#0000ff"><br></font></div></div><font color=3D"#0000ff"><br></font><div=
+ class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr"><font color=3D=
+"#ff0000">On Sun, Jan 19, 2020 at 10:52 PM George Michaelson &lt;<a href=3D=
+"mailto:ggm@algebras.org" target=3D"_blank" rel=3D"noreferrer">ggm@algebras=
+.org</a>&gt; wrote:<br></font></div><blockquote class=3D"gmail_quote" style=
+=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding=
+-left:1ex"><font color=3D"#ff0000">It does me no credit, that I initially r=
+eacted very badly to 386BSD,<br>
+and the initial {Net,Free,Open} situation.</font><br></blockquote><div><div=
+ class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><=
+font color=3D"#0000ff">First, be careful.=C2=A0 =C2=A0What we sometimes cal=
+l 386BSD as a &#39;release&#39; started just as a port of NET2 to the 386 b=
+ased &#39;commodity&#39; hardware platform.=C2=A0 The history is that in th=
+e late 1970s/early 80s Bill Jolitz was working for Nat Semi=C2=A0<span styl=
+e=3D"font-family:Arial,Helvetica,sans-serif">and ported BSD 4.1, to a multi=
+bus based NS16032 board that NS had built, which was similar to the Stanfor=
+d University Network (SUN) terminal what had a 68000.</span>=C2=A0=C2=A0</f=
+ont><span style=3D"color:rgb(0,0,255)">He eventually built a &#39;luggable&=
+#39; using that and updated to the port to 4.2++.=C2=A0 =C2=A0He (and Lynn =
+I believe) started a company to sell that hardware/software solution and fo=
+r whatever reason, it did not really take off.</span></div><div class=3D"gm=
+ail_default" style=3D"font-family:arial,helvetica,sans-serif"><font color=
+=3D"#0000ff"><br></font></div><div class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif"><font color=3D"#0000ff">At some point, he =
+got his hands on a 386based PC (Compaq I think) and started to move his por=
+t over to that system.=C2=A0 =C2=A0A number of people helped him (for insta=
+nce I did a bunch of the AT/disk controller work as I had access to the WD =
+design documents for another=C2=A0consulting gig I had at the time - Bill m=
+entioned this in the articles BTW).</font></div><div class=3D"gmail_default=
+" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">=
+<br></font></div><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif"><font color=3D"#0000ff">Bill and Lynn&#39;s NS16032 and=
+ 386 code went back to the CSRG &#39;masters&#39; - although how and that h=
+appened=C2=A0was never completely clear to me. The SCCS deltas tell at leas=
+t part of the story.=C2=A0 =C2=A0 =C2=A0Bill managed to make a bootable ima=
+ge that mostly installed on a PC/386 as the minicomputer versions did from =
+the formal release.=C2=A0 =C2=A0The ftp area of ucbvax had all of these boo=
+table images available for download such as one for an HP 68K system and I =
+think the DEC VAX and PMAX, the CCG system and a few others IIRC.=C2=A0 As =
+I have said in other messages if you were a UCB licensee=C2=A0you had the p=
+asswords to look/download from that area.=C2=A0 =C2=A0 Bill placed that ver=
+sion in the same ftp area.=C2=A0 The 386 based port went viral at least wit=
+h the UCB licensees.=C2=A0 (In fact, if Linus had known about it, theoretic=
+ally he could have used it also.=C2=A0 =C2=A0His university was licensee, b=
+ut as Larry McVoy likes to point, not all the schools were as free with the=
+ IP, so I will not go down that rathole).</font></div><div class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#00=
+00ff"><br></font></div><div class=3D"gmail_default" style=3D"font-family:ar=
+ial,helvetica,sans-serif"><font color=3D"#0000ff">The bottom line is that m=
+any people (like me on a=C2=A0Wyse386) started with Bill&#39;s original por=
+t; including the BSDi founders.</font></div><div class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br>=
+</font></div><div class=3D"gmail_default" style=3D"font-family:arial,helvet=
+ica,sans-serif"><font color=3D"#0000ff">When Jolitz and BSDi went separate =
+ways, Jolitiz continued to update the CSRG 386 based tarball (to an extent)=
+.=C2=A0 One of the issues was there originally was attempt to keep the diff=
+erent architectural versions of BSD in sync ( to a point and NetBSD does ye=
+t exist).=C2=A0 =C2=A0 A number of people were unhappy and the speed,=C2=A0=
+depth <i>etc</i>. of the 386 version, most notably=C2=A0Jordan Hubbard and =
+FreeBSD was born.=C2=A0 The two biggest issues Jordan wanted to fix, was ea=
+sier install and a bit wider support for more hardware (again I sent Jordan=
+ the changes to FreeBSN 1x for the Wyse and a couple of NCR boxes).=C2=A0 T=
+he NetBSD project would birth from the original ideals of CSRG and trying t=
+o keep everything the same but that&#39;s still in the future.</font></div>=
+<font color=3D"#0000ff"><br></font></div><div><font color=3D"#0000ff"><br><=
+/font></div><div><font color=3D"#0000ff">=C2=A0</font></div><blockquote cla=
+ss=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid =
+rgb(204,204,204);padding-left:1ex">
+<br><font color=3D"#ff0000">
+I found all this &quot;fragmentation&quot; pretty hard to understand. -BSDI=
+ felt<br>
+like it had occupied the space, and I couldn&#39;t entirely understand<br>
+what was going on, or why any of it mattered.</font><br></blockquote><div><=
+div class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif=
+"><font color=3D"#0000ff">See below....</font></div><font color=3D"#0000ff"=
+><br></font></div><div><font color=3D"#0000ff"><br></font></div><div><font =
+color=3D"#0000ff">=C2=A0</font></div><blockquote class=3D"gmail_quote" styl=
+e=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);paddin=
+g-left:1ex"><font color=3D"#ff0000">What I think I missed (didn&#39;t under=
+stand) was how draining support was<br>
+for Berkeley, and in the absence of a sugar daddy</font><br></blockquote><d=
+iv><font color=3D"#0000ff"><span class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif">Herein is the issue that many people on the =
+sidelines missed.</span>=C2=A0<span class=3D"gmail_default" style=3D"font-f=
+amily:arial,helvetica,sans-serif"></span></font></div><div><font color=3D"#=
+0000ff"><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,=
+sans-serif"><br></span></font></div><div><font color=3D"#0000ff"><span clas=
+s=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">CRSG w=
+as a large project and funded a lot of work at=C2=A0UCB in EECS. It never f=
+unded me (I was funded by Tektronix, HP, DEC <i>et al</i>), but that projec=
+t did a fund a number of students.=C2=A0 However, at some point CSRG stoppe=
+d being a research project and started being a support project for DARPA.=
+=C2=A0 There was also a good deal of resentment by some groups in EECS that=
+ were not getting DARPA funding.</span></font></div><div><span class=3D"gma=
+il_default" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D=
+"#0000ff"></font></span></div><div><span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">I&#39;ll not=
+ say if that was good or bad but I will say that it did cause great deal co=
+nsternation at UCB within the department and many people doing more formal =
+research were not happy.=C2=A0 =C2=A0 In the end, the EECS Department=C2=A0=
+mothers and fathers along with the Dean <i>et al</i>, decided to stop/end t=
+he CSRG project.=C2=A0 Many people who were directly or indirectly working =
+on BSD, like Mary Ann and myself, had graduated and had since left.=C2=A0=
+=C2=A0</font></span><font color=3D"#0000ff">Bob Kridle had formed Mt. Xinu<=
+span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-seri=
+f">, Asa Romberger has formed Unisoft,</span></font><span style=3D"color:rg=
+b(0,0,255);font-family:arial,helvetica,sans-serif">=C2=A0Joy had left/was l=
+eaving for Sun, </span><i style=3D"color:rgb(0,0,255);font-family:arial,hel=
+vetica,sans-serif">etc</i><span style=3D"color:rgb(0,0,255);font-family:ari=
+al,helvetica,sans-serif">.=C2=A0 =C2=A0 So the question remained what to do=
+ with CSRG.=C2=A0 =C2=A0As to what everyone would do, became every person f=
+or her/himself and as we know some of the folks, along with a few folks fro=
+m the USENIX community formed BSDi.</span></div><div><span class=3D"gmail_d=
+efault" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#00=
+00ff"><br></font></span></div><div><span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#0000ff">As was noted=
+ elsewhere, NetBSD would eventually be formed by volunteers to keep the dif=
+ferent ports alive (in fact much of the efforts was from folks not at UCB),=
+ but that was still in the offing.=C2=A0 =C2=A0Remember, while CSRG itself =
+was not a research project, a lot of people around the world were using the=
+ BSD code base for their own research.=C2=A0 The whole idea of NetBSD was t=
+o create a uniform platform that people could compare things.=C2=A0 So, the=
+ question of how that was to come about or do any work on BSD if DARPA was =
+not paying the bills, was still an open one.=C2=A0 But, the idea that would=
+ eventually create FreeBSD, was supporting a pure commodity <i>solution for=
+ day-to-day use,=C2=A0not as a research=C2=A0platform</i>. [I&#39;ll leave =
+off the later OpenBSD/NetBSD fork by Theo here as it has little to do with =
+the question].</font></span></div><div><span class=3D"gmail_default" style=
+=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></f=
+ont></span></div><div><span class=3D"gmail_default" style=3D"font-family:ar=
+ial,helvetica,sans-serif"><font color=3D"#0000ff">BSDi had a similar/same g=
+oal of producing something like SunOS/VMS <i>etc</i>=C2=A0but supported on =
+commodity hardware.=C2=A0 That solution was to sell it and using the revenu=
+es from the support contract, be able to pay people to do that work.=C2=A0 =
+As I said and in some other messages, it is noted that=C2=A0Bill Jolitz wan=
+ted something more FOSS.=C2=A0 =C2=A0Truth is BSDi code was &#39;open sourc=
+e&#39; but it took a $1K license to <i>get the source from them</i>.</font>=
+</span></div><div><span class=3D"gmail_default" style=3D"font-family:arial,=
+helvetica,sans-serif"><font color=3D"#0000ff"><br></font></span></div><div>=
+<span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-ser=
+if"><font color=3D"#0000ff">In the end, the=C2=A0real problem was not the i=
+nfighting between the different BSD camps, but AT&amp;T, who wanted the ent=
+ire pie.=C2=A0 Clearly, their executives saw anything other than their comp=
+lete control of the UNIX IP as a threat.=C2=A0 Hence the court case, the ev=
+entually=C2=A0AT&amp;T/Sun relationship <i>etc</i>...</font></span></div><d=
+iv><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-=
+serif"><font color=3D"#0000ff"><br></font></span></div><div><span class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font color=
+=3D"#0000ff">Your lack of &#39;sugar daddy,&#39; really comes back to that.=
+=C2=A0 =C2=A0There were few people at the time that could pay the bills.=C2=
+=A0 Until then DARPA had been it.=C2=A0 I do not know if DARPA wanted out o=
+r if another group could have been formed that could take over CSRG.=C2=A0 =
+I did have discussions with Rob over a beer that at least the thought had c=
+rossed the BSDi folks mind, that once started; they would apply for a DARPA=
+ contract.</font></span></div><div><span class=3D"gmail_default" style=3D"f=
+ont-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font><=
+/span></div><div><span class=3D"gmail_default" style=3D"font-family:arial,h=
+elvetica,sans-serif"><font color=3D"#0000ff">At the time had=C2=A0blow up, =
+I was a consultant and I personally was considering what I was going to do =
+next and if they had had a real future, the talks with Rob might have gotte=
+n more=C2=A0serious.=C2=A0 =C2=A0My wife wanted me to stop being independen=
+t if we were to start a family (I would join Locus instead).</font></span><=
+/div><div><span class=3D"gmail_default" style=3D"font-family:arial,helvetic=
+a,sans-serif"><font color=3D"#0000ff"><br></font></span></div><div><span cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><fon=
+t color=3D"#0000ff">BTW: I was in an interesting position as I was friends =
+with all of the different sides in the war/original fight.=C2=A0 Like Jolit=
+z, I wanted to see what we now call a &#39;FOSS&#39; release of BSD.=C2=A0 =
+=C2=A0But like Rob, I knew it was going to take some revenue stream to make=
+ it happen/continue the support.=C2=A0 =C2=A0 In the end, the AT&amp;T lega=
+l mess blew it all up.=C2=A0 =C2=A0BSDi ended up failing and Jordan&#39;s w=
+ork stayed around.</font></span></div><div><span class=3D"gmail_default" st=
+yle=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br>=
+</font></span></div><div><span class=3D"gmail_default" style=3D"font-family=
+:arial,helvetica,sans-serif"><font color=3D"#0000ff">BTW: what pays for Lin=
+ux development these days by number of &#39;committers salary&#39; is Intel=
+ (#1), IBM (#2), then a load of other firms including the different distros=
+.=C2=A0 But for <i>any</i> platform to be successful=C2=A0and actually cont=
+inue to be used in the market, someone has to pay the salaries of some set =
+of professional programmers to do the work.</font></span></div><div><span c=
+lass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><fo=
+nt color=3D"#0000ff"><br></font></span></div><div><span class=3D"gmail_defa=
+ult" style=3D"font-family:arial,helvetica,sans-serif"><font color=3D"#0000f=
+f">That said when AT&amp;T injoined=C2=A0BSDi and UCB a lot of people (myse=
+lf included) started to hack on Linux.=C2=A0 But just think if AT&amp;T had=
+ actually won the case and courts decided UNIX was allowed to be a trade se=
+cret, then Linux and all of the UNIX &#39;clones&#39; would have been in vi=
+olation.</font></span></div><div><span class=3D"gmail_default" style=3D"fon=
+t-family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></s=
+pan></div><div><span class=3D"gmail_default" style=3D"font-family:arial,hel=
+vetica,sans-serif"><font color=3D"#0000ff">No matter what flavor of UNIX yo=
+u like, we are all in debt to UCB and BSDi for settling the IP argument.=C2=
+=A0 The court was clear, the &gt;&gt;ideas&lt;&lt; behind UNIX (<i>a.k.a.</=
+i> the intellectual property) came from Ken, Dennis and friends at AT&amp;T=
+ and <i>they did own it.</i>=C2=A0 =C2=A0But because of the 1956 consent de=
+cree that published the ideas and the moment the ideas were published, we a=
+ll can now &gt;&gt;use&lt;&lt; them.=C2=A0 The provenance of the source cod=
+e does not relate to the provenance of the idea, so<i>=C2=A0the source code=
+ itself does not define what UNIX is or is not.=C2=A0=C2=A0</i></font></spa=
+n></div><div><span class=3D"gmail_default" style=3D"font-family:arial,helve=
+tica,sans-serif"><font color=3D"#0000ff"><i><br></i></font></span></div><di=
+v><span class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-s=
+erif"><font color=3D"#0000ff">I bring this all up in hopes to try to close =
+this rat hole of Linux, <i>vs</i>. *BSD.=C2=A0 =C2=A0Like editors, we all h=
+ave our own favorites.=C2=A0 That&#39;s cool, we don&#39;t want one thing t=
+o be forced down our throat.=C2=A0 Having a choice is what is good.=C2=A0 =
+=C2=A0And what I value, Larry or Jon may not necessarily=C2=A0like.=C2=A0 =
+=C2=A0Most of us if not all on this list probably want something that appro=
+ximates Ken and Dennis&#39;s original ideas not what IBM, DEC, CDC were try=
+ing to make us use in the old days or what Microsoft calls a system today.=
+=C2=A0</font></span></div><div><span class=3D"gmail_default" style=3D"font-=
+family:arial,helvetica,sans-serif"><font color=3D"#0000ff"><br></font></spa=
+n></div><div><span class=3D"gmail_default" style=3D"font-family:arial,helve=
+tica,sans-serif"><font color=3D"#0000ff">The discussion of how we got there=
+ and what people valued at the time is useful so we can try to remember the=
+ history and learn from it; but getting into right/wrong, good/bad, or you =
+could have had this is a tad tiresome; IMO.=C2=A0=C2=A0</font></span></div>=
+</div></div>
+</blockquote></div>
+
+--000000000000f8e5c4059c95e96e--

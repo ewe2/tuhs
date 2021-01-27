@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 4515 invoked from network); 10 Oct 2020 23:30:52 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 10 Oct 2020 23:30:52 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E37C893D6D; Sun, 11 Oct 2020 09:30:40 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D909693D28;
+	Sun, 11 Oct 2020 09:30:00 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3F81793D28; Sun, 11 Oct 2020 09:29:56 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 958E593D1B
+ for <tuhs@minnie.tuhs.org>; Sun, 11 Oct 2020 09:29:49 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 5F33818C0A6; Sat, 10 Oct 2020 19:29:48 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20201010232948.5F33818C0A6@mercury.lcs.mit.edu>
+Date: Sat, 10 Oct 2020 19:29:48 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > I noticed a place where I used R0 as a temp ... and was being bashed.
+    > So I fixed it, and now the shell starts OK, but attempting to do any
+    > command (e.g. "echo foo"), things hang
+
+Well, I had 'fixed' it; it turned out my 'fix' had a bug. :-( (The code I had
+to change for the /03 there was pushing the old PS, and that and the temp I
+had to push got intermangled.)
+
+Anyway, with that fixed, the /03 Mini-Unix works now. The old user command
+binaries seem to work OK on the /03; not that I've tried the all, but the ones
+I have tried (including the C compiler) all worked. They all should all work
+(there's nothing in user code that's model-dependent). I have tweaked the
+shell (to allow 'cd') and init (to get rid of the annoying long rights
+message), but that's all.
+
+The latest, greatest mch.s is uploaded:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/Mini/mch.s
+
+Although a couple of files (bio.c, clock.c, slp.c, and tty.c) had minor
+changes (to remove direct rerferences to the PS; they now call getps() and
+putps() for that), and main.c has minor changes to work when there's no KW11
+or switch register, really the only file with significant changes for the /03
+is mch.s. It's the only one where the object code is model-dependent; all the
+other changed ones use the same object code for all CPU models.
+
+I'll put up a Web page with details, links to sources, etc, 'soon'.
+
+
+A couple of other things.
+
+Mini-Unix has removed 'raw' devices (not sure why, probably seemed un-needed),
+so other disk drivers (e.g. the RL11 driver) aren't straight drop-ins. Minimal
+tweaks needed, though; just remove the read and write routines, I think.
+
+If there was a real use for 'raw' devices, they could probably be added back,
+but physio() would have to be modified (simplified). Not sure if anything else
+special would be needed; the process can't be swapped while raw I/O is
+ongoing, and so on Mini-Unix no other process could run. Probably OK, but
+needs to be checked.
+
+I recommend that everyone trying to run Mini-Unix on a hardware /03 invest in
+a KEF11 chip. (There are a few on eBait.) That way, you can leave the EIS
+emulator out of the build, which will save some space, and allow more room for
+device drivers. I added kernel printf() into the build, to help with
+debugging, but it can be removed to save space.
+
+You can change the system to use more room for the kernel (see the Mini-Unix
+docs), but that involves re-linking _every single user command_, including the
+shell and init. Not recommended.
+
+      Noel

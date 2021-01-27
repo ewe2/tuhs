@@ -1,0 +1,162 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=LOTS_OF_MONEY,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 26121 invoked from network); 22 May 2020 20:40:17 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 May 2020 20:40:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5AD4B9C91E; Sat, 23 May 2020 06:40:16 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id F40EA9C194;
+	Sat, 23 May 2020 06:39:49 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 718719C194; Sat, 23 May 2020 06:39:47 +1000 (AEST)
+Received: from hop.toad.com (75-101-100-43.dsl.static.fusionbroadband.com
+ [75.101.100.43])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 100499C187
+ for <tuhs@tuhs.org>; Sat, 23 May 2020 06:39:46 +1000 (AEST)
+Received: from hop.toad.com (localhost [127.0.0.1])
+ by hop.toad.com (8.12.9/8.12.9) with ESMTP id 04MKdPm0028539;
+ Fri, 22 May 2020 13:39:25 -0700
+To: arnold@skeeve.com
+In-reply-to: <202005221109.04MB92D3016090@freefriends.org> 
+References: <20200521182817.08C0318C093@mercury.lcs.mit.edu>
+ <m2o8qg2vx3.fsf@thuvia.hamartun.priv.no>
+ <CAEuQd1D2S2VOUn2dFApypYZsZQe+qm_0j8XM=wGzUEjeqi-+YQ@mail.gmail.com>
+ <202005221109.04MB92D3016090@freefriends.org>
+Comments: In-reply-to arnold@skeeve.com
+ message dated "Fri, 22 May 2020 05:09:02 -0600."
+Date: Fri, 22 May 2020 13:39:25 -0700
+Message-ID: <28538.1590179965@hop.toad.com>
+From: John Gilmore <gnu@toad.com>
+Subject: Re: [TUHS] History of popularity of C (GCC/Cygnus)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu, tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Tyler Adams <coppero1237@gmail.com> wrote:
+> > Is it because adding
+> > a backend to gcc was free, C was already well known, and C was sufficiently
+> > performant?
+
+arnold@skeeve.com wrote:
+> Cygnus Solutions (Hi John!) had a lot to do with this. They specialized
+> in porting GCC to different processors used in embedded systems and
+> provided support.
+
+First things first.  When figuring out what happened and what became
+popular, it's important to look at where money was flowing.  Economics
+will tell you things about systems that you can't learn any other way.
+
+Second, until the embedded market included 32-bit processors, gcc was
+unknown in it.  32-bit was way less than 1% of the embedded market; only
+in multi-thousand dollar things like laser printers (Adobe/Apple
+LaserWriter) and network switches (3Com/Cisco/etc).  Cygnus ended up
+with lots of those companies as support customers, because they were
+sick of porting their code through a different compiler for each new
+generation of hardware platforms.  But we had zero visibility into the
+vast majority of the embedded market.  We went there because even our
+tiny niche of it was huge, many times the size of the market for native
+compilers, and with much more diversity of customers.
+
+Early on, GCC had the slight advantage that because it was free (as in
+both beer and speech) and had an email community of maintainers, many
+people had started ports to different architectures.  Only a few of
+those were production-quality, but they each offered at least a starting
+point, and attracted interested users who might pay us to make them
+real.
+
+Cygnus was able to deliver production compilers for each new
+architecture for significantly less than the other companies building
+compilers for embedded systems.  I think that had more to do with our
+pricing strategy than the actual cost of modifying the compiler.  Our
+main competitors were half a dozen small, fat, lazy companies who
+charged $10,000 PER SEAT for cross-compilers and charged the chipmaker
+$1,000,000 and frequently more, to do a port to their latest chip.
+Cygnus charged chipmakers $500K for a brand new architecture, and $0 per
+seat, which caused us to eat our competitors' lunch over our first 3 to
+5 years.  Then we hired someone who knew more about pricing, and raised
+our own port price to a larger fraction of what the market would bear,
+to get better margins while still winning deals.
+
+We built the first 64-bit ports of GCC and the tools, for the SPARC when
+SPARC-64 was still secret, and later for other architectures.  (Sun's
+hardware diagnostics group funded our work.  They needed to be able to
+compile their chip and system tests, a full year before Sun's compiler
+group could deliver 64-bit compilers for customers.)
+
+A lot of what got done to make GCC a standard, production worthy
+compiler had little to do with the code generation.  For example, many
+customers really wanted cross-compilers hosted on DOS and Windows, as
+well as on various UNIX machines, so we ended up hiring the genius who
+created djgpp, DJ Delorie, and making THAT into a commercial quality
+supported product.  (We also hired the guy who made GCC run in the old
+MacOS development environment (Stan Shebs) and one of the senior
+developers and distributors for free Amiga applications (Fred Fish).)
+We had to vastly improve the testing infrastructure for the compiler and
+tools.  We designed and built DejaGnu (Rob Savoye's work), and with each
+bug report, we added to a growingly serious free C and C++ compiler test
+suite.  We automated enough of our build process that we could compare
+the code produced by different host systems for the same target
+platform.  (The "reproducible builds" teams are now trying to do that
+for the whole Linux distribution code base.)  DejaGnu actually ran our
+test suite on multiple target platforms with different target
+architectures, downloading the binaries over serial ports and jumping to
+them, and compared the tests' output so we could fix any discrepancies
+that were target-dependent.  We hired full-time writers (initially
+Roland Pesch, who had been a serious programmer earlier in life) to
+write real manuals and other documentation.  We wrote an email-based bug
+tracking system (PRMS), and the first working over-the-Internet version
+control system (remote cvs).  Our customers all used different object
+file formats, so we wrote new code for format independence (the BFD
+library) in the assembler, linker, size, nm and ar and other tools
+(e.g. we created objdump and objcopy).  Ultimately Steve Chamberlain
+wrote us and GNU a brand-new linker which had the flexibility needed for
+building embedded system binaries and putting code and data wherever the
+hardware needed it to go.
+
+We learned how to hire and manage remote employees, which meant we were
+able to hire talented gcc and tools hackers from around the country and
+the world, who jumped at the chance to turn their beloved hobby into a
+full-time paying gig.  We started our own ISP in order to get ourselves
+good, cheap commercial quality Internet access, and so we could teach
+our remote employees how to buy and install solid 56kbit/sec Frame Relay
+connections rather than flaky dialup access.
+
+And because we didn't control the master source code for gcc, one of our
+senior compiler hackers, Jim Wilson, spent a huge fraction of his time
+merging our changes upstream into FSF GCC, and merging their changes
+downstream into our product, keeping the ecosystem in sync.  We handled
+that overhead for significant other tools by taking up the whole work of
+maintenance and release engineering -- for example, I became FSF's
+maintainer for gdb.  I would make an FSF GDB release two weeks before
+Cygnus would make its own integrated toolchain releases.  If bug reports
+didn't start streaming in within days from the free software community,
+we knew we had made a solid release; and we had time to patch anything
+that turned up, before our customers got it from us on cartridge tapes.
+
+It wasn't just a compiler, it was a whole ecosystem that had to be built
+or improved.  About half of our employees were software engineers, so by
+the time our revenues grew from <$1M/year to $25M a year, we were
+spending about $12M every year improving the free software ecosystem.
+And because we avoided venture capital for six years, and shared the
+stock ownership widely among the employees, when we got lucky after 10
+years and were acquired by the second free software company to go public
+(the first was VA Linux, the second Red Hat), all those hackers became
+millionaires.  A case of doing well by doing good.
+
+	John
+	

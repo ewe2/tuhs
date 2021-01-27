@@ -1,0 +1,83 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26412 invoked from network); 27 Sep 2020 20:51:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 27 Sep 2020 20:51:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E73EF9CEFE; Mon, 28 Sep 2020 06:51:06 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7B69D9CEBF;
+	Mon, 28 Sep 2020 06:50:27 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EE48B9CEBF; Mon, 28 Sep 2020 06:50:23 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 55A059CEB9
+ for <tuhs@minnie.tuhs.org>; Mon, 28 Sep 2020 06:50:23 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 2D91918C0C8; Sun, 27 Sep 2020 16:50:22 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20200927205022.2D91918C0C8@mercury.lcs.mit.edu>
+Date: Sun, 27 Sep 2020 16:50:22 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Fwd: Choice of Unix for 11/03 and 11/23+ Systems
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > I also have a DEC 256KB board, but I doubt I could use it on the
+    > '03.
+
+Yes, DEC 256KB boards are what's called Q22, and those don't seem to work with
+LSI-11's; not even CPU ODT works. I just tried a 256KB MSV11-L with an LSI-11,
+and it definitely doesn't work; the MSV11-P is definitely a Q22 board, and so
+probably also won't work.
+
+What the Q22 means is that early in the lifetime of the QBUS, it only had 18
+address line - so-called Q18. (Technially the LII-11 used only 16 address lines,
+so it's actually Q16.) DEC latter snarfed some of the 'unused' pins, and
+made them QDAL18-21. So boards that use those pins for QDAL18-21 are 'Q22'
+boards.
+
+My theory on what the problem is is that the LSI-11 uses some of those pins
+for other things - I think the 'run' light, IIRC. So that confuses Q22 memory.
+If one tries to use one with an LSI-11, the machine is totally dead - not even
+ODT. It doesn't do any harm, though; unplug the Q22 memory, and plug in a Q18
+card like an MSV11-D, and it'll be fine.
+
+If you need memory for the LSI-11, MSV11-D boards are pretty common on eBait,
+for not much. They tend to be flaky, though; sometimes they come back to life
+if you leave them sit for a bit after you plug them in.
+
+  > I believe the [memory] board is non-DEC.
+
+Well, if it's Q22 it won't work either. Both that and the DEC board should
+work in the /23, though. (If you have the part number on the memory chips, a
+little arithmetic should give you the board size. 256K and up are generallly
+Q22; if you have a manual for that card it might say.)
+
+
+I'm still working with Mini-Unix; it's very fragile. When I got it running,
+the first thing I tried to do was changle the line editing characters (since
+my normal ones are burned into ROM). Alas, in stock V6, DEL is hard-wired to
+be 'interrupt process', so I can't just 'stty [mumble]', I have to rebuild the
+kernel to change that. Not a problem, necessarily - but I edited tty.h and
+said 'cc -c tty.c', and it crashed and re-started - and roached the disk. So
+I'm still trying to make progress. I might have mis-configured the simulator,
+I'll see.
+
+     Noel

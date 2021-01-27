@@ -1,0 +1,89 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.2 (2018-09-13) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.2
+Received: (qmail 10445 invoked from network); 11 Apr 2020 15:40:27 -0000
+Received-SPF:  pass (minnie.tuhs.org: domain of minnie.tuhs.org
+  designates 45.79.103.53 as permitted sender)
+  receiver=inbox.vuxu.org; client-ip=45.79.103.53
+  envelope-from=<tuhs-bounces@minnie.tuhs.org>
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with UTF8ESMTPZ; 11 Apr 2020 15:40:27 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 77CD89C192; Sun, 12 Apr 2020 01:40:25 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B8C0494489;
+	Sun, 12 Apr 2020 01:40:09 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5A49394489; Sun, 12 Apr 2020 01:40:06 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id CEA8994486
+ for <tuhs@tuhs.org>; Sun, 12 Apr 2020 01:40:03 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id 910A04422F; Sat, 11 Apr 2020 11:38:44 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20200411153844.910A04422F@lignose.oclsc.org>
+Date: Sat, 11 Apr 2020 11:38:44 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: [TUHS] V8, V9 and V10 now in the "Unix Tree"
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Minor corrections to the material in Paul's text.
+This is meant to be a laundry-list of facts, not a
+suggested set of words; I'm feeling too prolix this
+morning to produce the latter, and figure those on the
+list may be interested in the petty details anyway.
+
+The initial user-mode environment was a mix of 32V,
+subsequent work within 1127, and imports from 4.1BSD.
+I don't know the exact heritage: whether it was 1127's
+work with 4.1BSD stuff added or vice-versa.
+
+The kernel was a clean break, however: 4.1xBSD for some
+value of x (probably 4.1a but I don't remember which)
+with Research changes.  By the time of V8, that means:
+-- All trace of BSD's original network interfaces removed,
+except that select(2) remained in a slightly-different
+form.
+-- Stream I/O system added; all communication-device
+drivers (serial ports, Ethernet, Datakit) changed to
+work with streams.  Pipes were streams.
+-- File system switch added, supporting Killian's /proc
+and Weinberger's first-generation (neta) network file
+system.
+-- Berkeley FFS replaced by Weinberger's bitmapped
+file system: essentially the V7 file system except
+the free list was a bitmap and the blocksize was 4KiB.
+Hacky implementation, depending on a flag bit in the
+minor device number; didn't use the file system switch.
+Old 512-byte-block file systems had to be supported
+partly to ease the changeover, partly because the first
+version had a limited bitmap size so file systems larger
+than about 120MiB wouldn't work.  This limit was removed
+later.  (In retrospect I'm surprised I didn't then insist
+on converting any remaining old-format file systems in
+our domain and then removing the old-format code from
+the kernel, since user-mode tools--including a user-mode
+file server!--could be used to access any old disks
+discovered later.)
+
+For the purposes of Paul's note it probably suffices
+just to say that there was a restart with a 4.1-series
+kernel with changes as he describes, except also the
+new file system format.
+
+Norman Wilson
+Toronto ON

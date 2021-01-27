@@ -1,0 +1,137 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18599 invoked from network); 29 Jun 2020 15:14:58 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Jun 2020 15:14:58 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6CC209C652; Tue, 30 Jun 2020 01:14:54 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2C6769C190;
+	Tue, 30 Jun 2020 01:14:05 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 63A469C190; Tue, 30 Jun 2020 01:14:03 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 16F6C945A4
+ for <tuhs@minnie.tuhs.org>; Tue, 30 Jun 2020 01:14:03 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 7FEB535E136; Mon, 29 Jun 2020 08:14:02 -0700 (PDT)
+Date: Mon, 29 Jun 2020 08:14:02 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Paul Ruizendaal <pnr@planet.nl>
+Message-ID: <20200629151402.GE16252@mcvoy.com>
+References: <888A9360-A6E0-4EE0-84A5-8ADD478807E1@planet.nl>
+ <20200629144531.GD16252@mcvoy.com>
+ <294D0B70-CDBB-41FE-8F3D-035562863D44@planet.nl>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <294D0B70-CDBB-41FE-8F3D-035562863D44@planet.nl>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] VFS prior to 1984
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Jun 29, 2020 at 04:53:50PM +0200, Paul Ruizendaal wrote:
+> 
+> > On 29 Jun 2020, at 16:45, Larry McVoy <lm@mcvoy.com> wrote:
+> > 
+> > On Mon, Jun 29, 2020 at 11:11:17AM +0200, Paul Ruizendaal wrote:
+> >> As several people have observed in this topic, indeed there appears to be a close relationship between a device switch and a file system switch.
+> > 
+> > Yep.  If you think in objects, they are both objects with a set of methods.
+> > Pretty much two instances of the same idea.
+> 
+> Phrased that way all OO programs have a close relationship between them. Maybe: "they are both rather similar objects with a rather similar set of methods"?
+
+They are two different classes, similar, but not the same.  It's really
+4 classes, vfs, vnode for FS and block/char for devices.  This is from
+SunOS 4.1.1 that I happened to have an install image sitting around.
+Took me forever to find the device definitions, I resorted to
+
+find . -type f -name '*.h' -print | xargs grep strategy
+
+It's in include/sys/conf.h because, well, that's obvious, right?
+
+struct vfsops {
+        int     (*vfs_mount)();         /* mount file system */
+        int     (*vfs_unmount)();       /* unmount file system */
+        int     (*vfs_root)();          /* get root vnode */
+        int     (*vfs_statfs)();        /* get fs statistics */
+        int     (*vfs_sync)();          /* flush fs buffers */
+        int     (*vfs_vget)();          /* get vnode from fid */
+        int     (*vfs_mountroot)();     /* mount the root filesystem */
+        int     (*vfs_swapvp)();        /* return vnode for swap */
+};
+
+struct vnodeops {
+        int     (*vn_open)();
+        int     (*vn_close)();
+        int     (*vn_rdwr)();
+        int     (*vn_ioctl)();
+        int     (*vn_select)();
+        int     (*vn_getattr)();
+        int     (*vn_setattr)();
+        int     (*vn_access)();
+        int     (*vn_lookup)();
+        int     (*vn_create)();
+        int     (*vn_remove)();
+        int     (*vn_link)();
+        int     (*vn_rename)();
+        int     (*vn_mkdir)();
+        int     (*vn_rmdir)();
+        int     (*vn_readdir)();
+        int     (*vn_symlink)();
+        int     (*vn_readlink)();
+        int     (*vn_fsync)();
+        int     (*vn_inactive)();
+        int     (*vn_lockctl)();
+        int     (*vn_fid)();
+        int     (*vn_getpage)();
+        int     (*vn_putpage)();
+        int     (*vn_map)();
+        int     (*vn_dump)();
+        int     (*vn_cmp)();
+        int     (*vn_realvp)();
+        int     (*vn_cntl)();
+};
+
+/* two different device classes, block and char */
+struct bdevsw {
+        int     (*d_open)();
+        int     (*d_close)();
+        int     (*d_strategy)();
+        int     (*d_dump)();
+        int     (*d_psize)();
+        int     d_flags;
+};
+
+struct cdevsw {
+        int     (*d_open)();
+        int     (*d_close)();
+        int     (*d_read)();
+        int     (*d_write)();
+        int     (*d_ioctl)();
+        int     (*d_reset)();
+        int     (*d_select)();
+        int     (*d_mmap)();
+        struct  streamtab *d_str;
+        int     (*d_segmap)();
+};
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
