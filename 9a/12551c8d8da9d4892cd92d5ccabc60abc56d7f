@@ -1,0 +1,70 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 27771 invoked from network); 5 Feb 2021 14:19:02 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 5 Feb 2021 14:19:02 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 922FF9C7C8; Sat,  6 Feb 2021 00:18:57 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8FEF79BA45;
+	Sat,  6 Feb 2021 00:18:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2B2029BA45; Sat,  6 Feb 2021 00:18:22 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E41829BA3F
+ for <tuhs@minnie.tuhs.org>; Sat,  6 Feb 2021 00:18:20 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 68E1335E2B1; Fri,  5 Feb 2021 06:18:20 -0800 (PST)
+Date: Fri, 5 Feb 2021 06:18:20 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Bakul Shah <bakul@iitbombay.org>
+Message-ID: <20210205141820.GO13701@mcvoy.com>
+References: <20210205003315.GK13701@mcvoy.com>
+ <26D923CF-5319-4207-BA28-6EFA0E3BB1F8@iitbombay.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <26D923CF-5319-4207-BA28-6EFA0E3BB1F8@iitbombay.org>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] FreeBSD behind the times? (was: Favorite unix design
+ principles?)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Feb 04, 2021 at 09:17:54PM -0800, Bakul Shah wrote:
+> On Feb 4, 2021, at 4:33 PM, Larry McVoy <lm@mcvoy.com> wrote:
+> > 
+> > Ignoring the page cache and make their own cache has big problems.
+> > You can mmap() ZFS files and doing so means that when a page is referenced
+> > it is copied from the ZFS cache to the page cache.  That creates a
+> > coherency problem, I can write via the mapping and I can write via
+> > write(2) and now you have two copies of the data that don't match,
+> > that's pretty much OS no-no #1.
+> 
+> Write(2)ing to a mapped page sounds pretty dodgy. Likely to get you
+> in trouble in any case. Similarly read(2)ing. 
+
+The entire point of the SunOS 4.0 VM system was that the page you
+saw via mmap(2) is the exact same page you saw via read(2).  It's
+the page cache, it has page sized chunks of memory that cache 
+file,offset pairs.
+
+There is one, and only one, copy of the truth.  Doesn't matter how
+you get at it, there is only one "it".
+
+ZFS broke that contract and that was a step backwards in terms of
+OS design.
