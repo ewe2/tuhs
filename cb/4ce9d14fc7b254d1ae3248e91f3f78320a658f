@@ -1,0 +1,100 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 2127 invoked from network); 6 Feb 2021 00:32:27 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Feb 2021 00:32:27 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A820C9BA63; Sat,  6 Feb 2021 10:32:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A20DA9BA45;
+	Sat,  6 Feb 2021 10:31:56 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B78A49BA45; Sat,  6 Feb 2021 10:31:52 +1000 (AEST)
+X-Greylist: delayed 623 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 06 Feb 2021 10:31:51 AEST
+Received: from anduin.eldar.org (anduin.eldar.org [24.106.248.90])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6178C9BA3F
+ for <tuhs@tuhs.org>; Sat,  6 Feb 2021 10:31:51 +1000 (AEST)
+Received: from anduin.eldar.org (IDENT:brad@localhost [127.0.0.1])
+ by anduin.eldar.org (8.15.2/8.13.8) with ESMTPS id 1160L9TR028235
+ (version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+ Fri, 5 Feb 2021 19:21:09 -0500 (EST)
+Received: (from brad@localhost)
+ by anduin.eldar.org (8.15.2/8.13.8/Submit) id 1160L8RQ007700;
+ Fri, 5 Feb 2021 19:21:08 -0500 (EST)
+From: Brad Spencer <brad@anduin.eldar.org>
+To: Dave Horsfall <dave@horsfall.org>
+In-Reply-To: <alpine.BSF.2.21.9999.2102060736590.70858@aneurin.horsfall.org>
+ (message from Dave Horsfall on Sat, 6 Feb 2021 07:50:17 +1100 (EST))
+Date: Fri, 05 Feb 2021 19:21:08 -0500
+Message-ID: <xon8s826o7f.fsf@anduin.eldar.org>
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.4.3
+ (anduin.eldar.org [127.0.0.1]); Fri, 05 Feb 2021 19:21:10 -0500 (EST)
+Subject: Re: [TUHS] FreeBSD behind the times? (was: Favorite unix design
+ principles?)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Dave Horsfall <dave@horsfall.org> writes:
+
+> On Thu, 4 Feb 2021, Will Senn wrote:
+>
+>> ZFS needn't be compressed, and I don't generally do compression or 
+>> encryption unless required by law, so I can't speak from personal 
+>> experience on those use cases (others, far more experienced can). I do 
+>> know that it's truly a pain to recover from issues with either.
+>
+> [...]
+>
+> Thanks; I'd heard that ZFS was a compressed file system, so I stopped 
+> right there (I had lots of experience in recovering from corrupted RK05s, 
+> and didn't need any more trouble).
+
+[snip]
+
+I have some real world experience with ZFS and bad blocks.  As mentioned
+by others, compression is not required, but it would not matter too
+much.  ZFS is somewhat odd in that you can mount and use a damaged
+filesystem without too much trouble and recover anything possible.  A
+real example (and to keep it a TUHS topic), we had an older Solaris 10
+Sparc at the $DAYJOB about two years ago that developed bad blocks on
+the drive (ZFS detected this for us).  Not a surprise given the age of
+the system, being 6 to 8 years old at the time, we replaced the drive
+without issue and started a re-silver (ZFS's version of fsck and raid
+rebuild) and during that re-silver another drive developed block errors.
+This was a RAIDZ1 set up, so having two drives go out at the same time
+would cause something to be lost.  If it were another RAID variant, it
+would probably have been fatal.  What ZFS did was told us exactly which
+file was effected by the bad block and the system kept going, no
+unmounts, reboots or down time.  We replaced the second drive and the
+only problem we had was a single lost file.  Compression would not have
+changed this situation much, except perhaps making the problem a bit
+bigger, we may have lost two files or something.  I have another example
+with a Sun NFS appliance that runs under the covers Solaris 11 that
+developed multiple drive fails.  In the end, we estimated that around
+40% or so of the multi terabyte filesystem was damaged.  It was possible
+to still use the appliance and we were able to get a lot off of it as it
+continued to function as best as it could you just could not access the
+files that had bad blocks in them.  ZFS has honestly been amazing in the
+face of the problems I have seen.
+
+
+
+-- 
+Brad Spencer - brad@anduin.eldar.org - KC8VKS - http://anduin.eldar.org
