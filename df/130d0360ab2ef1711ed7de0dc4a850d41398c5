@@ -1,0 +1,111 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23718 invoked from network); 9 Feb 2021 05:30:36 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 9 Feb 2021 05:30:36 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E509C9BA51; Tue,  9 Feb 2021 15:30:32 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 379629BA43;
+	Tue,  9 Feb 2021 15:30:09 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A394C9BA43; Tue,  9 Feb 2021 15:30:04 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 98A3F9BA42
+ for <tuhs@minnie.tuhs.org>; Tue,  9 Feb 2021 15:30:02 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1195Tw9e017743
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 9 Feb 2021 00:29:58 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 200F415C39D8; Tue,  9 Feb 2021 00:29:58 -0500 (EST)
+Date: Tue, 9 Feb 2021 00:29:58 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: M Douglas McIlroy <m.douglas.mcilroy@dartmouth.edu>
+Message-ID: <YCId1oKS5AJwKCkU@mit.edu>
+References: <CAKH6PiU4ZLEU25UHw=gryTFMBGeH40DLj333zG1WvBHO1BZsFg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKH6PiU4ZLEU25UHw=gryTFMBGeH40DLj333zG1WvBHO1BZsFg@mail.gmail.com>
+Subject: Re: [TUHS] Macs and future unix derivatives
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Feb 08, 2021 at 10:58:08PM -0500, M Douglas McIlroy wrote:
+> > Do they *really* want something which is just V7 Unix, with nothing else?
+> > No TCP/IP, no hot-plug USB support?  No web browsing?
+> 
+> > Oh, you wanted more than that?  Feature bloat!  Feature bloat!
+> > Feature bloat!   Shame!  Shame!   Shame!
+> 
+> % ls /usr/share/man/man2|wc
+>     495     495    7230
+> % ls /bin|wc
+>    2809    2809   30468
+> 
+> How many of roughly 500 system calls (to say nothing of uncounted
+> ioctl's) do you think are necessary for writing those few crucial
+> capabilities that distinguish Linux from v7? There is
+> undeniably bloat, but only a sliver of it contributes to the
+> distinctive utility of today's systems.
+
+Well, let's take a look at those system calls.  They fall into a
+number of major categories:
+
+*) BSD innovations
+  *) BSD socket interfaces (so if you want TCP/IP... is it bloat?)
+  *) BSD job control
+  *) BSD effective id and its extensions
+  *) BSD groups
+*) New versions to maintain stable ABI's, e.g., (dup vs dup2 vs dup3,
+   wait vs wait3 vs wait4 vs waitpid, stat vs stat64, lstat vs lstat64,
+   chown vs chown32, etc.)
+*) System V IPC support (is support for enterprise databases like
+   Oracle "bloat"?)
+*) Posix real-time extensions
+*) Posix extended attributes
+*) Windows file streams support (the original reason for the *at(2)
+   system calls -- openat, linkat, renameat, and a dozen more)
+
+Ok, that last I'd agree was *pure* bloat, and an amazingly bad idea.
+But there are plenty of people who have bugged/begged me to add
+windows file streams because they were *convinced* it was a critical
+feature.  And I dare say bug-for-bugs Windows compatibility was worth
+millions of $$$ of potential sales, which is why they agreed to add it
+--- and why I kept on getting nagged to add that feature to ext4 (and
+I pushed back where the Solaris developers caved, so there.  :-)
+
+As for things like System V IPC support, that was only added to Linux
+because it was worth $$$, because enterprise databases like DB2 and
+Oracle demanded it.  Is that evidence of "cancer"?  You might not want
+it, but that's a great example of "one person's bloat is another
+person's critical feature".
+
+Or consider the dozen plus BSD sockets interface, which if removed
+would mean no TCP/IP support, and no graphical windowing systems.
+Critical feature, or bloat?
+
+But hey, if you only want V7 Unix, why are you complaining?  Just go
+and use it, and give up on all of this cancerous new features.  And I
+promise to get off of your lawn.  :-)
+
+Cheers,
+
+						- Ted
