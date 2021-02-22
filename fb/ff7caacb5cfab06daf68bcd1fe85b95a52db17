@@ -1,0 +1,106 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	FORGED_MUA_MOZILLA,MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=no
+	autolearn_force=no version=3.4.4
+Received: (qmail 29073 invoked from network); 22 Feb 2021 16:48:06 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 Feb 2021 16:48:06 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8A0F99CA8C; Tue, 23 Feb 2021 02:48:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 39A9493D39;
+	Tue, 23 Feb 2021 02:47:41 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (2048-bit key; unprotected) header.d=toaster.com header.i=@toaster.com header.b="f7xlLka3";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 7381E93D39; Tue, 23 Feb 2021 02:47:38 +1000 (AEST)
+X-Greylist: delayed 377 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Tue, 23 Feb 2021 02:47:36 AEST
+Received: from outpost.toaster.com (outpost.toaster.com [164.90.156.247])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 98CEB93D32
+ for <tuhs@minnie.tuhs.org>; Tue, 23 Feb 2021 02:47:36 +1000 (AEST)
+Received: from [192.168.44.246] (static-47-181-10-112.lsan.ca.frontiernet.net
+ [47.181.10.112])
+ (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+ key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+ (No client certificate requested) (Authenticated sender: jay)
+ by outpost.toaster.com (Postfix) with ESMTPSA id E1DB317A4C0
+ for <tuhs@minnie.tuhs.org>; Mon, 22 Feb 2021 16:41:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=toaster.com;
+ s=default; t=1614012078;
+ bh=coi9Qr9E1eNxopHcvkt2JCHjgbBGlmQOy328rFUyvW4=;
+ h=From:Subject:To:Date:From;
+ b=f7xlLka3wFR/9rQt5MbsigCKID2BzJ84vow9dUVmcSoOuEYu12ptJ8mDmNSBXpWl7
+ V6CyTaoZqTUGDKFJjEZAzOJPpZ1KUDXR+M2/hA81Kv8RFhgjjZDOHuwBy74/VXe1YU
+ qQ+WRItvhb0UoAkdtuHoiNHQKj60N2/5lro5p/j7+I1DECDRnM4YoEGzLkKD14Mfje
+ UGsNP+8A8CHv4yeOxKh6Y4bq1lm6malnKS/X2zVh28EjSpug/OYVmUySgk+rWKK+S/
+ y4fFS2SKxrqBCj/9NPrHFcCvBkbvsb41X/nzuaF18Cm77q81GXVxbgBSrKaRPSMt98
+ caTDOYQ1H4tPQ==
+To: tuhs@minnie.tuhs.org
+Date: Mon, 22 Feb 2021 08:41:17 -0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.7.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+Message-Id: <20210222164738.7381E93D39@minnie.tuhs.org>
+Subject: [TUHS] retro-fuse project
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+From: Jay Logue via TUHS <tuhs@minnie.tuhs.org>
+Reply-To: Jay Logue <jay-tuhs9915@toaster.com>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Lately, I've been playing around in v6 unix and mini-unix with a goal of 
+better understanding how things work and maybe doing a little hacking.  
+As my fooling around progressed, it became clear that moving files into 
+and out of the v6 unix world was a bit tedious.  So it occurred to me 
+that having a way to mount a v6 filesystem under linux or another modern 
+unix would be kind of ideal.  At the same time it also occurred to me 
+that writing such a tool would be a great way to sink my teeth into the 
+details of old Unix code.
+
+I am aware of Amit Singh's ancientfs tool for osxfuse, which implements 
+a user-space v6 filesystem (among other things) for MacOS.  However, 
+being read-only, it's not particularly useful for my problem.  So I set 
+out to create my own FUSE-based filesystem capable of both reading and 
+writing v6 disk images.  The result is a project I call retro-fuse, 
+which is now up on github for anyone to enjoy 
+(https://github.com/jaylogue/retro-fuse).
+
+A novel (or perhaps just peculiar) feature of retro-fuse is that, rather 
+than being a wholesale re-implementation of the v6 filesystem, it 
+incorporates the actual v6 kernel code itself, "lightly" modernized to 
+work with current compilers, and reconfigured to run as a Unix process.  
+Most of file-handling code of the kernel is there, down to a trivial 
+block device driver that reflects I/O into the host OS.  There's also a 
+filesystem initialization feature that incorporates code from the 
+original mkfs tool.
+
+Currently, retro-fuse only works on linux. But once I get access to my 
+mac again in a couple weeks, I'll port it to MacOS as well.  I also hope 
+to expand it to support other filesystems as well, such as v7 or the 
+early BSDs, but we'll see when that happens.
+
+As I expected, this was a fun and very educational project to work on.  
+It forced me to really understand what was going in the kernel (and to 
+really pay attention to what Lions was saying).  It also gave me a 
+little view into what it was like to work on Unix back in the day.  
+Hopefully someone else will find my little self-education project useful 
+as well.
+
+--Jay
+
