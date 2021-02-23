@@ -1,0 +1,115 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13302 invoked from network); 23 Feb 2021 18:58:26 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 23 Feb 2021 18:58:26 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 36A979C82B; Wed, 24 Feb 2021 04:58:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5AB5E9C73D;
+	Wed, 24 Feb 2021 04:57:59 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A80009C73D; Wed, 24 Feb 2021 04:57:56 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DF87A9C6CE
+ for <tuhs@minnie.tuhs.org>; Wed, 24 Feb 2021 04:57:55 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 11NIvrE7009414
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 23 Feb 2021 13:57:54 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id AE86D15C342C; Tue, 23 Feb 2021 13:57:53 -0500 (EST)
+Date: Tue, 23 Feb 2021 13:57:53 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+Message-ID: <YDVQMUG6UXzrPrMh@mit.edu>
+References: <CAKH6PiXW80gL1Hy7nVTrZ1Wm-zbKZGUj8+T8Ui4cjWdW=vV1LA@mail.gmail.com>
+ <alpine.BSF.2.21.9999.2102220924220.70858@aneurin.horsfall.org>
+ <alpine.DEB.2.21.2102211758180.5567@sd-119843.dedibox.fr>
+ <CAD-qYGqmj98onsSJ-JrF6e9k1U-YvcFb_z0Oi=ZmBV5BsBDMew@mail.gmail.com>
+ <m1lEbV3-0036x9C@more.local>
+ <78fede43-bf9b-5a56-5e59-e6ee5a0ee23d@spamtrap.tnetconsulting.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <78fede43-bf9b-5a56-5e59-e6ee5a0ee23d@spamtrap.tnetconsulting.net>
+Subject: Re: [TUHS] /usr separation
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Feb 23, 2021 at 11:28:13AM -0700, Grant Taylor via TUHS wrote:
+> 
+> What that fails to take into account is if the system actually uses an
+> initrd / initramfs or not.  Many of the systems I maintain do /not/ use an
+> initrd / initramfs.  Thus the systems have /some/ actual /need/ to be able
+> to bring up a minimal system to repair file system problems.  Even if the so
+> called problem is simply that the extent file system needs an fsck with
+> human interaction (time since last check and / or maximum number of mounts).
+
+There are two reasons why you might want to have an initramfs.  One is
+you are using a distribution-provided generic kernel, in which case
+the device driver / kernel modules needed to access the root file
+system needed to be loaded from *somewhere*, and that's the in-memory
+initramfs/initrd.
+
+The other reason is how you run fsck on the root file system.  That
+won't be needed if hardware is perfect, the kernel is bug-free(tm),
+and the root file system has journalling support, as all modern file
+systems tend to have.  However, if it is needed, there are two ways to
+do this.  One is the traditional way, which is to mount the root file
+system read/only, repair the file system, and if any changes were
+required to the root file system, force a reboot; otherwise, remount
+the root file system read-write, and proceed.  The other way of doing
+this is to include the fsck program in the initrams, and run fsck on
+the root file system before it is mounted.  Now you never have to
+worry about rebooting if any chances were made, since the root file
+system wasn't mounted and so there is no danger of invalid metadata
+being cached in memory.
+
+That being said, it's certainly possible to skip using an initramfs;
+it's geenrally not required, and if you're building your own kernel,
+with the device drivers you need for your hardwaer compiled into the
+kernel, most distributions will support skipping the initramfs.
+(Debian certainly does, in any case.)
+
+> */boot still tends to be it's own file system on Linux, mostly because
+> that's where the initrd / initramfs image live which contain drivers for
+> more fancy things (software RAID, LVM, ZFS, SAN, etc.) which are needed to
+> bring up / (root).
+
+/boot needs to exist due to limitations to the firmware and/or boot
+loader being used.  If the boot loader is using the legacy PC Bios
+interfaces to read the kernel and initial ramdisk/file system, then
+those files need to be in a low-numbered LBA disk space, due to legacy
+BIOS/firmware limitations.  It could also be a concern if you are
+using some exotic file system (say, ZFS), and the bootloader doesn't
+support that file system due to copyright licensing incompatibilities,
+or the boot loader just not supporting that bleeding-edge file system.
+In that case, you might have to keep /boot as an ext4 file system.
+
+Other than that, there is no reason why /boot needs to be its own file
+system, except that most installers will create one just because it's
+simpler to use the same approach for all cases, even if it's not
+needed for a particular use case.
+
+					- Ted
+
+P.S.  Oh, and if you are using UEFI, you might need to have yet
+another file system which is a Microsoft FAT file system, typically
+mounted as /boot/efi, to keep the UEFI firmware happy....
