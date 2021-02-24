@@ -1,0 +1,142 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 17055 invoked from network); 24 Feb 2021 14:15:01 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Feb 2021 14:15:01 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4FBDE9C79F; Thu, 25 Feb 2021 00:14:59 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8AB699C6CE;
+	Thu, 25 Feb 2021 00:14:21 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1D1849BA4D; Thu, 25 Feb 2021 00:14:15 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1C8679BA4D
+ for <tuhs@minnie.tuhs.org>; Thu, 25 Feb 2021 00:14:14 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 11OEECQD025827
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Wed, 24 Feb 2021 09:14:12 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 0412E15C342C; Wed, 24 Feb 2021 09:14:11 -0500 (EST)
+Date: Wed, 24 Feb 2021 09:14:11 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Grant Taylor <gtaylor@tnetconsulting.net>
+Message-ID: <YDZfM7L5xzx8WELZ@mit.edu>
+References: <CAKH6PiXW80gL1Hy7nVTrZ1Wm-zbKZGUj8+T8Ui4cjWdW=vV1LA@mail.gmail.com>
+ <alpine.BSF.2.21.9999.2102220924220.70858@aneurin.horsfall.org>
+ <alpine.DEB.2.21.2102211758180.5567@sd-119843.dedibox.fr>
+ <CAD-qYGqmj98onsSJ-JrF6e9k1U-YvcFb_z0Oi=ZmBV5BsBDMew@mail.gmail.com>
+ <m1lEbV3-0036x9C@more.local>
+ <78fede43-bf9b-5a56-5e59-e6ee5a0ee23d@spamtrap.tnetconsulting.net>
+ <YDVQMUG6UXzrPrMh@mit.edu>
+ <3d2d7b46-41e8-92d7-3a7b-d0f3006bc761@spamtrap.tnetconsulting.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <3d2d7b46-41e8-92d7-3a7b-d0f3006bc761@spamtrap.tnetconsulting.net>
+Subject: Re: [TUHS] /usr separation
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Feb 23, 2021 at 01:29:11PM -0700, Grant Taylor via TUHS wrote:
+> On 2/23/21 11:57 AM, Theodore Ts'o wrote:
+> > There are two reasons why you might want to have an initramfs.
+>
+> Rather than getting into a tit for tat debate, I'll agree that we have both
+> proposed reasons why you /might/ want to use an initramfs.  The operative
+> words are "you" and "might".  Each person probably wants slightly different
+> things.  It's far from one size fits all.
+
+Sure, I was trying to enumerate the reasons why initramfs, for some
+combinations of hardware / configurations, might be necessary.
+
+> > /boot needs to exist due to limitations to the firmware and/or boot
+> > loader being used.
+> 
+> Not necessarily.  E.g. one single partition containing /boot and / (root).
+
+Sorry, I should have written, "/boot MAY need to exist".
+
+> > Other than that, there is no reason why /boot needs to be its own file
+> > system, except that most installers will create one just because it's
+> > simpler to use the same approach for all cases, even if it's not needed
+> > for a particular use case.
+> 
+> As Steve Gibson is famous for saying; The tyranny of the default.
+
+I wouldn't say that; I'd rather say that if you have a huge
+combination of configurations that you have to test, those
+configurations which aren't regularly tested will tend to bitrot, or
+have odd failures in various error cases.  The more corners that you
+have, the more corner cases.
+
+And this is where it's all about *who* gets to pay, either via money,
+or via their labor, to support these various cases.  Weren't people
+just complaining, in other TUHS threads, of "bloat" in Linux?
+
+Well, this is how you get bloat.  It's just that if it's a feature
+*you* want, then it's not bloat, but an essential feature, and if it's
+not provided, you whine mightily.  And when you have a large number of
+enterprise customers paying $$$ to enterprise distribution vendors,
+each with their own set of essential features, and where *binary*
+backwards compatibility is considered an essential feature, then
+that's how you get what others will called "bloat".  I would call this
+the "Tyrany of Gold", as in the reformulated Golden Rule, "The ones
+with the Gold, makes the Rules".
+
+> > P.S.  Oh, and if you are using UEFI, you might need to have yet another
+> > file system which is a Microsoft FAT file system, typically mounted as
+> > /boot/efi, to keep the UEFI firmware happy....
+> 
+> Yes, the file system needs to exist.  But that's part of the firmware, not
+> the operating system.  I also question if that FAT file system needs to be
+> mounted or not.  --  I don't know how GRUB et al. deal with a non-mounted
+> UEFI file system.
+
+GRUB doesn't care.  But various system administration utilities that
+want to manage to UEFI boot menu (as distinct from the GRUB boot
+menu), they need to modify the files that are read by the UEFI
+firmware.  So it's convenient if it's mounted *somewhere*.  Also, even
+if it's not mounted, it's still a partition that has to be around, and
+one reason to keep it mounted is to avoid a system administrator from
+saying, "hmmm, what's this unused /dev/sda1 partition?  I guess I can
+use it as an extra swap partition!"  And then the system won't boot,
+and then they call the enterprise distro's help desk, and unnecessary
+calls into the help desk costs $$$, and distro's tend to optimize for
+unnecessary cost.  (Plus lots of unhappy customers who are down, even
+if it is there own d*mned fault, is not good for business.)
+
+> But even if it does need to be mounted, you can still get away with two
+> partitions; / (root) and /boot/efi.  I suspect UEFI does away with the LBA
+> issue you mentioned.
+
+Yes, in another 5 or 10 years, we can probably completely deprecate
+the MBR-based boot sequence.  At which point there will be another
+series of whiners on TUHS ala the complaint that distributions are
+dropping support for i386....
+
+But since most TUHS posters aren't paying $$$ to enterprise
+distributions, most enterpise distro engineers are going to give
+precisely zero f*cks.  But hey, if you want to volunteer to provide
+the hard work for supporting these configurations to the community
+distribution, like Debian, those distros will be happy to accept the
+volunteer help.  :-)
+
+						- Ted
