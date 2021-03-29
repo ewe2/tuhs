@@ -1,0 +1,72 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 19734 invoked from network); 29 Mar 2021 14:35:33 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Mar 2021 14:35:33 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 9AFF29C84F; Tue, 30 Mar 2021 00:35:28 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CA8E59C82B;
+	Tue, 30 Mar 2021 00:34:54 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DD2F79C82B; Tue, 30 Mar 2021 00:34:50 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 292219C829
+ for <tuhs@minnie.tuhs.org>; Tue, 30 Mar 2021 00:34:50 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 6B13135E1B9; Mon, 29 Mar 2021 07:34:49 -0700 (PDT)
+Date: Mon, 29 Mar 2021 07:34:49 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: tuhs@minnie.tuhs.org
+Message-ID: <20210329143449.GA28080@mcvoy.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: [TUHS] Remember the ed thread?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+I had *.clients.your-server.de crawling mcvoy.com in violation of my
+robots.txt.  For whatever reason, the tty settings (or something) 
+made vi not work, I dunno what the deal is, stty -tabs didn't help.
+
+So I had to resort to ed to write and debug the little program below.
+It was surprisingly pleasant, it's probably the first time I've used ed
+for anything real in at least a decade.  My fingers still know it.
+
++1 for ed.  It's how many decades old and still useful?
+
+
+#!/usr/libexec/bitkeeper/bk tclsh
+
+int
+main(void)
+{
+        FILE    log = popen("/var/log/apache2/dns.l", "r");
+        string  buf, ip;
+	string	dropped{string};
+
+	fconfigure(log, buffering: "line");
+        while (buf = <log>) {
+                unless (buf =~ /([^ ]+\.your-server\.de\.) /) continue;
+                ip = $1; 
+		if (defined(dropped{ip})) continue;
+		dropped{ip} = "yes";
+		warn("DROP ${ip}\n");
+		system("/sbin/iptables -I INPUT -s ${ip} -j DROP");
+        }
+}
