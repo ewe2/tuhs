@@ -1,0 +1,179 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=HTML_MESSAGE,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 13061 invoked from network); 28 Jun 2021 02:36:45 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Jun 2021 02:36:45 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AD5629CB48; Mon, 28 Jun 2021 12:36:40 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CDA6E9CA45;
+	Mon, 28 Jun 2021 12:35:17 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3A2289CA45; Mon, 28 Jun 2021 12:35:13 +1000 (AEST)
+Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com
+ [209.85.214.171])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3B0A29CA3B
+ for <tuhs@minnie.tuhs.org>; Mon, 28 Jun 2021 12:35:12 +1000 (AEST)
+Received: by mail-pl1-f171.google.com with SMTP id c15so8046640pls.13
+ for <tuhs@minnie.tuhs.org>; Sun, 27 Jun 2021 19:35:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20161025;
+ h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+ bh=j12aqIfHuwuHBLlr8IpyQV9ApWxFlvnBHUqDzJKsZk8=;
+ b=uAfmIwCMKFuRZOBTQCuaEGNRYXbKT2POpI0KDeSRFwLDu1amQxr8rDdo2Clr0hGj0I
+ 691KTXpghFEEdOOHTf9ovu5LZJ/eOxynlGaiA6qCdIJTdbrs6iKxi1I5o+ZeN27JWBQN
+ yLCylNlDkzp7B7bhB7UdYna6uSVI1kjoTVHRM37wFD+Z1Z2CTQhClMIqn47qme6rimzY
+ 3gAOaUqh+wSfkITTYAX8Y/bxLZVPyEAKsPlz0IpSnnHyBwY7mZZEXnxt+YG6y+d7Rhsz
+ iy4JAN6aBce1lW27vo2wCPXZD7a926wrQvIPXnzFrbIC/7xj+nT/j3EaYM0c8BwAAnbt
+ SErw==
+X-Gm-Message-State: AOAM533AEc5mxm3BZmU2ZZfeXR8y8mx1DbClhgMj3JgCchcwyLKRUZT5
+ wYuxqIb08qhLzAIRKzXwujkVmhEYWuA3aS2f8Yo5BMRg9WwH3g==
+X-Google-Smtp-Source: ABdhPJzjE8QOT73/L7bHBsEHpkaPWoBjv980UCvQPlbHwTkghtEoiSuwPrPg2e5+zprh28HEmBDy51ppUqnIFIRlWx0=
+X-Received: by 2002:a17:90a:9411:: with SMTP id
+ r17mr25052617pjo.49.1624847711016; 
+ Sun, 27 Jun 2021 19:35:11 -0700 (PDT)
+MIME-Version: 1.0
+From: Paul Riley <paul@rileyriot.com>
+Date: Mon, 28 Jun 2021 12:34:58 +1000
+Message-ID: <CAD05_j0NUPk70gbMEgXM7bNJfVkALKxHBbT87d+K=T3DxbF_1Q@mail.gmail.com>
+To: tuhs <tuhs@minnie.tuhs.org>
+Content-Type: multipart/alternative; boundary="000000000000a11b7505c5ca5601"
+Subject: [TUHS] Using printf from Assembly Language in V6, and db.
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000a11b7505c5ca5601
+Content-Type: text/plain; charset="UTF-8"
+
+Hi,
+
+I want to use printf from an assembly language program, in V6. It seems
+that the Unix Programmer's Manual doesn't show how to use it from assembly,
+so I wrote a short C program and captured the assembler output, for some
+clues. Listings below.
+
+In my example, the substitutional arguments for printf are pushed onto the
+stack in reverse order, then the address of the string, and then printf is
+called. After this, 6 is added to the stack pointer. I assume that the
+printf routine pops the address of the string off the stack, but leaves the
+other values on the stack, hence the need to add 2x3=6 to the stack after
+calling printf in my example.
+
+What troubles me is that the stack pointer is not decremented before the
+first mov, in the example below. Is this some C convention? I would assume
+that the first push in my example would overwrite the top of the stack.
+Perhaps I'm not used to PDP-11 stack conventions.
+
+I understand db only works on files like a.out or core dumps. If I wanted
+to break the assembly language program to examine values, how can I force a
+termination and core dump elegantly, so I can examine some register values?
+
+Paul
+
+
+*Paul Riley*
+
+Email: paul@rileyriot.com
+
+int a, b, c;
+int main(){
+  printf("printf: start\n");
+  a = 1;
+  b = 2;
+  c = 3;
+  printf("A = %d, B = %d, C = %d", a, b, c);
+  printf("printf: end\n");
+
+}
+
+.comm   _a,2
+.comm   _b,2
+.comm   _c,2
+.globl  _main
+.text
+_main:
+~~main:
+jsr     r5,csv
+jbr     L1
+L2:mov  $L4,(sp)
+jsr     pc,*$_printf
+mov     $1,_a
+mov     $2,_b
+mov     $3,_c
+mov     _c,(sp)
+mov     _b,-(sp)
+mov     _a,-(sp)
+mov     $L5,-(sp)
+jsr     pc,*$_printf
+add     $6,sp
+mov     $L6,(sp)
+jsr     pc,*$_printf
+L3:jmp  cret
+L1:jbr  L2
+.globl
+.data
+L4:.byte 160,162,151,156,164,146,72,40,163,164,141,162,164,12,0
+L5:.byte
+101,40,75,40,45,144,54,40,102,40,75,40,45,144,54,40,103,40,75,40,45,144,0
+L6:.byte 160,162,151,156,164,146,72,40,145,156,144,12,0
+#
+
+--000000000000a11b7505c5ca5601
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div>Hi,</div><div><br></div><div>I want to use printf fro=
+m an assembly language=C2=A0program,=C2=A0in V6. It seems that the Unix Pro=
+grammer&#39;s Manual doesn&#39;t show how to use it from assembly, so I wro=
+te a short C program and captured the assembler output, for some clues. Lis=
+tings below.</div><div><br></div><div>In my example, the substitutional arg=
+uments for printf are pushed onto the stack in reverse order, then the addr=
+ess of the string, and then printf is called. After this, 6 is added to the=
+ stack pointer. I assume that the printf routine pops the address of the st=
+ring off the stack, but leaves the other values on the stack, hence the nee=
+d to add 2x3=3D6 to the stack after calling printf in my example.</div><div=
+><br></div><div>What troubles me is that the stack pointer is not decrement=
+ed before the first mov, in the example below. Is this some C convention? I=
+ would assume that the first push in my example would overwrite the top of =
+the stack. Perhaps I&#39;m not used to PDP-11 stack conventions.</div><div>=
+<br></div><div>I understand db only works on files like a.out or core dumps=
+. If I wanted to break the assembly language program to examine values, how=
+ can I force a termination and core dump elegantly, so I can examine some r=
+egister values?</div><div><br></div><div>Paul</div><div><br></div><br clear=
+=3D"all"><div><div dir=3D"ltr" class=3D"gmail_signature" data-smartmail=3D"=
+gmail_signature"><div dir=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div di=
+r=3D"ltr"><div dir=3D"ltr"><div dir=3D"ltr"><div><b>Paul Riley</b></div><di=
+v><br></div><div>Email: <a href=3D"mailto:paul@rileyriot.com" target=3D"_bl=
+ank">paul@rileyriot.com</a><br></div><div><br><font face=3D"monospace">int =
+a, b, c;<br>int main(){<br>=C2=A0 printf(&quot;printf: start\n&quot;);<br>=
+=C2=A0 a =3D 1;<br>=C2=A0 b =3D 2;<br>=C2=A0 c =3D 3;<br>=C2=A0 printf(&quo=
+t;A =3D %d, B =3D %d, C =3D %d&quot;, a, b, c);<br>=C2=A0 printf(&quot;prin=
+tf: end\n&quot;);<br><br>}<br><br>.comm =C2=A0 _a,2<br>.comm =C2=A0 _b,2<br=
+>.comm =C2=A0 _c,2<br>.globl =C2=A0_main<br>.text<br>_main:<br>~~main:<br>j=
+sr =C2=A0 =C2=A0 r5,csv<br>jbr =C2=A0 =C2=A0 L1<br>L2:mov =C2=A0$L4,(sp)<br=
+>jsr =C2=A0 =C2=A0 pc,*$_printf<br>mov =C2=A0 =C2=A0 $1,_a<br>mov =C2=A0 =
+=C2=A0 $2,_b<br>mov =C2=A0 =C2=A0 $3,_c<br>mov =C2=A0 =C2=A0 _c,(sp)<br>mov=
+ =C2=A0 =C2=A0 _b,-(sp)<br>mov =C2=A0 =C2=A0 _a,-(sp)<br>mov =C2=A0 =C2=A0 =
+$L5,-(sp)<br>jsr =C2=A0 =C2=A0 pc,*$_printf<br>add =C2=A0 =C2=A0 $6,sp<br>m=
+ov =C2=A0 =C2=A0 $L6,(sp)<br>jsr =C2=A0 =C2=A0 pc,*$_printf<br>L3:jmp =C2=
+=A0cret<br>L1:jbr =C2=A0L2<br>.globl<br>.data<br>L4:.byte 160,162,151,156,1=
+64,146,72,40,163,164,141,162,164,12,0<br>L5:.byte 101,40,75,40,45,144,54,40=
+,102,40,75,40,45,144,54,40,103,40,75,40,45,144,0<br>L6:.byte 160,162,151,15=
+6,164,146,72,40,145,156,144,12,0<br>#<br></font><br></div></div></div></div=
+></div></div></div></div></div></div>
+
+--000000000000a11b7505c5ca5601--
