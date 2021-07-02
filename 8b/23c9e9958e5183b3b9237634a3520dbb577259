@@ -1,0 +1,107 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 1713 invoked from network); 2 Jul 2021 17:33:51 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jul 2021 17:33:51 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7B6A69C8DA; Sat,  3 Jul 2021 03:33:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DCF199C864;
+	Sat,  3 Jul 2021 03:32:55 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E67B89C864; Sat,  3 Jul 2021 03:32:53 +1000 (AEST)
+X-Greylist: delayed 913 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 03 Jul 2021 03:32:52 AEST
+Received: from ppsw-43.csi.cam.ac.uk (ppsw-43.csi.cam.ac.uk [131.111.8.143])
+ by minnie.tuhs.org (Postfix) with ESMTPS id CF9479C861
+ for <tuhs@minnie.tuhs.org>; Sat,  3 Jul 2021 03:32:52 +1000 (AEST)
+X-Cam-AntiVirus: no malware found
+X-Cam-ScannerInfo: https://help.uis.cam.ac.uk/email-scanner-virus
+Received: from [90.254.237.175] (port=65150 helo=milebook.lan)
+ by ppsw-43.csi.cam.ac.uk (smtp.hermes.cam.ac.uk [131.111.8.159]:25)
+ with esmtpsa (PLAIN:fanf2) (TLS1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
+ id 1lzMnI-0009bk-n0 (Exim 4.94.2)
+ (return-path <fanf2@hermes.cam.ac.uk>); Fri, 02 Jul 2021 18:17:36 +0100
+Date: Fri, 2 Jul 2021 18:17:35 +0100
+From: Tony Finch <dot@dotat.at>
+To: Bakul Shah <bakul@iitbombay.org>
+In-Reply-To: <C728300B-6E54-4C25-A160-C1392BE37469@iitbombay.org>
+Message-ID: <424dde98-7a42-57e6-e13a-83c3e6ccc020@dotat.at>
+References: <CAKr6gn04yBeYORTn122=HaDVo1Bjc7U0yVUX55BGy+=BHAnO-Q@mail.gmail.com>
+ <C728300B-6E54-4C25-A160-C1392BE37469@iitbombay.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] Dennis Ritchie's couch
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heritage Society mailing list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Bakul Shah <bakul@iitbombay.org> wrote:
+> > George Michaelson <ggm@algebras.org> wrote:
+> >
+> > a table.. hmm. so like.. we could write .. engines to "read" the table
+> > and do things in some kind of (maybe.. finite) way?
+> >
+> > I know, lets write a DSL to MAKE THE TABLE...
+> >
+> > Is all software "wheel of life" ?
+>
+> It would be just an operator precedence table and two functions. One to
+> parse a factor and one for binary expressions. The table might be something
+> like an array of {singles, doubles, associativity}, where the Nth entry
+> has precedence N. The binary expr parser uses the table to essentially
+> group sub expressions based on precedence and associativity. This is an old
+> idea. I think at least 4-5 decades old.
+
+Yes, it's a fairly straightforward to write an operator precedence parser
+using a pushdown automaton. Knuth wrote about it in 1962 :-) [page 8]
+https://archive.org/details/bitsavers_computersA_13990695
+
+I crufted together a #if evaluator for unifdef nearly 20 years ago, but
+it's, um, rather messy. (I was hacking on Dave Yost's code from the 1980s)
+http://dotat.at/cgi/git/unifdef.git/blob/HEAD:/unifdef.c#l950
+
+More recently I learned how to write a Pratt parser (1973), which is just
+a particular style of operator precedence parser, but when it's done
+properly it can be really neat.
+
+https://dl.acm.org/doi/10.1145/512927.512931
+
+The driver loop is tiny, if you set up the table mapping tokens to actions
+in the right way, so that the state transition functions handle errors as
+well as happy-path evaluation. (Blame Pratt for the field names!)
+
+	static Value
+	eval(Parser *p, int rbp) {
+		Value v = token[p->tok].nud(p);
+		while(token[p->tok].lbp > rbp)
+			v = token[p->tok].led(p, v);
+		return(v);
+	}
+
+Vaughan Pratt also designed the pretty neat Sun logo.
+
+Tony.
+-- 
+f.anthony.n.finch  <dot@dotat.at>  https://dotat.at/
+Channel Islands: Variable or northeasterly 1 to 3, becoming west to
+southwest 2 to 4 late evening, backing south to southeast soon after dawn,
+veering southwest to west 3 to 5 by noon, locally variable 1 to 3 in the
+far south of the area. Smooth or slight, with a low swell developing
+later. Mist and fog patches clearing early by early afternoon showers at
+first and again later rain and drizzle for a time, overnight and in the
+morning. Moderate to good, occasionally poor locally very poor.
+
