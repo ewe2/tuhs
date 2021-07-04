@@ -1,0 +1,118 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 12685 invoked from network); 4 Jul 2021 16:09:01 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 4 Jul 2021 16:09:01 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CA2D79C886; Mon,  5 Jul 2021 02:08:58 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 539EB9C873;
+	Mon,  5 Jul 2021 02:08:04 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C40479C873; Mon,  5 Jul 2021 02:08:01 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F09B39C871
+ for <tuhs@minnie.tuhs.org>; Mon,  5 Jul 2021 02:08:00 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 164G7ttN017507
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sun, 4 Jul 2021 12:07:56 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 1A7FA15C3C91; Sun,  4 Jul 2021 12:07:55 -0400 (EDT)
+Date: Sun, 4 Jul 2021 12:07:55 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Larry McVoy <lm@mcvoy.com>
+Message-ID: <YOHc29BtJa4c66EI@mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210704043615.GE817@mcvoy.com>
+Subject: Re: [TUHS] [tuhs] The Unix shell: a 50-year view
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sat, Jul 03, 2021 at 09:36:15PM -0700, Larry McVoy wrote:
+> In my opinion you couldn't be more wrong.  We still have the same problems,
+> we are still trying to grep an answer out of a bunch of info that has just
+> gotten bigger.
+> 
+> We still want to do the same things and we are doing them better with faster
+> CPUs, memory, disks, etc.
+
+I'm not sure I agree with you.  The same problems still exist, to be
+sure.  But there are new problems that have also arisen, for which
+Unix might not be the best match.  For example, Unix didn't have to
+deal with devices appearing after the system has booted; or those
+devices disappearing afterwards.  And of course, with services that
+might need to be started or reconfigured or stopped as devices get
+attached and detached.
+
+The original Unix systems didn't have the requirement of automatically
+detecting failed hardware or software, and taking action to mitigate
+those faults without depending on operators in data centers.  If we
+consider some of the structured logging systems, whether it's
+Ultrix/OSF's uerf, or Solaris's SMF, or Tuttle (an internal system I
+designed for $WORK), it's at least in part because scraping
+/var/log/messages and having cluster management systems parse textual
+log entries using an unholy mess of regex's is error prone and not
+necessarily reliable or maintainable.
+
+There are also new problems, such as Machine Learning, which has led
+to the introduction of coprocessors, which is a great example of
+something which is *not* doing the "same things" but with better CPUs,
+memory, disks, etc.
+
+You can of course define away some of these new problems as "not
+interesting", or "not the true spirit of Unix", but the reality is
+there are a good reason why systems have been changing --- it's in
+response the pressures of new requirements and new problems being
+added, even if the old problems haven't gone away.
+
+> I maybe think the reason you think that things aren't relevant anymore are
+> because young people don't get Unix, they just pile on to this framework
+> and that framework, NONE OF WHICH THEY UNDERSTAND, they just push more
+> stuff onto the stack.
+
+This is perhaps an unavoidable response to increasing complexity.
+When I was an undergraduate we started by building a computer using
+TTL chips on a breadboard, and then we went on to learn Scheme and the
+Lambda calculus, and then built up from there.  But a few years ago,
+MIT decided this wasn't sufficiently relevant to how most software
+engineers work today, so the intro to computing class was redone to
+use Python, and it was a stated goal to give students experience in
+how to build on top of a framework which is not sufficiently
+documented, and where they need to figure out what the #?$!@? was
+going on via experimentation, supplemented with whatever documentation
+and sources that students could find/read/understand.
+
+(And if you look at the depth of a stack trace after a typical Java
+application crashes due to an unhandled exception, MIT has probably
+gotten it right in terms of what most CS students will experience
+after they graduate.  I remember looking 80-90 Java function names in
+a Lotus Notes stack dump after a crash, involving the Eclipse *and*
+the Standard Java library frameworks, with awe and horror...)
+
+As a result, I've found that most new college grads don't have much in
+the way of Systems training or experience, and for those groups that
+need that kind of Systems thinking at $WORK, it's something we need to
+train, and not something I can assume new hires will have.  (This is
+also true for many candidates with significant industry experience
+which I've interviewed, alas.)
+
+						- Ted
