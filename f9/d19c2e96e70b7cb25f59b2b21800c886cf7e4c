@@ -1,0 +1,109 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 15100 invoked from network); 8 Jul 2021 14:01:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 8 Jul 2021 14:01:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E00289CA50; Fri,  9 Jul 2021 00:01:07 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 839199C861;
+	Fri,  9 Jul 2021 00:00:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 891EC9C861; Thu,  8 Jul 2021 23:59:58 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A18B79C854
+ for <tuhs@minnie.tuhs.org>; Thu,  8 Jul 2021 23:59:57 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+ id 38F094E12B71; Thu,  8 Jul 2021 13:59:57 +0000 (UTC)
+Date: Thu, 8 Jul 2021 14:59:57 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: tuhs@minnie.tuhs.org
+Message-ID: <YOcE3fre5cUTt6Br@clarinet.employees.org>
+References: <CAEoi9W4NXd-yajWk9bcb1X9eK_Ws17TBJOpDE6M-Qf+uLQ2v6A@mail.gmail.com>
+ <20210704004757.GB24671@tau1.ceti.pl>
+ <CAEoi9W7fLGFQMPUcS2E0VAANnPXDVrbxGFs++Nv5W42rxoNxYg@mail.gmail.com>
+ <20210705071450.GA12885@tau1.ceti.pl>
+ <CAD2gp_TNjzZCT8TCfHm_9ARZqFEaWL=6OdT6DOxY9auWY4=WHA@mail.gmail.com>
+ <20210706231659.GA13225@tau1.ceti.pl> <YOT5ajNhoUqyBqvi@mit.edu>
+ <20210707183222.GA9897@tau1.ceti.pl>
+ <6b736f82-97ed-4e51-9652-e672be4e2c66@localhost>
+ <20210708064652.GA19675@tau1.ceti.pl>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210708064652.GA19675@tau1.ceti.pl>
+Subject: Re: [TUHS] Overgrown ffox (was: The Unix shell: a 50-year view)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Jul 08, 2021 at 08:46:53AM +0200, Tomasz Rola wrote:
+> On Wed, Jul 07, 2021 at 08:50:51PM +0000, Michael Kjörling wrote:
+> > On 7 Jul 2021 20:32 +0200, from rtomek@ceti.pl (Tomasz Rola):
+> > > An excerpt from my ps:
+> > > 
+> > > USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+> > > 
+> > > xxxon    12331 12.5 20.4 5898360 2519640 ?     TNsl Mar29 18278:11 firefox-esr
+> > 
+> > I'm going to stick my neck out here by saying that the VSZ and RSS
+> > values reported by ps, at least for Firefox, are largely meaningless.
+
+Or does it depend upon the OS?  From a mac instance:
+
+$ ps -u 502 -o vsz,rss,ucomm,command|fgrep Firefox-78esr.app|awk '$3!="fgrep" {print int($1/1024),int($2/1024),$3}'
+10113 189 firefox
+5564 73 plugin-container
+6051 46 plugin-container
+6129 56 plugin-container
+5487 55 plugin-container
+5619 53 plugin-container
+7201 49 plugin-container
+6852 60 plugin-container
+5876 62 plugin-container
+6247 56 plugin-container
+6050 13 plugin-container
+6055 9 plugin-container
+
+The display from Activity Monitor, which one would assume better presents
+the mach VM gives for the 'firefox' process:
+
+Real Memory ~ 171M
+Private Memory ~ 80M
+Shared Memory ~ 85M
+Memory ~ 1.05G
+
+and when inspected a Virtual Memory size of ~ 9.8 G but Real memory size of ~ 170M
+
+Whereas a linux instance (viewing different pages) of 89.0.2 gives:
+
+$ ps -u 100 -o vsx,rss,ucomm,command|fgrep firefox|awk '$3!="grep" {print int($1/1024),int($2/1024),$3}'
+3147 356 firefox
+2699 200 Web
+2522 99 WebExtensions
+3271 219 Web
+2642 181 Web
+2511 105 Web
+2489 73 Web
+
+and yeah - it does 'leak' as the main firefox process sitting 'idle' has now become:
+
+3190 346 firefox
+
+So there are defintitly issues in mapping the current use of various types
+of memory to a simple display format.
+
+DF
