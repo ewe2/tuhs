@@ -1,0 +1,113 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 15549 invoked from network); 15 Jul 2021 15:47:41 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 15 Jul 2021 15:47:41 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 24F589C29F; Fri, 16 Jul 2021 01:47:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EF7D895038;
+	Fri, 16 Jul 2021 01:47:15 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1E90295038; Fri, 16 Jul 2021 01:47:12 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 8937C94566
+ for <tuhs@tuhs.org>; Fri, 16 Jul 2021 01:47:10 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id 4158A640CC6; Thu, 15 Jul 2021 11:44:43 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20210715154443.4158A640CC6@lignose.oclsc.org>
+Date: Thu, 15 Jul 2021 11:44:43 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] head/sed/tail (was The Unix shell: a 50-year view)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Some comments from someone (me) who tends to be pickier than
+most about cramming programs together and endless sets of
+options:
+
+I, too, had always thought sed was older than head.  I stand
+corrected.  I have a long-standing habit of typing sed 10q but
+don't spend much time fussing about head.
+
+When I arrived at Bell Labs in late summer 1984, tail -f was
+in /usr/bin and in the manual, readslow was only in /usr/bin.
+readslow was like tail -f, except it either printed the entire
+file first or (option -e) started at the end of the file.
+
+I was told readslow had come first, and had been invented in a
+hurry because people wanted to watch in real time the moves
+logged by one of Belle's chess matches.  Vague memory says it
+was written by pjw; the name and the code style seem consistent
+with that.
+
+Personally I feel like tail -r and tail -f both fit reasonably
+well within what tail does, since both have to do with the
+bottom of the file, though -r's implementation does make for
+a special extra code path in tail so maybe a separate program
+is better.  What I think is a bigger deal is that I have
+frequently missed tail -r on Linux systems, and somehow hadn't
+spotted tac; thanks to whoever here (was it Ted?) pointed it
+out first!
+
+On the other hand, adding data-processing functions to cat has
+never made sense to me.  It seems to originate from a mistaken
+notion that cat's focus is printing data on terminals, rather
+than concatenating data from different places.  Here is a test:
+if cat -v and cat -n and all that make sense, why shouldn't
+cat also subsume tr and pr and even grep?  What makes converting
+control characters and numbering lines so different from swapping
+case and adding page headers?  I don't see the distinction, and
+so I think vis(1) (in later Research) makes more sense than cat -v
+and nl(1) (in Linux for a long time) more sense than cat -n.
+(I'd also happily argue that given nl, pr shouldn't number lines.
+That a program was in V6 or V7 doesn't make it perfect.)
+
+And all those special options to wc that amounted to doing
+arithmetic on the output were always just silly.  I'm glad
+they were retracted.
+
+On the other other hand, why didn't I know about tac?  Because
+there are so damn many programs in /usr/bin these days.  When
+I started with UNIX ca. 1980, the manual (even the BSD version)
+was still short enough that one could sit down and read it through,
+section by section, and keep track of what one had read, and
+remember what all the different tools did.  That hasn't been
+true for decades.  This could be an argument for adding to
+existing programs (which many people already know about) rather
+than adding new programs (which many people will never notice).
+
+The real problem is that the system is just too damn big.  On
+an Ubuntu 18.04 system I run, ls /usr/bin | wc -l shows 3242
+entries.  How much of that is redundant?  How much is rarely or
+never used?  Nobody knows, and I suspect few even try to find
+out.  And because nobody knows, few are brave enough to throw
+things away, or even trim out bits of existing things.
+
+One day in the late 1980s, I helped out with an Introduction
+to UNIX talk at a DECUS symposium.  One of the attendees noticed
+the `total' line in the output of ls, and asked why is that there?
+doesn't that contradict the principles of tools' output you've
+just been talking about?  I thought about it, and said yes,
+you're right, that's a bit of old history and shouldn't be
+there any more.  When I got home to New Jersey, I took the
+`total' line out of Research ls.
+
+Good luck doing anything like that today.
+
+Norman Wilson
+Toronto ON
