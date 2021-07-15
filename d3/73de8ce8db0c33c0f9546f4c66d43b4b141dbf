@@ -1,0 +1,82 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 7062 invoked from network); 15 Jul 2021 14:28:53 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 15 Jul 2021 14:28:53 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0CF359C155; Fri, 16 Jul 2021 00:28:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 945829B9C2;
+	Fri, 16 Jul 2021 00:28:11 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E25D395038; Fri, 16 Jul 2021 00:28:08 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5F79694566
+ for <tuhs@minnie.tuhs.org>; Fri, 16 Jul 2021 00:28:08 +1000 (AEST)
+Received: from callcc.thunk.org (96-65-121-81-static.hfc.comcastbusiness.net
+ [96.65.121.81]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 16FES47t009635
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 15 Jul 2021 10:28:05 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id 32ABA4202F5; Thu, 15 Jul 2021 10:28:04 -0400 (EDT)
+Date: Thu, 15 Jul 2021 10:28:04 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: Douglas McIlroy <douglas.mcilroy@dartmouth.edu>
+Message-ID: <YPBF9GUgDw2Qa1nt@mit.edu>
+References: <CAKH6PiWDnDBEE9vWRU+6kAuEcMNFdpJ9tiv0=9VUr-LMJRRBbw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKH6PiWDnDBEE9vWRU+6kAuEcMNFdpJ9tiv0=9VUr-LMJRRBbw@mail.gmail.com>
+Subject: Re: [TUHS] head/sed/tail (was The Unix shell: a 50-year view)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Jul 14, 2021 at 10:38:06PM -0400, Douglas McIlroy wrote:
+> Head might not have been written if tail didn't exist. But, unlike head,
+> tail strayed from the tao of "do one thing well". Tail -r and tail -f are
+> as cringeworthy as cat -v.
+> 
+> -f is a strange feature that effectively turns a regular file into a pipe
+> with memory by polling for new data, A clean general alternative
+> might be to provide an open(2) mode that makes reads at the current
+> file end block if some process has the file open for writing.
+
+OTOH, this would mean adding more functionality (read: complexity)
+into the kernel, and there has always been a general desire to avoid
+pushing <stuff> into the kernel when it can be done in userspace.  Do
+you really think using a blocking read(2) is somehow more superior
+than using select(2) to wait for new data to be appended to the file?
+
+And even if we did this using a new open(2) mode, are you saying we
+should have a separate executable in /bin which would then be
+identical to cat, except that it uses a different open(2) mode?
+
+> -r is weird because it enables backwards reading, but only as
+> limited by count. Better would be a program, say revfile, that simply
+> reads backwards by lines. Then tail p  has an elegant implementation:
+>        revfile p | head | revfile
+
+I'll note, with amusement, that -r is one option which is *NOT* in the
+GNU version of tail.  I see it in FreeBSD, but this looks like a
+BSD'ism.  So for those like to claim that the GNU utilities have laden
+with useless options, this is one which can't be left at the feet of
+GNU coreutils.
+
+					- Ted
