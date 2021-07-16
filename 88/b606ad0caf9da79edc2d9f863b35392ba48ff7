@@ -1,0 +1,120 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 24896 invoked from network); 16 Jul 2021 02:23:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 16 Jul 2021 02:23:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A4AD19C834; Fri, 16 Jul 2021 12:23:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B30859C7F1;
+	Fri, 16 Jul 2021 12:22:52 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 94B979C7F1; Fri, 16 Jul 2021 12:22:51 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B5A5F9C7F0
+ for <tuhs@tuhs.org>; Fri, 16 Jul 2021 12:22:50 +1000 (AEST)
+Received: from callcc.thunk.org (96-65-121-81-static.hfc.comcastbusiness.net
+ [96.65.121.81]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 16G2Mkh9001887
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 15 Jul 2021 22:22:47 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id 1A6624202F5; Thu, 15 Jul 2021 22:22:46 -0400 (EDT)
+Date: Thu, 15 Jul 2021 22:22:45 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: Adam Thornton <athornton@gmail.com>
+Message-ID: <YPDtdWs1BDRnMWJn@mit.edu>
+References: <CAKH6PiVCjo3YnTZUVYOCDeffQ6POVwGAQA1QMR9UinkfGn+AmQ@mail.gmail.com>
+ <CAC20D2O=ZAD2mMOD+bDZ=-Rk1O8HRguaCCoMSvnQKQ1FE1-aBw@mail.gmail.com>
+ <YPCNnL4TLkLWqmFa@mit.edu>
+ <CAP2nic0qY4HrFTUYj0qwr=eney-re6Gn2O=0S23d6jwvOL_O+g@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAP2nic0qY4HrFTUYj0qwr=eney-re6Gn2O=0S23d6jwvOL_O+g@mail.gmail.com>
+Subject: Re: [TUHS] [COFF] 386BSD released
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Jul 15, 2021 at 12:49:07PM -0700, Adam Thornton wrote:
+> Although from a somewhat different perspective, it's also why the Linux
+> kernel syscall interface is so unruly, right?
+> 
+> You've got your...some number in the small dozens of common syscalls, which
+> are already present for the most part in v6 or v7.  These are the ones I,
+> at least, think of when I think of the Unix manual, section 2.
+
+Actually, a more reason why we have so many system calls is that there
+is a strong belief that backwards compatibility is important.  So much
+so that a Linux, or even Minix binary, from the early 1990's, will
+still run on a modern Linux kernel today.  So that means we have
+separate system calls for wait, wait3, wait4, etc.  Support for
+openat(2), linkat(2), etc., which got added to Posix by way of
+Solaris, need to be implemented as a separate system calls, since we
+need to keep the original open(2) system calls.  Etc.
+
+> And obviously there's a tradeoff there.  Elegance departs, and you've
+> probably introduced some security risk because these syscalls are not
+> nearly as well-exercised as the common ones, but on the other hand you have
+> these large companies paying to work on the kernel, and you have them
+> supporting their product on Linux systems because the system can be bent
+> into accommodating them more easily, and it will run better there than on
+> OSes where they don't get to introduce features that benefit their
+> products, which further drives adoption.
+
+In many cases, inside the kernel, system calls like wait(2) and
+wait3(2) will be implemeanted in terms of wait4(2), the implementation
+of open(2) and openat(2) share a common codepath, and so on.  So
+although the *number* of system calls may look big, in many cases
+there are shared code paths.  This is especially true for the system
+calls that implement 64-bit support, where the old legacy 32-bit
+system calls are just wrappers that call the 64-bit implementations of
+those system calls.
+
+There are also some architectures such as Alpha, where some of Linux's
+system calls used the Ultrix system call numbering scheme, and other
+Ultrix system calls were emulated, so that the Netscape browser, which
+was provided in binary form only for Ultrix on Alpha, would run on
+Linux Alpha.  Being able to run a subset of Ultrix binaries on Linux
+Alpha was certainly a hack, but the ability to run a web browser
+(there were no open source web browsers at that time) certainly drove
+adoption for at least some users.
+
+Was there perhaps some security risk in doing that?  Probably,
+although people cared a lot less about that in the early 90's.  And
+these days Linux support for architectures such as Alpha and HP's
+PA-RISC are done only by folks who do for fun.  :-)
+
+	    	      	       	      - Ted
+
+P.S.  At one point Linux x86 could also run SCO Unix binaries.  Which
+led to an amusing situation where MIT had purchased a site license for
+a proprietary spreadsheet program that ran on SCO Unix, for use by
+students who would be running Linux.  I worked with someone at that
+company (who eventually became one of the founders of Red Hat) and he
+gave me a custom application binary that checked for MIT's IP network
+address prefix, which was how the site license enforcement was
+implemented.
+
+Turns out his development environment was Linux, cross-compiling to
+create a SCO Unix binary, because the Linux development environment
+was more developer friendly than SCO's.  And so here he was, building
+a SCO Unix application on a Linux development machine, and then
+handing it to me so that our students could run that SCO Unix
+application on Linux systems at MIT.  The joys of syscall/OS
+emulation.  :-)
