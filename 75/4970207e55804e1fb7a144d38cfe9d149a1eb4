@@ -1,0 +1,107 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28032 invoked from network); 31 Jul 2021 22:17:23 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2021 22:17:23 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 5E8429C9DA; Sun,  1 Aug 2021 08:17:20 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B2F169C9B4;
+	Sun,  1 Aug 2021 08:17:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C45AB9C9B4; Sun,  1 Aug 2021 08:17:00 +1000 (AEST)
+Received: from fedora (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4E4FB9C9B2
+ for <tuhs@minnie.tuhs.org>; Sun,  1 Aug 2021 08:17:00 +1000 (AEST)
+Received: from fourwinds.com (localhost [127.0.0.1])
+ by fedora (8.16.1/8.15.2) with ESMTP id 16VMGxEB2446570
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 15:16:59 -0700
+Received: from localhost (jon@localhost)
+ by fourwinds.com (8.16.1/8.15.2/Submit) with ESMTP id 16VMGwTX2446561
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 15:16:58 -0700
+Message-Id: <202107312216.16VMGwTX2446561@fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+In-reply-to: <3598EE71-E652-43EF-B1AB-91CB8B3D577A@iitbombay.org>
+References: <20210731142533.69caf929@moon>
+ <202107311920.16VJK2jT2362871@fourwinds.com>
+ <3598EE71-E652-43EF-B1AB-91CB8B3D577A@iitbombay.org>
+Comments: In-reply-to Bakul Shah <bakul@iitbombay.org>
+ message dated "Sat, 31 Jul 2021 15:04:48 -0700."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <2446559.1627769818.1@localhost>
+Date: Sat, 31 Jul 2021 15:16:58 -0700
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] Systematic approach to command-line interfaces [ meta
+ issues ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Bakul Shah writes:
+> On Jul 31, 2021, at 12:20 PM, Jon Steinhart <jon@fourwinds.com> wrote:
+> > 
+> > So I never got getopt().  One of my rules is that I don't use a library
+> > in cases where the number of lines of gunk that that it takes to use a
+> > library function is >= the number of lines to just write it myself.  Yeah,
+> > I know the "but the library has more eyeballs and is debugged" argument
+> > but in reality libraries are the source of many bugs.  I've always taken
+> > the approach that I would never hire someone who had to use a library to
+> > implement a singly-linked list.
+>
+> getopt() is perhaps the wrong solution but consider something like MH,
+> whose commands all follow a common pattern. Consider:
+>
+>   - options (switches) all start with a single '-'
+>   - they may be abbreviated to a unique prefix.
+>   - Boolean options may be inverted by prepending -no (e.g. -nolist)
+>   - value options may also have -no format to remove a previous (or default) value
+>   - options may appear anywhere and the last instance wins
+>
+> But different commands take different options. It would make sense to factor
+> out common parsing, help etc. for a consistent treatment. In my Go code for
+> parsing MH like options I used Go's flag package as a model.
+>
+> Personally I vastly prefer MH style option processing to either single char
+> options or --very-long-names which can't be abbreviated. Never mind options for
+> commands like gcc, who can even remember 40+ ls options?
+>
+> But I haven't thought about how to extend this for shell scripts, or
+> exposing these so that shells like zsh can do command completion. To specify
+> these you need a vector of tuples (name, type, default, brief-help) but that
+> is painful to do in a shell.
+
+Ah, well, you've given away the secret of real UNIX geezers, we're on both
+this mailing list and the nmh list :-)
+
+Yes, I'm mostly happy with the way that nmh does options.
+
+I guess that I would look more kindly on getopt if it had existed much earlier
+so that people writing new commands would be encouraged to use the same format.
+Not as happy with it as an afterthought.
+
+Once again, I have to go back to the meatspace locality of reference issues.
+Sure, it would be nice to be able to factor out common parsing, for example
+if a related set of programs shared the same option set.  But unless it's
+something huge, I'd just put it in it's own file and use it for multiple
+programs; I wouldn't put it in a library.  My point is that the code that
+does the actual parsing is really trivial, and not necessarily the best
+use of a library.
+
+As far as help goes, I don't expect help built into command line programs;
+I expect to look up error messages on the manual pages.  I'm happy with a
+generic usage error as most "helpful" output that I get from programs is
+not actually helpful.
