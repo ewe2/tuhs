@@ -1,0 +1,74 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 5929 invoked from network); 1 Aug 2021 23:50:10 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Aug 2021 23:50:10 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 03DB49CA91; Mon,  2 Aug 2021 09:50:07 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C367A9CA63;
+	Mon,  2 Aug 2021 09:49:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 626BC9CA63; Mon,  2 Aug 2021 09:49:52 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 570DE9CA60
+ for <tuhs@minnie.tuhs.org>; Mon,  2 Aug 2021 09:49:51 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id BDD1335E11A; Sun,  1 Aug 2021 16:49:50 -0700 (PDT)
+Date: Sun, 1 Aug 2021 16:49:50 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: John Cowan <cowan@ccil.org>
+Message-ID: <20210801234950.GB3388@mcvoy.com>
+References: <20210731142533.69caf929@moon>
+ <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+ <CAEoi9W4jmzZB-thocbMrZ+B-bnU5bE-q0BsJ6bimw1V6mpUkeA@mail.gmail.com>
+ <40763c2d-52ad-eb01-8bf8-85acf6fee700@case.edu>
+ <CAEoi9W5Us72G_rxGogEd2FUh1cJdcf0GzR--omC4RFP-hzuQ_w@mail.gmail.com>
+ <CAD2gp_TGGWhKu-uUYN77Y-AnBnY8tTxgcOpfPv-4PNRjgL=idw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAD2gp_TGGWhKu-uUYN77Y-AnBnY8tTxgcOpfPv-4PNRjgL=idw@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Aug 01, 2021 at 07:36:53PM -0400, John Cowan wrote:
+> Nowadays it's a question whether fork() makes sense any more.   "A fork()
+> in the road" [Baumann et al. 2019] <
+> https://www.microsoft.com/en-us/research/uploads/prod/2019/04/fork-hotos19.pdf>
+> is an interesting argument against fork():
+> 
+> * It doesn't compose.
+> * It is insecure by default.
+> * It is slow (there are about 25 properties a process has in addition to
+> its memory and hardware state, and each of these needs to be copied or not)
+> even using COW (which is itself a Good Thing and can and should be provided
+> separately)
+> * It is incompatible with a single-address-space design.
+> 
+> In short, spawn() beats fork() like a drum, and fork() should be
+> deprecated. To be sure, the paper comes out of Microsoft Research, but I
+> find it pretty compelling anyway.
+
+When we were working on supporting BitKeeper on Windows, MacOS, all the
+various Unix versions, and Linux, we implemented all the needed libc
+stuff on Windows (so we could pretend we were not running on Windows).
+Everything except fork(), we made a spawnvp() interface.  That's the
+one thing that made more sense than the Unix way.  I have called fork()
+directly in decades.
