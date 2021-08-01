@@ -1,0 +1,95 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 22516 invoked from network); 1 Aug 2021 16:54:16 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Aug 2021 16:54:16 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 82B089CA60; Mon,  2 Aug 2021 02:54:10 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A3B2C9C9B2;
+	Mon,  2 Aug 2021 02:53:41 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="key not found in DNS" (0-bit key; secure) header.d=mail.malbolge.net header.i=@mail.malbolge.net header.b="IZA9hOlr";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 651CB9C9B2; Mon,  2 Aug 2021 02:53:38 +1000 (AEST)
+Received: from poseidon.malbolge.net (hera.malbolge.net [185.232.68.32])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 72A149C9AF
+ for <tuhs@minnie.tuhs.org>; Mon,  2 Aug 2021 02:53:36 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; s=_domainkey; bh=zz7T1ckgN
+ V2LPJYV57Zkv/pLOsv/HI2mcfF0GvGsz1k=;
+ h=references:in-reply-to:subject:
+ cc:to:from:date; d=mail.malbolge.net; b=IZA9hOlr53qEpsKkFTCQUVsBEx+Ym1
+ 2Rf4vNGl2nYTgV2GLKFPhv5J7JPIwKQdH0OTRYCVpT999Iv8zn11O8T27OSHXAqfs5P5lt
+ wuHsT6WCqTZ3lb0ZOh5Xde1eTnYsUyP0YbStG2rS6GRjmljl4lOkCn0+rt/4iZ0k5jo6qn
+ c=
+Received: from hermes.malbolge.net (hermes.malbolge.net [192.168.123.201])
+ by poseidon.malbolge.net (OpenSMTPD) with ESMTP id 1ec5f35c;
+ Sun, 1 Aug 2021 18:53:32 +0200 (CEST)
+Received: from moon (hera.malbolge.net [10.0.11.1])
+ by hermes.malbolge.net (Postfix) with ESMTPSA id 5BBA61C3D7C;
+ Sun,  1 Aug 2021 18:53:32 +0200 (CEST)
+Date: Sun, 1 Aug 2021 18:51:37 +0200
+From: Michael Siegel <msi@malbolge.net>
+To: Paul Winalski <paul.winalski@gmail.com>
+Message-ID: <20210801185137.0a4822b1@moon>
+In-Reply-To: <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+References: <20210731142533.69caf929@moon>
+ <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Am Sat, 31 Jul 2021 11:56:51 -0400
+schrieb Paul Winalski <paul.winalski@gmail.com>:
+
+> On 7/31/21, Michael Siegel <msi@malbolge.net> wrote:
+> >
+> > While doing that, I learned that there is a better way to approach
+> > this problem =E2=80=93 beyond using getopt(s) (which never really made
+> > sense to me) and having to write case statements in loops every
+> > time: Define a grammar, let a pre-built parser do the work, and
+> > have the parser provide the results to the program. =20
+>=20
+> This method for handling command lines dates back at least to the
+> 1970s.  The COMND JSYS (system call) in TOPS-20 operated this way, as
+> does the DCL command line interface in OpenVMS.  As you pointed out it
+> can greatly simplify the code in the application.  It also permits
+> command completion.  If the command has a long-winded option, such as
+> -supercalifragilisticexpialidocious, I can type -super then hit the
+> TAB key and as long as there is only one option that starts with
+> -super the parser will fill in the rest of the long keyword.  It also
+> means that you can provide interactive help.  At any point the user
+> can type a question mark and the command interpreter will say what
+> syntactic element is expected next.
+
+Being able to provide interactive help is exactly what the person who
+suggested grammar-based parsing to me was working on. I hadn't even
+thought about that at first. But given my recent investigation into
+built-in command documentation on Unix-like systems, I tend to think
+this would be a great enhancement =E2=80=93 if it was implemented with a
+strict focus on not getting in the way, i.e., the user should be able
+to switch it off completely, and search-as-you-type would be opt-in, if
+provided at all.
+
+
+--
+Michael
