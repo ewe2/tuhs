@@ -1,0 +1,116 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23735 invoked from network); 2 Aug 2021 12:12:30 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Aug 2021 12:12:30 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CE47A9CA8C; Mon,  2 Aug 2021 22:12:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 938E49CA63;
+	Mon,  2 Aug 2021 22:11:57 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3556B9CA63; Mon,  2 Aug 2021 22:11:52 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3FF6C9CA60
+ for <tuhs@tuhs.org>; Mon,  2 Aug 2021 22:11:51 +1000 (AEST)
+Received: from kent.sdaoden.eu (kent.sdaoden.eu [10.5.0.2])
+ by sdaoden.eu (Postfix) with ESMTPS id 96FB516056;
+ Mon,  2 Aug 2021 14:11:48 +0200 (CEST)
+Received: by kent.sdaoden.eu (Postfix, from userid 1000)
+ id 9898D69E; Mon,  2 Aug 2021 14:11:46 +0200 (CEST)
+Date: Mon, 02 Aug 2021 14:11:46 +0200
+Author: Steffen Nurpmeso <steffen@sdaoden.eu>
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: arnold@skeeve.com
+Message-ID: <20210802121146.mlcPX%steffen@sdaoden.eu>
+In-Reply-To: <202108011948.171JmAcK001895@freefriends.org>
+References: <CAKH6PiUggct8fuTTU2BQwT5b_grigJg+djdnADi=fzAvnG3Y4A@mail.gmail.com>
+ <202108011948.171JmAcK001895@freefriends.org>
+Mail-Followup-To: arnold@skeeve.com, tuhs@tuhs.org,
+ douglas.mcilroy@dartmouth.edu
+User-Agent: s-nail v14.9.22-173-g196623ce38
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] Systematic approach to command-line interfaces [ meta
+ issues ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org, douglas.mcilroy@dartmouth.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+arnold@skeeve.com wrote in
+ <202108011948.171JmAcK001895@freefriends.org>:
+ |Douglas McIlroy <douglas.mcilroy@dartmouth.edu> wrote:
+ |
+ |> In realizing the white paper's desire to "have the parser
+ |> provide the results to the program", it's likely that the mechanism
+ |> will, like Yacc, go beyond parsing and invoke semantic actions
+ |> as it identifies tree nodes.
+ |
+ |I have to admit that all this feels like overkill. Parsing options
+ |is only a very small part of the real work that a program does.
+ |
+ |Speaking for myself, I want something simple and regular that will
+ |get the job done and let me get on with the actual business of
+ |my software.  A grammar just for command-line argument parsing feels
+ |like the tail wagging the dog: not nearly enough ROI, at least
+ |for me.
+ |
+ |I happen to like the getopt_long interface designed by the GNU
+ |project. It's easy to learn, setup and use. Once it's in place
+ |it's set and forget.
+
+By coincidence just last week i stumbled over (actually searched
+and fixed) an issue where that terrible command line resorting hit
+me where i did not expect it.  Ie after changing aspects of
+a scripts that affect variable content, where that string then
+appended to a string constant and then evaluated-passed to
+a program, where the variable content did never contain
+a hyphen-minus initially, but after the rewrite.  So they saw
+a leading hyphen-minus somewhere on the line and turned it into an
+option.  (The fix was easy, just turn 'X'$Y into 'X'"$Y", it maybe
+should have always been written like that, but it seemed
+unnecessary at first.)
+
+ |My two cents,
+
+For C++/C i have always had my own one which can long options,
+optionally relates long to short options, where the long ones also
+can include a help string (all in one string, as in "debug;d;"
+N_("identical to -Sdebug") and N_() expands to literal).
+
+I agree with the other post that turning command lines into a tree
+of nodes is great, but of course this is hard to define.  For
+first level only yet (without support for multiplexer commands,
+ie, commands where the first command chooses an actual command)
+i have this for the mailer i maintain, for some commands already.
+It is a pain to write things like the following by hand
+
+  mx_CMD_ARG_DESC_SUBCLASS_DEF(call, 2, a_cmd_cad_call){
+     {mx_CMD_ARG_DESC_SHEXP | mx_CMD_ARG_DESC_HONOUR_STOP,
+        n_SHEXP_PARSE_TRIM_IFSSPACE}, /* macro name */
+     {mx_CMD_ARG_DESC_SHEXP | mx_CMD_ARG_DESC_OPTION |
+           mx_CMD_ARG_DESC_GREEDY | mx_CMD_ARG_DESC_HONOUR_STOP,
+        n_SHEXP_PARSE_IFS_VAR | n_SHEXP_PARSE_TRIM_IFSSPACE} /* args */
+  }mx_CMD_ARG_DESC_SUBCLASS_DEF_END;
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)
