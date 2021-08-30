@@ -1,0 +1,101 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 24436 invoked from network); 30 Aug 2021 14:43:42 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Aug 2021 14:43:42 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6E3EE9D549; Tue, 31 Aug 2021 00:43:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3D51F9D52D;
+	Tue, 31 Aug 2021 00:43:16 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C8AC39D52D; Tue, 31 Aug 2021 00:43:13 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3B6C59D52B
+ for <tuhs@tuhs.org>; Tue, 31 Aug 2021 00:43:13 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17UEgriM021335
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Mon, 30 Aug 2021 10:42:54 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id ACCBD15C3E7E; Mon, 30 Aug 2021 10:42:53 -0400 (EDT)
+Date: Mon, 30 Aug 2021 10:42:53 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Norman Wilson <norman@oclsc.org>
+Message-ID: <YSzubTwEY5YNSfi6@mit.edu>
+References: <20210830130603.A7D4C640CC6@lignose.oclsc.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210830130603.A7D4C640CC6@lignose.oclsc.org>
+Subject: Re: [TUHS] Is it time to resurrect the original dsw (delete with
+ switches)?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Aug 30, 2021 at 09:06:03AM -0400, Norman Wilson wrote:
+> Not to get into what is soemthing of a religious war,
+> but this was the paper that convinced me that silent
+> data corruption in storage is worth thinking about:
+> 
+> http://www.cs.toronto.edu/~bianca/papers/fast08.pdf
+> 
+> A key point is that the character of the errors they
+> found suggests it's not just the disks one ought to worry
+> about, but all the hardware and software (much of the latter
+> inside disks and storage controllers and the like) in the
+> storage stack.
+
+There's nothing I'd disagree with in this paper.  I'll note though
+that part of the paper's findings is that silent data corruption
+occured at a rate roughly 1.5 orders of magnitude less often than
+latent sector errors (e.g., UER's).
+
+The probability of at least one silent data corruption during the
+study period (41 months, although not all disks would have been in
+service during that entire time) was P = 0.0086 for nearline disks and
+P = 0.00065 for enterprise disks.  And P(1st error) remained constant
+over disk age, and per the authors' analysis, it was unclear whether
+P(1st error) changed as disk size increased --- which is
+representative of non media-related failures (not surprising given how
+much checksum and ECC checks are done by the HDD's).
+
+A likely supposition IMHO is that the use of more costly enterprise
+disks correlated with higher quality hardware in the rest of the
+storage stack --- so things like ECC memory really do matter.
+
+> As Ted has said, there are philosophical reasons why some prefer to
+> avoid it, but if you don't subscribe to those it's a fine answer.
+
+WRT to running ZFS on Linux, I wouldn't call it philosophical reasons,
+but rather legal risks.  Life is not perfect, so you can't drive any
+kind of risk (including risks of hardware failure) down to zero.
+
+Whether you should be comfortable with the legal risks in this case
+very much depends on who you are and what your risk profile might be,
+and you should contact a lawyer if you want legal advice.  Clearly the
+lawyers at companies like Red Hat and SuSE have given very answers
+from the lawyers at Canonical.  In addition, the answer for hobbyists
+and academics might be quite different from a large company making
+lots of money and more likely to attract the attention of the
+leadership and lawyers at Oracle.
+
+Cheers,
+
+					- Ted
