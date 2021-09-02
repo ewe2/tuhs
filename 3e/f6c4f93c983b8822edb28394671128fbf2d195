@@ -1,0 +1,142 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 10833 invoked from network); 2 Sep 2021 16:58:35 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Sep 2021 16:58:35 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 88EB79D535; Fri,  3 Sep 2021 02:58:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 0EF9A9BA1D;
+	Fri,  3 Sep 2021 02:58:01 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 55CE89BA1D; Fri,  3 Sep 2021 02:57:59 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2BA759B9F9
+ for <tuhs@minnie.tuhs.org>; Fri,  3 Sep 2021 02:57:57 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 182GvpId024164
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 2 Sep 2021 12:57:51 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id D6B9015C33F9; Thu,  2 Sep 2021 12:57:50 -0400 (EDT)
+Date: Thu, 2 Sep 2021 12:57:50 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Jon Steinhart <jon@fourwinds.com>
+Message-ID: <YTECjlhuKlC4aIad@mit.edu>
+References: <202108292212.17TMCGow1448973@darkstar.fourwinds.com>
+ <20210829235745.GC20021@mcvoy.com> <YSxUpxoVnUquMwOz@mit.edu>
+ <71B14DD4-0F7D-4AE1-9BCE-3327C056FFD2@iitbombay.org>
+ <202109021552.182FqNLB3750785@darkstar.fourwinds.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202109021552.182FqNLB3750785@darkstar.fourwinds.com>
+Subject: Re: [TUHS] Is it time to resurrect the original dsw (delete with
+ switches)?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heretics Society mailing list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Sep 02, 2021 at 08:52:23AM -0700, Jon Steinhart wrote:
+> Long intro, on to the question.  Anyone know what it does to reliability to
+> spin disks up and down.  I don't really need the media disks to be constantly
+> spinning; when whatever I'm listening to in the evening finishes the disk
+> could spin down until morning to save energy.  Likewise the video disk drive
+> is at most used for a few hours a day.
+> 
+> My big disks (currently 16T and 12T) bake when they're spinning which can't
+> be great for them, but I don't know how that compares to mechanical stress
+> from spinning up and down from a reliability standpoint.  Anyone know?
+
+First of all, I wouldn't worry too much about big disks "baking" while
+they are spinning.  Google runs its disks hot, in data centers where
+the ambient air temperatures is at least 80 degrees Fahrenheit[1], and
+it's not alone; Dell said in 2012 that it would honor warranties for
+servers running in environments as hot as 115 degrees Fahrenheit[2].
+
+[1] https://www.google.com/about/datacenters/efficiency/
+[2] https://www.datacenterknowledge.com/archives/2012/03/23/too-hot-for-humans-but-google-servers-keep-humming
+
+And of course, if the ambient *air* temperature is 80 degrees plus,
+you can just imagine the temperature at the hard drive.
+
+It's also true that a long time ago, disk drives had limited number of
+spin up/down cycles; this was in its spec sheet, and SMART would track
+the number of disk spinups.  I had a laptop drive where I had
+configured the OS so it would spin down the drive after 30 seconds of
+idle, and I realized that after about 9 months, SMART stats had
+reported that I had used up almost 50% of the rated spin up/down
+cycles for a laptop drive.  Needless to say, I backed of my agressive
+spindown policies.
+
+That being said, more modern HDD's have been designed for better power
+effiencies, with slower disk rotational speeds (which is probably fine
+for media disks, unless you are serving a large number of different
+video streams at the same time), and they are designed to allow for a
+much larger number of spindown cycles.  Check your spec sheets, this
+will be listed as load/unload cycles, and it will typically be a
+number like 200,000, 300,000 or 600,000.
+
+If you're only spinning down the a few times a day, I suspect you'll
+be fine.  Especially since if the disk dies due to a head crash or
+other head failure, it'll be a case of an obvious disk failure, not
+silent data corruption, and you can just pull your backups out of your
+fire safe.
+
+
+I don't personally have a lot of knowledge of how modern HDD's
+actually survive large numbers of load/unload cycles, because at $WORK
+we keep the disks spinning at all times.  A disk provides value in two
+ways: bytes of storage, and I/O operations.  And an idle disk means
+we're wasting part of its value it could be providing, and if the goal
+is to decrease the overall storage TCO, wasting IOPS is not a good
+thing[3].  Hence, we try to organize our data to keep all of the hard
+drives busy, by peanut-buttering the hot data across all of the disks
+in the cluster[4].
+
+[3] https://research.google/pubs/pub44830/
+[4] http://www.pdsw.org/pdsw-discs17/slides/PDSW-DISCS-Google-Keynote.pdf
+
+Hence, a spun-down disk is a disk which is frittering away the CapEx
+of the drive and a portion of the server cost to which the disk is
+attached.  And if you can find useful work for that disk to do, it's
+way more valuable to keep it spun up even taking into account to the
+power and air-conditioning costs of the spinning drive.
+
+
+It should also be noted that modern HDD's now also have *write*
+limits[5], just like SSD's.  This is especially true for technologies
+like HAMR --- where if you need to apply *heat* to write, that means
+additional thermal stress on the drive head when you write to a disk,
+but the write limits predate new technologies like HAMR and MAMR.
+
+[5] https://www.theregister.com/2016/05/03/when_did_hard_drives_get_workload_rate_limits/
+
+HDD write limits has implications for systems that are using log
+structured storage, or other copy-on-write schemes, or systems that
+are moving data around to balance hot and cold data as described in
+the PDSW keynote.  This is probably not an issue for home systems, but
+it's one of the things which keeps the storage space interesting.  :-)
+
+					- Ted
+
+P.S.  I have a Synology NAS box, and I *do* let the disks spin down.
+Storage at the industrial scale is really different than storage at
+the personal scale.  I do use RAID, but my backup strategy in extremis
+is encrypted backups uploaded to cloud storage (where I can take
+advantage of industrial-scale storage pricing).
