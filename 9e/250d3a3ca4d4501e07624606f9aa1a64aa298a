@@ -1,0 +1,130 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 14142 invoked from network); 3 Sep 2021 13:22:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 3 Sep 2021 13:22:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 410E29C891; Fri,  3 Sep 2021 23:22:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D9EE29C870;
+	Fri,  3 Sep 2021 23:22:03 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id F05BA9C870; Fri,  3 Sep 2021 23:21:59 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1C7749BA1E
+ for <tuhs@minnie.tuhs.org>; Fri,  3 Sep 2021 23:21:59 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 183DLpak016575
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Fri, 3 Sep 2021 09:21:52 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 5D02215C33F9; Fri,  3 Sep 2021 09:21:51 -0400 (EDT)
+Date: Fri, 3 Sep 2021 09:21:51 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Douglas McIlroy <douglas.mcilroy@dartmouth.edu>
+Message-ID: <YTIhbyOXDNuGb/Ov@mit.edu>
+References: <CAEoi9W6LNPeE69TQKcr8v=8s17usj0c5BQWGFcLQ5nj9GKLEsg@mail.gmail.com>
+ <bea278-3b10-9791-d4cb-9ff780c5f491@dotat.at>
+ <CAD2gp_TxaChsG7vn3xowvcimtLAi1no7qxOUa6Jk8JfJ3+JQBA@mail.gmail.com>
+ <CAKH6PiX64k3tHFM5szAofdgL1Fugc8PeHj9cvtq7rNrnuzaihQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKH6PiX64k3tHFM5szAofdgL1Fugc8PeHj9cvtq7rNrnuzaihQ@mail.gmail.com>
+Subject: Re: [TUHS] ATC/OSDI'21 joint keynote: It's Time for Operating
+ Systems to Rediscover Hardware (Timothy Roscoe)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Sep 02, 2021 at 11:24:37PM -0400, Douglas McIlroy wrote:
+> I set out to write a reply, then found that Marshall had said it all,
+> better..Alas, the crucial central principle of Plan 9 got ignored, while
+> its ancillary contributions were absorbed into Linux, making Linux fatter
+> but still oriented to a bygone milieu.
+
+I'm really not convinced trying to build distributed computing into
+the OS ala Plan 9 is viable.  The moment the OS has to span multiple
+TCB's (Trusted Computing Bases), you have to make some very
+opinionated decisions on a number of issues for which we do not have
+consensus after decades of trial and error:
+
+   * What kind of directory service do you use?  x.500/LDAP?   Yellow Pages?
+       Project Athena's Hesiod?
+   * What kind of distributed authentication do you use?  Kerboers?
+       Trust on first use authentication ala ssh?  .rhosts style
+       "trust the network" style authentication?
+   * What kind of distributed authorization service do you use?   Unix-style
+       numeric user-id/group-id's?   X.500 Distinguished Names in ACL's?
+       Windows-style Security ID's?
+   * Do you assume that all of the machines in your distributed
+       computation system belong to the same administrative domain?
+       What if individuals owning their own workstations want to have
+       system administrator privs on their system?  Or is your
+       distributed OS a niche system which only works when you have
+       clusters of machines that are all centrally and
+       administratively owned?
+   * What scale should the distributed system work at?  10's of machines
+       in a cluster?   100's of machines?  1000's of machines?
+       Tens of thousands of machines?  Distributed systems that work
+       well on football-sized data centers may not work that well
+       when you only have a few racks in colo facility.   The "I forgot
+       how to count that low" challenge is a real one....
+
+There have been many, many proposals in the distributed computing
+arena which all try to answer these questions differently.  Solaris
+had an answer with Yellow Pages, NFS, etc.  OSF/DCE had an answer
+involving Kerberos, DCE/RPC, DCE/DFS, etc.  More recently we have
+Docker's Swarm and Kubernetes, etc.  None have achieved dominance, and
+that should tell us something.
+
+The advantage of trying push all of these questions into the OS is
+that you can try to provide the illusion that there is no difference
+between local and remote resources.  But that either means that you
+have a toy (sorry, "research") system which ignores all of the ways in
+which remote computation which extends to a different node that may or
+may not be up, which may or may not have belong to a different
+administration domain, which may or may not have an adversary on the
+network between you and the remote node, etc.  OR, you have to make
+access to local resources just as painful as access to remote
+resources.  Furthermore, since supporting access remote resources is
+going to have more overhead, the illusion that access to local and
+remote resources can be the same can't be comfortably sustained in any
+case.
+
+When you add to that the complexities of building an OS that tries to
+do a really good job supporting local resources --- see all of the
+observations in Rob Pike's Systems Software Research is Dead slides
+about why this is hard --- it seems to me the solution of trying to
+build a hard dividing line between the Local OS and Distributed
+Computation infrastructure is the right one.
+
+There is a huge difference between creating a local OS that can live
+on a single developer's machine in their house --- and a distributed
+OS which requires setting up a directory server, and an authentication
+server, and a secure distributed time server, etc., before you set up
+the first useful node that can actually run user workloads.  You can
+try to do both under a single source tree, but it's going to result in
+a huge amount of bloat, and a huge amount of maintenance burden to
+keep it all working.
+
+By keeping the local node OS and the distributed computation system
+separate, it can help control complexity, and that's a big part of
+computer science, isn't it?
+
+						- Ted
