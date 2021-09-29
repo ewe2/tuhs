@@ -1,0 +1,133 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 4365 invoked from network); 29 Sep 2021 23:22:41 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Sep 2021 23:22:41 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 438789CAFE; Thu, 30 Sep 2021 09:22:38 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 336979CAE4;
+	Thu, 30 Sep 2021 09:21:53 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4BA3F9CAE4; Thu, 30 Sep 2021 09:21:48 +1000 (AEST)
+X-Greylist: delayed 672 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 30 Sep 2021 09:21:47 AEST
+Received: from mail.ultimate.com (mail.ultimate.com [104.225.1.121])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7BC809CAE3
+ for <tuhs@tuhs.org>; Thu, 30 Sep 2021 09:21:47 +1000 (AEST)
+Received: from ultimate.com (localhost [127.0.0.1])
+ by mail.ultimate.com (8.16.1/8.16.1) with ESMTPS id 18TNAXnB031141
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Wed, 29 Sep 2021 19:10:33 -0400 (EDT)
+ (envelope-from phil@ultimate.com)
+Received: (from phil@localhost)
+ by ultimate.com (8.16.1/8.16.1/Submit) id 18TNAXQp031140
+ for tuhs@tuhs.org; Wed, 29 Sep 2021 19:10:33 -0400 (EDT)
+ (envelope-from phil)
+From: Phil Budne <phil@ultimate.com>
+Message-Id: <202109292310.18TNAXQp031140@ultimate.com>
+Date: Wed, 29 Sep 2021 19:10:33 -0400
+To: tuhs@tuhs.org
+References: <20210731142533.69caf929@moon>
+ <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+ <CAEoi9W4jmzZB-thocbMrZ+B-bnU5bE-q0BsJ6bimw1V6mpUkeA@mail.gmail.com>
+ <40763c2d-52ad-eb01-8bf8-85acf6fee700@case.edu>
+ <CAEoi9W5Us72G_rxGogEd2FUh1cJdcf0GzR--omC4RFP-hzuQ_w@mail.gmail.com>
+ <CAD2gp_TGGWhKu-uUYN77Y-AnBnY8tTxgcOpfPv-4PNRjgL=idw@mail.gmail.com>
+ <CAD-qYGqWynaEDFZKSeuAApn9H9jJL36ombAzxrSV=VGVU46Gdg@mail.gmail.com>
+ <m1mVHBR-0036wTC@more.local>
+In-Reply-To: <m1mVHBR-0036wTC@more.local>
+User-Agent: Heirloom mailx 12.4 7/29/08
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Greg A. Woods wrote:
+> [[ I'm digging through old mail -- my summer has been preoccupied by
+> things that kept me from most everything else, including computing. ]]
+>
+> At Sun, 1 Aug 2021 18:13:18 -0600, Andrew Warkentin <andreww591@gmail.com> wrote:
+> Subject: Re: [TUHS] Systematic approach to command-line interfaces
+> >
+> > There's a third kind of primitive that is superior to either spawn()
+> > or fork() IMO, specifically one that creates a completely empty child
+> > process and returns a context that lets the parent set up the child's
+> > state using normal APIs.
+>
+> That's actually what fork(2) is, effectively -- it sets up a new process
+> that then effectively has control over its own destiny, but only by
+> using code supplied by the parent process, and thus it is also working
+> within the limits of the Unix security model.
+
+The original post above made me think of the TENEX (later TOPS-20)
+primatives for fork (a noun, aka process) control:
+
+	SFORK -- create an empty fork/process (halted)
+	GET -- map executable
+	SFORK -- start fork
+	HFORK -- halt a running fork
+	KFORK -- kill a fork
+	SPJFN -- set primary file job file numbers (stdin/stdout)
+	SPLFK -- splice a fork into tree
+
+TENEX, like UNIX was created with with knowledge of the Berkeley
+Timesharing System (SDS 940) and MULTICS.  Like MULTICS, TENEX was
+designed from square one as a VM system, and I believe the 4.2BSD
+specified mmap call was inspired by the TENEX PMAP call (which can map
+file pages into a process AND map process pages into a file, and map
+process pages from another process).
+
+The "halted" process state was also used when a user typed CTRL/C.  A
+halted process could be debugged (either in-process, entering a newly
+mapped debugger, or one already linked in, or out-of-process by
+splicing a debugger into the process tree).  Threads were easily
+implemented by mapping (selected pages of) the parent process (leaving
+others copy-on-write, or zero-fill for thread-local stoage).
+
+Starting on small machines (an 8KW PDP-7, and a (28KW?) PDP-11) UNIX
+placed a premium on maximum usefulness in the minimum space.
+
+The PDP-7 source we have implements fork (implemented, as on the
+PDP-11 by swapping out the forking process) but not exec!
+
+The Plan9 rfork unbundles traditional Unix descriptor and memory
+inheritance behaviors.
+
+For all the VM generality, a sore place (for me) in TENEX/TOPS-20, a
+single file descriptor (job file number) was shared by all processes
+in a login session ("job").  "Primary" input and output streams were
+however per-process, but, ISTR there was nothing to stop another
+process from closing a stream another process was using.
+
+And like MULTICS, TENEX had byte-stream I/O, implemented day-one for
+disk files (I'd have to look, but system code may well have
+implemented it by issuing PMAP calls (monitor call code could invoke
+monitor calls)), and most simple user programs used it, since it was
+simpler to program than file mapping.
+
+refs:
+https://opost.com/tenex/tenex72.txt
+https://www.opennet.ru/docs/BSD/design-44bsd-eng/x312.html
+http://www.bitsavers.org/pdf/dec/pdp10/TOPS20/AA-4166E-TM_TOPS-20_Monitor_Calls_Reference_Ver_5_Dec82.pdf
+
+P.S.
+And on the ORIGINAL topic, TOPS-20 started with code from the TENEX
+EXEC (shell) that implemented command completion and incremental, and
+made it the COMND system call (tho it could well have been a shared library,
+since almost all of the COMND code called other system calls to do the work).
