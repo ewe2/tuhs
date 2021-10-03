@@ -1,0 +1,125 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32620 invoked from network); 5 Feb 2021 00:33:52 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 5 Feb 2021 00:33:52 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0B5BC9C7A9; Fri,  5 Feb 2021 10:33:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 610009BA46;
+	Fri,  5 Feb 2021 10:33:20 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CC9CD9BA40; Fri,  5 Feb 2021 10:33:17 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A5FC29BA3F
+ for <tuhs@minnie.tuhs.org>; Fri,  5 Feb 2021 10:33:16 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id EF76F35E2B1; Thu,  4 Feb 2021 16:33:15 -0800 (PST)
+Date: Thu, 4 Feb 2021 16:33:15 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: George Michaelson <ggm@algebras.org>
+Message-ID: <20210205003315.GK13701@mcvoy.com>
+References: <CAEoi9W7aAJD-s+2xx+cvbDq76+WyAUVCcsT3GsNXr_TN9+wPpA@mail.gmail.com>
+ <46DC5B33-1F08-4DAE-ACAC-4318DB1498DA@iitbombay.org>
+ <CAKr6gn3Mvzy0Nf2NHHXGf6eFdumZU8h8jUUiU4e4T8Y_7ofisA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKr6gn3Mvzy0Nf2NHHXGf6eFdumZU8h8jUUiU4e4T8Y_7ofisA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] FreeBSD behind the times? (was: Favorite unix design
+ principles?)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, Feb 05, 2021 at 08:28:12AM +1000, George Michaelson wrote:
+> What ZFS did, and what Docker does, and snap does, and flatpack does,
+> is package things in a way which make modalities for use for  modern
+> sysadmin "just work"
+
+No argument there.
+
+> Basically Larry, I think you are kindof wrong. These alumni of yours
+> did what all kids should do: they ran ahead. Did they scrape their
+> knees doing it? Sure. But if they don't try things their teachers say
+> are bad, how do they advance the art? 
+
+Before I show you I'm not wrong, if you are saying (and I think you
+are) that you like ZFS and find it useful, I have no disagreement with
+that.  I'm in no way arguing that ZFS isn't useful.  If you are just 
+an end user and you don't run into any of the coherency problems, 
+it's great.
+
+I'm arguing from the point of view of how a kernel is supposed to work.
+What ZFS did is a gross violation of how the kernel is supposed to work
+and both Bonwick and Moore have admitted that, they just thought it was
+too hard to do it right.  There is a body of code in BitKeeper that does
+the exact part that they thought was too hard, a layer that takes a page
+fault and fills in the page from a compressed and xor-ed data source.
+Works great, one guy did it in a few months or so.  It's not that hard.
+
+So why is what ZFS did so wrong?
+
+Ignoring the page cache and make their own cache has big problems.
+You can mmap() ZFS files and doing so means that when a page is referenced
+it is copied from the ZFS cache to the page cache.  That creates a
+coherency problem, I can write via the mapping and I can write via
+write(2) and now you have two copies of the data that don't match,
+that's pretty much OS no-no #1.
+
+You can get around it, I know, because I've written the coherency code
+for SGI's IRIX when I did the bulk data server that went around the page
+cache and made NFS go at 60MB/sec for a single stream (and many times
+that for multiple streams).  So I'm not talking out of my ass, I know
+what coherency means when you have the same data in two different places,
+I know it is possible to make it work, I've done that, and I don't think
+it is a good idea (it was OK in SGI's case, it was for O_DIRECT which
+exists to completely bypass the page cache; so a special case that wasn't
+so bad and wasn't general).
+
+It's messy.  You could remove the data from the ZFS cache when you put
+it in the page cache but ZFS is compresses so it's not going line up on
+page boundaries like you'd want it to.  That means you're removing more
+than your page which sort of sucks.
+
+You could never map the pages writable, take a fault every time someone
+wants to write the page and then do the write back to the ZFS cache.
+That doesn't really work because you take the fault before the write
+completes, not after.  You can make it work, the write fault has to
+get an exclusive lock on the data in the ZFS cache, then return, then
+the page gets modified, now someone has to wake up and copy that data
+from the page cache to ZFS.  It's messy and it performs really poorly,
+nobody would do it this way.  
+
+You could lock the data in the ZFS cache, making it read only.  That
+doesn't work because you can write via mmap() and read via ZFS and you
+get old data.
+
+All of these sorts of problems, which are solvable, I've solved them,
+Sun solved them, are why you don't really want what ZFS did.  It's non
+ending case of wack a mole as the code evolves and someone slips in
+something that makes the page cache and the ZFS cache incoherent again.
+There isn't a pleasant way to make this stuff work, that's exactly
+why Sun made everything live in the page cache, there was only one
+copy of any chunk of data.
+
+Which makes it baffling to me that Sun would allow ZFS into the kernel
+but I guess the benefits were perceived to outweigh the ongoing work to
+make the caches coherent.  Personally, I think just doing it right is
+way easier.
+
+--lm

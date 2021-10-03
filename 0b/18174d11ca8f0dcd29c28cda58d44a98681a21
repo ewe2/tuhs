@@ -1,0 +1,96 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 5483 invoked from network); 30 Aug 2021 11:57:26 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Aug 2021 11:57:26 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DD0E69D546; Mon, 30 Aug 2021 21:57:23 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4B81F9D52D;
+	Mon, 30 Aug 2021 21:56:51 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BAA1A9D52D; Mon, 30 Aug 2021 21:56:46 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id EAE4C9D52B
+ for <tuhs@minnie.tuhs.org>; Mon, 30 Aug 2021 21:56:43 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17UBueXe031539
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Mon, 30 Aug 2021 07:56:40 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id E5F9C15C3CE6; Mon, 30 Aug 2021 07:56:39 -0400 (EDT)
+Date: Mon, 30 Aug 2021 07:56:39 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Bakul Shah <bakul@iitbombay.org>
+Message-ID: <YSzHd9xcwTDO+cru@mit.edu>
+References: <202108292212.17TMCGow1448973@darkstar.fourwinds.com>
+ <BDC0912E-DF42-49B0-9F8B-3E2A8275B24F@iitbombay.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <BDC0912E-DF42-49B0-9F8B-3E2A8275B24F@iitbombay.org>
+Subject: Re: [TUHS] Is it time to resurrect the original dsw (delete with
+ switches)?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heretics Society mailing list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Aug 29, 2021 at 08:36:37PM -0700, Bakul Shah wrote:
+> Chances are your disk has a URE 1 in 10^14 bits ("enterprise" disks
+> may have a URE of 1 in 10^15). 10^14 bit is about 12.5TB. For 16TB
+> disks you should use at least mirroring, provided some day you'd want
+> to fill up the disk. And a machine with ECC RAM (& trust but verify!).
+> I am no fan of btrfs but these are the things I'd consider for any FS.
+> Even if you have done all this, consider the fact that disk mortality
+> has a bathtub curve.
+
+You may find this article interesting: "The case of the 12TB URE:
+Explained and debunked"[1], and the following commit on a reddit
+post[2] discussiong this article:
+
+   "Lol of course it's a myth.
+
+   I don't know why or how anyone thought there would be a URE
+   anywhere close to every 12TB read.
+
+   Many of us have large pools that are dozens and sometimes hundreds of TB.
+
+   I have 2 64TB pools and scrub them every month. I can go years
+   without a checksum error during a scrub, which means that all my
+   ~50TB of data was read correctly without any URE many times in a
+   row which means that I have sometimes read 1PB (50TB x 2 pools x 10
+   months) worth from my disks without any URE.
+
+   Last I checked, the spec sheets say < 1 in 1x1014 which means less
+   than 1 in 12TB. 0 in 1PB is less than 1 in 12TB so it meets the
+   spec."
+
+[1] https://heremystuff.wordpress.com/2020/08/25/the-case-of-the-12tb-ure/
+[2] https://www.reddit.com/r/DataHoarder/comments/igmab7/the_12tb_ure_myth_explained_and_debunked/
+
+Of course, disks do die, and ECC and backups and checksums are good
+things.  But the whole "read 12TB get an error", saying really
+misunderstands how hdd failures work.  Losing an entire platter, or
+maybe the entire 12TB disk die due to a head crash, adds a lot of
+uncorrectable read errors to the numerator of the UER statistics.
+
+It just goes to show that human intuition really sucks at statistics,
+whether it's about vaccination side effects, nuclear power plants, or
+the danger of flying in airplanes versus driving in cars.
+
+	      	   	     	 	   - Ted

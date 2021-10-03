@@ -1,0 +1,84 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 5670 invoked from network); 6 Mar 2021 16:02:21 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Mar 2021 16:02:21 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8FA0C9CAC7; Sun,  7 Mar 2021 02:02:15 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 460309CA6D;
+	Sun,  7 Mar 2021 02:01:42 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id EC0E69CA6D; Sun,  7 Mar 2021 02:01:37 +1000 (AEST)
+Received: from mailhub-p.netside.co.jp (202.215.220.64.ap.gmobb-fix.jp
+ [202.215.220.64])
+ by minnie.tuhs.org (Postfix) with ESMTP id 2A6059CA6B
+ for <tuhs@minnie.tuhs.org>; Sun,  7 Mar 2021 02:01:36 +1000 (AEST)
+Received: from smtp1.prv.netside.co.jp
+ by mailhub-p.netside.co.jp (Postfix) with ESMTP id 269B944091E2
+ for <tuhs@minnie.tuhs.org>; Sun,  7 Mar 2021 01:01:13 +0900 (JST)
+Received: from coco.yorie.netside.co.jp
+ by smtp1.prv.netside.co.jp (Postfix) with ESMTP id 13397B61B
+ for <tuhs@minnie.tuhs.org>; Sun,  7 Mar 2021 01:01:11 +0900 (JST)
+Received: from localhost (localhost [IPv6:::1])
+ by coco.yorie.netside.co.jp (Postfix) with ESMTP id C0514511BD
+ for <tuhs@minnie.tuhs.org>; Sun,  7 Mar 2021 01:01:10 +0900 (JST)
+Date: Sun, 07 Mar 2021 01:01:10 +0900 (JST)
+Message-Id: <20210307.010110.2129264166997997578.mochid@netside.co.jp>
+To: tuhs@minnie.tuhs.org
+From: MOCHIDA Shuji <mochid@netside.co.jp>
+In-Reply-To: <c9d03a56-166d-001e-e8b5-8a4fd190c6a3@gmail.com>
+References: <20210306.114201.619231632323334129.mochid@netside.co.jp>
+ <c9d03a56-166d-001e-e8b5-8a4fd190c6a3@gmail.com>
+X-Mailer: Mew version 6.8 on Emacs 26.3
+Mime-Version: 1.0
+Content-Type: Text/Plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] 4.4BSD sparc, pmax binary recently compiled
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+>  gxemul -X -e 3max -db:./bsd44f-pmax-self-20210224.dkimg -j vmunix
+
+ You may add -o '-s' to boot single user, for setting time.
+
+  # TZ=Japan date
+  Sat Mar 6 20:11:12 JST 1994
+  # TZ=Japan date 2103062012
+  Sat Mar 6 20:12:00 JST 2021
+  # fsck -p
+  # ^D
+
+That is same as NetBSD 1.1/pmax. Emulator GXemul returns fixed year
+value 72 in gxemul-0.6.2/src/devices/dev_mc146818.cc
+mc146818_update_time():244, 4.4BSD's src/sys/pmax/pmax/clock.c
+inittodr() do year + YR_OFFSET -> 94, evry time you boot.
+
+> Now I just need to figure out how to get things in and out of there!
+
+ gxemul support NAPT networking by default, router 10.0.0.254 prepared.
+You can add same network address to le0.
+
+  # ifconfig le0 10.0.0.3
+  # route add default 10.0.0.254
+
+ If your gxemul is by pkgsrc, and above 0.6.2nb1, tap(4) support exists.
+
+ I can use NFS (mount_nfs -P), and amd (use mount:=, unmount:=),
+though low speed and unstable.
+
+-mochid

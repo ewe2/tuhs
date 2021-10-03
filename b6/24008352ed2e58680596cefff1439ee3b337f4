@@ -1,0 +1,108 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25677 invoked from network); 29 Sep 2021 16:57:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Sep 2021 16:57:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8D9E39CAFF; Thu, 30 Sep 2021 02:57:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C76B39CAE4;
+	Thu, 30 Sep 2021 02:57:18 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AF1869CAE4; Thu, 30 Sep 2021 02:57:17 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 867419CAE3
+ for <tuhs@tuhs.org>; Thu, 30 Sep 2021 02:57:16 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 0477735E102; Wed, 29 Sep 2021 09:57:15 -0700 (PDT)
+Date: Wed, 29 Sep 2021 09:57:15 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Message-ID: <20210929165715.GN18305@mcvoy.com>
+References: <20210731142533.69caf929@moon>
+ <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+ <CAEoi9W4jmzZB-thocbMrZ+B-bnU5bE-q0BsJ6bimw1V6mpUkeA@mail.gmail.com>
+ <40763c2d-52ad-eb01-8bf8-85acf6fee700@case.edu>
+ <CAEoi9W5Us72G_rxGogEd2FUh1cJdcf0GzR--omC4RFP-hzuQ_w@mail.gmail.com>
+ <CAD2gp_TGGWhKu-uUYN77Y-AnBnY8tTxgcOpfPv-4PNRjgL=idw@mail.gmail.com>
+ <CAD-qYGqWynaEDFZKSeuAApn9H9jJL36ombAzxrSV=VGVU46Gdg@mail.gmail.com>
+ <m1mVHBR-0036wTC@more.local> <20210928181016.GN18305@mcvoy.com>
+ <m1mVcd5-0036x9C@more.local>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <m1mVcd5-0036x9C@more.local>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Sep 29, 2021 at 09:40:23AM -0700, Greg A. Woods wrote:
+> At Tue, 28 Sep 2021 11:10:16 -0700, Larry McVoy <lm@mcvoy.com> wrote:
+> Subject: Re: [TUHS] Systematic approach to command-line interfaces
+> >
+> > On Tue, Sep 28, 2021 at 10:46:25AM -0700, Greg A. Woods wrote:
+> > > The "unix" nod to
+> > > single level storage by way of mmap() suffers from horribly bad design
+> > > and neglect.
+> >
+> > So what is it about mmap you don't like?
+> 
+> Mmap() as we have it today almost completely ignores the bigger picture
+> and the lessons that came before it.
+> 
+> It was an add-on hack that basically said only "Oh, Yeah, we can do that
+> too!  Look at this." -- and nobody bothered to look for decades.
+> 
+> For one it has no easy direct language support (though it is possible in
+> C to pretend to use it directly, though the syntax often gets cumbersome).
+> 
+> Single-level-storage was obviously designed into Multics from the
+> beginning and from the ground up, and it was easily used in the main
+> languages supported on Multics -- but it was just an add-on hack in Unix
+> (that, if memory serves me correctly, was initially only poorly used in
+> another extremely badly designed add-on hack that didn't pay any
+> attention whatsoever to past lessons, i.e. dynamic linking. which to
+> this day is a horror show of inefficiencies and bad hacks).
+> 
+> I think perhaps the problem was that mmap() came too soon in a narrow
+> sub-set of the Unix implementations that were around at the time, when
+> many couldn't support it well (especially on 32-bit systems -- it really
+> only becomes universally useful with either segments or 64-bit and
+> larger address spaces).  The fracturing of "unix" standards at the time
+> didn't help either.
+
+I think you didn't use SunOS 4.x.  mmap() was implemented correctly 
+there, the 4.x VM system mostly got rid of the buffer cache (the
+buffer cache was used only for reading directories and inodes, there
+was no regular file data there).  If you read(2) a page and mmap()ed
+it and then did a write(2) to the page, the mapped page is the same
+physical memory as the write()ed page.  Zero coherency issues.
+
+This was not true in other systems, they copied the page from the
+buffer cache and had all sorts of coherency problems.  It took
+about a decade for other Unix implementations to catch up and I
+think that's what you are hung up on.
+
+SunOS 4.x got it right.  You can read about it, I have all the papers
+cached at http://mcvoy.com/lm/papers
+
+ZFS screwed it all up again, ZFS has it's own cache because they weren't
+smart enough to know how to make compressed file systems use the page
+cache (we did it in BitKeeper so I have an existance proof that it is
+possible).  I was deeply disapointed to hear that ZFS screwed up that
+badly, the Sun I was part of would have NEVER even entertained such an
+idea, they worked so hard to get a unified page cache.  It's just sad.

@@ -1,0 +1,168 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31749 invoked from network); 31 Jan 2021 02:25:30 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jan 2021 02:25:30 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 659199C7C7; Sun, 31 Jan 2021 12:25:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 826C69C653;
+	Sun, 31 Jan 2021 12:25:04 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1FF289C653; Sun, 31 Jan 2021 12:25:02 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1C3119C63D
+ for <tuhs@tuhs.org>; Sun, 31 Jan 2021 12:25:01 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 4524635E1AD; Sat, 30 Jan 2021 18:25:00 -0800 (PST)
+Date: Sat, 30 Jan 2021 18:25:00 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Will Senn <will.senn@gmail.com>
+Message-ID: <20210131022500.GU4227@mcvoy.com>
+References: <CAKH6PiWY3ggz7Rv6Y0mNr_MH5+z7duHhFH9xf-rKgsvhQvCWgA@mail.gmail.com>
+ <CAEuQd1DO1_gv-ByrM91DLQ3kqm7pap9bK+4JsQKJoNqD1Z-GZw@mail.gmail.com>
+ <CAKH6PiXKjksEpQOMMMQTbcsMvX2thz3WzqjoRWJAsXnZ4Eq_iQ@mail.gmail.com>
+ <CAEuQd1C91GOZ7eJ6U+_hUz31AEDB-rfR=0tH6fdbkz8RCESBkA@mail.gmail.com>
+ <202101301950.10UJoWeA456408@darkstar.fourwinds.com>
+ <CAEuQd1Dpbcs=kd0XynnwUkYoL_UgRfd355ttZcsLiB8Hf4gEXQ@mail.gmail.com>
+ <CAC20D2M0_X3Tw7371jnrMvUiDBOFDRW1Y6Cycmu_QKnWhotU4A@mail.gmail.com>
+ <20210130222854.GN4227@mcvoy.com>
+ <20210130231119.GA33905@eureka.lemis.com>
+ <E15A5CDB-9A26-4437-ADEC-BCC51DA0F770@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <E15A5CDB-9A26-4437-ADEC-BCC51DA0F770@gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] FreeBSD behind the times? (was: Favorite unix design
+ principles?)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+If you like ZFS you don't understand operating systems design.  I do.
+Jeff Bonwick was a stats student at Stanford when he took my OS class,
+I convinced him to come to Sun.  Bill Moore worked for me.  That's the two
+main ZFS guys and I thought I had taught them well but they let me down.
+
+ZFS doesn't use the page cache, they said it was too hard because ZFS
+is compressed.  A typical file system just has block numbers, a compressed
+one needs another int per block, it's the int that says these many bytes
+are a block uncompressed.  It's not that hard, it is 2 ints instead of 1.
+
+In case I'm not being clear, the page cache is what everyone else uses
+but ZFS has its own cache.  So if you want to mmap() a ZFS file, ZFS
+has to bcopy() the data into the page cache and then spend a shit ton
+of code to make sure that the page cache data is in sync with the ZFS
+cache data.
+
+SunOS came from BSD but SunOS added mmap.  Which had the same problem,
+the BSD buffer cache was exactly the same as the ZFS cache, Sun spent 
+years of effort to get rid of the buffer cache, everything is in the 
+page cache.  So ZFS was a HUGE step backwards in systems design.  Might
+be the best file system ever (it is not) but it was not a good player
+in the OS world.
+
+Those guys said that it was too hard to make a compressed file fit in
+the page cache.  BitKeeper has that code and proves that it can be done.
+Be happy to walk anyone who cares through that code, I didn't write that,
+Wayne Scott did, but it's some of the best written code I've ever seen.
+Up there with Mojo's work on the SunOS VM system.  (I'll bet that noone
+takes me up on this offer, people love to argue but most don't want to
+learn.  Prove me wrong, please).
+
+So good on you that you like ZFS and FreeBSD.  I don't and I don't for
+really good reasons.
+
+Let's try it this way.  Get back to me when you can show me 40 people 
+who have installed FreeBSD on their own, with no help.  In the same 
+time, I can show you 40,000 people who have installed Linux on their
+own, with no help.  Probably 400,000.
+
+Technology is great, ease of use is what gets you users.  ZFS is
+great but doesn't play nice with the OS.
+
+That's my oh brother.
+
+On Sat, Jan 30, 2021 at 07:47:41PM -0600, Will Senn wrote:
+> Oh brother. I use FreeBSD all the time. I prefer it for its stability and ZFS which has NEVER let me down and I???ve done my share of stupid user error. Now that Linux has ZFS, it doesn???t seem as stuck in the dark ages, but uptime on my fbsd instance is 10x any of my Linux instances. We are soooo off topic, I think :). But, I???m always up for talking up FBSD. I use it in my classes, too and the system is much more coherent for my systems programming classes than linux.
+> 
+> Will
+> 
+> Sent from my iPhone
+> 
+> > On Jan 30, 2021, at 5:11 PM, Greg 'groggy' Lehey <grog@lemis.com> wrote:
+> > 
+> >> On Saturday, 30 January 2021 at 14:28:54 -0800, Larry McVoy wrote:
+> >>> On Sat, Jan 30, 2021 at 04:28:26PM -0500, Clem Cole wrote:
+> >>> If I could get the day-2-day
+> >>> applications that I need to work on FreeBSD, I suspect I would be there in
+> >>> a heartbeat.
+> >> 
+> >> I dunno about that.  I tried out FreeBSD a couple of years ago when
+> >> Netflix was flirting with me.  The installer hasn't seen any loving in
+> >> 30 years it would seem.  The disk setup tool sucks just as bad as it
+> >> did back in 1988.
+> > 
+> > You could be right there, for some value of 1988 (FreeBSD came into
+> > being in 1992).  The tools work without being good.  But how often do
+> > you use them?  I've been using FreeBSD since the beginning, and I
+> > can't recall when I last used the disk partitioning tool, though I'm
+> > sure that when I did I overrode a lot of (all?) the suggestions.
+> > 
+> >> I remember when Linux was this bad in the .90ish releases.  A long
+> >> time ago.  Now their install is painless, it's every bit as good as
+> >> Windows and maybe better.
+> > 
+> > FWIW, I find Microsoft "Windows" installation terminally confusing
+> > (that's what you were talking about, right?).  And I've run into
+> > serious problems with various Linux installations too.  That doesn't
+> > make the FreeBSD tools better, but maybe it relativizes it.
+> > 
+> >> And it got that way fast, I remember doing an install on some
+> >> machine around 1998 or 1999, I didn't have a mouse plugged in, no
+> >> worries, you could just move around with the keyboard.  X11 came up
+> >> as part of the install, the entire install was graphical and
+> >> seamless.
+> > 
+> > The FreeBSD installer *does* install X if you select it.
+> > 
+> >> FreeBSD is stuck in the 1990's in terms of user interface.
+> > 
+> > You're still talking about the installer, aren't you?  The normal user
+> > interface is via the shell, which hasn't changed, and for a good
+> > reason.
+> > 
+> >> They've done some good stuff in the kernel but it's not an end user
+> >> system,
+> > 
+> > There I have to agree with you.  A little TLC would go a long way.
+> > But I hope that you're not advocating the "change your GUI with your
+> > underwear" attitude that Microsoft, Apple and many Linux distros
+> > have.  One of the reasons I don't use Linux is because every time I
+> > try, the interface has changed.
+> > 
+> > Greg
+> > --
+> > Sent from my desktop computer.
+> > Finger grog@lemis.com for PGP public key.
+> > See complete headers for address and phone numbers.
+> > This message is digitally signed.  If your Microsoft mail program
+> > reports problems, please read http://lemis.com/broken-MUA
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 

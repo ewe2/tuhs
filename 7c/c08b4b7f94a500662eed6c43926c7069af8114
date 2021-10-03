@@ -1,0 +1,97 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no
+	version=3.4.4
+Received: (qmail 28085 invoked from network); 31 Jul 2021 12:35:58 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2021 12:35:58 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 569029CA4F; Sat, 31 Jul 2021 22:35:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C4A7C9C9B2;
+	Sat, 31 Jul 2021 22:35:11 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="key not found in DNS" (0-bit key; secure) header.d=mail.malbolge.net header.i=@mail.malbolge.net header.b="yq/bU6m9";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0A0A09C9B2; Sat, 31 Jul 2021 22:35:08 +1000 (AEST)
+X-Greylist: delayed 451 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 31 Jul 2021 22:35:05 AEST
+Received: from poseidon.malbolge.net (hera.malbolge.net [185.232.68.32])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 0DD879C9AF
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 22:35:04 +1000 (AEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; s=_domainkey; bh=k0GrPLbHh
+ 2YlCEkEioqYJVLJrynNXGluUzgDOJL92mg=; h=subject:to:from:date;
+ d=mail.malbolge.net; b=yq/bU6m9QLKUPDMRNCwLMmz5nR5lT1AwhVLvsMZBSXAjH+b
+ BUU8tmhNjeDC3MUINy0Q3X7N+WOxIm4GortF2QPCcrFcPNofc4urvCefp6V9yTscQszTq1
+ PIcU8dO7jg1LQIKp7mGymFLKbhMCpaVhftsoUFjU+vqrzN+rs0PGRw=
+Received: from hermes.malbolge.net (hermes.malbolge.net [192.168.123.201])
+ by poseidon.malbolge.net (OpenSMTPD) with ESMTP id f64a1241
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 14:27:05 +0200 (CEST)
+Received: from moon (hera.malbolge.net [10.0.11.1])
+ by hermes.malbolge.net (Postfix) with ESMTPSA id 942131C38AE
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 14:27:30 +0200 (CEST)
+Date: Sat, 31 Jul 2021 14:25:33 +0200
+From: Michael Siegel <msi@malbolge.net>
+To: tuhs@minnie.tuhs.org
+Message-ID: <20210731142533.69caf929@moon>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Subject: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hello,
+
+I've recently started to implement a set of helper functions and
+procedures for parsing Unix-like command-line interfaces (i.e., POSIX +
+GNU-style long options, in this case) in Ada.
+
+While doing that, I learned that there is a better way to approach
+this problem =E2=80=93 beyond using getopt(s) (which never really made sens=
+e to
+me) and having to write case statements in loops every time: Define a
+grammar, let a pre-built parser do the work, and have the parser
+provide the results to the program.
+
+Now, defining such a grammar requires a thoroughly systematic approach
+to the design of command-line interfaces. One problem with that is
+whether that grammar should allow for sub-commands. And that leads to
+the question of how task-specific tool sets should be designed. These
+seem to be a relatively new phenomenon in Unix-like systems that POSIX
+doesn't say anything about, as far as I can see.
+
+So, I've prepared a bit of a write-up, pondering on the pros and cons
+of two different ways of having task-specific tool sets
+(non-hierarchical command sets vs. sub-commands) that is available at
+
+  https://www.msiism.org/files/doc/unix-like_command-line_interfaces.html
+
+I tend to think the sub-command approach is better. But I'm neither a UI
+nor a Unix expert and have no formal training in computer things. So, I
+thought this would be a good place to ask for comment (and get some
+historical perspective).
+
+This is all just my pro-hobbyist attempt to make some people's lives
+easier, especially mine. I mean, currently, the "Unix" command line is
+quite a zoo, and not in a positive sense. Also, the number of
+well-thought-out command-line interfaces doesn't seem to be a growing
+one. But I guess that could be changed by providing truly easy ways to
+make good interfaces.
+
+
+--
+Michael

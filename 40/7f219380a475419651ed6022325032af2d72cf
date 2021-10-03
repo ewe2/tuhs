@@ -1,0 +1,67 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8228 invoked from network); 29 Sep 2021 19:12:51 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Sep 2021 19:12:51 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 6D1849CAFE; Thu, 30 Sep 2021 05:12:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 34AAB9CAE5;
+	Thu, 30 Sep 2021 05:12:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D08CC9CAE4; Thu, 30 Sep 2021 05:12:18 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 704569CAE3
+ for <tuhs@tuhs.org>; Thu, 30 Sep 2021 05:12:18 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 34ADD35E116; Wed, 29 Sep 2021 12:12:18 -0700 (PDT)
+Date: Wed, 29 Sep 2021 12:12:18 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Message-ID: <20210929191218.GR18305@mcvoy.com>
+References: <20210929180742.4E63218C0BE@mercury.lcs.mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210929180742.4E63218C0BE@mercury.lcs.mit.edu>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Sep 29, 2021 at 02:07:42PM -0400, Noel Chiappa wrote:
+>     > From: Larry McVoy
+> 
+>     > If you read(2) a page and mmap()ed it and then did a write(2) to the
+>     > page, the mapped page is the same physical memory as the write()ed
+>     > page. Zero coherency issues.
+> 
+> Now I'm confused; read() and write() semantically include a copy operation
+> (so there are then two copies of that data chunk, and possible consistency
+> issues between them), and the copied item is not necessarily page-sized (so
+> you can't ensure consistency between the original+copy by mapping it in). So
+> when one does a read(file, &buffer, 1), one gets a _copy of just that byte_
+> in the process' address space (and similar for write()).
+> 
+> Yes, there's no coherency issue between the contents of an mmap()'d page, and
+> the system's idea of what's in that page of the file, but that's a
+> _different_ coherency issue.
+
+That "different" coherency issue is the one I was talking about.  SunOS
+got rid of it, when HP-UX etc grudgingly implemented mmap() they did not
+have a unified page cache, they had pages that were mmapped but the data
+was copied from the buffer cache.  It was a mess for years and years.

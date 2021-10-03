@@ -1,0 +1,130 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 31480 invoked from network); 8 Jul 2021 06:48:25 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 8 Jul 2021 06:48:25 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E39189CA43; Thu,  8 Jul 2021 16:48:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DE8F29C861;
+	Thu,  8 Jul 2021 16:47:04 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BF36F9C861; Thu,  8 Jul 2021 16:47:01 +1000 (AEST)
+Received: from mailout7.ceti.pl (mailout7.ceti.pl [62.121.128.47])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 757649C854
+ for <tuhs@minnie.tuhs.org>; Thu,  8 Jul 2021 16:46:57 +1000 (AEST)
+Received: from tau1.ceti.pl (tau.ceti.pl [62.121.128.11])
+ by mailout7.ceti.pl (Postfix) with ESMTP id B48BD37812BE;
+ Thu,  8 Jul 2021 08:46:53 +0200 (CEST)
+Received: by tau1.ceti.pl (Postfix, from userid 3727)
+ id 6D055960CE1; Thu,  8 Jul 2021 08:46:53 +0200 (CEST)
+Date: Thu, 8 Jul 2021 08:46:53 +0200
+From: Tomasz Rola <rtomek@ceti.pl>
+To: Michael =?iso-8859-1?Q?Kj=F6rling?= <michael@kjorling.se>
+Message-ID: <20210708064652.GA19675@tau1.ceti.pl>
+References: <396911b232bae5938068a14fe0f7181e@firemail.de>
+ <CAEoi9W4NXd-yajWk9bcb1X9eK_Ws17TBJOpDE6M-Qf+uLQ2v6A@mail.gmail.com>
+ <20210704004757.GB24671@tau1.ceti.pl>
+ <CAEoi9W7fLGFQMPUcS2E0VAANnPXDVrbxGFs++Nv5W42rxoNxYg@mail.gmail.com>
+ <20210705071450.GA12885@tau1.ceti.pl>
+ <CAD2gp_TNjzZCT8TCfHm_9ARZqFEaWL=6OdT6DOxY9auWY4=WHA@mail.gmail.com>
+ <20210706231659.GA13225@tau1.ceti.pl> <YOT5ajNhoUqyBqvi@mit.edu>
+ <20210707183222.GA9897@tau1.ceti.pl>
+ <6b736f82-97ed-4e51-9652-e672be4e2c66@localhost>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <6b736f82-97ed-4e51-9652-e672be4e2c66@localhost>
+User-Agent: Mutt/1.5.21 (2010-09-15)
+Subject: Re: [TUHS] Overgrown ffox (was: The Unix shell: a 50-year view)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Jul 07, 2021 at 08:50:51PM +0000, Michael Kjörling wrote:
+> On 7 Jul 2021 20:32 +0200, from rtomek@ceti.pl (Tomasz Rola):
+> > An excerpt from my ps:
+> > 
+> > USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+> > 
+> > xxxon    12331 12.5 20.4 5898360 2519640 ?     TNsl Mar29 18278:11 firefox-esr
+> 
+> I'm going to stick my neck out here by saying that the VSZ and RSS
+> values reported by ps, at least for Firefox, are largely meaningless.
+> 
+> I started my usual Firefox instance, which has a handful of plugins,
+> about a metric gazillion bookmarks, and has been my main web browser
+> profile for years (so it probably has collected some crud over time).
+> `ps auxw` reported that process as having a total RSS of a whopping
+> 374 GB.
+> 
+> It is downright _impossible_ that Firefox could actually be using that
+
+This is quite strange for me. Without looking at your system I can only
+suspect it has something to do with multithreading.
+
+If I do two different commands as root, with firefox pid here
+.eq. 12331, as above:
+
+=>  (500 15):    lsof -p 12331 | wc -l
+402
+
+=>  (500 17):   lsof | awk '$2==12331' | wc -l
+22055
+
+The first column gives a name, and in second case it not always is
+'firefox'. I am yet to study manpage for lsof and play with it, but it
+surely shows interesting things.
+
+On my system, when firefox gets killed, 'free' shows a difference - if
+I recall, free mem increases by the size of rss plus all the stuff
+which was opened and released from buffers. I did not pay much
+attention, I assumed numbers would match and this is what they
+probably did :-).
+
+OS on my box used to report to me as Debian, and still does, but some
+years ago I have decided to skip the usual system upgrade, and after
+some more time I started to upgrade various elements by hand. So it is
+more like a tattered patchwork right now. But it does what I expect,
+hopefully.
+
+[...]
+> That's a _factor almost 2300x_ difference between the reported RSS,
+> and the amount of memory that was actually freed up by closing the
+> browser.
+
+Yeah, strange.
+
+[...]
+> On modern systems, with everything from shared libraries to
+> memory-mapped I/O to routine use of memory overcommitting, the
+> resident set size is clearly a poor indicator of the actual amount
+> of memory actively used by a complex process.
+
+Hard to tell - first I would like to learn where the hundred-giga rss
+came from...
+
+-- 
+Regards,
+Tomasz Rola
+
+--
+** A C programmer asked whether computer had Buddha's nature.      **
+** As the answer, master did "rm -rif" on the programmer's home    **
+** directory. And then the C programmer became enlightened...      **
+**                                                                 **
+** Tomasz Rola          mailto:tomasz_rola@bigfoot.com             **

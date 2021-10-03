@@ -1,0 +1,133 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8415 invoked from network); 31 Jul 2021 19:20:36 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2021 19:20:36 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1DB6F9CA4C; Sun,  1 Aug 2021 05:20:34 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 254409C9B2;
+	Sun,  1 Aug 2021 05:20:11 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 2AE279C9B2; Sun,  1 Aug 2021 05:20:08 +1000 (AEST)
+Received: from fedora (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 313C89C9AF
+ for <tuhs@minnie.tuhs.org>; Sun,  1 Aug 2021 05:20:07 +1000 (AEST)
+Received: from fourwinds.com (localhost [127.0.0.1])
+ by fedora (8.16.1/8.15.2) with ESMTP id 16VJK48H2362874
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 12:20:04 -0700
+Received: from localhost (jon@localhost)
+ by fourwinds.com (8.16.1/8.15.2/Submit) with ESMTP id 16VJK2jT2362871
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 12:20:02 -0700
+Message-Id: <202107311920.16VJK2jT2362871@fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: tuhs@minnie.tuhs.org
+In-reply-to: <20210731142533.69caf929@moon>
+References: <20210731142533.69caf929@moon>
+Comments: In-reply-to Michael Siegel <msi@malbolge.net>
+ message dated "Sat, 31 Jul 2021 14:25:33 +0200."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-ID: <2362869.1627759202.1@localhost>
+Content-Transfer-Encoding: 8bit
+Date: Sat, 31 Jul 2021 12:20:02 -0700
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] Systematic approach to command-line interfaces [ meta
+ issues ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Michael Siegel writes:
+> Hello,
+>
+> I've recently started to implement a set of helper functions and
+> procedures for parsing Unix-like command-line interfaces (i.e., POSIX +
+> GNU-style long options, in this case) in Ada.
+>
+> While doing that, I learned that there is a better way to approach
+> this problem – beyond using getopt(s) (which never really made sense to
+> me) and having to write case statements in loops every time: Define a
+> grammar, let a pre-built parser do the work, and have the parser
+> provide the results to the program.
+>
+> Now, defining such a grammar requires a thoroughly systematic approach
+> to the design of command-line interfaces. One problem with that is
+> whether that grammar should allow for sub-commands. And that leads to
+> the question of how task-specific tool sets should be designed. These
+> seem to be a relatively new phenomenon in Unix-like systems that POSIX
+> doesn't say anything about, as far as I can see.
+>
+> So, I've prepared a bit of a write-up, pondering on the pros and cons
+> of two different ways of having task-specific tool sets
+> (non-hierarchical command sets vs. sub-commands) that is available at
+>
+>   https://www.msiism.org/files/doc/unix-like_command-line_interfaces.html
+>
+> I tend to think the sub-command approach is better. But I'm neither a UI
+> nor a Unix expert and have no formal training in computer things. So, I
+> thought this would be a good place to ask for comment (and get some
+> historical perspective).
+>
+> This is all just my pro-hobbyist attempt to make some people's lives
+> easier, especially mine. I mean, currently, the "Unix" command line is
+> quite a zoo, and not in a positive sense. Also, the number of
+> well-thought-out command-line interfaces doesn't seem to be a growing
+> one. But I guess that could be changed by providing truly easy ways to
+> make good interfaces.
+>
+>
+> --
+> Michael
+
+Well, don't let me discourage you from doing what you want.  But, in my
+opinion, it doesn't add value to do something that's already been done
+but differently; it detracts from value because now there's yet another
+competing way to do something.
+
+I'm actually surprised that the format of commands was as consistent as
+it was for as long as it was.  Sure, I never liked the way that things
+like tar were inconsistent, but it was mostly good for a long time.  I
+see two reasons for the more recent messiness.
+
+ o  Minimal learning of history by newer practicioners resulting in
+    doing things in a way that they're familiar instead of learning
+    the behavior of the target environment and fitting in.  It's what
+    I call the "Ugly American Tourist" model; I'm in your country so
+    you should speak English; why would I learn your language?
+
+ o  The endless pile of --gnu-long-option-names.
+
+On one hand, I sort of understand the long option names because so many
+commands have so many options that there's no way to have one-character
+mnemonics.  But, I would make the argument that if one has that many
+options it's a sign that the command is trying to do too much stuff.
+For example, I don't care for the compression options on tar.  These are
+actually just invoking separate programs in a pipeline, which to me is
+the job of the shell.  Sure, it can be convenient, but again, one of the
+advantages of the shell is that I can make scripts for anything that I'm
+doing so often that the convenience would be nice.  And without restarting
+an old flame war, separate programs are more stylisticly in line and more
+useful than many of the cat options.
+
+So I never got getopt().  One of my rules is that I don't use a library
+in cases where the number of lines of gunk that that it takes to use a
+library function is >= the number of lines to just write it myself.  Yeah,
+I know the "but the library has more eyeballs and is debugged" argument
+but in reality libraries are the source of many bugs.  I've always taken
+the approach that I would never hire someone who had to use a library to
+implement a singly-linked list.
+
+Jon

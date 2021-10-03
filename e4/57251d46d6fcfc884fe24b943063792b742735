@@ -1,0 +1,105 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 15679 invoked from network); 23 Feb 2021 00:25:22 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 23 Feb 2021 00:25:22 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id EA85D9C9ED; Tue, 23 Feb 2021 10:25:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6B1EC93D39;
+	Tue, 23 Feb 2021 10:24:50 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1B80393D39; Tue, 23 Feb 2021 10:24:46 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 664AE93D32
+ for <tuhs@tuhs.org>; Tue, 23 Feb 2021 10:24:44 +1000 (AEST)
+Received: by sdaoden.eu (Postfix, from userid 1000)
+ id 51BCF16057; Tue, 23 Feb 2021 01:24:42 +0100 (CET)
+Date: Tue, 23 Feb 2021 01:24:41 +0100
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Robert Clausecker <fuz@fuz.su>
+Message-ID: <20210223002441.a8dF2%steffen@sdaoden.eu>
+In-Reply-To: <YDPX3sDuIQzjCrXL@fuz.su>
+References: <f039c049-add5-ee79-eb5a-84c56a6fc2d2@gmail.com>
+ <20210222033217.dkqavclp22sa77ln@localhost.localdomain>
+ <CAC0cEp-urPFt93eNNtFFoS3=yVCc4Ts8ijgvZ4uDzs4R9R7M4Q@mail.gmail.com>
+ <YDPX3sDuIQzjCrXL@fuz.su>
+Mail-Followup-To: Robert Clausecker <fuz@fuz.su>, tuhs@tuhs.org
+User-Agent: s-nail v14.9.21-105-g4b55359c
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] Proliferation of options is great simplification of
+ pipes, really?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Robert Clausecker wrote in
+ <YDPX3sDuIQzjCrXL@fuz.su>:
+ |> I can imagine a simple perl (or python or whatever) script that would run
+ |> through groff input, determine which preprocessors are *actually* needed,
+ |> and set up a pipeline to run through (only) the needed preprocessors \
+ |> in the
+ |> proper order. I wouldn't have to tell groff what preprocessors I \
+ |> think are
+ |> needed, and groff wouldn't have to change (although my script would) when
+ |> another preprocessor comes into existence. Modern processors are fast
+ |> enough, and groff input small enough, that the "extra" pass wouldn't be
+ |> burdensome. And it would take the burden off me to remember exactly which
+ |> preprocessors are essential. -- jpl
+ |
+ |I'm not sure if it would be that simple.  With preprocessors like
+ |soelim, your script would have to be able to open arbitrary external
+ |files to find out what preprocessors are needed.  And perhaps other
+ |preprocessors too could trigger dependencies on additional
+ |preprocessors depending on how they are used.
+
+Newer incarnations of man(1) support a shebang-alike control line
+<^'\" >followed by concat of [egprtv]+ and include $MANROFFSEQ
+content into this list, then do
+
+   case "${preproc_arg}" in
+                  e)      pipeline="$pipeline | $EQN" ;;
+                  g)      GRAP  ;; # Ignore for compatibility.
+                  p)      pipeline="$pipeline | $PIC" ;;
+                  r)      pipeline="$pipeline | $REFER" ;;
+                  t)      pipeline="$pipeline | $TBL" ;;
+                  v)      pipeline="$pipeline | $VGRIND" ;;
+                  *)      usage ;;
+                  esac
+
+(I copied all this from 2014 text, do not ask me no questions.)
+It would make very much sense to extend this syntax for roff
+usage, so that document creators can define how manual consumers
+generate the result.  This should/could include specification and
+thus automatic adjustment of the used character set.
+The problem with pipes is that they are academic.  You can write
+wrapper scripts or shell functions or for simple cases even
+aliases to give the desire a name, but it does not fit pretty well
+the all-graphical shader-improved wiping experience people now
+have.  You also want good manuals and a shell with a good history
+feature and a nice line editor and possibly tabulator completion,
+just in case you have forgotten something or made an error or are
+too lazy to type that much.
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

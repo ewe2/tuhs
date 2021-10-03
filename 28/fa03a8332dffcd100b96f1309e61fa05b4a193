@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29665 invoked from network); 16 Jul 2021 13:01:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 16 Jul 2021 13:01:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DA2D99C830; Fri, 16 Jul 2021 23:01:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CE0BE9C7F1;
+	Fri, 16 Jul 2021 23:01:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id AEA4E9C7F1; Fri, 16 Jul 2021 23:01:19 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 28AEF9C7F0
+ for <tuhs@tuhs.org>; Fri, 16 Jul 2021 23:01:19 +1000 (AEST)
+Received: from callcc.thunk.org (96-65-121-81-static.hfc.comcastbusiness.net
+ [96.65.121.81]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 16GD0xvL022616
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Fri, 16 Jul 2021 09:01:00 -0400
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+ id F1A554202F5; Fri, 16 Jul 2021 09:00:58 -0400 (EDT)
+Date: Fri, 16 Jul 2021 09:00:58 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+To: Bakul Shah <bakul@iitbombay.org>
+Message-ID: <YPGDCoO4uB1ehBxi@mit.edu>
+References: <alpine.BSF.2.21.9999.2107140824460.15723@aneurin.horsfall.org>
+ <213a4c11-3ab2-4b4a-8d6b-b52105a19711@localhost>
+ <alpine.BSF.2.21.9999.2107161127480.32008@aneurin.horsfall.org>
+ <5777F7E6-062B-4C5A-9C98-36FFE6AC3414@stdio.com>
+ <YPEKScdjJCE+KMjj@mit.edu>
+ <A75B5962-43CC-4BFA-B20F-DD66913DB72D@iitbombay.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <A75B5962-43CC-4BFA-B20F-DD66913DB72D@iitbombay.org>
+Subject: Re: [TUHS] 386BSD released
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Jul 15, 2021 at 10:51:11PM -0700, Bakul Shah wrote:
+> 
+> Dave Yost wrote the serial driver for our 4 port serial card @ Fortune
+> (1981-82).  Later chips like NS16550 had 16 char on chip buffers but we
+> back then we used a Moto SIO chip that had only one char buffer.  IIRC,
+> he used two tricks. One was "partially evaluated" xmit/recv handlers so
+> that each port got its own xmit/recv functions, with hand-crafted
+> instructions (in hex, no less!) just right for a given port and all the
+> interry t handler . The  do was transfer a char from/to the buffer it
+> (lready knew about. The other was he increased the cblock size from 8 to 128
+> (what a clist points to). He says he described this design to dmr who said
+> why not?!  With this design Yost's code was able to handle 4 full-duplex
+> 9600 baud streams at full-speed. Not bad for a 5.6Mhz clock machine!
+
+The trick that I used was two have two "flip buffers" which were
+dedicated for each serial port.  One buffer would be filled by the
+interrupt handler, while the other would be buffer would be processed
+by the bottom half (read: software interrupt) handler.  When the
+bottom half handler had emptied one buffer, it would check to see if
+there were any characters in the other buffer, and if so, flip the two
+and process the characters in that buffer.  Exclusion was handled by a
+combination of disabling serial interrupts and using a spinlock (which
+was held just long enough to flip the pointers to the two flip
+buffers).
+
+With this scheme I could handle multiple pairs of 115200 baud streams
+at full rates before the 40 MHz CPU was saturated.  No memory
+allocation is required on the hot paths, and the amount of processing
+that is done in the hardware interrupt context is the absolute
+minimum.
+
+I also added a bit test against 32-byte bitarray to determine whether
+a character could be handled via the fast path or require special
+handling (in case it was a ^C, ^U, ^S, etc.) but that was important
+only for cooked mode; it wasn't needed for raw mode.  I suspect this
+hack would become less or even not helpful as Intel processors became
+more Spectre- and Meltdown-susceptible, but for the 386, it was a win.  :-)
+
+     	      	  			    	- Ted

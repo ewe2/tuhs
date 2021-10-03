@@ -1,0 +1,136 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18713 invoked from network); 4 Feb 2021 17:47:23 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 4 Feb 2021 17:47:23 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DDCB39CA3A; Fri,  5 Feb 2021 03:47:20 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id C63839C9FD;
+	Fri,  5 Feb 2021 03:46:52 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0915F9C9F7; Fri,  5 Feb 2021 03:46:51 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8D4C99C9F7
+ for <tuhs@minnie.tuhs.org>; Fri,  5 Feb 2021 03:46:50 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 2697835E2B1; Thu,  4 Feb 2021 09:46:50 -0800 (PST)
+Date: Thu, 4 Feb 2021 09:46:50 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Dan Cross <crossd@gmail.com>
+Message-ID: <20210204174650.GC13701@mcvoy.com>
+References: <202101301950.10UJoWeA456408@darkstar.fourwinds.com>
+ <CAEuQd1Dpbcs=kd0XynnwUkYoL_UgRfd355ttZcsLiB8Hf4gEXQ@mail.gmail.com>
+ <CAC20D2M0_X3Tw7371jnrMvUiDBOFDRW1Y6Cycmu_QKnWhotU4A@mail.gmail.com>
+ <20210130222854.GN4227@mcvoy.com>
+ <20210130231119.GA33905@eureka.lemis.com>
+ <E15A5CDB-9A26-4437-ADEC-BCC51DA0F770@gmail.com>
+ <20210131022500.GU4227@mcvoy.com>
+ <alpine.BSF.2.21.9999.2102041629440.70858@aneurin.horsfall.org>
+ <9504e27d-d976-9681-6b97-aa87d124fc43@gmail.com>
+ <CAEoi9W7aAJD-s+2xx+cvbDq76+WyAUVCcsT3GsNXr_TN9+wPpA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAEoi9W7aAJD-s+2xx+cvbDq76+WyAUVCcsT3GsNXr_TN9+wPpA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] FreeBSD behind the times? (was: Favorite unix design
+ principles?)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
++1 to everything Dan said, including the "who cares if it works?".
+
+I was definitely coming at it from the kernel perspective, I joined Sun
+just after SunOS 4.0 came out; that was the release that made mmap/page
+cache be a coherent thing, the buffer cache was almost completely gone,
+I think it was still used for inodes and directories but no user data
+was in there.
+
+The amount of work that went into that was huge but the resulting kernel
+was actually smaller (I think) and much easier to understand and maintain
+(I know).  And the kernel team was quite proud of that work, with good
+reason.
+
+Which is why it blows my mind that the same organization that saw the
+value of have one way to do things, did a 180 and said the page cache
+isn't that important.  When I talked to the ZFS guys about it, their
+plan was that ZFS was going to be the only local file system so it sort
+of didn't matter.  But that's nonsense, you are going to have tmpfs,
+nfs, vfat, ntfs, whatever apple uses, etc.  So you are going to have a
+page cache for all of those, which means the page cache is never going
+away, which means that mmap() wants pages (remember, you can mmap stuff
+that isn't in memory, you need the hardware to fault for you so you can
+go get it).  The ZFS guys said making that work is too hard, we did it
+in BitKeeper, it works fine.  
+
+So the combination of going back to something anyone with OS smarts 
+knows is a bad idea plus the fact that I know from personal experience
+that they could have done in the page cache and still have compression
+and XOR, yeah, I lost a lot of respect for those guys.  
+
+ZFS is very useful, it could have been that and played nice with the 
+page cache.
+
+On Thu, Feb 04, 2021 at 11:32:31AM -0500, Dan Cross wrote:
+> On Thu, Feb 4, 2021 at 10:47 AM Will Senn <will.senn@gmail.com> wrote:
+> 
+> > [snip]
+> >
+> > In response to the negative vibes around ZFS. [snip]
+> >
+> 
+> I think the discordance is around the semantics ZFS's implementation
+> implies. Larry's point about mmap() vs a buffer cache is entirely valid; it
+> took lots of people heroic amounts of work worthy of Greek sagas to bridge
+> the difference between the original buffer and VM page caches, but ZFS
+> says, "meh. too much work; not worth it." The practical implication of that
+> is that memory mapped IO (via `mmap`) is no longer coherent with file IO
+> (via `open`/`close`/`read`/`write`) without lots of work that both degrades
+> performance and add complexity.
+> 
+> The question that a lot of folks who use ZFS regularly ask is, "does that
+> matter?" And perhaps it doesn't: if I've got a file server sitting there
+> serving NFS, do I care what it's kernel is doing? As long as it's
+> saturating the network and disks, and it's reliable...not really.
+> (Incidentally, that was kind of the philosophy behind the original plan9
+> file server kernel...as I heard the story, the rate of change of the plan9
+> kernel proper was too high, so Ken split off the file server portion into
+> its own, special-purpose kernel, and it stayed like that for ~20 years).
+> Similarly, if I'm on the local machine and the required coherence code is
+> there and largely works, then again, perhaps as a consumer of the
+> filesystem, I just don't care. After all, one can still get work done, and
+> ZFS has a bunch of other features that make it very attractive, right? In
+> particular, it's very good at NOT losing my data, kernel purity be damned.
+> 
+> On the other hand, if we're discussing OS design and implementation,
+> (re)splitting the VM and buffer caches is a poor decision. One might well
+> ask, "why?" and the answer may be, "because it adds significant complexity
+> to the kernel." This to me seems like the crux of the disagreement.
+> Satisfied users of ZFS might legitimately ask, "who cares?" and one might
+> respond, "kernel maintainers." If the kernel is mostly transparent as far
+> as a particular use case goes, though, then I can see why one would bulk at
+> the suggestion that this matters. If one is concerned with the design and
+> implementation of kernels, I could see why one would care very much.
+> 
+> Like many things, it's a matter of perspective.
+> 
+>         - Dan C.
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 

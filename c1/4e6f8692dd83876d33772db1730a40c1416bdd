@@ -1,0 +1,82 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 14335 invoked from network); 2 Aug 2021 01:05:28 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Aug 2021 01:05:28 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2DDCC9CA7B; Mon,  2 Aug 2021 11:05:26 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 054129CA63;
+	Mon,  2 Aug 2021 11:05:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CE7209CA63; Mon,  2 Aug 2021 11:05:06 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 45F929CA60
+ for <tuhs@minnie.tuhs.org>; Mon,  2 Aug 2021 11:05:06 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 172153cX019261
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sun, 1 Aug 2021 21:05:04 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 6FAF815C3DD2; Sun,  1 Aug 2021 21:05:03 -0400 (EDT)
+Date: Sun, 1 Aug 2021 21:05:03 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Andrew Warkentin <andreww591@gmail.com>
+Message-ID: <YQdEv2nOznGExbK8@mit.edu>
+References: <20210731142533.69caf929@moon>
+ <CABH=_VR-tfenCLE=DeNcb2ahPjG80v6Ma+W0sRt2jAfy2OX4hg@mail.gmail.com>
+ <CAEoi9W4jmzZB-thocbMrZ+B-bnU5bE-q0BsJ6bimw1V6mpUkeA@mail.gmail.com>
+ <40763c2d-52ad-eb01-8bf8-85acf6fee700@case.edu>
+ <CAEoi9W5Us72G_rxGogEd2FUh1cJdcf0GzR--omC4RFP-hzuQ_w@mail.gmail.com>
+ <CAD2gp_TGGWhKu-uUYN77Y-AnBnY8tTxgcOpfPv-4PNRjgL=idw@mail.gmail.com>
+ <CAD-qYGqWynaEDFZKSeuAApn9H9jJL36ombAzxrSV=VGVU46Gdg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAD-qYGqWynaEDFZKSeuAApn9H9jJL36ombAzxrSV=VGVU46Gdg@mail.gmail.com>
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Aug 01, 2021 at 06:13:18PM -0600, Andrew Warkentin wrote:
+> There's a third kind of primitive that is superior to either spawn()
+> or fork() IMO, specifically one that creates a completely empty child
+> process and returns a context that lets the parent set up the child's
+> state using normal APIs.
+
+I've seen this argument a number of times, but what's never been clear
+to me is what *would* the "normal APIs" be which would allow a parent
+to set up the child's state?  How would that be accomplished?  Lots of
+new system calls?  Magic files in /proc/<pid>/XXX which get
+manipulated somehow?  (How, exactly, does one affect the child's
+memory map via magic read/write calls to /proc/<pid>/XXX....  How
+about environment variables, etc.)
+
+And what are the access rights by which a process gets to reach out
+and touch another process's environment?  Is it only allowed only for
+child processes?  And is it only allowed before the child starts
+running?  What if the child process is going to be running a setuid or
+setgid executable?
+
+The phrase "all process state will have a file-based interface" sounds
+good on paper, but I think it remains to be seen how well a "echo XXX
+> /proc/<pid>/magic-file" API would actually work.  The devil is
+really in the details....
+
+					- Ted

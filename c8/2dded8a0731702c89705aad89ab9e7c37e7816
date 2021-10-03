@@ -1,0 +1,131 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 12857 invoked from network); 18 Feb 2021 20:21:59 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 18 Feb 2021 20:21:59 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3B3D29C75B; Fri, 19 Feb 2021 06:21:56 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8B28E9C6D8;
+	Fri, 19 Feb 2021 06:21:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B376E9C6D8; Fri, 19 Feb 2021 06:21:22 +1000 (AEST)
+Received: from cuzuco.com (v.cuzuco.com [166.84.7.17])
+ by minnie.tuhs.org (Postfix) with ESMTP id 7923D9C6D6
+ for <tuhs@minnie.tuhs.org>; Fri, 19 Feb 2021 06:21:21 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by cuzuco.com (8.14.9/8.13.3) with SMTP id 11IKK1dt006545;
+ Thu, 18 Feb 2021 15:20:15 -0500 (EST)
+Date: Thu, 18 Feb 2021 15:20:01 -0500 (EST)
+Message-Id: <202102182020.11IKK1dt006545@cuzuco.com>
+From: Brian Walden <tuhs@cuzuco.com>
+To: <tuhs@minnie.tuhs.org>
+Subject: Re: [TUHS] cut, paste, join, etc.
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+The last group before I left the labs in 1992 was on was the
+POST team.
+
+pq stood for "post query," but POST consisted of -
+- mailx: (from SVR3.1) as the mail user agent
+- UPAS: (from research UNIX) as the mail delivery agent
+- pq: the program to query the database
+- EV: (pronounced like the biblical name) the database (and the
+  genesis program to create indices)
+- post: program to combine all the above to read email and to send mail via queries
+
+pq by default would looku up people
+  pq lastname:     find all people with lastname, same as pq last=lastname
+  pq first.last:   find all people with first last, same as pq first=first/last=last
+  pq first.m.last: find all people with first m last, same as pq first=first/middle=m/last=last
+
+this how email to dennis.m.ritchie @ att.com worked to send it on to research!dmr
+
+you could send mail to a whole department via /org=45267 or the whole division
+via /org=45 or a whole location via /loc=mh or just the two people in a specific
+office via /loc=mh/room=2f-164
+these are "AND"s an "OR" is just another query after it on the same line
+
+There were some special extentions -
+- prefix, e.g.  pq mackin* got all mackin, mackintosh, mackinson, etc
+- soundex, e.g. pq mackin~ got all with the last name that sounding like mackin,
+    so names such as mackin, mckinney, mckinnie, mickin, mikami, etc
+    (mackintosh and mackinson did not match the soundex, therefore not included)
+
+The EV database was general and fairly simple. It was directory with
+files called "Data" and "Proto" in it.
+"Data" was plain text, pipe delineated fields, newline separated records -
+
+ 123456|ritchie|dennis|m||r320|research!dmr|11273|mh|2c-517|908|582|3770
+
+   (used data from preserved at https://www.bell-labs.com/usr/dmr/www/)
+
+"Proto" defined the fields in a record (I didn't remember exact syntax anymore) -
+
+ id       n i
+ last     a i
+ first    a i
+ middle   a -
+ suffix   a -
+ soundex  a i
+ email    a i
+ org      n i
+ loc      a i
+ room     a i
+ area     n i
+ exch     n i
+ ext      n i
+
+"n" means a number so 00001 was the same as 1, and "a" means alpha, the "i" or "-"
+told genesis if an index should be generated or not. I think is had more but
+that has faded with the years.
+
+If indices are generated it would then point to the block number in Data, so an lseek(2)
+could get to the record quick. I beleive there was two levels of block pointing indices.
+(sort of like inode block pointers had direct and indirect blocks)
+So everytime you added records to Data you had to regenerate all the indices, that was
+very time consuming.
+
+The nice thing about text Data was grep(1) worked just fine, or cut -d'|' or awk -F'|'
+but pq was much faster with a large numer of records.
+
+
+-Brian
+
+Dan Cross <crossd at gmail.com> wrote:
+> It seems that Andrew has addressed Daytona, but there was a small database
+> package called `pq` that shipped with plan9 at one point that I believe
+> started life on Unix. It was based on "flat" text files as the underlying
+> data source, and one would describe relations internally using some
+> mechanism (almost certainly another special file). An interesting feature
+> was that it was "implicitly relational": you specified the data you wanted
+> and it constructed and executed a query internally: no need to "JOIN"
+> tables on attributes and so forth. I believe it supported indices that were
+> created via a special command. I think it was used as the data source for
+> the AT&T internal "POST" system. A big downside was that you could not add
+> records to the database in real time.
+>
+> It was taken to Cibernet Inc (they did billing reconciliation for wireless
+> carriers. That is, you have an AT&T phone but make a call that's picked up
+> by T-Mobile's tower: T-Mobile lets you make the call but AT&T has to pay
+> them for the service. I contracted for them for a short time when I got out
+> of the Marine Corps---the first time) and enhanced and renamed "Eteron" and
+> the record append issue was, I believe, solved. Sadly, I think that
+> technology was lost when Cibernet was acquired. It was kind of cool.
+>
+>         - Dan C.
+>

@@ -1,0 +1,129 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 6730 invoked from network); 30 Sep 2021 09:14:11 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Sep 2021 09:14:11 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2B82E9CB06; Thu, 30 Sep 2021 19:14:08 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 30D369CAE4;
+	Thu, 30 Sep 2021 19:13:23 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=planet.nl header.i=@planet.nl header.b="Rbtwjng9";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 401A39CAE5; Thu, 30 Sep 2021 19:13:15 +1000 (AEST)
+X-Greylist: delayed 664 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 30 Sep 2021 19:13:07 AEST
+Received: from ewsoutbound.kpnmail.nl (ewsoutbound.kpnmail.nl [195.121.94.183])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 4E89E9CAE3
+ for <tuhs@minnie.tuhs.org>; Thu, 30 Sep 2021 19:13:07 +1000 (AEST)
+X-KPN-MessageId: 0475d080-21cd-11ec-a02e-005056992ed3
+Received: from smtp.kpnmail.nl (unknown [10.31.155.7])
+ by ewsoutbound.so.kpn.org (Halon) with ESMTPS
+ id 0475d080-21cd-11ec-a02e-005056992ed3;
+ Thu, 30 Sep 2021 11:01:36 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=planet.nl; s=planet01;
+ h=to:date:message-id:subject:mime-version:content-type:from;
+ bh=YqjKS/yN5J1FgwcyeZTgTBmqhBIPk5ofa93It3wtH7M=;
+ b=Rbtwjng9zzvijXz1V8z2sy424rpx2Gw0iw+N+MVom+cRO+cQVtAddtUwlNkjFkSOye2w3WARShUTA
+ ylhMR8Tf+Sf6idFE5rVbQ8VCvrlwbLVwVHT3gK90TmBRA43ZsjKY1RTYP22cOOA2zuhU2M9W6q35yG
+ cmB1N+h55VrnW0Ig=
+X-KPN-MID: 33|hzLKX5oBlEpLGwZhlDnafvcQshvHLqL7ROHeDBzn9WSRBqYOtznrm068zwMJtR4
+ /vcZqw2V8XL/I/BW0QlIbmngPZCJ/9bdxHT8BvUoPZhU=
+X-KPN-VerifiedSender: Yes
+X-CMASSUN: 33|umitg9YAV3Intb5ghtSCuP6uh6XAJkSpkOG80tlQJmO9dYJqppvFcKok6DdV9PB
+ F394kOicoqhBbD9iioGdCdw==
+X-Originating-IP: 80.101.112.122
+Received: from mba2.fritz.box (sqlite.xs4all.nl [80.101.112.122])
+ by smtp.kpnmail.nl (Halon) with ESMTPSA
+ id 0cd38f1d-21cd-11ec-aee5-005056998788;
+ Thu, 30 Sep 2021 11:01:51 +0200 (CEST)
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 13.4 \(3608.120.23.2.4\))
+Message-Id: <EDEDF06A-C3A2-4E17-8F78-14DF63C8C5AD@planet.nl>
+Date: Thu, 30 Sep 2021 11:01:50 +0200
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3608.120.23.2.4)
+Subject: [TUHS] mmap origin (was Systematic approach to command-line
+ interfaces)
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+From: Paul Ruizendaal via TUHS <tuhs@minnie.tuhs.org>
+Reply-To: Paul Ruizendaal <pnr@planet.nl>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+On Wed, Sep 29, 2021 at 09:40:23AM -0700, Greg A. Woods wrote:
+
+> I think perhaps the problem was that mmap() came too soon in a narrow
+> sub-set of the Unix implementations that were around at the time, when
+> many couldn't support it well (especially on 32-bit systems -- it =
+really
+> only becomes universally useful with either segments or 64-bit and
+> larger address spaces).  The fracturing of "unix" standards at the =
+time
+> didn't help either.
+>=20
+> Perhaps these "add-on hack" problems are the reason so many people =
+think
+> fondly of the good old Unix versions where everything was still coming
+> from a few good minds that could work together to build a cohesive
+> design.  The add-ons were poorly done, not widely implemented, and
+> usually incompatible with each other when they were adopted by
+> additional implementations.
+
+mmap() did come from those days and minds.
+
+The first appearance of mmap() was in 32V R3, done by John Reiser in =
+1981. This is the version of 32V with full demand paging; it implemented =
+a unified buffer cache. According to John, that version of mmap() =
+already had the modern 6 argument API. John added mmap() because he =
+worked with Tenex a lot during his PhD days and missed PMAP. He needed =
+some 6 months to design, implement and debug this version of 32V as a =
+skunkworks project.
+
+I am trying to revert early VAX SVr1/r2 code to get a better view of =
+what 32V R3 looked like, but unfortunately I did not have much time for =
+this effort in last couple of months. It would seem that 32V R3 assumed =
+that disk blocks and memory pages were the same size (true on a 1980 =
+VAX) and with that assumption a unified buffer cache comes natural in =
+this code base.
+
+For 4.2BSD initially Joy cs. had a different approach to memory mapped =
+files in mind (see the 1981 tech report #4 from CSRG). By the time of =
+4.2BSD=E2=80=99s release the manual defined a mmap() system call, but it =
+was not implemented and it appears to have been largely forgotten until =
+SunOS 4 and dynamic libraries six years later.
+
+In the SysV lineage it is less clear. For sure mmap() is not there, but =
+the first implementation of the shmem IPC feature might derive from the =
+32V R3 code. On the inside, SVr2 virtual memory appears to implement the =
+segments (now called regions) that Joy envisaged for 4.2BSD but did not =
+implement.
+
+CB Unix had a precursor to shmem as well, where a portion of system core =
+was reserved for shared memory purposes and could be accessed either via =
+the /dev/mem device or could be mapped into the PDP-11 address space =
+(using 1 of the 8 segment registers for each map). Here too the device =
+and the map were unified.
+
+So far, I have not come across any shared library implementations or =
+precursors in early Unix prior to SunOS 4.
+
+Paul
+

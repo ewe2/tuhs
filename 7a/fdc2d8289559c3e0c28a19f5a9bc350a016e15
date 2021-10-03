@@ -1,0 +1,111 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11318 invoked from network); 5 Mar 2021 15:32:50 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 5 Mar 2021 15:32:50 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 001BD9CA6D; Sat,  6 Mar 2021 01:32:47 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CA5EF9CA6A;
+	Sat,  6 Mar 2021 01:32:24 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 873889CA6A; Sat,  6 Mar 2021 01:32:20 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D26639CA68
+ for <tuhs@minnie.tuhs.org>; Sat,  6 Mar 2021 01:32:19 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 125FWF7x015681
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Fri, 5 Mar 2021 10:32:15 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 3B0F515C3A88; Fri,  5 Mar 2021 10:32:15 -0500 (EST)
+Date: Fri, 5 Mar 2021 10:32:15 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: John Gilmore <gnu@toad.com>
+Message-ID: <YEJO/47hHmW1Pf8Q@mit.edu>
+References: <dc90e590-96c5-15a7-42ba-2c7964ac8461@gmail.com>
+ <20210304212459.GA6303@eureka.lemis.com>
+ <d6b1eebd-4181-71b9-3042-add8f0b0a1b4@gmail.com>
+ <20210304212917.GB6303@eureka.lemis.com>
+ <CAC0cEp_sEEPYuXWxz+4k9iMrXiyPLB_WuU0BfSNfk2_nNeyPDA@mail.gmail.com>
+ <25189.1614937832@hop.toad.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <25189.1614937832@hop.toad.com>
+Subject: Re: [TUHS] tunefs -m 5%
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, Mar 05, 2021 at 01:50:32AM -0800, John Gilmore wrote:
+> John P. Linderman <jpl.jpl@gmail.com> wrote:
+> > I have several 12 TB disks scattered about my house. 5% of 12TB is 600GB.
+> 
+> At one point in hystery, ext2 performance was reported to suffer badly
+> if there was less than 5% of disk space available in an active
+> filesystem.  My naive belief, probably informed by older and wiser heads
+> around Sun, was that when the file system was >95% full, ext2 spent a
+> lot of time seeking around in free lists finding single allocatable
+> blocks.  And there were no built-in "defragmentation" programs that
+> could easily fix that.
+
+I'll point out that BSD FFS, at least in BSD 4.3, reserves 10% of the
+file system for reserved blocks.  The reasoning gave was the same as
+with ext2, which is performance suffers when the file system gets
+really fully.  It really depends on the workload, but for the worst
+case workloads, I've seen performance degradations happen earlier than
+90% or 95% full.
+
+Defragmentation is a hard problem, and it takes a *long* time, and or
+chews up a lot of write cycles on flash, persistent memory, etc.  This
+is especially true when the file system is very full, since there is
+very little "swing space" available to copy data around, especially if
+one is striving for the perfect state (e.g., a files are contiguous,
+and the free space is contiguous).  Defragmentation utilities was
+something that was only really popular on Windows systems, and in the
+last, oh, ten years or so, even in the Windows world defrag is not
+something you'll see in their disk utilities.
+
+Ext4 has a defrag program, but it's really primitive, and it only
+works by attempting to defrag *files*.  It doesn't try to defrag *free
+space*, which is what you really need if you want to try to keep
+performance up (and have space so as to keep files defragmented).  The
+main reason why is that no one has sponsored work in this space ---
+probably because it's way cheaper just to over-provision disk space.
+
+If someone wants to try to implement it, I have a rough design about
+how it might be done for ext4 --- but someone has to volunteer $$$ or
+their own personal time in order to implement it.  And if it's only
+for yourself, it's probably cheaper just to spend a extra few bucks to
+buy a bigger disk.  I suspect it's for similar reasons that none of
+the legacy Unix systems have defragmentation implemented either.  It's
+not something which makes business case.
+
+But hey, if someone is interested in working on it, I'll give the
+standard open source answer --- patches gratefully accepted.  I'll
+even give you a rough design as a starting point.  (And there's no
+guarantee it will be a good idea for flash, given that seeks are
+mostly free for flash, and write cycles are a consideration, and how
+many people are still using HDD's today; newer operating systems, such
+as Fuschia, have started designing for a world where they only need to
+care about file systems for flash.)
+
+Cheers,
+
+					- Ted

@@ -1,0 +1,85 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 1414 invoked from network); 5 Jul 2021 20:30:46 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 5 Jul 2021 20:30:46 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8474E9CA62; Tue,  6 Jul 2021 06:30:43 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A0D359C9F7;
+	Tue,  6 Jul 2021 06:29:55 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5CEE89C9F1; Tue,  6 Jul 2021 06:29:53 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 6F5C59C9F0
+ for <tuhs@tuhs.org>; Tue,  6 Jul 2021 06:29:52 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id BF641640CC6; Mon,  5 Jul 2021 16:26:12 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20210705202612.BF641640CC6@lignose.oclsc.org>
+Date: Mon,  5 Jul 2021 16:26:12 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] Binary log files
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Some of us have, literally for decades, been dealing with
+wtmp by rolling it weekly or monthly or quarterly or whatever,
+letting cron run something like
+
+	cd /usr/adm	# that's how long I've been doing this!
+	umask 022
+	>wtmp.new
+	ln wtmp wtmp.prev
+	mv wtmp.new wtmp
+	# also so long ago there was no seq(1)
+	nums=`awk 'BEGIN {for (i = 12; i >= 0; i--) print i; exit}'`
+	for i in $nums; do
+		inext=`expr $i + 1`
+		if [ -f wtmp.$i ]; then
+			mv wtmp.$i wtmp.$inext
+		fi
+	done
+	mv wtmp.prev wtmp.0
+
+This really isn't rocket science.  It isn't even particularly
+interesting UNIX history.  Can we move on to something that IS
+interesting?
+
+Here are some things I find more interesting:
+
+1.  utmp came before wtmp: utmp(V) appears in the First Edition
+manual, wtmp(V) only in the Second.  Apparently interest in
+who else is logged in right now predated interest in who has
+logged in recently.
+
+2.  Both files started out in /tmp.  wtmp is first said to be
+in /usr/adm instead in the Fifth Edition manual, utmp in /etc
+in the Sixth.
+
+3.  The names /tmp/utmp and /tmp/wtmp appear to have been
+issued by the Department of Redundancy Department.  I think
+it quite likely that Ken and Dennis would have been familiar
+with that joke once the recording containing it was issued
+in mid-1970, but I don't know whether utmp existed in some
+form before that.  I see no sign of it in the fragments of
+PDP-7 source code we have (in particular init doesn't seem
+to use it), but what about later PDP-7 or very early PDP-11
+code predating the late-1971 First Edition manual?
+
+Norman Wilson
+Toronto ON
+Not Insane

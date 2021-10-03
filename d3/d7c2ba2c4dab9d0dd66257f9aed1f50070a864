@@ -1,0 +1,113 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 16114 invoked from network); 30 Aug 2021 03:47:33 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Aug 2021 03:47:33 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 086529D55A; Mon, 30 Aug 2021 13:47:31 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9151E9D52C;
+	Mon, 30 Aug 2021 13:46:58 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BBCE89D52C; Mon, 30 Aug 2021 13:46:56 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E579D9D52B
+ for <tuhs@minnie.tuhs.org>; Mon, 30 Aug 2021 13:46:52 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 17U3klWW000485
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sun, 29 Aug 2021 23:46:48 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 63BC615C3CE6; Sun, 29 Aug 2021 23:46:47 -0400 (EDT)
+Date: Sun, 29 Aug 2021 23:46:47 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Larry McVoy <lm@mcvoy.com>
+Message-ID: <YSxUpxoVnUquMwOz@mit.edu>
+References: <202108292212.17TMCGow1448973@darkstar.fourwinds.com>
+ <20210829235745.GC20021@mcvoy.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210829235745.GC20021@mcvoy.com>
+Subject: Re: [TUHS] Is it time to resurrect the original dsw (delete with
+ switches)?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heretics Society mailing list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Aug 29, 2021 at 04:57:45PM -0700, Larry McVoy wrote:
+> 
+> I give them credit for remounting read-only when seeing errors, they may
+> have gotten that from BitKeeper.
+
+Actually, the btrfs folks got that from ext2/ext3/ext4.  The original
+behavior was "don't worry, be happy" (log errors and continue), and I
+added two additional options, "remount read-only", and "panic and
+reboot the system".  I recommend the last especially for high
+availability systems, since you can then fail over to the secondary
+system, and fsck can repair the file system on the reboot path.
+
+
+The primary general-purpose file systems in Linux which are under
+active development these days are btrfs, ext4, f2fs, and xfs.  They
+all have slightly different focus areas.  For example, f2fs is best
+for low-end flash, the kind that is find on $30 dollar mobile handsets
+on sale in countries like India (aka, "the next billion users").  It
+has deep knowledge of "cost-optimized" flash where random writes are
+to be avoided at all costs because write amplification is a terrible
+thing with very primitive FTL's.
+
+For very large file systems (e.g., large RAID arrays with pedabytes of
+data), XFS will probably do better than ext4 for many workloads.
+
+Btrfs is the file systems for users who have ZFS envy.  I believe many
+of those sexy new features are best done at other layers in the
+storage stack, but if you *really* want file-system level snapshots
+and rollback, btrfs is the only game in town for Linux.  (Unless of
+course you don't mind using ZFS and hope that Larry Ellison won't sue
+the bejesus out of you, and if you don't care about potential GPL
+violations....)
+
+Ext4 is still getting new features added; we recently added a
+light-weight journaling (a simplified version of the 2017 Usenix ATC
+iJournaling paper[1]), and just last week we've added parallelized
+orphan list called Orphan File[2] which optimizes parallel truncate
+and unlink workloads.  (Neither of these features are enabled by
+default yet, because maybe in a few years, or earlier if community
+distros want to volunteer their users to be guinea pigs.  :-)
+
+[1] https://www.usenix.org/system/files/conference/atc17/atc17-park.pdf
+[2] https://www.spinics.net/lists/linux-ext4/msg79021.html
+
+We currently aren't adding the "sexy new features" of btrfs or ZFS,
+but that's mainly because there isn't a business justification to pay
+for the engineering effort needed to add them.  I have some design
+sketches of how we *could* add them to ext4, but most of the ext4
+developers like food with our meals, and I'm still a working stiff so
+I focus on work that adds value to my employer --- and, of course,
+helping other ext4 developers working at other companies figure out
+ways to justify new features that would add value to *their*
+employers.
+
+I might work on some sexy new features if I won the Powerball Lottery
+and could retire rich, or I was working at company where engineers
+could work on whatever technologies they wanted without getting
+permission from the business types, but those companies tend not to
+end well (especially after they get purchased by Oracle....)
+
+						- Ted

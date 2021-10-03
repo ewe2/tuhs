@@ -1,0 +1,102 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11973 invoked from network); 4 Apr 2021 16:18:52 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 4 Apr 2021 16:18:52 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id CA3499CA51; Mon,  5 Apr 2021 02:18:50 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 012849C641;
+	Mon,  5 Apr 2021 02:18:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BF0B49C641; Mon,  5 Apr 2021 02:18:20 +1000 (AEST)
+Received: from ppsw-32.csi.cam.ac.uk (ppsw-32.csi.cam.ac.uk [131.111.8.132])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7E5CA9C63F
+ for <tuhs@tuhs.org>; Mon,  5 Apr 2021 02:18:19 +1000 (AEST)
+X-Cam-AntiVirus: no malware found
+X-Cam-ScannerInfo: http://help.uis.cam.ac.uk/email-scanner-virus
+Received: from [90.251.56.255] (port=62860 helo=milebook.lan)
+ by ppsw-32.csi.cam.ac.uk (smtp.hermes.cam.ac.uk [131.111.8.156]:25)
+ with esmtpsa (PLAIN:fanf2) (TLS1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
+ id 1lT5S5-000Pe6-13 (Exim 4.94)
+ (return-path <fanf2@hermes.cam.ac.uk>); Sun, 04 Apr 2021 17:18:17 +0100
+Date: Sun, 4 Apr 2021 17:18:16 +0100
+From: Tony Finch <dot@dotat.at>
+To: Dan Stromberg <drsalists@gmail.com>
+In-Reply-To: <CAGGBd_r8JzjhUn-QjfJ2d_Vy_VLzb6jE1k2MPPdjRYS1oqJL4A@mail.gmail.com>
+Message-ID: <3c7d43cd-3f3d-bbcc-ea93-f27289935d5c@dotat.at>
+References: <20210401145025.GA1202@naleco.com>
+ <D8EEAA7D-1782-4E35-8C4C-70CCE2D95AAF@pobox.com>
+ <alpine.DEB.2.21.2104020207370.25184@sd-119843.dedibox.fr>
+ <202104020700.13270EDK018774@freefriends.org>
+ <alpine.DEB.2.21.2104020551320.25468@sd-119843.dedibox.fr>
+ <202104021026.132AQhs5014565@freefriends.org>
+ <20210402140229.GD1202@naleco.com>
+ <alpine.DEB.2.21.2104021012160.26114@sd-119843.dedibox.fr>
+ <20210402151650.GA8268@mcvoy.com>
+ <alpine.BSF.2.21.9999.2104031247300.23232@aneurin.horsfall.org>
+ <CAGGBd_r8JzjhUn-QjfJ2d_Vy_VLzb6jE1k2MPPdjRYS1oqJL4A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: Re: [TUHS] Zombified SCO comes back from the dead,
+ brings trial back to life against IBM
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Dan Stromberg <drsalists@gmail.com> wrote:
+>
+> Please see https://stromberg.dnsalias.org/~strombrg/why-solaris.html for a
+> list of benefits of 5.5 over 4.1.x.
+
+A few of those are distinctly mixed blessings :-)
+
+I learned about Solaris's in-kernel telnet the hard way, trying to debug a
+system on which telnet would not work properly after rebooting. I think I
+worked it out by trussing telnetd, which showed me that it was trying to
+load a kernel module, and failing because we had chrooted it. A bit of
+searching around told me what the module was for.
+
+The Solaris automounter was neat - we did clever things with the userland
+part, and it mostly performed well because the fast path was in the
+kernel. Except that it didn't have a cache for ENOENT directory entries,
+so requests for nonexistent paths always took a trip to userland, and (as
+far as I could tell) these requests were serialized, and if you managed to
+overload the automounter it would start returning bogus errors - I think
+it was EPERM. Our Apache httpd started randomly returning 403 errors when
+it tried to access a missing .htaccess (which it did on every request!)
+and got EPERM instead.
+
+The name service cache was also problematic. It was probably useful for
+getpwnam() etc. on systems using NIS, but it behaved very badly on systems
+that sent a lot of DNS queries through nscd. It worked much better for us
+if we simply prevented it from running at all. And I'm not entirely sure
+it was all that great for NIS: another problem I heard of second hand was
+password files getting truncated when lots of users were trying to change
+their passwords at the same time. My colleagues fixed that by ensuring all
+password changes happened on the NIS master with suitable locking, and the
+password files were periodically replicated with rdist instead of using
+more normal NIS machinery.
+
+Tony.
+-- 
+f.anthony.n.finch  <dot@dotat.at>  https://dotat.at/
+Shetland Isles: West 7 or gale 8, veering northwest gale 8 or severe
+gale 9, occasionally storm 10 later. Moderate or rough, becoming very
+rough in sheltered east, otherwise very rough becoming high or very
+high. Rain then squally snow showers. Moderate or poor, occasionally
+good.
+

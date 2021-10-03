@@ -1,0 +1,90 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 7227 invoked from network); 20 Jun 2021 01:50:28 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 20 Jun 2021 01:50:28 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 313BE94955; Sun, 20 Jun 2021 11:50:24 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2730F93DBB;
+	Sun, 20 Jun 2021 11:49:25 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 3363693DBB; Sun, 20 Jun 2021 11:49:21 +1000 (AEST)
+X-Greylist: delayed 1852 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 20 Jun 2021 11:49:18 AEST
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+ by minnie.tuhs.org (Postfix) with SMTP id 42DC693D62
+ for <tuhs@tuhs.org>; Sun, 20 Jun 2021 11:49:18 +1000 (AEST)
+Received: by lignose.oclsc.org (Postfix, from userid 1000)
+ id E7D7F640CC6; Sat, 19 Jun 2021 21:15:53 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20210620011553.E7D7F640CC6@lignose.oclsc.org>
+Date: Sat, 19 Jun 2021 21:15:53 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Subject: Re: [TUHS] Disassemblers
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Rob Pike:
+
+  Although upon reflection, I think what I did was fix 'adb' and call it
+  'db'. Haven't had my coffee yet this morning.
+
+====
+
+I don't think so.  I did quite a lot of work on adb during my
+time at the Labs.  I remember clearly that it still used all
+the Bournegol macros when I started; I doubt Rob would have
+left that there.  (It was Rob who translated the shell
+back to C, I believe.)
+
+I got into adb because it still used ptrace and everyone else
+seemed scared to touch the code to convert it to use /proc.
+So I fixed that, and fixed sdb too, and finally removed
+the ptrace call from the kernel.  I remember celebrating
+by expunging ptrace from the UNIX Room copy of the V8
+manual.  ptrace happened to occupt two facing pages, which
+I glued together.
+
+I did a lot more hacking on adb after that, ranging from
+little stuff like making # a synonym for 0x in input
+(so that adb's output could be picked up from the screen
+and re-used as input, a principle established firmly and
+correctly by Rob!) to a major restructuring to isolate
+machine-dependent pieces like instruction decoding and
+word formats, so that it was simpler not only to make
+adb work on a new processor architecture but even to make
+a sort of cross-adb that could, say, correctly interpret
+a PDP-11 core image on a VAX.  (This actually mattered;
+by the time I arrived Research had no PDP-11s running
+general-purpose UNIX, but did have LSI-11s acting as
+Datakit controllers and a standalone power-backed-up
+LSI-11 that decoded the time signal from WWVB.)
+
+I was never really happy about the restructuring; it did
+more or less what I wanted but it wasn't really graceful.
+And cross-adb needed a distinct binary for each target.
+I had thoughts of trying to make a meta-language to
+describe the target's data formats (simple except for
+floating point) and how to print its instructions
+(messier, but I remember being inspired by the clever
+table-driven code in an disassembler Ken wrote for,
+I think it was, the NS32000), so that one could load
+a table from a file at startup; never had the time or
+the courage to carry through on it.
+
+Norman Wilson
+Toronto ON

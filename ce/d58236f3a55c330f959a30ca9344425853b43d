@@ -1,0 +1,150 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 11336 invoked from network); 30 Aug 2021 17:41:09 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Aug 2021 17:41:09 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E47719D5BC; Tue, 31 Aug 2021 03:40:58 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EBDD29D52D;
+	Tue, 31 Aug 2021 03:40:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0AA579D52D; Tue, 31 Aug 2021 03:39:31 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id EE7529D52B
+ for <tuhs@minnie.tuhs.org>; Tue, 31 Aug 2021 03:39:29 +1000 (AEST)
+Received: from kent.sdaoden.eu (kent.sdaoden.eu [10.5.0.2])
+ by sdaoden.eu (Postfix) with ESMTPS id 0EB9F16057;
+ Mon, 30 Aug 2021 19:39:27 +0200 (CEST)
+Received: by kent.sdaoden.eu (Postfix, from userid 1000)
+ id 0F37CDCF; Mon, 30 Aug 2021 17:05:10 +0200 (CEST)
+Date: Mon, 30 Aug 2021 17:05:10 +0200
+Author: Steffen Nurpmeso <steffen@sdaoden.eu>
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Jon Steinhart <jon@fourwinds.com>
+Message-ID: <20210830150510.jWrRZ%steffen@sdaoden.eu>
+In-Reply-To: <202108292212.17TMCGow1448973@darkstar.fourwinds.com>
+References: <202108292212.17TMCGow1448973@darkstar.fourwinds.com>
+Mail-Followup-To: Jon Steinhart <jon@fourwinds.com>,
+ The Unix Heretics Society mailing list <tuhs@minnie.tuhs.org>
+User-Agent: s-nail v14.9.22-175-gc118a4a5c7
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] Is it time to resurrect the original dsw (delete with
+ switches)?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Unix Heretics Society mailing list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Jon Steinhart wrote in
+ <202108292212.17TMCGow1448973@darkstar.fourwinds.com>:
+ |I recently upgraded my machines to fc34.  I just did a stock
+ |uncomplicated installation using the defaults and it failed miserably.
+ |
+ |Fc34 uses btrfs as the default filesystem so I thought that I'd give it
+ ...
+
+ |Any of the rest of you have any experiences with btrfs?  I'm sure that it
+ |works fine at large companies that can afford a team of disk babysitters.
+ |What benefits does btrfs provide that other filesystem formats such as
+ |ext4 and ZFS don't?  Is it just a continuation of the "we have to do
+ |everything ourselves and under no circumstances use anything that came
+ |from the BSD world" mentality?
+
+=46rom a small man perspective i can say i use btrfs.  I have seen
+more problems with filesystems in these 29 months than in the ~36
+years (well, 22 if you only count Unix, mostly FreeBSD) before.
+
+I have learned that i have to chattr +C my vm/ directory in order
+to avoid filesystem errors which can only be solved by deleting
+the corrupted files (which were not easy to find out,
+inspect-internal inode-resolve could have helped a bit better, but
+.. why?).  I have seen (factual) snapshot receive errors that were
+not indicated by the tool's exit status.  With dangling files
+laying around.   I have seen +C attributes missing on the target
+filesystem from played in snapshots.  I have found it impossible
+to mount external devices because "BTRFS warning (device
+<unknown>): duplicate device /dev/sdc2 devid 1 generation 3977"
+even though the former umount was successful (i must admit i had
+used lazytime mount option there, be sure not to do that for
+BTRFS).  I know where you coming from, i tried it all without
+success.  With all the little tools that do not do what you want.
+
+I found it quite ridiculous that i had to shrink-resize my
+filesystem in an iteration because the "minimum possible" size was
+adjusted each and every time, until i finally was where the actual
+filesystem usage indicated you would end up with from the
+beginning.  (defrag did not prevent this.)
+
+On the other hand i am still here, now on Luks2, now with xxhash
+checksums and data and meta DUP (instead of RAID 1, i thought).
+Same data, just moved over onto.
+
+I think i would try out ZFS if it would be in-kernel.  The FreeBSD
+Handbook is possibly the best manual you can have for that.  But
+i mean the ZFS code is much, much larger than BTRFS, BTRFS serves
+me really, really good for what i want and need, and i am sailing
+Linux stable/latest (4.19, now 5.10) here, on a free and small
+Linux distribution without engineering power aka supervision, that
+sails somewhat the edge of what all the many involved projects
+produce, with problems all over the place, sometimes more,
+sometimes less, some all the time.  That is nothing new, you have
+to live with some deficiencies in the free software world; i just
+find it sometimes hard to believe that this is still true for
+Linux with the many many billions of Dollars that went in, and the
+tens of thousands of people working on it.
+
+I really hate that all the Linux kernel guys seem to look forward
+only, mostly, you have to go and try out the newest thing, maybe
+there all is good.  Of course .. i can understand this (a bit).
+That is the good thing of using such an engineering-power
+distribution, you likely get backports and have a large user base
+with feedback.
+
+ |In my limited experience btrfs is a BiTteR FileSystem to swallow.
+
+Well often people say you need to know what you are doing.  That
+is hard without proper documentation, and the www is a toilet.
+And noone writes HOWTOs any more.  But, for example, if i do not
+use an undocumented kernel parameter (rtw88_pci.disable_aspm=3D1),
+and use wifi and bluetooth (audio) in conjunction, then i have to
+boot into the Windows startup screen in order to properly
+reinitialize my wifi/bluetooth chip.  Or else you are dead.  And
+that even though it seems the Linux driver comes from the Chip
+creator itself.  So i think a "chattr +C" here and there, it can
+be directory-wide, it could be a mount or creation option, isn't
+that bad.  Also it is just me having had a go (or julia or nim; or
+perl) on using _one_ filesystem with several subvolumes for
+anything; if i would have used my (well, security context only)
+old-style way of doing things and used several hard partitions
+with individual filesystems, i would have used +C from the
+beginning for that one.  Especially if i would have read it in the
+manual page.
+
+I do believe todays' journalled, checksummed, snapshot'able
+copy-on-write filesystems are complex beasts.
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

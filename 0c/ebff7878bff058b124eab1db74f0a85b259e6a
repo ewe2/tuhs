@@ -1,0 +1,80 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 10544 invoked from network); 2 Aug 2021 14:59:32 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Aug 2021 14:59:32 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 698E39CA94; Tue,  3 Aug 2021 00:59:29 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9BA389CA63;
+	Tue,  3 Aug 2021 00:58:59 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6609A9CA63; Tue,  3 Aug 2021 00:58:57 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8C7F99CA60
+ for <tuhs@tuhs.org>; Tue,  3 Aug 2021 00:58:56 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 172EwoV5024688
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Mon, 2 Aug 2021 10:58:50 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 0B0CD15C3DD2; Mon,  2 Aug 2021 10:58:50 -0400 (EDT)
+Date: Mon, 2 Aug 2021 10:58:50 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Douglas McIlroy <douglas.mcilroy@dartmouth.edu>
+Message-ID: <YQgIKtnNakqciILp@mit.edu>
+References: <CAKH6PiV6Fj6gOi0eA=6wco4UfzD=+rgTiAeZYbfABvP9DP0Osg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKH6PiV6Fj6gOi0eA=6wco4UfzD=+rgTiAeZYbfABvP9DP0Osg@mail.gmail.com>
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sun, Aug 01, 2021 at 10:42:53PM -0400, Douglas McIlroy wrote:
+> > spawn() beats fork()[;] fork() should be deprecated
+> 
+> Spawn is a further complication of exec, which tells what signals and
+> file descriptors to inherit in addition to what arguments and
+> environment variables to pass.
+> 
+> Fork has a place. For example, Program 1 in
+> www.cs.dartmouth.edu/~doug/sieve/sieve.pdf forks like crazy and never
+> execs. To use spawn, the program would have to be split in three (or
+> be passed a switch setting).
+> 
+> While you may dismiss Program 1 as merely a neat demo, the same idea
+> applies in parallelizing code for use in a multiprocessor world.
+
+It's certainly clear that some kind of primitive is needed to create
+new threads.  An open question is whether if there exists some kind of
+"new thread" primitve plus either spawn(2) or some kind of "create a
+child process and then then frob like crazy using 'echo XXX >
+/proc/<pid>/<magic files>'" whether there still is a need for a
+fork(2) system call.
+
+Obviously, as soon as we start going down this path, we're deviated
+quite strongly from the "radical simplicity" of Unix Version 7 that
+people have accused modern systems (whether they be Linux or FreeBSD)
+of lacking.  It's rather interesting that we haven't heard complaints
+about how people who dare to try come up with new API's are somehow
+traitors to "The Unix Philosphy" that we've seen on other threads.  :-)
+
+	    	      		      	    - Ted

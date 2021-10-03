@@ -1,0 +1,83 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13883 invoked from network); 17 Sep 2021 15:55:07 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Sep 2021 15:55:07 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8088F9CAD2; Sat, 18 Sep 2021 01:55:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3B3969CAB3;
+	Sat, 18 Sep 2021 01:54:45 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4E0199CAB3; Sat, 18 Sep 2021 01:54:42 +1000 (AEST)
+X-Greylist: delayed 1157 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 18 Sep 2021 01:54:41 AEST
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1A0279CAB2
+ for <tuhs@minnie.tuhs.org>; Sat, 18 Sep 2021 01:54:41 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 96CC618C0A6; Fri, 17 Sep 2021 11:35:23 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20210917153523.96CC618C0A6@mercury.lcs.mit.edu>
+Date: Fri, 17 Sep 2021 11:35:23 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Unix for PDP11/20 w/o mmu or paging option
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Roland Huisman
+
+    > I have a PDP11/20 and I would love to run an early Unix version on
+    > it. ... But it seems that the earliest versions of Unix do not need the
+    > extra memory.  Does anyone have RK05 disk images for these early Unix
+    > versions?
+
+Although the _kernel_ source for V1 is available:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=V1
+
+most of the rest is missing; only 'init' and 'sh' are available. So one would
+have to write almost _everything_ else. Some commands are available in PDP-11
+assembler in later versions, and might be movable without _too_ much work -
+but one would have to start with the assembler itself, which is luckily in
+assembler.
+
+
+If I were trying to run 'UNIX' on an -11/20, I think the only reasonable
+choice would be MINI-UNIX:
+
+  https://gunkies.org/wiki/MINI-UNIX
+
+It's basically V6 UNIX with all use of the PDP-11 memory management
+removed. The advantage of going MINI-UNIX is that almost all V6 source
+(applications, drivers, etc) will run on it 'as is'.
+
+It does need ~56KB of main memory. If you don't have that much on the -11/20,
+LSX (links in the above) would be an option; it's very similar to MINI-UNIX,
+but is trimmed down some, to allow its use on systems with less main memory.
+
+I'm not sure if MINI-UNIX has been run on the -11/20, but it _should_ run
+there; it runs on the -11/05, and the only differences between the /20 and the
+/05 are that the /20 does not have the RTT instruction (and I just checked,
+and MINI-UNIX doesn't use RTT), and SWAB doesn't clear the V condition code
+bit. (There are other minor differences, such as OP Rn, (Rn)+ are different on
+the -11/20, but that shouldn't be an issue.)
+
+Step 1 would be to get MINI-UNIX running on an -11/20 under a simulator; links
+in the above to get you there.
+
+	Noel

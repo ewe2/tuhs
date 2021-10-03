@@ -1,0 +1,110 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29187 invoked from network); 28 Jun 2021 05:12:06 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Jun 2021 05:12:06 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3A43C9CB5E; Mon, 28 Jun 2021 15:12:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9CF679CA5F;
+	Mon, 28 Jun 2021 15:10:59 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BEE899CA5F; Mon, 28 Jun 2021 15:10:56 +1000 (AEST)
+X-Greylist: delayed 1323 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Mon, 28 Jun 2021 15:10:56 AEST
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 0BC909CA3B
+ for <tuhs@minnie.tuhs.org>; Mon, 28 Jun 2021 15:10:56 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 2B53B18C08F; Mon, 28 Jun 2021 00:48:52 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20210628044852.2B53B18C08F@mercury.lcs.mit.edu>
+Date: Mon, 28 Jun 2021 00:48:52 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Using printf from Assembly Language in V6, and db.
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Riley
+
+    > I want to use printf from an assembly language program, in V6. ...  the
+    > substitutional arguments for printf are pushed onto the stack in reverse
+    > order, then the address of the string, and then printf is called. After
+    > this, 6 is added to the stack pointer.
+
+This is all down to the standard C environment / calling sequence on the
+PDP-11 (at least, in V6 C; other compilers may do it differently). Calls to
+printf() are in no way special.
+
+Very briefly, there's a 'frame pointer' (R5) which points to the current stack
+frame; all arguments and automatics are relative to that. A pair of special
+routines, csv and cret (I couldn't find the source on TUHS, but it happens to
+be here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/lib/csv.s
+
+if you want to see it), set up and tear down the frame on entry/exit to that
+routine. The SP (R6) points to a blank location on the top (i.e. lower address;
+PDP-11 stacks grow down) of the stack.
+
+To call a subroutine, the arguments are pushed, the routine is called (which
+pushes the return PC), and on return (which pops the return PC), the arguments
+are discarded by the caller.
+
+(I wrote a note, BITD, explaining how all this worked; I'll upload it to the
+CHWiki when I get a chance.)
+
+
+    > I assume that the printf routine pops the address of the string off the
+    > stack, but leaves the other values on the stack
+
+No, all C routines (including printf()) leave the stack more or less alone,
+except for CSV/CRET hackery, allocating space for automatic variables on
+routine entry (that would be at L1; try looking at the .s for a routine with
+automatic variables), and popping the return PC on exit. The exception to this
+is the stuff around calling _enother_ routine (sketched above).
+
+Another exception is alloca() (source here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/lib/alloca.s
+
+again, couldn't find it in TUHS), which allocated a block of memory on
+the stack (automatically discarded when the routine which called alloca()
+returns). Note that since all automatic variables and incoming arguments
+are relative to the FP, alloca is _really_ simple; justs adjusts the
+SP, and it's done.
+
+    > What troubles me is that the stack pointer is not decremented before the
+    > first mov, in the example below. Is this some C convention? I would
+    > assume that the first push in my example would overwrite the top of the
+    > stack.
+
+That's right; that's because in the C runtime environment, the top location
+on the stack is a trash word (set up by csv).
+
+    > I understand db only works on files like a.out or core dumps. If I
+    > wanted to break the assembly language program to examine values, how can
+    > I force a termination and core dump elegantly, so I can examine some
+    > register values?
+
+Use 'cdb':
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=V6/usr/man/man1/cdb.1
+
+which can do interactive debugging.
+
+      Noel

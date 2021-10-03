@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 908 invoked from network); 29 Sep 2021 18:08:25 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Sep 2021 18:08:25 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 2694A9CB36; Thu, 30 Sep 2021 04:08:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 59B6F9CAE4;
+	Thu, 30 Sep 2021 04:07:48 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 43B559CAE4; Thu, 30 Sep 2021 04:07:44 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B675C9CAE3
+ for <tuhs@tuhs.org>; Thu, 30 Sep 2021 04:07:43 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 4E63218C0BE; Wed, 29 Sep 2021 14:07:42 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20210929180742.4E63218C0BE@mercury.lcs.mit.edu>
+Date: Wed, 29 Sep 2021 14:07:42 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Systematic approach to command-line interfaces
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Larry McVoy
+
+    > If you read(2) a page and mmap()ed it and then did a write(2) to the
+    > page, the mapped page is the same physical memory as the write()ed
+    > page. Zero coherency issues.
+
+Now I'm confused; read() and write() semantically include a copy operation
+(so there are then two copies of that data chunk, and possible consistency
+issues between them), and the copied item is not necessarily page-sized (so
+you can't ensure consistency between the original+copy by mapping it in). So
+when one does a read(file, &buffer, 1), one gets a _copy of just that byte_
+in the process' address space (and similar for write()).
+
+Yes, there's no coherency issue between the contents of an mmap()'d page, and
+the system's idea of what's in that page of the file, but that's a
+_different_ coherency issue.
+
+Or am I confused?
+
+
+PS:
+    > From: "Greg A. Woods"
+
+    > I now struggle with liking the the Unix concept of "everything is a
+    > file" -- especially with respect to actual data files.  Multics also got
+    > it right to use single-level storage -- that's the right abstraction
+
+Oh, one other thing that SLS breaks, for data files, is the whole Unix 'pipe'
+abstraction, which is at the heart of the whole Unix tools paradigm. So no
+more 'cmd | wc' et al. And since SLS doesn't have the 'make a copy'
+semantics of pipe output, it would be hard to trivially work around it.
+
+Yes, one could build up a similar framework, but each command would have to
+specify an input file and an output file (no more 'standard in' and 'out'),
+and then the command interpreter would have to i) take command A's output file
+and feed it to command B, and ii) delete A's output file when the whole works
+was done. Yes, the user could do it manually, but compare:
+
+  cmd aaa | wc
+
+and
+
+  cmd aaa bbb
+  wc bbb
+  rm bbb
+
+If bbb is huge, one might run out of room, but with today's 'light my cigar
+with disk blocks' life, not a problem - but it would involve more disk
+traffic, as bbb would have to be written out in its entirety, not just have a
+mall piece kept in the disk cache as with a pipe.
+
+	Noel

@@ -1,0 +1,111 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23173 invoked from network); 31 Jul 2021 21:33:43 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2021 21:33:43 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B510B9CB17; Sun,  1 Aug 2021 07:33:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 094E39CA4E;
+	Sun,  1 Aug 2021 07:32:47 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D7EDD9C9B2; Sun,  1 Aug 2021 07:32:08 +1000 (AEST)
+Received: from fedora (fourwinds.com [63.64.179.162])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6BB2D9C9B4
+ for <tuhs@minnie.tuhs.org>; Sun,  1 Aug 2021 07:32:08 +1000 (AEST)
+Received: from fourwinds.com (localhost [127.0.0.1])
+ by fedora (8.16.1/8.15.2) with ESMTP id 16VLW6Ku2410046
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 14:32:06 -0700
+Received: from localhost (jon@localhost)
+ by fourwinds.com (8.16.1/8.15.2/Submit) with ESMTP id 16VLW6VD2410038
+ for <tuhs@minnie.tuhs.org>; Sat, 31 Jul 2021 14:32:06 -0700
+Message-Id: <202107312132.16VLW6VD2410038@fourwinds.com>
+From: Jon Steinhart <jon@fourwinds.com>
+To: TUHS main list <tuhs@minnie.tuhs.org>
+In-reply-to: <CAFH29to=A77KqHo8M9KjY4UW6cTaWqrqEKj8SpTPMtj9JYQpFA@mail.gmail.com>
+References: <20210731142533.69caf929@moon>
+ <202107311920.16VJK2jT2362871@fourwinds.com>
+ <CAFH29to=A77KqHo8M9KjY4UW6cTaWqrqEKj8SpTPMtj9JYQpFA@mail.gmail.com>
+Comments: In-reply-to Richard Salz <rich.salz@gmail.com>
+ message dated "Sat, 31 Jul 2021 17:06:11 -0400."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <2410032.1627767126.1@localhost>
+Date: Sat, 31 Jul 2021 14:32:06 -0700
+X-JON-SPAM: local delivery
+Subject: Re: [TUHS] Systematic approach to command-line interfaces [ meta
+ issues ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Richard Salz writes:
+> On Sat, Jul 31, 2021 at 3:21 PM Jon Steinhart <jon@fourwinds.com> wrote:
+>
+> > opinion, it doesn't add value to do something that's already been done
+> > but differently; it detracts from value because now there's yet another
+> > competing way to do something.
+> >
+>
+> You mean like not using getopt and rolling your own?  Shrug.
+>
+> while ((i = getopt(argc, argv, "xxxxx:xxxx")) != -1)
+>    switch (i) {
+>    case ....
+>   }
+> argc -= optind;
+> argv += optind;
+>
+> So I never got getopt().  One of my rules is that I don't use a library
+> > in cases where the number of lines of gunk that that it takes to use a
+> > library function is >= the number of lines to just write it myself.
+>
+>
+> I don't know, what lines in the above are extra beyond what you write?  The
+> last two if being generous I suppose.
+
+Well, in my opinion that's not really an accurate representation of using getopt.
+
+I would of course write the #include line, and the table of options, which would
+end up being >= the number of lines that it takes me to do this...
+
+	while (--argc > 0) {
+		if (*(++argv)[0] == '-') {
+			for (p = *argv + 1; *p != '\0'; p++) {
+				switch (*p) {
+
+Even if it took a few more lines to do it my way, I'm a believer that good coding
+style keeps "meatspace locality of reference" in mind.  As programmers, we put in
+a lot of effort to ensure locality of reference for computers, but then completely
+toss it for people who aren't as good as it.  So given a choice of a few lines of
+code versus having to look something up somewhere else, I choose the few lines of
+code.
+
+Being a geezer, I have lots of code lying around from which I can extract working
+fragments such as the one above.  Writing those few lines of code provides insulation
+from supply-side attack vectors bugs in libraries, versioning issues, having to load
+debug libraries, and so on.
+
+I realize that this isn't a huge deal by itself; it's a philosophical point.  When
+I strace any random program that I didn't write I'm astonished by the amount of
+library loading that takes place.  So any issues are multiplied by n.
+
+Don't get me wrong; I use plenty of libraries.  But I tend to use those for stuff
+that is so common that there is a benefit from shared libraries (or at least there
+was before everything got containerized) and for libraries that do actual hard stuff.
+But I don't use libraries for small snippets of code that I could easily write
+myself yielding better code clarity for others reading my code.
+
+Jon

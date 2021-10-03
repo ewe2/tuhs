@@ -1,0 +1,118 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 25047 invoked from network); 1 Sep 2021 15:07:53 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Sep 2021 15:07:53 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A206A9D55A; Thu,  2 Sep 2021 01:07:50 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3A64B9BA1D;
+	Thu,  2 Sep 2021 01:07:31 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5D8489BA1D; Thu,  2 Sep 2021 01:07:26 +1000 (AEST)
+X-Greylist: delayed 1147 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Thu, 02 Sep 2021 01:07:25 AEST
+Received: from elf.torek.net (unknown [50.212.202.245])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D9A8E9B9F9
+ for <tuhs@tuhs.org>; Thu,  2 Sep 2021 01:07:25 +1000 (AEST)
+Received: from elf.torek.net (localhost [127.0.0.1])
+ by elf.torek.net (8.15.2/8.15.2) with ESMTPS id 181EmHKd062092
+ (version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO)
+ for <tuhs@tuhs.org>; Wed, 1 Sep 2021 07:48:17 -0700 (PDT)
+ (envelope-from torek@elf.torek.net)
+Received: (from torek@localhost)
+ by elf.torek.net (8.15.2/8.15.2/Submit) id 181EmCiB062091
+ for tuhs@tuhs.org; Wed, 1 Sep 2021 07:48:12 -0700 (PDT)
+ (envelope-from torek)
+Date: Wed, 1 Sep 2021 07:48:12 -0700 (PDT)
+From: Chris Torek <torek@elf.torek.net>
+Message-Id: <202109011448.181EmCiB062091@elf.torek.net>
+To: tuhs@tuhs.org
+In-Reply-To: <20210901141638.F064F640CC6@lignose.oclsc.org>
+X-Greylist: inspected by milter-greylist-4.6.2 (elf.torek.net [127.0.0.1]);
+ Wed, 01 Sep 2021 07:48:18 -0700 (PDT) for IP:'127.0.0.1'
+ DOMAIN:'localhost' HELO:'elf.torek.net' FROM:'torek@elf.torek.net' RCPT:''
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.6.2
+ (elf.torek.net [127.0.0.1]); Wed, 01 Sep 2021 07:48:18 -0700 (PDT)
+Subject: Re: [TUHS] Who said ...
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+>DEC's diags were far from perfect, but they were a hell of a
+>lot better than the largely-nonexistent diags available for
+>modern Intel-architecture systems.  I am right now dealing
+>with a system that has an intermittent fault, that causes
+>the OS to crash in the middle of some device driver every
+>so often.  Other identical systems don't, so I don't think
+>it's software.
+
+Could be the device itself, corrupting things.
+
+Some problems are just hard to track down.  If you remember
+the infamous UDA50/RA81 setup, the original Unix driver was
+flaky somehow in that it would "lose" MSCP packets and hang.
+I rewrote the thing from scratch to fix that problem.  But
+then we got an Emulex board that had a ... different problem.
+
+I hacked on our driver to find it.  The problem turned out
+to be that the Emulex hardware (or firmware) would *drop*
+16 of the 32 bits of a 32-bit field.  In each MSCP packet,
+there was a single 32-bit field where you could store arbitrary
+data to be reflected back to you in a reply.  The Unix driver
+stored `struct buf *bp` there, if I remember right, and I
+originally did as well.
+
+Once I figured out this was being clobbered, I replaced it
+with a small integer (index into "outstanding I/O table") with
+check bytes.  I'd log the occurrence of corruption, recover the
+useful data from the 16 bytes that had the right data, and we
+would be on our merry way.  There was no obvious pattern here
+though.
+
+Two other sort of related war stories...
+
+ * We had the carry-chain timing bug on our VAX 780 at one point.
+   It most-consistently hit on the `extzv` instruction in the
+   kernel exit() handler, but only about 1 out of every 10 to 100
+   thousand occurrences.  So I wrote a user-land program that
+   would spin doing that `extzv`.  If the user program crashed,
+   the board-set installed in the backplane had the problem, and
+   we'd have the DEC service guy cycle through them (in the usual
+   "how many flat tires do we have today" dance).
+
+ * The Ultrasparc II CPU had a similar timing bug, I think in the
+   register forwarding logic.  The BSD/OS SPARC port had a three
+   instruction sequence for setting up the right stack on a
+   trap (interrupt, system call, etc)., and it would randomly
+   crash with a bizarre value, that I eventually figured out
+   was from putting the result that should have gone into one
+   of the %l registers, into the %sp register instead.  It only
+   happened after a pipeline flush for other purposes and I
+   forget what I did to make it happen frequently enough to
+   diagnose.
+
+   (Re-ordering the three instructions fixed the problem.)
+
+Tying back into ZFS etc., if that was on this mailing list: :-)
+
+I had a bad DIMM in an Intel box a while back, that corrupted
+data in the kernel buffer pool.  That one was scary, because,
+while the memtest86 tests found it, who knows what data they
+corrupted?
+
+(This is why I want ECC, even in my home systems.)
+
+Chris

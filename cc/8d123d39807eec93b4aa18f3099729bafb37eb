@@ -1,0 +1,80 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 27584 invoked from network); 31 Jul 2021 22:13:37 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2021 22:13:37 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 3EE0B9CA5E; Sun,  1 Aug 2021 08:13:35 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 35A869C9B4;
+	Sun,  1 Aug 2021 08:13:20 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 4D4819C9B4; Sun,  1 Aug 2021 08:13:18 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id E47F59C9B2
+ for <tuhs@minnie.tuhs.org>; Sun,  1 Aug 2021 08:13:17 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 7605F35E0F8; Sat, 31 Jul 2021 15:13:17 -0700 (PDT)
+Date: Sat, 31 Jul 2021 15:13:17 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Bakul Shah <bakul@iitbombay.org>
+Message-ID: <20210731221317.GG23759@mcvoy.com>
+References: <20210731142533.69caf929@moon>
+ <202107311920.16VJK2jT2362871@fourwinds.com>
+ <3598EE71-E652-43EF-B1AB-91CB8B3D577A@iitbombay.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <3598EE71-E652-43EF-B1AB-91CB8B3D577A@iitbombay.org>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Systematic approach to command-line interfaces [ meta
+ issues ]
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sat, Jul 31, 2021 at 03:04:48PM -0700, Bakul Shah wrote:
+> On Jul 31, 2021, at 12:20 PM, Jon Steinhart <jon@fourwinds.com> wrote:
+> > 
+> > So I never got getopt().  One of my rules is that I don't use a library
+> > in cases where the number of lines of gunk that that it takes to use a
+> > library function is >= the number of lines to just write it myself.  Yeah,
+> > I know the "but the library has more eyeballs and is debugged" argument
+> > but in reality libraries are the source of many bugs.  I've always taken
+> > the approach that I would never hire someone who had to use a library to
+> > implement a singly-linked list.
+> 
+> getopt() is perhaps the wrong solution but consider something like MH,
+> whose commands all follow a common pattern. Consider:
+> 
+>   - options (switches) all start with a single '-'
+>   - they may be abbreviated to a unique prefix.
+
+That last one is a gotcha waiting to happen:
+
+program --this-is-the-long-option
+
+is the same as 
+
+program --this
+
+but that will break scripts (and fingers) when program gets a new 
+option like
+
+program --this-is-the-even-longer-option
+
+We wrote our own getopt() for BitKeeper and it had long and short options
+but no gotcha unique prefix.

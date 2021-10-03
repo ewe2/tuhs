@@ -1,0 +1,136 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 3909 invoked from network); 9 Feb 2021 16:14:17 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 9 Feb 2021 16:14:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 8F9A19C8FA; Wed, 10 Feb 2021 02:14:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 874349BA43;
+	Wed, 10 Feb 2021 02:13:38 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id DB3A49BA43; Wed, 10 Feb 2021 02:13:33 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1B7969BA42
+ for <tuhs@minnie.tuhs.org>; Wed, 10 Feb 2021 02:13:33 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 119GDU24029979
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 9 Feb 2021 11:13:31 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 92E1515C39D8; Tue,  9 Feb 2021 11:13:30 -0500 (EST)
+Date: Tue, 9 Feb 2021 11:13:30 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Andrew Warkentin <andreww591@gmail.com>
+Message-ID: <YCK0qtpRi+tMV1zw@mit.edu>
+References: <CAKH6PiU4ZLEU25UHw=gryTFMBGeH40DLj333zG1WvBHO1BZsFg@mail.gmail.com>
+ <YCId1oKS5AJwKCkU@mit.edu>
+ <CAD-qYGq_WPJ8VA=cESnyZtbcgjbuRTrjZ4Wb3ds-vy56cYyKMQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAD-qYGq_WPJ8VA=cESnyZtbcgjbuRTrjZ4Wb3ds-vy56cYyKMQ@mail.gmail.com>
+Subject: Re: [TUHS] Macs and future unix derivatives
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Mon, Feb 08, 2021 at 11:37:38PM -0700, Andrew Warkentin wrote:
+> > But hey, if you only want V7 Unix, why are you complaining?  Just go
+> > and use it, and give up on all of this cancerous new features.  And I
+> > promise to get off of your lawn.  :-)
+> >
+> There's no reason any of that has to be implemented with primitives
+> though. All of that could be implemented on top of normal file APIs
+> fairly easily.
+
+Everything can be implemented in terms of a turing machine tape, so
+I'm sure that's true.  Whether or not it would be *performant* and
+*secure* in the face of application level bugs might be a different
+story, though.
+
+In fact, some of the terrible semantics of the Posix interfaces exist
+only because there were traditional Unix vendors on the standards
+committee insisting on semantics that *could* be implemented using a
+user-mode library on top of normal file API's (I'm looking at you,
+fcntl locking semantics, where a close of *any* file descriptor, even
+a fd cloned via dup(2) or fork(2) will release the lock).  So yes,
+Posix fcntl(2) locking *can* be implemented in terms of normal file
+API's.... AND IT WAS A TERRIBLE IDEA.  (For more details, see [1].)
+
+[1] https://www.samba.org/samba/news/articles/low_point/tale_two_stds_os2.html
+
+I could go on about other spectactularly bad ideas enshrined in POSIX,
+such as telldir(2) and seekdir(2), which date all the way back to the
+assumption that directories should only be implemented in terms of
+linear linked lists with O(n) lookup performance, but I don't whine
+about that as feature bloat imposed by external standards, but just
+the cost of doing business.  (Or at least, of relevance.)
+
+> Also, sockets are not the ideal interface for a window server IMO. The
+> only reason they are used is because conventional Unix didn't provide
+> user-mode file server support until fairly recently (and the support
+> that's been added to more recent conventional Unices is a hack that
+> has poor performance and isn't used all that much).
+
+I'm not sure what you're referring to; if you mean the *at(2) system
+calls, which is why they exist in Linux (not for !@#!? Windows file
+streams support); they are needed to provide secure and performant
+user-mode file servers for things like Samba.  Trying to implement a
+user-space file server using only the V7 Unix primitives will cause
+you to have some really horrible Time of Use vs Time of Check (TOUTOC)
+security gaps; you can narrow the TOUTOC races with some terrible
+performance sucking impacts, but removing them entirely is almost
+impossible.
+
+The reason why it's not used that much is because a lot of programmers
+want to be compatible with OS's that don't support those new
+interfaces --- and so they don't use it.
+
+And that's the final thing for folks to remember.  There's an old
+saying, "without software, it's just a paperweight."  This is just as
+true for an OS; if you don't have application software, who cares how
+clean it is?  And it had better be performant, and not just a
+Posix-compliant layer afterthought demanded by the Product Manager as
+a checklist feature item.  Rob Pike talked about this over two decades
+ago in his talk, Systems Software Research is Dead[2].  The slide
+talking about Standards (page #13) is especially relevant here:
+
+    To be a viable computer system, one must honor a huge list of
+    large, and often changing, standards: TCP/IP, HTTP, HTML, XML,
+    CORBA, Unicode, POSIX, NFS, SMB, MIME, POP, IMAP, X, ...
+
+    A huge amount of work, but if you don’t honor the standards you’re
+    marginalized.
+
+[2] http://herpolhode.com/rob/utah2000.pdf
+
+That's because most people aren't going to port or rewrite application
+software for some random OS, whether it is a research OS or someone's
+new "simple, clean, reimplementation".  And most users do expect to
+have a working web browser.... and text editor..., and their favorite
+games, whether it's nethack or spacewars, etc., etc., etc.
+
+If you want to call it feature bloat, so be it.  But that seems to me
+like it's an excuse made by people who are bitter that people aren't
+using (or paying for, or contributing to) their pet operating system.
+
+Cheers,
+
+					- Ted

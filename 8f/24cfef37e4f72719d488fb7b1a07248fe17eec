@@ -1,0 +1,116 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32429 invoked from network); 3 Jul 2021 17:45:30 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 3 Jul 2021 17:45:30 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 4543F9C883; Sun,  4 Jul 2021 03:45:27 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 494579C871;
+	Sun,  4 Jul 2021 03:44:32 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id C7C0E9C86C; Sun,  4 Jul 2021 03:44:28 +1000 (AEST)
+X-Greylist: delayed 434 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 04 Jul 2021 03:44:27 AEST
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id ED6869C864
+ for <tuhs@minnie.tuhs.org>; Sun,  4 Jul 2021 03:44:27 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 163Hb7Fd004239
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sat, 3 Jul 2021 13:37:07 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id E7DE215C3CE6; Sat,  3 Jul 2021 13:37:06 -0400 (EDT)
+Date: Sat, 3 Jul 2021 13:37:06 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Dan Cross <crossd@gmail.com>
+Message-ID: <YOCgQkwbz8Xf8ap9@mit.edu>
+References: <CMM.0.95.0.1625261060.beebe@gamma.math.utah.edu>
+ <20210702213648.GW817@mcvoy.com>
+ <CAEdTPBfs1S91FCKfHGojgaT9edODhWPRs9W2ZGmpN3frsyXCvw@mail.gmail.com>
+ <alpine.DEB.2.21.2107021910240.15013@sd-119843.dedibox.fr>
+ <396911b232bae5938068a14fe0f7181e@firemail.de>
+ <CAEoi9W4NXd-yajWk9bcb1X9eK_Ws17TBJOpDE6M-Qf+uLQ2v6A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAEoi9W4NXd-yajWk9bcb1X9eK_Ws17TBJOpDE6M-Qf+uLQ2v6A@mail.gmail.com>
+Subject: Re: [TUHS] [tuhs] The Unix shell: a 50-year view
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Sat, Jul 03, 2021 at 09:20:57AM -0400, Dan Cross wrote:
+> 
+> Systemd is both good and bad.
+
+I agree with most of what you assess as "good" and "bad" with systemd.
+However...
+
+> It uses ersatz data formats that are abjectly
+> horrible. It uses binary logging, which means that one cannot use the full
+> complement of Unix text filters to inspect logs....
+
+To be fair, systemd isn't the first.  BSD's sar program uses a binary
+log file.
+
+I'm not sure whether it's BSD's fault or only after it was pulled into
+the systat package for Linux, but the binary format for the sar file
+is (a) not self-describing, (b) not backwards compatible, and (c) not
+stable between different versions, such that if you copy /var/log/sa/saNN
+the files from one system and try to interpret it on another system, you
+need to make sure that other system has the same version of sar installed.
+
+This can be a headache if you are trying to debug an enterprise system
+which is using a seven-year-old version of RHEL, and your laptop is
+running something a bit more modern.
+
+Things like Ingres also came out of Berkely, and modern databases all
+use binary format files.  Is anything running a database, whether it
+be Ingress, Postgres, Oracle Enterprise Database, DB2, no longer "Unix"?
+
+And then there's AIX, which uses binary config files which are
+manipulated using "smit", and mixes per-machine specific configs with
+more general configs, all in a single config (or should I say,
+"registry") file, so $DEITY help you if you try to copy the smit
+database from one system to another if you are trying to do some kind
+of large scale administration setup.  And granted there are many
+people would dispute whether AIX is actually "Unix", it technically
+speaking qualified to use the "Unix"(tm) trademark.
+
+Similarly, Digital Equipment Corpartion's Ultrix used a binary log
+file which you had to transmogrify using the uerf ("Ultrix Error
+Report Formatter").  Like systemd, Ultrix uses a structured logging so
+you can pull out specific types of logs, and Ultrix's uerf works much
+systemd's journalctl.
+
+So the concept of using binary logs and binary files predates systemd,
+and there are more than a few examples that can be found in historical
+systems that most people would have no trouble calling "Unix", and
+even qualify for the Unix(tm) trademark.
+
+					- Ted
+
+P.S. For the most part, Linux systems don't qualify for the Unix(tm)
+trademark, although it's not clear most people care about that these
+days.  (A long time ago distributions paid $$$ to Posix Compliance
+labs, probably because the government procurement requirements
+required Unix(tm) systems, much like OSI stacks were simlarly required
+by government procurement requirements.)
+
+

@@ -1,0 +1,149 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 1450 invoked from network); 8 Jul 2021 21:49:06 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 8 Jul 2021 21:49:06 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 247BE9CB0C; Fri,  9 Jul 2021 07:49:04 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 95F809CA32;
+	Fri,  9 Jul 2021 07:48:11 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8A8599CA32; Fri,  9 Jul 2021 07:48:08 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5F4209C88E
+ for <tuhs@minnie.tuhs.org>; Fri,  9 Jul 2021 07:48:07 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 168Llw0R024489
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 8 Jul 2021 17:47:58 -0400
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 0347615C3DBB; Thu,  8 Jul 2021 17:47:57 -0400 (EDT)
+Date: Thu, 8 Jul 2021 17:47:57 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Michael =?iso-8859-1?Q?Kj=F6rling?= <michael@kjorling.se>
+Message-ID: <YOdyjcVCL5TS3VBg@mit.edu>
+References: <396911b232bae5938068a14fe0f7181e@firemail.de>
+ <CAEoi9W4NXd-yajWk9bcb1X9eK_Ws17TBJOpDE6M-Qf+uLQ2v6A@mail.gmail.com>
+ <20210704004757.GB24671@tau1.ceti.pl>
+ <CAEoi9W7fLGFQMPUcS2E0VAANnPXDVrbxGFs++Nv5W42rxoNxYg@mail.gmail.com>
+ <20210705071450.GA12885@tau1.ceti.pl>
+ <CAD2gp_TNjzZCT8TCfHm_9ARZqFEaWL=6OdT6DOxY9auWY4=WHA@mail.gmail.com>
+ <20210706231659.GA13225@tau1.ceti.pl> <YOT5ajNhoUqyBqvi@mit.edu>
+ <20210707183222.GA9897@tau1.ceti.pl>
+ <6b736f82-97ed-4e51-9652-e672be4e2c66@localhost>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <6b736f82-97ed-4e51-9652-e672be4e2c66@localhost>
+Subject: Re: [TUHS] [tuhs] The Unix shell: a 50-year view
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Jul 07, 2021 at 08:50:51PM +0000, Michael Kjörling wrote:
+> 
+> I'm going to stick my neck out here by saying that the VSZ and RSS
+> values reported by ps, at least for Firefox, are largely meaningless.
+
+No, VSZ is correct, but it's confusing since it includes things that
+you might not expect.  VSZ includes *all* virtual memory space
+consumed by a process.
+
+For example, consider this simple program:
+
+main(int argc, char **argv)
+{
+	printf("Hello, world\n");
+	sleep(10);
+	return 0;
+}
+
+It uses shared libraries:
+
+% ldd /tmp/hello
+        linux-vdso.so.1 (0x00007fff20bff000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fd8caad9000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007fd8cacca000)
+
+If you run the program the ps listing looks like this:
+
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+tytso    4060239  0.0  0.0   2300   512 pts/2    T    17:01   0:00 /tmp/hello
+
+If you look at /proc/4060239/maps, you'll memory map for the process.
+
+5559e8e7d000-5559e8e7e000 r--p 00000000 00:25 260006                     /tmp/hello
+5559e8e7e000-5559e8e7f000 r-xp 00001000 00:25 260006                     /tmp/hello
+5559e8e7f000-5559e8e80000 r--p 00002000 00:25 260006                     /tmp/hello
+5559e8e80000-5559e8e81000 r--p 00002000 00:25 260006                     /tmp/hello
+5559e8e81000-5559e8e82000 rw-p 00003000 00:25 260006                     /tmp/hello
+5559ea383000-5559ea3a4000 rw-p 00000000 00:00 0                          [heap]
+7f8419a44000-7f8419a69000 r--p 00000000 fc:00 10763398                   /usr/lib/x86_64-linux-gnu/libc-2.31.so
+7f8419a69000-7f8419bb4000 r-xp 00025000 fc:00 10763398                   /usr/lib/x86_64-linux-gnu/libc-2.31.so
+			  ...
+
+If you add the sum total of all of the VM regions, i.e.:
+
+(0x5559e8e7e000 - 0x5559e8e7d000) +
+(0x5559e8e7f000 - 0x5559e8e7e000) +
+(0x5559e8e80000 - 0x5559e8e7f000) +
+	...
+
+(ignore the last vsyscall region, since that's a kernel page mapped
+into all processes)   You'll get the 2300k of the VSZ.
+
+If the process mmap's in a large 2GB file, the VSZ will go up by 2GB,
+even if none of the file is paged in.  Or if you mmap in 2MB of
+anonymous memory backed by the zero page for the heap, the VSZ will go
+up by 2MB.  
+
+> I started my usual Firefox instance, which has a handful of plugins,
+> about a metric gazillion bookmarks, and has been my main web browser
+> profile for years (so it probably has collected some crud over time).
+> `ps auxw` reported that process as having a total RSS of a whopping
+> 374 GB.
+
+I don't think that's right.  Are you sure it's not 374MB?  I started
+firefox-esr on my Debian machine, and the PS output is:
+
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+tytso    4063201  5.8  1.0 3027868 357248 pts/2  Sl   17:38   0:07 firefox-esr
+tytso    4063274  0.5  0.3 2446608 105620 pts/2  Sl   17:38   0:00 /usr/lib/firefox-esr/firefox-esr -contentproc -childID 1 -isF
+tytso    4063317  0.8  0.3 2457032 124200 pts/2  Sl   17:38   0:01 /usr/lib/firefox-esr/firefox-esr -contentproc -childID 2 -isF
+tytso    4063341  2.9  0.8 2623896 282420 pts/2  Sl   17:38   0:03 /usr/lib/firefox-esr/firefox-esr -contentproc -childID 3 -isF
+
+357248k is 343MB.  Maybe you were adding up the RSS's for all of the
+processes?  That's misleading because if a physical 4k page is shared
+across multiple process, that 4k page will be accounted in each of the
+processes's RSS --- even if that process hasn't actually *used* that
+particular page.  So for example, the hello world program had a 512k RSS:
+
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+tytso    4060239  0.0  0.0   2300   512 pts/2    T    17:01   0:00 /tmp/hello
+
+That's not because the hello world program actually used half a
+megabyte worth of the C library; but rather, almost half a megabyte of
+the C library has been paged in to support all of the processes
+currently running in the system.  It also follows that every process
+using shared library is going to have an RSS which is at least 512k.
+
+Cheers,
+
+					- Ted

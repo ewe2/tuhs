@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 21026 invoked from network); 17 Feb 2021 04:02:54 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Feb 2021 04:02:54 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 150779C880; Wed, 17 Feb 2021 14:02:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8CFEC9B966;
+	Wed, 17 Feb 2021 14:02:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id CE0E79B966; Wed, 17 Feb 2021 14:01:45 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 25C919B95A
+ for <tuhs@minnie.tuhs.org>; Wed, 17 Feb 2021 14:01:45 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net
+ [72.74.133.215]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 11H41Wxa018797
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Tue, 16 Feb 2021 23:01:33 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id AAE9015C3428; Tue, 16 Feb 2021 23:01:32 -0500 (EST)
+Date: Tue, 16 Feb 2021 23:01:32 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Jon Steinhart <jon@fourwinds.com>
+Message-ID: <YCyVHI5LNorkHos5@mit.edu>
+References: <202102151956.11FJuRIh3079869@darkstar.fourwinds.com>
+ <m2wnv8v36e.fsf@thuvia.hamartun.priv.no>
+ <202102161959.11GJxWC5676454@darkstar.fourwinds.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <202102161959.11GJxWC5676454@darkstar.fourwinds.com>
+Subject: Re: [TUHS] Abstractions
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+It's always useful to talk about requirements as the first part of the
+design process.
+
+At the high level, how important is backwards compatibility?  Is the
+problem of how support existing application in scope, or not?  Or is
+the assumption that emulation libraries will always be sufficient.
+
+How about performance, either of applications using the new API, or
+applcications using the legacy API's?  And what are the hardware
+platforms that this new set of abstractions going to target?  Is the
+goal only to target small embedded systems?  Mobile handsets?  Desktop
+systems?  Is it supposed to be able to scale to super computers?  Are
+web front-ends that need to be able to accept thousands of incoming
+TCP connections per second, and then redirect those connections to
+application logic servers in scope?
+
+Solutions that involve being able to support intpret general SQL
+queries may not scale in terms of performance and the ability to
+support thousands of file descriptors in a single process.
+
+Backwards compatibility is why we have multiple asynchronous I/O
+interfaces --- from select, poll, epoll, kqueue, and io_uring.  And
+the reason why we've had multiple asynchronus I/O interfaces over the
+decades is because the performance requirements have changed, and the
+capability of hardware interfaces for high performance I/O has
+changed; it's no longer about I/O ports and interrupts, but instead,
+having multiple request and response queues through memory mapped I/O,
+and the need to be able to use multiple CPU's and multiplexing
+multiple network or storage transactions across a single doorbell or
+system call.
+
+If all of this is out of scope, then the design process will be much
+simpler, and perhaps more elegant; but the resulting design will not
+be useful for many of the use cases where Linux is used today.  And
+perhaps that's OK.  On the other hand, one person's simple, elegant
+design is another person's toy that isn't fit for their purpose.
+
+IBM once said that part of Linux's power is that it scales from wrist
+watches to super computers.  Is that in scope for this theoretical
+design question?
+
+						- Ted

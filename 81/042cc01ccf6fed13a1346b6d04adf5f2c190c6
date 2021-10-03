@@ -1,0 +1,148 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_IN_DNSWL_NONE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 21476 invoked from network); 22 Jun 2021 16:18:54 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 Jun 2021 16:18:54 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 56ECB9C7F9; Wed, 23 Jun 2021 02:18:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 570039C5FE;
+	Wed, 23 Jun 2021 02:18:10 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6A9109C5FE; Wed, 23 Jun 2021 02:18:06 +1000 (AEST)
+X-Greylist: delayed 1501 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Wed, 23 Jun 2021 02:18:05 AEST
+Received: from cuzuco.com (v.cuzuco.com [166.84.7.17])
+ by minnie.tuhs.org (Postfix) with ESMTP id E19DA9C5F8
+ for <tuhs@minnie.tuhs.org>; Wed, 23 Jun 2021 02:18:05 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by cuzuco.com (8.14.9/8.13.3) with SMTP id 15MFqa97028493;
+ Tue, 22 Jun 2021 11:52:51 -0400 (EDT)
+Date: Tue, 22 Jun 2021 11:52:36 -0400 (EDT)
+Message-Id: <202106221552.15MFqa97028493@cuzuco.com>
+From: Brian Walden <tuhs@cuzuco.com>
+To: <tuhs@minnie.tuhs.org>
+Subject: Re: [TUHS] Arithmetic expansion in Unix shells
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+even tho it was there, in-shell integer arithmetic had a few
+issues before ksh86.
+
+pre-ksh86 these had problems --
+
+A. decimal point in a number
+$ integer I
+$ I=2.2
+
+would error on the assignment, but with ksh86 $I is truncated to 2
+
+(yes "integer" is an builtin alias to typeset -i and ksh courses at the time
+instructed to use that over typset)
+
+B. negative numbers
+$ integer I
+$ I=-2
+
+here pre-86 $I would be assigned a large value like 2147483646
+
+also ksh was not stardard until SVR4 (very late 80s) so it was found
+in paths like /usr/add-on/bin/ksh or /usr/exptools/bin/ksh, or not even
+there at all, you could not reliably #! ksh scripts
+
+also with ksh86 the double paren ((...)) notation was exactly the same as
+"let ..." and were completely optional if the variable was predefined as
+an integer, so
+
+$ I=0
+$ ((I=I+1))
+
+ and
+
+$ integer I
+$ I=0
+$ I=I+1
+
+are the same.
+
+All internal integers in ksh were C longs (at least 32-bits)
+
+where Bourne shell all vars are strings so you would need to do this --
+
+$ I=`expr $I + 1`
+
+But also at that time expr(1) could NOT deal with negative numbers on input,
+they became strings. So
+
+$ expr -9 + 1
+
+is an error with "non-numeric argument", and
+
+$ expr -11 '<' -1
+
+returns 0, a false statement, which are hidden bugs with variables.
+
+expr(1) was also 32-bits, as was test (i.e [ ) which could deal with
+negative numbers just fine.
+
+for arbitrarily large numbers you needed use dc(1) or bc(1). but dc(1)
+also has a issue with inputing negative numbers as it uses an _ not
+a - to denote a negatve number on input, but does use the - on output.
+
+$ I=`echo _9 1 - p | dc`
+
+is how you would do ((I=-9 - 1)) in bourne with dc
+which is cumbersome if you have a variable with a neagtive number in it,
+and required a "tr - _" first.
+
+however
+
+$ I=`echo -9 - 1 | bc`
+
+worked just fine in bourne.
+
+
+-Brian
+
+Chet Ramey wrote:
+> On 6/21/21 5:57 AM, arnold at skeeve.com wrote:
+> > Arithmetic expansion dates back at least as far as ksh88.
+>
+> ksh had the `let' builtin from at least 1983. The ((...)) compound command
+> was there by ksh-86.
+>
+> > Bash likely picked it up from there.
+>
+> Sort of, see below.
+>
+> > The original was only integer math and Bash remains that way (IIRC,
+> > Chet can correct me if I'm wrong). ksh93 added floating point math.
+>
+> Yes, bash only has integer arithmetic, since it's all POSIX requires.
+>
+> > POSIX would have picked it up from ksh88.
+>
+> The $((...)) form of arithmetic expansion is something POSIX picked up
+> from ksh-88, eventually. The early drafts of the standard (through 1003.2
+> d9, at least), used $[...], but they eventually adopted $((...)) because
+> ksh-88 had already implemented it, though it's not documented in Bolsky
+> and Korn.
+>
+> I put $[...] into bash first (it's still there, though deprecated), then
+> `let', then $((...)) after POSIX added it, and finally  `((' for
+> compatibility.
+>
+> Chet
