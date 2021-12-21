@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23506 invoked from network); 21 Dec 2021 21:43:03 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 21 Dec 2021 21:43:03 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E95039CEC3; Wed, 22 Dec 2021 07:42:55 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id E3CA79CE85;
+	Wed, 22 Dec 2021 07:42:23 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id D85F79CE75; Wed, 22 Dec 2021 07:42:21 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 5C1E39CC2E
+ for <tuhs@minnie.tuhs.org>; Wed, 22 Dec 2021 07:42:21 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 4A13118C07A; Tue, 21 Dec 2021 16:42:20 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20211221214220.4A13118C07A@mercury.lcs.mit.edu>
+Date: Tue, 21 Dec 2021 16:42:20 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] PDP 11/23 running UNIX version 6 at VCF Midwest!
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Paul Ruizendaal
+
+    > Does anyone remember, was this a real life bug back in 6th edition 
+
+The 'V6' at MIT (actually, PWB1) never had an issue, but then again,
+its TTY driver (here:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/mit/dmr/tty.c
+
+if anyone wants to see it) was heavily re-written. But from the below,
+it's almost certainlynothing to do with the TTY code...
+
+
+    > From: Dave Plonka
+
+    > one experiment we did was to redirection the bas(1)ic program's output
+    > to a file and what we found was that (a) characters would still
+    > sometimes be lost
+
+Good test.
+
+If you all want to chase this down (I can lend V6 expertise, if needed), I'd
+say the first step is to work out whether it's the application, or the
+system, losing the characters. To do that, I'd put a little bit of code in
+write() to store a copy of data sent through that in a circular buffer, along
+with tagging it with the writing process, etc.
+
+Once you figure out where it's getting lost, then you can move on to
+how/why.
+
+
+    > From: Clem Cole
+
+    > First Sixth Edition does not have support for either the 11/23
+
+Yeah, but it's super-trivial to add /23 support to V6:
+
+  http://gunkies.org/wiki/Running_UNIX_V6_on_an_-11/23
+
+The only places where change is needed (no LKS register, no switch register,
+and support for more than 256KB of main memory - and that one one can get by
+without), it's hard to see how they could cause this problem.
+
+    > One other thought, I'm pretty sure that Noel's V6+ system from MIT can
+    > support a 23
+
+No, we never ran than on a /23 BITD (no need, no mass storage); and I have
+yet to bring the V6+ system up (although I have all the bits, and intend to,
+at some point, to get its TCP/IP running). I've been using stock (well,
+hacked a bit, in a number of ways - e.g. 8-bit serial line output) V6.
+
+	Noel
