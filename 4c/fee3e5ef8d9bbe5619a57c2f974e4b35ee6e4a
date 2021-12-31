@@ -1,0 +1,93 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 17386 invoked from network); 31 Dec 2021 03:08:55 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Dec 2021 03:08:55 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 0F44A9D041; Fri, 31 Dec 2021 13:08:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4F0499D007;
+	Fri, 31 Dec 2021 13:08:37 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 06AA69D006; Fri, 31 Dec 2021 13:08:35 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3FD319D002
+ for <tuhs@minnie.tuhs.org>; Fri, 31 Dec 2021 13:08:32 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net
+ [108.7.220.252]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BV38TJP020692
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 30 Dec 2021 22:08:29 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 1A80A15C33A3; Thu, 30 Dec 2021 22:08:29 -0500 (EST)
+Date: Thu, 30 Dec 2021 22:08:29 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Dan Cross <crossd@gmail.com>
+Message-ID: <Yc50LSUs7B790YFG@mit.edu>
+References: <20211230034512.B9B3718C08E@mercury.lcs.mit.edu>
+ <Yc3g/+i9BQBK/5qO@mit.edu>
+ <CAEoi9W6NM9pKwLukQdF_bo9enGV0-Mjp7m_bqy+nt1E8Oxssmg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAEoi9W6NM9pKwLukQdF_bo9enGV0-Mjp7m_bqy+nt1E8Oxssmg@mail.gmail.com>
+Subject: Re: [TUHS] moving directories in svr2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Dec 30, 2021 at 05:31:09PM -0500, Dan Cross wrote:
+> On Thu, Dec 30, 2021 at 11:41 AM Theodore Ts'o <tytso@mit.edu> wrote:
+> > On Wed, Dec 29, 2021 at 10:45:12PM -0500, Noel Chiappa wrote:
+> > >     > From: Bakul Shah
+> > >
+> > >     > My guess is *not* storing a path instead of a ptr to the inode was done
+> > >     > to save on memory.
+> > >
+> > > More probably speed; those old disks were not fast, and on a PDP-11, disk
+> > > caches were so small that converting the path to the current directory to its
+> > > in memory inode could take a bunch of disk reads.
+> >
+> > The other problem with storing the path as a string is that if
+> > higher-level directories get renamed, the path would become
+> > invalidated.  If you store the cwd as "/foo/bar/baz/quux", and someone
+> > renames "/foo/bar" to "/foo/sadness" the cwd-stored-as-a-string would
+> > become invalidated.
+> 
+> Why? Presumably as you traversed the filesystem, you'd cache, (path
+> component, inode) pairs and keep a ref on the inode.  For any given
+> file, including $CWD, you'd know it's pathname from the root as you
+> accessed it, but if it got renamed, it wouldn't matter because you'd
+> have cached a reference to the inode.
+
+I was responding to Bakul's suggestion that the original Unix
+could/should have stored the cwd as a string, instead of a pointer to
+a directory inode.  If you stored the cwd as a string, then you could
+interpret .. by chopping off the last file name component of the
+string, and so now you could have hard links to directories and the
+file system tree could then be a file system DAG.
+
+I don't think Bakul's proposal would have worked --- although I
+suppose if you disallowed directory renames, I guess it could.  Noel's
+objection above was a performance one, in that if you had to parse the
+path every single time, you'd be much more dependent on the namei
+cache --- and that PDP-11 didn't have the memory to support a
+sufficiently large cache.
+
+							- Ted
+
