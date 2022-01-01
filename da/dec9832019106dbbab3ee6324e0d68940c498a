@@ -1,0 +1,61 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	MIME_QP_LONG_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 4562 invoked from network); 1 Jan 2022 03:27:26 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Jan 2022 03:27:26 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AED429D040; Sat,  1 Jan 2022 13:27:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B143C9CF51;
+	Sat,  1 Jan 2022 13:27:12 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5B89A9CF51; Sat,  1 Jan 2022 13:27:11 +1000 (AEST)
+X-Greylist: delayed 509 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 01 Jan 2022 13:27:10 AEST
+Received: from cesium.clock.org (cesium.clock.org [157.22.10.65])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DA14F9CF06
+ for <tuhs@minnie.tuhs.org>; Sat,  1 Jan 2022 13:27:10 +1000 (AEST)
+Received: from cesium.clock.org (localhost [127.0.0.1])
+ by cesium.clock.org (Postfix) with ESMTP id 61FA3CBED0;
+ Fri, 31 Dec 2021 19:18:30 -0800 (PST)
+From: "Erik E. Fair" <fair-tuhs@netbsd.org>
+In-reply-to: <CAHYQbfAHj8J3Ar44iokPHnmW5h9QA4pGcizL2ouTOAwbDdykfg@mail.gmail.com>
+References: <be45b84e-3853-2679-768b-1f995bdbb396@gmail.com>
+To: Jacob Ritorto <jacob.ritorto@gmail.com>
+Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0
+Date: Fri, 31 Dec 2021 19:18:30 -0800
+Message-ID: <28153.1641007110@cesium.clock.org>
+Subject: Re: [TUHS] v7 /etc/ttys and /usr/adm/wtmp shenanigans
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Classically, files don't get de-allocated (their blocks re-added to the =
+filesystem free list) until the last open reference to their inode is removed, =
+even if the file name is removed from all directories.
+
+This behavior is commonly used for temporary files: open(2) with O_CREAT and =
+unlink(2), and file disappears when the file descriptor is finally closed or =
+the process exits without explicitly closing the descriptor (the kernel will =
+close all descriptors associated with an exiting process).
+
+Where process accounting is concerned, the kernel itself holds the inode =
+reference until it is explictly told to turn off process accounting. See =
+acct(2).
+
+	Erik Fair
