@@ -1,0 +1,129 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 14074 invoked from network); 31 Jan 2022 01:41:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jan 2022 01:41:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 84DC39BDAE; Mon, 31 Jan 2022 11:41:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 97C7A951B7;
+	Mon, 31 Jan 2022 11:41:20 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 42DC5951B7; Mon, 31 Jan 2022 11:41:17 +1000 (AEST)
+Received: from mail.ultimate.com (mail.ultimate.com [104.225.1.121])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B308B9518E
+ for <tuhs@minnie.tuhs.org>; Mon, 31 Jan 2022 11:41:16 +1000 (AEST)
+Received: from ultimate.com (localhost [127.0.0.1])
+ by mail.ultimate.com (8.16.1/8.16.1) with ESMTPS id 20V1fBBu021497
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+ Sun, 30 Jan 2022 20:41:12 -0500 (EST)
+ (envelope-from phil@ultimate.com)
+Received: (from phil@localhost)
+ by ultimate.com (8.16.1/8.16.1/Submit) id 20V1fBoE021496;
+ Sun, 30 Jan 2022 20:41:11 -0500 (EST) (envelope-from phil)
+From: Phil Budne <phil@ultimate.com>
+Message-Id: <202201310141.20V1fBoE021496@ultimate.com>
+Date: Sun, 30 Jan 2022 20:41:11 -0500
+To: tuhs@minnie.tuhs.org, drsalists@gmail.com
+References: <0f83f174-eeca-30fb-7b98-77fb0da80f2e@gmail.com>
+ <CAC20D2Nh0t9dxVbRvXFxXkCfEaWkmp9MP1Xf+=YC3rfXf3SK3g@mail.gmail.com>
+ <9E47A62E-3AAD-491E-9164-3DCAD22EC1F7@kdbarto.org>
+ <CAGGBd_r24ODfR9oX_sMHkDWOotz9Bhup=CgDEgC=NNq9BFuNcg@mail.gmail.com>
+In-Reply-To: <CAGGBd_r24ODfR9oX_sMHkDWOotz9Bhup=CgDEgC=NNq9BFuNcg@mail.gmail.com>
+User-Agent: Heirloom mailx 12.4 7/29/08
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Subject: Re: [TUHS] Compilation "vs" byte-code interpretation,
+ was Re: Looking back to 1981 - what pascal was popular on what unix?
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+> Is there consistency here?
+
+There's a wide spectrum of strategies used for implementation of
+languages, and no perfect and universally agreed on taxonomy.
+
+	(And in networking, where there is an "International Standard"
+	taxonomy, both the original ARPAnet, and the modern Internet
+	don't fit into the (ISO) model!)
+
+At ends of the spectrum you might get people to agree on the "pure
+interpreter", which intreprets source code DIRECTLY, and the "native
+code compiler", which generates instructions for the instruction set
+of a physical computer (typically the one the compiler is running on,
+with the term "cross compiler" used when the target architecture is
+different than the one the compiler is running on).
+
+I don't doubt this has been brought up many times in the "comp.compilers"
+group: https://compilers.iecc.com/
+
+To bring the discussion back to "Unix Heritage":
+
+The earliest Unix shells were pure interpreters
+(and for all I know, most still are).
+
+Some BASIC language systems have been pure interpreters, but it gets
+murky fast; Some interpretive systems have converted source code to
+tokens in memory, or even saved to disk.
+
+Beyond pure interpreters, most interpreters perform some kind of
+compilation into some alternate representation of the program often
+starting (with and sometimes (LISP), ending) with a tree.  Often, the
+tree is traversed to a prefix or postfix "polish" form, which might,
+or might not be written out (as a byte code, or other intermediate
+form).
+
+The earliest Unix language systems (TMG and B) on both the PDP-7 and
+PDP-11 are interesting in that they output "word code" that is
+assembled by as, and loaded with ld to produce "regular" executable
+files which contain interpreters.
+
+The earliest (PDP-7) Unix compilers, TMG and B both generated code for
+(stack-oriented, postfix) pseudo machines (which happened to have
+opcode fields the same size and position as the PDP-7 itself).
+
+Since PDP-11 pointers can be a full 16-bit word, PDP-11 TMG and B
+generate a stream of 16-bit postfix code (with pointers to interpreter
+and "native code" support routines).  TMG contains an interpreter
+loop, but the B interpreter is "threaded code" using machine register
+r3 for the interpreter program counter, and each interpreter opcode
+routine ends with "jmp *(r3)+"
+
+I haven't examined Sixth Edition "bas" (written in assembler) closely
+enough to say what kind of internal representation (if any) it uses.
+"bc" generates postfix "dc" code using a yacc parser, and "sno"
+appears to recursively eval a tree.
+
+Seventh Edition awk looks to recursively execute a tree generated by a
+yacc parser.
+
+Compilers on older/smaller systems were sometimes divided into
+multiple passes and wrote intermediate representations to disk, and
+such output _could_ have been interpreted.
+
+Language processors which output source code for another language (on
+heritage Unix; struct, ratfor, and cfront for early C++) are usually
+called preprocessors.
+
+So...  Interpreters and preprocessors may perform much the same work
+as compilers in their front ends, may or may not be identified as
+compilers.
+
+Java (and UCSD Pascal?) have compilers (to virtual machine code)
+and an interpreter (for the virtual machine code).
+
+Clear as mud?
