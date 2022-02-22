@@ -1,0 +1,88 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 30326 invoked from network); 22 Feb 2022 10:42:42 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 22 Feb 2022 10:42:42 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 98EC69CCFB; Tue, 22 Feb 2022 20:42:39 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 445FB9CBC8;
+	Tue, 22 Feb 2022 20:39:57 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6130D9CBC8; Tue, 22 Feb 2022 20:39:53 +1000 (AEST)
+Received: from relay05.pair.com (relay05.pair.com [216.92.24.67])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D8D469CB50
+ for <tuhs@tuhs.org>; Tue, 22 Feb 2022 20:39:50 +1000 (AEST)
+Received: from orac.inputplus.co.uk (unknown [84.93.57.220])
+ by relay05.pair.com (Postfix) with ESMTP id AF00C1A27DB;
+ Tue, 22 Feb 2022 05:39:49 -0500 (EST)
+Received: from orac.inputplus.co.uk (orac.inputplus.co.uk [IPv6:::1])
+ by orac.inputplus.co.uk (Postfix) with ESMTP id 1B0482206F;
+ Tue, 22 Feb 2022 10:39:48 +0000 (GMT)
+To: Otto Moerbeek <otto@drijf.net>
+mail-followup-to: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+From: Ralph Corderoy <ralph@inputplus.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+In-reply-to: <Yg9Z7Y8RK2+GQeDI@clue.drijf.net>
+References: <CAKH6PiVi+JoxDG7ACMG5G+qnTkxTMsohGx6Wq3UNVkogO4N0Vg@mail.gmail.com>
+ <CAKr6gn2pJROQNr3M+JGU1vs3bRRh3SrTS5N-8w+vWP2oApwmsw@mail.gmail.com>
+ <alpine.BSF.2.21.9999.2202161122500.45073@aneurin.horsfall.org>
+ <202202160754.21G7sbUa011318@freefriends.org> <1nKFRN-4IZ-00@marmaro.de>
+ <8735kig8vb.fsf@vuxu.org> <m27d9tw9fx.fsf@thuvia.hamartun.priv.no>
+ <alpine.BSF.2.21.9999.2202180810480.45073@aneurin.horsfall.org>
+ <4E3028A1-EC08-424A-B814-CC2AEEEAEC7B@iitbombay.org>
+ <Yg9Z7Y8RK2+GQeDI@clue.drijf.net>
+Date: Tue, 22 Feb 2022 10:39:48 +0000
+Message-Id: <20220222103948.1B0482206F@orac.inputplus.co.uk>
+Subject: Re: [TUHS] Lorinda Cherry
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi Otto,
+
+> MacOS uses the GNU implementation which has a long standing issue with
+> deep recursion.  It even cannot handle the tail recursive calls used
+> here and will run out of its stack.
+
+When learning dc and seeing it relied on tail calls, the first thing
+I did was check it did tail-call elimination, and it did.  That was
+GNU dc.
+
+Trying just now, I see no growth in memory usage despite heavy CPU load
+shown by TIME increasing.
+
+    $ dc
+    !ps u `pidof dc`
+    USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+    ralph    11489  0.0  0.0   2332  1484 pts/1    S+   10:33   0:00 dc
+    [lmx]smlmx
+    ^C
+    Interrupt!
+    !ps u `pidof dc`
+    USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+    ralph    11489 75.5  0.0   2332  1488 pts/1    S+   10:33   0:46 dc
+
+The memory used remained at that level during the macro execution too,
+watched from outside.
+
+Do you have more detail on what GNU dc can't handle?  dc without
+tail-call elimination is a bit crippled.
+
+-- 
+Cheers, Ralph.
