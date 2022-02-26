@@ -1,0 +1,95 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18381 invoked from network); 26 Feb 2022 21:48:17 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 26 Feb 2022 21:48:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B08D09CFCB; Sun, 27 Feb 2022 07:48:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B4F5A944BA;
+	Sun, 27 Feb 2022 07:46:22 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id BED33944BA; Sun, 27 Feb 2022 07:46:19 +1000 (AEST)
+Received: from cuzuco.com (v.cuzuco.com [166.84.7.17])
+ by minnie.tuhs.org (Postfix) with ESMTP id 4353093D6E
+ for <tuhs@minnie.tuhs.org>; Sun, 27 Feb 2022 07:46:19 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by cuzuco.com (8.14.9/8.13.3) with SMTP id 21QLjjR0024198;
+ Sat, 26 Feb 2022 16:45:54 -0500 (EST)
+Date: Sat, 26 Feb 2022 16:45:45 -0500 (EST)
+Message-Id: <202202262145.21QLjjR0024198@cuzuco.com>
+From: Brian Walden <tuhs@cuzuco.com>
+To: <tuhs@minnie.tuhs.org>
+Subject: Re: [TUHS] run commands at login in v6 and stty
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+6th Edition used the Thompson shell as /bin/sh. I don't think it had
+those capabilities. Sometimes you could find an early version of the
+Bourne shell in /bin/nsh (new shell) in v6.
+
+The 7th Edition made the Bourne shell /bin/sh. And there sometimes
+you could find the Thompson shell in /bin/osh (old shell).
+
+Will Senn wrote:
+> Login commands question:
+>
+> I'm sure it's simple, but I can't figure it out. How do I get something
+> to run at login in v6? Right now, I use ed to create a file 'setprof'
+> that contains:
+>
+>     stty erase[space][backspace][return]
+>     stty nl0 cr0
+>
+> Then after logging in:
+>
+>     sh setprof
+>
+> It works, but, it is pretty clunky.
+>
+> stty question:
+>
+> So, I looked at stty.c and it looks like the following should work, if
+> the terminal is sending ^H for backspace:
+>
+>     #define BS0     0
+>     #define BS1     0100000
+>
+>     modes[]
+>     ...
+>              "bs0",
+>              BS0, BS1,
+>
+>              "bs1",
+>              BS1, BS1,
+>
+>
+> but:
+>
+>     stty bs0
+>     or
+>     stty bs1
+>
+> don't result in proper backspace handling..
+>
+> but:
+>
+>     stty[space][^h][return]
+>
+>
+> works...
+>
+> Thoughts?
