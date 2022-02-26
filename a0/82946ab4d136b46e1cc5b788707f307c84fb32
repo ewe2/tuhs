@@ -1,0 +1,86 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 13791 invoked from network); 26 Feb 2022 21:13:33 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 26 Feb 2022 21:13:33 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C9E379CFCA; Sun, 27 Feb 2022 07:13:30 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 12248944BA;
+	Sun, 27 Feb 2022 07:11:08 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0E70D944BA; Sun, 27 Feb 2022 07:11:06 +1000 (AEST)
+X-Greylist: delayed 469 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sun, 27 Feb 2022 07:11:04 AEST
+Received: from pio-pvt-msa2.bahnhof.se (pio-pvt-msa2.bahnhof.se [79.136.2.41])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7404593D6E
+ for <tuhs@minnie.tuhs.org>; Sun, 27 Feb 2022 07:11:04 +1000 (AEST)
+Received: from localhost (localhost [127.0.0.1])
+ by pio-pvt-msa2.bahnhof.se (Postfix) with ESMTP id C8F4640AF8
+ for <tuhs@minnie.tuhs.org>; Sat, 26 Feb 2022 22:03:12 +0100 (CET)
+X-Virus-Scanned: Debian amavisd-new at bahnhof.se
+Received: from pio-pvt-msa2.bahnhof.se ([127.0.0.1])
+ by localhost (pio-pvt-msa2.bahnhof.se [127.0.0.1]) (amavisd-new, port 10024)
+ with ESMTP id BVYzl4tL6E26 for <tuhs@minnie.tuhs.org>;
+ Sat, 26 Feb 2022 22:03:11 +0100 (CET)
+Received: by pio-pvt-msa2.bahnhof.se (Postfix) with ESMTPA id B8EF440AC7
+ for <tuhs@minnie.tuhs.org>; Sat, 26 Feb 2022 22:03:11 +0100 (CET)
+Received: from localhost (localhost [127.0.0.1])
+ by localhost (Postfix) with ESMTPS id D04032E01B5
+ for <tuhs@minnie.tuhs.org>; Sat, 26 Feb 2022 22:03:10 +0100 (CET)
+Date: Sat, 26 Feb 2022 21:03:09 +0000
+From: Michael =?utf-8?B?S2rDtnJsaW5n?= <michael@kjorling.se>
+To: tuhs@minnie.tuhs.org
+Message-ID: <b6552831-18a8-49dd-ac79-c93cd082972c@localhost>
+References: <acd97ce7-5827-56ba-aec2-6cf4dbb41169@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <acd97ce7-5827-56ba-aec2-6cf4dbb41169@gmail.com>
+Subject: Re: [TUHS] run commands at login in v6 and stty
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On 26 Feb 2022 14:39 -0600, from will.senn@gmail.com (Will Senn):
+> I'm sure it's simple, but I can't figure it out. How do I get something to
+> run at login in v6?
+
+From a very quick perusal of
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/usr/source/s2/sh.c it
+doesn't look like you can, at least not in the way we're used to today
+of having the shell execute a magic file (such as ~/.bashrc) during
+startup. I also don't see anything in
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=V6/etc/passwd that
+suggests that the shell can be specified on a per-user basis the way
+we're used to being able to do today, so the hack of making that point
+to a program that does some initial setup and then launches the shell
+proper also might not be readily available.
+
+On the other hand,
+https://minnie.tuhs.org/cgi-bin/utree.pl?file=V7/usr/src/cmd/sh/main.c
+looks like it includes such support; see the section surrounding the
+pathopen(nullstr, profile) call toward the bottom of main(). (Beware:
+it's written in Bourne C.)
+
+I won't say "you can't do it in V6", because I don't know things
+anywhere near well enough to say that, but it doesn't look entirely
+trivial at least, and it seems to have been added in V7's sh.
+
+-- 
+Michael Kjörling • https://michael.kjorling.se • michael@kjorling.se
+ “Remember when, on the Internet, nobody cared that you were a dog?”
+
