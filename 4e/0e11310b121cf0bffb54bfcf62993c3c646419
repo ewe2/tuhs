@@ -1,0 +1,74 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 30514 invoked from network); 27 Feb 2022 07:40:22 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 27 Feb 2022 07:40:22 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B3F3D9CFC3; Sun, 27 Feb 2022 17:40:18 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 79692944BA;
+	Sun, 27 Feb 2022 17:38:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 30931944BA; Sun, 27 Feb 2022 17:38:15 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DCC6C93D6E
+ for <tuhs@minnie.tuhs.org>; Sun, 27 Feb 2022 17:38:13 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id C63E318C083; Sun, 27 Feb 2022 02:38:12 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20220227073812.C63E318C083@mercury.lcs.mit.edu>
+Date: Sun, 27 Feb 2022 02:38:12 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] CSR in V6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Will Senn
+
+    > My question is - how did y'all run things - with CSR zero and no kernel
+    > messages ... or with CSR non-zero and kernel messages.
+
+On the -11/45 V6+ at MIT, we didn't have a printing terminal on the console,
+just a VT52. We had a tool at MIT called 'dmesg':
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/unix/man8/dmesg.8
+
+which made up for that a bit.
+
+We normally ran with the CSR set to 173030 - the 'boot in single-user'
+setting. That's because at one point the machine was in the 9th floor machine
+room, but the console VT52 was on the 5th floor (where our offices were - the
+famous print of the GE-645 Multics was on the hallway wall outside mine :-),
+and I'd added a 'reboot()' system call (nothing fancy, it just jumped to the
+bootstrap ROM), so we could reboot the machine without going up in the
+elevator (not if it had crashed, of course). Later on, after we'd done with
+kernel hacking (adding a network interface, and IP), and the machine stayed up
+for long periods, we moved the console up next to the machine (since if it
+crashed, you had to use the front panel to restart it, so you had to be up
+there anyway); we stayed with the default CSR setting, though. (If it panic'd,
+you could see the reason why when you went to reboot it.)
+
+    > Oh, BTW, I know I've seen this noted elsewhere, but I can't remember
+    > where.
+
+Maybe at:
+
+  https://gunkies.org/wiki/UNIX_Sixth_Edition#Distros
+
+which discusses it?
+
+	Noel
