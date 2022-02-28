@@ -1,0 +1,142 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 7136 invoked from network); 28 Feb 2022 14:10:16 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Feb 2022 14:10:16 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id AE6EB9CD04; Tue,  1 Mar 2022 00:10:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DE1A99CBCF;
+	Tue,  1 Mar 2022 00:07:19 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 5B35B9CBCF; Tue,  1 Mar 2022 00:07:16 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 685979CBCE
+ for <tuhs@minnie.tuhs.org>; Tue,  1 Mar 2022 00:07:15 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 1C1A135E08B; Mon, 28 Feb 2022 06:07:15 -0800 (PST)
+Date: Mon, 28 Feb 2022 06:07:15 -0800
+From: Larry McVoy <lm@mcvoy.com>
+To: Rob Pike <robpike@gmail.com>
+Message-ID: <20220228140715.GQ21168@mcvoy.com>
+References: <CAKH6PiVCk6gSv-WVztRUiJrOt3QHVi1pCVEKzw1RcEi+m+G=bw@mail.gmail.com>
+ <CAKzdPgw3F9snv-kO+tE=rE2Q_wh_7AKxVaZ9gXFoCxaX6pgBkA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKzdPgw3F9snv-kO+tE=rE2Q_wh_7AKxVaZ9gXFoCxaX6pgBkA@mail.gmail.com>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] run commands at login in v6 and stty
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Douglas McIlroy <douglas.mcilroy@dartmouth.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+So I'm curious, did Plan 9 run on a similar number of architectures and
+support a similar number of graphics cards?
+
+If it did that, nicely, then you have a great point, the X11 people
+(and most of us) clearly missed a better way to do things.  If this is
+the case, I'd like to understand how you did it because just including
+different definitions doesn't begin to scratch the surface of what the
+#ifdefs did in X11, there were tons in the actual code.
+
+Maybe the constant system interface made all the difference, that 
+could be.  
+
+If it supported a much smaller number of targets, well, sure, it's
+easier to be clean if you have a clean set of targets.
+
+I remain grateful for the #ifdefs, I could make enough sense of it 
+all to bring up X11 on every platform I worked on.  It wasn't pretty,
+there was a ton of "I don't recognize this $WHATEVER, what happens if
+I just #if 0 around the whole thing?  Wow, it compiles, lets see if
+I get a window system.  Yep, I do.  Shrug."  That limited what I had
+to understand to the much smaller subset of code I was actually
+going to run, yeah, that set of #ifdefs was a mess but not such
+a mess that I didn't get a working X11.
+
+I'm not arguing that #ifdef is good, I'm just acknowledging it had
+a lot of benefit to me, and _for me_, the cost was worth it in that
+instance.  I could have X11 working in less than a day.
+
+I do get your point about abstracting the interface differences away,
+I actually hate #ifdefs in the code with a passion so in BitKeeper we
+had all that stuff buried under the abstractions.  We made everything
+look like Unix, even on Windows, except for fork().  I haven't called
+fork() directly in close to 20 years, we picked up spawn() and made that
+work everywhere.  The abstraction layer cuts down on the #ifdefs in the
+code a LOT.
+
+On Mon, Feb 28, 2022 at 06:22:28PM +1100, Rob Pike wrote:
+> Plan 9 had the distinct advantage of a constant system interface at the
+> source level. X11 did not, but it also made essentially no attempt to
+> abstract it away, so the lines starting #ifdef often outnumbered the actual
+> code. I couldn't make hide nor hair of it, and had no way to reliably test
+> any change.
+> 
+> C with #ifdefs is not portable, it is a collection of 2^n overlaid
+> programs, where n is the number of distinct #if[n]def tags. It's too bad
+> the problems of that approach were not appreciated by the C standard
+> committee, who mandated the #ifndef guard approach that I'm sure could
+> count as a provable billion dollar mistake, probably much more. The cost of
+> building #ifdef'ed code, especially with C++, which decided to be more
+> fine-grained about it, is unfathomable.
+> 
+> Google alone might well count for many millions of dollars in wasted
+> compilation equipment. I remember giving a Plan 9 demo to someone soon
+> after I got to Google. None of the features of the system were of interest.
+> The thing that astounded my audience was the ability to build the kernel on
+> a P90 in 20 seconds or so, and the window system in under 3. At that time,
+> a build of a Google server would require hours on a large distcc cluster.
+> 
+> I still shudder to think of it. It's worse now, of course, far worse, but
+> Google has far larger clusters to handle it and some improvement in
+> tooling. However, the #ifdefs persist.
+> 
+> 
+> Tom Cargill warned Bjarne about this around 1984, but the plea fell on deaf
+> ears.
+> 
+> -rob
+> 
+> 
+> On Mon, Feb 28, 2022 at 12:07 PM Douglas McIlroy <
+> douglas.mcilroy@dartmouth.edu> wrote:
+> 
+> > > The X11 tree was a heavily ifdef-ed.  And it needed to be, I don't have
+> > > an answer as to how you would reuse all that code on different hardware
+> > > in a better way.
+> >
+> > Plan 9 did it with #include. The name of the included file was the same for
+> > every architecture. Only the search path for include files changed. Done
+> > with
+> > care, this eliminates the typical upfront #ifdefs.that define constants
+> > and set
+> > flags.
+> >
+> > Other preprocessor conditionals can usually be replaced by a regular if,
+> > letting
+> > the compiler optimize away the unwanted alternative. This makes
+> > conditionals
+> > obey the scope rules of C.
+> >
+> > Doug
+> >
+
+-- 
+---
+Larry McVoy            	     lm at mcvoy.com             http://www.mcvoy.com/lm 
