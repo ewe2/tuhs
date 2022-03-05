@@ -1,0 +1,868 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.1 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HTML_MESSAGE,MAILING_LIST_MULTI autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 10352 invoked from network); 12 Jan 2022 22:33:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 12 Jan 2022 22:33:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 584D99CFF0; Thu, 13 Jan 2022 08:33:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 388449CFD1;
+	Thu, 13 Jan 2022 08:33:03 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (1024-bit key; unprotected) header.d=ccc.com header.i=@ccc.com header.b="dIpL/k2P";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 54D919CF7E; Thu, 13 Jan 2022 08:33:01 +1000 (AEST)
+Received: from mail-qv1-f46.google.com (mail-qv1-f46.google.com
+ [209.85.219.46])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 27C1D9C78F
+ for <tuhs@tuhs.org>; Thu, 13 Jan 2022 08:33:00 +1000 (AEST)
+Received: by mail-qv1-f46.google.com with SMTP id a8so4667702qvx.2
+ for <tuhs@tuhs.org>; Wed, 12 Jan 2022 14:33:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ccc.com; s=google;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc; bh=mVjHvYydoarJUhlE419pyXPlivt8Rh7V7oChmUlbMuY=;
+ b=dIpL/k2PBACqOwqKp31EAI7s24UclacQ/DGyYoHe/yEngwv4R8pTiaHKgEnKtK637e
+ bSCzNbXGWmfucm4cQ2ONB5A3Zlk1tby9pfqRNeLyYPGKl4IG+I+iNhVaNrlfppOAmsv+
+ ppDaC7LazYTsLE53YslYTKAROlTX0UJ1lLVcw=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc;
+ bh=mVjHvYydoarJUhlE419pyXPlivt8Rh7V7oChmUlbMuY=;
+ b=54rkqcuVcCqkv9T1xOopGG8bq1wfPovOLWg1pYopD6TiAB8Tp87TKOyJ5fE7sEguWN
+ 2G/pMIPZ5nIrG7A7s+uPDDfF4wJtiLTmvFo8jiDjjxGXifd65D2/9AWFzPZrk06imACq
+ ccvMCp3Rdg4Pcb7/SgJDIxXHSmIyYzb9yqVyz7e2j7W/PcDFLWvatdoGOmdD63hconNz
+ VtbwkHpc8efXaR6+vGJkWTL11hjku373YZVw4NeQigaeJX2y6kKLwhPV6/IcVeMhbSat
+ s5ID4jdL1fd2lFU+lgBkOW9aLsbZsI7wIP0B4qKSHQ20h3DXNrsTsd1nTR+OXtWxKI9V
+ 5NcA==
+X-Gm-Message-State: AOAM5310JTA9evTBxNwKDWbBDEXg/QBRSywUiISLUWHZu2nRFxQItsMs
+ k0hgsO6IFJZ4N5h4eqLkVpDNvotzKlGGYrKElegnK8Deoe6bpn9i
+X-Google-Smtp-Source: ABdhPJyzcd4dlMFoGl75ON8edhzpMOpI44vhpK3jWf26v4MtyZgRFviqCbOP6t+XKy5Z0SnJv5wmABVttYPQtLHvPco=
+X-Received: by 2002:ad4:4ee6:: with SMTP id dv6mr1556091qvb.77.1642026778841; 
+ Wed, 12 Jan 2022 14:32:58 -0800 (PST)
+MIME-Version: 1.0
+References: <20220101031511.GB8135@mcvoy.com>
+ <CABwHSOuMxgEJnNUczbcGhA_939q_XfwCLyqacaGpz3+AjdSqSQ@mail.gmail.com>
+ <20220111015901.GE25103@eureka.lemis.com> <4409b91cd794867d@orthanc.ca>
+ <20220111024218.GE3441@mcvoy.com>
+ <CAC20D2OvbMtSaBp3t+tk1ksTNhgDjSS70dMGXgngfgpcXGG5fA@mail.gmail.com>
+ <CAD2gp_TUJo3SU7e4NW6PDVxyey4dL-JvrbiaSbKMBB+fD9zOJA@mail.gmail.com>
+ <CAC20D2N7PXkwvFe7iyUhznwrAyJf7k6oea3R+QiHL79Ty+0xDA@mail.gmail.com>
+ <202201120854.20C8sDRR014233@freefriends.org>
+ <CAEoi9W4wByhYcAVqz5e+d-ooe5sx4oWDgD2OmkwC0PYbc6DXXg@mail.gmail.com>
+ <20220112180619.mxzojchd62vpwm2f@localhost.localdomain>
+In-Reply-To: <20220112180619.mxzojchd62vpwm2f@localhost.localdomain>
+From: Clem Cole <clemc@ccc.com>
+Date: Wed, 12 Jan 2022 17:32:32 -0500
+Message-ID: <CAC20D2OPWB=znL3s6mvTEYJDiA5yATYVREXOqnks4etxDNjczw@mail.gmail.com>
+To: "G. Branden Robinson" <g.branden.robinson@gmail.com>
+Content-Type: multipart/alternative; boundary="000000000000dd63a805d56a26b4"
+Subject: Re: [TUHS] *roff history as told to GNU
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+--000000000000dd63a805d56a26b4
+Content-Type: text/plain; charset="UTF-8"
+
+Looks excellent -- friendly edit -- ditroff had nothing to do with
+vcat/vpr/vtroff.   Tom Ferrin wrote the original at UCSF in the mid/late
+70s -- the reasons was the the CAT typesetter was expensive and actually
+kinda nasty run.   Many of us had plotters in those days and Tom's hack was
+a welcomed addition to the tool set.
+
+instead of:
+
+leading some developers to contrive translators for C/A/T-formatted
+documents to other devices.  An example was vtroff for Versatec and
+Benson-Varian plotters.
+
+
+I offer:
+
+In mid/late 70s, Tom Ferrin a graphics researcher at UCSF using the font
+set released in the late 1960s, from Alan Hershey [
+https://en.wikipedia.org/wiki/Hershey_fonts], wrote a program to simulate
+the C/A/T typesetter allowing the output of the original troff program to
+be 'plotted'. This program originally called vcat for virtual cat
+typesetter, was first distributed as part of an early USENIX distribution
+tape, but was eventually re-released in 3BSD and later BSD distributions as
+the UCB vpr(1) command and associated wrapper that call it was created
+called vtroff.
+
+
+
+On Wed, Jan 12, 2022 at 1:07 PM G. Branden Robinson <
+g.branden.robinson@gmail.com> wrote:
+
+> Hi, Dan,
+>
+> At 2022-01-12T11:33:35-0500, Dan Cross wrote:
+> > I have some questions about the earlier history.
+>
+> I've been collecting a detailed narrative history not just of the *roff
+> _programs_ but also of the development on the language in the roff(7)
+> manual page.  Below I'll share a current chunk of it that is planned for
+> the next release (groff 1.23).  It has been heavily revised since
+> groff 1.22.4.  Many of my revisions have been motivated by accounts from
+> this list, from the "history of man pages" (more of a history of troff)
+> at manpages.bsd.lv, and the minnie TUHS archive.
+>
+> > As I understand it, in the beginning there was RUNOFF, which I believe
+> > originated on CTSS? The CTSS sources contain a RUNOFF program that's
+> > made up of ~1100 lines of MAD and ~1300 lines of assembler.
+>
+> This is a detail I hadn't encountered before; instead I've read claims
+> that distorted it into being a solely high-level language project.
+>
+> > There is certainly a RUNOFF in Multics, written in BCPL (there's a
+> > small "outer module transfer vector" program in ALM).
+>
+> As I understand it, _this_ RUNOFF is undisputedly Doug McIlroy's.
+>
+> > This is where it gets muddy for me; I understand this was roughly
+> > ported to unix as `roff` by Ken and that at this point,
+>
+> It is hard to find an account of this period that _isn't_ muddy.  Claims
+> from Murray Hill luminaries suggest that V0 and V1 Unix roffs were the
+> collective work of Thompson, Ritchie, Ossanna, a fourth person who
+> contributed the hyphenation algorithm (does someone have the name?), and
+> McIlroy, because in Ritchie's words[1], this roff was "transliterated"
+> from Doug's BCPL codebase.
+>
+> > formatting was fairly primitive: suitable for hardcopy terminals and
+> > line printers, and could do things like center lines and so forth, but
+> > nothing fancy (https://www.cs.dartmouth.edu/~doug/reader.pdf).
+>
+> Yes.  My contributions to groff's roff(7) page attempt to shed more
+> light on this sort of thing.  Sadly, at crucial periods sources and even
+> documentation are missing.  For example, there is an nroff entry in the
+> Unix V2 manual table of contents, but no man page is present.  In other
+> early editions the reader is asked to see Ossanna for documentation, and
+> it seems the corresponding artifacts might be lost to time.
+>
+> > Ossanna then took over and greatly expanded the capabilities of
+> > `roff`, adding macros and traps and making it Turing-complete; this
+> > was `nroff`, which grew to become `troff` once the C/A/T typesetter
+> > was acquired.
+>
+> Yes.
+>
+> Here's what I have, though it looks better typeset[2].  Corrections from
+> witnesses are warmly welcomed.
+>
+> Name
+>        roff - concepts and history of roff typesetting
+>
+> Description
+>        The term roff describes a family of document formatting systems
+>        known by names like troff, nroff, ditroff, and groff.  A roff
+>        system consists of an extensible text formatting language and a
+>        set of programs for printing and converting to other text
+>        formats.  Unix-like operating systems often distribute a roff
+>        system as a core package.
+>
+> [snip]
+>
+> History
+>        Computer-driven document formatting dates back to the 1960s.  The
+>        roff system itself is intimately connected with the Unix
+>        operating system, but its roots go back to the earlier operating
+>        systems CTSS and Multics.
+>
+>    The predecessor--RUNOFF
+>        roff's ancestor RUNOFF was written in the MAD language by Jerry
+>        Saltzer to prepare his Ph.D. thesis using the Compatible Time
+>        Sharing System (CTSS), a project of the Massachusetts Institute
+>        of Technology (MIT).  The program is generally referred to in
+>        full capitals, both to distinguish it from its many descendants,
+>        and because bits were expensive in those days; five- and six-bit
+>        character encodings were still in widespread usage, and mixed-
+>        case alphabetics seen as a luxury.  RUNOFF introduced a syntax of
+>        inlining formatting directives amid document text, by beginning a
+>        line with a period (an unlikely occurrence in human-readable
+>        material) followed by a "control word".  Control words with
+>        obvious meaning like ".line length n" were supported as well as
+>        an abbreviation system; the latter came to overwhelm the former
+>        in popular usage and later derivatives of the program.  A sample
+>        of control words from a RUNOFF manual of December 1966 <http://
+>        web.mit.edu/Saltzer/www/publications/ctss/AH.9.01.html> was
+>        documented as follows (with the parameter notation slightly
+>        altered).  The abbreviations will be familiar to roff veterans.
+>
+>                         Abbreviation   Control word
+>                                  .ad   .adjust
+>                                  .bp   .begin page
+>                                  .br   .break
+>                                  .ce   .center
+>                                  .in   .indent n
+>                                  .ll   .line length n
+>                                  .nf   .nofill
+>                                  .pl   .paper length n
+>                                  .sp   .space [n]
+>
+>        In 1965, MIT's Project MAC teamed with Bell Telephone
+>        Laboratories and General Electric (GE) to inaugurate the Multics
+>        <http://www.multicians.org> project.  After a few years, Bell
+>        Labs discontinued its participation in Multics, famously
+>        prompting the development of Unix.  Meanwhile, Saltzer's RUNOFF
+>        proved influential, seeing many ports and derivations elsewhere.
+>
+>        In 1969, Doug McIlroy wrote one such reimplementation of RUNOFF
+>        in the BCPL language for a GE 645 running GECOS at the Bell Labs
+>        location in Murray Hill, New Jersey.  In its manual, the control
+>        commands were termed "requests", their two-letter names were
+>        canonical, and the control character was configurable with a .cc
+>        request.  Other familiar requests emerged at this time; no-adjust
+>        (.na), need (.ne), page offset (.po), tab configuration (.ta,
+>        though it worked differently), temporary indent (.ti), character
+>        translation (.tr), and automatic underlining (.ul; on RUNOFF you
+>        had to backspace and underscore in the input yourself).  .fi to
+>        enable filling of output lines got the name it retains to this
+>        day.
+>
+>    Unix and roff
+>        roff was one of the first Unix programs.  McIlroy's runoff was,
+>        in Dennis Ritchie's term, "transliterated" from BCPL to DEC PDP-7
+>        assembly language for the fledgling Unix operating system.  It
+>        saw its name shortened to roff (perhaps under the influence of
+>        Ken Thompson), while adding support for automatic hyphenation
+>        with .hc and .hy requests; a generalization of line spacing
+>        control with the .ls request; and what later roffs would call
+>        diversions, with "footnote" requests.  This roff indirectly
+>        funded operating systems research at Murray Hill, for it was used
+>        to prepare patent applications for AT&T to the U.S. government.
+>        This arrangement enabled the group to acquire a PDP-11; roff
+>        promptly proved equal to the task of typesetting the first
+>        edition of the manual for what would later become known as "Unix
+>        Version 1", dated November 1971.
+>
+>        Output from all of the foregoing programs was limited to line
+>        printers and paper terminals such the IBM 2471 (based on the
+>        Selectric line of typewriters) and the Teletype Corporation Model
+>        37.  Proportionally-spaced type was unknown.
+>
+>    New roff and Typesetter roff
+>        The first years of Unix were spent in rapid evolution.  The
+>        practicalities of preparing standardized documents like patent
+>        applications (and Unix manual pages), combined with McIlroy's
+>        enthusiasm for macro languages, perhaps created an irresistible
+>        pressure to make roff extensible.  Joe Ossanna's nroff, literally
+>        a "new roff", was the outlet for this pressure.  By the time of
+>        Unix Version 3 (February 1973)--and still in PDP-11 assembly
+>        language--it sported a swath of features now considered essential
+>        to roff systems: definition of macros (.de), diversion of text
+>        thence (.di), and removal thereof (.rm); trap planting (.wh;
+>        "when") and relocation (.ch; "change"); conditional processing
+>        (.if); and environments (.ev).  Incremental improvements included
+>        assignment of the next page number (.pn); no-space mode (.ns) and
+>        restoration of vertical spacing (.rs); the saving (.sv) and
+>        output (.os) of vertical space; specification of replacement
+>        characters for tabs (.tc) and leaders (.lc); configuration of the
+>        no-break control character (.c2); shorthand to disable automatic
+>        hyphenation (.nh); a condensation of what were formerly six
+>        different requests for configuration of page "titles" (headers
+>        and footers) into one (.tl) with a length controlled separately
+>        from the line length (.lt); automatic line numbering (.nm);
+>        interactive input (.rd), which necessitated buffer-flushing
+>        (.fl), and was made convenient with early program cessation
+>        (.ex); source file inclusion in its modern form (.so; though
+>        RUNOFF had an ".append" control word for a similar purpose) and
+>        early advance to the next file argument (.nx); ignorable content
+>        (.ig); and programmable abort (.ab).
+>
+>        Third Edition Unix also brought the pipe(2) system call, the
+>        explosive growth of a componentized system based around it, and a
+>        "filter model" that remains perceptible today.  Equally
+>        importantly, the Bell Labs site in Murray Hill acquired a Graphic
+>        Systems C/A/T phototypesetter, and with it came the necessity of
+>        expanding the capabilities of a roff system to cope with
+>        proportionally-spaced type, multiple type sizes, and a variety of
+>        fonts.  Ossanna wrote a parallel implementation of nroff for the
+>        C/A/T, dubbing it troff (for "typesetter roff").  Unfortunately,
+>        surviving documentation does not illustrate what requests were
+>        implemented at this time for C/A/T support; the troff(1) man page
+>        in Fourth Edition Unix (November 1973) does not feature a request
+>        list, unlike nroff(1).  Apart from typesetter-driven features,
+>        Unix Version 4 roffs added string definitions (.ds); made the
+>        escape character configurable (.ec); and enabled the user to
+>        write diagnostics to the standard error stream (.tm).  Around
+>        1974, empowered with multiple type sizes, italics, and a symbol
+>        font specially commissioned by Bell Labs from Graphic Systems,
+>        Brian Kernighan and Lorinda Cherry implemented eqn for
+>        typesetting mathematics.  In the same year, for Fifth Edition
+>        Unix, Ossanna combined and reimplemented the two roffs in C,
+>        using preprocessor conditions of that language to generate both
+>        from a single source tree.
+>
+>        Ossanna documented the syntax of the input language to the nroff
+>        and troff programs in the "Troff User's Manual", first published
+>        in 1976, with further revisions as late as 1992 by Kernighan.
+>        (The original version was entitled "Nroff/Troff User's Manual",
+>        which may partially explain why roff practitioners have tended to
+>        refer to it by its AT&T document identifier, "CSTR #54".)  Its
+>        final revision serves as the de facto specification of AT&T
+>        troff, and all subsequent implementors of roff systems have done
+>        so in its shadow.
+>
+>        A small and simple set of roff macros was first used for the
+>        manual pages of Unix Version 4 and persisted for two further
+>        releases, but the first macro package to be formally described
+>        and installed was ms by Lesk in Version 6.  He also wrote a
+>        manual, "Typing Documents on the Unix System", describing ms and
+>        basic nroff/troff usage, updating it as the package accrued
+>        features.  Sixth Edition additionally saw the debut of the tbl
+>        preprocessor for formatting tables, also by Lesk.
+>
+>        For Unix Version 7 (January 1979), McIlroy designed, implemented,
+>        and documented the man macro package, introducing most of the
+>        macros described in groff_man(7) today, and edited volume 1 of
+>        the Version 7 manual using it.  Documents composed using ms
+>        featured in volume 2, edited by Kernighan.
+>
+>        Ossanna had passed away unexpectedly in 1977, and after the
+>        release of Version 7, with the C/A/T typesetter becoming
+>        supplanted by alternative devices such as the Mergenthaler
+>        Linotron 202, Kernighan undertook a revision and rewrite of troff
+>        to generalize its design.  To implement this revised
+>        architecture, he developed the font and device description file
+>        formats and the device-independent output format that remain in
+>        use today.  He described these novelties in the article "A
+>        Typesetter-independent TROFF", last revised in 1982, and like the
+>        troff manual itself, it is widely known by a shorthand, "CSTR
+>        #97".
+>
+>        Kernighan's innovations prepared troff well for the introduction
+>        of the Adobe PostScript language in 1982 and a vibrant market in
+>        laser printers with built-in interpreters for it.  An output
+>        driver for PostScript, dpost, was swiftly developed.  However,
+>        due to AT&T software licensing practices, Ossanna's troff, with
+>        its tight coupling to the capabilities of the C/A/T, remained in
+>        parallel distribution with device-independent troff throughout
+>        the 1980s, leading some developers to contrive translators for
+>        C/A/T-formatted documents to other devices.  An example was
+>        vtroff for Versatec and Benson-Varian plotters.  Today, however,
+>        all actively maintained troffs follow Kernighan's device-
+>        independent design.
+>
+> Regards,
+> Branden
+>
+> [1] "The Evolution of the Unix Time-Sharing System", Ritchie, 1984
+> [2] Formatted with:
+>       groff -man -P-c -Tascii -rLL=72n -rHY=0 -dAD=l build/man/roff.7
+>     (The `AD` string is new to groff 1.23 man(7).)
+>
+
+--000000000000dd63a805d56a26b4
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div class=3D"gmail_default" style=3D"font-family:arial,he=
+lvetica,sans-serif">Looks excellent -- friendly edit -- ditroff had nothing=
+ to do with vcat/vpr/vtroff. =C2=A0 Tom Ferrin wrote the original at UCSF i=
+n the mid/late 70s -- the reasons was the the CAT typesetter was expensive =
+and actually kinda nasty run. =C2=A0 Many of us had plotters in those days =
+and Tom&#39;s hack was a welcomed=C2=A0addition to the tool set.</div><div =
+class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><b=
+r></div><div class=3D"gmail_default" style=3D"font-family:arial,helvetica,s=
+ans-serif">instead of:</div><div class=3D"gmail_default" style=3D"font-fami=
+ly:arial,helvetica,sans-serif"><br></div><blockquote style=3D"margin:0 0 0 =
+40px;border:none;padding:0px"><div class=3D"gmail_default" style=3D"font-fa=
+mily:arial,helvetica,sans-serif"><font color=3D"#ff0000"><span style=3D"fon=
+t-family:Arial,Helvetica,sans-serif">leading some developers to contrive tr=
+anslators for</span><span style=3D"font-family:Arial,Helvetica,sans-serif">=
+=C2=A0C/A/T-formatted documents to other devices.=C2=A0 An example was</spa=
+n><span style=3D"font-family:Arial,Helvetica,sans-serif">=C2=A0vtroff for V=
+ersatec and Benson-Varian plotters.</span></font></div></blockquote><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><spa=
+n style=3D"font-family:Arial,Helvetica,sans-serif"><br></span></div><div cl=
+ass=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><spa=
+n style=3D"font-family:Arial,Helvetica,sans-serif">I offer:</span></div><di=
+v class=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif">=
+<span style=3D"font-family:Arial,Helvetica,sans-serif"><br></span></div><bl=
+ockquote style=3D"margin:0 0 0 40px;border:none;padding:0px"><div class=3D"=
+gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><font color=
+=3D"#ff0000"><span style=3D"font-family:Arial,Helvetica,sans-serif">In mid/=
+late 70s, Tom Ferrin a graphics researcher at UCSF using the font set relea=
+sed in the late 1960s, from Alan Hershey [</span><span style=3D"font-family=
+:Arial,Helvetica,sans-serif"><a href=3D"https://en.wikipedia.org/wiki/Hersh=
+ey_fonts">https://en.wikipedia.org/wiki/Hershey_fonts</a>], wrote a program=
+ to simulate the C/A/T typesetter allowing the output of the original troff=
+ program to be &#39;plotted&#39;. This program originally called vcat for v=
+irtual cat typesetter, was first distributed as part of an early USENIX dis=
+tribution tape, but was eventually re-released in 3BSD and later BSD distri=
+butions as the UCB vpr(1)=C2=A0command=C2=A0and associated wrapper that cal=
+l it was created called vtroff.</span></font></div></blockquote><div class=
+=3D"gmail_default" style=3D"font-family:arial,helvetica,sans-serif"><br></d=
+iv></div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_att=
+r">On Wed, Jan 12, 2022 at 1:07 PM G. Branden Robinson &lt;<a href=3D"mailt=
+o:g.branden.robinson@gmail.com">g.branden.robinson@gmail.com</a>&gt; wrote:=
+<br></div><blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8=
+ex;border-left-width:1px;border-left-style:solid;border-left-color:rgb(204,=
+204,204);padding-left:1ex">Hi, Dan,<br>
+<br>
+At 2022-01-12T11:33:35-0500, Dan Cross wrote:<br>
+&gt; I have some questions about the earlier history.<br>
+<br>
+I&#39;ve been collecting a detailed narrative history not just of the *roff=
+<br>
+_programs_ but also of the development on the language in the roff(7)<br>
+manual page.=C2=A0 Below I&#39;ll share a current chunk of it that is plann=
+ed for<br>
+the next release (groff 1.23).=C2=A0 It has been heavily revised since<br>
+groff 1.22.4.=C2=A0 Many of my revisions have been motivated by accounts fr=
+om<br>
+this list, from the &quot;history of man pages&quot; (more of a history of =
+troff)<br>
+at <a href=3D"http://manpages.bsd.lv" rel=3D"noreferrer" target=3D"_blank">=
+manpages.bsd.lv</a>, and the minnie TUHS archive.<br>
+<br>
+&gt; As I understand it, in the beginning there was RUNOFF, which I believe=
+<br>
+&gt; originated on CTSS? The CTSS sources contain a RUNOFF program that&#39=
+;s<br>
+&gt; made up of ~1100 lines of MAD and ~1300 lines of assembler.<br>
+<br>
+This is a detail I hadn&#39;t encountered before; instead I&#39;ve read cla=
+ims<br>
+that distorted it into being a solely high-level language project.<br>
+<br>
+&gt; There is certainly a RUNOFF in Multics, written in BCPL (there&#39;s a=
+<br>
+&gt; small &quot;outer module transfer vector&quot; program in ALM).<br>
+<br>
+As I understand it, _this_ RUNOFF is undisputedly Doug McIlroy&#39;s.<br>
+<br>
+&gt; This is where it gets muddy for me; I understand this was roughly<br>
+&gt; ported to unix as `roff` by Ken and that at this point,<br>
+<br>
+It is hard to find an account of this period that _isn&#39;t_ muddy.=C2=A0 =
+Claims<br>
+from Murray Hill luminaries suggest that V0 and V1 Unix roffs were the<br>
+collective work of Thompson, Ritchie, Ossanna, a fourth person who<br>
+contributed the hyphenation algorithm (does someone have the name?), and<br=
+>
+McIlroy, because in Ritchie&#39;s words[1], this roff was &quot;translitera=
+ted&quot;<br>
+from Doug&#39;s BCPL codebase.<br>
+<br>
+&gt; formatting was fairly primitive: suitable for hardcopy terminals and<b=
+r>
+&gt; line printers, and could do things like center lines and so forth, but=
+<br>
+&gt; nothing fancy (<a href=3D"https://www.cs.dartmouth.edu/~doug/reader.pd=
+f" rel=3D"noreferrer" target=3D"_blank">https://www.cs.dartmouth.edu/~doug/=
+reader.pdf</a>).<br>
+<br>
+Yes.=C2=A0 My contributions to groff&#39;s roff(7) page attempt to shed mor=
+e<br>
+light on this sort of thing.=C2=A0 Sadly, at crucial periods sources and ev=
+en<br>
+documentation are missing.=C2=A0 For example, there is an nroff entry in th=
+e<br>
+Unix V2 manual table of contents, but no man page is present.=C2=A0 In othe=
+r<br>
+early editions the reader is asked to see Ossanna for documentation, and<br=
+>
+it seems the corresponding artifacts might be lost to time.<br>
+<br>
+&gt; Ossanna then took over and greatly expanded the capabilities of<br>
+&gt; `roff`, adding macros and traps and making it Turing-complete; this<br=
+>
+&gt; was `nroff`, which grew to become `troff` once the C/A/T typesetter<br=
+>
+&gt; was acquired.<br>
+<br>
+Yes.<br>
+<br>
+Here&#39;s what I have, though it looks better typeset[2].=C2=A0 Correction=
+s from<br>
+witnesses are warmly welcomed.<br>
+<br>
+Name<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0roff - concepts and history of roff typesetting<=
+br>
+<br>
+Description<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0The term roff describes a family of document for=
+matting systems<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0known by names like troff, nroff, ditroff, and g=
+roff.=C2=A0 A roff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0system consists of an extensible text formatting=
+ language and a<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0set of programs for printing and converting to o=
+ther text<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0formats.=C2=A0 Unix-like operating systems often=
+ distribute a roff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0system as a core package.<br>
+<br>
+[snip]<br>
+<br>
+History<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Computer-driven document formatting dates back t=
+o the 1960s.=C2=A0 The<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0roff system itself is intimately connected with =
+the Unix<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0operating system, but its roots go back to the e=
+arlier operating<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0systems CTSS and Multics.<br>
+<br>
+=C2=A0 =C2=A0The predecessor--RUNOFF<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0roff&#39;s ancestor RUNOFF was written in the MA=
+D language by Jerry<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Saltzer to prepare his Ph.D. thesis using the Co=
+mpatible Time<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Sharing System (CTSS), a project of the Massachu=
+setts Institute<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0of Technology (MIT).=C2=A0 The program is genera=
+lly referred to in<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0full capitals, both to distinguish it from its m=
+any descendants,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0and because bits were expensive in those days; f=
+ive- and six-bit<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0character encodings were still in widespread usa=
+ge, and mixed-<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0case alphabetics seen as a luxury.=C2=A0 RUNOFF =
+introduced a syntax of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0inlining formatting directives amid document tex=
+t, by beginning a<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0line with a period (an unlikely occurrence in hu=
+man-readable<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0material) followed by a &quot;control word&quot;=
+.=C2=A0 Control words with<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0obvious meaning like &quot;.line length n&quot; =
+were supported as well as<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0an abbreviation system; the latter came to overw=
+helm the former<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0in popular usage and later derivatives of the pr=
+ogram.=C2=A0 A sample<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0of control words from a RUNOFF manual of Decembe=
+r 1966 &lt;http://<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0<a href=3D"http://web.mit.edu/Saltzer/www/public=
+ations/ctss/AH.9.01.html" rel=3D"noreferrer" target=3D"_blank">web.mit.edu/=
+Saltzer/www/publications/ctss/AH.9.01.html</a>&gt; was<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0documented as follows (with the parameter notati=
+on slightly<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0altered).=C2=A0 The abbreviations will be famili=
+ar to roff veterans.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 Abbreviation=C2=A0 =C2=A0Control word<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.ad=C2=A0 =C2=A0.adjust<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.bp=C2=A0 =C2=A0.begin page<br=
+>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.br=C2=A0 =C2=A0.break<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.ce=C2=A0 =C2=A0.center<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.in=C2=A0 =C2=A0.indent n<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.ll=C2=A0 =C2=A0.line length n=
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.nf=C2=A0 =C2=A0.nofill<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.pl=C2=A0 =C2=A0.paper length =
+n<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0.sp=C2=A0 =C2=A0.space [n]<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0In 1965, MIT&#39;s Project MAC teamed with Bell =
+Telephone<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Laboratories and General Electric (GE) to inaugu=
+rate the Multics<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0&lt;<a href=3D"http://www.multicians.org" rel=3D=
+"noreferrer" target=3D"_blank">http://www.multicians.org</a>&gt; project.=
+=C2=A0 After a few years, Bell<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Labs discontinued its participation in Multics, =
+famously<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0prompting the development of Unix.=C2=A0 Meanwhi=
+le, Saltzer&#39;s RUNOFF<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0proved influential, seeing many ports and deriva=
+tions elsewhere.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0In 1969, Doug McIlroy wrote one such reimplement=
+ation of RUNOFF<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0in the BCPL language for a GE 645 running GECOS =
+at the Bell Labs<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0location in Murray Hill, New Jersey.=C2=A0 In it=
+s manual, the control<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0commands were termed &quot;requests&quot;, their=
+ two-letter names were<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0canonical, and the control character was configu=
+rable with a .cc<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0request.=C2=A0 Other familiar requests emerged a=
+t this time; no-adjust<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(.na), need (.ne), page offset (.po), tab config=
+uration (.ta,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0though it worked differently), temporary indent =
+(.ti), character<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0translation (.tr), and automatic underlining (.u=
+l; on RUNOFF you<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0had to backspace and underscore in the input you=
+rself).=C2=A0 .fi to<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0enable filling of output lines got the name it r=
+etains to this<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0day.<br>
+<br>
+=C2=A0 =C2=A0Unix and roff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0roff was one of the first Unix programs.=C2=A0 M=
+cIlroy&#39;s runoff was,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0in Dennis Ritchie&#39;s term, &quot;transliterat=
+ed&quot; from BCPL to DEC PDP-7<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0assembly language for the fledgling Unix operati=
+ng system.=C2=A0 It<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0saw its name shortened to roff (perhaps under th=
+e influence of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Ken Thompson), while adding support for automati=
+c hyphenation<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0with .hc and .hy requests; a generalization of l=
+ine spacing<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0control with the .ls request; and what later rof=
+fs would call<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0diversions, with &quot;footnote&quot; requests.=
+=C2=A0 This roff indirectly<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0funded operating systems research at Murray Hill=
+, for it was used<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0to prepare patent applications for AT&amp;T to t=
+he U.S. government.<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0This arrangement enabled the group to acquire a =
+PDP-11; roff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0promptly proved equal to the task of typesetting=
+ the first<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0edition of the manual for what would later becom=
+e known as &quot;Unix<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Version 1&quot;, dated November 1971.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Output from all of the foregoing programs was li=
+mited to line<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0printers and paper terminals such the IBM 2471 (=
+based on the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Selectric line of typewriters) and the Teletype =
+Corporation Model<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A037.=C2=A0 Proportionally-spaced type was unknown=
+.<br>
+<br>
+=C2=A0 =C2=A0New roff and Typesetter roff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0The first years of Unix were spent in rapid evol=
+ution.=C2=A0 The<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0practicalities of preparing standardized documen=
+ts like patent<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0applications (and Unix manual pages), combined w=
+ith McIlroy&#39;s<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0enthusiasm for macro languages, perhaps created =
+an irresistible<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0pressure to make roff extensible.=C2=A0 Joe Ossa=
+nna&#39;s nroff, literally<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0a &quot;new roff&quot;, was the outlet for this =
+pressure.=C2=A0 By the time of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Unix Version 3 (February 1973)--and still in PDP=
+-11 assembly<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0language--it sported a swath of features now con=
+sidered essential<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0to roff systems: definition of macros (.de), div=
+ersion of text<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0thence (.di), and removal thereof (.rm); trap pl=
+anting (.wh;<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0&quot;when&quot;) and relocation (.ch; &quot;cha=
+nge&quot;); conditional processing<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(.if); and environments (.ev).=C2=A0 Incremental=
+ improvements included<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0assignment of the next page number (.pn); no-spa=
+ce mode (.ns) and<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0restoration of vertical spacing (.rs); the savin=
+g (.sv) and<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0output (.os) of vertical space; specification of=
+ replacement<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0characters for tabs (.tc) and leaders (.lc); con=
+figuration of the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0no-break control character (.c2); shorthand to d=
+isable automatic<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0hyphenation (.nh); a condensation of what were f=
+ormerly six<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0different requests for configuration of page &qu=
+ot;titles&quot; (headers<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0and footers) into one (.tl) with a length contro=
+lled separately<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0from the line length (.lt); automatic line numbe=
+ring (.nm);<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0interactive input (.rd), which necessitated buff=
+er-flushing<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(.fl), and was made convenient with early progra=
+m cessation<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(.ex); source file inclusion in its modern form =
+(.so; though<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0RUNOFF had an &quot;.append&quot; control word f=
+or a similar purpose) and<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0early advance to the next file argument (.nx); i=
+gnorable content<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(.ig); and programmable abort (.ab).<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Third Edition Unix also brought the pipe(2) syst=
+em call, the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0explosive growth of a componentized system based=
+ around it, and a<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0&quot;filter model&quot; that remains perceptibl=
+e today.=C2=A0 Equally<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0importantly, the Bell Labs site in Murray Hill a=
+cquired a Graphic<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Systems C/A/T phototypesetter, and with it came =
+the necessity of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0expanding the capabilities of a roff system to c=
+ope with<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0proportionally-spaced type, multiple type sizes,=
+ and a variety of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0fonts.=C2=A0 Ossanna wrote a parallel implementa=
+tion of nroff for the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0C/A/T, dubbing it troff (for &quot;typesetter ro=
+ff&quot;).=C2=A0 Unfortunately,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0surviving documentation does not illustrate what=
+ requests were<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0implemented at this time for C/A/T support; the =
+troff(1) man page<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0in Fourth Edition Unix (November 1973) does not =
+feature a request<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0list, unlike nroff(1).=C2=A0 Apart from typesett=
+er-driven features,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Unix Version 4 roffs added string definitions (.=
+ds); made the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0escape character configurable (.ec); and enabled=
+ the user to<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0write diagnostics to the standard error stream (=
+.tm).=C2=A0 Around<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A01974, empowered with multiple type sizes, italic=
+s, and a symbol<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0font specially commissioned by Bell Labs from Gr=
+aphic Systems,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Brian Kernighan and Lorinda Cherry implemented e=
+qn for<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0typesetting mathematics.=C2=A0 In the same year,=
+ for Fifth Edition<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Unix, Ossanna combined and reimplemented the two=
+ roffs in C,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0using preprocessor conditions of that language t=
+o generate both<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0from a single source tree.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Ossanna documented the syntax of the input langu=
+age to the nroff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0and troff programs in the &quot;Troff User&#39;s=
+ Manual&quot;, first published<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0in 1976, with further revisions as late as 1992 =
+by Kernighan.<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0(The original version was entitled &quot;Nroff/T=
+roff User&#39;s Manual&quot;,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0which may partially explain why roff practitione=
+rs have tended to<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0refer to it by its AT&amp;T document identifier,=
+ &quot;CSTR #54&quot;.)=C2=A0 Its<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0final revision serves as the de facto specificat=
+ion of AT&amp;T<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0troff, and all subsequent implementors of roff s=
+ystems have done<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0so in its shadow.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0A small and simple set of roff macros was first =
+used for the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0manual pages of Unix Version 4 and persisted for=
+ two further<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0releases, but the first macro package to be form=
+ally described<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0and installed was ms by Lesk in Version 6.=C2=A0=
+ He also wrote a<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0manual, &quot;Typing Documents on the Unix Syste=
+m&quot;, describing ms and<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0basic nroff/troff usage, updating it as the pack=
+age accrued<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0features.=C2=A0 Sixth Edition additionally saw t=
+he debut of the tbl<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0preprocessor for formatting tables, also by Lesk=
+.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0For Unix Version 7 (January 1979), McIlroy desig=
+ned, implemented,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0and documented the man macro package, introducin=
+g most of the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0macros described in groff_man(7) today, and edit=
+ed volume 1 of<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0the Version 7 manual using it.=C2=A0 Documents c=
+omposed using ms<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0featured in volume 2, edited by Kernighan.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Ossanna had passed away unexpectedly in 1977, an=
+d after the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0release of Version 7, with the C/A/T typesetter =
+becoming<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0supplanted by alternative devices such as the Me=
+rgenthaler<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Linotron 202, Kernighan undertook a revision and=
+ rewrite of troff<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0to generalize its design.=C2=A0 To implement thi=
+s revised<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0architecture, he developed the font and device d=
+escription file<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0formats and the device-independent output format=
+ that remain in<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0use today.=C2=A0 He described these novelties in=
+ the article &quot;A<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Typesetter-independent TROFF&quot;, last revised=
+ in 1982, and like the<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0troff manual itself, it is widely known by a sho=
+rthand, &quot;CSTR<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0#97&quot;.<br>
+<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0Kernighan&#39;s innovations prepared troff well =
+for the introduction<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0of the Adobe PostScript language in 1982 and a v=
+ibrant market in<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0laser printers with built-in interpreters for it=
+.=C2=A0 An output<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0driver for PostScript, dpost, was swiftly develo=
+ped.=C2=A0 However,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0due to AT&amp;T software licensing practices, Os=
+sanna&#39;s troff, with<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0its tight coupling to the capabilities of the C/=
+A/T, remained in<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0parallel distribution with device-independent tr=
+off throughout<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0the 1980s, leading some developers to contrive t=
+ranslators for<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0C/A/T-formatted documents to other devices.=C2=
+=A0 An example was<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0vtroff for Versatec and Benson-Varian plotters.=
+=C2=A0 Today, however,<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0all actively maintained troffs follow Kernighan&=
+#39;s device-<br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0independent design.<br>
+<br>
+Regards,<br>
+Branden<br>
+<br>
+[1] &quot;The Evolution of the Unix Time-Sharing System&quot;, Ritchie, 198=
+4<br>
+[2] Formatted with:<br>
+=C2=A0 =C2=A0 =C2=A0 groff -man -P-c -Tascii -rLL=3D72n -rHY=3D0 -dAD=3Dl b=
+uild/man/roff.7<br>
+=C2=A0 =C2=A0 (The `AD` string is new to groff 1.23 man(7).)<br>
+</blockquote></div>
+
+--000000000000dd63a805d56a26b4--

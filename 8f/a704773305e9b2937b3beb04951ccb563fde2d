@@ -1,0 +1,90 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26643 invoked from network); 1 Mar 2022 00:48:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Mar 2022 00:48:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E0AA89CE72; Tue,  1 Mar 2022 10:48:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 31AD89CC02;
+	Tue,  1 Mar 2022 10:46:40 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A46E59CC02; Tue,  1 Mar 2022 10:44:24 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1F9729CBCE
+ for <tuhs@minnie.tuhs.org>; Tue,  1 Mar 2022 10:44:24 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id EB7A118C07B; Mon, 28 Feb 2022 19:44:22 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20220301004422.EB7A118C07B@mercury.lcs.mit.edu>
+Date: Mon, 28 Feb 2022 19:44:22 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Memory on Lion's v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Will Senn
+
+    > Does anybody know how much memory was configured on the PDP-11 that
+    > Lion's used for the commentary system. Here's what the book says about
+    > the system:
+    > ..
+    > ; PDP11/40 processor;
+    > ...
+    > It seems like he must have had an MMU
+
+V6 absolutely requires an MMU; the need for it is all throughout basic
+attributes of the system - e.g. user processes start their address space at 0.
+
+(BTW, there are V6 descendants, MINI-UNIX:
+
+  http://gunkies.org/wiki/MINI-UNIX
+
+and LSX, which don't use/need an MMU, and run on -11 models without memory
+managament, such as -11/05's, but I don't think they were in wide use outside
+Bell.)
+
+
+    > and 128k memory
+
+The -11/40, as originally released, only supported the MM11-L, which came in
+multiples of 16KB (for a 3-board set). Use of the later MM11-U (32KB units)
+required a new main power harness, which only came in on
+higher-serial-numbered -11/40's.
+
+The -11/40 (as it was at first) that I had at LCS had, to start with, I'm
+pretty sure, 3 MM11-L units (i.e. one MM11-L backplane full) - i.e. 48KB. I
+know this sounds incredible, and I'm having a hard time believing it myself,
+wondering if my memory is failing with age; but it definitely had
+extraordinarily little.
+
+I just looked on my V6 (running in a simulator), and it appears that by
+trimming all parameters (e.g. number of disk buffers) to the absolute bone,
+the kernel could be trimmed to about 36KB. (I haven't actually tried it,
+since I don't feel like recompiling all the kernel modules, but one can
+estimate it - take the current system size [44KB], delete 10 buffers @ .5KB
+gives 39KB, etc, etc.)
+
+That would allow a maximum user process of 12KB on a 48KB machine - and
+MINI-UNIX, which runs basically stock V6 user code, can manage with user
+processes that small.
+
+I see Andrew's email which reports that the Lions machine had more main
+memory, 128KB (maybe 4 MM11-U's - two MM11-U backplanes full); that 
+woould have made their life a lot easier.
+
+	Noel

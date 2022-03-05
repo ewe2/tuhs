@@ -1,0 +1,145 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 22780 invoked from network); 25 Oct 2021 18:50:51 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 25 Oct 2021 18:50:51 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 27A129D090; Tue, 26 Oct 2021 04:50:49 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 647CD9CCA2;
+	Tue, 26 Oct 2021 04:50:21 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 37B469CCA2; Tue, 26 Oct 2021 04:50:18 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 079B49CBED
+ for <tuhs@tuhs.org>; Tue, 26 Oct 2021 04:50:17 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id C74C918C0B5; Mon, 25 Oct 2021 14:50:15 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20211025185015.C74C918C0B5@mercury.lcs.mit.edu>
+Date: Mon, 25 Oct 2021 14:50:15 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Unix NCP protocol stack for ARPANET
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: "Ron Natalie"
+
+    > However, the last NCP host table shows this statistic for DEC machines
+    > on the NCP Arpanet
+    > ...
+    > PDP11 (MOS):  11
+    > PDP11 (MINITS); 10
+
+Hi, which host table was this that you're looking at?
+
+I'm pretty sure there was no MINITS NCP ('NCP' in the sense of 'Initial
+Connection Protocol (ICP)' and 'ARPANET Host-to-Host Protocol (AHHP)' - see
+below). There was _certainaly_ no MINITS machine on the ARPANET at MIT (the
+birthplace of MINITS).
+
+To confirm, I looked at a major MINITS source repository, here:
+
+    https://github.com/PDP-10/its/tree/master/src/mits_s
+
+and saw nothing like that. (Not even an 1822 interface driver.)
+
+If you look there, you _will_ see things labelled 'NCP', but this is just a
+terminological affliction among the CHAOS people, to whom 'NCP' apparently
+meant 'protocol implementation' or 'network code'.
+
+Also, implementations of the 'Host-to-IMP Protocol (HIP)' are _not_ NCP
+either; there was an HIP implementation in the C Gateway, but that was
+as IP router, one that could connect to an IMP.
+
+IF IT DOESN'T HAVE AHHP, IT"S NOT NCP.
+
+
+Also, I was intimately familiar with MOS, and neither of the two earliest
+applications that ran on it (the TIU, and the Port Expander, both of which I
+have the source code for) had any NCP. I looked at a lot of the MOS 'NCP"
+listings in a old host table (see here:
+
+  https://gunkies.org/wiki/Talk:Network_Control_Program
+
+for details) and concluded that the MOS 'NCP' entries were all 'confused'.
+
+
+    > From: Clem Cole
+
+    > I was under the impression, that you folks at MIT did a ChaosNet
+    > interface, IIRC, so there may have been some sort of conversion on
+    > your LAN, but I really doubt there was a real NCP running.
+
+The AI Lab did both i) a LAN called CHAOS (4 Mbit/seccond CSMA-CD over CATV
+cable) and ii) a protocol family callled CHAOS (which later ran over XDI
+Ethernet). I'm not sure that any of it has any relvance to what's under
+discussion here.
+
+    > But there was a Rand stack around the same time and III think
+    > Holmgren ended up at UCSB after his time at UICI. Im fairly sure there
+    > was cross polinartion but I don't know how much.
+
+I looked through my V6 Unix NCP, but although there were some RAND #ifdefs, I
+didn't see anything about Rand (except that the MMDF is noted as being based
+on something done at Rand). I retain the distinct impression that all V6 Unix
+NCP machines were running some descendant of the UIUC code. NOSC seems to have
+served as a distro center at one point, see:
+
+  https://minnie.tuhs.org//cgi-bin/utree.pl?file=SRI-NOSC/new/dist.log
+
+but I can't tell who they were sending it too.
+
+(We never tried to get it running at MIT since we were out of IMP ports.
+By the time we got another IMP, we had IP running on the -11 and
+NCP was done anyway.)
+
+As for UCB, there are a bunch of UCBUFMOD #ifdef's, not sure what that
+was about.
+
+
+    > As for other NCPs, PARC had MAXC on the net, but I thought it had
+    > originally a DG Nova front end that was replaced with an Alto. 
+
+No, Maxc1 had a Nova, Maxc2 had an Alto.
+
+
+    > From: Paul Ruizendaal
+
+    > they started with 32V in the Fall of 1979, and ported UIUC's NCP code
+    > to it
+
+Thanks for straightening that out. I had a vague memory that there were a
+few VAXen that ran NCP, but wasn't sure.
+
+    > 2. Note that the BBN TCP worked over NCP as its primary transport.
+
+Your terminology is confused. TCP _never_ ran 'on' NCP; they were
+_alternative_ protocol stacks on top of IHP (on the ARPANET). No
+AHHP, no NCP.
+
+    > The driver is still there if you look
+
+That acc.c is a driver for the ACC 1822 interface; it includes bits of IHP
+("Try to send 3 no-ops to IMP") but I don't think it includes the complete IHP.
+There are other BSD 1822 device drivers, e.g.:
+
+  https://minnie.tuhs.org/cgi-bin/utree.pl?file=2.11BSD/sys/pdpif/if_sri.c
+
+That's the BSD2.11 Stanford/SRI 1822 device driver.
+
+	Noel

@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 19614 invoked from network); 2 Mar 2022 01:23:13 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Mar 2022 01:23:13 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 34C299D022; Wed,  2 Mar 2022 11:23:11 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 939AE9CFD0;
+	Wed,  2 Mar 2022 11:22:09 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 485EC9D002; Wed,  2 Mar 2022 11:20:05 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 150D59CC02
+ for <tuhs@minnie.tuhs.org>; Wed,  2 Mar 2022 11:20:00 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id 0B3D818C087; Tue,  1 Mar 2022 20:19:59 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20220302011959.0B3D818C087@mercury.lcs.mit.edu>
+Date: Tue,  1 Mar 2022 20:19:59 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] Memory on Lion's v6
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Andrew Hume
+
+    > the actual configuration of Lions; PDP 11/40 was
+    >        128 Kbytes of core memory
+    > ...
+    > but note that because ... of addressing weirdness (the top 8KB were
+    > memory-mapped to I/O registers), Lions' PDP actually had 112KB of main
+    > memory
+
+I think that '112KB' must be an error; the 8KB for the 'I/O page' (as DEC
+eventually named ir, long after the rest of the world had started using the
+term :-) were deducted from the _UNIBUS_ address space, meaning a UNIBUS -11
+(the 'pure' UNIBUS -11's, i.e. other than the -11/70, -11/44, etc) could have
+a maximum of 248KB of main memory (which is on the UNIBUS).
+
+A pure UNIBUS -11 with 128KB of main memory (like Lions') has... 128KB of
+main memory. The 'small memory management model' -11's (like the /40, /60,
+/23, etc) can use at most 64KB of that _at any moment in time_ for user
+processes (i.e. directly accessible by the CPU, in 'user' mode).
+
+(The kernel on such machines is basically retricted to 56KB at any moment in
+time, since one 'segment/page' - the terminology changed over time - has to be
+dedicated to the I/O page: the memory management control registers are in
+that, so once the CPU can no longer 'see' them, it's stuck. Long, potentially
+interesting digression about, and ways to semi-work around that, elided,
+unless people want to hear it.)
+
+
+    > From: Noel Chiappa
+
+    > The -11/40 (as it was at first) that I had at LCS had, to start with,
+    > I'm pretty sure, 3 MM11-L units .. - i.e. 48KB. I know this sounds
+    > incredible, and I'm having a hard time believing it myself, wondering
+    > if my memory is failing with age
+
+It is:
+
+  # size /lib/c0
+  13440+2728+10390=26558 (63676)
+
+('c1' takes 14848+6950+2088=23886, FWIW.) So 'my' -11/40 must have had more
+than 48KB. 
+
+MINI-UNIX provides, on an -11/05 type machine with the maximum of 56KB of
+addressable main memory (if you plugged in 64KB worth, the /05 CPU couldn't
+'see' the top 8KB of that), up to 32KB for a user process. So that will
+just hold the stock V6 C compiler.
+
+I'm not now sure how much memory my -11 _did_ have initially, but it's not
+important.
+
+	Noel

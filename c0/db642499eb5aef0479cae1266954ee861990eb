@@ -1,0 +1,71 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 5156 invoked from network); 30 Dec 2021 16:40:52 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 30 Dec 2021 16:40:52 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E34799CFF5; Fri, 31 Dec 2021 02:40:48 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 63B8C9CD62;
+	Fri, 31 Dec 2021 02:40:36 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 1C2819CD62; Fri, 31 Dec 2021 02:40:35 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 8CB449CC2E
+ for <tuhs@minnie.tuhs.org>; Fri, 31 Dec 2021 02:40:33 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net
+ [108.7.220.252]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BUGeVJq032536
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 30 Dec 2021 11:40:31 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id 0B99F15C33A3; Thu, 30 Dec 2021 11:40:31 -0500 (EST)
+Date: Thu, 30 Dec 2021 11:40:31 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Message-ID: <Yc3g/+i9BQBK/5qO@mit.edu>
+References: <20211230034512.B9B3718C08E@mercury.lcs.mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211230034512.B9B3718C08E@mercury.lcs.mit.edu>
+Subject: Re: [TUHS] moving directories in svr2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Wed, Dec 29, 2021 at 10:45:12PM -0500, Noel Chiappa wrote:
+>     > From: Bakul Shah
+> 
+>     > My guess is *not* storing a path instead of a ptr to the inode was done
+>     > to save on memory.
+> 
+> More probably speed; those old disks were not fast, and on a PDP-11, disk
+> caches were so small that converting the path to the current directory to its
+> in memory inode could take a bunch of disk reads.
+
+The other problem with storing the path as a string is that if
+higher-level directories get renamed, the path would become
+invalidated.  If you store the cwd as "/foo/bar/baz/quux", and someone
+renames "/foo/bar" to "/foo/sadness" the cwd-stored-as-a-string would
+become invalidated.
+
+Sure, you could scan the pwd of all the processes running on the
+system and do edit all of the strings, but once you go SMP, the
+potential locking pitfalls would be numerous.
+
+						- Ted

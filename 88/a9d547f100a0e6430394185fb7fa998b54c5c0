@@ -1,0 +1,74 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32280 invoked from network); 29 Dec 2021 19:34:15 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Dec 2021 19:34:15 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A47CA9CFF0; Thu, 30 Dec 2021 05:34:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8FF5D9CEED;
+	Thu, 30 Dec 2021 05:33:54 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6A3379CEBE; Thu, 30 Dec 2021 05:33:50 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id C9F409CEA9
+ for <tuhs@minnie.tuhs.org>; Thu, 30 Dec 2021 05:33:49 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id A4ED018C08E; Wed, 29 Dec 2021 14:33:48 -0500 (EST)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20211229193348.A4ED018C08E@mercury.lcs.mit.edu>
+Date: Wed, 29 Dec 2021 14:33:48 -0500 (EST)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] moving directories in svr2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > From: Clem Cole
+
+    > Try it on V6 or V7 and you will get 'directory exists' as an error.
+
+The V6 'mv' is prepared to move a directory _within_ a directory (i.e.
+'rename' functionality). I'm not sure why it's not prepared to move within
+a partition; probably whoever wrote it wasn't prepared to deal with all the
+extra work for that (unlink from the old '..', then link to the '..' in the
+new directory, etc, etc).
+
+(The MIT PWB1 had a 'mvdir' written by Jeff Schiller, so PWB1 didn't have
+'move directory' functionality before that. MIT must have been using the PWB1
+system for 6.031, which I didn't recall; the comments in 'mvdir' refer to it
+being used there.)
+
+The V6 'mv' is fairly complicated (as I found out when I tried to modify it
+to use 'smdate()', so that moving a file didn't change its 'last write'
+date). Oddly enough, it is prepared to do cross-partition 'moves' (it forks a
+'cp' to do the move). Although on V6, 'cp' only does one file; 'cp *.c
+{dest}' was not supported, there was 'cpall' for that. (Why no 'mvall', I
+wonder? It would have been trivial to clone 'cpall'.)
+
+Run fact; the V6 'mv' is the place that has the famous (?)  "values of B will
+ give rise to dom!" error message (in the directory-moing section).
+
+    > if the BSD mv command for 4.1 supported it. If it did then it was not
+    > atomic -- it would have had to create the new directory, move the
+    > contents independently and then remove the old one.
+
+Speaking of atomic operation, in V6 'mkdir' (not being a system call) was
+not atomic, so if interrupted at 'just the right time', it could leave
+the FS in an inconsistent state. That's the best reason I've come across
+to make 'mkdir' a system call - it can be made atomic that way.
+
+	Noel

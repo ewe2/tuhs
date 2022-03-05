@@ -1,0 +1,91 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 10317 invoked from network); 24 Dec 2021 03:49:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 24 Dec 2021 03:49:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 7505A9CEB2; Fri, 24 Dec 2021 13:49:12 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DAF029CC17;
+	Fri, 24 Dec 2021 13:48:45 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 415B69CC17; Fri, 24 Dec 2021 13:48:42 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 7DCD29CC01
+ for <tuhs@minnie.tuhs.org>; Fri, 24 Dec 2021 13:48:38 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net
+ [108.7.220.252]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BO3mUpg017071
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Thu, 23 Dec 2021 22:48:32 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id C40C815C00C8; Thu, 23 Dec 2021 22:48:30 -0500 (EST)
+Date: Thu, 23 Dec 2021 22:48:30 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Steve Nickolas <usotsuki@buric.co>
+Message-ID: <YcVDDv9DpTdVo3Nv@mit.edu>
+References: <818A6F70-D117-471A-9E08-E37B34F8FAE0@mac.com>
+ <y2a8rwcyuo1.fsf@offog.org> <20211223021805.GK24180@mcvoy.com>
+ <dd67a840-461f-4941-b93c-4e5e661fd8c0@localhost>
+ <20211223141958.GR24180@mcvoy.com>
+ <ca9d9c00-fd60-b8f9-c5b4-e00c7d7ad07c@csp-partnership.co.uk>
+ <CANCZdfrvbtasOXJfF6CD7EdvAQ49rCu16eT4koD+5kWrKxRgQg@mail.gmail.com>
+ <20211223161923.GT24180@mcvoy.com>
+ <alpine.DEB.2.21.2112231712350.19418@sd-119843.dedibox.fr>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.21.2112231712350.19418@sd-119843.dedibox.fr>
+Subject: Re: [TUHS] Photos of University Computer Labs - now off topic
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Thu, Dec 23, 2021 at 05:13:39PM -0500, Steve Nickolas wrote:
+> On Thu, 23 Dec 2021, Larry McVoy wrote:
+> 
+> > On Thu, Dec 23, 2021 at 10:02:40AM -0600, Warner Losh wrote:
+> > > > I had forgotten about control-t - does anything modern still do that
+> > > 
+> > > FreeBSD does. It's my biggest annoyance with Linux that it doesn't.
+> > 
+> > Seems like a patch might be nice.
+> 
+> Yeah, I miss SIGINFO when I'm on Linux.
+
+There have been patches proposed, but it turns out the sticky wicket
+is that we're out of signal numbers on most architectures.  There are
+code points that potentially could be repurposed, since they aren't
+actually signaled from the kernel:
+
+    SIGLOST        -        Term    File lock lost (unused)
+    SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)
+
+Howveer, the current behavior if no signal handler is installed is to
+terminate the process --- and it's unclear whether there might be some
+user space libraries that might be using these signals for their own
+nefarious purposes.  So someone would have to deprecate one of these
+signals, and then try to do a code search across the internet to see
+if there's any evidence that SIGLOST or SIGSTKFLT is being used (at
+least in open source software).
+
+It's not impossible to deal with this, but no one has cared enough to
+really try to push this through as a new feature.
+
+Cheers,
+
+						- Ted

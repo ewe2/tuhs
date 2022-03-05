@@ -1,0 +1,114 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32685 invoked from network); 31 Dec 2021 05:16:24 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Dec 2021 05:16:24 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 777BF9D041; Fri, 31 Dec 2021 15:16:22 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id ABD499D006;
+	Fri, 31 Dec 2021 15:16:11 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8946B9D006; Fri, 31 Dec 2021 15:16:10 +1000 (AEST)
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3618F9D002
+ for <tuhs@minnie.tuhs.org>; Fri, 31 Dec 2021 15:16:09 +1000 (AEST)
+Received: from cwcc.thunk.org (pool-108-7-220-252.bstnma.fios.verizon.net
+ [108.7.220.252]) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 1BV5G6n9024080
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Fri, 31 Dec 2021 00:16:06 -0500
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+ id F3A5515C33A3; Fri, 31 Dec 2021 00:16:05 -0500 (EST)
+Date: Fri, 31 Dec 2021 00:16:05 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Rob Pike <robpike@gmail.com>
+Message-ID: <Yc6SFRbK1aCuxJOr@mit.edu>
+References: <20211230034512.B9B3718C08E@mercury.lcs.mit.edu>
+ <Yc3g/+i9BQBK/5qO@mit.edu>
+ <CAEoi9W6NM9pKwLukQdF_bo9enGV0-Mjp7m_bqy+nt1E8Oxssmg@mail.gmail.com>
+ <Yc50LSUs7B790YFG@mit.edu>
+ <CAKzdPgzOBKEaMdCGxKirP4cxSDeBZrU6VO78JFpxf05vi-5_AQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKzdPgzOBKEaMdCGxKirP4cxSDeBZrU6VO78JFpxf05vi-5_AQ@mail.gmail.com>
+Subject: Re: [TUHS] moving directories in svr2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>,
+ Noel Chiappa <jnc@mercury.lcs.mit.edu>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, Dec 31, 2021 at 02:23:15PM +1100, Rob Pike wrote:
+> In broad strokes, that's exactly what we did in Plan 9, with great results,
+> as was said here a while back. The paper ended with a plea to do the same
+> to Unix, which I think is quite doable.
+> 
+> https://9p.io/sys/doc/lexnames.html
+
+I'm sure it *could* be done.  In fact, Linux has a number of the
+pieces of the implementations already, which could be reused for a
+Plan-9-style lexical namespace.  Linux has bind mounts, and a dentry is
+essentially a cached directory lookup (it contains a pointer to its
+parent dentry, the filename used to do the lookup and a pointer to the
+resulting inode).  And a struct file contains a struct dentry, which
+means in Linux it is possible to determine the path used to open a
+particular file.  There are some differences of course; so it's not
+exact, but I agree with you that it is quite "doable".  (In
+particular, how Linux dentries and symlinks interact appears to be
+different from how Plan 9 and Channels did things, if I understand the
+paper correctly.)
+
+The question though, is whether Linux *should* do it.  Or rather,
+*could* we do it without breaking backwards compatibility with users
+and application which expect that dot-dot works the way it does in
+classical Unix implementations for the past 4 decades or so.
+
+Granted that the combination of symlinks, and hard links, and in
+Linux, bind mounts (not to mention bind namespaces, chroots, and
+pivot_root operations), can be confusing.  But there is a whole
+ecosystem of shell scripts, programs, user's finger macros, etc., that
+would break if we "made things better" or "made things simpler".
+
+One of the benefits of research OS's is that you can experiment with
+things without having to worry about the howls of angry users when you
+break backwards compatibility, or eliminate some particular awkward
+API or feature.
+
+      	      	   	       	     	   - Ted
+
+P.S.  For example, how I wish I could eliminate telldir/seekdir, or at
+least change things so that telldir/seekdir used a substantially
+larger "cookie" to memoize a position in a directory's readdir stream
+which has to be valid effectively forever.  Today, you can pass a
+32-bit telldir cookie to seekdir, and readdir MUST not return a
+directory entry that it had already returned, and MUST not skip a
+directory entry that was present at the time of the telldir().  Thus
+spake POSIX, and there are applications which depend on
+telldir/seekdir/readdir having this precise set of semantics
+
+If your directory is stored internally as a linear stream, that's not
+too bad; but if you're using a more complex data structure, life gets
+interesting.  I know of one file system (JFS) which added an extra,
+separate, on-disk b-tree structure to each directory just to be able
+to provide stable telldir/seekdir cookies.  (And of course, there's a
+performance impact to needing to update an extra b-tree each time a
+directory entry is added or removed.)
+
+With a research OS, it's at least possible to say, "Well, *that* was a
+mistake; let's pretend it never happened and let's see how much better
+life would be."  :-)
