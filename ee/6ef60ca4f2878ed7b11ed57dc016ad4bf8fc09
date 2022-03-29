@@ -1,0 +1,110 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 21723 invoked from network); 29 Mar 2022 16:01:49 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Mar 2022 16:01:49 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 462199D700; Wed, 30 Mar 2022 02:01:46 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id AA7CC9D6AA;
+	Wed, 30 Mar 2022 02:01:31 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 77D1E9D6AA; Wed, 30 Mar 2022 02:01:30 +1000 (AEST)
+Received: from mcvoy.com (mcvoy.com [192.169.23.250])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A17A49D684
+ for <tuhs@minnie.tuhs.org>; Wed, 30 Mar 2022 02:01:29 +1000 (AEST)
+Received: by mcvoy.com (Postfix, from userid 3546)
+ id 218B435E817; Tue, 29 Mar 2022 09:01:28 -0700 (PDT)
+Date: Tue, 29 Mar 2022 09:01:28 -0700
+From: Larry McVoy <lm@mcvoy.com>
+To: Paul Ruizendaal <pnr@planet.nl>
+Message-ID: <20220329160128.GD26960@mcvoy.com>
+References: <DE7DACF9-6EEA-4A9B-A72C-64EC557BDD20@planet.nl>
+ <CAC20D2OAJPs6_K9BEYDttFrY66ULtTX-BL3PyNvQ7jFQqqapHA@mail.gmail.com>
+ <9316583A-2461-40B9-8B87-15AC4A719198@planet.nl>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9316583A-2461-40B9-8B87-15AC4A719198@planet.nl>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+Subject: Re: [TUHS] Paging code in SysV R2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Tue, Mar 29, 2022 at 05:24:17PM +0200, Paul Ruizendaal wrote:
+> No, sorry, my scope of interest is mostly 1975-1985.
+> 
+> I did read the Mach virtual memory paper from 1988 - from that paper I gather that the data structures used are totally different from those in Sys V or BSD.
+> 
+> There is also the VM implementation that Richard Miller did on SysV r1
+> in 1983.  Interestingly, his design seems to parallel the choices made
+> by Reiser a few years before, but it is lighter touch. Both Reiser and
+> Miller refer to Denning and Tenex as prior art. Miller's 1984 Usenix
+> paper about this project argues that doing approximated LRU from the
+> page table data results in a process local working set view, which he
+> argued was preferable to the system global working set view generated
+> in the BSD clock algorithm.
+
+I have HUGE respect for the BSD pageout code.  I was the guy who first
+got rid of the rotational delay in UFS which doubled the speed at which
+you could read data off the disk.  Which was nice, but it filled memory
+with pages and the pageout code could not free them as fast as UFS 
+was making more.
+
+So I wrote 13 different attempts at a better pageout system (no, I didn't
+save the code, it belonged to Sun, I think it is lost at this point).
+While some of those attempts were better in very specific cases,
+none of them, not one of them, were as good, in all cases, as the BSD
+pageout code.
+
+That said, it couldn't keep up now that UFS was faster (it couldn't 
+keep up with a single disk, it had no hope of keeping up with multiple
+disks).  So I did an awful hack, that last I checked was still there:
+
+    if (we are doing sequential reads AND we are about to start paging out) {
+    	start freeing pages a window behind where we are reading
+    }
+
+The effect was that if you were about to be out of free memory, sequential
+I/O became a sliding 256K window of pages, the vnode that was using up all
+the memory became the one that started freeing memory.  It was much faster
+and simpler than having the pageout code scan through every page.
+
+It was also an ugly hack, it was just the best I could come up with at the
+time.
+
+The whole effort left me in awe of the BSD pageout code.  It's pretty
+simple but I'd challenge anyone to do better than that code in all
+use cases.  Not saying it can't be done, but when I was at my coding
+prime, I couldn't do it.
+
+I did start down the path of doing a vnode based working set design.
+I gave up when I realized that the swap vnode was by far the biggest
+vnode, everyone's brk() came from that and it was all jumbled together.
+Trying to do a vnode per process got really messy around fork().
+
+I had many a late night design discussion at Antonio's Nut House in
+Palo Alto with my office mate, Howard Chartok, trying to come up with
+a design that couldn't be shot down.  Perhaps too much beer because we
+never got to one.  
+
+I still suspect there is something to be said for a vnode based working
+set approach.  Especially if you brought back the hack I did that put
+the basename of the vnode in the vnode (Shannon took it out because of
+"hard links").  Too bad that didn't survive, I wrote a topvn (like top
+but for vnodes) that was really good at giving you some insight into
+what was going on.
