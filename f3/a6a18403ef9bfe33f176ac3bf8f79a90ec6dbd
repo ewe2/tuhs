@@ -1,0 +1,92 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 7023 invoked from network); 9 Apr 2022 12:17:59 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 9 Apr 2022 12:17:59 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id B8C989D70A; Sat,  9 Apr 2022 22:17:53 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4DE6C9D680;
+	Sat,  9 Apr 2022 22:17:24 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id B286F9D680; Sat,  9 Apr 2022 22:15:48 +1000 (AEST)
+X-Greylist: delayed 323 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 09 Apr 2022 22:15:48 AEST
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 2BB0D9D665
+ for <tuhs@tuhs.org>; Sat,  9 Apr 2022 22:15:48 +1000 (AEST)
+Received: from penguin.thunk.org (8-19-56-94.hwccustomers.com [8.19.56.94]
+ (may be forged)) (authenticated bits=0)
+ (User authenticated as tytso@ATHENA.MIT.EDU)
+ by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 239CAMWA028882
+ (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+ Sat, 9 Apr 2022 08:10:23 -0400
+Received: by penguin.thunk.org (Postfix, from userid 1000)
+ id BF0D517AC4; Sat,  9 Apr 2022 08:10:21 -0400 (EDT)
+Date: Sat, 9 Apr 2022 08:10:21 -0400
+From: tytso <tytso@mit.edu>
+To: The Unix Heritage Society mailing list <tuhs@tuhs.org>
+Message-ID: <YlF3rb2m+AUfCPfj@mit.edu>
+References: <CAEoi9W7zf8owckJ5cTWgz4oW015FaDnvGE1+xg=6TbaMB9QjFg@mail.gmail.com>
+ <7wh774dtvi.fsf@junk.nocrew.org>
+ <CAEoi9W5DCi=FZsMCqm9tZdtFvRBfcT7SZbFWukfTJ8p8dkc=CQ@mail.gmail.com>
+ <20220408152834.GE29186@mcvoy.com> <m1ncvkN-000iJNC@more.local>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <m1ncvkN-000iJNC@more.local>
+Subject: Re: [TUHS] Interesting commentary on Unix from Multicians.
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+On Fri, Apr 08, 2022 at 02:02:23PM -0700, Greg A. Woods wrote:
+> Single Level Storage is an awesome concept and removes so many ugly
+> hacks from algorithms that otherwise have to process data in files.
+> Doing data processing with read and write and pipes is effectively
+> working through a straw whereas SLS allows all (reasonably sized) data
+> to be presented in entirely complete randomly accessible arrays just by
+> attaching a "file" to a segment.  Mmap() is a very poor replacement that
+> requires a great deal extra bookkeeping that's next to impossible to
+> hide from; and also there's the problem of the consistency semantics
+> being different between the I/O based filesystems and direct memory
+> mapping of their files, which Mmap() reveals, and which SLS eliminates
+> (by simply not having any I/O mechanism for files in the first place!).
+
+To be fair, Multics had it a lot easier, because core memory meant
+that every single memory access could be considered "durable storage",
+so there was no real need for "fsync(2)" or "msync(2)".
+
+So I/O consistency could be done much like writing to persistent
+memory, except that there would be no need for "CLFLUSH" (Who needs
+multi-level memory caches when the clock cycle is pathetically slow?)
+and no need to worry about write endurance exhaustion with core
+memory, either.
+
+So how much of the consistency benefits are due to the hardware, and
+how much is due to the OS?  We could just as easily claim that Multics
+is superior to Unix because it's immune to Spectre and Meltdown
+attacks --- except that Unix on a PDP-11 would be immune to cache
+based attacks as well.  Of course, Unix on a PDP-11 is a lot slower
+than NetBSD on an modern x86_64 machines....
+
+> Multics dynamic linking makes any unix-ish implementation look most
+> ugly, incredibly insecure, and horribly inefficient.  Unix shared
+> libraries are bad hack to simulate what Multics did natively and
+> naturally, with elegance, and with direct hardware security support.
+
+What if we compared Multics dynamic linking to Solaris Doors?
+
+     	   	    	    	    	       - Ted
