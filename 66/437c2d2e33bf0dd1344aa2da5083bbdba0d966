@@ -1,0 +1,78 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 9117 invoked from network); 23 Jun 2022 02:19:10 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 23 Jun 2022 02:19:10 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 36C944013F;
+	Thu, 23 Jun 2022 12:19:05 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id D3DCB40107
+	for <tuhs@tuhs.org>; Thu, 23 Jun 2022 12:18:59 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id C1BD918C095; Wed, 22 Jun 2022 22:18:58 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220623021858.C1BD918C095@mercury.lcs.mit.edu>
+Date: Wed, 22 Jun 2022 22:18:58 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: MZBXYLJOGO7Q3UJUJKRNUUEDXPN2BWLG
+X-Message-ID-Hash: MZBXYLJOGO7Q3UJUJKRNUUEDXPN2BWLG
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: forgotten versions
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/MZBXYLJOGO7Q3UJUJKRNUUEDXPN2BWLG/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Dan Cross
+
+    > I believe that's actually a menu
+
+Hence the "erroneous _impression_" (emphasis added).
+
+I'm curious as to how they decided which models to run which editions on.
+Although V4 _ran_ on the /45, split I+D wasn't supported - for user or kernel
+- until V6. (I'm assuming a number of things - both in the kernel, and
+applications - started hitting the 64KB limit, which led to its support.)
+
+
+Speaking of split I+D, there's an interesting little mystery in V6 that at
+one point in time I thought involved split I+D - but now that I look closely,
+apparently not. The mystery involves a 'tombstone' in the V6 buf.h:
+
+  #define B_RELOC 0200 /* no longer used */
+
+I had created (in my mind) an explanation what this is all about - but now
+that I look, it's probably all wrong!
+
+My explanation involves the slightly odd layout of the kernel in physical
+memory, with split I+D; data below the code, at physical 0. This actually
+makes a lot of sense; it means the virtual address of any data (e.g. a
+buffer) is the same as its physical address (needed for DMA). It does require
+the oddness of 'sysfix', to invert the order of code+data in the system
+binary, plus odd little quirks in the assembler startup (e.g. copying the
+code up to make room for BSS).
+
+So I thought that B_RELOC was a hangover from a time, at the start of split
+I+D, when data _wasn't_ at physical 0, so a buffer's virtual and phsyical
+addresses differed.
+
+But that must be wrong (at least in any simple way). B_RELOC was in buf.h as
+of V4 - the first kernel version in C - with no split I+D. So my theory has
+to be wrong.
+
+However, I am unable to find any code in the V4 kernel which uses it! So
+unless someone who remembers the very early PDP-11 kernel can enlighten us,
+its purpose will always remain a mystery!
+
+	Noel
