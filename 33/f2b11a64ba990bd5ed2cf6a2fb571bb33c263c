@@ -1,0 +1,70 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 15717 invoked from network); 26 Jun 2022 02:20:40 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 26 Jun 2022 02:20:40 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 663FA40112;
+	Sun, 26 Jun 2022 12:20:03 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 27EC340111
+	for <tuhs@tuhs.org>; Sun, 26 Jun 2022 12:19:57 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 0140918C0A2; Sat, 25 Jun 2022 22:19:55 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220626021956.0140918C0A2@mercury.lcs.mit.edu>
+Date: Sat, 25 Jun 2022 22:19:55 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: GPZLCGTEXKMQXVPNFT3KF62XDOZTYJR4
+X-Message-ID-Hash: GPZLCGTEXKMQXVPNFT3KF62XDOZTYJR4
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Research Datakit notes
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/GPZLCGTEXKMQXVPNFT3KF62XDOZTYJR4/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Paul Ruizendaal
+
+    > it would seem to me that Sandy had figured out a core problem some 30
+    > years before the TCP/IP world would come up with a similar solution. I
+    > would not even be surprised if I learned that modern telco routers
+    > transparantly set up virtual circuits for tcp traffic.
+
+To fully explore this topic would take a book, which I don't have the energy
+to write, and nobody would bother to read, but... 
+
+Anyway, I'm not upon the latest and greatest high-speed routers: I saw some
+stuff from one major vendor under NDA about a decade ago, but that's my most
+recent - but at that point there was nothing that looked even _vaguely_ like
+virtual circuits. (The stuff Craig was alluding to was just about
+connectivity for getting bitts from _interface_ to _interface_ - if you don't
+have a giant crossbar - which is going to require buffering on each input
+anyway - how exactly do you get bits from board A to board Q - a single
+shared bus isn't going to do it...)
+
+A problem with anything like VC's in core switches is the growth of per-VC
+state - a major high-speed node will have packets from _millions_ of TCP
+connections flowing through it at any time. In the late-80's/early-90's - well
+over 30 years ago - I came up with an advanced routing architecture called
+Nimrod (see RFC-1992, "The Nimrod Routing Architecture"; RFC-1753 may be of
+interest too); it had things called 'flows' which were half way between pure
+datagrams (i.e. no setup - you just stick the right destination address in the
+header and send it off) and VCs (read the RFCs if you want to kow why), and it
+went to a lot of trouble to allow flow aggregation in traffic going to core
+switches _precisely_ to limit the growth of state in core switches, which
+would have traffic from millions of connections going through them.
+
+I have barely begun to even scratch the surface, here.
+
+	Noel
