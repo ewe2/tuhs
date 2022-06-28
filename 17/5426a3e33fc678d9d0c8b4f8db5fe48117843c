@@ -1,0 +1,81 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29349 invoked from network); 28 Jun 2022 22:53:47 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Jun 2022 22:53:47 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 014CC40971;
+	Wed, 29 Jun 2022 08:53:11 +1000 (AEST)
+Received: from clarinet.employees.org (clarinet.employees.org [198.137.202.74])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 5EC2A40138
+	for <tuhs@tuhs.org>; Wed, 29 Jun 2022 08:53:06 +1000 (AEST)
+Received: by clarinet.employees.org (Postfix, from userid 1736)
+	id 2C5EE4E11D60; Tue, 28 Jun 2022 22:53:06 +0000 (UTC)
+Resent-From: Derek Fawcus <dfawcus@employees.org>
+Resent-Date: Tue, 28 Jun 2022 23:53:06 +0100
+Resent-Message-ID: <YruGUm2IciaOZfor@clarinet.employees.org>
+Resent-To: tuhs@tuhs.org
+Date: Tue, 28 Jun 2022 23:45:18 +0100
+From: Derek Fawcus <dfawcus+lists-tuhs@employees.org>
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+Message-ID: <YruEfkCDAM0XJu1F@clarinet.employees.org>
+References: <2803DC51-6CBC-4257-B40C-8A559C27CAE3@planet.nl>
+ <20220625230939.GG19404@mcvoy.com>
+ <CAKzdPgxoT5zJ-rHEe=Wqhnd4zXcUZB+Qs+0Za5bWnRuEFc7WuQ@mail.gmail.com>
+ <YrraM0wD+qeaAX0V@clarinet.employees.org>
+ <CAKzdPgwg4x54Putd5TwUmh_zkpxW=YX42xeANN9N1_+3AHfHLA@mail.gmail.com>
+ <0CA3B3AA-6491-47A5-843D-CDF2F3A74659@cfcl.com>
+ <CALQ0xCB-c8mBOVT+7Ud0sutuHx9OzUU1CXWhweFTBCZ2Kjb8BQ@mail.gmail.com>
+ <76DD5063-3817-4550-980A-66E728DFD634@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <76DD5063-3817-4550-980A-66E728DFD634@gmail.com>
+Message-ID-Hash: C5KCNI7DH7DHRWOQZC2PRW274SARPBB4
+X-Message-ID-Hash: C5KCNI7DH7DHRWOQZC2PRW274SARPBB4
+X-MailFrom: dfawcus@employees.org
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] HTTP (was Re: Re: Research Datakit notes)
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/C5KCNI7DH7DHRWOQZC2PRW274SARPBB4/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+On Tue, Jun 28, 2022 at 10:05:26AM -0700, Adam Thornton wrote:
+> 
+> And I think we already have the answer about what the abstraction is, albeit at an application rather than the kernel level.
+> 
+> To answer Rob's question: I think the abstraction is now much farther up the stack.  To a pretty good first approximation, almost all applications simply definte their own semantics on top of HTTP(S) (OK, OK, Websockets muddy the waters again) and three-to-five verbs.  There's an incantation to establish a circuit (or a "session" if you're under the age of 50, I guess), and then you GET, DELETE, and at least one of PUT/POST/PATCH, for "read", "unlink", and "write".  This does seem to be a more record-oriented (kids these days get snippy if you call them "records" rather than "objects" but w/e) format than a stream of bytes (or at least you put an abstraction layer in between your records and the stream-of-octets that's happening).
+
+Yes it is effectively records, or RPCs w/o state between requests.  So akin to DNS queries over UDP, rather than DNS queries over TCP.
+
+As the whole HTTP model allows for proxies, at which point the request (GET, HEAD, POST, etc) includes
+an endpoint address (DNS name and port) and path at that endpoint.  Having 'session' state is built at
+a level above HTTP, by cookies or redirecting to magic URIs encoding the session ID after the query (the '?').
+
+The fact that this all happens to run over a TCP connection, simply means that we have stacked sets of
+VCs.  An application VC on top of a connectionless HTTP on top of a TCP 'VC'.  One could argue that
+Websockets simplifies this by ripping out the HTTP layer, and having the top VC then just being message
+framing within the TCP session.
+
+(Ignoring for the moment TLS on top of TCP, or HTTP/3 being on top of QUIC, hence UDP)
+
+> This is certainly not efficient at a wire protocol level, but it's a fairly small cognitive burden for people who just want to write applications that communicate with each other.
+
+Sort of, in that I recently investigated the Go HTTP client/server APIs as someone was asking us about 
+implementing a MiTM HTTP(S) "firewall".  Depending upon how one deals with it, it hides the VCs and exposes
+the connectionless RPCs.
+
+With such a MiTM in place, the 'nice' RPC in a session is effectivly forced back to the 'nasty' RPC in datagrams, even though the endpoints may be unaware, but they already include the whole datagram remote address in the request.  Responses come back by 'magic' without explicit address.
+
+So maybe from that perspective one could model HTTP request/response as RPCs over SVCs, those being raised and torn down for each exchange.
+
+DF
