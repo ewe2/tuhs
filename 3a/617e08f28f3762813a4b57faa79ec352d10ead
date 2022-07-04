@@ -1,0 +1,95 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26313 invoked from network); 4 Jul 2022 21:34:33 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 4 Jul 2022 21:34:33 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 27C2D421E2;
+	Tue,  5 Jul 2022 07:34:12 +1000 (AEST)
+Received: from mail.ultimate.com (mail.ultimate.com [104.225.1.121])
+	by minnie.tuhs.org (Postfix) with ESMTPS id F216A421E1
+	for <tuhs@tuhs.org>; Tue,  5 Jul 2022 07:34:03 +1000 (AEST)
+Received: from ultimate.com (localhost [127.0.0.1])
+	by mail.ultimate.com (8.16.1/8.16.1) with ESMTPS id 264LXkNK074139
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+	Mon, 4 Jul 2022 17:33:47 -0400 (EDT)
+	(envelope-from phil@ultimate.com)
+Received: (from phil@localhost)
+	by ultimate.com (8.16.1/8.16.1/Submit) id 264LXkeA074138;
+	Mon, 4 Jul 2022 17:33:46 -0400 (EDT)
+	(envelope-from phil)
+From: Phil Budne <phil@ultimate.com>
+Message-Id: <202207042133.264LXkeA074138@ultimate.com>
+Date: Mon, 04 Jul 2022 17:33:46 -0400
+To: lm@mcvoy.com
+References: <72C18447-E565-4A02-84E2-BFB309E97330@planet.nl>
+ <20220704204449.GT18597@mcvoy.com>
+In-Reply-To: <20220704204449.GT18597@mcvoy.com>
+User-Agent: Heirloom mailx 12.4 7/29/08
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Message-ID-Hash: HJQX4CHSR43WFAJ2JNL7VJ46YNJNCDVN
+X-Message-ID-Hash: HJQX4CHSR43WFAJ2JNL7VJ46YNJNCDVN
+X-MailFrom: phil@ultimate.com
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: tuhs@tuhs.org
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Re.: is networking different?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/HJQX4CHSR43WFAJ2JNL7VJ46YNJNCDVN/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+Larry McVoy wrote:
+> Decades ago, I tried to make a library that worked like this and it
+> was problematic.  There are all sorts of setsockopt things that
+> you sometimes need to set.
+>
+> I'd love to be wrong on this, if anyone has a working, for all of the
+> normal use cases, library like this, I'd love to see it.
+
+The DEC's TOPS-20 TCP/IP interface (coded on top of a set of new
+system calls that implemented the BBN (original) TCP/IP interface for
+TENEX/TOPS-20, since system calls could make system calls) was like
+that.  BUT the TENEX/TOPS-20 system call to pass a pathname into the
+system allowed "attributes" to be appended to paths as
+";ATTR[:VALUE]"(*), which was used to determine whether it was an active
+(connect) or passive (listen) open.
+
+TCP was implemented as a logical device:
+	TCP:[LOCAL_HOST][-LOCAL_PORT[#]].[FOREIGN_HOST][-FOREIGN_PORT][;A1..]
+
+For details see:
+	https://www.rfc-editor.org/ien/ien176.txt
+
+And
+	http://www.bitsavers.org/pdf/dec/pdp10/TOPS20/V7/JSYS_REFERENCE.MEM.txt
+	(JSYS is the machine instruction used for system calls)
+
+	A full set of attribute keywords at page 3-170 (search text document)
+	and description of TCP: device as implemented in section 2.4.10
+
+	NOTE!  The original text file undoubtedly had bare carriage return
+	characters for overstrikes (bold and underscore).
+
+A feature of this interface is that you can fully specify the
+four-tuple of the connection when doing a passive open, which ISTR was
+used by FTP (the client listened for a connection on the same local
+address and port as the command connection, from the foreign address
+and FTP-DATA port of the server, and the PORT command was not necessary.
+
+An even more obscure implementation is in my port of the original
+Bell Labs (Holmdel, that is) implementation of SNOBOL4, where I
+implemented tcp connections (active only) as /tcp/HOSTNAME/SERVICE[/ATTR]...
+where ATTR can be used to set various setsockopts:
+
+	http://www.regressive.org/snobol4/csnobol4/curr/doc/snobol4io.1.html
+	(search for tcp).
