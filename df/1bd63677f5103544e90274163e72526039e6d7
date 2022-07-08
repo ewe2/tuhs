@@ -1,0 +1,206 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 32290 invoked from network); 8 Jul 2022 08:09:57 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 8 Jul 2022 08:09:57 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4A4BC4013C;
+	Fri,  8 Jul 2022 18:09:52 +1000 (AEST)
+Received: from marmaro.de (marmaro.de [176.28.23.198])
+	by minnie.tuhs.org (Postfix) with ESMTP id 7190B4013B
+	for <tuhs@tuhs.org>; Fri,  8 Jul 2022 18:09:48 +1000 (AEST)
+Received: by marmaro.de (masqmail 0.3.6-dev, from userid 1000)
+	id 1o9j3b-3aR-00
+	for <tuhs@tuhs.org>; Fri, 08 Jul 2022 10:09:47 +0200
+To: tuhs@tuhs.org
+In-reply-to: <1o9ihZ-3C2-00@marmaro.de>
+References: <1o9ihZ-3C2-00@marmaro.de>
+Comments: In-reply-to markus schnalke <meillo@marmaro.de>   message dated "Fri, 08 Jul 2022 09:47:01 +0200."
+MIME-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <13790.1657267787.1@marmaro.de>
+Content-Transfer-Encoding: quoted-printable
+Date: Fri, 08 Jul 2022 10:09:47 +0200
+From: markus schnalke <meillo@marmaro.de>
+Message-ID: <1o9j3b-3aR-00@marmaro.de>
+Message-ID-Hash: 34N5MNTX6UIDKRHJAJ2BMPTSKJQDTZWX
+X-Message-ID-Hash: 34N5MNTX6UIDKRHJAJ2BMPTSKJQDTZWX
+X-MailFrom: meillo@marmaro.de
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: ed: multiple addresses (with semicolons)
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/34N5MNTX6UIDKRHJAJ2BMPTSKJQDTZWX/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+Hoi,
+
+now I did find nroff sources to the manpages of earlier editions
+-- still learning about the organization of the code on the TUHS
+website.
+
+Already in the 1st Edition the ed(1) manpage writes:
+
+	Commands may require zero, one, or two addresses.  Commands
+	which require no addresses regard the presence of an
+	address as an error. Commands which require the presence of
+	one address all assume a default address (often ".") but if
+	given more than one address ignore any extras and use the
+	last given. Commands which require two addresses have
+	defaults in the case of zero or one address but use the
+	last two if more than two are given.
+
+Hence this features was already present from the beginning. My
+question must thus shift to QED: Was it present there as well or
+was it newly introduced to ed? As it is not listed as a
+differences to QED, it seems to have been taken from there
+unchanged.
+
+
+My interest in general use cases and stories around the feature
+is still present. ;-)
+
+
+meillo
+
+
+
+[2022-07-08 09:47] markus schnalke <meillo@marmaro.de>
+>
+> Hoi,
+> =
+
+> via a recent message from Chris Pinnock to the list I became aware
+> of the book ``Ed Mastery'' by Michael W. Lucas. At once I bought
+> and read it. Although it is not on the mastery level it claims and
+> I would have liked it to be, it still was fun to read.
+> =
+
+> This brought me back to my ed interest. I like ed a lot and despite
+> my young age, I've actually programmed with ed for fun and have
+> prepared the troff slides for a talk on early Unix tools (like ed)
+> with ed alone. I use the Heirloom version of ed.
+> =
+
+> Anyways, I wondered about the possibility to give multiple
+> addresses ... more than two for relative address searches.
+> =
+
+> For example, to print the context of the first occurance of `argv'
+> within the main function, you can use:
+> =
+
+> 	/^main(/;/\<argv\>/-2;+4n =
+
+> =
+
+> For the last occurance it's even one level more:
+> =
+
+> 	/^main(/;/^}/;?\<argv\>?-2;+4n
+> =
+
+> (The semicolons mean that the next search or relative addressing
+> starts at the result of the previous one. I.e. in this case: We go
+> to the `main' function, from there go to the function end, then
+> backwards to `argv' minus two lines and print (with line numbers)
+> this line and four lines more.)
+> =
+
+> =
+
+> The manpage of 6th Edition mentiones this possibility to give more
+> than two addresses:
+> =
+
+> 	Commands may require zero, one, or two addresses.  Commands
+> 	which require no addresses regard the presence of an address
+> 	as an error.  Commands which accept one or two addresses
+> 	assume default addresses when insufficient are given.  If
+> 	more addresses are given than such a command requires, the
+> 	last one or two (depending on what is accepted) are used.
+> =
+
+> 	http://man.cat-v.org/unix-6th/1/ed
+> =
+
+> You can see it in the sources as well:
+> 	https://www.tuhs.org/cgi-bin/utree.pl?file=3DV6/usr/source/s1/ed.c
+> (Search for  ';'  to find the line. There's a loop processing the
+> addresses.)
+> =
+
+> V5 ed(1) is in assembler, however, which I cannot read. Thus there
+> must have been a complete rewrite, maybe introducing this feature
+> at that point. (I don't know where to find v5 manpage to check
+> that as well.)
+> =
+
+> =
+
+> I wonder how using multiple addresses for setting starting points
+> for relative searches came to be. When was it implemented and what
+> use cases drove this features back in the days? Or was it more an
+> accident that was introduced by the implementation, which turned
+> out to be useful? Or maybe it existed already in earlier versions
+> of ed, althoug maybe undocumented.
+> =
+
+> =
+
+> =
+
+> =
+
+> For reference, POSIX writes:
+> =
+
+> 	Commands accept zero, one, or two addresses. If more than the
+> 	required number of addresses are provided to a command that
+> 	requires zero addresses, it shall be an error. Otherwise, if more
+> 	than the required number of addresses are provided to a command,
+> 	the addresses specified first shall be evaluated and then discarded
+> 	until the maximum number of valid addresses remain, for the
+> 	specified command.
+> =
+
+> 	https://pubs.opengroup.org/onlinepubs/9699919799/utilities/ed.html
+> =
+
+> Here more explanation rom the rationale section:
+> =
+
+> 	Any number of addresses can be provided to commands taking
+> 	addresses; for example, "1,2,3,4,5p" prints lines 4 and 5, because
+> 	two is the greatest valid number of addresses accepted by the print
+> 	command. This, in combination with the <semicolon> delimiter,
+> 	permits users to create commands based on ordered patterns in the
+> 	file. For example, the command "3;/foo/;+2p" will display the first
+> 	line after line 3 that contains the pattern foo, plus the next two
+> 	lines. Note that the address "3;" must still be evaluated before
+> 	being discarded, because the search origin for the "/foo/" command
+> 	depends on this.
+> =
+
+> As far as I can see, multiple addresses make only sense with the
+> semicolon separator, because the comma separator does not change
+> the state, thus previous addresses can have no effect on later
+> addresses. The implementation just does not forbid them, for
+> simplicity reasons.
+> =
+
+> =
+
+> =
+
+> meillo
+> =
+
