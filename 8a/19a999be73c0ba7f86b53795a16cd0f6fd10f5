@@ -1,0 +1,86 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 9584 invoked from network); 11 Jul 2022 21:07:04 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 11 Jul 2022 21:07:04 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2EF6540BA1;
+	Tue, 12 Jul 2022 07:07:00 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 3084B40BA1
+	for <tuhs@tuhs.org>; Tue, 12 Jul 2022 07:06:56 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 0E7EF18C096; Mon, 11 Jul 2022 17:06:55 -0400 (EDT)
+To: gctersteeg@gmail.com, tuhs@tuhs.org
+Message-Id: <20220711210655.0E7EF18C096@mercury.lcs.mit.edu>
+Date: Mon, 11 Jul 2022 17:06:55 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: RIM2TGN6OPALU74GWU3ZLILM2D3P2EHV
+X-Message-ID-Hash: RIM2TGN6OPALU74GWU3ZLILM2D3P2EHV
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: LSX issues and musing
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/RIM2TGN6OPALU74GWU3ZLILM2D3P2EHV/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+It would be really appreciated if people replying to messages like this would
+take 10 minutes (or so - that's about how lonfg it took me to find the actual
+answer to this person's question) to do some research, instead of just
+replying off the top of their heads with whatever they happen to think they
+know.
+
+    > From: Gavin Tersteeg        
+       	
+    > I can't seem to get the kernel to actually link together once
+    > everything is compiled. When the final "ld -X" is executed, I always
+    > get the following errors:
+    > "Undefined:
+    > _end
+    > _edata
+    > _decmch"
+
+The first two are automagically defined by the linker after a successful
+read-through of the files+libraries, i.e. when then are no un-defined
+symbols. Ignore them; they will go away when you fix the problem.
+
+The real issue is the missing 'decmch'. That apparently comes from decfd.c,
+which I assume is the DEC floppy disk driver. Depending on the setting of the
+EIS conditional compilation flag (a different one for C files, from the
+PDP-11 assembler files, please note - and I haven't worked out what its
+definitiion means; whether if defined, it means the machine _does_ have the
+EIS, or _does not_x), it will be called for.
+
+'decmch' is in low.s (rather oddly; that usualy holds just interrupt vectors
+and interrupt toeholds), conditionally assembled on:
+
+	.if DEC
+	.if EIS-1
+
+The first line presumably adds it if there _is_ a DEC floppy disk, the second
+I don't know _for sure_ the sense of (although I'm guessing that EIS=1 means
+there _is_ an EIS chip, so this line says 'assemble if there it _not_ an EIS
+chip').
+
+Although you'd think that whatever calculation it is doing, it would need to
+do if there's an EIS chip or not, so with an EIS chip it must calculate it
+some other way; you'll have to read decfd.c and see how it works.
+
+Note that you'll have to make sure the EIS flags (note plural) are set
+to the same sense, when compiling the C and assembler files...
+
+
+Let me send this off, and I'll reply to some other points in a
+separate message.
+
+	Noel
