@@ -1,0 +1,109 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_ILLEGAL_IP autolearn=no autolearn_force=no version=3.4.4
+Received: (qmail 7620 invoked from network); 7 May 2022 18:51:43 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 7 May 2022 18:51:43 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 347889D439; Sun,  8 May 2022 04:51:40 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A384D9CEEF;
+	Sun,  8 May 2022 04:49:24 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 0484C9CEEF; Sun,  8 May 2022 04:49:21 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id DAB429CEEE
+ for <tuhs@minnie.tuhs.org>; Sun,  8 May 2022 04:49:19 +1000 (AEST)
+Received: from kent.sdaoden.eu (kent.sdaoden.eu [192.0.2.2])
+ by sdaoden.eu (Postfix) with ESMTPS id B2ABF16059;
+ Sat,  7 May 2022 20:49:17 +0200 (CEST)
+Received: by kent.sdaoden.eu (Postfix, from userid 1000)
+ id 84C7782164; Sat,  7 May 2022 20:49:15 +0200 (CEST)
+Date: Sat, 07 May 2022 20:49:15 +0200
+Author: Steffen Nurpmeso <steffen@sdaoden.eu>
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: ron minnich <rminnich@gmail.com>
+Message-ID: <20220507184915.nXfTT%steffen@sdaoden.eu>
+In-Reply-To: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+References: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+Mail-Followup-To: ron minnich <rminnich@gmail.com>,
+ TUHS main list <tuhs@minnie.tuhs.org>
+User-Agent: s-nail v14.9.24-235-gfda91a48ef
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] conventions around zero padding in ip4
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+ron minnich wrote in
+ <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>:
+ |I first learned in the 80s that 127.1 meant 127.0.0.1. I always
+ |assumed zero padding was defined in a standard *somewhere*, but am
+ |finding out maybe not. I talked to the IP OG, and he tells me that
+ |padding was not in any standard. [side note: it's weird and wonderful
+ |to still have so many people "present at the creation" of computing as
+ |we know it still around, and to find they are so willing to answer
+ |naive questions!]
+ |
+ |Padding is a standard in ip6, possibly because the addresses are so
+ |long. :: is your friend.
+
+It was/is called compression there, and it was optional ("may") at
+first (in RFC 1884).  RFC 1884 was an overall wonderful RFC,
+uppercase or lowercase are possible, leading zeros in a field were
+optional ("not necessary") etc.
+
+Unfortunately RFC 5952 loaded too much Sushi and Sake first, and
+turned this to a soldiers dream, "Leading zeros MUST be
+suppressed", "Shorten as Much as Possible", " "::" MUST NOT be
+used to shorten just one 16-bit 0 field", "longest run [.] MUST be
+shortened", "MUST [.] lowercase".
+
+Luckily SMTP seems to keep the elder 
+
+ |IP4 padding came up recently: the ip command interprets 10.2 as
+ |10.2.0.0, whereas most things (golang libraries, ping, ...) interpret
+ |it as 10.0.0.2. The latter interpretation accords with what I learned
+ |40y ago.
+ |
+ |But, I find myself wondering: where was the first use of the IP4 zero
+ |padding convention?
+
+I did not even know this is possible, but for special software
+like postfix SMTP etc., where it de-facto means "substring", so
+10.2 is 10.2.0.0/16 (unless i am totally mistakent now).
+I could imagine that the introduction of CIDR notation as such
+(RFC 1519) played a role?
+
+I have had no idea of networks but modem beeps at all, coming from
+a staid pupils' desk with C64 -> DOS -> 4DOS / Windows 3.1 -> 4DOS
+/ Windows95B (and then, and then!!  It became real) , and there
+you had the GUI boxes which "zero padded" anything, unless i am
+mistaken.
+
+Btw ipcalc(1) (of RedHat aka https://gitlab.com/ipcalc) is
+incapable to deal with that abbreviation at all.
+So it maybe is a generation issue, like most other things.
+"'Hope i die before i get old".
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

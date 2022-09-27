@@ -1,0 +1,125 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 26563 invoked from network); 27 Jun 2022 00:44:33 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 27 Jun 2022 00:44:33 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EF42940C63;
+	Mon, 27 Jun 2022 10:43:54 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id AE30F40C4C
+	for <tuhs@tuhs.org>; Mon, 27 Jun 2022 10:43:50 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 84ABA18C07B; Sun, 26 Jun 2022 20:43:49 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220627004349.84ABA18C07B@mercury.lcs.mit.edu>
+Date: Sun, 26 Jun 2022 20:43:49 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: WQLERMMVYXHUZNOH3J6UCNVNI6JXAKBW
+X-Message-ID-Hash: WQLERMMVYXHUZNOH3J6UCNVNI6JXAKBW
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Research Datakit notes
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/WQLERMMVYXHUZNOH3J6UCNVNI6JXAKBW/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+Just as the topic of TUHS isn't 'how _I_ could/would build a _better_ OS', but
+'history of the OS that was _actually built_' (something that many posters
+here seem to lose track of, to the my great irritation), so too the topic
+isn't 'how to build a better network' - or actually, anything network-centric.
+
+I'll make a few comments on a couple of things, though.
+
+
+    > From: steve jenkin
+
+    > packet switching won over Virtual Circuits in the now distant past but
+    > in small, local and un-congested networks without reliability
+    > constraints, any solution can look good. ... Packet switching
+    > hasn't scaled well to Global size, at least IMHO.
+
+The internetworking architecture, circa 1978, has not scaled as well as would
+have been optimal, for a number of reasons, among them:
+
+- pure scaling effects (e.g. algorithms won't scale up; subsystems which
+  handle several different needs will often need to be separated out at a larger
+  scale; etc)
+
+- inherent lack of hindsight (unknown unknowns, to use Rumsfeld's phrase; some
+  things you only learn in hindsight)
+
+- insufficiently detailed knowledge of complete requirements for a
+  global-scale network (including O+M, eventual business model, etc)
+
+- limited personnel resources at the time (some things we _knew_ were going to
+  be a problem we had to ignore because we didn't have people to throw at the
+  problem, then and there)
+
+- rapid technological innovation (and nobody's crystal ball is 100% perfect)
+
+It has been possible to fix some aspects of the ca. 1978 system - e.g. the
+addition of DNS, which I think has worked _reasonably_ well - but in other
+areas, changes weren't really adequate, often because they were constrained by
+things like upward compatibility requirements (e.g. BGP, which, among numerous
+other issues, had to live with existing IP addressing).
+
+Having said all that, I think your assertion that virtual circuits would have
+worked better in a global-scale network is questionable. The whole point of
+networks which use unreliable datagrams as a fundamental building block is
+that by moving a lot of functionality into the edge nodes, it makes the
+switches a lot simpler. Contemporary core routers may be complex - but they
+would be much worse if the network used virtual circuits.
+
+Something I suspect you may be unaware of is that most of the people who
+devised the unreliable datagram approach of the internetworking architecture
+_had experience with an actual moderately-sized, operational virtual circuit
+network_ - the ARPANET. (Yes, it was basically a VC network. Look at things
+like RFNMs, links {the specific ARPANET mechanism referred to by this term,
+not the general concept}, etc.) So they _knew_ what a VC network would
+involve.
+
+So, think about the 'core routers' in a network which used VC's. I guess a
+typical core router tese days uses a couple of OC768 links. Assume an average
+packet size of 100 bytes (probably roughly accurate, with the bimodal
+distribution between data and acks). With 4 OC768's, that's 4*38.5G/800 =
+~155M packets/second. I'm not sure of the average TCP connection length in
+packets these days, but assume it's 100 packets or so (that's a 100KB Web
+object). That's still roughly _1 million cicuit setups per second_.
+
+If the answer is 'oh, we'll use aggregation so core routers don't see
+individual connections - or their setup/tear-down' - well, the same
+can be done with a datagram system; that's what MPLS does. Work
+through the details - VCs were not preferred, for good reasons.
+
+
+    > Ethernet only became a viable LAN technology with advent of Twisted
+    > pair: point to point + Switches.
+
+It's really irritating that a lot of things labelled 'Ethernet' these days
+_aren't_ _real_ Ethernet (i.e. a common broadcast bus allocated via CSMA-CD).
+
+They use the same _packet format_ as Ethernet (especially the 48-bit
+globally-unique address, which can usefully be blown into things at
+manufacture time), but it's not Ethernet. In some cases, they also retain the
+host interface<->network physical interface - but the thing on the other side
+of the interface is totally different (such as the hub-based systems commmon
+now - as you indicate, it's a bunch of small datagram packet switches plugged
+together with point-point links).
+
+Interfaces are forever; like the screw in light-bulb. These days, it's likely
+an LED bulb on one side, powered by a reactor on the other - two technologies
+which were unforseen (and unforseeable) when the interface was defined, well
+over 100 years ago.
+
+	Noel

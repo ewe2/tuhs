@@ -1,0 +1,61 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 30004 invoked from network); 11 Jul 2022 23:47:44 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 11 Jul 2022 23:47:44 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 70ED940BCB;
+	Tue, 12 Jul 2022 09:47:35 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 3935C40BCA
+	for <tuhs@tuhs.org>; Tue, 12 Jul 2022 09:47:30 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 2E9F418C096; Mon, 11 Jul 2022 19:47:29 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220711234729.2E9F418C096@mercury.lcs.mit.edu>
+Date: Mon, 11 Jul 2022 19:47:29 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: SHTB4ZUJMILTG5XETI4GLIXG3TPXBGPB
+X-Message-ID-Hash: SHTB4ZUJMILTG5XETI4GLIXG3TPXBGPB
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: LSX issues and musing
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/SHTB4ZUJMILTG5XETI4GLIXG3TPXBGPB/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Paul Ruizendaal
+
+    > Note that LSX only holds one process in core and swaps other processes
+    > (NPROC = 3) out to floppy. It reportedly took several hours for the
+    > Terak to self-compile LSX from source.
+
+If one is working in a simulator, and not a real hardware PDP-11, there's a
+'trick' one can use to make life a lot easier - for MINI-UNIX, at least; I'll
+comment on LSX below.
+
+As I report in the MINI-UNIX Computer History Wiki article: "MINI-UNIX uses
+the same file system as V6; this allows MINI-UNIX packs to be 'mounted' on V6
+systems (either real, or simulated), which is very convenient for working on
+them." So just spin up a V6 in the simulator, mount the LSX/MINI-UNIX pack,
+and away you go. The V6 toolchain can be used to compile/link kernels; to
+link user commands one will need to import the LSX/MINI-UNIX loader (which,
+since V6 is source compatible with LSX/MINI-UNIX, is trivial).
+
+LSX is potentially more complex, as it supports _two different_ file system
+formats: the standard V6 one, and a 'contiguous' one which is very similar
+to the V6 one (rdwri.c has no conditionals on CONTIG; not so alloc.c,
+though), but is not fully compatible. So non-contiguous LSX file systems
+can be mounted under V6, but not contiguous ones.
+
+	Noel

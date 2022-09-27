@@ -1,0 +1,162 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_ILLEGAL_IP,T_SCC_BODY_TEXT_LINE autolearn=no autolearn_force=no
+	version=3.4.4
+Received: (qmail 19300 invoked from network); 9 May 2022 14:11:47 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 9 May 2022 14:11:47 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 1A3B09D440; Tue, 10 May 2022 00:11:45 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id EBBD99CC80;
+	Tue, 10 May 2022 00:09:02 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id E77559CC80; Tue, 10 May 2022 00:08:57 +1000 (AEST)
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id F0A869CC79
+ for <tuhs@minnie.tuhs.org>; Tue, 10 May 2022 00:08:51 +1000 (AEST)
+Received: from kent.sdaoden.eu (kent.sdaoden.eu [192.0.2.2])
+ by sdaoden.eu (Postfix) with ESMTPS id 68A1516059;
+ Mon,  9 May 2022 16:08:49 +0200 (CEST)
+Received: by kent.sdaoden.eu (Postfix, from userid 1000)
+ id 0B9D882247; Mon,  9 May 2022 16:08:47 +0200 (CEST)
+Date: Mon, 09 May 2022 16:08:46 +0200
+Author: Steffen Nurpmeso <steffen@sdaoden.eu>
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Ralph Corderoy <ralph@inputplus.co.uk>
+Message-ID: <20220509140846.Qaxea%steffen@sdaoden.eu>
+In-Reply-To: <20220508102208.50A2822158@orac.inputplus.co.uk>
+References: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+ <20220508102208.50A2822158@orac.inputplus.co.uk>
+Mail-Followup-To: Ralph Corderoy <ralph@inputplus.co.uk>, tuhs@minnie.tuhs.org
+User-Agent: s-nail v14.9.24-238-g9856c4e34b
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] conventions around zero padding in ip4
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: tuhs@minnie.tuhs.org
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Ralph Corderoy wrote in
+ <20220508102208.50A2822158@orac.inputplus.co.uk>:
+ |> I first learned in the 80s that 127.1 meant 127.0.0.1. I always
+ |> assumed zero padding was defined in a standard *somewhere*, but am
+ |> finding out maybe not.
+ |
+ |It has been standardised; see inet_addr(3p) where =E2=80=98p=E2=80=99 mea=
+ns the POSIX
+ |version of the man page or
+ |https://pubs.opengroup.org/onlinepubs/9699919799/functions/inet_addr.html
+ |
+ |Briefly, the string must be one of
+ |
+ |    a.b.c.d
+ |    a.b.cd
+ |    a.bcd
+ |    abcd
+ |
+ |where the number of bytes represented is the number of characters.
+ |Each number is as defined by ISO C, e.g. =E2=80=980x...=E2=80=99 means he=
+x, thus
+ |=E2=80=98ping 017777777776=E2=80=99.
+ |
+ |That's all there is to it.  It's simple to explain and I've used it for
+ |years too.  Given POSIX defines it, without deprecation, programming
+ |languages which don't use the C library and programs which must parse
+ |the string themselves should follow POSIX to avoid those annoying
+ |programs which deviate from the long-established norm.
+ |
+ |> IP4 padding came up recently: the ip command interprets 10.2 as
+ |> 10.2.0.0, whereas most things (golang libraries, ping, ...) interpret
+ |> it as 10.0.0.2.
+ |
+ |Bug the ip(1) folks, pointing to POSIX.  :-)
+
+"However", RFC 2553 says
+
+  RFC 2553       Basic Socket Interface Extensions for IPv6     March 1999
+
+     The address conversion functions -- inet_ntoa() and inet_addr() --
+     convert IPv4 addresses between binary and printable form.  These
+     functions are quite specific to 32-bit IPv4 addresses.  We have
+     designed two analogous functions that convert both IPv4 and IPv6
+     addresses, and carry an address type parameter so that they can be
+     extended to other protocol families as well.
+
+And for this POSIX says
+
+  If the af argument of inet_pton( ) is AF_INET, the src string
+  shall be in the standard IPv4 dotted-decimal form:
+  ddd.ddd.ddd.ddd where "ddd" is a one to three digit decimal
+  number between 0 and 255 (see inet_addr( )). The inet_pton()
+  function does not accept other formats [.]
+
+I am too lazy / busy to check whether inet_pton() with AF_INET
+gets the short version right.
+(I personally had IPAdress:: .. pub boolean fromString(const char
+*_straddr, ui4 _straddrlen=3DM1::ui4):
+
+    * Tries to parse the address as stored in \a _straddr.
+    * If \a _straddr was successfully parsed a true boolean is returned.
+    * Otherwise \THIS has not been modified.
+    *
+    * This function can parse all usual address representations,
+    * in particular all of those which can be produced with toString().
+    * It can even parse "127.  0.  0.  1", "127.000.000.001",
+    * but \e cannot parse "127.  0.0000.  1" (room for four digits).
+    * And ditto for IPv6.
+    *
+    * \remarks If result is IPv6, flowInfo() and scopeId() are set to 0.
+    * \note
+    * ARPA strings are not understood!
+    * I.e., strings produced by toArpaString() cannot be re-parsed to
+    * a plain address with this one!
+    *
+    * \note
+    * ::0.0.0.0 and ::FFFF:0.0.0.0 will fail.
+    * ::0.0.0.1 and ::FFFF:0.0.0.1 will also fail.
+
+and now find the need to do
+
+    /* xxx Client had this already, simply binary pass it, too? */
+    c_af =3D (su_cs_find_c(pgp->pg_ca, ':') !=3D NIL) ? AF_INET6 : AF_INET;
+    if(inet_pton(c_af, pgp->pg_ca, (c_af =3D=3D AF_INET ? S(void*,&c_sip.v4)
+             : S(void*,&c_sip.v6))) !=3D 1){
+       su_log_write(su_LOG_CRIT, _("Cannot re-parse an already "
+          "prepared IP address?: "), pgp->pg_ca);
+       goto jleave0;
+    }
+    c_ip =3D (c_af =3D=3D AF_INET) ? R(u32*,&c_sip.v4.s_addr)
+          : R(u32*,c_sip.v6.s6_addr);
+
+quite lengthy and complicated.  Of course inet_pton() can be made
+"extended to other protocol families", and maybe they are already
+even, but i find this distressing as either you need to provide
+some kind of _(un)?register() or even hardwire, maybe with a tree
+of #ifdef, those other families.  And better watch out for
+EAFNOSUPPORT at runtime.  Of course i came late and wanted /
+needed something specific so i am fine out.
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

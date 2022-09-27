@@ -1,0 +1,96 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	PP_MIME_FAKE_ASCII_TEXT,T_SCC_BODY_TEXT_LINE autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 2982 invoked from network); 9 May 2022 16:19:12 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 9 May 2022 16:19:12 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id ECAA49D459; Tue, 10 May 2022 02:19:09 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1A76A9CC80;
+	Tue, 10 May 2022 02:15:30 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 957E79CC80; Tue, 10 May 2022 02:14:19 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+ by minnie.tuhs.org (Postfix) with ESMTPS id D914F9CC79
+ for <tuhs@minnie.tuhs.org>; Tue, 10 May 2022 02:14:17 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+ id EDB2F18C073; Mon,  9 May 2022 12:14:16 -0400 (EDT)
+To: tuhs@minnie.tuhs.org
+Message-Id: <20220509161416.EDB2F18C073@mercury.lcs.mit.edu>
+Date: Mon,  9 May 2022 12:14:16 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Subject: Re: [TUHS] conventions around zero padding in ip4
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: jnc@mercury.lcs.mit.edu
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+    > There were other ways of specifying a IP address numerically, initially;
+
+I decided to set the Way-Back Machine to as close to 0 as I could get, and
+looked to see what the Terminal Interface Unit:
+
+  https://gunkies.org/wiki/Terminal_Interface_Unit
+
+whose source I recently recovered, did. This is an interesting
+implementation, because it was definitely one of the first 4 TCP
+implementations done (before any UNIX ones); likely one of the first two,
+along with the TENEX one. (Actually, they both likely originally predate the
+split of TCP and IP into separate protocols, although this version post-dates
+that split.)
+
+The manual:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/mos/docs/tiunv1.lpt
+
+(in "B. TELNET Commands") and the source:
+
+  http://ana-3.lcs.mit.edu/~jnc/tech/mos/tiu/telnet-1.mac
+
+disagree on how the user gave addresses in numeric form in an 'open' command;
+both agree that it was '@O <rest>,<net>,<socket>', but the manual claims
+that 'rest' "may be specified symbolically, or numerically in decimal", but the
+code shows that '#xxx' could also be used, to give it in hex. (Although if hex
+were used, the number could be a max of 16 bits; decimal alloweded up to 42 bits.)
+
+
+    > From: Michael Kjörling
+
+    > Looks like [A/B/C addresses] happened in 1978 or thereabouts?
+    > https://www.rfc-editor.org/ien/ien46.txt
+
+No; it post-dates the IEN era; "Assigned Numbers" of September 1981 (RFC-790)
+is the first mention I could find of it. (That Dave Clark IEN is talking
+about what later became 'IP subnets' - which ironically long pre-date A/B/C -
+see IEN-82, February 1979.)
+
+The Internet Protocol spec of September 1981 (RFC-791) also has A/B/C; my
+memory is that this change was _not_ discussed in the INWG, Postel just
+sprung it on us in these two RFCs.
+
+I suspect what happened is that Jon (as keeper of the network numbers)
+realized that there was an increasing demand for network numbers, and 256
+would only last so long, so he sprung into action and did the A/B/C thing.
+(If this topic is of more interest, it should get moved to the
+'internet-history' list, it's off-topic here.)
+
+Interestingly, RFC-790 says: "One notation for internet host addresses
+commonly used divides the 32-bit address into four 8-bit fields and specifies
+the value of each field as a decimal number with the fields separated by
+periods." Note the "one notation", implying that it wasn't any kind of
+standard at that point.
+
+	Noel
