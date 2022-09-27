@@ -1,0 +1,129 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23512 invoked from network); 31 Jul 2022 19:57:27 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 31 Jul 2022 19:57:27 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id DA27740116;
+	Mon,  1 Aug 2022 05:57:19 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id CFD504010E
+	for <tuhs@tuhs.org>; Mon,  1 Aug 2022 05:57:03 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id ACC4218C0C1; Sun, 31 Jul 2022 15:57:02 -0400 (EDT)
+To: gctersteeg@gmail.com, tuhs@tuhs.org
+Message-Id: <20220731195702.ACC4218C0C1@mercury.lcs.mit.edu>
+Date: Sun, 31 Jul 2022 15:57:02 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: 33NO3ZJMEQYCL7H4EZWSPERD2BC6PIEK
+X-Message-ID-Hash: 33NO3ZJMEQYCL7H4EZWSPERD2BC6PIEK
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: LSX issues and musing
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/33NO3ZJMEQYCL7H4EZWSPERD2BC6PIEK/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+{I was going to reply to an earlier message, but my CFS left me with
+insufficient energy; I'll try and catch up on the points I was goibf to make
+here.}
+
+    > From: Gavin Tersteeg
+
+    > This leaves me with about 1.9kb of space left in the kernel for
+    > additional drivers
+
+I'm curious how much memory you have in your target system; it must not be a
+lot, if you're targeting LSX.
+
+I ask because LSX has been somewhat 'lobotimized' (I don't mean that in a
+negative way; it's just recognition that LSX has had a lot of corners
+trimmed, to squeeze it down as much as possible), and some of those trims
+behind some of the issues you're having (below).
+
+At the time the LSI-11 came out, semiconductor DRAM was just getting started,
+so an LSI-11 with 8KB onboard and a 32KB DRAM card (or four 8KB MMV11 core
+memory cards :-), to produce the 40KB target for LSX systems, was then a
+reasonable configuration. These days, one has to really search to find
+anything smaller than 64KB...
+
+It might be easier to just run MINI-UNIX (which is much closer to V6, and
+thus a known quantity), than add a lot of things back in to LSX to produce
+what will effectively be MINI-UNIX; even if you have to buy a bit more QBUS
+memory for the machine.
+
+
+    > the LSX "mkfs" was hardcoded to create filesystems with 6 blocks of
+    > inodes. This maxed the number of files on a disk to 96, but even with
+    > the maximum circumvented LSX would only tolerate a maximum of 101 files.
+
+And here you're seeing the 'lobotomizing' of LSX come into play. That '101'
+made me suspicious, as the base V6 'caches' 100 free inodes in the
+super-block; once those are used, it scans the ilist on disk to refill it.
+
+The code in alloc$ialloc in LSX is hard to understand (there are a lot of
+#ifdef's), and it's very different from the V6 code, but I'm pretty sure it
+doesn't refill the 'cache' after it uses the cached 100 free inodes. So, you
+can have as many free inodes on a disk as you want, but LSX will never use
+more than the first 100.
+
+(Note that the comment in the LSX source "up to 100 spare I nodes in the
+super block. When this runs out, a linear search through the I list is
+instituted to pick up 100 more." is inaccurate; it probably wasn't updated
+after the code was changed. ISTR tis is true of a lot of the comments.)
+
+Use MINI-UNIX.
+
+   > A fresh filesystem that was mkfs'd on stock V6 can be mounted on LSX,
+   > but any attempt to create files on it will fail. 
+
+The V6 'mkfs' does not fill the free inode cache in the super-block. So, it's
+empty when you start out. The LSX ialloc() says:
+
+	if(fp->s_ninode > 0) {
+	...
+	}
+	u.u_error = ENOSPC;
+	return(NULL);
+
+which would produce what you're seeing.
+
+Also, another problem with trying to 'push' LSX into a previously un-handled
+operating regions (e.g. large disks, but there are likely others) is that
+there are probably things that are un-tested in that previously unused
+operating mode, and there may be un-found bugs that you trip across.
+
+Use MINI-UNIX.
+
+    > Interestingly enough, existing large V6 RK05 images can be mounted,
+    > read from, and written to. The only limitations on these pre existing
+    > images is that if enough files are deleted, the system will randomly crash.
+
+I had a look at the source (in sys4.c, nami.c, iget.c, rdwri.c, and alloc.c),
+but I couldn't quickly find the cause; it isn't obvious. (When unlinking a
+file, the blocks in the file have to be freed - that's inode 'ip' - and the
+directory - inode 'pp' - has to be updated; so it's pretty complicated.)
+
+Use MINI-UNIX.
+
+
+   > The information there about continuous files ... will be extremely
+   > helpful if I ever try to make those work in the future.
+
+My recollection is that the LSX kernel doesn't have code to create contiguous
+files; the LSX page at the CHWiki says "the paper describing LSX indicates
+there were two separate programs, one to allocate space for such files, and
+one to move a file into such an area, but they do not seem to be extant". If
+you find them, could you let me know? Thanks.
+
+	Noel

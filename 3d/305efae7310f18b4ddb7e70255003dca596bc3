@@ -1,0 +1,72 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 22810 invoked from network); 9 Sep 2022 18:46:20 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 9 Sep 2022 18:46:20 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A550A422CE;
+	Sat, 10 Sep 2022 04:46:17 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+	by minnie.tuhs.org (Postfix) with ESMTP id 6A606422C9
+	for <tuhs@tuhs.org>; Sat, 10 Sep 2022 04:46:13 +1000 (AEST)
+Received: by oclsc.org id B1BBD4F1D8; Fri,  9 Sep 2022 14:46:12 -0400 (EDT)
+Received: by oclsc.org id 17C84640CDB; Fri,  9 Sep 2022 14:46:13 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-ID: <A26778E372C45C9311F9E18B2025E32E.for-standards-violators@oclsc.org>
+Date: Fri,  9 Sep 2022 14:46:13 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Message-ID-Hash: HUYF56XHGEHRRNG5W7TQEVIAHXFFS26D
+X-Message-ID-Hash: HUYF56XHGEHRRNG5W7TQEVIAHXFFS26D
+X-MailFrom: norman@oclsc.org
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Does anybody know the etymology of the term "word" as in collection of bits?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/HUYF56XHGEHRRNG5W7TQEVIAHXFFS26D/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+Doug McIlroy:
+
+  Bit-addressing is very helpful for manipulating characters
+  in a word-organized memory. The central idea of my ancient
+  (patented!) string macros that underlay SNOBOL was that it's
+  more efficient to refer to 6-bit characters as living at
+  bits 0,6,12,... of a 36-bit word than as being characters
+  0,1,2,... of the word. I've heard that this convention was
+  supported in hardware on the PDP-10.
+
+====
+
+Indeed it was.  The DEC-10 had `byte pointers' as well as
+(36-bit) word addresses.  A byte pointer comprised an address,
+a starting bit within the addressed word, and a length.
+There were instructions to load and store an addressed byte
+to or from a register, and to do same while incrementing
+the pointer to the next byte, wrapping the start of the next
+word if the remainder of the current word was too small.
+(Bytes couldn't span word boundaries.)
+
+Byte pointers were used routinely to process text.  ASCII
+text was conventionally stored as five 7-bit bytes packed
+into each 36-bit word.  The leftover bit was used by some
+programs as a flag to mean these five characters (usually
+the first of a line) were special, e.g. represented a
+five-decimal-digit line number.
+
+Byte pointers were used to access Sixbit characters as
+well (each character six bits, so six to the word,
+character set comprising the 64-character subset of
+ASCII starting with 0 == space).
+
+Norman Wilson
+Toronto ON
+(spent about four years playing with TOPS-10 before
+growing up to play with UNIX)

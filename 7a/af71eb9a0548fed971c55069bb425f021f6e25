@@ -1,0 +1,82 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29929 invoked from network); 8 May 2022 10:26:14 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 8 May 2022 10:26:14 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C0C349CF03; Sun,  8 May 2022 20:26:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2E4E69CEF3;
+	Sun,  8 May 2022 20:22:17 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 592B49CEEF; Sun,  8 May 2022 20:22:14 +1000 (AEST)
+Received: from relay05.pair.com (relay05.pair.com [216.92.24.67])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 737739CEEE
+ for <tuhs@minnie.tuhs.org>; Sun,  8 May 2022 20:22:10 +1000 (AEST)
+Received: from orac.inputplus.co.uk (unknown [87.112.46.167])
+ by relay05.pair.com (Postfix) with ESMTP id 518491A26B2
+ for <tuhs@minnie.tuhs.org>; Sun,  8 May 2022 06:22:09 -0400 (EDT)
+Received: from orac.inputplus.co.uk (orac.inputplus.co.uk [IPv6:::1])
+ by orac.inputplus.co.uk (Postfix) with ESMTP id 50A2822158
+ for <tuhs@minnie.tuhs.org>; Sun,  8 May 2022 11:22:08 +0100 (BST)
+To: tuhs@minnie.tuhs.org
+From: Ralph Corderoy <ralph@inputplus.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+In-reply-to: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+References: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+Date: Sun, 08 May 2022 11:22:08 +0100
+Message-Id: <20220508102208.50A2822158@orac.inputplus.co.uk>
+Subject: Re: [TUHS] conventions around zero padding in ip4
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi Ron,
+
+> I first learned in the 80s that 127.1 meant 127.0.0.1. I always
+> assumed zero padding was defined in a standard *somewhere*, but am
+> finding out maybe not.
+
+It has been standardised; see inet_addr(3p) where ‘p’ means the POSIX
+version of the man page or
+https://pubs.opengroup.org/onlinepubs/9699919799/functions/inet_addr.html
+
+Briefly, the string must be one of
+
+    a.b.c.d
+    a.b.cd
+    a.bcd
+    abcd
+
+where the number of bytes represented is the number of characters.
+Each number is as defined by ISO C, e.g. ‘0x...’ means hex, thus
+‘ping 017777777776’.
+
+That's all there is to it.  It's simple to explain and I've used it for
+years too.  Given POSIX defines it, without deprecation, programming
+languages which don't use the C library and programs which must parse
+the string themselves should follow POSIX to avoid those annoying
+programs which deviate from the long-established norm.
+
+> IP4 padding came up recently: the ip command interprets 10.2 as
+> 10.2.0.0, whereas most things (golang libraries, ping, ...) interpret
+> it as 10.0.0.2.
+
+Bug the ip(1) folks, pointing to POSIX.  :-)
+
+-- 
+Cheers, Ralph.

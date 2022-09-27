@@ -1,0 +1,121 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=0.3 required=5.0 tests=MAILING_LIST_MULTI,
+	RCVD_ILLEGAL_IP,T_SCC_BODY_TEXT_LINE autolearn=no autolearn_force=no
+	version=3.4.4
+Received: (qmail 21539 invoked from network); 1 Apr 2022 19:52:17 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 1 Apr 2022 19:52:17 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id A52A79D707; Sat,  2 Apr 2022 05:52:13 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id CE76D9D6FA;
+	Sat,  2 Apr 2022 05:50:05 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 93D679D6FA; Sat,  2 Apr 2022 05:50:02 +1000 (AEST)
+X-Greylist: delayed 478 seconds by postgrey-1.36 at minnie.tuhs.org;
+ Sat, 02 Apr 2022 05:50:01 AEST
+Received: from sdaoden.eu (sdaoden.eu [217.144.132.164])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 6501E9D6F9
+ for <tuhs@minnie.tuhs.org>; Sat,  2 Apr 2022 05:50:01 +1000 (AEST)
+Received: from kent.sdaoden.eu (kent.sdaoden.eu [192.0.2.2])
+ by sdaoden.eu (Postfix) with ESMTPS id 0B78F16059;
+ Fri,  1 Apr 2022 21:42:01 +0200 (CEST)
+Received: by kent.sdaoden.eu (Postfix, from userid 1000)
+ id 78ABD6C1A3; Fri,  1 Apr 2022 21:41:59 +0200 (CEST)
+Date: Fri, 01 Apr 2022 21:41:59 +0200
+Author: Steffen Nurpmeso <steffen@sdaoden.eu>
+From: Steffen Nurpmeso <steffen@sdaoden.eu>
+To: Jon Steinhart <jon@fourwinds.com>
+Message-ID: <20220401194159.HF6gb%steffen@sdaoden.eu>
+In-Reply-To: <202204011726.231HQFm03349496@darkstar.fourwinds.com>
+References: <CAKH6PiVu9GVoEpao=Ammiw_t8whf=yw8Ok49cQRDm1JDQ1x7dA@mail.gmail.com>
+ <44FEFAE6-720F-4449-84DB-228B7A6C097C@kdbarto.org>
+ <202204011726.231HQFm03349496@darkstar.fourwinds.com>
+Mail-Followup-To: Jon Steinhart <jon@fourwinds.com>,
+ TUHS main list <tuhs@minnie.tuhs.org>
+User-Agent: s-nail v14.9.24-229-g94fb1056fb
+OpenPGP: id=EE19E1C1F2F7054F8D3954D8308964B51883A0DD;
+ url=https://ftp.sdaoden.eu/steffen.asc; preference=signencrypt
+BlahBlahBlah: Any stupid boy can crush a beetle. But all the professors in
+ the world can make no bugs.
+Subject: Re: [TUHS] A Reiser tour de force
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Jon Steinhart wrote in
+ <202204011726.231HQFm03349496@darkstar.fourwinds.com>:
+ |David Barto writes:
+ |>> On Apr 1, 2022, at 8:59 AM, Douglas McIlroy <douglas.mcilroy@dartmouth.e\
+ |>> du> wrote:
+ |>> The recent discussion about Research choosing BSD's paging over
+ |>> Reiser-London's brought to mind a stunning program by Reiser that
+ |>> Research did adopt.
+ |>> 
+ |>> A critical primitive in the Blit terminal was bitblt (block transfer
+ |>> of a rectangular area). It was used ubiquitously, for example to
+ ...
+ |>> Bitblt got refined (i.e. elaborated) several times before Reiser did
+ |>> away with it entirely. Instead he wrote a just-in-time generator of
+ |>> optimal code. Thousands of distinct variants, which varied in size
+ |>> from 16 to 72 bytes, could be produced by the same 400 lines of
+ |>> assembler code.
+ ...
+ |> Does this exist for the rest of us to study?
+ ...
+ |It's not insanely complicated by modern standards.  Without any knowledge
+ |of other work, I did the same thing for a 68020 based graphics system where
+ |the JIT code went into the I-cache and was amazingly fast for its day.
+ |
+ |If I remember correctly, things started with an outer-loop test to see
+ |if there were overlapping regions to determine whether to go forward
+ |to backwards to avoid having the destination trash the source.
+ ...
+
+Only to add that "modern standard" C libraries define
+"overlapping" by means of exclusivity, meaning that memcpy(x,
+&x[1], 1) is an invalid overlapping that requires memmove() to be
+used.
+
+ |#?132(0.02 1/76)|alp-2022:tmp$ cat t.c
+ |#include <string.h>
+ |void doit(char *cp);
+ |int main(void){
+ |  char buf[3] = {'1', '2', '\0'};
+ |  doit(buf);
+ |  return buf[0];
+ |}
+ |void doit(char *cp){
+ |  memcpy(cp, &cp[1], 2);
+ |}
+ |#?0(0.02 1/76)|alp-2022:tmp$ gcc -D_FORTIFY_SOURCE=2 -O -o zt t.c
+ |#?0(0.02 1/76)|alp-2022:tmp$ ./zt
+ |Illegal instruction
+ |#?132(0.02 1/76)|alp-2022:tmp$ gcc --version
+ |gcc (Alpine 11.2.1_git20220219) 11.2.1 20220219
+ |Copyright (C) 2021 Free Software Foundation, Inc.
+ |This is free software; see the source for copying conditions.  There is NO
+ |warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ |
+ |#?0(0.02 1/76)|alp-2022:tmp$
+
+Your mileage will vary though.
+
+--steffen
+|
+|Der Kragenbaer,                The moon bear,
+|der holt sich munter           he cheerfully and one by one
+|einen nach dem anderen runter  wa.ks himself off
+|(By Robert Gernhardt)

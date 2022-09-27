@@ -1,0 +1,143 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 2582 invoked from network); 17 Jun 2022 18:54:59 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 17 Jun 2022 18:54:59 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 2CFD240D1E;
+	Sat, 18 Jun 2022 04:54:54 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+	by minnie.tuhs.org (Postfix) with ESMTP id D15DA40CDE
+	for <tuhs@tuhs.org>; Sat, 18 Jun 2022 04:54:45 +1000 (AEST)
+Received: by oclsc.org id EF28D4F32C; Fri, 17 Jun 2022 14:54:44 -0400 (EDT)
+Received: by oclsc.org id 44F0C640CD9; Fri, 17 Jun 2022 14:54:45 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-ID: <A1CB63EB45FDA9CDBDB17912BE89F0DE.for-standards-violators@oclsc.org>
+Date: Fri, 17 Jun 2022 14:54:45 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Message-ID-Hash: ZBZEGA53WDCORTIX2GCOROAKEY54NTVS
+X-Message-ID-Hash: ZBZEGA53WDCORTIX2GCOROAKEY54NTVS
+X-MailFrom: norman@oclsc.org
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Sockets vs Streams (was Re: forgotten versions
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/ZBZEGA53WDCORTIX2GCOROAKEY54NTVS/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+As one of the few remaining people who has actually worked
+with the original dmr stream I/O system, I'd love to dive
+into the debate here, but I don't have time.  I can't resist
+commenting on a few things that have flown by, though.  Maybe
+I can find time to engage better on the weekend.
+
+-- If you think there were no record delimiters in the stream
+system, you don't know enough about it.  A good resource to
+repair that is Dennis's BSTJ paper:
+
+	https://www.bell-labs.com/usr/dmr/www/st.pdf
+
+It's an early description and some of the details later
+evolved (for example we realized that once pipes were
+streams, we no longer needed pseudoterminals) but the
+fundamentals remained constant.
+
+See the section about Message blocks, and the distinction
+between data and control blocks.  Delimiters were one kind
+of control; there were others, some of them potentially
+specific to the network at hand.  In particular, Datakit
+(despite being a virtual-circuit network) had several sorts
+of control words, including message delimiters.  Delimiters
+were necessary even just for terminals, though: how else
+does the generic read(2) code know to return early, before
+filling the buffer, when a complete line has arrived?
+
+-- It's hard to compare sockets to streams and make much
+sense, because they are very different kinds of thing.
+When people talk about sockets, especially when complaining
+that sockets are a mess, they usually mean the API: system
+calls like connect and listen and getpeername and so on.
+
+The stream system was mainly about the internal structure--
+the composable modules and the general-purpose queue interface
+between them, so that you could take a stream representing
+an (already set up) network connection and push the tty
+module on it and have a working remote terminal, no need
+for user-mode programs and pseudo-terminals.
+
+It's not inconceivable to build a system with socket-like
+API and stream internals.
+
+-- Connection setup was initially done with network-specific
+magic messages and magic ioctls.  Later we moved the knowledge
+of that messy crap into network-specific daemons, so a user
+program could make a network call just by calling
+	fd = ipcopen("string-destination-name")
+without knowing or caring whether the network transport was
+TCP or Datakit or involved forwarding over Datakit to a
+gateway that then placed a TCP call to the Internet or whatnot.
+That's what the connection server was all about:
+
+	https://www.bell-labs.com/usr/dmr/www/spe.pdf
+
+Again, the API is not specific to the stream system.  It
+wouldn't be hard to write a connection server that provided
+the same universal just-use-a-string interface (with the
+privileged parts or network details left up to daemons)
+on a system with only socket networking; the only subtle
+bit is that it needs to be possible to pass an open file
+descriptor from one process to another (on the same system),
+which I don't think the socket world had early on but I
+believe they added long ago.
+
+-- There's nothing especially hard about UDP or broadcast.
+It's not as if the socket abstraction has some sort of magic
+datagram-specific file descriptor.  Since every message sent
+and every message received has to include the far end's
+address info, you have to decide how to do that, whether
+by specifying a format for the data (the first N bytes are
+always the remote's address, for example) or provide an
+out-of-band mechanism (some ioctl mess that lets you
+supply it separately, a la sendto/recvfrom, and encodes it
+as a control message).
+
+There was an attempt to make UDP work in the 9th/10th edition
+era.  I don't think it ever worked very cleanly.  When I
+took an unofficial snapshot and started running the system
+at home in the mid-1990s, I ended up just tossing UDP out,
+because I didn't urgently need it (at the time TCP was good
+enough for DNS, and I had to write my own DNS resolver anyway).
+I figured I'd get around to fixing it later but never did.
+But I think the only hard part is in deciding on an interface.
+
+-- It's certainly true that the Research-system TCP/IP code
+was never really production-quality (and I say that even
+though I used it for my home firewall/gateway for 15 years).
+TCP/IP wasn't taken as seriously as it ought to have been
+by most of us in 1127 in the 1980s.  But that wasn't because
+of the stream structure--the IP implementation was in fact
+a copy of that from 4.2 (I think) BSD, repackaged and
+shoehorned into the stream world by Robert T Morris, and
+later cleaned up quite a bit by Paul Glick.  Maybe it would
+have worked better had it been done from scratch by someone
+who cared a lot about it, as the TCP/IP implementors in the
+BSD world very much did.  Certainly it's a non-trivial design
+problem--the IP protocols and their sloppy observance of
+layering (cf the `pseudo header' in the TCP and UDP standards)
+make them more complicated to implement in a general-purpose
+framework.
+
+Or maybe it just can't be done, but I wish someone had
+tried in the original simpler setup rather than the
+cluttered SVr4 STREAMS.
+
+Norman Wilson
+Toronto ON

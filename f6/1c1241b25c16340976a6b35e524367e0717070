@@ -1,0 +1,110 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 17978 invoked from network); 10 May 2022 10:52:21 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 10 May 2022 10:52:21 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id DE78393D2D; Tue, 10 May 2022 20:52:19 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 8353D93D28;
+	Tue, 10 May 2022 20:49:14 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id A078893D28; Tue, 10 May 2022 20:49:09 +1000 (AEST)
+Received: from relay05.pair.com (relay05.pair.com [216.92.24.67])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 1372393D1B
+ for <tuhs@minnie.tuhs.org>; Tue, 10 May 2022 20:49:06 +1000 (AEST)
+Received: from orac.inputplus.co.uk (unknown [87.112.46.167])
+ by relay05.pair.com (Postfix) with ESMTP id CD5E31A2750
+ for <tuhs@minnie.tuhs.org>; Tue, 10 May 2022 06:49:04 -0400 (EDT)
+Received: from orac.inputplus.co.uk (orac.inputplus.co.uk [IPv6:::1])
+ by orac.inputplus.co.uk (Postfix) with ESMTP id DF66E221AE
+ for <tuhs@minnie.tuhs.org>; Tue, 10 May 2022 11:49:03 +0100 (BST)
+To: tuhs@minnie.tuhs.org
+From: Ralph Corderoy <ralph@inputplus.co.uk>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+In-reply-to: <20220509140846.Qaxea%steffen@sdaoden.eu>
+References: <CAP6exY++wLs+qqAaHL-7bJGfahS6AE1uitxZG1=yP4Se7sZ_rg@mail.gmail.com>
+ <20220508102208.50A2822158@orac.inputplus.co.uk>
+ <20220509140846.Qaxea%steffen@sdaoden.eu>
+Date: Tue, 10 May 2022 11:49:03 +0100
+Message-Id: <20220510104903.DF66E221AE@orac.inputplus.co.uk>
+Subject: Re: [TUHS] conventions around zero padding in ip4
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hi Steffen,
+
+> > It has been standardised; see inet_addr(3p) where ‘p’ means the
+> > POSIX version of the man page or
+> > https://pubs.opengroup.org/onlinepubs/9699919799/functions/inet_addr.html
+> > 
+> > Briefly, the string must be one of
+> > 
+> >     a.b.c.d
+> >     a.b.cd
+> >     a.bcd
+> >     abcd
+...
+> "However", RFC 2553 says
+>
+>   RFC 2553       Basic Socket Interface Extensions for IPv6     March 1999
+>
+>      The address conversion functions -- inet_ntoa() and inet_addr() --
+>      convert IPv4 addresses between binary and printable form.  These
+>      functions are quite specific to 32-bit IPv4 addresses.  We have
+>      designed two analogous functions that convert both IPv4 and IPv6
+>      addresses
+
+So that RFC added inet_pton(3) and inet_ntop(3).
+
+> And for this POSIX says
+>
+>   If the af argument of inet_pton( ) is AF_INET, the src string
+>   shall be in the standard IPv4 dotted-decimal form:
+>   ddd.ddd.ddd.ddd where "ddd" is a one to three digit decimal
+>   number between 0 and 255 (see inet_addr( )). The inet_pton()
+>   function does not accept other formats [.]
+
+True.  The non-POSIX inet_pton(3) here points out it only accepts IPv4
+in decimal 3.1.4.1 form and pushes the programmer to getaddrinfo(3)
+instead.
+
+    NOTES
+
+    Unlike inet_aton(3) and inet_addr(3), inet_pton() supports IPv6
+    addresses.  On the other hand, inet_pton() accepts only IPv4 addresses
+    in dotted-decimal notation, whereas inet_aton(3) and inet_addr(3)
+    allow the more general numbers-and-dots notation (hexadecimal and
+    octal number formats, and formats that don't require all four bytes
+    to be explicitly written).  For an interface that handles both
+    IPv6 addresses, and IPv4 addresses in numbers-and-dots notation,
+    see getaddrinfo(3).
+
+And POSIX's getaddrinfo(3p) punts to inet_addr(3p) for describing what
+IPv4 formats are accepted, so we've gone full circle.
+
+    If the specified address family is AF_INET or AF_UNSPEC, address
+    strings using Internet standard dot notation as specified in
+    inet_addr() are valid.
+
+It looks to me that the RFC introduced a limited format which then had
+to be standardised but the older interface is still being spread by
+newer functions like getaddrinfo().
+
+-- 
+Cheers, Ralph.

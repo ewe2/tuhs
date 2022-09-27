@@ -1,0 +1,99 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 5892 invoked from network); 28 Jun 2022 15:51:01 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 28 Jun 2022 15:51:01 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5B31C40CB9;
+	Wed, 29 Jun 2022 01:50:54 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 5A10C40CB8
+	for <tuhs@tuhs.org>; Wed, 29 Jun 2022 01:50:51 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 2D27618C096; Tue, 28 Jun 2022 11:50:50 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220628155050.2D27618C096@mercury.lcs.mit.edu>
+Date: Tue, 28 Jun 2022 11:50:50 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: P6SNBWG5TA3VSMH7PKVA6MVLBSJMVQOX
+X-Message-ID-Hash: P6SNBWG5TA3VSMH7PKVA6MVLBSJMVQOX
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Research Datakit notes
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/P6SNBWG5TA3VSMH7PKVA6MVLBSJMVQOX/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Rob Pike
+
+    > having the switch do some of the call validation and even maybe
+    > authentication (I'm not sure...) sounds like it takes load off the host.
+
+I don't have enough information to express a judgement in this particular
+case, but I can say a few things about how one would go about analyzing
+questions of 'where should I put function [X]; in the host, or in the
+'network' (which almost inevitably means 'in the switches')'.
+
+It seems to me that one has to examine three points:
+
+- What is the 'cost' to actually _do_ the thing (which might be in
+transmission usage, or computing power, or memory, or delay), in each
+alternative; these costs obviously generally cannot be amortized across
+multiple similar transactions.
+
+- What is the 'cost' of providing the _mechanism_ to do the thing, in each
+alternative. This comes in three parts. The first is the engineering cost of
+_designing_ the thing, in detail; this obviously is amortized across muiple
+instances. The second is _producing_ the mechanism, in the places where it is
+needed (for mechanisms in software, this cost is essentially zero, unless it
+needs a lot of memory/computes/etc); this is not amortized across many. The
+third is harder to measure: it's complexity.
+
+This is probably a book by itself, but it has costs that are hard to
+quantify, and are also very disparate: e.g. more complex designs are more
+likely to have unforseen bugs, which is very different from the 'cost' that
+more complex designs are probaly harder to evolve for new uses.
+
+So far I haven't said anything that isn't applicable across a broad range of
+information sytems. The last influence on where one puts functions is much
+more common in communication systems: the Saltzer/Clark/Reed 'End-to-end
+Arguments in System Design' questions. If one _has_ to put a function in the
+host to get 'acceptable' performace of that function, the
+operation/implementation/design cost implications are irrelevant: one has to
+grit one's teeth and bear them.
+
+This may then feed back to design questions in the other areas. E.g. the
+Version 2 ring at MIT deliberately left out hardware packet checksums -
+because it was mostly intended for use with TCP/IP traffic, which provided a
+pseudo-End-to-End checksum, so the per-unit hardware costs didn't buy enough
+to be worth the costs of a hardware CRC. (Which was the right call; I don't
+recall the lack of a hardware checksum ever causing a problem.)
+
+And then there's the 'techology is a moving target' point: something that
+might be unacceptably expensive (in computing cost) in year X might be fine
+in year X+10, when we're lighting our cigars with unneeded computing power.
+So when one is designing a communication system with a likely lifetime in
+many decades, one tends to bias one's judgement toward things like End-to-End
+analysis - because those factors will be forever.
+
+
+Sorry if I haven't offered any answer to your initial query: "having the
+switch do some of the call validation ... sounds like it takes load off the
+host", but as I have tried to explain, these 'where should one do [X]'
+questions are very complicated, and one would need a lot more detail before
+one could give a good answer.
+
+But, in general, "tak[ing] load off the host" doesn't seem to rate
+highly as a goal these days... :-) :-(
+
+	Noel

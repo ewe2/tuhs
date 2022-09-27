@@ -1,0 +1,113 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 12579 invoked from network); 15 Jul 2022 10:25:53 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 15 Jul 2022 10:25:53 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A33A0406E8;
+	Fri, 15 Jul 2022 20:25:46 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 44C54406E6
+	for <tuhs@tuhs.org>; Fri, 15 Jul 2022 20:25:38 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 22E9018C080; Fri, 15 Jul 2022 06:25:37 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20220715102537.22E9018C080@mercury.lcs.mit.edu>
+Date: Fri, 15 Jul 2022 06:25:37 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: NGLK3PCE2ISFGTI27EVFP6GBOSFQE5I7
+X-Message-ID-Hash: NGLK3PCE2ISFGTI27EVFP6GBOSFQE5I7
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Unix V8 Chaosnet, any takers?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/NGLK3PCE2ISFGTI27EVFP6GBOSFQE5I7/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Lars Brinkhoff
+
+    > There is a small hobbyist Chaos network going
+
+What encapsulation are they using to transmit CHAOS packets (over the
+Internet, I assume)? I know there was an IP protocol number assigned for
+CHAOS (16.), but I don't recall if there was ever a spec? (Which is kind of
+amusing, since in 'Assigned Numbers', the person responsible for 16. is ....
+me! :-)
+
+There was a spec for encapsulating IP in CHAOS, and that actually _was_
+implemented at MIT BITD; it was used for a while to get IP traffic to a Unix
+machine (V7, IIRC) over on main campus, at a stage when only CHAOS hardware
+(very confusing that the same name was applied to hardware, and a protocol
+suite) ran across to main campus from Tech Square.
+
+
+    > From: Grant Taylor
+
+    > I wonder if there is an opportunity for something that pretends to be
+    > the remote side locally, sends the data via some other
+    > non-latency-sensitive protocol to a counter part where the counter part
+    > pretends to be the near side.
+
+Let's think through the details. The near-end 'invisibility box' (let's call
+it) is going to have to send acks to the original source machine, otherwise
+that will time out, abort the connection, etc. The originating machine is its
+own thing, and this behaviour can't be controlled/stopped.
+
+(This, BTW, shows a key difference between 'local' and 'across network'
+modes, a recent topic here; in a situation where two distinct machines are
+cooperating across a network, the other machine is its own entity, and can't
+be expected/guaranteed to do anything in particular at all.)
+
+In addition, the near-end invisibility box is going to have to keep a copy of
+each packet, until the destination machine sends an ack to the invisibility
+box - because if the packet is lost, the invisibility box is going to have to
+retransmit it. (The original source is not going to - it's already gotten an
+ack, so as far as it's concerned, that packet is done and dusted.) And the
+near-end invisibility box is also going to have to have to have a time-out
+timer, so that when the ack isn't seen, it will know to retransmit the packet.
+
+There's no point to _also_ sending the acks on to the originating machine;
+they won't do anything useful, and might just confuse it.
+
+So, let's see now: the near-end invisibility box buffers the packet, looks
+for an ack, times out when it doesn't see it, re-transmits the packet - that
+sounds familiar? Oh, right, it's a reliable connection.
+
+And presumably there's an invisibility box at the far end too, so the same
+can happen for any data packets the destination machine sends.
+
+The only question is whether, when doing the detailed design, there's any
+point to having the destination machine's acks sent to the near-end
+invisibility box - or just use them at the far-end invisibility box. (I.e.
+create three reliable connections: i) a CHAOS connection originating
+machine<->near-end invisibility box; ii) {whatever} near-end invisibility
+ox<->far-end invisibility box; iii) CHAOS far-end invisibility box<->original
+destination machine - and glue them together.)
+
+That is in some sense simpler than creating an extra-ordinary mechanism to
+have a 'helper' box in the middle of the connection (to terminate the CHAOS
+connection from the original machine, and have another CHAOS connection, but
+with an enhanced time-out mechanism which can cope with larger RTT's, from
+there to the original destination); and the same in the other direction.
+
+
+The amusing thing is that the CHAOS protocol stack actually already had
+something very similar to this, BITD. If one were sitting at a machine that
+only had CHAOS, and one wanted to (say) TELNET to an ARPANET host, there was
+a CHAOS service which ARPANET hosts on the CHAOSNET provided: open a CHAOS
+connection to that serrver, and it would open an NCP connection to one's
+intended ultimate destination, and glue the byte streams together. (The
+ultimate destination was passed as data over the CHAOS connection, when
+opening it.)
+
+	Noel

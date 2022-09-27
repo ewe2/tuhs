@@ -1,0 +1,204 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,T_SCC_BODY_TEXT_LINE autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 18322 invoked from network); 2 Jul 2022 10:11:20 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 2 Jul 2022 10:11:20 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id D967E40D1A;
+	Sat,  2 Jul 2022 20:11:12 +1000 (AEST)
+Received: from ewsoutbound.kpnmail.nl (unknown [195.121.94.168])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 2F5CD409B6
+	for <tuhs@tuhs.org>; Sat,  2 Jul 2022 20:11:01 +1000 (AEST)
+X-KPN-MessageId: 36cc9aa5-f9ef-11ec-a80d-005056aba152
+Received: from smtp.kpnmail.nl (unknown [10.31.155.37])
+	by ewsoutbound.so.kpn.org (Halon) with ESMTPS
+	id 36cc9aa5-f9ef-11ec-a80d-005056aba152;
+	Sat, 02 Jul 2022 12:10:35 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=planet.nl; s=planet01;
+	h=to:date:message-id:subject:mime-version:content-type:from;
+	bh=m3ZSb4gjcwO90T6xiw9IvHDMZ2JAtFMpPf1toyD8888=;
+	b=QA12OH2IfBkrSZIvBlY9Ho7W0fDhL8bd8Ib9ApiBfLrL9jPXiNsDtyo4235EVWaDGS6DiDhTTOLxk
+	 OBLcdrLqMlyT9huuW4numviRWgvun7LcOWygdZSq9fMu1hKmpVUwInsPG3/tlDL+MURjbXAbn95jPk
+	 GRLA1O1dfJEXae5w=
+X-KPN-MID: 33|1LbvZMtiSiOV+CtH6vx/D1w28cM+KYUF5h/h32Kfn0SYj+DFMTFH4gRM4QR9Ih3
+ EtcDBlgt+muLeCOpmgjP/+3BCT9BZmiNCJiAuuwTw11E=
+X-KPN-VerifiedSender: Yes
+X-CMASSUN: 33|rCs+S+pN2NTZ7bYdqITrcZGnAeseyVqhwHKF0xKm43FUneftide4JYRJ2q2Sone
+ hZr7E/yqIkZfpvZSAQd+QrQ==
+X-Originating-IP: 77.172.38.96
+Received: from smtpclient.apple (77-172-38-96.fixed.kpn.net [77.172.38.96])
+	by smtp.kpnmail.nl (Halon) with ESMTPSA
+	id 3df93b0a-f9ef-11ec-929b-005056ab1411;
+	Sat, 02 Jul 2022 12:10:49 +0200 (CEST)
+From: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 14.0 \(3654.120.0.1.13\))
+Message-Id: <1962DE84-726F-498E-853E-6E4A768223E1@planet.nl>
+Date: Sat, 2 Jul 2022 12:10:46 +0200
+To: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+X-Mailer: Apple Mail (2.3654.120.0.1.13)
+Message-ID-Hash: E5QBHAMPIWMTAVNFJ4WHZTOEZEFZNHFI
+X-Message-ID-Hash: E5QBHAMPIWMTAVNFJ4WHZTOEZEFZNHFI
+X-MailFrom: pnr@planet.nl
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Compare, contrast and a "Unixy" networking API
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/E5QBHAMPIWMTAVNFJ4WHZTOEZEFZNHFI/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+
+Following an insightful post by Norman Wilson =
+(https://minnie.tuhs.org/pipermail/tuhs/2022-June/025929.html) and =
+re-reading a few old papers =
+(https://minnie.tuhs.org/pipermail/tuhs/2022-June/026028.html), I was =
+thinking about similarities and differences between the various Unix =
+networking approaches in the 1975-1985 era and came up with the =
+following observations:
+
+- First something obvious: early Unix was organised around two classes =
+of device: character based and block based. Arguably, it is maybe better =
+to think of these classes conceptually as =E2=80=9Ctransient=E2=80=9D =
+and =E2=80=9Cmemoizing=E2=80=9D. A difference between the two would be =
+wether or not it makes conceptual sense to do a seek operation on them =
+and pipes and networks are in the transient class.
+
+- On the implementation side, this relates two early kernel data =
+structures: clists and disk buffers. Clists were designed for slow, low =
+volume traffic and most early Unix network code creates a third kind: =
+the mbufs of Arpanet Unix, BBN-TCP Unix and BSD, the packets of =
+Chesson's V7 packet driver, Ritchie's streams etc. These are all the =
+same when seen from afar: higher capacity replacements for clists.
+
+- Typically devices are accessed via a filter. At an abstract level, =
+there is not much difference between selecting a line discipline, =
+pushing a stream filter or selecting a socket type. At the extreme end =
+one could argue that pushing a TCP stack on a network device is =
+conceptually the same as mounting a file system on a disk device. =
+Arguably, both these operations could be performed through a generalised =
+mount() call.
+
+- Another implementation point is the organisation of the code. Is the =
+network code in the kernel, or in user land? Conceptually connection =
+management is different from stream management when connected (e.g. CMC =
+and URP with Datakit, or RTP and BSP in Xerox Pups). In the BSD lineage =
+all is in the kernel, and in the Research lineage connection management =
+is done in a user space daemon.
+
+Arpanet Unix (originally based on V5) had a curious solution: the =
+network code was organised in a single process, but with code both in =
+kernel mode and in user mode. The user code would make a special system =
+call, and the kernel code would interact with the IMP driver, manage =
+buffers and deliver packets. Only when a state-changing event happened, =
+it would return to user mode and the user code would handle connection =
+management (followed by a new call into kernel mode). Interestingly, =
+this approach mostly hid the IMP connection, and this carried through to =
+the BSD=E2=80=99s where the network devices were also buried in the =
+stack. Arpanet Unix made this choice to conserve kernel address space =
+and to minimize the amount of original kernel code that had to be =
+touched.
+
+- Early Unix has three ways to obtain a file descriptor: open, creat and =
+pipe. Later also fifo. In this context adding more (like socket) does =
+not seem like a mortal sin. Arguably, all could be rolled into one, with =
+open() handling all cases. Some of this was done in 4.2BSD. It is =
+possible to combine socket() & friends into open() with additional =
+flags, much as was done in Arpanet Unix and BBN-TCP Unix.
+
+- Network connections have different meta data than disk files, and in =
+sockets this handled via specialised calls. This seems a missed =
+opportunity for unified mechanisms. The API used in BBN-TCP handles most =
+of this via ioctl. However, one could (cheekily!) argue that V7 unix has =
+a somewhat byzantine meta data API, with the functionality split over =
+seek, ioctl, fcntl, stat and fstat. These could all be handled in a =
+generalised ioctl. Conceptually, this could also be replaced by using =
+read/write on a meta data file descriptor, which could for example be =
+the regular descriptor with the high bit set. But this, of course, did =
+never exist.
+
+- A pain point in Arpanet Unix was that a listening connection (i.e. a =
+server endpoint) would block until a client arrived and then turn into =
+the connection with the client. This would fork out into a service =
+process and the main server process would open a new listening socket =
+for the next client. In sockets this was improved into a rendez-vous =
+type server connection that would spawn individual client connections =
+via =E2=80=98accept=E2=80=99. The V8/V9 IPC library took a similar =
+approach, but also developed the mechanism into a generalized way to (i) =
+create rendez-vous points and (ii) ship descriptors across local =
+connections.
+
+- The strict blocking nature of IO in early Unix was another pain point =
+for writing early network code. The first solution to that were BBN=E2=80=99=
+s await and capac primitives, which worked around the blocking nature. =
+With SysIII, non-blocking file access appeared and 4.1a BSD saw the =
+arrival of 'select=E2=80=99. Together these offer a much more convenient =
+way to deal with multiple tty or network streams in a single threaded =
+process (although it did modify some of the early Unix philosophy). =
+Non-blocking IO and select() also appeared in the Research lineage with =
+8th edition.
+
+- The file system switch (FSS) arrived around 1983, during the gestation =
+of 8th edition. This was just 1 or 2 years after the network interfaces =
+for BSD and Datakit got their basic shape. Had the FSS been part of V7 =
+(as it well could have been), probably the networking designs would have =
+been a bit different, using virtual directories for networking =
+connections. The =E2=80=98namei hack=E2=80=99 in MIT=E2=80=99s CHAOS =
+network code already points in this direction. A similar approach could =
+have been extended to named pipes (arriving in SysIII), where the fifo =
+endpoint could have been set up through creating a file in a virtual =
+directory, and making connections through a regular open of such a =
+virtual file (and 9th edition appears to implement this.)
+
+oOo
+
+To me it seems that the V1-V7 abstractions, the system call API, etc. =
+were created with the experience of CTSS, Multics and others fresh in =
+mind. The issues were understood and it combined the best of the ideas =
+that came before. When it came to networking, Unix did not have this =
+advantage and was necessarily trying to ride a bike whilst inventing it. =
+Maybe in a different time line it would have been possible to pick the =
+best ideas in this area as well and combine these into a coherent =
+framework.
+
+I concur with the observation that this list should be about discussion =
+of what once was and only tangentially about what might have been, so it =
+is only after considerable hesitation that I write the below.
+
+Looking at the compare and contrast above (and having been tainted by =
+what became dominant in later decades), I would say that the most =
+=E2=80=9CUnixy=E2=80=9D way to add networking to V7/SysIII era Unix =
+would have been something like:
+
+- Network access via open/read/write/close, in the style of BBN-TCP
+
+- Network namespace exposed via a virtual file system, a bit like V9
+
+- Meta data via a generalised ioctl, or via read/write on a meta data =
+descriptor
+
+- Connection rendez-vous via a generalised descriptor shipping =
+mechanism, in the style of V8/V9
+
+- Availability of non-blocking access, together with a waiting primitive =
+(select/poll/etc.), in the style of BSD
+
+- Primary network device visible as any other device, network protocol =
+mounted similar to a file system.
+
+- Both connection management and stream management located in kernel =
+code, in the style of BSD
+
+
+

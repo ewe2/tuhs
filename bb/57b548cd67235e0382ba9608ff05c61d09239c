@@ -1,0 +1,99 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 6675 invoked from network); 2 May 2022 23:15:23 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 2 May 2022 23:15:23 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id F2D9D9D49C; Tue,  3 May 2022 09:15:17 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 3E5469CE23;
+	Tue,  3 May 2022 09:14:49 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 1000)
+ id 220549CE23; Tue,  3 May 2022 08:02:53 +1000 (AEST)
+Date: Tue, 3 May 2022 08:02:53 +1000
+To: tuhs@tuhs.org
+Message-ID: <20220502220253.GA21349@minnie.tuhs.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.9.4 (2018-02-28)
+Subject: [TUHS] 2.9BSD with MSCP Support
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+From: Warren Toomey via TUHS <tuhs@minnie.tuhs.org>
+Reply-To: Warren Toomey <wkt@tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+[ This also in from Peter Klapper. The files are at:
+  https://www.tuhs.org/Archive/Distributions/UCB/2.9BSD_MSCP/ ]
+
+This is a 2.9BSD kernel with a backported MSCP driver from 2.10BSD
+
+I tried to make a clean integration of the driver into the 2.9BSD source tree in order to be able use the standard procedures to configure and build the kernel.
+
+To try it, rename the original directories /usr/include/sys and /usr/src/sys and unpack the two tar archives into your /usr directory.
+
+Then change into /usr/src/sys/conf and just do a ./config for the kernel you want.
+
+I made some configurations for:
+MSCP23 (MSCP enabled kernel for the PDP11/23)
+MSCP73 (MSCP enabled kernel for the PDP11/73)
+FLOP23 (MSCP enabled 11/23 kernel for a boot floppy)
+FLOP73 (MSCP enabled 11/73 kernel for a boot floppy)
+MSCPSH (MSCP enabled kernel for an extended SIMH environment)
+
+You may need to adapt the kernel configurations for the correct timezone and maybe the line frequency.
+
+This is probably the most recent BSD system which runs on the PDP11/23.
+
+Read the full story about this here: https://forum.vcfed.org/index.php?threads/scientific-micro-systems-sms-1000-model-40.1237048/
+
+There is NO root password in this distribution. For installation on real hardware, at least a Maxtor XT-1085 (RD53) or larger is recommended.
+My SMS1000 system currently has a Maxtor XT-1140 installed. Original was an XT-1085 in the system.
+
+The disk layout for these two disks during installation is as follows:
+
+Maxtor XT-1085 / DEC RD53
+=========================
+1024/8/18
+interleave 1,4
+--- layout ---
+root = ra(0,0), size 3200
+swap = ra(0,6400), size 1920
+usr = ra(0,10240), size 64180
+
+Maxtor XT-1140
+==============
+918/15/18
+interleave 1,4
+--- layout ----
+root = ra(0,0), size 3200
+swap = ra(0,6400), size 1920
+usr = ra(0,10240), size 114880
+
+I've split the data into 4 parts in order to not get too much when downloading:
+
+1.) 29bsd-simh.tgz: A SIMH image including configuration file. "pdp11 sms1123.ini"
+
+2.) 29bsd-smstape.tgz: A Linux dump of the QIC24 installation tape which was generated with my SMS1000 system. You can write this under Linux to a 60MB QIC tape with: "dd if=29bsd-sms-tape.dd of=/dev/st0" The SMS1000 generated format is not compatible with Linux, but the Linux dd'ed tape can be read by the SMS1000 system.
+
+3.) 29bsd-tapefiles.tgz: The files to create a SIMH tape image, or real tape for another system.
+
+4.) 29bsd-vtserver.tgz: The version of the vtserver and the corresponding configuration file with which I performed the successful initial installation. I worked with 19200bps, which is the maximum my SMS1000 supports on the console, under 2.9BSD only 9600bps works anyway.
+
+Have fun with it, if you find bugs, they may of course be mine. ;)
+I wish you and the community also a lot of fun with this version of 2.9BSD.
+
+// Peter

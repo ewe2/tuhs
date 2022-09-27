@@ -1,0 +1,85 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 8206 invoked from network); 3 Aug 2022 15:17:24 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 3 Aug 2022 15:17:24 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 17C6840125;
+	Thu,  4 Aug 2022 01:17:18 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id F25084011C
+	for <tuhs@tuhs.org>; Thu,  4 Aug 2022 01:17:10 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id E4CA718C0CF; Wed,  3 Aug 2022 11:17:09 -0400 (EDT)
+To: gctersteeg@gmail.com, tuhs@tuhs.org
+Message-Id: <20220803151709.E4CA718C0CF@mercury.lcs.mit.edu>
+Date: Wed,  3 Aug 2022 11:17:09 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: YKSBETHYMK23Z7RWD6EGDD6LKZKBYIBM
+X-Message-ID-Hash: YKSBETHYMK23Z7RWD6EGDD6LKZKBYIBM
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: LSX issues and musing
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/YKSBETHYMK23Z7RWD6EGDD6LKZKBYIBM/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > Also, another problem with trying to 'push' LSX into a previously
+    > un-handled operating regions (e.g. large disks, but there are likely
+    > others) is that there are probably things that are un-tested in that
+    > previously unused operating mode, and there may be un-found bugs that
+    > you trip across.
+
+'Speak of the devil, and hear the sound of his wings.'
+
+    >> From: Gavin Tersteeg
+
+    >> Interestingly enough, existing large V6 RK05 images can be mounted,
+    >> read from, and written to. The only limitations on these pre existing
+    >> images is that if enough files are deleted, the system will randomly
+    >> crash.
+
+    > I had a look at the source (in sys4.c, nami.c, iget.c, rdwri.c, and
+    > alloc.c), but I couldn't quickly find the cause; it isn't obvious.
+
+I don't know if the following is _the_ cause of the crashes, but another
+problem (another aspect of the '100 free inodes cache' thing) swam up out of
+my brain. If you look at V6's alloc$ifree(), it says:
+
+	if(fp->s_ninode >= 100)
+		return;
+	fp->s_inode[fp->s_ninode++] = ino;
+
+LSX's is missing the first two lines. So, if you try and free more than 100
+inodes on LSX, the next line will march out of the s_inode array and smash
+other fields in the in-core copy of the super-block.
+
+Like I said, this is not certain to be the cause of those crashes; and it's
+not really a 'bug' (as in the opening observation) - but the general sense of
+that observation is right on target. LSX is really designed to operate only
+on disks with less than 100 inodes, and tring to run it elsewhere is going to
+run into issues.
+
+How many similar limitations exist in other areas I don't know.
+
+
+    > From: Heinz Lycklama <heinz@osta.com>
+
+    > Remember that the LSX and Mini-UNIX systems were developed for two
+    > different purposes.
+
+Oh, that's understood - but this just re-states my observation, that LSX was
+designed to operate in a certain environment, and trying to run it elsewhere
+is just asking for problems.
+
+	Noel

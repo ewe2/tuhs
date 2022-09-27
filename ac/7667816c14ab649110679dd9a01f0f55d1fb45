@@ -1,0 +1,135 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 9613 invoked from network); 14 Sep 2022 21:33:41 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 14 Sep 2022 21:33:41 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 26D4E40E40;
+	Thu, 15 Sep 2022 07:33:34 +1000 (AEST)
+Received: from lug-owl.de (lug-owl.de [188.68.32.151])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 316684098C
+	for <tuhs@tuhs.org>; Thu, 15 Sep 2022 07:33:28 +1000 (AEST)
+Received: by lug-owl.de (Postfix, from userid 1001)
+	id 05FC042037; Wed, 14 Sep 2022 23:33:26 +0200 (CEST)
+Date: Wed, 14 Sep 2022 23:33:25 +0200
+From: Jan-Benedict Glaw <jbglaw@lug-owl.de>
+To: Lars Brinkhoff <lars@nocrew.org>
+Message-ID: <20220914213325.wqdkdocq6lajjubw@lug-owl.de>
+References: <7w7d30jnp1.fsf@junk.nocrew.org>
+ <CANCZdfpjkTb+o5X-c69GmMfiUjEK9QWCU_mL+H6WJHtmZx-8YA@mail.gmail.com>
+ <7wv8px5c46.fsf@junk.nocrew.org>
+ <7wsfkt4zjr.fsf@junk.nocrew.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="zo7a24jma43mby5j"
+Content-Disposition: inline
+In-Reply-To: <7wsfkt4zjr.fsf@junk.nocrew.org>
+X-Operating-System: Linux chamaeleon 5.14.0-0.bpo.2-amd64 
+X-gpg-fingerprint: 250D 3BCF 7127 0D8C A444  A961 1DBD 5E75 8399 E1BB
+X-gpg-key: wwwkeys.de.pgp.net
+X-Echelon-Enable: howto poison arsenous mail psychological biological nuclear
+ warfare test the bombastical terror of flooding the spy listeners explosion
+ sex drugs and rock'n'roll
+X-TKUeV: howto poison arsenous mail psychological biological nuclear warfare
+ test the bombastical terror of flooding the spy listeners explosion sex
+ drugs and rock'n'roll
+X-message-flag: Please send plain text messages only. Do not send HTML
+ emails. Thank you.
+User-Agent: NeoMutt/20170113 (1.7.2)
+Message-ID-Hash: VR3GPALMCSVWJEIQM6O5TIA7B5K5D62F
+X-Message-ID-Hash: VR3GPALMCSVWJEIQM6O5TIA7B5K5D62F
+X-MailFrom: jbglaw@lug-owl.de
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: The Eunuchs Hysterical Society <tuhs@tuhs.org>
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Extracting files from various old dump/restore tapes
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/VR3GPALMCSVWJEIQM6O5TIA7B5K5D62F/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+
+--zo7a24jma43mby5j
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, 2022-09-14 17:48:56 +0000, Lars Brinkhoff <lars@nocrew.org> wrote:
+> Lars Brinkhoff wrote:
+> > In the end I decided to roll my own rather than port an old version of
+> > restore forward and possibly merge in a few other versions.
+>=20
+> Now available from here:
+>=20
+> https://github.com/larsbrinkhoff/tools-for-unusual-tape-formats
+
+Here's some stuff to build it, at least on my side.
+
+  * -Ilibword does not exist
+  * Seems `classify-tape.c` got renamed to `classify.c`
+  * read_32bits_l() is unused and produces a warning
+
+Thanks! I'll include that into my autobuilder.
+
+MfG, JBG
+
+
+
+diff --git a/Makefile b/Makefile
+index fca9d3c..ae61913 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,5 @@
+=20
+-CFLAGS =3D -g -W -Wall -Ilibword
++CFLAGS =3D -g -W -Wall
+=20
+ TOOLS =3D	cpio classify restore
+=20
+@@ -8,7 +8,7 @@ all: $(TOOLS)
+ clean:
+ 	rm -f $(TOOLS) *.o
+=20
+-classify: classify-tape.o tape-image.o
++classify: classify.o tape-image.o
+ 	$(CC) $(CFLAGS) $^ -o $@
+=20
+ cpio: cpio.o mkdirs.o
+diff --git a/classify.c b/classify.c
+index 8f81213..2843164 100644
+--- a/classify.c
++++ b/classify.c
+@@ -43,12 +43,6 @@ read_16bits_l (uint8_t *start)
+   return start[0] | (start[1] << 8);
+ }
+=20
+-static uint32_t
+-read_32bits_l (uint8_t *start)
+-{
+-  return read_16bits_l (start) | (read_16bits_l (start + 2) << 16);
+-}
+-
+ static word_t
+ read_36bits (uint8_t *x)
+ {
+
+--=20
+
+--zo7a24jma43mby5j
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iF0EABECAB0WIQQlDTvPcScNjKREqWEdvV51g5nhuwUCYyJIogAKCRAdvV51g5nh
+u4oYAJ0ZeC5K9NRFwBLG4OUj6h7a/8VZxgCfVab2Jioo9HKEnGHjD22Vdp7Rbmc=
+=xgvc
+-----END PGP SIGNATURE-----
+
+--zo7a24jma43mby5j--

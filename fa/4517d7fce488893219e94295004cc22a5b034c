@@ -1,0 +1,85 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 23535 invoked from network); 28 May 2022 11:39:33 -0000
+Received: from minnie.tuhs.org (2600:3c01:e000:146::1)
+  by inbox.vuxu.org with ESMTPUTF8; 28 May 2022 11:39:33 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id B1BAC421C5;
+	Sat, 28 May 2022 21:39:27 +1000 (AEST)
+Received: from smtp.hope-2000.org (smtp.hope-2000.org [IPv6:2a01:4f8:221:2942:a08:20ff:fe53:dfe])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 4FFB840CCA
+	for <tuhs@tuhs.org>; Sat, 28 May 2022 21:39:11 +1000 (AEST)
+Received: from executor.headcrashers.org ([IPv6:2a01:598:b00f:f48b:224:d7ff:fe15:817c])
+	(authenticated bits=0)
+	by smtp.hope-2000.org (8.15.2/8.15.2) with ESMTPSA id 24SBd4Db018490
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+	Sat, 28 May 2022 13:39:04 +0200 (CEST)
+Received: from executor.headcrashers.org (executor.local [127.0.0.1])
+	by executor.headcrashers.org (8.16.1+Sun/8.16.1) with ESMTP id 24SBd46I003817;
+	Sat, 28 May 2022 13:39:04 +0200 (CEST)
+Received: (from woodstoc@localhost)
+	by executor.headcrashers.org (8.16.1+Sun/8.16.1/Submit) id 24SBd3QN003816;
+	Sat, 28 May 2022 13:39:03 +0200 (CEST)
+Date: Sat, 28 May 2022 13:39:03 +0200
+From: Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+To: tuhs@tuhs.org
+Message-ID: <YpIJ171xybiS0uy2@grumpf.hope-2000.org>
+Mail-Followup-To: tuhs@tuhs.org, Matthias Bruestle <m@mbsks.franken.de>
+References: <Yo9nacaVxsHjs2v3@mbsks.franken.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yo9nacaVxsHjs2v3@mbsks.franken.de>
+Message-ID-Hash: 7JCRPV744SEISMQZ5FBJKACMYIVFWA2M
+X-Message-ID-Hash: 7JCRPV744SEISMQZ5FBJKACMYIVFWA2M
+X-MailFrom: rosenfeld@grumpf.hope-2000.org
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Why is it always "fast boot" in 2.11BSD?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/7JCRPV744SEISMQZ5FBJKACMYIVFWA2M/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+On Thu, May 26, 2022 at 01:41:29PM +0200, Matthias Bruestle wrote:
+> I have noticed, that 2.11BSD is in all cases where I looked set
+> to "fast boot", which AFAIK means no fsck of at least /. I found
+> nobody talking about this or providing information about how to
+> change it to "slow boot" with a proper check, which is now normal.
+> 
+> Is there a reason why it is not possible to deactivate fast boot?
+> Or is it just that nobody bothered to do it?
+
+Interesting. When I played with 2.11BSD a few years ago I found that it
+only did a "fast" boot if rebooted with "shutdown -rf". A cold boot
+would always drop into single user and allow running fsck manually.
+
+IIRC /boot or even one of the earlier bootstrap stages would check a
+certain memory location for certain values, which the kernel(?) would
+place there in the reboot syscall. As I wanted to always force a fast
+boot, I had this in my simh.ini to force a fast boot:
+
+d 157772 177777
+d 157774 002400
+d 157776 000000
+
+If you're using a simulator I wouldn't be suprised if it does that
+automatically nowadays, of perhaps 2.11BSD was patched a while back to
+reverse that behaviour.
+
+I don't remember what these values do, though. And you want to do the
+opposite anyway. But perhaps this helps you find out more. 
+
+
+Hans
+
+
+-- 
+%SYSTEM-F-ANARCHISM, The operating system has been overthrown

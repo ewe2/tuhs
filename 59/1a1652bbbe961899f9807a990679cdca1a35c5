@@ -1,0 +1,85 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 3062 invoked from network); 28 May 2022 13:20:20 -0000
+Received: from minnie.tuhs.org (2600:3c01:e000:146::1)
+  by inbox.vuxu.org with ESMTPUTF8; 28 May 2022 13:20:20 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 9F512421D0;
+	Sat, 28 May 2022 23:20:14 +1000 (AEST)
+Received: from elvis.franken.de (elvis.franken.de [193.175.24.41])
+	by minnie.tuhs.org (Postfix) with ESMTP id 483B4421C9
+	for <tuhs@tuhs.org>; Sat, 28 May 2022 23:20:09 +1000 (AEST)
+Received: from uucp by elvis.franken.de with local-rmail (Exim 3.36 #1)
+	id 1nuwMR-0001ss-00
+	for tuhs@tuhs.org; Sat, 28 May 2022 15:20:07 +0200
+Received: by mbsks.franken.de (Postfix, from userid 1000)
+	id 1AB9BA003AD; Sat, 28 May 2022 15:14:55 +0200 (CEST)
+Date: Sat, 28 May 2022 15:14:55 +0200
+From: Matthias Bruestle <m@mbsks.franken.de>
+To: tuhs@tuhs.org
+Message-ID: <YpIgT+YLJ/+/ulGq@mbsks.franken.de>
+References: <Yo9nacaVxsHjs2v3@mbsks.franken.de>
+ <YpIJ171xybiS0uy2@grumpf.hope-2000.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YpIJ171xybiS0uy2@grumpf.hope-2000.org>
+Message-ID-Hash: LENBMUV3X2LBRGPZQB5JSBTZZXFBUNOF
+X-Message-ID-Hash: LENBMUV3X2LBRGPZQB5JSBTZZXFBUNOF
+X-MailFrom: m@mbsks.franken.de
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Why is it always "fast boot" in 2.11BSD?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/LENBMUV3X2LBRGPZQB5JSBTZZXFBUNOF/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+On Sat, May 28, 2022 at 01:39:03PM +0200, Hans Rosenfeld wrote:
+> Interesting. When I played with 2.11BSD a few years ago I found that it
+> only did a "fast" boot if rebooted with "shutdown -rf". A cold boot
+> would always drop into single user and allow running fsck manually.
+
+I use a quite basic simh.ini without fancy memory manipulations.
+At the moment the behaviour is:
+1) First boot => enter unix at : prompt => no fsck => root shell
+2) ^D => "fast boot" => no fsck => multiuser
+3) login + reboot => passed : prompt =>  no "fast boot" => fsck => multiuser
+That is with the RA92 image provided with simh for the ESP32,
+which contains a command to setup WiFi.
+
+I found at minnie.tuhs.org/Distributions/Boot_Images/2.11_on_Simh
+a version where Andru Luvisi has configured a 1MB RAM disk mounted
+to /tmp for the temp file required by fsck.  Needed to compile a new
+kernel, but with the RAM disk fsck runs nicely. I put a # in front of
+rwhod in /etc/rc to prevent it beeing started, but then it never went
+into multisuser. No idea why.
+
+> IIRC /boot or even one of the earlier bootstrap stages would check a
+> certain memory location for certain values, which the kernel(?) would
+> place there in the reboot syscall. As I wanted to always force a fast
+> boot, I had this in my simh.ini to force a fast boot:
+> 
+> d 157772 177777
+> d 157774 002400
+> d 157776 000000
+
+Seems to be related to bootdev here:
+73Boot from ra(0,0,0) at 0172150
+: unix
+Boot: bootdev=02400 bootcsr=0172150
+
+But it looks always like this, with and without fastboot.
+
+Thanks
+Matthias
+
+-- 
+When You Find Out Your Normal Daily Lifestyle Is Called Quarantine

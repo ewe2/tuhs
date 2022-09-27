@@ -1,0 +1,101 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 29295 invoked from network); 12 Mar 2022 08:03:11 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 12 Mar 2022 08:03:11 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id 21A749C9DB; Sat, 12 Mar 2022 18:03:07 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 5461E9C772;
+	Sat, 12 Mar 2022 18:01:03 +1000 (AEST)
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 8C7F59C772; Sat, 12 Mar 2022 18:00:59 +1000 (AEST)
+Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
+ by minnie.tuhs.org (Postfix) with ESMTPS id 3282A9C73E
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Mar 2022 18:00:58 +1000 (AEST)
+Received: from [10.10.3.121] (unknown [10.10.3.121])
+ by mail.ispras.ru (Postfix) with ESMTPS id AF8C740D4004
+ for <tuhs@minnie.tuhs.org>; Sat, 12 Mar 2022 08:00:54 +0000 (UTC)
+Date: Sat, 12 Mar 2022 11:00:54 +0300 (MSK)
+From: Alexander Monakov <amonakov@ispras.ru>
+To: tuhs@minnie.tuhs.org
+Message-ID: <d165b2bb-425d-d457-97c8-af5e84ab44c3@ispras.ru>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Subject: [TUHS] pcc struct return quirk
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+Hello,
+
+I'm trying to understand a quirk in 32-bit x86 code generation conventions:
+on Linux, when returning a structure from a function by value:
+
+struct S {
+	int i, j;
+};
+
+struct S f(int x)
+{
+	return (struct S){x, sizeof(void*)};
+}
+
+the caller reserves space for the returned structure and passes a pointer
+to that space as an 'invisible' extra argument, which is prepended to
+the argument list; the callee returns this pointer (although the caller
+knows it anyway); it's as if the function is transformed to
+
+struct S *f(struct S *ret, int x)
+{
+	ret->i = x;
+	ret->j = sizeof(void*);
+	return ret;
+}
+
+with one essential difference: the function 'f' itself is responsible for
+popping the extra argument off the stack (the 'x' argument is popped by
+its caller).
+
+This necessitates using the return-with-immediate ('ret 4') instruction
+instead of the normal 'ret'; this is the only instance where this variant of
+the 'ret' instruction is used in code generation for C programs on Linux
+normally.
+
+I wonder how this exception came to be.
+
+Early versions of GCC (e.g. gcc-1.27) did not implement this convention, i.e.
+the caller was responsible for popping the invisible pointer similar to the
+normal arguments. The "callee-pops" variant was implemented later for
+"compatibility with other compilers", and the option that controls this is
+called -fpcc-struct-return, which also disables returning small structures in
+registers (in the example above GCC would return the value in EDX:EAX register
+pair).
+
+Operating systems differ on following this convention. For example, FreeBSD
+and OpenBSD do not, and neither does Windows.
+
+Looking at 386BSD tree in unix-history-repo, I see that it used GCC, not PCC.
+Where can I look at the history of x86 code generation development in PCC?
+Do I understand correctly that i386 code generation in PCC evolved in parallel
+with GCC, and at some point GCC was convinced to adopt the (less efficient)
+PCC calling convention by default?
+
+Did PCC prefer to do this stack adjustment for the invisible pointer on the
+callee side for some other platform, and the behavior was merely carried over
+to the i386 port?
+
+Thank you.
+Alexander

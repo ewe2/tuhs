@@ -1,0 +1,110 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI,T_SCC_BODY_TEXT_LINE autolearn=ham
+	autolearn_force=no version=3.4.4
+Received: (qmail 17022 invoked from network); 29 Mar 2022 11:22:16 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 29 Mar 2022 11:22:16 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id E2D5E9D6B8; Tue, 29 Mar 2022 21:22:09 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id A71BB9D662;
+	Tue, 29 Mar 2022 21:21:41 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=fail reason="signature verification failed" (1024-bit key; unprotected) header.d=planet.nl header.i=@planet.nl header.b="saHYQd+D";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 118089D662; Tue, 29 Mar 2022 21:21:34 +1000 (AEST)
+Received: from ewsoutbound.kpnmail.nl (unknown [195.121.94.170])
+ by minnie.tuhs.org (Postfix) with ESMTPS id B16289D661
+ for <tuhs@minnie.tuhs.org>; Tue, 29 Mar 2022 21:21:26 +1000 (AEST)
+X-KPN-MessageId: 4d377693-af52-11ec-99f9-005056ab378f
+Received: from smtp.kpnmail.nl (unknown [10.31.155.40])
+ by ewsoutbound.so.kpn.org (Halon) with ESMTPS
+ id 4d377693-af52-11ec-99f9-005056ab378f;
+ Tue, 29 Mar 2022 13:20:55 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=planet.nl; s=planet01;
+ h=to:date:message-id:subject:mime-version:content-type:from;
+ bh=D+rlS7S9nme1dpmFPlqXyTkwwXT5MABtlz2it2IxJxo=;
+ b=saHYQd+DaIr17l6EydPi27hqUo+omirTPUGQrRnfmFWm1Phk9q3q9brjbTnR8b6BG5qHEW3Gue94X
+ Hd7UoBk2x0CIBHqUoUedTz0tmVbiH9PvhMhk0eJtpglBgUgr3pqX2uUL87x94maMOTyVJ+lb5fLdop
+ rgoxFlHDAXuoUWM4=
+X-KPN-MID: 33|cxMxS24nLKneBIoVo0MOxiSdt8htMNWNiwOx+3EShlBOIe15fc0E2VP6ROqmhQc
+ Ff1ZbFKzN/wkpXiWPsbT5a+37QATAA6diX3eTKPev8gw=
+X-KPN-VerifiedSender: Yes
+X-CMASSUN: 33|FDKhGsgomHI8uHZmONxTSAJEmlnkyXNC1t2SIPRk7TOlcZW/PL1qslNQagSkHET
+ krZLMSlkrbXxXX9zQbLC34w==
+X-Originating-IP: 80.101.112.122
+Received: from smtpclient.apple (sqlite.xs4all.nl [80.101.112.122])
+ by smtp.kpnmail.nl (Halon) with ESMTPSA
+ id 587f4c38-af52-11ec-b148-005056ab7584;
+ Tue, 29 Mar 2022 13:21:15 +0200 (CEST)
+Content-Type: text/plain;
+	charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 14.0 \(3654.120.0.1.13\))
+Message-Id: <DE7DACF9-6EEA-4A9B-A72C-64EC557BDD20@planet.nl>
+Date: Tue, 29 Mar 2022 13:21:14 +0200
+To: TUHS main list <tuhs@minnie.tuhs.org>
+X-Mailer: Apple Mail (2.3654.120.0.1.13)
+Subject: [TUHS] Paging code in SysV R2
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+From: Paul Ruizendaal via TUHS <tuhs@minnie.tuhs.org>
+Reply-To: Paul Ruizendaal <pnr@planet.nl>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+
+I did not have a lot of time to work on documenting the evolution of =
+paging / virtual memory code in 32V, Sys III and early SysV in the past =
+months, but I did get some more background information that seems worth =
+sharing.
+
+My understanding of the virtual memory story at USG is now as follows:
+
+Somewhere in 1981/82 a project plan for Unix 5 / System V was made and =
+evolving John Reiser=E2=80=99s virtual memory code for 32V-r3 was part =
+of that plan. =E2=80=9CEvolving=E2=80=9D in this context meant making it =
+more maintainable and more hardware independent. John=E2=80=99s code =
+assumed a memory page, a disk block and a file block all to be the same =
+size, and it needed to be more general. It was also designed around the =
+VAX MMU and this too needed to be generalised. The person assigned to =
+that job was Bob (Robert) Baron, reporting to Tom Raleigh. The project =
+involved quite a bit of re-architecting and progress was slowish. On top =
+of that Bob left for CMU to work on Mach. Tom Raleigh tried to pick up =
+where Bob had left off, but progress remained slowish.
+
+In parallel, Keith Kelleman and Steve Burroff were working on Unix for =
+the 3B20 Unix. They did paging code from scratch around the 3B20 MMU =
+(which used a more or less =E2=80=98modern=E2=80=99 page table design) =
+and developed their idea for the =E2=80=9Cregions=E2=80=9D abstraction =
+to support large, non-contiguous address spaces. It seems that they =
+built on the main working set ideas/concepts in the Reiser/Baron/Raleigh =
+code base, combined these with their =E2=80=9Cregions=E2=80=9D idea, =
+made it multi-processor capable and made it all work on the 3B20. Around =
+that time Tom Raleigh seems to have transferred to Bellcore, and the VAX =
+code base got orphaned.
+
+Two young engineers appear to have picked up the work on the VAX code =
+base: Dean Jagels and Jim McCormick. My understanding is that they =
+essentially back ported the 3B20 work to the VAX, falling back on the =
+Reiser/Baron/Raleigh work where necessary. They got it working, and as =
+far as I can tell, this is what got released in 1984 as part of SysV =
+R2.4 for the VAX (the oldest surviving source code for this that I could =
+find).
+
+This somewhat tortuous birth may in part explain why Research chose to =
+use the 4BSD virtual memory code for 8th edition.
+
+

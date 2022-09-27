@@ -1,0 +1,94 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI,
+	T_SCC_BODY_TEXT_LINE autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 18210 invoked from network); 20 Jun 2022 00:44:25 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 20 Jun 2022 00:44:25 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 813E940D7A;
+	Mon, 20 Jun 2022 10:44:20 +1000 (AEST)
+Received: from oclsc.com (oclsc.com [206.248.137.164])
+	by minnie.tuhs.org (Postfix) with ESMTP id E922540D79
+	for <tuhs@tuhs.org>; Mon, 20 Jun 2022 10:44:14 +1000 (AEST)
+Received: by oclsc.org id 1B76D4F5BB; Sun, 19 Jun 2022 20:44:14 -0400 (EDT)
+Received: by oclsc.org id 4ED24640CD9; Sun, 19 Jun 2022 20:44:14 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-ID: <B405B86346E5B413D4E88E869D726C55.for-standards-violators@oclsc.org>
+Date: Sun, 19 Jun 2022 20:44:14 -0400 (EDT)
+From: norman@oclsc.org (Norman Wilson)
+Message-ID-Hash: QI6YBGQXFI6OG7CKXNRXDHSURM7W2UFP
+X-Message-ID-Hash: QI6YBGQXFI6OG7CKXNRXDHSURM7W2UFP
+X-MailFrom: norman@oclsc.org
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: RFS (was Re: Re: forgotten versions)
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/QI6YBGQXFI6OG7CKXNRXDHSURM7W2UFP/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+I don't know the exact history of RFS a la System V, but I
+don't think it was Peter Weinberger's stuff, and it certainly
+wasn't his code.  Nor his name: he called his first version
+neta and his second netb (he knew it would be changing and
+allowed for it in the name from the start).
+
+I don't remember us ever calling it RFS, or even remote
+file systems, inside 1127; we called it network file systems
+(never NFS because the Sun stuff existed by then).
+
+For those who don't know it, Peter's goal was quite different
+from that of NFS.  The idea behind NFS seems always to have
+been to mount a remote file system as if it were local, with
+a base assumption early on that everything was within the
+same administrative domain so it was OK to make assumptions
+about userids matching up, and running code as super-user.
+Peter described his intent as `I want to be able to use your
+disks, and that's a lot simpler if I don't have to get you
+to add code to your kernel, or even to run a program as
+super-user.'  Hence the entirely-user-mode server program,
+which could use super-user privileges to afford access as
+any user if it had them, but also worked fine when run as
+an ordinary user with only that user's file permissions.
+We did in fact normally run it as super-user so each of
+our 15 or so VAXes could see the file system tree on each
+other, but we also occasionally did it otherwise.
+
+That was one reason device files worked as they did, accessing
+the device on the server end rather than acting like a local
+special file on the client: we didn't care about running
+diskless clients, but we did occasionally care about accessing
+a remote system's tape drive.
+
+Peter, being a self-described fan of cheap hacks, also wasn't
+inclined to spend much time thinking about general abstractions;
+in effect he just turned various existing kernel subroutines
+(when applied to a network file system) into RPCs.  The
+structure of the file system switch was rather UNIX-specific,
+reflecting that.
+
+That also means Peter's code was a bit ad-hoc and wonky in
+places.  He cleaned it up considerably between neta and netb,
+and I did further cleanup later.  I even had a go at a library
+to isolate the network protocol from the server proper, converted
+the netb server to use it, and made a few demo servers of my own
+like one to read and write raw FILES-11 file systems--useful for
+working with the console file system on the VAX 8800 series,
+which was exported to the host as a block device--and a daemon
+to allow a tar archive to be mounted as a read-only file system.
+
+In modern systems, you can do the same sort of things with FUSE,
+and set up the same I-want-to-use-your-disks (or I want to get
+at my own files from afar without privileges) scheme with sshfs.
+I would be very surprised to learn that either of those borrowed
+from their ancient cousins in Research UNIX; so far as I know
+they're independent inventions.  Either way I'm glad they exist.
+
+Norman Wilson
+Toronto ON

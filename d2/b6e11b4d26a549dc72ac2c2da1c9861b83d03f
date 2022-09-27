@@ -1,0 +1,553 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.1 required=5.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FROM,MAILING_LIST_MULTI,T_SCC_BODY_TEXT_LINE
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 17957 invoked from network); 3 Apr 2022 12:27:35 -0000
+Received: from minnie.tuhs.org (45.79.103.53)
+  by inbox.vuxu.org with ESMTPUTF8; 3 Apr 2022 12:27:35 -0000
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+	id C3F679D694; Sun,  3 Apr 2022 22:27:33 +1000 (AEST)
+Received: from minnie.tuhs.org (localhost [127.0.0.1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 1DB8C9D666;
+	Sun,  3 Apr 2022 22:25:04 +1000 (AEST)
+Authentication-Results: minnie.tuhs.org;
+	dkim=pass (2048-bit key; unprotected) header.d=gmail.com header.i=@gmail.com header.b="DbxmSaNw";
+	dkim-atps=neutral
+Received: by minnie.tuhs.org (Postfix, from userid 112)
+ id 6D6059D666; Sun,  3 Apr 2022 22:25:00 +1000 (AEST)
+Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com
+ [209.85.216.45])
+ by minnie.tuhs.org (Postfix) with ESMTPS id A51669D663
+ for <tuhs@minnie.tuhs.org>; Sun,  3 Apr 2022 22:24:59 +1000 (AEST)
+Received: by mail-pj1-f45.google.com with SMTP id
+ nt14-20020a17090b248e00b001ca601046a4so2513639pjb.0
+ for <tuhs@minnie.tuhs.org>; Sun, 03 Apr 2022 05:24:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmail.com; s=20210112;
+ h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+ :cc:content-transfer-encoding;
+ bh=Qf0K9G5GC+BYlbJd/Yu4sjRz23ONSOnKS+BI94J3hvw=;
+ b=DbxmSaNwboJ7qY06jbPRDuYyQe+O8uiM4284gVag8Sy6SunYioK/F1x2DKoIZiRbN6
+ lQJagCECS3xE6m1fguz2+mCJJkLiYJvhWeqKnIo6euFUDeCZaxdoWIj8AxaANJY7WEcD
+ ffxJfd5o6vmPJWOYqhfEmTpnb9BBD3HZTpVSRN0C1wanumAtBTXEpgzoOpBQlnHxYGgO
+ WX2urFcrE2h9R4nvloxghQD509prxO2KmSSaScsPuklNRgKvq+GViU/bavQW9y7VznaG
+ V492F0SPEcSetVd3dVuYlgmBvEzr0h7qMo2VV67V4orJC2o4yWO197toxc9EofWVHzJc
+ pDxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=1e100.net; s=20210112;
+ h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+ :message-id:subject:to:cc:content-transfer-encoding;
+ bh=Qf0K9G5GC+BYlbJd/Yu4sjRz23ONSOnKS+BI94J3hvw=;
+ b=k6En9taRWsRR9wYqwK/Jcx9DsxDnjtNymu95TP3iPVtejYDsMALDyA5iN4AtvJiMVS
+ TEPDDJhQy0DQTh5WoPENYdLEhaxiQ8n7BVR+KxYhEeJf/5uzrnrn05PU+bhkO24kqej0
+ VUO+dNK0GN/29YiobBq1w6lqJGuaailbv77CfkTZ+sDiStg2FdD1uYJN4cvl8Xxu32Eb
+ ctOc28XldO57PPF8eX/wbPb9jawNhtNdb+/mA4WItBdwqDBWAYR15bpTpkLkbZgXV6fU
+ TztKjyxMdDV/HjSYAEMo0Y1OyfDdWuerXd2QCRlMVkX9WNRpecP2OmSNvixsrQRgkbgZ
+ c15Q==
+X-Gm-Message-State: AOAM531Py5la3a48jqViIxkGxhD8jz1JM3an4xOtit8Z7Gb2yjn35DIw
+ bs37HZ6ptMc9CwGrTUs6fsv6YKGykExHVdrMi8E=
+X-Google-Smtp-Source: ABdhPJx/zYm3mE/HvmzObi0CRd/cCzlDvJ/JuTVieIWUG4GeRUfc2HOI+EtmnrRCw7Y1xexwrZxIgmnR46+/Rq2QkuY=
+X-Received: by 2002:a17:90a:c717:b0:1ca:2884:2063 with SMTP id
+ o23-20020a17090ac71700b001ca28842063mr16718495pjt.50.1648988698753; Sun, 03
+ Apr 2022 05:24:58 -0700 (PDT)
+MIME-Version: 1.0
+References: <7521B7CB-E1C7-44C2-BBF4-A97F63082545@planet.nl>
+In-Reply-To: <7521B7CB-E1C7-44C2-BBF4-A97F63082545@planet.nl>
+From: Rob Pike <robpike@gmail.com>
+Date: Sun, 3 Apr 2022 22:24:46 +1000
+Message-ID: <CAKzdPgw+s7_d2T4y2j7vM2Vbvth613XJ5Nmv5UWgVG5JWcvi7g@mail.gmail.com>
+To: Paul Ruizendaal <pnr@planet.nl>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [TUHS] A Reiser tour de force
+X-BeenThere: tuhs@minnie.tuhs.org
+X-Mailman-Version: 2.1.26
+Precedence: list
+List-Id: The Unix Heritage Society mailing list <tuhs.minnie.tuhs.org>
+List-Unsubscribe: <https://minnie.tuhs.org/cgi-bin/mailman/options/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=unsubscribe>
+List-Archive: <http://minnie.tuhs.org/pipermail/tuhs/>
+List-Post: <mailto:tuhs@minnie.tuhs.org>
+List-Help: <mailto:tuhs-request@minnie.tuhs.org?subject=help>
+List-Subscribe: <https://minnie.tuhs.org/cgi-bin/mailman/listinfo/tuhs>,
+ <mailto:tuhs-request@minnie.tuhs.org?subject=subscribe>
+Cc: TUHS main list <tuhs@minnie.tuhs.org>
+Errors-To: tuhs-bounces@minnie.tuhs.org
+Sender: "TUHS" <tuhs-bounces@minnie.tuhs.org>
+
+That is not Reiser's implementation. It's not even a compiling
+implementation, it's just some loops. I think that's one of Bart's.
+
+Reiser's was just assembly language, in a single file, not pseudo-C.
+
+I went looking around github but couldn't find it. I've got some feelers ou=
+t.
+
+-rob
+
+On Sun, Apr 3, 2022 at 9:25 PM Paul Ruizendaal via TUHS
+<tuhs@minnie.tuhs.org> wrote:
+>
+> A not-very-thorough search at tuhs turned up V9/jerq/src/lib/j/bitblt.c
+> It appears to be a pre-Reiser bitblt, not what was asked for.
+>
+>
+> The Reiser code is in the V8 jerq tarball that Dan Cross donated:
+> v8jerq.tar.bz2
+>
+> It is in file blit/src/libj/bitblt.s (attached below for convenience). It=
+ is 750 lines of 68K assembler. It does not appear to have been ported to t=
+he Bellmac 32 CPU. Maybe it did not make sense in that context.
+>
+> Paul
+>
+>
+> There also is a file =E2=80=9Cbitblt.C=E2=80=9D in that same directory (d=
+ated May 82, versus Aug 82 for the assembler file) that seems to have a sim=
+ilar approach coded up in C, with a big switch where each case has a lot of=
+ =E2=80=9Casm()=E2=80=9D statements. It is about 400 lines long. No author =
+is mentioned.
+>
+> I have not investigated deeply, but at first glance it is possible that t=
+he approach was first coded up as a kind of threaded code in C (with inline=
+ asm) and later that Summer redone as fully hand coded assembler. Just a gu=
+ess.
+>
+> Paul
+>
+> =3D=3D=3D=3D
+>
+> #include <jerq.h>
+> #define LEFTDIR 8
+> #define NOSHIFT 4
+> #define DAMMIT 4 /* you'll see why */
+> #undef sw
+>
+> bitblt(sm,r,dm,p,fc)
+> Bitmap *sm,*dm;
+> Rectangle r;
+> Point p;
+> int fc;
+> {
+> register Word *source,*dest,*_source,*_dest; /* %a2-%a5 */
+> register UWord m,mask1,mask2; /* %d2,%d3,%d4 */
+> register int a,b,i; /* %d5,%d6,%d7 */
+>
+> int j,h,w,dx1,sw,dw;
+>
+> /* clip to the destination Bitmap only */
+> #define rp dest
+> #define pp source
+> rp =3D (int *) &(dm->rect);
+> pp =3D (int *) &p;
+> if ((a =3D *rp++ - *pp++) > 0) {
+> *(pp-1) +=3D a;
+> r.origin.x +=3D a;
+> }
+> if ((a =3D *rp++ - *pp) > 0) {
+> *pp +=3D a;
+> r.origin.y +=3D a;
+> }
+> if ((a =3D r.origin.x + *rp++ - *(pp-1)) < r.corner.x)
+> r.corner.x =3D a;
+> if ((a =3D r.origin.y + *rp - *pp) < r.corner.y)
+> r.corner.y =3D a;
+> i =3D r.corner.y - r.origin.y; /* going to be h */
+> a =3D r.corner.x - r.origin.x - 1; /* going to be dx1 */
+> if (i <=3D 0 || a < 0)
+> return;
+> if (a < 16)
+> goto narrow;
+> h =3D i;
+> dx1 =3D a; /* i and b are regs, avoid work! */
+> sw =3D sm->width << 1; /* sleazy hack to avoid shift */
+> dw =3D dm->width << 1; /* in outer, inner loops */
+> w =3D ((p.x+dx1) >> 4) - (p.x >> 4) - 1; /* inner loop */
+> mask1 =3D ~topbits[p.x & 15];
+> mask2 =3D topbits[((p.x+dx1) & 15) + 1];
+> if (sm =3D=3D dm) { /* may have to mess with loop order */
+> if (r.origin.y < p.y) { /* swap top with bottom */
+> r.origin.y +=3D h-1;
+> p.y +=3D h-1;
+> sw =3D -sw;
+> dw =3D -dw;
+> }
+> if (r.origin.x < p.x) { /* swap left with right */
+> fc |=3D LEFTDIR;
+> r.origin.x +=3D dx1;
+> p.x +=3D dx1;
+> }
+> }
+> _dest =3D addr(dm,p);
+> _source =3D addr(sm,r.origin);
+> a =3D (p.x&15) - (r.origin.x&15);
+> if (a < 0)
+> a +=3D 16;
+> else /* a =3D=3D 0 means no shift, remember that */
+> _source--; /* else grab long and shift right */
+> b =3D 16 - a;
+> if (a =3D=3D 0)
+> fc |=3D NOSHIFT;
+> source =3D _source;
+> dest =3D _dest;
+> switch (fc) {
+> case F_STORE | NOSHIFT:
+> b =3D w;
+> _source++;
+> source =3D _source;
+> a =3D h; /* a is free =3D> use it */
+> do {
+> *dest++ =3D (~mask1 & *dest) | (mask1 & *source++);
+> if ((i =3D b>>2) > 0) do {
+> *((long *)dest)++ =3D *((long *)source)++;
+> *((long *)dest)++ =3D *((long *)source)++;
+> } while (--i > 0);
+> if ((i =3D b&3) > 0) do {
+> *dest++ =3D *source++;
+> } while (--i > 0);
+> *dest =3D (~mask2 & *dest) | (mask2 & *source);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--a > 0);
+> break;
+> case F_STORE:
+> do {
+> asm(" mov.l (%a2)+,%d2 # (long) m =3D *source++");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> *dest++ =3D (~mask1 & *dest) | (mask1 & m);
+> asm(" ror.l %d6,%d2 # rotate m right by b");
+> if ((i =3D w) > 0) do {
+> m =3D *source++;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest++ =3D m;
+> asm(" ror.l %d6,%d2 # m >> b");
+> } while (--i > 0);
+> m =3D *source;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest =3D (~mask2 & *dest) | (mask2 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_STORE | NOSHIFT | LEFTDIR:
+> b =3D w;
+> _source++;
+> source =3D _source;
+> a =3D h;
+> do {
+> *dest =3D (~mask2 & *dest) | (mask2 & *source);
+> if ((i =3D b>>2) > 0) do {
+> *--((long *)dest) =3D *--((long *)source);
+> *--((long *)dest) =3D *--((long *)source);
+> } while (--i > 0);
+> if ((i =3D b&3) > 0) do {
+> *(--dest) =3D *(--source);
+> } while (--i > 0);
+> dest--;
+> *dest =3D (~mask1 & *dest) | (mask1 & *(--source));
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--a > 0);
+> break;
+> case F_STORE | LEFTDIR:
+> do {
+> asm(" mov.l (%a2),%d2 # (long) m =3D *source");
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest =3D (~mask2 & *dest) | (mask2 & m);
+> asm(" rol.l %d5,%d2 # m << a");
+> if ((i =3D w) > 0) do {
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> *(--dest) =3D m;
+> asm(" rol.l %d5,%d2 # m << a");
+> } while (--i > 0);
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> dest--;
+> *dest =3D (~mask1 & *dest) | (mask1 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_OR:
+> case F_OR | NOSHIFT:
+> do {
+> asm(" mov.l (%a2)+,%d2 # (long) m =3D *source++");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> *dest++ |=3D (mask1 & m);
+> asm(" ror.l %d6,%d2 # rotate m right by b");
+> if ((i =3D w) > 0) do {
+> m =3D *source++;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest++ |=3D m;
+> asm(" ror.l %d6,%d2 # m >> b");
+> } while (--i > 0);
+> m =3D *source;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest |=3D (mask2 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_OR | LEFTDIR:
+> case F_OR | NOSHIFT | LEFTDIR:
+> do {
+> asm(" mov.l (%a2),%d2 # (long) m =3D *source");
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest |=3D (mask2 & m);
+> asm(" rol.l %d5,%d2 # m << a");
+> if ((i =3D w) > 0) do {
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> *(--dest) |=3D m;
+> asm(" rol.l %d5,%d2 # m << a");
+> } while (--i > 0);
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> dest--;
+> *dest |=3D (mask1 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_CLR:
+> case F_CLR | NOSHIFT:
+> do {
+> asm(" mov.l (%a2)+,%d2 # (long) m =3D *source++");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> *dest++ &=3D ~(mask1 & m);
+> asm(" ror.l %d6,%d2 # rotate m right by b");
+> if ((i =3D w) > 0) do {
+> m =3D *source++;
+> asm(" ror.l %d5,%d2 # m >> a");
+> asm(" not.w %d2 # m =3D ~m");
+> *dest++ &=3D m;
+> asm(" ror.l %d6,%d2 # m >> b");
+> } while (--i > 0);
+> m =3D *source;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest &=3D ~(mask2 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_CLR | LEFTDIR:
+> case F_CLR | NOSHIFT | LEFTDIR:
+> do {
+> asm(" mov.l (%a2),%d2 # (long) m =3D *source");
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest &=3D ~(mask2 & m);
+> asm(" rol.l %d5,%d2 # m << a");
+> if ((i =3D w) > 0) do {
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> asm(" not.w %d2 # m =3D ~m");
+> *(--dest) &=3D m;
+> asm(" rol.l %d5,%d2 # m << a");
+> } while (--i > 0);
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> dest--;
+> *dest &=3D ~(mask1 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_XOR | NOSHIFT:
+> b =3D w;
+> _source++;
+> source =3D _source;
+> a =3D h;
+> do {
+> *dest++ ^=3D (mask1 & *source++);
+> if ((i =3D b>>2) > 0) do {
+> *((long *)dest)++ ^=3D *((long *)source)++;
+> *((long *)dest)++ ^=3D *((long *)source)++;
+> } while (--i > 0);
+> if ((i =3D b&3) > 0) do {
+> *dest++ ^=3D *source++;
+> } while (--i > 0);
+> *dest ^=3D (mask2 & *source);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--a > 0);
+> break;
+> case F_XOR:
+> default:
+> do {
+> asm(" mov.l (%a2)+,%d2 # (long) m =3D *source++");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> *dest++ ^=3D (mask1 & m);
+> asm(" ror.l %d6,%d2 # rotate m right by b");
+> if ((i =3D w) > 0) do {
+> m =3D *source++;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest++ ^=3D m;
+> asm(" ror.l %d6,%d2 # m >> b");
+> } while (--i > 0);
+> m =3D *source;
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest ^=3D (mask2 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> case F_XOR | NOSHIFT | LEFTDIR:
+> b =3D w;
+> _source++;
+> source =3D _source;
+> a =3D h;
+> do {
+> *dest ^=3D (mask2 & *source);
+> if ((i =3D b>>2) > 0) do {
+> *--((long *)dest) ^=3D *--((long *)source);
+> *--((long *)dest) ^=3D *--((long *)source);
+> } while (--i > 0);
+> if ((i =3D b&3) > 0) do {
+> *(--dest) ^=3D *(--source);
+> } while (--i > 0);
+> dest--;
+> *dest ^=3D (mask1 & *(--source));
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--a > 0);
+> break;
+> case F_XOR | LEFTDIR:
+> do {
+> asm(" mov.l (%a2),%d2 # (long) m =3D *source");
+> asm(" ror.l %d5,%d2 # m >> a");
+> *dest ^=3D (mask2 & m);
+> asm(" rol.l %d5,%d2 # m << a");
+> if ((i =3D w) > 0) do {
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> *(--dest) ^=3D m;
+> asm(" rol.l %d5,%d2 # m << a");
+> } while (--i > 0);
+> m =3D *(--source);
+> asm(" rol.l %d6,%d2 # m << b");
+> dest--;
+> *dest ^=3D (mask1 & m);
+> (char *) _source +=3D sw;
+> source =3D _source;
+> (char *) _dest +=3D dw;
+> dest =3D _dest;
+> } while (--h > 0);
+> break;
+> }
+> return;
+> narrow:
+> /*
+> * width is 16 bits or less, so we can do it by reading and
+> * writing 32 bits at a time
+> */
+> _source =3D (Word *) sm;
+> _dest =3D (Word *) dm;
+> mask1 =3D ((Bitmap *) _source)->width; /* source increment */
+> mask1 <<=3D 1; /* hack to add to an address register */
+> mask2 =3D ((Bitmap *) _dest)->width; /* dest increment */
+> mask2 <<=3D 1;
+> if (_source =3D=3D _dest && r.origin.y < p.y) { /* swap top with bottom *=
+/
+> r.origin.y +=3D i-1;
+> p.y +=3D i-1;
+> mask1 =3D -mask1;
+> mask2 =3D -mask2;
+> }
+> asm(" mov &0,%d6 # (long) b =3D 0");
+> b =3D topbits[a+1];
+> a =3D (16 - (p.x & 15)); /* hocus pocus to get long mask */
+> asm(" rol.l %d5,%d6 # (long) b <<=3D a");
+> a =3D 16 - a - (r.origin.x & 15); /* shift constant */
+> if (a < 0) { /* guess what! -1 =3D=3D 63 to the 68000!!! */
+> fc |=3D DAMMIT; /* not fatal, just slow */
+> }
+> source =3D addr(_source,r.origin);
+> dest =3D addr(_dest,p);
+> switch (fc) {
+> case F_STORE:
+> case F_STORE | DAMMIT:
+> asm(" mov.l %d6,%d1 # prepare inverse mask");
+> asm(" not.l %d1 ");
+> do {
+> asm(" mov.l (%a2),%d2 # m =3D *source");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> asm(" and.l %d6,%d2 # m &=3D b");
+> asm(" mov.l (%a3),%d0 # m |=3D *dest&~b");
+> asm(" and.l %d1,%d0 ");
+> asm(" or.l %d0,%d2 ");
+> asm(" mov.l %d2,(%a3) # *dest =3D m");
+> (char *) source +=3D (int) mask1;
+> (char *) dest +=3D (int) mask2;
+> } while (--i > 0);
+> break;
+> case F_OR:
+> case F_OR | DAMMIT:
+> do {
+> asm(" mov.l (%a2),%d2 # m =3D *source");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> asm(" and.l %d6,%d2 # m &=3D b");
+> asm(" or.l %d2,(%a3) # *dest |=3D m");
+> (char *) source +=3D (int) mask1;
+> (char *) dest +=3D (int) mask2;
+> } while (--i > 0);
+> break;
+> case F_CLR:
+> case F_CLR | DAMMIT:
+> do {
+> asm(" mov.l (%a2),%d2 # m =3D *source");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> asm(" and.l %d6,%d2 # m &=3D b");
+> asm(" not.l %d2 # m =3D ^m");
+> asm(" and.l %d2,(%a3) # *dest &=3D m");
+> (char *) source +=3D (int) mask1;
+> (char *) dest +=3D (int) mask2;
+> } while (--i > 0);
+> break;
+> case F_XOR:
+> do {
+> asm(" mov.l (%a2),%d2 # m =3D *source");
+> asm(" ror.l %d5,%d2 # rotate m right by a");
+> asm(" and.l %d6,%d2 # m &=3D b");
+> asm(" eor.l %d2,(%a3) # *dest ^=3D m");
+> (char *) source +=3D (int) mask1;
+> (char *) dest +=3D (int) mask2;
+> } while (--i > 0);
+> break;
+> case F_XOR | DAMMIT:
+> a =3D -a;
+> do {
+> asm(" mov.l (%a2),%d2 # m =3D *source");
+> asm(" rol.l %d5,%d2 # rotate m left by a");
+> asm(" and.l %d6,%d2 # m &=3D b");
+> asm(" eor.l %d2,(%a3) # *dest ^=3D m");
+> (char *) source +=3D (int) mask1;
+> (char *) dest +=3D (int) mask2;
+> } while (--i > 0);
+> break;
+> }
+> return;
+> }
+>
