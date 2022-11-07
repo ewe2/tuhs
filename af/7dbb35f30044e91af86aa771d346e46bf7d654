@@ -1,0 +1,90 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 19499 invoked from network); 3 Nov 2022 19:44:11 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 3 Nov 2022 19:44:11 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 63B7E41DC4;
+	Fri,  4 Nov 2022 05:43:50 +1000 (AEST)
+Received: from blade-b3-vm-relay.servers.aueb.gr (blade-b3-vm-relay.servers.aueb.gr [195.251.255.106])
+	by minnie.tuhs.org (Postfix) with ESMTP id CC22040614
+	for <tuhs@tuhs.org>; Fri,  4 Nov 2022 05:43:46 +1000 (AEST)
+Received: from blade-a1-vm-smtp.servers.aueb.gr (blade-a1-vm-smtp.servers.aueb.gr [195.251.255.217])
+	by blade-b3-vm-relay.servers.aueb.gr (Postfix) with ESMTP id F1DBF28B5
+	for <tuhs@tuhs.org>; Thu,  3 Nov 2022 21:43:44 +0200 (EET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aueb.gr; s=201901;
+	t=1667504624; bh=85vhdTBUaRnLAHbQLIBncladVPQSmE1A1cZivWTX+Nk=;
+	h=Date:To:From:Subject:From;
+	b=O8P+Brcmv1r7f3PjegoiefI/KiPTIpEXM1UwU+n1X+qgle+YPdSp/oTCsQi35kGbB
+	 I1r8dVJ4XgUOZ++lsYcCKYZxbw1e8f/rUHLYrTndcdiXhzjgnpgcnbuSQ2UJJPioch
+	 zEg8m9p1/QlWSBX8GXiqBeCUWSLWg9AImg0J7PFlNeufDQ/DVnHCOenfyVLYuYaeEC
+	 lLm2/3fpHfQYhKPv/KFaSBz9fEbYmuKxxwACc1eDw9Y9pHyrzYmS8xB57uYZk6627k
+	 9OD5TsfL359knWLHvAMD4ggnOye06kJIrfNumEvPMgtEEGu8VgOe5YLjPcN6Lj/IjP
+	 TbjgMekXa8ULw==
+Received: from [192.168.136.3] (ppp-2-87-105-130.home.otenet.gr [2.87.105.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	(Authenticated sender: dds)
+	by blade-a1-vm-smtp.servers.aueb.gr (Postfix) with ESMTPSA id DE5DE98C
+	for <tuhs@tuhs.org>; Thu,  3 Nov 2022 21:43:44 +0200 (EET)
+Message-ID: <7b249e68-de74-2c81-32b0-18ecb74a85ec@aueb.gr>
+Date: Thu, 3 Nov 2022 21:43:44 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.1
+Content-Language: el-en
+To: TUHS main list <tuhs@tuhs.org>
+From: Diomidis Spinellis <dds@aueb.gr>
+Organization: Athens University of Economics and Business
+Phone: +30 210 8203621
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Message-ID-Hash: V563WNPTABCOSGXYNKTXDU2G4RV7PVSU
+X-Message-ID-Hash: V563WNPTABCOSGXYNKTXDU2G4RV7PVSU
+X-MailFrom: dds@aueb.gr
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] vi in cooked mode?
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/V563WNPTABCOSGXYNKTXDU2G4RV7PVSU/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+I remember being told back in the 1980s that vi would set the terminal 
+to "cooked mode" when vi was in "insert mode", so as to reduce expensive 
+context switching for each character typed.  Only vi's "command mode" 
+would set the terminal to "raw mode" so as to provide immediate feedback 
+on each (command) character typed.  This would be a clever system 
+performance optimization, and would also explain designing vi around 
+distinct insert and command modes.
+
+However, I can't find such evidence even as far back as BSD 1.  It seems 
+that in insert mode ESC was processed like any other character.
+
+https://github.com/dspinellis/unix-history-repo/blob/BSD-1-Snapshot-Development/ex-1.1/ex_vops.c#L507
+
+Cooked mode was only entered when scrolling in order to receive interrupts.
+
+https://github.com/dspinellis/unix-history-repo/blob/BSD-1-Snapshot-Development/ex-1.1/ex_vadjust.c#L180
+
+Also, for this scheme to work ESC would need to be mapped to an 
+interrupt key, so as to allow exiting the cooked mode through the 
+corresponding signal handler.  Again, grepping for ESC, did not show me 
+any such code.
+
+I also remember being told that this optimization was what allowed 
+twenty students to concurrently perform interactive editing on a VAX 
+11/780 (running 4.2BSD and then 4.3BSD), and that Emacs was not provided 
+to students because it was always operating in raw mode.
+
+Was I misled?  Was there perhaps a hacked version of vi that worked in 
+this way?
+
+-Diomidis

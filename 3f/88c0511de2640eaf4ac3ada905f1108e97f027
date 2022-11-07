@@ -1,0 +1,82 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.0 required=5.0 tests=MAILING_LIST_MULTI
+	autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 28348 invoked from network); 12 Oct 2022 19:39:44 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 12 Oct 2022 19:39:44 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 925D440E4C;
+	Thu, 13 Oct 2022 05:39:06 +1000 (AEST)
+Received: from mercury.lcs.mit.edu (mercury.lcs.mit.edu [18.26.0.122])
+	by minnie.tuhs.org (Postfix) with ESMTPS id A521240E47
+	for <tuhs@tuhs.org>; Thu, 13 Oct 2022 05:38:57 +1000 (AEST)
+Received: by mercury.lcs.mit.edu (Postfix, from userid 11178)
+	id 7FE9618C077; Wed, 12 Oct 2022 15:38:56 -0400 (EDT)
+To: tuhs@tuhs.org
+Message-Id: <20221012193856.7FE9618C077@mercury.lcs.mit.edu>
+Date: Wed, 12 Oct 2022 15:38:56 -0400 (EDT)
+From: jnc@mercury.lcs.mit.edu (Noel Chiappa)
+Message-ID-Hash: H6EMAUI54JSA5L2KYOW2SBPRCCHJP4BH
+X-Message-ID-Hash: H6EMAUI54JSA5L2KYOW2SBPRCCHJP4BH
+X-MailFrom: jnc@mercury.lcs.mit.edu
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+CC: jnc@mercury.lcs.mit.edu
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: Attempting To Build NOSC and BBN UNIXs + ARPANET code
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/H6EMAUI54JSA5L2KYOW2SBPRCCHJP4BH/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+    > From: Michael Casadevall
+
+    > sys4.c is entirely corrupted, and part of impio.c is cut off
+
+The copy on MIT-CSR (the origin of the copy at TUHS) has the same issues. I
+doubt it's possible to recover them from that system; you'll have to find
+some other way to recover them (perhaps through a dump of the BBN system), or
+re-code them (as you did with sys4.c).
+
+    > I do need to do a readthrough for the VDH driver ... I think that might
+    > be for the radio links to Hawaii and the UK? 
+
+No. Read BBN 1822.
+
+The LH and DH bit-serial physical interfaces only work up to about 1000 feet
+or so. (Less for LH; DH is logically idential to LH, but uses differential
+pairs - the LH is single-sided). VDH is, in the bottom layer, simply a
+synchronous serial link, allowing the host to be up to hunreds of miles from
+the IMP.
+
+
+    > From: Lars Brinkhoff
+
+    > Another it adding emulators for various IMP interfaces. I.e. you will
+    > not get anywhere without adding one of IMP11A, ACC, or VDH to SIMH.
+
+Did VDH PDP-11's have a special VDH interface, or did they simply use an
+off-the-rack DEC synchronous serial interface like a DU11? (More of them
+here:
+
+  http://gunkies.org/wiki/Category:DEC_Synchronous_Serial_Interfaces
+
+if anyone wants.) Looking at net_vdh.h, it seems to be a "VDH-11C"
+
+Looking online, the VDH-11 seems to be an ACC prodict, but I wasn't able to
+find anything out about it at all. (I have some hardcopy manuals for other
+ACC IMP interface products, and I was going to look in them to see if any of
+them listed its manual in a 'see also', but I can't find them.)
+
+I'm not sure why people did just use an off-the-rack DEC synchronous serial
+interface; maybe the VDH11 did a BBN specific CRC, or something (in addition
+to using DMA; mostr DEC sync interfaces didn't, IIRC)?
+
+Anyway, you don't want to use VDH.
+
+	Noel

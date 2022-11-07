@@ -1,0 +1,909 @@
+X-Spam-Checker-Version: SpamAssassin 3.4.4 (2020-01-24) on inbox.vuxu.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.8 required=5.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	MAILING_LIST_MULTI autolearn=ham autolearn_force=no version=3.4.4
+Received: (qmail 1704 invoked from network); 6 Nov 2022 23:58:24 -0000
+Received: from minnie.tuhs.org (50.116.15.146)
+  by inbox.vuxu.org with ESMTPUTF8; 6 Nov 2022 23:58:24 -0000
+Received: from minnie.tuhs.org (localhost [IPv6:::1])
+	by minnie.tuhs.org (Postfix) with ESMTP id 4819F40ED1;
+	Mon,  7 Nov 2022 09:58:10 +1000 (AEST)
+Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
+	by minnie.tuhs.org (Postfix) with ESMTPS id 38AD5409FF
+	for <tuhs@tuhs.org>; Mon,  7 Nov 2022 09:57:52 +1000 (AEST)
+Received: by mail-pj1-f54.google.com with SMTP id c15-20020a17090a1d0f00b0021365864446so8844563pjd.4
+        for <tuhs@tuhs.org>; Sun, 06 Nov 2022 15:57:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cfcl.com; s=google;
+        h=to:references:message-id:content-transfer-encoding:date:in-reply-to
+         :from:subject:mime-version:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=in4fawjxyu9ub1trdRZ7dNV5nwRkoWHXKsrSaI5oHts=;
+        b=R6DWcJ6XVULdsWAIcj8kANYSKIGGa/dJ6cymXnZFpLOGe2LwynXzrCkB6iJTPBCtaf
+         YTEAM9yucJt997pKhov2IMuOkKDEv/xdJNbcNnieTVwhIjKpGlO3MXKCGGE+gTkg2hHv
+         eLmYvUjUK0igv67RbrsfuHXy/pAT7HpLWFrkv+YBO0kcMLwQgaIyqkHEKIUAGjr1ViVd
+         /i/9FOZ6X6cCMG/vv7WC/LlO1+pyejCeSLm2N4HcsKhNVCPvnxVsS5uAQxox1lUQB9cs
+         E1F2Sr7zTKtHEvbcyEVTeLL0VW8CmKdxA9mcp4OvXgyCqrUSTib6my66vuI7TkuJCDV8
+         iUIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=to:references:message-id:content-transfer-encoding:date:in-reply-to
+         :from:subject:mime-version:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=in4fawjxyu9ub1trdRZ7dNV5nwRkoWHXKsrSaI5oHts=;
+        b=qVUZ3wtNVP8WDnTtWgSQKi+330P5b3FVkipeMXFJyB41CYx0Gsi6rhrm9LsbnGKwyo
+         UYLV6HgI6hrXow6AP9IZa4HYJyJ45ne7+1aWUSgL4iDnLKsZ9n/Mty5305AieQ0hmnkB
+         2cdzTMRZN1qZS95m1mb/o8dJpL9eukgZArWx4SSzst13sJTSteusMauJ3Y0epn3mlnqc
+         SrdiMiLMbzTRgrJBMMgWfMLcK4fafw8BbRheAlYtg3ELwK/9kR9D35RKe6C0d9xAF/Wq
+         FWIQSkLtGwpP2ec9vLwUiRlrIDxuqVBHz+fj0tCjdtXHurWjGsoMpJEJRs54GI/DwMs2
+         Kang==
+X-Gm-Message-State: ACrzQf1c+qCiLg+Lgz12EXlK9kQmCZNsRThEG8roXS4AspRyjT0QFXmr
+	IwlSMVSAfPFDs4r5c0IHwoMTVNCNRJHzyA==
+X-Google-Smtp-Source: AMsMyM5nHnV1OXSGzaMuCfjyl6rGtSm8p3oUc4we0R6eiiOzXM1PHz3drxdwRlxwYN0LVA7fHOCviQ==
+X-Received: by 2002:a17:902:e9ca:b0:186:8624:9675 with SMTP id 10-20020a170902e9ca00b0018686249675mr47497242plk.76.1667779010635;
+        Sun, 06 Nov 2022 15:56:50 -0800 (PST)
+Received: from [192.168.254.24] ([50.125.55.227])
+        by smtp.gmail.com with ESMTPSA id e2-20020a056a0000c200b005623f96c24bsm3064309pfj.89.2022.11.06.15.56.49
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 06 Nov 2022 15:56:49 -0800 (PST)
+Content-Type: text/plain;
+	charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 13.4 \(3608.120.23.2.7\))
+From: Rich Morin <rdm@cfcl.com>
+In-Reply-To: <74b464ac-2799-badd-9eae-a65acbe08bd7@spamtrap.tnetconsulting.net>
+Date: Sun, 6 Nov 2022 15:56:47 -0800
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <86F17F7B-4775-4B15-BC83-0E7FEC974786@cfcl.com>
+References: <20221102060730.A114A18C08A@mercury.lcs.mit.edu>
+ <74b464ac-2799-badd-9eae-a65acbe08bd7@spamtrap.tnetconsulting.net>
+To: TUHS <tuhs@tuhs.org>
+X-Mailer: Apple Mail (2.3608.120.23.2.7)
+Message-ID-Hash: OL4WETX2LMNR53C2ZOMBODZ7WWIPDMJT
+X-Message-ID-Hash: OL4WETX2LMNR53C2ZOMBODZ7WWIPDMJT
+X-MailFrom: rdm@cfcl.com
+X-Mailman-Rule-Misses: dmarc-mitigation; no-senders; approved; emergency; loop; banned-address; member-moderation; header-match-tuhs.tuhs.org-0; nonmember-moderation; administrivia; implicit-dest; max-recipients; max-size; news-moderation; no-subject; digests; suspicious-header
+X-Mailman-Version: 3.3.6b1
+Precedence: list
+Subject: [TUHS] Re: early Unix papers, from Jim Joyce
+List-Id: The Unix Heritage Society mailing list <tuhs.tuhs.org>
+Archived-At: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/message/OL4WETX2LMNR53C2ZOMBODZ7WWIPDMJT/>
+List-Archive: <https://www.tuhs.org/mailman3/hyperkitty/list/tuhs@tuhs.org/>
+List-Help: <mailto:tuhs-request@tuhs.org?subject=help>
+List-Owner: <mailto:tuhs-owner@tuhs.org>
+List-Post: <mailto:tuhs@tuhs.org>
+List-Subscribe: <mailto:tuhs-join@tuhs.org>
+List-Unsubscribe: <mailto:tuhs-leave@tuhs.org>
+
+I'd like to begin by thanking folks for their suggestions.  I'd also =
+like to express my awe and appreciation for Nelson Beebe's bibliographic =
+work.  That said, I am not now (and will likely never be) in a position =
+to do anything similar for the documents in question, let alone scan and =
+OCR them, etc.  If someone wants to take on such a project, please let =
+me know.
+
+However, as a small step along the way, I opened up the box and produced =
+a rough list of the contents (see below).  When I noticed version or =
+date information, I noted it, but many of the documents are missing that =
+sort of thing.  So, YMMV.
+
+It appears that most of the items are copies of Unix Version 7 =
+documents, printed at UC Berkeley (UCB).  Some of the rest are a mix of =
+photocopied articles from magazines (e.g., BSTJ, BYTE, Comm. ACM, =
+Software--Practice and Experience).  I assume that most of this content =
+is readily available, but some may not be.  In any case, the =
+bibliographic info might be useful.=20
+
+Finally, there are assorted documents that were edited or produced at =
+UCB.  Some of these (especially the ones marked DRAFT) may be of =
+historical interest.  Anyway, please let me know if any of this sounds =
+like it might be worth passing along...
+
+-r
+
+P.S.  Careful Reader may notice a strong emphasis on text processing in =
+this collection.  Jim's research interests included the use of computers =
+to analyze Middle English poetry.  For example, the rhyme schemes =
+allowed him to clarify the pronunciation of certain words.
+
+
+# Notes
+
+The documents are currently stored in manilla folders in a cardboard =
+box.
+Folders are separated by bars (---) in the List.
+Folders are listed below in the order found in the box.
+
+Dates and "UNX x.y.z" notations are transcribed, when available.
+These notations appear to relate to UCB's "UNIX Documentation Guide".
+
+# List
+
+"The Programmer's Workbench -- A Machine for Software Development"
+Evan L. Ivie
+Comm. ACM; October, 1977
+
+---
+
+"Lint, a C Program Checker"
+S. C. Johnson
+UNX 12.2.3
+July 26, 1978=20
+
+---
+
+"A Tour Through the Portable C Compiler"
+S. C. Johnson
+UNX 13.2.7
+
+---
+
+"UNIX Programming -- Second Edition"
+Brian W. Kernighan, Dennis M. Ritchie
+UNX 2.2.3
+November 12, 1978
+
+---
+
+"Some Applications of Inverted Indexes on the UNIX System"
+M. E. Lesk
+UNX 12.2.2
+
+---
+
+"Why Pascal is Not My Favorite Programming Language"
+Brian W. Kernighan
+July 18, 1981
+
+---
+
+"A TROFF Tutorial"
+Brian W. Kernighan
+
+---
+
+"RATFOR -- A Preprocessor for a Rational Fortran"
+Brian W. Kernighan
+UNX 12.2.6
+
+---
+
+"Advanced Editing on UNIX"
+Brian W. Kernighan
+UNX 3.3.3
+October 17, 1980
+
+---
+
+"Nroff / Troff User's Manual"
+Joseph F. Ossanna
+
+---
+
+"A Typesetter-independent TROFF"
+Brian W. Kernighan
+
+---
+
+"A Tutorial Introduction to the UNIX Text Editor"
+B. W. Kernighan
+
+---
+
+"PIC -- A Graphics Language for Typesetting"
+"User Manual"
+Brian W. Kernighan
+Revised Edition; March, 1982
+
+"PIC -- A Graphics Language for Typesetting"
+"User Manual"
+Brian W. Kernighan
+
+---
+
+"Typesetting Mathematics -- User's Guide (Second Edition)"
+Brian W. Kernighan and Lorinda L. Cherry
+May 30, 1977
+
+---
+
+"A System for Typesetting Mathematics"
+Brian W. Kernighan and Lorinda L. Cherry
+Comm. ACM; March, 1975
+
+---
+
+"The PIC Graphics Language"
+
+---
+
+"LEARN -- Computer-Aided Instruction on UNIX (Second Edition)"
+Brian W. Kernighan, Michael E. Lesk
+UNX 12.2.1
+January 30, 1979
+
+---
+
+"UNIX Programming -- Second Edition"
+Brian W. Kernighan, Dennis M. Ritchie
+November 12, 1978
+
+---
+
+"FSCK -- The Unix File System Check Program"
+T. J. Kowalski
+
+---
+
+"Typing Documents on UNIX and GCOS: the -ms Macros for Nroff and Troff"
+M. E. Lesk
+October 8, 1976
+
+"A Revised Version of -ms" (DRAFT)
+Bill Tuthill
+UNX 4.42
+12/6/82
+
+also includes a line printer listing ???
+
+---
+
+"Combining Data Bases: National and Cartographic Files"
+Michael E. Lesk
+October 26, 1981
+
+---
+
+"Lex - A Lexical Analyzer Generator"
+M. E. Lesk and E. Schmidt
+UNX 12.2.5
+
+---
+
+SED -- A Non-interactive Text Editor"
+Lee E. McMahon
+UNX 12.2.8
+August 15, 1978
+
+---
+
+"Statistical Text Processing"
+L. E. McMahon, L. L. Cherry, and R. Morris
+BSTJ Vol. 57, No. 6; July-August, 1978
+
+---
+
+"A Tutorial Introduction to ADB"
+J. F. Maranzano, S. R. Bourne
+UNX 11.3.1
+May 5, 1977
+
+---
+
+"The UNIX (tm) system: making computers easier to use"
+Samuel P. Morgan
+Bell Laboratories Record; December, 1978
+
+---
+
+"Password Security: A Case History"
+Robert Morris, Ken Thompson
+UNX 13.2.10
+April 3, 1978
+
+---
+
+Uucp Implementation Description
+UNX 13.2.9
+D. A. Nowitz
+UNX 13.2.9
+October 31, 1978
+
+---
+
+"C Reference Manual"
+Dennis M. Ritchie
+
+---
+
+"The Standard I/O Library"
+D. M. Ritchie
+E. M. Gould (local editing)
+March 27, 1978
+
+---
+
+"Classes: An Abstract Data Type Facility for the C Language"
+Bjarne Stroustrup
+Bell Labs CSTR No. 84
+April 3, 1980
+Revised August 14, 1981
+
+---
+
+"A Set of C Classes for Co-routine Style Programming"
+Bjarne Stroustrup
+Bell Labs CSTR No. 90
+November 18, 1980
+
+---
+
+"UNIX Implementation"
+K. Thompson
+UNX 13.2.4
+
+---
+
+"UNIX Documentation Guide"
+Computing Services, UC Berkeley
+
+---
+
+"Berkeley Software for UNIX on the VAX"
+"4.1bsd version of May, 1981"
+
+---
+
+"Ex/Edit Command Summary (Version 2.0)"
+Computing Services, UC Berkeley
+August 29, 1979
+
+---
+
+"-ms Command Summary" (DRAFT 2 May 78)
+
+---
+
+"UNIX Command Summary"
+Computer Center, UC Berkeley
+January 18, 1978
+
+---
+
+"Ex Reference Manual"
+"Version 1.1 -- November, 1977"
+William N. Joy
+CSD, EECS, USB
+November 26, 1977
+
+---
+
+"Experiences with the UNIX Time-sharing System"
+John Lions
+Software--Practice and Experience, Vol. 9, 702-709 (1979)
+
+---
+
+"Writing Papers with NROFF using -ME"
+Eric P. Allman
+Electronics Research Laboratory, UCB
+May 13, 1978
+
+---
+
+"-ME Reference Manual"
+Eric P. Allman
+Electronics Research Laboratory, UCB
+May 13, 1978
+
+---
+
+"Writing NROFF Terminal Descriptions"
+Eric Allman
+Britton-Lee, Inc.
+
+---
+
+"Bell's Lettres"
+Natalie Angier
+Discover; July, 1981
+
+---
+
+"Screen Updating and Cursor Management Optimization: A Library Package"
+Kenneth C. R. C. Arnold
+CSD, EECS, UCB
+4th Berkeley Distribution
+
+---
+
+"Design and Implementation of the Berkeley Virtual Memory Extensions to =
+the UNIX Operating System"
+Ozalp Babaoglu, William Joy, Juan Porcar
+CSD, EECS, UCB
+December 2, 1979
+
+---
+
+"Data Structures Added in the Berkeley Virtual Memory Extensions to the =
+UNIX Operating System"
+Ozalp Babaoglu, William Joy
+CSD, EECS, UCB
+November 23, 1979
+
+---
+
+"UNIX with Satellite Processors"
+Amnon B. Barak and Amos Shapir
+Software--Practice and Experience, Vol. 10, 383-392 (1980)
+
+---
+
+"Development system interface expedited software design"
+Jim Bessemer
+Electronics Design; September 2, 1982
+
+---
+
+"LocalNet and UNIX"
+K. J. Biba, S. J. Leffler
+Sytek, Inc.; June, 1981
+
+---
+
+"Edit: A Tutorial"
+Ricki Blau, James Joyce
+Computing Services, UCB
+UNX 3.3.1
+September, 1981
+
+"Edit: A Tutorial"
+Ricki Blau, James Joyce
+Computing Services Division, Computing Affairs, UCB
+January, 1978
+
+"Text Editing with UNIX"
+
+---
+
+"Communicating with UNIX"
+Ricki Blau
+Computing Services, UCB
+UNX 1.3.1
+September, 1981
+
+---
+
+"UNIX on a Micro"
+Cornelia Boldyreff
+SIGSMALL Newsletter, Vol. 7, No. 1; February, 1981
+
+---
+
+"Extending the Interprocess Communication Facility of UNIX for a =
+Distributed Operating System"
+Sheng-Yang Chiu
+Bolt, Beranek and Newman, Inc.
+27 July 1981
+Revised: 31 July 1981
+Request for Comments: DOS-8
+
+---
+
+"DEAFNET: A Distributed Communications Service for the Deaf"
+Earl Craighill
+SRI International
+May, 1980
+
+---
+
+Programmer's Workbench Papers
+Second International Conference on Software Engineering
+T. A. Dolotta, J. R. Mashey, D. W. Smith, M. H. Bianchi, J. L. Wood
+October 13-15, 1976
+
+---
+
+"The Programmer's Workbench"
+T. A. Dolotta, R. C. Haight, J. R. Mashey
+BSTJ; July-August, 1978
+
+---
+
+"A Comparison of the Programming Languages C and Pascal"
+Alan R. Feuer, Narain H. Gehani
+ACM Computing Surveys, Vol. 14, No. 1; March 1982
+
+---
+
+"A Dual Processor VAX 11/780"
+George H. Goble, Michael H. Marsh
+School of EE, Purdue
+TR-EE 81-31; September, 1981
+
+---
+
+"The UNIX Operating System and the XENIX Standard Operating Environment"
+Robert B. Greenberg
+BYTE; June, 1981
+
+---
+
+"Growing, Pruning and Climbing Binary Trees with tiny-c"
+Les Hancock
+Dr. Dobb's Journal No. 36, Vol. 4, Issue 6; June/July 1979
+
+---
+
+"Implementing a tiny interpreter with a CP/M-flavored C"
+Les Hancock
+Dr. Dobb's Journal No. 41
+
+---
+
+"A Portable File Directory System"
+David R. Hanson
+Software--Practice and Experience, Vol. 10, 623-634 (1980)
+
+---
+
+"Getting Acquainted with Ex: An Aid for Humanities Users"
+A Publication of The Old English Colloquium's Unix Project
+A. Hernandez
+January 1, 1979
+
+---
+
+"Some Facts and Fallacies about UNIX"
+Jim Isaak
+FORUM, Computer System News; January 18, 1982
+
+---
+
+"Operating systems confer new degree of sophistication on =
+microprocessors"
+R. Colin Johnson
+Electronics; March 24, 1981
+
+---
+
+"UNIX - New Avenues in Research and Development"
+Robert E. Jones
+Hardcopy; February, 1982
+
+---
+
+"An Architecture for Interprocess Communication in UNIX"
+William Joy and Robert Fabry
+CSRG, EECS, UCB
+DRAFT of June 22, 1981
+
+"Proposals for enhancement of UNIX on the VAX"
+William Joy and Robert Fabry
+CSRG, EECS, UCB
+July 21, 1981; Revised August 31, 1981
+
+---
+
+"4.2BSD System Manual"
+William Joy, Eric Cooper, Robert Fabry, Samuel Leffler and Kirk McKusick
+CSRG, EECS, UCB
+Draft of February 14, 1982
+
+---
+
+"An Introduction to Display Editing with Vi"
+William Joy
+CSRG, EECS, UCB
+April 2, 1979
+
+---
+
+"Berkeley Pascal User's Manual"
+William N. Joy, Susan L. Graham, Charles B. Haley
+CSD, EECS, UCB
+Version 1.1 - April, 1979
+
+---
+
+"Installing and Operating 4.1bsd"
+William N. Joy
+CSRG, EECS, UCB
+May 18, 1981
+
+---
+
+"Berkeley Pascal PX Implementation Notes"
+Version 1.1 - April, 1979
+William N. Joy
+CSD, EECS, UCB
+March 30, 1979
+
+"Berkeley Pascal PX Implementation Notes"
+Version 2.0 - January, 1979
+William N. Joy, M. Kirk McKusick
+CSD, EECS, UCB
+April 9, 1981
+
+---
+
+"Berkeley Pascal PXP Implementation Notes"
+Version 1.1 - April, 1979
+William N. Joy
+CSD, EECS, UCB
+April 10, 1981
+
+---
+
+"UNIX Aids for English Composition Courses"
+James Joyce
+Computing in the Humanities; 1982
+
+---
+
+"PIC -- A Crude Graphics Language for Typesetting"
+Brian W. Kernighan
+Bell Labs CSTR No. 85
+January 24, 1981
+
+also published in:
+Software--Practice and Experience, Vol. 12, 1-21 (1982)
+
+---
+
+"Printf for the C Function Library"
+Christopher Kern
+BTYE; May, 1981
+
+---
+
+"The BDS C Compiler"
+Christopher Kern
+BYTE; June, 1981
+
+---
+
+"The Unix Programming Environment"
+Brian W. Kernighan, John R. Mashey
+IEEE Computer; April, 1981
+
+---
+
+"Hints on Configuring VAX Systems for UNIX"
+Revised: May 4, 1981
+Bob Kridle, Bill Joy
+CSRG, UCB
+
+---
+
+"Unix Text Formatting for Beginners"
+Gordon P. Leffadinger
+Computing Services, UCB
+May 10, 1982 (DRAFT)
+
+---
+
+"The UNIX Operating System"
+"A Sophisticated and Portable Multiuser Operating System"
+Bob Marsh, Grant Munsey, Kip Myers, Craig Forney
+Microcomputer Operating Systems, in
+Microcomputer Applications, (c) 1981
+
+---
+
+"Data Stream Linkage Mechanism"
+J. P. Morrison
+IBM Syst J, Vol. 17, No. 4; 1978
+
+---
+
+"Unix-like software runs on mini- and microcomputers"
+P. J. Plauger and M. S. Krieger
+Electronics; March 24, 1981
+
+---
+
+"An Inter-Process Communication Facility for UNIX"
+Richard F. Rashid
+CMU-CS-80-124
+February 4, 1980
+Revised: 11 June 1980
+
+"An Inter-Process Communication Facility for UNIX"
+Richard F. Rashid
+February 4, 1980
+Revised: 2 April 1981
+
+---
+
+"Thoughts on 'An Architecture for Interprocess Communication'
+by William Joy and Robert Fabry"
+DRAFT -- DO NOT CIRCULATE'
+A Personal Commentary
+Richard F. Rashid
+printed 29-Jul-81
+
+---
+
+"An Introduction to the Berkeley Network"
+Eric Schmidt
+CSD, EECS, UCB
+May, 1979
+(revised March, 1980)
+
+---
+
+"The UNIXperience for the Unexpert"
+Wurster Computer Center
+"The UNIXperience for Unexperts was prepared with the UNIX system by =
+Claire E. Taylor, a real beginner, in the Spring of 1979, for the =
+computer graphics course taught by Aaron Marcus"
+
+---
+
+"LIST -- A Source-Listing Program for the C Language"
+Jeff Taylor
+BYTE; June, 1981
+
+---
+
+"The -mx Macro Package: A Revised Version of -ms"
+Bill Tuthill
+Computing Services, UCB (DRAFT)
+
+---
+
+"Literary Text Processing by Computer"
+William Tuthill
+Comparative literature Dept., UCB
+15 January 1981
+
+also, man pages for assorted commands in the HUM section:
+cedilla, cfreq, dict, dissolve, ...
+
+---
+
+"The Unix Word Processing Facilities"
+Vance Vaughan
+June 1, 1977
+
+---
+
+"Adapting Unix to a 16-bit microcomputer"
+Bruce Weiner and Douglas Swartz
+Electronics; March 24, 1981
+
+---
+
+"Productivity Engineering in the UNIX Environment"
+EECS & ERL, UCB
+This appears to be a grant proposal:
+"The proposed contract will be a continuation of contract
+N00039-80-K-0649, ARPA Order Number 4031, April 1980 to present."
+
+---
+
+(not in a folder)
+
+"Writing Distributed Programs with Courier"
+Eric C. Cooper
+CSD, EECS, UCB
+
+"gprof: A Call Graph Execution Profiler"
+Susan L. Graham, Peter B. Kessler, Marshall K. McKusick
+CSD, EECS, UCB
+Proc. ACM SIGPLAN -82 Symp. on Compiler Construction
+
+"VAX/VMS Performance and Configuration"
+Hank Levy
+Advanced-11 Engineering
+August 15, 1978
+
+---
+
+"A Fast File System for UNIX"
+DRAFT of September 6, 1982
+Marshall Kirk McKusick, William N. Joy, Samuel J. Leffler, Robert S. =
+Fabry
+CSRG, CSD, EECS, UCB
+
+"Refer -- A Bibliography System"
+Bill Tuthill
+Computing Services, UCB
+October 1, 1982
+
+"Refer -- A Bibliography System"
+Bill Tuthill
+Humanities Computing Service, UCB
+September 6, 1982
+
+"The Cambridge Ring and UNIX"
+R. P. A. Collinson
+Software--Practice and Experience, Vol. 12, 583-594 (1982)
+
+"Description of a Menu Creation and Interpretation System"
+Michael J. Heffler
+Software--Practice and Experience, Vol. 12, 269-281 (1982)
+
+"A Programmable Text Editor"
+Christopher W. Fraser
+Software--Practice and Experience, Vol. 12, 241-250 (1982)
+
+"The Syntax of Interactive Command Languages: A Framework for Design"
+I. Trotter Hardy, Jr.
+Software--Practice and Experience, Vol. 12, 67-75 (1982)
+
+"Why Pascal is Not My Favorite Programming Language"
+Brian W. Kernighan
+CSTR No. 100
+July 18, 1981
+
+"A High-Level Approach to Computer Document Formatting"
+Brian K. Reid
+1980 ACM 0-89791-011-7
+
+"How Users Search:
+A Comparison of Menu and Attribute Retrieval Systems on a Library =
+Catalog"
+V. J. Geller
+M. E. Lesk
+Bell Labs
+September 27, 1981
+
+"Porting the Unix Operating System"
+Robert Erickson, Peter Tom
+HHB-SOFTRON
+(describes porting of UNIX/v7 to the SIEMENS R30)
+
+---
+
+"A Walk Through AWK"
+Leon S. Levy
+Bell Labs
+SIGPLAN Notices, V18 #12; December, 1983
+
+---
+
+"Setting Up Unix - Seventh Edition"
+Charles B. Haley, Dennis M. Ritchie
+Bell Labs
+UNX 13.2.2
+
+---
+
+"PARTS - A System for Assigning Word Classes to English Text"
+L. L. Cherry
+Bell Labs, CSTR No. 81
+
+---
+
+"Writing Tools - The STYLE and DICTION Programs
+L. L. Cherry, W. Vesterman
+February, 1981
+
+"Writing Tools - The STYLE and DICTION Programs
+L. L. Cherry, W. Vesterman
+November 22, 1980
+
+Letter from Jim Joyce to Lorinda Cherry, inviting her to speak
+at the 1983 meeting of the Association for Literary and Linguistic =
+Computing
+
+"The Seybold Report on Word Processing"
+Vol. 4, No. 1, January 1981
+ISSN: 0160-9572
+
+---
+
+"Route Finding in Street Maps by Computers and People"
+R. J. Elliott, M. E. Lesk
+Bell Labs
+
+---
+
+"Regenerating System Software"
+Charles B. Haley, Dennis M. Ritchie
+Bell Labs
+UNX 13.2.3
+
+---
+
+"Make - A Program for Maintaining Computer Programs"
+S. I. Feldman
+Bell Labs
+
+---
+---
+
+
+
+
